@@ -464,7 +464,7 @@ class WC_API_Server {
 				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 				'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
 				'links'              => array(
-					'help' => 'http://woothemes.github.io/woocommerce-rest-api-docs/',
+					'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
 				),
 			),
 		) );

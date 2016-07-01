@@ -64,9 +64,6 @@ class WC_Admin_Meta_Boxes {
 		// Save Coupon Meta Boxes
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
 
-		// Save Rating Meta Boxes
-		add_action( 'comment_edit_redirect', 'WC_Meta_Box_Order_Reviews::save', 1, 2 );
-
 		// Error handling (for showing errors from meta boxes on next page load)
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
 		add_action( 'shutdown', array( $this, 'save_errors' ) );
@@ -112,8 +109,6 @@ class WC_Admin_Meta_Boxes {
 	 * Add WC Meta boxes.
 	 */
 	public function add_meta_boxes() {
-		$screen = get_current_screen();
-
 		// Products
 		add_meta_box( 'postexcerpt', __( 'Product Short Description', 'woocommerce' ), 'WC_Meta_Box_Product_Short_Description::output', 'product', 'normal' );
 		add_meta_box( 'woocommerce-product-data', __( 'Product Data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );

@@ -95,6 +95,16 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
 	}
 
 	/**
@@ -137,7 +147,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -180,6 +190,20 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access batch create, update and delete items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function batch_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get all attributes.
 	 *
 	 * @param WP_REST_Request $request
@@ -209,9 +233,9 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$args = array(
 			'attribute_label'   => $request['name'],
 			'attribute_name'    => $request['slug'],
-			'attribute_type'    => $request['type'],
-			'attribute_orderby' => $request['order_by'],
-			'attribute_public'  => $request['has_archives'],
+			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
+			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
+			'attribute_public'  => true === $request['has_archives'],
 		);
 
 		// Set the attribute slug.
@@ -470,7 +494,6 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param object $attribute Attribute object.
-	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given attribute.
 	 */
 	protected function prepare_links( $attribute ) {
@@ -562,7 +585,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 * Get attribute name.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return int|WP_Error
+	 * @return string
 	 */
 	protected function get_taxonomy( $request ) {
 		if ( '' !== $this->attribute ) {
@@ -610,9 +633,9 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
 		if ( strlen( $slug ) >= 28 ) {
 			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		}
 

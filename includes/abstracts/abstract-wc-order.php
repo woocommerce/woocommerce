@@ -180,13 +180,15 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Set the payment method for the order.
 	 *
-	 * @param WC_Payment_Gateway $payment_method
+	 * @param WC_Payment_Gateway|string $payment_method
 	 */
-	public function set_payment_method( $payment_method ) {
-
+	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
 			update_post_meta( $this->id, '_payment_method', $payment_method->id );
 			update_post_meta( $this->id, '_payment_method_title', $payment_method->get_title() );
+		} else {
+			update_post_meta( $this->id, '_payment_method', '' );
+			update_post_meta( $this->id, '_payment_method_title', '' );
 		}
 	}
 
@@ -670,7 +672,7 @@ abstract class WC_Abstract_Order {
 		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
 
 		// If is_vat_exempt is 'yes', or wc_tax_enabled is false, return and do nothing.
-		if ( 'yes' === $this->is_vat_exempt or ! wc_tax_enabled() ) {
+		if ( 'yes' === $this->is_vat_exempt || ! wc_tax_enabled() ) {
 			return false;
 		}
 
@@ -731,9 +733,6 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-
-
-
 		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
@@ -746,10 +745,10 @@ abstract class WC_Abstract_Order {
 					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
-							'country'   => $args['country'],
-							'state'     => $args['state'],
-							'postcode'  => $args['postcode'],
-							'city'      => $args['city'],
+							'country'   => $country,
+							'state'     => $state,
+							'postcode'  => $postcode,
+							'city'      => $city,
 							'tax_class' => $tax_class,
 						) );
 						break;
@@ -757,15 +756,15 @@ abstract class WC_Abstract_Order {
 				}
 			} else {
 				$tax_rates = WC_Tax::find_shipping_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
 					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
 				) );
 			}
 
-			$line_taxes          = WC_Tax::calc_tax( $item->get_total(), $tax_rates, false );
+			$line_taxes          = WC_Tax::calc_tax( $item['cost'], $tax_rates, false );
 			$line_tax            = max( 0, array_sum( $line_taxes ) );
 			$shipping_tax_total += $line_tax;
 
@@ -1139,7 +1138,7 @@ abstract class WC_Abstract_Order {
 			'country'       => $this->shipping_country
 		), $this );
 
-		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
+		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
 	/**
@@ -1364,6 +1363,11 @@ abstract class WC_Abstract_Order {
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
+		}
+
+		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
+			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+			$tax_totals = array_intersect_key( $tax_totals, $amounts );
 		}
 
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -2737,6 +2741,6 @@ abstract class WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_editable() {
-		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
+		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft', 'failed' ) ), $this );
 	}
 }

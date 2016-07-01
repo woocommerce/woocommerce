@@ -19,6 +19,7 @@ class WC_Form_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -34,6 +35,21 @@ class WC_Form_Handler {
 		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
+		add_action( 'wp', array( __CLASS__, 'delete_payment_method_action' ), 20 );
+		add_action( 'wp', array( __CLASS__, 'set_default_payment_method_action' ), 20 );
+	}
+
+	/**
+	 * Remove key and login from querystring, set cookie, and redirect to account page to show the form.
+	 */
+	public static function redirect_reset_password_link() {
+		if ( is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
+			$value = sprintf( '%s:%s', wp_unslash( $_GET['login'] ), wp_unslash( $_GET['key'] ) );
+			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+
+			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
+			exit;
+		}
 	}
 
 	/**
@@ -374,6 +390,82 @@ class WC_Form_Handler {
 
 			}
 
+		}
+
+	}
+
+	/**
+	 * Process the delete payment method form.
+	 */
+	public static function delete_payment_method_action() {
+		global $wp;
+
+		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
+
+			$token_id = absint( $wp->query_vars['delete-payment-method'] );
+			$token = WC_Payment_Tokens::get( $token_id );
+			$delete = true;
+
+			if ( is_null( $token ) ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( get_current_user_id() !== $token->get_user_id() ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $token_id ) ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( $delete ) {
+				WC_Payment_Tokens::delete( $token_id );
+				wc_add_notice( __( 'Payment method deleted.', 'woocommerce' ) );
+			}
+
+			wp_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
+			exit();
+		}
+
+	}
+
+	/**
+	 * Process the delete payment method form.
+	 */
+	public static function set_default_payment_method_action() {
+		global $wp;
+
+		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
+
+			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
+			$token = WC_Payment_Tokens::get( $token_id );
+			$delete = true;
+
+			if ( is_null( $token ) ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( get_current_user_id() !== $token->get_user_id() ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'set-default-payment-method-' . $token_id ) ) {
+				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				$delete = false;
+			}
+
+			if ( $delete ) {
+				WC_Payment_Tokens::set_users_default( $token->get_user_id(), intval( $token_id ) );
+				wc_add_notice( __( 'This payment method was successfully set as your default.', 'woocommerce' ) );
+			}
+
+			wp_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
+			exit();
 		}
 
 	}
@@ -755,7 +847,7 @@ class WC_Form_Handler {
 			}
 		}
 
-		if ( $missing_attributes ) {
+		if ( ! empty( $missing_attributes ) ) {
 			wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
 		} elseif ( empty( $variation_id ) ) {
 			wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
@@ -775,7 +867,10 @@ class WC_Form_Handler {
 	 * Process the login form.
 	 */
 	public static function process_login() {
-		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' ) ) {
+		$nonce_value = isset( $_POST['_wpnonce'] ) ? $_POST['_wpnonce'] : '';
+		$nonce_value = isset( $_POST['woocommerce-login-nonce'] ) ? $_POST['woocommerce-login-nonce'] : $nonce_value;
+
+		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
 
 			try {
 				$creds    = array();
@@ -902,7 +997,10 @@ class WC_Form_Handler {
 	 * Process the registration form.
 	 */
 	public static function process_registration() {
-		if ( ! empty( $_POST['register'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' ) ) {
+		$nonce_value = isset( $_POST['_wpnonce'] ) ? $_POST['_wpnonce'] : '';
+		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? $_POST['woocommerce-register-nonce'] : $nonce_value;
+
+		if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) ? $_POST['username'] : '';
 			$password = 'no' === get_option( 'woocommerce_registration_generate_password' ) ? $_POST['password'] : '';
 			$email    = $_POST['email'];

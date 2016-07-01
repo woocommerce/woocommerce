@@ -96,15 +96,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/me', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'get_current_item' ),
-			'args'     => array(
-				'context' => array(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
@@ -321,7 +312,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
 
 		// Create customer.
-		$customer_id = wc_create_new_customer( $request['email'], $request['username'], $request['password'] );;
+		$customer_id = wc_create_new_customer( $request['email'], $request['username'], $request['password'] );
 		if ( is_wp_error( $customer_id ) ) {
 			return $customer_id;
 		}
@@ -390,7 +381,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! empty( $request['username'] ) && $request['username'] !== $customer->user_login ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable", 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Customer email.
@@ -475,31 +466,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get the current customer.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function get_current_item( $request ) {
-		$id = get_current_user_id();
-		if ( empty( $id ) ) {
-			return new WP_Error( 'woocommerce_rest_not_logged_in', __( 'You are not currently logged in.', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
-		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		$customer = wp_get_current_user();
-		$response = $this->prepare_item_for_response( $customer, $request );
-		$response = rest_ensure_response( $response );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
-		$response->set_status( 302 );
-
-		return $response;
-	}
-
-	/**
 	 * Prepare a single customer output for response.
 	 *
 	 * @param WP_User $customer Customer object.
@@ -524,7 +490,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
 			'avatar_url'       => wc_get_customer_avatar_url( $customer->customer_email ),
-			'billing_address'  => array(
+			'billing'          => array(
 				'first_name' => $customer->billing_first_name,
 				'last_name'  => $customer->billing_last_name,
 				'company'    => $customer->billing_company,
@@ -537,7 +503,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				'email'      => $customer->billing_email,
 				'phone'      => $customer->billing_phone,
 			),
-			'shipping_address' => array(
+			'shipping'         => array(
 				'first_name' => $customer->shipping_first_name,
 				'last_name'  => $customer->shipping_last_name,
 				'company'    => $customer->shipping_company,
@@ -589,19 +555,19 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		}
 
 		// Customer billing address.
-		if ( isset( $request['billing_address'] ) ) {
-			foreach ( array_keys( $schema['properties']['billing_address']['properties'] ) as $address ) {
-				if ( isset( $request['billing_address'][ $address ] ) ) {
-					update_user_meta( $customer->ID, 'billing_' . $address, wc_clean( $request['billing_address'][ $address ] ) );
+		if ( isset( $request['billing'] ) ) {
+			foreach ( array_keys( $schema['properties']['billing']['properties'] ) as $address ) {
+				if ( isset( $request['billing'][ $address ] ) ) {
+					update_user_meta( $customer->ID, 'billing_' . $address, wc_clean( $request['billing'][ $address ] ) );
 				}
 			}
 		}
 
 		// Customer shipping address.
-		if ( isset( $request['shipping_address'] ) ) {
-			foreach ( array_keys( $schema['properties']['shipping_address']['properties'] ) as $address ) {
-				if ( isset( $request['shipping_address'][ $address ] ) ) {
-					update_user_meta( $customer->ID, 'shipping_' . $address, wc_clean( $request['shipping_address'][ $address ] ) );
+		if ( isset( $request['shipping'] ) ) {
+			foreach ( array_keys( $schema['properties']['shipping']['properties'] ) as $address ) {
+				if ( isset( $request['shipping'][ $address ] ) ) {
+					update_user_meta( $customer->ID, 'shipping_' . $address, wc_clean( $request['shipping'][ $address ] ) );
 				}
 			}
 		}
@@ -692,7 +658,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'last_order' => array(
 					'description' => __( 'Last order data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => array(
@@ -718,7 +684,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'total_spent' => array(
 					'description' => __( 'Total amount spent.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -728,9 +694,9 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'billing_address' => array(
+				'billing' => array(
 					'description' => __( 'List of billing address data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(
@@ -791,9 +757,9 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'shipping_address' => array(
+				'shipping' => array(
 					'description' => __( 'List of shipping address data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(

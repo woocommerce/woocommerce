@@ -32,13 +32,24 @@ class WC_Embed {
 		add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
 		// Make sure no comments display. Doesn't make sense for products.
-		remove_action( 'embed_content_meta', 'print_embed_comments_button' );
+		add_action( 'embed_content_meta', array( __CLASS__, 'remove_comments_button' ), 5 );
 
 		// In the comments place let's display the product rating.
 		add_action( 'embed_content_meta', array( __CLASS__, 'get_ratings' ), 5 );
 
 		// Add some basic styles.
 		add_action( 'embed_head', array( __CLASS__, 'print_embed_styles' ) );
+	}
+
+	/**
+	 * Remove comments button on product embeds.
+	 *
+	 * @since 2.6.0
+	 */
+	public static function remove_comments_button() {
+		if ( self::is_embedded_product() ) {
+			remove_action( 'embed_content_meta', 'print_embed_comments_button' );
+		}
 	}
 
 	/**
@@ -98,7 +109,7 @@ class WC_Embed {
 			$buttons[] = sprintf( $button, esc_url( add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ) ), esc_html__( 'Buy Now', 'woocommerce' ) );
 		}
 
-		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read More', 'woocommerce' ) );
+		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read more', 'woocommerce' ) );
 
 		return '<p>' . implode( ' ', $buttons ) . '</p>';
 	}

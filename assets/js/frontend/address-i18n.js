@@ -98,7 +98,7 @@ jQuery( function( $ ) {
 						}
 					}
 
-					if ( 'postcode' === key || 'city' === key ) {
+					if ( 'postcode' === key || 'city' === key || 'state' === key ) {
 						if ( locale['default'][ key ].label ) {
 							field.find( 'label' ).html( locale['default'][ key ].label );
 						}

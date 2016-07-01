@@ -18,25 +18,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Notices {
 
 	/**
+	 * Stores notices.
+	 * @var array
+	 */
+	private static $notices = array();
+
+	/**
 	 * Array of notices - name => callback.
 	 * @var array
 	 */
 	private static $core_notices = array(
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
-		'updating'            => 'updating_notice',
 		'template_files'      => 'template_file_check_notice',
 		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
 		'no_shipping_methods' => 'no_shipping_methods_notice',
 		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
-
-	/**
-	 * Stores notices.
-	 * @var array
-	 */
-	private static $notices = array();
 
 	/**
 	 * Constructor.
@@ -85,8 +84,9 @@ class WC_Admin_Notices {
 		}
 
 		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
+		$location         = wc_get_base_location();
 
-		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
 			WC_Admin_Notices::add_notice( 'simplify_commerce' );
 		}
 
@@ -144,7 +144,7 @@ class WC_Admin_Notices {
 	public static function add_notices() {
 		$notices = self::get_notices();
 
-		if ( $notices ) {
+		if ( ! empty( $notices ) ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			foreach ( $notices as $notice ) {
 				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
@@ -172,7 +172,7 @@ class WC_Admin_Notices {
 	public static function output_custom_notices() {
 		$notices = self::get_notices();
 
-		if ( $notices ) {
+		if ( ! empty( $notices ) ) {
 			foreach ( $notices as $notice ) {
 				if ( empty( self::$core_notices[ $notice ] ) ) {
 					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
@@ -189,15 +189,13 @@ class WC_Admin_Notices {
 	 * If we need to update, include a message with the update button.
 	 */
 	public static function update_notice() {
-		include( 'views/html-notice-update.php' );
-	}
-
-	/**
-	 * If we are updating, show progress.
-	 */
-	public static function updating_notice() {
 		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
-			include( 'views/html-notice-updating.php' );
+			$updater = new WC_Background_Updater();
+			if ( $updater->is_updating() || ! empty( $_GET['do_update_woocommerce'] ) ) {
+				include( 'views/html-notice-updating.php' );
+			} else {
+				include( 'views/html-notice-update.php' );
+			}
 		} else {
 			include( 'views/html-notice-updated.php' );
 		}
@@ -288,7 +286,7 @@ class WC_Admin_Notices {
 			global $wpdb;
 
 			$product_count = wp_count_posts( 'product' );
-			$method_count  = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
 				include( 'views/html-notice-no-shipping-methods.php' );
@@ -304,7 +302,9 @@ class WC_Admin_Notices {
 	 * Simplify Commerce is being removed from core.
 	 */
 	public static function simplify_commerce_notice() {
-		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) ) {
+		$location = wc_get_base_location();
+
+		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) || ! in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
 			self::remove_notice( 'simplify_commerce' );
 			return;
 		}

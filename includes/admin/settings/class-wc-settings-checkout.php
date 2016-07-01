@@ -212,7 +212,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Set Default Payment Method', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the setting a default payment page', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the setting a default payment method page', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_set_default_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'set-default-payment-method',
@@ -317,7 +317,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									case 'name' :
 										$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(no title)', 'woocommerce' );
 										echo '<td class="name">
-											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . esc_html( $method_title ) . '</a>
+											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) . '">' . esc_html( $method_title ) . '</a>
 										</td>';
 										break;
 

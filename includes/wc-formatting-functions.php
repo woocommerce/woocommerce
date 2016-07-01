@@ -27,6 +27,29 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
 }
 
 /**
+ * Sanitize permalink values before insertion into DB.
+ *
+ * Cannot use wc_clean because it sometimes strips % chars and breaks the user's setting.
+ *
+ * @since  2.6.0
+ * @param  string $value
+ * @return string
+ */
+function wc_sanitize_permalink( $value ) {
+	global $wpdb;
+
+	$value = $wpdb->strip_invalid_text_for_column( $wpdb->options, 'option_value', $value );
+
+	if ( is_wp_error( $value ) ) {
+		$value = '';
+	}
+
+	$value = esc_url_raw( $value );
+	$value = str_replace( 'http://', '', $value );
+	return untrailingslashit( $value );
+}
+
+/**
  * Gets the filename part of a download URL.
  *
  * @param string $file_url
@@ -254,12 +277,17 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
- * Clean variables using sanitize_text_field.
+ * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
+ * Non-scalar values are ignored.
  * @param string|array $var
  * @return string|array
  */
 function wc_clean( $var ) {
-	return is_array( $var ) ? array_map( 'wc_clean', $var ) : sanitize_text_field( $var );
+	if ( is_array( $var ) ) {
+		return array_map( 'wc_clean', $var );
+	} else {
+		return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
+	}
 }
 
 /**
@@ -394,11 +422,11 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, get_woocommerce_currency_symbol( $currency ), $price );
-	$return          = '<span class="amount">' . $formatted_price . '</span>';
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $currency ) . '</span>', $price );
+	$return          = '<span class="woocommerce-Price-amount amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );
@@ -450,9 +478,9 @@ function wc_time_format() {
 
 /**
  * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
- * a WP core method exists (see http://core.trac.wordpress.org/ticket/24730).
+ * a WP core method exists (see https://core.trac.wordpress.org/ticket/24730).
  *
- * Adapted from http://www.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
+ * Adapted from https://secure.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
  *
  * @since 2.1
  * @return string a valid PHP timezone string for the site
@@ -629,8 +657,20 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 function wc_format_postcode( $postcode, $country ) {
 	$postcode = wc_normalize_postcode( $postcode );
 
-	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
-		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+	switch ( $country ) {
+		case 'CA' :
+		case 'GB' :
+			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+			break;
+		case 'BR' :
+			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+			break;
+		case 'JP' :
+			$postcode = trim( substr_replace( $postcode, '-', 3, 0 ) );
+			break;
+		case 'PT' :
+			$postcode = trim( substr_replace( $postcode, '-', 4, 0 ) );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
@@ -646,7 +686,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	return trim( preg_replace( '/[\s]/', '', strtoupper( $postcode ) ) );
+	return preg_replace( '/[\s\-]/', '', trim( strtoupper( $postcode ) ) );
 }
 
 /**

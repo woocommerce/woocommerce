@@ -287,7 +287,7 @@ class WC_AJAX {
 		if ( WC()->cart->is_empty() ) {
 			$data = array(
 				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
-					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
+					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a></div>'
 				) )
 			);
 
@@ -435,7 +435,7 @@ class WC_AJAX {
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -716,7 +716,7 @@ class WC_AJAX {
 						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
 							'name' 			=> wc_clean( $attribute_names[ $i ] ),
@@ -748,16 +748,7 @@ class WC_AJAX {
 			 }
 		}
 
-		if ( ! function_exists( 'attributes_cmp' ) ) {
-			function attributes_cmp( $a, $b ) {
-				if ( $a['position'] == $b['position'] ) {
-					return 0;
-				}
-
-				return ( $a['position'] < $b['position'] ) ? -1 : 1;
-			}
-		}
-		uasort( $attributes, 'attributes_cmp' );
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 		update_post_meta( $post_id, '_product_attributes', $attributes );
 
@@ -922,9 +913,7 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			@set_time_limit( 0 );
-		}
+		wc_set_time_limit( 0 );
 
 		$post_id = intval( $_POST['post_id'] );
 
@@ -1076,7 +1065,7 @@ class WC_AJAX {
 				die();
 			}
 
-			if ( $files ) {
+			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
 					if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 
@@ -1767,17 +1756,21 @@ class WC_AJAX {
 	/**
 	 * Search for products and echo json.
 	 *
-	 * @param string $x (default: '')
+	 * @param string $term (default: '')
 	 * @param string $post_types (default: array('product'))
 	 */
-	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
+	public static function json_search_products( $term = '', $post_types = array( 'product' ) ) {
 		global $wpdb;
 
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		if ( empty( $term ) ) {
+			$term = wc_clean( stripslashes( $_GET['term'] ) );
+		} else {
+			$term = wc_clean( $term );
+		}
 
 		if ( empty( $term ) ) {
 			die();
@@ -2074,7 +2067,7 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for product ordering.
 	 *
-	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
 	 */
 	public static function product_ordering() {
 		global $wpdb;
@@ -2376,7 +2369,6 @@ class WC_AJAX {
 				$data['consumer_secret'] = '';
 				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
 			} else {
-				$status          = 2;
 				$consumer_key    = 'ck_' . wc_rand_hash();
 				$consumer_secret = 'cs_' . wc_rand_hash();
 
@@ -2630,6 +2622,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Enabled.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2646,6 +2639,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Downloadable Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2660,6 +2654,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Virtual Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2674,6 +2669,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Manage Stock Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2688,6 +2684,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2714,6 +2711,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2740,6 +2738,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Stock.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2762,6 +2761,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Weight.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2772,6 +2772,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Length.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2782,6 +2783,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Width.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2792,6 +2794,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Height.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2802,6 +2805,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Download Limit.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2812,6 +2816,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Download Expiry.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2822,6 +2827,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Delete all.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2836,6 +2842,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Sale Schedule.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2872,6 +2879,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Increase Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2882,6 +2890,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Decrease Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2892,6 +2901,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Increase Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2902,6 +2912,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Decrease Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2912,6 +2923,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Price.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param string $operator + or -
 	 * @param string $field price being adjusted
@@ -2950,9 +2962,29 @@ class WC_AJAX {
 		}
 	}
 
-
 	/**
 	 * Bulk edit variations via AJAX.
+	 * @uses WC_AJAX::variation_bulk_set_meta()
+	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_increase()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_schedule()
+	 * @uses WC_AJAX::variation_bulk_action_delete_all()
+	 * @uses WC_AJAX::variation_bulk_action_variable_download_expiry()
+	 * @uses WC_AJAX::variation_bulk_action_variable_download_limit()
+	 * @uses WC_AJAX::variation_bulk_action_variable_height()
+	 * @uses WC_AJAX::variation_bulk_action_variable_width()
+	 * @uses WC_AJAX::variation_bulk_action_variable_length()
+	 * @uses WC_AJAX::variation_bulk_action_variable_weight()
+	 * @uses WC_AJAX::variation_bulk_action_variable_stock()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_manage_stock()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_virtual()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_downloadable()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_enabled
 	 */
 	public static function bulk_edit_variations() {
 		ob_start();
@@ -3323,10 +3355,12 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
-				$result = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$term_id = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 			} else {
-				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
+				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}
+
+			do_action( 'woocommerce_shipping_classes_save_class', $term_id, $data );
 		}
 
 		$wc_shipping = WC_Shipping::instance();

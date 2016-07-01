@@ -84,7 +84,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( 'includes/class-wc-eval-math.php' );
+		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
 
 		$locale   = localeconv();
 		$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );

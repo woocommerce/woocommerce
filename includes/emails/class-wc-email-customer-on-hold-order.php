@@ -12,7 +12,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
  * An email sent to the customer when a new order is on-hold for.
  *
  * @class       WC_Email_Customer_On_Hold_Order
- * @version     2.0.0
+ * @version     2.6.0
  * @package     WooCommerce/Classes/Emails
  * @author      WooThemes
  * @extends     WC_Email
@@ -34,6 +34,7 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();

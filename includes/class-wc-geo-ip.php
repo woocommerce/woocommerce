@@ -57,7 +57,7 @@ class WC_Geo_IP {
 	/**
 	 * Flags.
 	 *
-	 * @var array
+	 * @var int
 	 */
 	public $flags;
 
@@ -71,14 +71,14 @@ class WC_Geo_IP {
 	/**
 	 * Memory buffer.
 	 *
-	 * @var array
+	 * @var string
 	 */
 	public $memory_buffer;
 
 	/**
 	 * Database type.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	public $databaseType;
 
@@ -1310,8 +1310,6 @@ class WC_Geo_IP {
 						|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
 						|| ( $this->databaseType == self::GEOIP_LOCATIONA_EDITION )
 						|| ( $this->databaseType == self::GEOIP_ACCURACYRADIUS_EDITION )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0_V6 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1_V6 )
 						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1 )
 						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1_V6 )
 						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION )
@@ -1768,21 +1766,21 @@ class WC_Geo_IP_Record {
 	/**
 	 * Latitude
 	 *
-	 * @var float
+	 * @var int
 	 */
 	public $latitude;
 
 	/**
 	 * Longitude.
 	 *
-	 * @var float
+	 * @var int
 	 */
 	public $longitude;
 
 	/**
 	 * Area code.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	public $area_code;
 
@@ -1792,14 +1790,14 @@ class WC_Geo_IP_Record {
 	 * Metro and DMA code are the same.
 	 * Use metro code instead.
 	 *
-	 * @var int
+	 * @var float
 	 */
 	public $dma_code;
 
 	/**
 	 * Metro code.
 	 *
-	 * @var int
+	 * @var float
 	 */
 	public $metro_code;
 

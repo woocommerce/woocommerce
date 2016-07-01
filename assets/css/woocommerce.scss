@@ -1617,9 +1617,11 @@ p.demo_store {
 }
 
 /**
- * Cart page
+ * Cart/checkout page
  */
-.woocommerce-cart {
+.woocommerce-cart,
+.woocommerce-checkout,
+#add_payment_method {
 	table.cart {
 		.product-thumbnail {
 			min-width: 32px;
@@ -1745,12 +1747,6 @@ p.demo_store {
 			}
 		}
 	}
-}
-
-/**
- * Checkout
- */
-.woocommerce-checkout, #add_payment_method {
 	.checkout {
 		.col-2 {
 			h3#ship-to-different-address {
@@ -1854,10 +1850,23 @@ p.demo_store {
 				color: darken( $secondary, 20% );
 			}
 
-			.wc-saved-payment-methods {
+			.woocommerce-SavedPaymentMethods {
 				list-style: none outside;
 				margin: 0;
+				.woocommerce-SavedPaymentMethods-token,
+				.woocommerce-SavedPaymentMethods-new {
+					margin: 0 0 .5em 0;
+					label {
+						cursor: pointer;
+					}
+				}
+				.woocommerce-SavedPaymentMethods-tokenInput {
+					vertical-align: middle;
+					margin: -3px 1em 0 0;
+					position: relative;
+				}
 			}
+
 			.wc-credit-card-form {
 				border: 0;
 				padding: 0;

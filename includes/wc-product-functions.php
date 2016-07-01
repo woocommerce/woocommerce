@@ -106,6 +106,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		foreach( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
+
+		// Does this product have a parent?
+		if ( $parent_id = wp_get_post_parent_id( $post_id ) ) {
+			wc_delete_product_transients( $parent_id );
+		}
 	}
 
 	// Delete transients
@@ -701,7 +706,6 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param int $thumbnail_id
  * @param object|bool $product
  * @return array
  */

@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); ?>
 </h2>
 
+<?php do_action( 'woocommerce_shipping_zone_before_methods_table' ); ?>
+
 <table class="wc-shipping-zone-methods widefat">
 	<thead>
 		<tr>
@@ -96,6 +98,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<article>
 					<form action="" method="post">
 						<div class="wc-shipping-zone-method-selector">
+							<p><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></p>
+
 							<select name="add_method_id">
 								<?php
 									foreach ( WC()->shipping->load_shipping_methods() as $method ) {

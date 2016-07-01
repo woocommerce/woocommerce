@@ -298,7 +298,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
-		$data = $request->get_json_params();
+		$data = array_filter( $request->get_params() );
 
 		$defaults = array(
 			'discount_type'                => 'fixed_cart',
@@ -469,7 +469,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				),
 				'amount' => array(
 					'description' => __( 'The amount of discount.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'expiry_date' => array(
@@ -538,12 +538,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				),
 				'minimum_amount' => array(
 					'description' => __( 'Minimum order amount that needs to be in the cart before coupon applies.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'maximum_amount' => array(
 					'description' => __( 'Maximum order amount allowed when using the coupon.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'email_restrictions' => array(
@@ -560,7 +560,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			),
 		);
 
-		return $this->add_additional_fields_schema( $schema );;
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

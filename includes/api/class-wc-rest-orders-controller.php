@@ -129,6 +129,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'parent_id'            => $post->post_parent,
 			'status'               => $order->get_status(),
 			'order_key'            => $order->order_key,
+			'number'               => $order->get_order_number(),
 			'currency'             => $order->get_order_currency(),
 			'version'              => $order->order_version,
 			'prices_include_tax'   => $order->prices_include_tax,
@@ -151,7 +152,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->customer_user_agent,
 			'created_via'          => $order->created_via,
 			'customer_note'        => $order->customer_note,
-			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date, true ),
+			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date ),
 			'date_paid'            => $order->paid_date,
 			'cart_hash'            => $order->cart_hash,
 			'line_items'           => array(),
@@ -159,6 +160,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'shipping_lines'       => array(),
 			'fee_lines'            => array(),
 			'coupon_lines'         => array(),
+			'refunds'              => array(),
 		);
 
 		// Add addresses.
@@ -298,8 +300,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					);
 				}
 
-				foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				if ( isset( $fee_line_taxes['subtotal'] ) ) {
+					foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+						$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+					}
 				}
 
 				$fee_line['taxes'] = array_values( $fee_tax );
@@ -318,6 +322,15 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 
 			$data['coupon_lines'][] = $coupon_line;
+		}
+
+		// Add refunds.
+		foreach ( $order->get_refunds() as $refund ) {
+			$data['refunds'][] = array(
+				'id'     => $refund->id,
+				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
+				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $dp ),
+			);
 		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -402,6 +415,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
+		// Search by product.
 		if ( ! empty( $request['product'] ) ) {
 			$order_ids = $wpdb->get_col( $wpdb->prepare( "
 				SELECT order_id
@@ -416,7 +430,54 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$args['post__in'] = $order_ids;
 		}
 
+		// Search.
+		if ( ! empty( $args['s'] ) ) {
+			$order_ids = wc_order_search( $args['s'] );
+
+			if ( ! empty( $order_ids ) ) {
+				unset( $args['s'] );
+				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
+			}
+		}
+
 		return $args;
+	}
+
+	/**
+	 * Prepare a single order for create.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_Error|stdClass $data Object.
+	 */
+	protected function prepare_item_for_database( $request ) {
+		$data = new stdClass;
+
+		// Set default order args.
+		$data->status        = $request['status'];
+		$data->customer_id   = $request['customer_id'];
+		$data->customer_note = $request['customer_note'];
+
+		/**
+		 * Filter the query_vars used in `get_items` for the constructed query.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for insertion.
+		 *
+		 * @param stdClass        $data    An object representing a single item prepared
+		 *                                 for inserting the database.
+		 * @param WP_REST_Request $request Request object.
+		 */
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+	}
+
+	/**
+	 * Create base WC Order object.
+	 *
+	 * @param array $data
+	 * @return WC_Order
+	 */
+	protected function create_base_order( $data ) {
+		return wc_create_order( $data );
 	}
 
 	/**
@@ -434,12 +495,14 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
-			$order = wc_create_order( array(
-				'status'        => $request['status'],
-				'customer_id'   => $request['customer_id'],
-				'customer_note' => $request['customer_note'],
-				'created_via'   => 'rest-api',
-			) );
+			$data = $this->prepare_item_for_database( $request );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+
+			$data->created_via = 'rest-api';
+
+			$order = $this->create_base_order( (array) $data );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -468,7 +531,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				if ( is_array( $request[ $line ] ) ) {
 					foreach ( $request[ $line ] as $item ) {
 						$set_item = 'set_' . $line_type;
-						$new_item = $this->$set_item( $order, $item, 'create' );
+						$this->$set_item( $order, $item, 'create' );
 					}
 				}
 			}
@@ -481,7 +544,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
 			}
 			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+				update_post_meta( $order->id, '_payment_method_title', $request['payment_method_title'] );
 			}
 			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
@@ -546,11 +609,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 
-		if ( ! empty( $item['product_id'] ) ) {
-			$product_id = (int) $item['product_id'];
-		} else if ( ! empty( $item['sku'] ) ) {
+		if ( ! empty( $item['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $item['sku'] );
-		} else if ( ! empty( $item['variation_id'] ) ) {
+		} elseif ( ! empty( $item['product_id'] ) && empty( $item['variation_id'] ) ) {
+			$product_id = (int) $item['product_id'];
+		} elseif ( ! empty( $item['variation_id'] ) ) {
 			$product_id = (int) $item['variation_id'];
 		}
 
@@ -799,7 +862,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * 1) Only non-protected meta (no leading underscore) can be set
 	 * 2) Meta values must be scalar (int, string, bool)
 	 *
-	 * @param WC_Order $order Order data.
+	 * @param int $order_id Order ID.
 	 * @param array $meta_data Meta data in array( 'meta_key' => 'meta_value' ) format.
 	 */
 	protected function update_meta_data( $order_id, $meta_data ) {
@@ -1096,6 +1159,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'number' => array(
+					'description' => __( 'Order number.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'currency' => array(
 					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1304,12 +1373,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit' ),
-					'writeonly'   => true,
+					'context'     => array( 'edit' ),
 				),
 				'transaction_id' => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
-					'type'        => 'boolean',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'customer_ip_address' => array(
@@ -1349,7 +1417,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'cart_hash' => array(
 					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -1366,7 +1434,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'name' => array(
 							'description' => __( 'Product name.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
@@ -1424,7 +1492,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1545,7 +1613,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'method_id' => array(
 							'description' => __( 'Shipping method ID.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'total' => array(
@@ -1560,7 +1628,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1608,7 +1676,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'total' => array(
-							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1618,7 +1686,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1668,6 +1736,32 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'discount_tax' => array(
 							'description' => __( 'Discount total tax.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
+				),
+				'refunds' => array(
+					'description' => __( 'List of refunds.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Refund ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'reason' => array(
+							'description' => __( 'Refund reason.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total' => array(
+							'description' => __( 'Refund total.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

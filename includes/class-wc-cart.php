@@ -682,7 +682,7 @@ class WC_Cart {
 				'undo_item' => $cart_item_key,
 			);
 
-			return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '' );
+			return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
 		}
 
 		/**
@@ -771,6 +771,11 @@ class WC_Cart {
 					$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
 					$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
 				}
+			}
+
+			if ( apply_filters( 'woocommerce_cart_hide_zero_taxes', true ) ) {
+				$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+				$tax_totals = array_intersect_key( $tax_totals, $amounts );
 			}
 
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
@@ -885,7 +890,7 @@ class WC_Cart {
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
-		 * @return string $cart_item_key
+		 * @return string|bool $cart_item_key
 		 */
 		public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			// Wrap in try catch so plugins can throw an exception to prevent adding to cart
@@ -1255,7 +1260,7 @@ class WC_Cart {
 					$line_subtotal_tax     = 0;
 					$line_subtotal         = $line_price;
 					$line_tax              = 0;
-					$line_total            = WC_Tax::round( $discounted_price * $values['quantity'] );
+					$line_total            = round( $discounted_price * $values['quantity'], WC_ROUNDING_PRECISION );
 
 				/**
 				 * Prices include tax.
@@ -1285,11 +1290,16 @@ class WC_Cart {
 						// Adjusted price (this is the price including the new tax rate)
 						$adjusted_price    = ( $line_subtotal + $line_subtotal_tax ) / $values['quantity'];
 
-						// Apply discounts
+						// Apply discounts and get the discounted price FOR A SINGLE ITEM
 						$discounted_price  = $this->get_discounted_price( $values, $adjusted_price, true );
-						$discounted_taxes  = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
+
+						// Convert back to line price and round nicely
+						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+
+						// Now use rounded line price to get taxes.
+						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
 						$line_tax          = array_sum( $discounted_taxes );
-						$line_total        = ( $discounted_price * $values['quantity'] ) - $line_tax;
+						$line_total        = $discounted_line_price - $line_tax;
 
 					/**
 					 * Regular tax calculation (customer inside base and the tax class is unmodified.
@@ -1305,9 +1315,14 @@ class WC_Cart {
 
 						// Calc prices and tax (discounted)
 						$discounted_price = $this->get_discounted_price( $values, $base_price, true );
-						$discounted_taxes = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
-						$line_tax         = array_sum( $discounted_taxes );
-						$line_total       = ( $discounted_price * $values['quantity'] ) - $line_tax;
+
+						// Convert back to line price and round nicely
+						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+
+						// Now use rounded line price to get taxes.
+						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
+						$line_tax          = array_sum( $discounted_taxes );
+						$line_total        = $discounted_line_price - $line_tax;
 					}
 
 					// Tax rows - merge the totals we just got
@@ -1495,13 +1510,14 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( ! wc_shipping_enabled() ) {
+			// If shipping is disabled or not yet configured, we can skip this.
+			if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
 				return false;
 			}
 
 			$needs_shipping = false;
 
-			if ( $this->cart_contents ) {
+			if ( ! empty( $this->cart_contents ) ) {
 				foreach ( $this->cart_contents as $cart_item_key => $values ) {
 					$_product = $values['data'];
 					if ( $_product->needs_shipping() ) {

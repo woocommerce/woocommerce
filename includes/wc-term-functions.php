@@ -120,7 +120,7 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
 /**
  * WooCommerce Dropdown categories.
  *
- * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258.
+ * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
  * We use a custom walker, just like WordPress does.
  *
  * @param int $deprecated_show_uncategorized (default: 1)
@@ -159,7 +159,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 
 	$terms = get_terms( 'product_cat', apply_filters( 'wc_product_dropdown_categories_get_terms_args', $args ) );
 
-	if ( ! $terms ) {
+	if ( empty( $terms ) ) {
 		return;
 	}
 
@@ -195,23 +195,6 @@ function wc_walk_category_dropdown_tree() {
 
 	return call_user_func_array( array( &$walker, 'walk' ), $args );
 }
-
-/**
- * WooCommerce Term/Order item Meta API - set table name.
- */
-function wc_taxonomy_metadata_wpdbfix() {
-	global $wpdb;
-	$termmeta_name = 'woocommerce_termmeta';
-	$itemmeta_name = 'woocommerce_order_itemmeta';
-
-	$wpdb->woocommerce_termmeta = $wpdb->prefix . $termmeta_name;
-	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
-
-	$wpdb->tables[] = 'woocommerce_termmeta';
-	$wpdb->tables[] = 'woocommerce_order_itemmeta';
-}
-add_action( 'init', 'wc_taxonomy_metadata_wpdbfix', 0 );
-add_action( 'switch_blog', 'wc_taxonomy_metadata_wpdbfix', 0 );
 
 /**
  * When a term is split, ensure meta data maintained.
@@ -307,7 +290,7 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  *
  * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
- * @param mixed $meta_key
+ * @param string $meta_key
  * @param string $meta_value (default: '')
  * @param bool $deprecated (default: false)
  * @return bool
@@ -448,6 +431,11 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		return $clauses;
 	}
 
+	// No need to filter counts
+	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
+		return $clauses;
+	}
+
 	// Wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
 	$found = false;
 	foreach ( (array) $taxonomies as $taxonomy ) {
@@ -468,9 +456,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false )  {
-		$clauses['fields'] = 'tm.*, ' . $clauses['fields'];
-	}
+	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'];
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
@@ -555,7 +541,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	}
 
 	// Exit if we have no terms to count
-	if ( ! $terms ) {
+	if ( empty( $terms ) ) {
 		return;
 	}
 
@@ -689,7 +675,6 @@ function wc_get_term_product_ids( $term_id, $taxonomy ) {
 
 /**
  * When a post is updated and terms recounted (called by _update_post_term_count), clear the ids.
- * @param int $term_id
  * @param int    $object_id  Object ID.
  * @param array  $terms      An array of object terms.
  * @param array  $tt_ids     An array of term taxonomy IDs.

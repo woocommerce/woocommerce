@@ -2,11 +2,11 @@
 /**
  * WooCommerce Admin
  *
- * @class       WC_Admin
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.3
+ * @class    WC_Admin
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -141,13 +141,23 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' && ! current_user_can( 'edit_posts' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			$prevent_access = true;
+		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
+			$has_cap     = false;
+			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
+
+			foreach ( $access_caps as $access_cap ) {
+				if ( current_user_can( $access_cap ) ) {
+					$has_cap = true;
+					break;
+				}
+			}
+
+			if ( ! $has_cap ) {
+				$prevent_access = true;
+			}
 		}
 
-		$prevent_access = apply_filters( 'woocommerce_prevent_admin_access', $prevent_access );
-
-		if ( $prevent_access ) {
+		if ( apply_filters( 'woocommerce_prevent_admin_access', $prevent_access ) ) {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
@@ -180,7 +190,7 @@ class WC_Admin {
 			$email         = new WC_Email();
 
 			// wrap the content with the email template and then add styles
-			$message       = $email->style_inline( $mailer->wrap_message( $email_heading, $message ) );
+			$message       = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email
 			echo $message;

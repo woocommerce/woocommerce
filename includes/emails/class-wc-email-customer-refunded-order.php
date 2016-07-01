@@ -22,7 +22,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	/**
 	 * Refund order.
 	 *
-	 * @var WC_Order
+	 * @var WC_Order|bool
 	 */
 	public $refund;
 
@@ -121,7 +121,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
-		if ( $refund_id ) {
+		if ( ! empty( $refund_id ) ) {
 			$this->refund = wc_get_order( $refund_id );
 		} else {
 			$this->refund = false;

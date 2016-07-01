@@ -44,7 +44,9 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_regular() {
-
+		// Make sure pages exist
+		WC_Install::create_pages();
+		
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
 
@@ -64,6 +66,8 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_ssl() {
+		// Make sure pages exist
+		WC_Install::create_pages();
 
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );

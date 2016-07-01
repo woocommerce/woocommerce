@@ -55,7 +55,6 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 			'id'          => (int) $item->term_id,
 			'name'        => $item->name,
 			'slug'        => $item->slug,
-			'parent'      => (int) $item->parent,
 			'description' => $item->description,
 			'count'       => (int) $item->count,
 		);
@@ -112,11 +111,6 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
-				),
-				'parent' => array(
-					'description' => __( 'The id for the parent of the resource.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
 				),
 				'description' => array(
 					'description' => __( 'HTML description of the resource.', 'woocommerce' ),

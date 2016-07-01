@@ -74,7 +74,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
-				for ( $i = 0; $i<count( $stack ); $i++ ) { // freeze the state of the non-argument variables
+				$stack_size = count( $stack );
+				for ( $i = 0; $i<$stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[$i];
 					if ( preg_match( '/^[a-z]\w*$/', $token ) and !in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
@@ -103,7 +104,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			$index = 0;
 			$stack = new WC_Eval_Math_Stack;
 			$output = array(); // postfix form of expression, to be passed to pfx()
-			// $expr = trim(strtolower($expr));
 			$expr = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );
@@ -136,7 +136,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					while ( $stack->count > 0 and ( $o2 = $stack->last() ) and in_array( $o2, $ops ) and ( $ops_r[$op] ? $ops_p[$op] < $ops_p[$o2] : $ops_p[$op] <= $ops_p[$o2] ) ) {
 						$output[] = $stack->pop(); // pop stuff off the stack into the output
 					}
-					// many thanks: http://en.wikipedia.org/wiki/Reverse_Polish_notation#The_algorithm_in_detail
+					// many thanks: https://en.wikipedia.org/wiki/Reverse_Polish_notation#The_algorithm_in_detail
 					$stack->push( $op ); // finally put OUR operator onto the stack
 					$index++;
 					$expecting_op = false;

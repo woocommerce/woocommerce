@@ -69,7 +69,7 @@ function wc_get_page_id( $page ) {
  */
 function wc_get_page_permalink( $page ) {
 	$page_id   = wc_get_page_id( $page );
-	$permalink = $page_id ? get_permalink( $page_id ) : get_home_url();
+	$permalink = 0 < $page_id ? get_permalink( $page_id ) : get_home_url();
 	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 
@@ -120,7 +120,9 @@ function wc_nav_menu_items( $items ) {
 
 		if ( ! empty( $customer_logout ) ) {
 			foreach ( $items as $key => $item ) {
-				if ( strstr( $item->url, $customer_logout ) ) {
+				$path = parse_url( $item->url, PHP_URL_PATH );
+				$query = parse_url( $item->url, PHP_URL_QUERY );
+				if ( strstr( $path, $customer_logout ) || strstr( $query, $customer_logout ) ) {
 					unset( $items[ $key ] );
 				}
 			}

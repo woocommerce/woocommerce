@@ -6,9 +6,9 @@ When contributing please ensure you follow the guidelines below to help us keep 
 
 __Please Note:__
 
-GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooThemes Support](http://support.woothemes.com) for customer support, [WordPress.org](http://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
+GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooThemes Support](https://support.woothemes.com) for customer support, [WordPress.org](https://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
 
-- [WooExperts](http://www.woothemes.com/experts/)
+- [WooExperts](https://www.woothemes.com/experts/)
 - [Codeable](https://codeable.io/)
 
 ## Contributing To The Core
@@ -37,7 +37,7 @@ If you think something could be improved and you're able to do so, make your cha
 
 * Fork the repository on GitHub
 * Make the changes to your forked repository
-  * **Ensure you stick to the [WordPress Coding Standards](http://make.wordpress.org/core/handbook/coding-standards/php/).**
+  * **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/coding-standards/php/).**
   * Ensure you use LF line endings - no crazy Windows line endings please :)
 * When committing, reference your issue number (#1234) and include a note about the fix
 * Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained by WooCommerce developers
@@ -92,8 +92,8 @@ By translating video tutorials you'll be helping non-English speaking users and 
 
 # Additional Resources
 
-* [General GitHub documentation](http://help.github.com/)
-* [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
+* [General GitHub documentation](https://help.github.com/)
+* [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
 * [Translator Handbook](https://make.wordpress.org/polyglots/handbook/)
-* [WooCommerce Docs](http://docs.woothemes.com/)
-* [WooThemes Support](http://support.woothemes.com)
+* [WooCommerce Docs](https://docs.woothemes.com/)
+* [WooThemes Support](https://support.woothemes.com)

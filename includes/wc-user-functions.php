@@ -352,41 +352,52 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
 
 /**
+ * Get customer download permissions from the database.
+ *
+ * @param int $customer_id Customer/User ID
+ * @return array
+ */
+function wc_get_customer_download_permissions( $customer_id ) {
+	global $wpdb;
+
+	return apply_filters( 'woocommerce_permission_list', $wpdb->get_results(
+		$wpdb->prepare( "
+			SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
+			WHERE user_id = %d
+			AND permissions.order_id > 0
+			AND
+				(
+					permissions.downloads_remaining > 0
+					OR permissions.downloads_remaining = ''
+				)
+			AND
+				(
+					permissions.access_expires IS NULL
+					OR permissions.access_expires >= %s
+					OR permissions.access_expires = '0000-00-00 00:00:00'
+				)
+			ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
+			",
+			$customer_id,
+			date( 'Y-m-d', current_time( 'timestamp' ) )
+		)
+	), $customer_id );
+}
+
+/**
  * Get customer available downloads.
  *
  * @param int $customer_id Customer/User ID
  * @return array
  */
 function wc_get_customer_available_downloads( $customer_id ) {
-	global $wpdb;
-
 	$downloads   = array();
 	$_product    = null;
 	$order       = null;
 	$file_number = 0;
 
 	// Get results from valid orders only
-	$results = apply_filters( 'woocommerce_permission_list', $wpdb->get_results( $wpdb->prepare( "
-		SELECT permissions.*
-		FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
-		WHERE user_id = %d
-		AND permissions.order_id > 0
-		AND
-			(
-				permissions.downloads_remaining > 0
-				OR
-				permissions.downloads_remaining = ''
-			)
-		AND
-			(
-				permissions.access_expires IS NULL
-				OR
-				permissions.access_expires >= %s
-				OR
-				permissions.access_expires = '0000-00-00 00:00:00'
-			)
-		ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
-		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) ), $customer_id );
+	$results = wc_get_customer_download_permissions( $customer_id );
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
@@ -628,7 +639,7 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  *
  * @since 2.6.0
  * @param int $customer_id Customer ID.
- * @return WC_Order|bool Order object if successful or false.
+ * @return WC_Order Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
 	global $wpdb;

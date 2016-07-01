@@ -144,6 +144,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 		$id = 0;
 
 		try {
+			$porcelain = isset( $assoc_args['porcelain'] );
+			unset( $assoc_args['porcelain'] );
+
 			$data = apply_filters( 'woocommerce_cli_create_product_data', $this->unflatten_array( $assoc_args ) );
 
 			// Check if product title is specified
@@ -204,7 +207,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+			if ( $this->is_variable( $data ) ) {
 				$this->save_variations( $id, $data );
 			}
 
@@ -213,7 +216,11 @@ class WC_CLI_Product extends WC_CLI_Command {
 			// Clear cache/transients
 			wc_delete_product_transients( $id );
 
-			WP_CLI::success( "Created product $id." );
+			if ( $porcelain ) {
+				WP_CLI::line( $id );
+			} else {
+				WP_CLI::success( "Created product $id." );
+			}
 		} catch ( WC_CLI_Exception $e ) {
 			// Remove the product when fails
 			$this->clear_product( $id );
@@ -650,7 +657,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+			if ( $this->is_variable( $data ) ) {
 				$this->save_variations( $id, $data );
 			}
 
@@ -1177,7 +1184,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 						wp_set_object_terms( $product_id, $values, $taxonomy );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
@@ -1211,16 +1218,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 				}
 			}
 
-			if ( ! function_exists( 'attributes_cmp' ) ) {
-				function attributes_cmp( $a, $b ) {
-					if ( $a['position'] == $b['position'] ) {
-						return 0;
-					}
-
-					return ( $a['position'] < $b['position'] ) ? -1 : 1;
-				}
-			}
-			uasort( $attributes, 'attributes_cmp' );
+			uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 			update_post_meta( $product_id, '_product_attributes', $attributes );
 		}
@@ -1311,7 +1309,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 				$clear_parent_ids[] = $product_id;
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 
 					$children_by_price = get_posts( array(
@@ -2020,8 +2018,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 			'timeout' => 10
 		) );
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ) );
+		if ( is_wp_error( $response ) ) {
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ) );
+		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) );
 		}
 
 		// Ensure we have a file name and type
@@ -2059,10 +2059,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Get product image as attachment
+	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since  2.5.0
-	 * @param  int $upload
+	 * @param  array $upload
 	 * @param  int $id
 	 * @return int
 	 */
@@ -2120,5 +2120,22 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Delete product
 		wp_delete_post( $product_id, true );
+	}
+
+	/**
+	 * Check if is a variable.
+	 *
+	 * @since 2.6.2
+	 * @param array $data
+	 * @return bool
+	 */
+	private function is_variable( $data ) {
+		if ( isset( $data['type'] ) && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+			$types = apply_filters( 'woocommerce_cli_get_product_variable_types', array( 'variable' ) );
+
+			return in_array( $data['type'], $types );
+		}
+
+		return false;
 	}
 }

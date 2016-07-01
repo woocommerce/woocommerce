@@ -30,6 +30,38 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	protected $rest_base = '';
 
 	/**
+	 * Add the schema from additional fields to an schema array.
+	 *
+	 * The type of object is inferred from the passed schema.
+	 *
+	 * @param array $schema Schema array.
+	 */
+	protected function add_additional_fields_schema( $schema ) {
+		if ( empty( $schema['title'] ) ) {
+			return $schema;
+		}
+
+		/**
+		 * Can't use $this->get_object_type otherwise we cause an inf loop.
+		 */
+		$object_type = $schema['title'];
+
+		$additional_fields = $this->get_additional_fields( $object_type );
+
+		foreach ( $additional_fields as $field_name => $field_options ) {
+			if ( ! $field_options['schema'] ) {
+				continue;
+			}
+
+			$schema['properties'][ $field_name ] = $field_options['schema'];
+		}
+
+		$schema['properties'] = apply_filters( 'woocommerce_rest_' . $object_type . '_schema', $schema['properties'] );
+
+		return $schema;
+	}
+
+	/**
 	 * Get normalized rest base.
 	 *
 	 * @return string
@@ -90,6 +122,18 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( ! empty( $items['create'] ) ) {
 			foreach ( $items['create'] as $item ) {
 				$_item = new WP_REST_Request( 'POST' );
+
+				// Default parameters.
+				$defaults = array();
+				$schema   = $this->get_public_item_schema();
+				foreach ( $schema['properties'] as $arg => $options ) {
+					if ( isset( $options['default'] ) ) {
+						$defaults[ $arg ] = $options['default'];
+					}
+				}
+				$_item->set_default_params( $defaults );
+
+				// Set request parameters.
 				$_item->set_body_params( $item );
 				$_response = $this->create_item( $_item );
 

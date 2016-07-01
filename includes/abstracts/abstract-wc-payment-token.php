@@ -18,25 +18,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
  abstract class WC_Payment_Token extends WC_Data {
 
- 	/**
- 	 * Token Data (stored in the payment_tokens table).
- 	 * @var array
- 	 */
- 	protected $_data = array(
- 		'id'         => 0,
- 		'gateway_id' => '',
- 		'token'      => '',
- 		'is_default' => 0,
- 		'user_id'    => 0,
- 	);
+	/**
+	 * Token Data (stored in the payment_tokens table).
+	 * @var array
+	 */
+	protected $_data = array(
+		 'id'         => 0,
+		 'gateway_id' => '',
+		 'token'      => '',
+		 'is_default' => 0,
+		 'user_id'    => 0,
+	);
 
- 	/**
- 	 * Meta type. Payment tokens are a new object type.
- 	 * @var string
- 	 */
- 	protected $_meta_type = 'payment_token';
+	/**
+	 * Meta type. Payment tokens are a new object type.
+	 * @var string
+	 */
+	protected $_meta_type = 'payment_token';
 
- 	/**
+	 /**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	/**
 	 * Returns the payment token ID.
 	 * @since 2.6.0
-	 * @return ID Token ID
+	 * @return integer Token ID
 	 */
 	public function get_id() {
 		return absint( $this->_data['id'] );
@@ -97,6 +97,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 */
 	public function get_type() {
 		return isset( $this->_data['type'] ) ? $this->_data['type'] : '';
+	}
+
+	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_display_name() {
+		return $this->get_type();
 	}
 
 	/**
@@ -190,7 +198,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	/**
 	 * Update a payment token.
 	 * @since 2.6.0
-	 * @return True on success, false if validation failed and a payment token could not be updated
+	 * @return boolean on success, false if validation failed and a payment token could not be updated
 	 */
 	public function update() {
 		if ( false === $this->validate() ) {
@@ -226,7 +234,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	/**
 	 * Create a new payment token in the database.
 	 * @since 2.6.0
-	 * @return True on success, false if validation failed and a payment token could not be created
+	 * @return boolean on success, false if validation failed and a payment token could not be created
 	 */
 	public function create() {
 		if ( false === $this->validate() ) {
@@ -265,7 +273,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	/**
 	 * Saves a payment token to the database - does not require you to know if this is a new token or an update token.
 	 * @since 2.6.0
-	 * @return True on success, false if validation failed and a payment token could not be saved
+	 * @return boolean on success, false if validation failed and a payment token could not be saved
 	 */
 	public function save() {
 		if ( $this->get_id() > 0 ) {

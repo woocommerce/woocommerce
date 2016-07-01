@@ -439,7 +439,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			// order status
 			if ( ! empty( $data['status'] ) ) {
 
-				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '' );
+				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
 			// customer ID

@@ -167,7 +167,7 @@ class WC_Tax {
 	public static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
 
-		if ( $rates ) {
+		if ( ! empty( $rates ) ) {
 			// Multiple taxes
 			foreach ( $rates as $key => $rate ) {
 
@@ -233,7 +233,7 @@ class WC_Tax {
 			return array();
 		}
 
-		$postcode          = wc_clean( $postcode );
+		$postcode          = wc_normalize_postcode( wc_clean( $postcode ) );
 		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
 		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
@@ -286,13 +286,19 @@ class WC_Tax {
 		$criteria[] = $wpdb->prepare( "tax_rate_class = %s", sanitize_title( $tax_class ) );
 
 		// Pre-query postcode ranges for PHP based matching.
-		$postcode_search = wc_get_wildcard_postcodes( $postcode );
-		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%-%';" );
+		$postcode_search = wc_get_wildcard_postcodes( $postcode, $country );
+		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%...%';" );
 
 		if ( $postcode_ranges ) {
-			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
-			$postcode_search = array_unique( array_merge( $postcode_search, array_values( $matches ) ) );
+			$matches = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code', $country );
+			if ( ! empty( $matches ) ) {
+				foreach ( $matches as $matched_postcodes ) {
+					$postcode_search = array_merge( $postcode_search, $matched_postcodes );
+				}
+			}
 		}
+
+		$postcode_search = array_unique( $postcode_search );
 
 		/**
 		 * Location matching criteria - ORed
@@ -616,15 +622,6 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the postcodes.
-	 * @param  string $postcode
-	 * @return string
-	 */
-	private static function format_tax_rate_postcode( $postcode ) {
-		return strtoupper( trim( $postcode ) );
-	}
-
-	/**
 	 * format the city.
 	 * @param  string $city
 	 * @return string
@@ -821,9 +818,11 @@ class WC_Tax {
 		if ( ! is_array( $postcodes ) ) {
 			$postcodes = explode( ';', $postcodes );
 		}
-		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), $postcodes ), array( '*' ) ) );
-
-		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
+		// No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
+		foreach ( $postcodes as $key => $postcode ) {
+			$postcodes[ $key ] = strtoupper( trim( str_replace( chr( 226 ) . chr( 128 ) . chr( 166 ), '...', $postcode ) ) );
+		}
+		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_filter( $postcodes ), array( '*' ) ), 'postcode' );
 	}
 
 	/**

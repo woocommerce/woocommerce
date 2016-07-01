@@ -51,7 +51,8 @@ abstract class WC_Widget extends WP_Widget {
 	public function __construct() {
 		$widget_ops = array(
 			'classname'   => $this->widget_cssclass,
-			'description' => $this->widget_description
+			'description' => $this->widget_description,
+			'customize_selective_refresh' => true
 		);
 
 		parent::__construct( $this->widget_id, $this->widget_name, $widget_ops );
@@ -166,7 +167,7 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
 				break;
 				case 'checkbox' :
-					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
+					$instance[ $key ] = empty( $new_instance[ $key ] ) ? 0 : 1;
 				break;
 				default:
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );

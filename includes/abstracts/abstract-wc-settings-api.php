@@ -60,7 +60,7 @@ abstract class WC_Settings_API {
 	 * Set default required properties for each field.
 	 * @param array
 	 */
-	private function set_defaults( $field ) {
+	protected function set_defaults( $field ) {
 		if ( ! isset( $field['default'] ) ) {
 			$field['default'] = '';
 		}
@@ -73,6 +73,17 @@ abstract class WC_Settings_API {
 	public function admin_options() {
 		echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
 	}
+
+	/**
+	 * Initialise settings form fields.
+	 *
+	 * Add an array of fields to be displayed
+	 * on the gateway's settings screen.
+	 *
+	 * @since  1.0.0
+	 * @return string
+	 */
+	public function init_form_fields() {}
 
 	/**
 	 * Return the name of the option in the WP DB.
@@ -226,7 +237,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
-	 * @return mixed  The value specified for the option or a default value for the option.
+	 * @return string The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		if ( empty( $this->settings ) ) {

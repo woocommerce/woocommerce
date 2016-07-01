@@ -72,6 +72,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'delivery_url' => array(
 						'required' => true,
 					),
+					'secret' => array(
+						'required' => true,
+					),
 				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -166,7 +169,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$webhook->set_delivery_url( $request['delivery_url'] );
 
 		// Set secret.
-		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : wc_webhook_generate_secret() );
+		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : '' );
 
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
@@ -342,8 +345,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 			$data->ID = absint( $request['id'] );
 		}
 
-		$schema = $this->get_item_schema();
-
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
 			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
@@ -387,7 +388,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param WP_Post $webhook Webhook object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -520,7 +520,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'edit' ),
-					'writeonly'   => true,
 				),
 				'date_created' => array(
 					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),

@@ -23,7 +23,7 @@ class WC_Shipping {
 	/** @var bool True if shipping is enabled. */
 	public $enabled					 = false;
 
-	/** @var array Stores methods loaded into woocommerce. */
+	/** @var array|null Stores methods loaded into woocommerce. */
 	public $shipping_methods         = null;
 
 	/** @var float Stores the cost of shipping */
@@ -131,9 +131,15 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = array() ) {
-		if ( $package ) {
+		if ( ! empty( $package ) ) {
+			$status_options         = get_option( 'woocommerce_status_options', array() );
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
+
+			// Debug output
+			if ( ! empty( $status_options['shipping_debug_mode'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
+				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
+			}
 		} else {
 			$this->shipping_methods = array();
 		}
@@ -162,6 +168,9 @@ class WC_Shipping {
 			}
 			$method = new $method();
 		}
+		if ( is_null( $this->shipping_methods ) ) {
+			$this->shipping_methods = array();
+		}
 		$this->shipping_methods[ $method->id ] = $method;
 	}
 
@@ -169,7 +178,7 @@ class WC_Shipping {
 	 * Unregister shipping methods.
 	 */
 	public function unregister_shipping_methods() {
-		$this->shipping_methods = array();
+		$this->shipping_methods = null;
 	}
 
 	/**
@@ -196,7 +205,7 @@ class WC_Shipping {
 			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0', 'orderby' => 'name' ) );
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
-		return $this->shipping_classes;
+		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
 	}
 
 	/**
@@ -280,7 +289,7 @@ class WC_Shipping {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
 				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'] );
+					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], false ), $package['rates'], $chosen_method );
 					$chosen_methods[ $i ] = $chosen_method;
 					$method_counts[ $i ]  = sizeof( $package['rates'] );
 					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
@@ -317,7 +326,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		if ( ! $this->enabled || ! $package ) {
+		if ( ! $this->enabled || empty( $package ) ) {
 			return false;
 		}
 

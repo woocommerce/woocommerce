@@ -19,7 +19,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/** @protected string Token Type String. */
 	protected $type = 'CC';
 
- 	/**
+	/**
 	 * Validate credit card payment tokens.
 	 *
 	 * These fields are required by all credit card payment tokens:
@@ -61,6 +61,17 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_display_name() {
+		$display = wc_get_credit_card_type_label( $this->get_card_type() );
+		$display .= '&nbsp;' . sprintf( __( 'ending in %s', 'woocommerce' ), $this->get_last4() );
+		$display .= ' ' . sprintf( __( '(expires %s)', 'woocommerce' ), $this->get_expiry_month() . '/' . substr( $this->get_expiry_year(), 2 ) );
+		return $display;
 	}
 
 	/**
@@ -109,12 +120,12 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the expiration month for the card (MM format).
+	 * Set the expiration month for the card (formats into MM format).
 	 * @since 2.6.0
 	 * @param string $month
 	 */
 	public function set_expiry_month( $month ) {
-		$this->add_meta_data( 'expiry_month', $month, true );
+		$this->add_meta_data( 'expiry_month', str_pad( $month, 2, '0', STR_PAD_LEFT ), true );
 	}
 
 	/**

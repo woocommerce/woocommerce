@@ -36,20 +36,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a>
 				</div>
 			</td>
-			<td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other shipping zone.', 'woocommerce' ); ?></td>
+			<td class="wc-shipping-zone-region"><?php esc_html_e( 'This zone is used for shipping addresses that aren&lsquo;t included in any other shipping zone. Adding shipping methods to this zone is optional.', 'woocommerce' ); ?></td>
 			<td class="wc-shipping-zone-methods">
 				<ul>
 					<?php
 						$worldwide = new WC_Shipping_Zone( 0 );
 						$methods   = $worldwide->get_shipping_methods();
 
-						if ( $methods ) {
+						if ( ! empty( $methods ) ) {
 							foreach ( $methods as $method ) {
 								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 							}
 						} else {
-							echo '<li class="wc-shipping-zone-method">&ndash;</li>';
+							echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 						}
 					?>
 					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
@@ -119,7 +119,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
 				<div class="wc-shipping-zone-postcodes">
 					<textarea name="zone_postcodes[{{ data.zone_id }}]" data-attribute="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"></textarea>
-					<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. 90210-99000) are also supported.', 'woocommerce' ) ?></span>
+					<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woocommerce' ) ?></span>
 				</div>
 			</div>
 		</td>
@@ -146,6 +146,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<article>
 					<form action="" method="post">
 						<div class="wc-shipping-zone-method-selector">
+							<p><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></p>
+
 							<select name="add_method_id">
 								<?php
 									foreach ( WC()->shipping->load_shipping_methods() as $method ) {

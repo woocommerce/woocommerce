@@ -13,22 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
-	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
-	 * If tokenization is displayed, just the fields will be displayed.
+	 * Builds our payment fields area - including tokenization fields for logged
+	 * in users, and the actual payment fields.
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
-		$display_tokenization = $this->supports( 'tokenization' ) && is_checkout();
-
-		if ( $display_tokenization ) {
+		if ( $this->supports( 'tokenization' ) && is_checkout() ) {
 			$this->tokenization_script();
 			$this->saved_payment_methods();
-		}
-
-		$this->form();
-
-		if ( $display_tokenization ) {
+			$this->form();
 			$this->save_payment_method_checkbox();
+		} else {
+			$this->form();
 		}
 	}
 
@@ -50,7 +46,8 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	 * @since 2.6.0
 	 */
 	public function form() {
-		$html   = '';
+		wp_enqueue_script( 'wc-credit-card-form' );
+
 		$fields = array();
 
 		$cvc_field = '<p class="form-row form-row-last">
@@ -61,7 +58,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		$default_fields = array(
 			'card-number-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr( $this->id ) . '-card-number">' . __( 'Card Number', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="•••• •••• •••• ••••" ' . $this->field_name( 'card-number' ) . ' />
+				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;" ' . $this->field_name( 'card-number' ) . ' />
 			</p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
 				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
@@ -76,7 +73,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->id ) );
 		?>
 
-		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-credit-card-form'>
+		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
 				foreach ( $fields as $field ) {
@@ -87,6 +84,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			<div class="clear"></div>
 		</fieldset>
 		<?php
+
 		if ( $this->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
 			echo '<fieldset>' . $cvc_field . '</fieldset>';
 		}

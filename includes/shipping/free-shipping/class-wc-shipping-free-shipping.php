@@ -46,6 +46,18 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
+		wc_enqueue_js( "
+			jQuery( function( $ ) {
+				$('#woocommerce_free_shipping_requires').change(function(){
+					if ( $(this).val() === 'coupon' || $(this).val() === '' ) {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').hide();
+					} else {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').show();
+					}
+				}).change();
+			});
+		" );
+
 		return array(
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ),
@@ -76,18 +88,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'		=> true
 			)
 		);
-
-		wc_enqueue_js( "
-			jQuery( function( $ ) {
-				$('#woocommerce_free_shipping_requires').change(function(){
-					if ( $(this).val() === 'coupon' || $(this).val() === '' ) {
-						$('#woocommerce_free_shipping_min_amount').closest('tr').hide();
-					} else {
-						$('#woocommerce_free_shipping_min_amount').closest('tr').show();
-					}
-				}).change();
-			});
-		" );
 	}
 
 	/**
@@ -96,7 +96,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		$is_available       = false;
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 
@@ -113,6 +112,12 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {
 			$total = WC()->cart->get_displayed_subtotal();
+
+			if ( 'incl' === WC()->cart->tax_display_cart ) {
+				$total = $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() );
+			} else {
+				$total = $total - WC()->cart->get_cart_discount_total();
+			}
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;

@@ -1,7 +1,7 @@
 /*global ajaxurl */
 
 /**
- * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+ * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/)
  *
  * Modified - products have no children (non hierarchical)
  */

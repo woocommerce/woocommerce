@@ -20,10 +20,8 @@ add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 /**
  * WP Header.
  *
- * @see  wc_products_rss_feed()
  * @see  wc_generator_tag()
  */
-add_action( 'wp_head', 'wc_products_rss_feed' );
 add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
 add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 
@@ -256,6 +254,8 @@ add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
 /**
  * My Account.
  */
+add_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation' );
+add_action( 'woocommerce_account_content', 'woocommerce_account_content' );
 add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
 add_action( 'woocommerce_account_view-order_endpoint', 'woocommerce_account_view_order' );
 add_action( 'woocommerce_account_downloads_endpoint', 'woocommerce_account_downloads' );
@@ -263,5 +263,3 @@ add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_ed
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
 add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
 add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );
-add_action( 'woocommerce_account_set-default-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'set_default_payment_method' ) );
-add_action( 'woocommerce_account_delete-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'delete_payment_method' ) );

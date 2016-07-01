@@ -84,6 +84,20 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
 }
 
 /**
+ * Get a product attribute ID by name.
+ *
+ * @since  2.6.0
+ * @param string $name Attribute name.
+ * @return int
+ */
+function wc_attribute_taxonomy_id_by_name( $name ) {
+	$name       = str_replace( 'pa_', '', $name );
+	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
+
+	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
+}
+
+/**
  * Get a product attributes label.
  *
  * @param string $name
@@ -139,7 +153,7 @@ function wc_attribute_orderby( $name ) {
 function wc_get_attribute_taxonomy_names() {
 	$taxonomy_names = array();
 	$attribute_taxonomies = wc_get_attribute_taxonomies();
-	if ( $attribute_taxonomies ) {
+	if ( ! empty( $attribute_taxonomies ) ) {
 		foreach ( $attribute_taxonomies as $tax ) {
 			$taxonomy_names[] = wc_attribute_taxonomy_name( $tax->attribute_name );
 		}
@@ -162,7 +176,7 @@ function wc_get_attribute_types() {
 
 /**
  * Check if attribute name is reserved.
- * http://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
+ * https://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
  *
  * @since  2.4.0
  * @param  string $attribute_name

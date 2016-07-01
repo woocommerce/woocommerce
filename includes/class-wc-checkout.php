@@ -184,8 +184,8 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
-				'created_via'   => 'checkout'
+				'cart_hash'     => md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total ),
+				'created_via'   => 'checkout',
 			);
 
 			// Insert or update the post data
@@ -366,7 +366,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_before_checkout_process' );
 
 			if ( WC()->cart->is_empty() ) {
-				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ) );
+				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'shop' ) ) ) );
 			}
 
 			do_action( 'woocommerce_checkout_process' );
@@ -414,7 +414,7 @@ class WC_Checkout {
 				}
 
 				// Skip account if not needed
-				if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
+				if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( false === $this->must_create_account && empty( $this->posted['createaccount'] ) ) ) ) {
 					continue;
 				}
 
@@ -445,7 +445,7 @@ class WC_Checkout {
 					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 					// Validation: Required fields
-					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
+					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || "" === $this->posted[ $key ] ) ) {
 						switch ( $fieldset_key ) {
 							case 'shipping' :
 								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
@@ -573,7 +573,7 @@ class WC_Checkout {
 
 				// Validate Shipping Methods
 				$packages               = WC()->shipping->get_packages();
-				$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+				$this->shipping_methods = (array) WC()->session->get( 'chosen_shipping_methods' );
 
 				foreach ( $packages as $i => $package ) {
 					if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
@@ -614,9 +614,9 @@ class WC_Checkout {
 
 					if ( is_wp_error( $new_customer ) ) {
 						throw new Exception( $new_customer->get_error_message() );
+					} else {
+						$this->customer_id = absint( $new_customer );
 					}
-
-					$this->customer_id = $new_customer;
 
 					wc_set_customer_auth_cookie( $this->customer_id );
 

@@ -71,7 +71,7 @@ class WC_Comments {
 			$clauses['join'] = '';
 		}
 
-		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) ) {
+		if ( ! stristr( $clauses['join'], "JOIN $wpdb->posts ON" ) ) {
 			$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
 		}
 
@@ -92,7 +92,7 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-		if ( ! strstr( $join, $wpdb->posts ) ) {
+		if ( ! stristr( $join, "JOIN $wpdb->posts ON" ) ) {
 			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
 		}
 
@@ -235,7 +235,6 @@ class WC_Comments {
 		delete_post_meta( $post_id, '_wc_average_rating' );
 		delete_post_meta( $post_id, '_wc_rating_count' );
 		delete_post_meta( $post_id, '_wc_review_count' );
-		WC_Product::sync_average_rating( $post_id );
 	}
 
 	/**

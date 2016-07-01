@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * @version 2.0-beta13
+ * @version 2.0-beta13.1
  */
 abstract class WP_REST_Controller {
 

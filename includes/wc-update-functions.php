@@ -4,10 +4,10 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.6.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Functions
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -274,7 +274,7 @@ function wc_update_200_line_items() {
 
 		$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
 
-		if ( $order_taxes ) {
+		if ( ! empty( $order_taxes ) ) {
 			foreach( $order_taxes as $order_tax ) {
 
 				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
@@ -447,7 +447,7 @@ function wc_update_220_order_status() {
 	global $wpdb;
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-pending'
@@ -459,7 +459,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-processing'
@@ -471,7 +471,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-on-hold'
@@ -483,7 +483,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-completed'
@@ -495,7 +495,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-cancelled'
@@ -507,7 +507,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-refunded'
@@ -519,7 +519,7 @@ function wc_update_220_order_status() {
 	);
 	$wpdb->query( "
 		UPDATE {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		SET posts.post_status = 'wc-failed'
@@ -766,7 +766,7 @@ function wc_update_240_refunds() {
 		", $refunded_order->ID ) );
 
 		if ( $order_total > $refunded_total ) {
-			$refund = wc_create_refund( array(
+			wc_create_refund( array(
 				'amount'     => $order_total - $refunded_total,
 				'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 				'order_id'   => $refunded_order->ID,
@@ -859,6 +859,7 @@ function wc_update_260_termmeta() {
 	if ( get_option( 'db_version' ) >= 34370 && $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_termmeta';" ) ) {
 		if ( $wpdb->query( "INSERT INTO {$wpdb->termmeta} ( term_id, meta_key, meta_value ) SELECT woocommerce_term_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_termmeta;" ) ) {
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
+			wp_cache_flush();
 		}
 	}
 }

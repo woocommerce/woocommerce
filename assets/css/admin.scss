@@ -106,42 +106,30 @@
 	}
 }
 
+.woocommerce-message,
+.woocommerce-BlankState {
+	a.button-primary,
+	button.button-primary {
+		background: #bb77ae;
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		color: #fff;
+		text-shadow: 0px -1px 1px #A36597, 1px 0px 1px #A36597, 0px 1px 1px #A36597, -1px 0px 1px #A36597;
+
+		&:hover, &:focus, &:active {
+			background: #A36597;
+			border-color: #A36597;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		}
+	}
+}
+
 .woocommerce-message {
 	position: relative;
 	border-left-color: #cc99c2 !important;
 	overflow: hidden;
-
-	a.button-primary,
-	button.button-primary {
-		background: #bb77ae;
-		border-color: #aa559a;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		color: #fff;
-		text-decoration: none !important;
-		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
-
-		&:hover {
-			background: #c480b7;
-			border-color: #aa559a;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		}
-
-		&:active {
-			background: #aa559a;
-			border-color: #873A79;
-			-webkit-box-shadow: inset 0px 2px 0px #873A79;
-			box-shadow: inset 0px 2px 0px #873A79;
-		}
-
-		&:focus {
-			background: #bb77ae;
-			border-color: #aa559a;
-			-webkit-box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
-			box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
-		}
-	}
 
 	a.skip,
 	a.docs {
@@ -1037,19 +1025,17 @@ ul.wc_coupon_list_block {
 					font-size: 21px;
 					display: block;
 					text-align: center;
-					&:after {
+					&:before {
 						@include icon_dashicons( "\f128" );
 						width: 38px;
 						line-height: 38px;
 						display: block;
-						z-index: 1;
 					}
 					img {
 						width: 100%;
 						height: 100%;
 						margin: 0;
 						padding: 0;
-						z-index: 2;
 						position: relative;
 					}
 				}
@@ -1059,7 +1045,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					margin-top: .5em;
 					font-size: 0.92em !important;
-					color: #c8c8c8;
+					color: #888;
 				}
 			}
 
@@ -1160,7 +1146,7 @@ ul.wc_coupon_list_block {
 
 				small.times, del, .wc-order-item-taxes, .wc-order-item-discount, .wc-order-item-refund-fields {
 					font-size: 0.92em !important;
-					color: #c8c8c8;
+					color: #888;
 				}
 
 				.wc-order-item-taxes, .wc-order-item-refund-fields {
@@ -1211,7 +1197,7 @@ ul.wc_coupon_list_block {
 			table.display_meta {
 				margin: .5em 0 0 0;
 				font-size: 0.92em !important;
-				color: #c8c8c8;
+				color: #888;
 
 				tr {
 					th {
@@ -2108,6 +2094,7 @@ table.wc_input_table {
 	.ui-sortable:not(.ui-sortable-disabled) {
 		td.sort {
 			cursor: move;
+			font-size: 15px;
 			background: #f9f9f9;
 			text-align: center;
 			vertical-align: middle;
@@ -2228,14 +2215,16 @@ table.wc_shipping {
 	td.sort {
 		padding: 0 7px;
 		cursor: move;
+		font-size: 15px;
 		text-align: center;
 		vertical-align: middle;
+
 		&:before {
 			content: "\f333";
 			font-family: 'Dashicons';
 			text-align: center;
 			line-height: 1;
-			color: #ccc;
+			color: #999;
 			display: block;
 			width: 17px;
 			float: left;
@@ -2322,8 +2311,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			position: absolute;
 		}
 		.button-primary {
-			background-color: #a16696;
-			border-color: #a16696;
+			background-color: #804877;
+			border-color: #804877;
 			-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			margin: 0;
@@ -2353,6 +2342,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 	td.wc-shipping-zone-sort, td.wc-shipping-zone-method-sort {
 		cursor: move;
+		font-size: 15px;
 		text-align: center;
 
 		&:before {
@@ -2566,13 +2556,18 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 }
 
 .wc-backbone-modal .wc-shipping-zone-method-selector {
-	padding: 2px;
+	p {
+		margin-top: 0;
+	}
 	.wc-shipping-zone-method-description {
-		margin: 1em 0;
+		margin: .75em 1px 0;
 		line-height: 1.5em;
+		color: #999;
+		font-style: italic;
 	}
 	select {
 		width: 100%;
+		cursor: pointer;
 	}
 }
 
@@ -3243,6 +3238,11 @@ img.help_tip {
 			th {
 				padding: 7px 0 7px 7px !important;
 
+				&.sort {
+					width: 17px;
+					padding: 7px !important;
+				}
+
 				.woocommerce-help-tip {
 					font-size: 1.1em;
 					margin-left: 0;
@@ -3261,13 +3261,13 @@ img.help_tip {
 				input.input_text {
 					width: 100%;
 					float: none;
-					margin: 1px 0;
 					min-width: 0;
+					margin: 1px 0;
 				}
 
 				.upload_file_button {
-					float: right;
 					width: auto;
+					float: right;
 					cursor: pointer;
 				}
 
@@ -3289,12 +3289,11 @@ img.help_tip {
 			}
 
 			td.sort {
-				padding: 0 8px;
-				cursor: move;
 				width: 17px;
-				background: #f9f9f9;
+				cursor: move;
+				font-size: 15px;
 				text-align: center;
-				vertical-align: middle;
+				background: #f9f9f9;
 				padding-right: 7px !important;
 
 				&:before {
@@ -3321,28 +3320,33 @@ img.help_tip {
 .woocommerce_variation {
 	h3 {
 		.sort {
+			width: 17px;
+			height: 26px;
 			cursor: move;
+			float: right;
+			font-size: 15px;
+			font-weight: 400;
+			margin-right: .5em;
+			visibility: hidden;
 			text-align: center;
 			vertical-align: middle;
-			float: right;
-			height: 26px;
-			width: 17px;
-			visibility: hidden;
-			vertical-align: middle;
-			margin-right: .5em;
-			color: #a0a5aa;
+
 			&:before {
 				content: "\f333";
 				font-family: 'Dashicons';
 				text-align: center;
-				cursor: move;
-				line-height: 1;
+				line-height: 28px;
+				color: #999;
 				display: block;
 				width: 17px;
-				line-height: 28px;
+				float: left;
+				height: 100%;
 			}
+
 			&:hover {
-				color: #777;
+				&:before {
+					color: #777;
+				}
 			}
 		}
 	}
@@ -4615,6 +4619,55 @@ table.bar_chart {
 	}
 }
 
+.post-type-shop_order {
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e01d" );
+	}
+}
+
+.post-type-shop_coupon {
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e600" );
+	}
+}
+
+.post-type-product {
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e006" );
+	}
+}
+
+.woocommerce-BlankState {
+	text-align: center;
+	padding: 5em 0 0;
+
+	.woocommerce-BlankState-message {
+		color: #aaa;
+		margin: 0 auto 1.5em;
+		line-height: 1.5em;
+		font-size: 1.2em;
+		max-width: 500px;
+
+		&:before {
+			color: #ddd;
+			text-shadow: 0 -1px 1px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.8);
+			font-size: 8em;
+			display: block;
+			position: relative !important;
+			top: auto;
+			left: auto;
+			line-height: 1em;
+			margin: 0 0 0.1875em 0;
+		}
+	}
+
+	.woocommerce-BlankState-cta {
+		font-size: 1.2em;
+		padding: .75em 1.5em;
+		height: auto;
+	}
+}
+
 /**
  * Small screen optimisation
  */
@@ -4893,7 +4946,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 51px;
+	padding-bottom: 55px;
 
 	header,
 	article {
@@ -4902,23 +4955,23 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-header {
-		height: 50px;
+		height: auto;
 		background: #fcfcfc;
-		padding: 0 50px 0 16px;
+		padding: 1em 1.5em;
 		border-bottom: 1px solid #ddd;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
 			font-weight: 700;
-			line-height: 50px;
+			line-height: 1.5em;
 		}
 
 		.modal-close-link {
 			cursor: pointer;
 			color: #777;
-			height: 50px;
-			width: 50px;
+			height: 54px;
+			width: 54px;
 			padding: 0;
 			position: absolute;
 			top: 0;
@@ -4952,8 +5005,18 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 10px 16px;
+		padding: 1.5em;
 
+		p {
+			margin: 1.5em 0;
+		}
+		p:first-child {
+			margin-top: 0;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
 		.pagination {
 			padding: 10px 0 0;
 			text-align: center;
@@ -4966,7 +5029,7 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 10px 16px;
+		padding: 1em 1.5em;
 		background: #fcfcfc;
 		border-top: 1px solid #dfdfdf;
 		box-shadow: 0 -4px 4px -4px rgba(0,0,0,0.1);
@@ -4993,7 +5056,6 @@ table.bar_chart {
 	font-size: inherit;
 	font-weight: inherit;
 	padding: 3px 5px;
-	width: 100% !important;
 }
 .select2-container {
 	line-height: 1.85em;

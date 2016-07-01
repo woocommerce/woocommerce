@@ -740,41 +740,43 @@ class WC_API_Products extends WC_API_Resource {
 				continue;
 			}
 
+			$post_data = get_post( $variation->get_variation_id() );
+
 			$variations[] = array(
-					'id'                => $variation->get_variation_id(),
-					'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
-					'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
-					'downloadable'      => $variation->is_downloadable(),
-					'virtual'           => $variation->is_virtual(),
-					'permalink'         => $variation->get_permalink(),
-					'sku'               => $variation->get_sku(),
-					'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
-					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
-					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
-					'taxable'           => $variation->is_taxable(),
-					'tax_status'        => $variation->get_tax_status(),
-					'tax_class'         => $variation->get_tax_class(),
-					'managing_stock'    => $variation->managing_stock(),
-					'stock_quantity'    => (int) $variation->get_stock_quantity(),
-					'in_stock'          => $variation->is_in_stock(),
-					'backordered'       => $variation->is_on_backorder(),
-					'purchaseable'      => $variation->is_purchasable(),
-					'visible'           => $variation->variation_is_visible(),
-					'on_sale'           => $variation->is_on_sale(),
-					'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
-					'dimensions'        => array(
-						'length' => $variation->length,
-						'width'  => $variation->width,
-						'height' => $variation->height,
-						'unit'   => get_option( 'woocommerce_dimension_unit' ),
-					),
-					'shipping_class'    => $variation->get_shipping_class(),
-					'shipping_class_id' => ( 0 !== $variation->get_shipping_class_id() ) ? $variation->get_shipping_class_id() : null,
-					'image'             => $this->get_images( $variation ),
-					'attributes'        => $this->get_attributes( $variation ),
-					'downloads'         => $this->get_downloads( $variation ),
-					'download_limit'    => (int) $product->download_limit,
-					'download_expiry'   => (int) $product->download_expiry,
+				'id'                => $variation->get_variation_id(),
+				'created_at'        => $this->server->format_datetime( $post_data->post_date_gmt ),
+				'updated_at'        => $this->server->format_datetime( $post_data->post_modified_gmt ),
+				'downloadable'      => $variation->is_downloadable(),
+				'virtual'           => $variation->is_virtual(),
+				'permalink'         => $variation->get_permalink(),
+				'sku'               => $variation->get_sku(),
+				'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
+				'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
+				'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
+				'taxable'           => $variation->is_taxable(),
+				'tax_status'        => $variation->get_tax_status(),
+				'tax_class'         => $variation->get_tax_class(),
+				'managing_stock'    => $variation->managing_stock(),
+				'stock_quantity'    => (int) $variation->get_stock_quantity(),
+				'in_stock'          => $variation->is_in_stock(),
+				'backordered'       => $variation->is_on_backorder(),
+				'purchaseable'      => $variation->is_purchasable(),
+				'visible'           => $variation->variation_is_visible(),
+				'on_sale'           => $variation->is_on_sale(),
+				'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
+				'dimensions'        => array(
+					'length' => $variation->length,
+					'width'  => $variation->width,
+					'height' => $variation->height,
+					'unit'   => get_option( 'woocommerce_dimension_unit' ),
+				),
+				'shipping_class'    => $variation->get_shipping_class(),
+				'shipping_class_id' => ( 0 !== $variation->get_shipping_class_id() ) ? $variation->get_shipping_class_id() : null,
+				'image'             => $this->get_images( $variation ),
+				'attributes'        => $this->get_attributes( $variation ),
+				'downloads'         => $this->get_downloads( $variation ),
+				'download_limit'    => (int) $product->download_limit,
+				'download_expiry'   => (int) $product->download_expiry,
 			);
 		}
 
@@ -907,12 +909,12 @@ class WC_API_Products extends WC_API_Resource {
 						wp_set_object_terms( $product_id, $values, $taxonomy );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
 							'value'        => '',
-							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 							'is_taxonomy'  => $is_taxonomy
@@ -933,7 +935,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attributes[ $attribute_slug ] = array(
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
-						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 						'is_taxonomy'  => $is_taxonomy
@@ -941,16 +943,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			if ( ! function_exists( 'attributes_cmp' ) ) {
-				function attributes_cmp( $a, $b ) {
-					if ( $a['position'] == $b['position'] ) {
-						return 0;
-					}
-
-					return ( $a['position'] < $b['position'] ) ? -1 : 1;
-				}
-			}
-			uasort( $attributes, 'attributes_cmp' );
+			uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 			update_post_meta( $product_id, '_product_attributes', $attributes );
 		}
@@ -1018,7 +1011,7 @@ class WC_API_Products extends WC_API_Resource {
 				$clear_parent_ids[] = $product_id;
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 
 					$children_by_price = get_posts( array(
@@ -1095,12 +1088,13 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-			} elseif ( 'variable' === $product_type ) {
-				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
-				wc_update_product_stock_status( $product_id, $stock_status );
+				// Stock status is always determined by children so sync later.
+				if ( 'variable' !== $product_type ) {
+					wc_update_product_stock_status( $product_id, $stock_status );
+				}
 
 				// Stock quantity
 				if ( isset( $data['stock_quantity'] ) ) {
@@ -1804,8 +1798,10 @@ class WC_API_Products extends WC_API_Resource {
 			'timeout' => 10
 		) );
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
+		if ( is_wp_error( $response ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), 400 );
+		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure we have a file name and type
@@ -1843,10 +1839,10 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get product image as attachment
+	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since 2.2
-	 * @param integer $upload
+	 * @param array $upload
 	 * @param int $id
 	 * @return int
 	 */
@@ -1881,6 +1877,23 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
+	 * Get attribute options.
+	 *
+	 * @param int $product_id
+	 * @param array $attribute
+	 * @return array
+	 */
+	protected function get_attribute_options( $product_id, $attribute ) {
+		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+		} elseif ( isset( $attribute['value'] ) ) {
+			return array_map( 'trim', explode( '|', $attribute['value'] ) );
+		}
+
+		return array();
+	}
+
+	/**
 	 * Get the attributes for a product or product variation
 	 *
 	 * @since 2.1
@@ -1907,21 +1920,13 @@ class WC_API_Products extends WC_API_Resource {
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
-
-				// taxonomy-based attributes are comma-separated, others are pipe (|) separated
-				if ( $attribute['is_taxonomy'] ) {
-					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
-				} else {
-					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
-				}
-
 				$attributes[] = array(
 					'name'      => wc_attribute_label( $attribute['name'] ),
 					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
-					'options'   => array_map( 'trim', $options ),
+					'options'   => $this->get_attribute_options( $product->id, $attribute ),
 				);
 			}
 		}

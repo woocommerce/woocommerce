@@ -54,7 +54,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
-		$token->set_gateway_id( 'simplify_commerce' );
+		$token->set_gateway_id( 'bacs' );
 		$token->save();
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -63,10 +63,10 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$token->save();
 
 		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
-		$this->assertCount( 1, WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) );
+		$this->assertCount( 1, WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'bacs' ) );
 
-		foreach ( WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) as $simplify_token ) {
-			$this->assertEquals( 'simplify_commerce', $simplify_token->get_gateway_id() );
+		foreach ( WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'bacs' ) as $gateway_token ) {
+			$this->assertEquals( 'bacs', $gateway_token->get_gateway_id() );
 		}
 	}
 
@@ -77,7 +77,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	function test_wc_get_customer_default_token() {
 		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
-		$token->set_gateway_id( 'simplify_commerce' );
+		$token->set_gateway_id( 'bacs' );
 		$token->save();
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -101,7 +101,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 */
 	function test_wc_get_customer_default_token_returns_first_created_when_no_default_token_set() {
 		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
-		$token->set_gateway_id( 'simplify_commerce' );
+		$token->set_gateway_id( 'bacs' );
 		$token->save();
 
 		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
@@ -111,7 +111,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
 		$default_token = WC_Payment_Tokens::get_customer_default_token( $this->user_id );
-		$this->assertEquals( 'simplify_commerce', $default_token->get_gateway_id() );
+		$this->assertEquals( 'bacs', $default_token->get_gateway_id() );
 	}
 
 	/**

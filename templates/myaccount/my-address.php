@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
@@ -23,23 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 $customer_id = get_current_user_id();
 
 if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
-	$page_title = apply_filters( 'woocommerce_my_account_my_address_title', __( 'My Addresses', 'woocommerce' ) );
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
 		'billing' => __( 'Billing Address', 'woocommerce' ),
 		'shipping' => __( 'Shipping Address', 'woocommerce' )
 	), $customer_id );
 } else {
-	$page_title = apply_filters( 'woocommerce_my_account_my_address_title', __( 'My Address', 'woocommerce' ) );
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
 		'billing' =>  __( 'Billing Address', 'woocommerce' )
 	), $customer_id );
 }
 
-$oldcol    = 1;
-$col = 1;
+$oldcol = 1;
+$col    = 1;
 ?>
-
-<h2><?php echo $page_title; ?></h2>
 
 <p>
 	<?php echo apply_filters( 'woocommerce_my_account_my_address_description', __( 'The following addresses will be used on the checkout page by default.', 'woocommerce' ) ); ?>

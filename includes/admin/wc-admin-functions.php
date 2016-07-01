@@ -179,6 +179,9 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @param array $items Order items to save
  */
 function wc_save_order_items( $order_id, $items ) {
+	// Allow other plugins to check change in order items before they are saved
+	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
+
 	global $wpdb;
 
 	// Order items + fees
@@ -374,6 +377,6 @@ function wc_save_order_items( $order_id, $items ) {
 	// Update version after saving
 	update_post_meta( $order_id, '_order_version', WC_VERSION );
 
-	// inform other plugins that the items have been saved
+	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }

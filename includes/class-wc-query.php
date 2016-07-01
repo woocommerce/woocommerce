@@ -13,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Query' ) ) :
-
 /**
  * WC_Query Class.
  */
@@ -110,10 +108,10 @@ class WC_Query {
 				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
-				$title = __( 'Edit Account Details', 'woocommerce' );
+				$title = __( 'Account Details', 'woocommerce' );
 			break;
 			case 'edit-address' :
-				$title = __( 'Edit Address', 'woocommerce' );
+				$title = __( 'Addresses', 'woocommerce' );
 			break;
 			case 'payment-methods' :
 				$title = __( 'Payment Methods', 'woocommerce' );
@@ -133,11 +131,35 @@ class WC_Query {
 	}
 
 	/**
+	 * Endpoint mask describing the places the endpoint should be added.
+	 *
+	 * @since 2.6.2
+	 * @return int
+	 */
+	protected function get_endpoints_mask() {
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			$page_on_front     = get_option( 'page_on_front' );
+			$myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
+			$checkout_page_id  = get_option( 'woocommerce_checkout_page_id' );
+
+			if ( in_array( $page_on_front, array( $myaccount_page_id, $checkout_page_id ) ) ) {
+				return EP_ROOT | EP_PAGES;
+			}
+		}
+
+		return EP_PAGES;
+	}
+
+	/**
 	 * Add endpoints for query vars.
 	 */
 	public function add_endpoints() {
+		$mask = $this->get_endpoints_mask();
+
 		foreach ( $this->query_vars as $key => $var ) {
-			add_rewrite_endpoint( $var, EP_ROOT | EP_PAGES );
+			if ( ! empty( $var ) ) {
+				add_rewrite_endpoint( $var, $mask );
+			}
 		}
 	}
 
@@ -244,6 +266,11 @@ class WC_Query {
 			}
 		}
 
+		// Fix product feeds
+		if ( $q->is_feed() && $q->is_post_type_archive( 'product' ) ) {
+			$q->is_comment_feed = false;
+		}
+
 		// Special check for shops with the product archive on front
 		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 
@@ -259,7 +286,7 @@ class WC_Query {
 			define( 'SHOP_IS_ON_FRONT', true );
 
 			// Get the actual WP page to avoid errors and let us use is_front_page()
-			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
+			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
 			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
@@ -400,8 +427,6 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
-		global $wpdb;
-
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
 			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -454,7 +479,7 @@ class WC_Query {
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065.
+	 * WP Core doens't let us change the sort direction for invidual orderby params - https://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
@@ -626,9 +651,25 @@ class WC_Query {
 		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
 
 		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
-			$tax_query[] = array(
+			$tax_query[ $args['taxonomy'] ] = array(
 				'taxonomy' => $args['taxonomy'],
 				'terms'    => array( $args['term'] ),
+				'field'    => 'slug',
+			);
+		}
+
+		if ( ! empty( $args['product_cat'] ) ) {
+			$tax_query[ 'product_cat' ] = array(
+				'taxonomy' => 'product_cat',
+				'terms'    => array( $args['product_cat'] ),
+				'field'    => 'slug',
+			);
+		}
+
+		if ( ! empty( $args['product_tag'] ) ) {
+			$tax_query[ 'product_tag' ] = array(
+				'taxonomy' => 'product_tag',
+				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',
 			);
 		}
@@ -698,7 +739,3 @@ class WC_Query {
 		_deprecated_function( 'layered_nav_query', '2.6', '' );
 	}
 }
-
-endif;
-
-return new WC_Query();
