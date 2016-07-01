@@ -608,7 +608,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		return apply_filters( 'woocommerce_product_is_in_stock', $this->stock_status === 'instock' );
+		return apply_filters( 'woocommerce_product_is_in_stock', $this->stock_status === 'instock', $this );
 	}
 
 	/**

@@ -423,20 +423,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		$status = $this->stock_status === 'instock';
-
-		/**
-		 * Sanity check to ensure stock qty is not lower than 0 but still listed
-		 * instock.
-		 *
-		 * Check is not required for products on backorder since they can be
-		 * instock regardless of actual stock quantity.
-		 */
-		if ( true === $this->managing_stock() && ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$status = false;
-		}
-
-		return apply_filters( 'woocommerce_variation_is_in_stock', $status );
+		return apply_filters( 'woocommerce_variation_is_in_stock', $this->stock_status === 'instock', $this );
 	}
 
 	/**
