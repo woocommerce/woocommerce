@@ -301,7 +301,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'             => __( 'Low Stock Threshold', 'woocommerce' ),
-					'desc'              => '',
+					'desc'              => __( 'When product stock reaches this amount you will be notified via email.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_low_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
@@ -310,12 +310,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'step' => 1
 					),
 					'default'           => '2',
-					'autoload'          => false
+					'autoload'          => false,
+					'desc_tip'          => true,
 				),
 
 				array(
 					'title'             => __( 'Out Of Stock Threshold', 'woocommerce' ),
-					'desc'              => '',
+					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_no_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
@@ -323,7 +324,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'min'  => 0,
 						'step' => 1
 					),
-					'default'           => '0'
+					'default'           => '0',
+					'desc_tip'          => true,
 				),
 
 				array(
