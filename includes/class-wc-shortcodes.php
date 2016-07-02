@@ -149,7 +149,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Cart shortcode.
+	 * My account page shortcode.
 	 *
 	 * @param mixed $atts
 	 * @return string
