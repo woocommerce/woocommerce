@@ -119,6 +119,16 @@ class WC_Admin_Status {
 
 					echo '<div class="updated inline"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
 				break;
+				case 'delete_geoip_log' :
+					$logger = new WC_Logger();
+					$deleted = $logger->remove( 'geoip' );
+
+					if ( $deleted ) {
+						echo '<div class="updated inline"><p>' . __( 'GeoIP Log successfully deleted.', 'woocommerce' ) . '</p></div>';
+					} else {
+						echo '<div class="error inline"><p>' . __( 'There was an error deleting the GeoIP Log.', 'woocommerce' ) . '</p></div>';
+					}
+				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
 					if ( isset( $tools[ $action ]['callback'] ) ) {
@@ -186,6 +196,11 @@ class WC_Admin_Status {
 				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
 				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
+			),
+			'delete_geoip_log' => array(
+				'name'    => __( 'Delete GeoIP Log', 'woocommerce' ),
+				'button'  => __( 'Delete GeoIP Log', 'woocommerce' ),
+				'desc'    => __( 'This will delete the GeoIP log created by WooCommerce.', 'woocommerce' ),
 			)
 		);
 

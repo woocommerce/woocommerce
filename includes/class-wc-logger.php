@@ -124,4 +124,27 @@ class WC_Logger {
 		return $result;
 	}
 
+	/**
+	 * Remove/delete the chosen file.
+	 *
+	 * @param string $handle
+	 *
+	 * @return bool
+	 */
+	public function remove( $handle ) {
+		$removed = false;
+		$file    = wc_get_log_file_path( $handle );
+
+		if ( is_file( $file ) && is_writable( $file ) ) {
+			// Close first to be certain no processes keep it alive after it is unlinked.
+			$this->close( $handle );
+
+			$removed = unlink( $file );
+		}
+
+		do_action( 'woocommerce_log_remove', $handle, $removed );
+
+		return $removed;
+	}
+
 }
