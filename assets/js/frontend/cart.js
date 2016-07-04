@@ -96,7 +96,7 @@ jQuery( function( $ ) {
 			if ( $( '.woocommerce-checkout' ).length ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
-			
+
 			$( '.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
 			$( '.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
 
@@ -275,7 +275,7 @@ jQuery( function( $ ) {
 				this.submit_click );
 			$( document ).on(
 				'submit',
-				'div.woocommerce > form',
+				'div.woocommerce:not(.widget_product_search) > form',
 				this.cart_submit );
 			$( document ).on(
 				'click',
