@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order' ) ) :
 
 /**
  * Customer On-hold Order Email.
