@@ -757,8 +757,8 @@ abstract class WC_Abstract_Order {
 
 			// Inherit tax class from items
 			if ( '' === $shipping_tax_class ) {
-				$tax_classes      = WC_Tax::get_tax_classes();
-				$found_tax_classe = $this->get_items_tax_classes();
+				$tax_classes       = WC_Tax::get_tax_classes();
+				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
 					$tax_class = sanitize_title( $tax_class );
