@@ -162,7 +162,7 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
-	return wc_get_endpoint_url( $endpoint );
+	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
 }
 
 /**
