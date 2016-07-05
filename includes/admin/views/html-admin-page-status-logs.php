@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php endforeach; ?>
 				</select>
 				<input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
+				<?php if ( ! empty( $handle ) ) : ?>
+					<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => $handle ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e('Delete', 'woocommerce');?></a>
+				<?php endif; ?>
 			</form>
 		</div>
 		<div class="clear"></div>
