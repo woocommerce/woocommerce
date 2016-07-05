@@ -311,7 +311,7 @@ jQuery( function( $ ) {
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).blur();
 
 						// Scroll to top
 						$( 'html, body' ).animate( {
@@ -440,7 +440,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( error_message );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
 				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
 			}, 1000 );
