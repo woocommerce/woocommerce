@@ -213,8 +213,8 @@ class WC_Comments {
 
 	/**
 	 * Modify recipient of review email.
-	 * @param array $emails
-	 * @param int $comment_id
+	 * @param  array $emails
+	 * @param  int   $comment_id
 	 * @return array
 	 */
 	public static function comment_moderation_recipients( $emails, $comment_id ) {
@@ -241,7 +241,7 @@ class WC_Comments {
 	 * Remove order notes from wp_count_comments().
 	 * @since  2.2
 	 * @param  object $stats
-	 * @param  int $post_id
+	 * @param  int    $post_id
 	 * @return object
 	 */
 	public static function wp_count_comments( $stats, $post_id ) {
@@ -256,7 +256,7 @@ class WC_Comments {
 
 			$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
 
-			$total = 0;
+			$total    = 0;
 			$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
 
 			foreach ( (array) $count as $row ) {
@@ -270,7 +270,7 @@ class WC_Comments {
 			}
 
 			$stats['total_comments'] = $total;
-			$stats['all'] = $total;
+			$stats['all']            = $total;
 			foreach ( $approved as $key ) {
 				if ( empty( $stats[ $key ] ) ) {
 					$stats[ $key ] = 0;
@@ -296,7 +296,7 @@ class WC_Comments {
 
 	/**
 	 * Determine if a review is from a verified owner at submission.
-	 * @param int $comment_id
+	 * @param  int  $comment_id
 	 * @return bool
 	 */
 	public static function add_comment_purchase_verification( $comment_id ) {
@@ -308,6 +308,7 @@ class WC_Comments {
 		}
 		return $verified;
 	}
+
 }
 
 WC_Comments::init();
