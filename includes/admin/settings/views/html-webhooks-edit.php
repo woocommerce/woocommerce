@@ -177,7 +177,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			if ( 'action' === current ) {
 				action_event_field.show();
-			} else if ( 'custom' === current ) {
+			} elseif ( 'custom' === current ) {
 				custom_topic_field.show();
 			}
 		}).change();
