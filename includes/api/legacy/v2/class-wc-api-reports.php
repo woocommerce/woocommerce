@@ -29,14 +29,13 @@ class WC_API_Reports extends WC_API_Resource {
 	 * GET /reports/sales
 	 *
 	 * @since 2.1
-	 * @param array $routes
+	 * @param  array $routes
 	 * @return array
 	 */
 	public function register_routes( $routes ) {
-
 		# GET /reports
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_reports' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_reports' ), WC_API_Server::READABLE ),
 		);
 
 		# GET /reports/sales
@@ -66,12 +65,11 @@ class WC_API_Reports extends WC_API_Resource {
 	 * Get the sales report
 	 *
 	 * @since 2.1
-	 * @param string $fields fields to include in response
-	 * @param array $filter date filtering
+	 * @param  string $fields fields to include in response
+	 * @param  array  $filter date filtering
 	 * @return array
 	 */
 	public function get_sales_report( $fields = null, $filter = array() ) {
-
 		// check user permissions
 		$check = $this->validate_request();
 
@@ -121,7 +119,7 @@ class WC_API_Reports extends WC_API_Resource {
 				if ( date( ( 'day' == $this->report->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
 					$customer_count++;
 				}
- 			}
+			}
 
 			$period_totals[ $time ] = array(
 				'sales'     => wc_format_decimal( 0.00, 2 ),
@@ -154,7 +152,7 @@ class WC_API_Reports extends WC_API_Resource {
 				continue;
 			}
 
-			$period_totals[ $time ]['orders']   = (int) $order->count;
+			$period_totals[ $time ]['orders'] = (int) $order->count;
 		}
 
 		// add total order items for each period
@@ -179,7 +177,7 @@ class WC_API_Reports extends WC_API_Resource {
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
-		$sales_data  = array(
+		$sales_data = array(
 			'total_sales'       => $report_data->total_sales,
 			'net_sales'         => $report_data->net_sales,
 			'average_sales'     => $report_data->average_sales,
@@ -201,12 +199,11 @@ class WC_API_Reports extends WC_API_Resource {
 	 * Get the top sellers report
 	 *
 	 * @since 2.1
-	 * @param string $fields fields to include in response
-	 * @param array $filter date filtering
+	 * @param  string $fields fields to include in response
+	 * @param  array  $filter date filtering
 	 * @return array
 	 */
 	public function get_top_sellers_report( $fields = null, $filter = array() ) {
-
 		// check user permissions
 		$check = $this->validate_request();
 
@@ -218,14 +215,14 @@ class WC_API_Reports extends WC_API_Resource {
 		$this->setup_report( $filter );
 
 		$top_sellers = $this->report->get_order_report_data( array(
-			'data' => array(
+			'data'         => array(
 				'_product_id' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
 					'name'            => 'product_id'
 				),
-				'_qty' => array(
+				'_qty'        => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
@@ -264,7 +261,6 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @param array $filter date filtering
 	 */
 	private function setup_report( $filter ) {
-
 		include_once( WC()->plugin_path() . '/includes/admin/reports/class-wc-admin-report.php' );
 		include_once( WC()->plugin_path() . '/includes/admin/reports/class-wc-report-sales-by-date.php' );
 
@@ -279,7 +275,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 				// overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges
 				$_GET['start_date'] = $this->server->parse_datetime( $filter['date_min'] );
-				$_GET['end_date'] = isset( $filter['date_max'] ) ? $this->server->parse_datetime( $filter['date_max'] ) : null;
+				$_GET['end_date']   = isset( $filter['date_max'] ) ? $this->server->parse_datetime( $filter['date_max'] ) : null;
 
 			} else {
 
@@ -309,13 +305,12 @@ class WC_API_Reports extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @see WC_API_Resource::validate_request()
-	 * @param null $id unused
-	 * @param null $type unused
-	 * @param null $context unused
-	 * @return bool true if the request is valid and should be processed, false otherwise
+	 * @param  null $id      unused
+	 * @param  null $type    unused
+	 * @param  null $context unused
+	 * @return bool          true if the request is valid and should be processed, false otherwise
 	 */
 	protected function validate_request( $id = null, $type = null, $context = null ) {
-
 		if ( ! current_user_can( 'view_woocommerce_reports' ) ) {
 
 			return new WP_Error( 'woocommerce_api_user_cannot_read_report', __( 'You do not have permission to read this report', 'woocommerce' ), array( 'status' => 401 ) );
@@ -325,4 +320,5 @@ class WC_API_Reports extends WC_API_Resource {
 			return true;
 		}
 	}
+
 }
