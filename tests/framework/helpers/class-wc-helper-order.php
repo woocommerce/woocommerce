@@ -13,7 +13,6 @@ class WC_Helper_Order {
 	 * @param int $order_id ID of the order to delete.
 	 */
 	public static function delete_order( $order_id ) {
-
 		$order = wc_get_order( $order_id );
 
 		// Delete all products in the order
@@ -35,7 +34,6 @@ class WC_Helper_Order {
 	 * @return WC_Order Order object.
 	 */
 	public static function create_order() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		WC_Helper_Shipping::create_simple_flat_rate();
@@ -48,7 +46,7 @@ class WC_Helper_Order {
 		);
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception
-		$order 					= wc_create_order( $order_data );
+		$order                  = wc_create_order( $order_data );
 
 		// Add order products
 		$item_id = $order->add_product( $product, 4 );
@@ -87,4 +85,5 @@ class WC_Helper_Order {
 
 		return wc_get_order( $order->id );
 	}
+
 }
