@@ -46,8 +46,9 @@ class WC_Meta_Box_Order_Downloads {
 						}
 
 						// don't show permissions to files that have since been removed
-						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) )
+						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) ) {
 							continue;
+						}
 
 						// Show file title instead of count if set
 						$file = $product->get_file( $download->download_id );
@@ -80,7 +81,7 @@ class WC_Meta_Box_Order_Downloads {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
@@ -89,10 +90,10 @@ class WC_Meta_Box_Order_Downloads {
 		if ( isset( $_POST['download_id'] ) ) {
 
 			// Download data
-			$download_ids           = $_POST['download_id'];
-			$product_ids            = $_POST['product_id'];
-			$downloads_remaining    = $_POST['downloads_remaining'];
-			$access_expires         = $_POST['access_expires'];
+			$download_ids        = $_POST['download_id'];
+			$product_ids         = $_POST['product_id'];
+			$downloads_remaining = $_POST['downloads_remaining'];
+			$access_expires      = $_POST['access_expires'];
 
 			// Order data
 			$product_ids_max = max( array_keys( $product_ids ) );
@@ -111,21 +112,22 @@ class WC_Meta_Box_Order_Downloads {
 					'%s',
 				);
 
-				$expiry  = ( array_key_exists( $i, $access_expires ) && '' != $access_expires[ $i ] ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
+				$expiry = ( array_key_exists( $i, $access_expires ) && '' != $access_expires[ $i ] ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 
 				$data['access_expires'] = $expiry;
 				$format[]               = '%s';
 
-				$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
+				$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 					$data,
 					array(
-						'order_id' 		=> $post_id,
-						'product_id' 	=> absint( $product_ids[ $i ] ),
-						'download_id'	=> wc_clean( $download_ids[ $i ] )
+						'order_id'    => $post_id,
+						'product_id'  => absint( $product_ids[ $i ] ),
+						'download_id' => wc_clean( $download_ids[ $i ] )
 						),
 					$format, array( '%d', '%d', '%s' )
 				);
 			}
 		}
 	}
+
 }
