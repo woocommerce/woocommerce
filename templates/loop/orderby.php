@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				continue;
 			}
 			if ( is_array( $val ) ) {
-				foreach( $val as $innerVal ) {
+				foreach ( $val as $innerVal ) {
 					echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $innerVal ) . '" />';
 				}
 			} else {
