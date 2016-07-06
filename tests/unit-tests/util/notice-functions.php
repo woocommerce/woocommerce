@@ -13,7 +13,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function tearDown() {
-
 		WC()->session->set( 'wc_notices', null );
 	}
 
@@ -23,7 +22,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	function test_wc_notice_count() {
-
 		// no error notices
 		$this->assertEquals( 0, wc_notice_count( 'error' ) );
 
@@ -47,7 +45,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	function test_wc_has_notice() {
-
 		// negative
 		wc_add_notice( 'Bogus Notice', 'success' );
 		$this->assertFalse( wc_has_notice( 'Legit Notice' ) );
@@ -63,7 +60,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	function test_wc_add_notice() {
-
 		// default type
 		wc_add_notice( 'Test Notice' );
 		$notices = wc_get_notices();
@@ -86,7 +82,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	function test_wc_clear_notices() {
-
 		wc_add_notice( 'Test Notice' );
 		wc_clear_notices();
 		$this->assertEmpty( WC()->session->get( 'wc_notices' ) );
@@ -98,7 +93,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_notices() {
-
 		wc_add_notice( 'One True Notice', 'notice' );
 
 		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div>' );
@@ -114,7 +108,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_notices_actions() {
-
 		$this->assertNotFalse( has_action( 'woocommerce_before_shop_loop', 'wc_print_notices' ) );
 		$this->assertNotFalse( has_action( 'woocommerce_before_single_product', 'wc_print_notices' ) );
 	}
@@ -125,7 +118,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_success_notice() {
-
 		$this->expectOutputString( '<div class="woocommerce-message">Success!</div>' );
 
 		wc_print_notice( 'Success!' );
@@ -137,7 +129,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_info_notice() {
-
 		$this->expectOutputString( '<div class="woocommerce-info">Info!</div>' );
 
 		wc_print_notice( 'Info!', 'notice' );
@@ -149,7 +140,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_error_notice() {
-
 		// specific type
 		$this->expectOutputString( '<ul class="woocommerce-error"><li>Error!</li></ul>' );
 
@@ -162,7 +152,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_notices() {
-
 		// no notices
 		$notices = wc_get_notices();
 		$this->assertInternalType( 'array', $notices );
