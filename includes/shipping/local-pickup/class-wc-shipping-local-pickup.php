@@ -19,11 +19,11 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                    = 'local_pickup';
-		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Local Pickup', 'woocommerce' );
-		$this->method_description    = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
-		$this->supports              = array(
+		$this->id                 = 'local_pickup';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Local Pickup', 'woocommerce' );
+		$this->method_description = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
+		$this->supports           = array(
 			'shipping-zones',
 			'instance-settings',
 			'instance-settings-modal',
@@ -35,15 +35,14 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * Initialize local pickup.
 	 */
 	public function init() {
-
 		// Load the settings.
 		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title		     = $this->get_option( 'title' );
-		$this->tax_status	     = $this->get_option( 'tax_status' );
-		$this->cost	             = $this->get_option( 'cost' );
+		$this->title      = $this->get_option( 'title' );
+		$this->tax_status = $this->get_option( 'tax_status' );
+		$this->cost       = $this->get_option( 'cost' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -55,9 +54,9 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$this->add_rate( array(
-			'label' 	 => $this->title,
-			'package'    => $package,
-			'cost'       => $this->cost,
+			'label'   => $this->title,
+			'package' => $package,
+			'cost'    => $this->cost,
 		) );
 	}
 
@@ -66,7 +65,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'title' => array(
+			'title'      => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
@@ -74,23 +73,24 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'tax_status' => array(
-				'title' 		=> __( 'Tax Status', 'woocommerce' ),
-				'type' 			=> 'select',
-				'class'         => 'wc-enhanced-select',
-				'default' 		=> 'taxable',
-				'options'		=> array(
-					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-					'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
+				'title'   => __( 'Tax Status', 'woocommerce' ),
+				'type'    => 'select',
+				'class'   => 'wc-enhanced-select',
+				'default' => 'taxable',
+				'options' => array(
+					'taxable' => __( 'Taxable', 'woocommerce' ),
+					'none'    => _x( 'None', 'Tax status', 'woocommerce' )
 				)
 			),
-			'cost' => array(
-				'title' 		=> __( 'Cost', 'woocommerce' ),
-				'type' 			=> 'text',
-				'placeholder'	=> '0',
-				'description'	=> __( 'Optional cost for local pickup.', 'woocommerce' ),
-				'default'		=> '',
-				'desc_tip'		=> true
+			'cost'       => array(
+				'title'       => __( 'Cost', 'woocommerce' ),
+				'type'        => 'text',
+				'placeholder' => '0',
+				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true
 			)
 		);
 	}
+
 }
