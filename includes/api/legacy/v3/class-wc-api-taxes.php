@@ -27,11 +27,10 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * GET /taxes/<id>
 	 *
 	 * @since 2.1
-	 * @param array $routes
+	 * @param  array $routes
 	 * @return array
 	 */
 	public function register_routes( $routes ) {
-
 		# GET/POST /taxes
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_taxes' ), WC_API_Server::READABLE ),
@@ -79,10 +78,10 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param string $fields
-	 * @param array  $filter
-	 * @param string $class
-	 * @param int    $page
+	 * @param  string $fields
+	 * @param  array  $filter
+	 * @param  string $class
+	 * @param  int    $page
 	 *
 	 * @return array
 	 */
@@ -112,8 +111,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id The tax ID
-	 * @param string $fields fields to include in response
+	 * @param  int            $id     The tax ID
+	 * @param  string         $fields fields to include in response
 	 *
 	 * @return array|WP_Error
 	 */
@@ -174,7 +173,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param array $data
+	 * @param  array $data
 	 *
 	 * @return array
 	 */
@@ -243,8 +242,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id The tax ID
-	 * @param array $data
+	 * @param  int   $id   The tax ID
+	 * @param  array $data
 	 *
 	 * @return array
 	 */
@@ -330,7 +329,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id The tax ID
+	 * @param  int   $id The tax ID
 	 *
 	 * @return array
 	 */
@@ -362,8 +361,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param string $class
-	 * @param array $filter
+	 * @param  string $class
+	 * @param  array  $filter
 	 *
 	 * @return array
 	 */
@@ -411,8 +410,8 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		// Filter by tax class
 		if ( ! empty( $args['tax_rate_class'] ) ) {
-			$tax_rate_class = 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '';
-			$query .= " AND tax_rate_class = '$tax_rate_class'";
+			$tax_rate_class  = 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '';
+			$query          .= " AND tax_rate_class = '$tax_rate_class'";
 		}
 
 		// Order tax rates
@@ -447,7 +446,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param array $data
+	 * @param  array $data
 	 *
 	 * @return array
 	 */
@@ -515,7 +514,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param string $fields
+	 * @param  string $fields
 	 *
 	 * @return array
 	 */
@@ -554,7 +553,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param array $data
+	 * @param  array $data
 	 *
 	 * @return array
 	 */
@@ -618,7 +617,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $slug The tax class slug
+	 * @param  int   $slug The tax class slug
 	 *
 	 * @return array
 	 */
@@ -688,4 +687,5 @@ class WC_API_Taxes extends WC_API_Resource {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
+
 }
