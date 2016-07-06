@@ -13,7 +13,6 @@ class WC_Helper_Coupon {
 	 * @return WC_Coupon
 	 */
 	public static function create_coupon() {
-
 		// Coupon code
 		$coupon_code = 'dummycoupon';
 
@@ -50,7 +49,7 @@ class WC_Helper_Coupon {
 	/**
 	 * Delete a coupon.
 	 *
-	 * @param $coupon_id
+	 * @param       $coupon_id
 	 *
 	 * @return bool
 	 */
