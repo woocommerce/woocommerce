@@ -10,7 +10,6 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 	 * Test the get_taxable_address method.
 	 */
 	public function test_get_taxable_address() {
-
 		$customer           = WC_Helper_Customer::create_mock_customer();
 		$base_store_address = WC_Helper_Customer::get_expected_store_location();
 		$customer_address   = $customer->get_taxable_address(); // Default is geolocation!
@@ -66,7 +65,6 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 	 * Test the is_customer_outside_base method.
 	 */
 	public function test_is_customer_outside_base() {
-
 		// Get the original settings for the session and the WooCommerce options
 		$original_chosen_shipping_methods = WC_Helper_Customer::get_chosen_shipping_methods();
 		$original_tax_based_on            = WC_Helper_Customer::get_tax_based_on();
@@ -115,4 +113,5 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		// Clean up product
 		WC_Helper_Product::delete_product( $product->id );
 	}
+
 }
