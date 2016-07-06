@@ -22,11 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_auth_page_header' ); ?>
 
-<h1><?php printf( __( '%s would like to connect to your store' , 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
+<h1><?php printf( __( '%s would like to connect to your store', 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
 
 <?php wc_print_notices(); ?>
 
-<p><?php printf( __( 'This will give "%s" <strong>%s</strong> access which will allow it to:' , 'woocommerce' ), esc_html( $app_name ), esc_html( $scope ) ); ?></p>
+<p><?php printf( __( 'This will give "%s" <strong>%s</strong> access which will allow it to:', 'woocommerce' ), esc_html( $app_name ), esc_html( $scope ) ); ?></p>
 
 <ul class="wc-auth-permissions">
 	<?php foreach ( $permissions as $permission ) : ?>
@@ -44,4 +44,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<a href="<?php echo esc_url( $return_url ); ?>" class="button wc-auth-deny"><?php _e( 'Deny', 'woocommerce' ); ?></a>
 </p>
 
-<?php do_action( 'woocommerce_auth_page_footer' ); ?>
+<?php do_action( 'woocommerce_auth_page_footer' );
