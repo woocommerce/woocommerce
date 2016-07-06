@@ -4,15 +4,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
-* Abstract WC Data Class
-*
-* Implemented by classes using the same CRUD(s) pattern.
-*
-* @version  2.6.0
-* @package  WooCommerce/Abstracts
-* @category Abstract Class
-* @author   WooThemes
-*/
+ * Abstract WC Data Class
+ *
+ * Implemented by classes using the same CRUD(s) pattern.
+ *
+ * @version  2.6.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
+ */
 abstract class WC_Data {
 
 	/**
@@ -136,12 +136,12 @@ abstract class WC_Data {
 	 * Get Meta Data by Key.
 	 * @since 2.6.0
 	 * @param  string $key
-	 * @param  bool $single return first found meta with key, or all with $key
+	 * @param  bool   $single return first found meta with key, or all with $key
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true ) {
 		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-		$value    = '';
+		$value      = '';
 
 		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
@@ -177,9 +177,9 @@ abstract class WC_Data {
 	/**
 	 * Add meta data.
 	 * @since 2.6.0
-	 * @param string $key Meta key
-	 * @param string $value Meta value
-	 * @param bool $unique Should this be a unique key?
+	 * @param string $key    Meta key
+	 * @param string $value  Meta value
+	 * @param bool   $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
@@ -195,9 +195,9 @@ abstract class WC_Data {
 	/**
 	 * Update meta data by key or ID, if provided.
 	 * @since 2.6.0
-	 * @param  string $key
-	 * @param  string $value
-	 * @param  int $meta_id
+	 * @param string $key
+	 * @param string $value
+	 * @param int    $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$array_key = '';
@@ -221,8 +221,8 @@ abstract class WC_Data {
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+		$array_keys       = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
 	}
 
 	/**
@@ -237,24 +237,24 @@ abstract class WC_Data {
 			return;
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			$cache_key   = WC_Cache_Helper::get_cache_prefix( $this->_cache_group ) . $this->get_id();
 			$cached_meta = wp_cache_get( $cache_key, $this->_cache_group );
 
 			if ( false !== $cached_meta ) {
 				$this->_meta_data = $cached_meta;
-				$cache_loaded = true;
+				$cache_loaded     = true;
 			}
 		}
 
 		if ( ! $cache_loaded ) {
 			global $wpdb;
-			$db_info = $this->_get_db_info();
-			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
-				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
-			", $this->get_id() ) );
+			$db_info       = $this->_get_db_info();
+			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( '
+				SELECT ' . $db_info['meta_id_field'] . ', meta_key, meta_value
+				FROM ' . $db_info['table'] . '
+				WHERE ' . $db_info['object_id_field'] . ' = %d ORDER BY ' . $db_info['meta_id_field'] . '
+			', $this->get_id() ) );
 
 			foreach ( $raw_meta_data as $meta ) {
 				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
@@ -267,7 +267,7 @@ abstract class WC_Data {
 				);
 			}
 
-			if ( ! empty ( $this->_cache_group ) ) {
+			if ( ! empty( $this->_cache_group ) ) {
 				wp_cache_set( $cache_key, $this->_meta_data, $this->_cache_group );
 			}
 		}
@@ -279,10 +279,10 @@ abstract class WC_Data {
 	 */
 	protected function save_meta_data() {
 		global $wpdb;
-		$db_info = $this->_get_db_info();
-		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "
-			SELECT " . $db_info['meta_id_field'] . " FROM " . $db_info['table'] . "
-			WHERE " . $db_info['object_id_field'] . " = %d", $this->get_id() ) . "
+		$db_info      = $this->_get_db_info();
+		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( '
+			SELECT ' . $db_info['meta_id_field'] . ' FROM ' . $db_info['table'] . '
+			WHERE ' . $db_info['object_id_field'] . ' = %d', $this->get_id() ) . "
 			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');
 		" ) );
 		$set_meta_ids = array();
@@ -305,7 +305,7 @@ abstract class WC_Data {
 			delete_metadata_by_mid( $this->_meta_type, $meta_id );
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->_cache_group );
 		}
 		$this->read_meta_data();
@@ -319,20 +319,20 @@ abstract class WC_Data {
 	protected function _get_db_info() {
 		global $wpdb;
 
-		$meta_id_field   = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
-		$table           = $wpdb->prefix;
+		$meta_id_field = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
+		$table         = $wpdb->prefix;
 
 		// If we are dealing with a type of metadata that is not a core type, the table should be prefixed.
 		if ( ! in_array( $this->_meta_type, array( 'post', 'user', 'comment', 'term' ) ) ) {
 			$table .= 'woocommerce_';
 		}
 
-		$table .= $this->_meta_type . 'meta';
-		$object_id_field = $this->_meta_type . '_id';
+		$table           .= $this->_meta_type . 'meta';
+		$object_id_field  = $this->_meta_type . '_id';
 
 		// Figure out our field names.
 		if ( 'user' === $this->_meta_type ) {
-			$meta_id_field   = 'umeta_id';
+			$meta_id_field = 'umeta_id';
 		}
 
 		if ( ! empty( $this->object_id_field_for_meta ) ) {
