@@ -30,7 +30,7 @@ interface WC_API_Handler {
 	 * Parse the raw request body entity into an array
 	 *
 	 * @since 2.1
-	 * @param string $data
+	 * @param  string $data
 	 * @return array
 	 */
 	public function parse_body( $data );
@@ -39,7 +39,7 @@ interface WC_API_Handler {
 	 * Generate a response from an array of data
 	 *
 	 * @since 2.1
-	 * @param array $data
+	 * @param  array  $data
 	 * @return string
 	 */
 	public function generate_response( $data );
