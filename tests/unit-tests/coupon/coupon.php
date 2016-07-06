@@ -12,7 +12,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_discount() {
-
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
 
@@ -38,7 +37,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_discount_duplicate() {
-
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
 
@@ -70,7 +68,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_fixed_cart_discount() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
@@ -128,7 +125,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_percent_cart_discount() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
@@ -186,7 +182,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_fixed_product_discount() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
@@ -250,7 +245,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_percent_product_discount() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
