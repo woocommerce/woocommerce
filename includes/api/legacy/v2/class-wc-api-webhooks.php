@@ -23,15 +23,14 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Register the routes for this class
 	 *
 	 * @since 2.2
-	 * @param array $routes
+	 * @param  array $routes
 	 * @return array
 	 */
 	public function register_routes( $routes ) {
-
 		# GET|POST /webhooks
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_webhooks' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_webhook' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_webhooks' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_webhook' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /webhooks/count
@@ -41,7 +40,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 		# GET|PUT|DELETE /webhooks/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_webhook' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'get_webhook' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_webhook' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 			array( array( $this, 'delete_webhook' ), WC_API_Server::DELETABLE ),
 		);
@@ -63,13 +62,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get all webhooks
 	 *
 	 * @since 2.2
-	 * @param array $fields
-	 * @param array $filter
-	 * @param int $page
+	 * @param  array $fields
+	 * @param  array $filter
+	 * @param  int   $page
 	 * @return array
 	 */
 	public function get_webhooks( $fields = null, $filter = array(), $status = null, $page = 1 ) {
-
 		if ( ! empty( $status ) ) {
 			$filter['status'] = $status;
 		}
@@ -98,12 +96,11 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get the webhook for the given ID
 	 *
 	 * @since 2.2
-	 * @param int $id webhook ID
-	 * @param array $fields
+	 * @param  int   $id     webhook ID
+	 * @param  array $fields
 	 * @return array
 	 */
 	public function get_webhook( $id, $fields = null ) {
-
 		// ensure webhook ID is valid & user has permission to read
 		$id = $this->validate_request( $id, 'shop_webhook', 'read' );
 
@@ -133,8 +130,8 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get the total number of webhooks
 	 *
 	 * @since 2.2
-	 * @param string $status
-	 * @param array $filter
+	 * @param  string $status
+	 * @param  array  $filter
 	 * @return array
 	 */
 	public function get_webhooks_count( $status = null, $filter = array() ) {
@@ -159,11 +156,10 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Create an webhook
 	 *
 	 * @since 2.2
-	 * @param array $data parsed webhook data
+	 * @param  array $data parsed webhook data
 	 * @return array
 	 */
 	public function create_webhook( $data ) {
-
 		try {
 			if ( ! isset( $data['webhook'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_webhook_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'webhook' ), 400 );
@@ -234,12 +230,11 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Edit a webhook
 	 *
 	 * @since 2.2
-	 * @param int $id webhook ID
-	 * @param array $data parsed webhook data
+	 * @param  int   $id   webhook ID
+	 * @param  array $data parsed webhook data
 	 * @return array
 	 */
 	public function edit_webhook( $id, $data ) {
-
 		try {
 			if ( ! isset( $data['webhook'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_webhook_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'webhook' ), 400 );
@@ -320,11 +315,10 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Delete a webhook
 	 *
 	 * @since 2.2
-	 * @param int $id webhook ID
+	 * @param  int   $id webhook ID
 	 * @return array
 	 */
 	public function delete_webhook( $id ) {
-
 		$id = $this->validate_request( $id, 'shop_webhook', 'delete' );
 
 		if ( is_wp_error( $id ) ) {
@@ -343,15 +337,14 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Helper method to get webhook post objects
 	 *
 	 * @since 2.2
-	 * @param array $args request arguments for filtering query
+	 * @param  array    $args request arguments for filtering query
 	 * @return WP_Query
 	 */
 	private function query_webhooks( $args ) {
-
 		// Set base query arguments
 		$query_args = array(
-			'fields'      => 'ids',
-			'post_type'   => 'shop_webhook',
+			'fields'    => 'ids',
+			'post_type' => 'shop_webhook',
 		);
 
 		// Add status argument
@@ -382,12 +375,11 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get deliveries for a webhook
 	 *
 	 * @since 2.2
-	 * @param string $webhook_id webhook ID
-	 * @param string|null $fields fields to include in response
+	 * @param  string      $webhook_id webhook ID
+	 * @param  string|null $fields     fields to include in response
 	 * @return array
 	 */
 	public function get_webhook_deliveries( $webhook_id, $fields = null ) {
-
 		// Ensure ID is valid webhook ID
 		$webhook_id = $this->validate_request( $webhook_id, 'shop_webhook', 'read' );
 
@@ -417,9 +409,9 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get the delivery log for the given webhook ID and delivery ID
 	 *
 	 * @since 2.2
-	 * @param string $webhook_id webhook ID
-	 * @param string $id delivery log ID
-	 * @param string|null $fields fields to limit response to
+	 * @param  string      $webhook_id webhook ID
+	 * @param  string      $id         delivery log ID
+	 * @param  string|null $fields     fields to limit response to
 	 * @return array
 	 */
 	public function get_webhook_delivery( $webhook_id, $id, $fields = null ) {
