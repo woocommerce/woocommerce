@@ -110,7 +110,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * Add common cli arguments to argument list before WP_User_Query is run.
 	 *
 	 * @since  2.5.0
-	 * @param  array $base_args required arguments for the query (e.g. `post_type`, etc)
+	 * @param  array $base_args  required arguments for the query (e.g. `post_type`, etc)
 	 * @param  array $assoc_args arguments provided in when invoking the command
 	 * @return array
 	 */
@@ -175,7 +175,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  string $datetime RFC3339 datetime
-	 * @return string MySQl datetime (YYYY-MM-DD HH:MM:SS)
+	 * @return string           MySQl datetime (YYYY-MM-DD HH:MM:SS)
 	 */
 	protected function parse_datetime( $datetime ) {
 		// Strip millisecond precision (a full stop followed by one or more digits)
@@ -203,9 +203,9 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * Format a unix timestamp or MySQL datetime into an RFC3339 datetime.
 	 *
 	 * @since  2.5.0
-	 * @param  int|string $timestamp unix timestamp or MySQL datetime
-	 * @param  bool $convert_to_utc
-	 * @return string RFC3339 datetime
+	 * @param  int|string $timestamp      unix timestamp or MySQL datetime
+	 * @param  bool       $convert_to_utc
+	 * @return string                     RFC3339 datetime
 	 */
 	protected function format_datetime( $timestamp, $convert_to_utc = false ) {
 		if ( $convert_to_utc ) {
@@ -237,7 +237,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * Get formatter object based on supplied arguments.
 	 *
 	 * @since  2.5.0
-	 * @param  array $assoc_args Associative args from CLI to determine formatting
+	 * @param  array             $assoc_args Associative args from CLI to determine formatting
 	 * @return \WP_CLI\Formatter
 	 */
 	protected function get_formatter( $assoc_args ) {
@@ -262,7 +262,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $assoc_args Associative args from CLI
-	 * @return array Formatter args
+	 * @return array             Formatter args
 	 */
 	protected function get_format_args( $assoc_args ) {
 		$format_args = array(
@@ -301,10 +301,10 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * a flatten array would contain key 'a.b.c' => ...
 	 *
 	 * @since 2.5.0
-	 * @param array  $arr    Array that may contains nested array
-	 * @param string $prefix Prefix
+	 * @param  array  $arr    Array that may contains nested array
+	 * @param  string $prefix Prefix
 	 *
-	 * @return array Flattened array
+	 * @return array          Flattened array
 	 */
 	protected function flatten_array( $arr, $prefix = '' ) {
 		$flattened = array();
@@ -385,7 +385,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * as absolute integer.
 	 *
 	 * @since  2.5.0
-	 * @param  string $key Array key
+	 * @param  string     $key Array key
 	 * @return string|int
 	 */
 	protected function get_normalized_array_key( $key ) {
@@ -399,10 +399,11 @@ class WC_CLI_Command extends WP_CLI_Command {
 	 * Check if the value is equal to 'yes', 'true' or '1'
 	 *
 	 * @since 2.5.4
-	 * @param  string $value
+	 * @param  string  $value
 	 * @return boolean
 	 */
 	protected function is_true( $value ) {
 		return ( 'yes' === $value || 'true' === $value || '1' === $value ) ? true : false;
 	}
+
 }
