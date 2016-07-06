@@ -51,23 +51,22 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
 		if ( empty( $this->product_ids ) ) {
 			return array();
 		}
 
-		$legend   = array();
+		$legend = array();
 
 		$total_sales = $this->get_order_report_data( array(
-			'data' => array(
+			'data'         => array(
 				'_line_total' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
-					'function' => 'SUM',
-					'name'     => 'order_item_amount'
+					'function'        => 'SUM',
+					'name'            => 'order_item_amount'
 				)
 			),
-			'where_meta' => array(
+			'where_meta'   => array(
 				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
@@ -81,7 +80,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		) );
 
 		$total_items = absint( $this->get_order_report_data( array(
-			'data' => array(
+			'data'         => array(
 				'_qty' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
@@ -89,7 +88,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'name'            => 'order_item_count'
 				)
 			),
-			'where_meta' => array(
+			'where_meta'   => array(
 				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
@@ -103,14 +102,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		) ) );
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
-			'color' => $this->chart_colours['sales_amount'],
+			'title'            => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
+			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1
 		);
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
-			'color' => $this->chart_colours['item_count'],
+			'title'            => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
+			'color'            => $this->chart_colours['item_count'],
 			'highlight_series' => 0
 		);
 
@@ -121,12 +120,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Output the report.
 	 */
 	public function output_report() {
-
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last Month', 'woocommerce' ),
+			'month'      => __( 'This Month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 Days', 'woocommerce' )
 		);
 
 		$this->chart_colours = array(
@@ -136,12 +134,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
@@ -150,7 +149,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_widgets() {
-
 		$widgets = array();
 
 		if ( ! empty( $this->product_ids ) ) {
@@ -172,7 +170,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Output current filters.
 	 */
 	public function current_filters() {
-
 		$this->product_ids_titles = array();
 
 		foreach ( $this->product_ids as $product_id ) {
@@ -201,12 +198,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				<div>
 					<input type="hidden" class="wc-product-search" style="width:203px;" name="product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" />
 					<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
-					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-					<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ); ?>" />
+					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ); ?>" />
+					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" />
+					<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ); ?>" />
+					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ); ?>" />
+					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ); ?>" />
 				</div>
 			</form>
 		</div>
@@ -215,14 +212,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			<table cellspacing="0">
 				<?php
 				$top_sellers = $this->get_order_report_data( array(
-					'data' => array(
+					'data'         => array(
 						'_product_id' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => '',
 							'name'            => 'product_id'
 						),
-						'_qty' => array(
+						'_qty'        => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => 'SUM',
@@ -255,14 +252,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			<table cellspacing="0">
 				<?php
 				$top_freebies = $this->get_order_report_data( array(
-					'data' => array(
+					'data'         => array(
 						'_product_id' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => '',
 							'name'            => 'product_id'
 						),
-						'_qty' => array(
+						'_qty'        => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => 'SUM',
@@ -303,7 +300,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			<table cellspacing="0">
 				<?php
 				$top_earners = $this->get_order_report_data( array(
-					'data' => array(
+					'data'         => array(
 						'_product_id' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
@@ -364,12 +361,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Output an export link.
 	 */
 	public function get_export_button() {
-
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -397,14 +393,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		} else {
 			// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
 			$order_item_counts = $this->get_order_report_data( array(
-				'data' => array(
-					'_qty' => array(
+				'data'         => array(
+					'_qty'        => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
 						'name'            => 'order_item_count'
 					),
-					'post_date' => array(
+					'post_date'   => array(
 						'type'     => 'post_data',
 						'function' => '',
 						'name'     => 'post_date'
@@ -416,7 +412,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'name'            => 'product_id'
 					)
 				),
-				'where_meta' => array(
+				'where_meta'   => array(
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
@@ -432,14 +428,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			) );
 
 			$order_item_amounts = $this->get_order_report_data( array(
-				'data' => array(
+				'data'         => array(
 					'_line_total' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
-						'function' => 'SUM',
-						'name'     => 'order_item_amount'
+						'function'        => 'SUM',
+						'name'            => 'order_item_amount'
 					),
-					'post_date' => array(
+					'post_date'   => array(
 						'type'     => 'post_data',
 						'function' => '',
 						'name'     => 'post_date'
@@ -451,7 +447,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'name'            => 'product_id'
 					),
 				),
-				'where_meta' => array(
+				'where_meta'   => array(
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
@@ -489,7 +485,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 						var series = [
 							{
-								label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ); ?>",
 								data: order_data.order_item_counts,
 								color: '<?php echo $this->chart_colours['item_count']; ?>',
 								bars: { fillColor: '<?php echo $this->chart_colours['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
@@ -497,7 +493,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 								hoverable: false
 							},
 							{
-								label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ); ?>",
 								data: order_data.order_item_amounts,
 								yaxis: 2,
 								color: '<?php echo $this->chart_colours['sales_amount']; ?>',
@@ -540,7 +536,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									font: {
@@ -585,4 +581,5 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			<?php
 		}
 	}
+
 }
