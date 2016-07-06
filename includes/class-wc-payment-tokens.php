@@ -75,9 +75,9 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 * @since 2.6.0
-	 * @param  int    $customer_id  Customer ID
-	 * @param  string $gateway_id      Optional Gateway ID for getting tokens for a specific gateway
-	 * @return array                Array of token objects
+	 * @param  int    $customer_id Customer ID
+	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway
+	 * @return array               Array of token objects
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {
 		if ( $customer_id < 1 ) {
@@ -95,7 +95,7 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns a customers default token or NULL if there is no default token.
 	 * @since 2.6.0
-	 * @param  int $customer_id
+	 * @param  int                   $customer_id
 	 * @return WC_Payment_Token|null
 	 */
 	public static function get_customer_default_token( $customer_id ) {
@@ -120,8 +120,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns an array of payment token objects associated with the passed order ID.
 	 * @since 2.6.0
-	 * @param int $order_id Order ID
-	 * @return array Array of token objects
+	 * @param  int   $order_id Order ID
+	 * @return array           Array of token objects
 	 */
 	public static function get_order_tokens( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -145,8 +145,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Get a token object by ID.
 	 * @since 2.6.0
-	 * @param  int $token_id Token ID
-	 * @return WC_Payment_Token|null Returns a valid payment token or null if no token can be found
+	 * @param  int                   $token_id Token ID
+	 * @return WC_Payment_Token|null           Returns a valid payment token or null if no token can be found
 	 */
 	public static function get( $token_id, $token_result = null ) {
 		global $wpdb;
@@ -166,10 +166,10 @@ class WC_Payment_Tokens {
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
 
 		if ( class_exists( $token_class ) ) {
-			$meta =  get_metadata( 'payment_token', $token_id );
+			$meta        =  get_metadata( 'payment_token', $token_id );
 			$passed_meta = array();
 			if ( ! empty( $meta ) ) {
-				foreach( $meta as $meta_key => $meta_value ) {
+				foreach ( $meta as $meta_key => $meta_value ) {
 					$passed_meta[ $meta_key ] = $meta_value[0];
 				}
 			}
@@ -186,7 +186,7 @@ class WC_Payment_Tokens {
 	 */
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
-		if ( ! empty ( $type ) ) {
+		if ( ! empty( $type ) ) {
 			$class = 'WC_Payment_Token_' . $type;
 			$token = new $class( $token_id );
 			$token->delete();
@@ -226,8 +226,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns what type (credit card, echeck, etc) of token a token is by ID.
 	 * @since 2.6.0
-	 * @param  int $token_id Token ID
-	 * @return string        Type
+	 * @param  int    $token_id Token ID
+	 * @return string           Type
 	 */
 	public static function get_token_type_by_id( $token_id ) {
 		global $wpdb;
