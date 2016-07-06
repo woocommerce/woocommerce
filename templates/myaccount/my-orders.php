@@ -102,4 +102,4 @@ if ( $customer_orders ) : ?>
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-<?php endif; ?>
+<?php endif;
