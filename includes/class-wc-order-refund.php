@@ -27,7 +27,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Init/load the refund object. Called from the constructor.
 	 *
-	 * @param  string|int|object|WC_Order_Refund $refund Refund to init
+	 * @param string|int|object|WC_Order_Refund $refund Refund to init
 	 * @uses   WP_POST
 	 */
 	protected function init( $refund ) {
@@ -50,7 +50,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Gets an refund from the database.
 	 *
 	 * @since 2.2
-	 * @param int $id
+	 * @param  int  $id
 	 * @return bool
 	 */
 	public function get_refund( $id = 0 ) {
@@ -97,9 +97,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_refund_amount() {
-		return apply_filters( 'woocommerce_formatted_refund_amount', wc_price( $this->refund_amount, array('currency' => $this->get_order_currency()) ), $this );
+		return apply_filters( 'woocommerce_formatted_refund_amount', wc_price( $this->refund_amount, array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
-
 
 	/**
 	 * Get refunded amount.
@@ -110,4 +109,5 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	public function get_refund_reason() {
 		return apply_filters( 'woocommerce_refund_reason', $this->reason, $this );
 	}
+
 }
