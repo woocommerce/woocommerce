@@ -49,22 +49,22 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_children() {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-        	$transient_name = 'wc_product_children_' . $this->id;
+			$transient_name = 'wc_product_children_' . $this->id;
 			$this->children = array_filter( array_map( 'absint', (array) get_transient( $transient_name ) ) );
 
-        	if ( empty( $this->children ) ) {
+			if ( empty( $this->children ) ) {
 
-        		$args = apply_filters( 'woocommerce_grouped_children_args', array(
-        			'post_parent' 	=> $this->id,
-        			'post_type'		=> 'product',
-        			'orderby'		=> 'menu_order',
-        			'order'			=> 'ASC',
-        			'fields'		=> 'ids',
-        			'post_status'	=> 'publish',
-        			'numberposts'	=> -1,
-        		) );
+				$args = apply_filters( 'woocommerce_grouped_children_args', array(
+					'post_parent' => $this->id,
+					'post_type'   => 'product',
+					'orderby'     => 'menu_order',
+					'order'       => 'ASC',
+					'fields'      => 'ids',
+					'post_status' => 'publish',
+					'numberposts' => -1,
+				) );
 
-		        $this->children = get_posts( $args );
+				$this->children = get_posts( $args );
 
 				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 			}
@@ -95,7 +95,7 @@ class WC_Product_Grouped extends WC_Product {
 
 			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 ) {
+				if ( $sale_price !== '' && $sale_price >= 0 ) {
 					$is_on_sale = true;
 				}
 			}
@@ -111,7 +111,6 @@ class WC_Product_Grouped extends WC_Product {
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
 	}
 
-
 	/**
 	 * Returns false if the product cannot be bought.
 	 *
@@ -126,7 +125,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Returns the price in html format.
 	 *
 	 * @access public
-	 * @param string $price (default: '')
+	 * @param  string $price (default: '')
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
@@ -134,7 +133,7 @@ class WC_Product_Grouped extends WC_Product {
 		$child_prices     = array();
 
 		foreach ( $this->get_children() as $child_id ) {
-			$child          = wc_get_product( $child_id );
+			$child = wc_get_product( $child_id );
 			if ( '' !== $child->get_price() ) {
 				$child_prices[] = 'incl' === $tax_display_mode ? $child->get_price_including_tax() : $child->get_price_excluding_tax();
 			}
@@ -163,4 +162,5 @@ class WC_Product_Grouped extends WC_Product {
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
+
 }
