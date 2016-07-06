@@ -48,7 +48,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Column cb.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_cb( $key ) {
@@ -58,13 +58,13 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return description column.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_description( $key ) {
 		$url = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] );
 
-		$output = '<strong>';
+		$output  = '<strong>';
 		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
 		if ( empty( $key['description'] ) ) {
 			$output .= esc_html__( 'API Key', 'woocommerce' );
@@ -87,7 +87,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
 		}
 
-		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
+		$output .= '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>';
 
 		return $output;
 	}
@@ -95,7 +95,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return truncated consumer key column.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_truncated_key( $key ) {
@@ -105,7 +105,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return user column.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_user( $key ) {
@@ -125,7 +125,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return permissions column.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_permissions( $key ) {
@@ -146,7 +146,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return last access column.
 	 *
-	 * @param  array $key
+	 * @param  array  $key
 	 * @return string
 	 */
 	public function column_last_access( $key ) {
@@ -200,7 +200,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		// Get the API keys
 		$keys = $wpdb->get_results(
 			"SELECT key_id, user_id, description, permissions, truncated_key, last_access FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search}" .
-			$wpdb->prepare( "ORDER BY key_id DESC LIMIT %d OFFSET %d;", $per_page, $offset ), ARRAY_A
+			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ), ARRAY_A
 		);
 
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" );
@@ -214,4 +214,5 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'total_pages' => ceil( $count / $per_page )
 		) );
 	}
+
 }
