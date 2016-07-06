@@ -51,7 +51,7 @@ class WC_HTTPS {
 	/**
 	 * Force https for urls.
 	 *
-	 * @param mixed $content
+	 * @param  mixed  $content
 	 * @return string
 	 */
 	public static function force_https_url( $content ) {
@@ -126,6 +126,7 @@ class WC_HTTPS {
 			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
 		}
 	}
+
 }
 
 WC_HTTPS::init();
