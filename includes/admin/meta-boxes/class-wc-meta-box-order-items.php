@@ -44,10 +44,11 @@ class WC_Meta_Box_Order_Items {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 		wc_save_order_items( $post_id, $_POST );
 	}
+
 }
