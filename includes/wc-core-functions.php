@@ -726,6 +726,9 @@ function wc_print_js() {
  * @param  string  $secure Whether the cookie should be served only over https.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
+	if ( $secure === false && get_option( 'woocommerce_secure_cookies' ) === 'yes' ) {
+		$secure = true;
+	}
 	if ( ! headers_sent() ) {
 		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
