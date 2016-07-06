@@ -70,4 +70,4 @@ do_action( 'woocommerce_before_edit_account_form' ); ?>
 	<?php do_action( 'woocommerce_edit_account_form_end' ); ?>
 </form>
 
-<?php do_action( 'woocommerce_after_edit_account_form' ); ?>
+<?php do_action( 'woocommerce_after_edit_account_form' );
