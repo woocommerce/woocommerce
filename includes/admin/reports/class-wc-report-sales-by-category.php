@@ -54,7 +54,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Get all product ids in a category (and its children).
 	 *
-	 * @param  int $category_id
+	 * @param  int   $category_id
 	 * @return array
 	 */
 	public function get_products_in_category( $category_id ) {
@@ -71,7 +71,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
 		if ( empty( $this->show_categories ) ) {
 			return array();
 		}
@@ -94,7 +93,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 			$legend[] = array(
 				'title'            => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
-				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
+				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
 				'highlight_series' => $index
 			);
 
@@ -108,12 +107,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * Output the report.
 	 */
 	public function output_report() {
-
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last Month', 'woocommerce' ),
+			'month'      => __( 'This Month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 Days', 'woocommerce' )
 		);
 
 		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
@@ -129,7 +127,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		// Get item sales data
 		if ( ! empty( $this->show_categories ) ) {
 			$order_items = $this->get_order_report_data( array(
-				'data' => array(
+				'data'         => array(
 					'_product_id' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
@@ -142,7 +140,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 						'function'        => 'SUM',
 						'name'            => 'order_item_amount'
 					),
-					'post_date' => array(
+					'post_date'   => array(
 						'type'     => 'post_data',
 						'function' => '',
 						'name'     => 'post_date'
@@ -186,7 +184,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_widgets() {
-
 		return array(
 			array(
 				'title'    => __( 'Categories', 'woocommerce' ),
@@ -199,19 +196,18 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * Output category widget.
 	 */
 	public function category_widget() {
-
 		$categories = get_terms( 'product_cat', array( 'orderby' => 'name' ) );
 		?>
 		<form method="GET">
 			<div>
 				<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
-						$r = array();
-						$r['pad_counts'] 	= 1;
-						$r['hierarchical'] 	= 1;
-						$r['hide_empty'] 	= 1;
-						$r['value']			= 'id';
-						$r['selected'] 		= $this->show_categories;
+						$r                 = array();
+						$r['pad_counts']   = 1;
+						$r['hierarchical'] = 1;
+						$r['hide_empty']   = 1;
+						$r['value']        = 'id';
+						$r['selected']     = $this->show_categories;
 
 						include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 
@@ -221,12 +217,12 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				<a href="#" class="select_none"><?php _e( 'None', 'woocommerce' ); ?></a>
 				<a href="#" class="select_all"><?php _e( 'All', 'woocommerce' ); ?></a>
 				<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
-				<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-				<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-				<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-				<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-				<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-				<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+				<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ); ?>" />
+				<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ); ?>" />
+				<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" />
+				<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ); ?>" />
+				<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ); ?>" />
+				<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ); ?>" />
 			</div>
 			<script type="text/javascript">
 				jQuery(function(){
@@ -252,12 +248,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * Output an export link.
 	 */
 	public function get_export_button() {
-
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -317,7 +312,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				}
 
 				$chart_data[ $category->term_id ]['category'] = $category->name;
-				$chart_data[ $category->term_id ]['data'] = $category_chart_data;
+				$chart_data[ $category->term_id ]['data']     = $category_chart_data;
 
 				$index++;
 			}
@@ -435,4 +430,5 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			<?php
 		}
 	}
+
 }
