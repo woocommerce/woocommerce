@@ -493,7 +493,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		if ( 'ids' === $formatter->format ) {
 			$query_args['fields'] = 'ids';
-			$query = new WP_Query( $query_args );
+			$query                = new WP_Query( $query_args );
 			echo implode( ' ', $query->posts );
 		} else {
 			$query = new WP_Query( $query_args );
@@ -745,7 +745,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $posts Array of post
-	 * @return array Items
+	 * @return array        Items
 	 */
 	protected function format_posts_to_items( $posts ) {
 		$items = array();
@@ -768,7 +768,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_product_data( $product ) {
-
 		// Add data that applies to every product type.
 		$product_data = array(
 			'title'              => $product->get_title(),
@@ -857,7 +856,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_images( $product ) {
-
 		$images = $attachment_ids = array();
 
 		if ( $product->is_type( 'variation' ) ) {
@@ -935,7 +933,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_attributes( $product ) {
-
 		$attributes = array();
 
 		if ( $product->is_type( 'variation' ) ) {
@@ -984,7 +981,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_downloads( $product ) {
-
 		$downloads = array();
 
 		if ( $product->is_downloadable() ) {
@@ -1065,7 +1061,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Save product meta
 	 *
 	 * @since  2.5.0
-	 * @param  int $product_id
+	 * @param  int   $product_id
 	 * @param  array $data
 	 * @return bool
 	 * @throws WC_CLI_Exception
@@ -1145,8 +1141,8 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$attributes = array();
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$is_taxonomy    = 0;
-				$taxonomy       = 0;
+				$is_taxonomy = 0;
+				$taxonomy    = 0;
 
 				if ( ! isset( $attribute['name'] ) ) {
 					continue;
@@ -1518,7 +1514,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Save variations.
 	 *
 	 * @since  2.5.0
-	 * @param  int $id
+	 * @param  int   $id
 	 * @param  array $data
 	 * @return bool
 	 * @throws WC_CLI_Exception
@@ -1555,7 +1551,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			} else {
 				$update_variation = array( 'post_title' => $variation_post_title, 'menu_order' => $menu_order );
 				if ( isset( $variation['visible'] ) ) {
-					$post_status = ( false === $variation['visible'] ) ? 'private' : 'publish';
+					$post_status                     = ( false === $variation['visible'] ) ? 'private' : 'publish';
 					$update_variation['post_status'] = $post_status;
 				}
 
@@ -1762,8 +1758,8 @@ class WC_CLI_Product extends WC_CLI_Command {
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$attribute_value = ! empty( $value ) ? sanitize_title( stripslashes( $value ) ) : '';
+						$attribute_key            = 'attribute_' . sanitize_title( $_attribute['name'] );
+						$attribute_value          = ! empty( $value ) ? sanitize_title( stripslashes( $value ) ) : '';
 						$updated_attribute_keys[] = $attribute_key;
 
 						update_post_meta( $variation_id, $attribute_key, $attribute_value );
@@ -1831,8 +1827,8 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Save product images.
 	 *
 	 * @since  2.5.0
-	 * @param  array $images
-	 * @param  int $id
+	 * @param array $images
+	 * @param int   $id
 	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_images( $id, $images ) {
@@ -1884,7 +1880,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Save product shipping data.
 	 *
 	 * @since 2.5.0
-	 * @param int $id
+	 * @param int   $id
 	 * @param array $data
 	 */
 	private function save_product_shipping_data( $id, $data ) {
@@ -1901,7 +1897,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length
@@ -1932,9 +1928,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Save downloadable files.
 	 *
 	 * @since 2.5.0
-	 * @param int $product_id
+	 * @param int   $product_id
 	 * @param array $downloads
-	 * @param int $variation_id
+	 * @param int   $variation_id
 	 */
 	private function save_downloadable_files( $product_id, $downloads, $variation_id = 0 ) {
 		$files = array();
@@ -1974,11 +1970,11 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Get attribute taxonomy by slug.
 	 *
 	 * @since  2.5.0
-	 * @param  string $slug
+	 * @param  string      $slug
 	 * @return string|null
 	 */
 	private function get_attribute_taxonomy_by_slug( $slug ) {
-		$taxonomy = null;
+		$taxonomy             = null;
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		foreach ( $attribute_taxonomies as $key => $tax ) {
@@ -1996,14 +1992,14 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Upload image from URL
 	 *
 	 * @since  2.5.0
-	 * @param  string $image_url
-	 * @return int|WP_Error attachment id
+	 * @param  string       $image_url
+	 * @return int|WP_Error            attachment id
 	 * @throws WC_CLI_Exception
 	 */
 	private function upload_product_image( $image_url ) {
-		$file_name 		= basename( current( explode( '?', $image_url ) ) );
-		$wp_filetype 	= wp_check_filetype( $file_name, null );
-		$parsed_url 	= @parse_url( $image_url );
+		$file_name   = basename( current( explode( '?', $image_url ) ) );
+		$wp_filetype = wp_check_filetype( $file_name, null );
+		$parsed_url  = @parse_url( $image_url );
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
@@ -2063,7 +2059,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $upload
-	 * @param  int $id
+	 * @param  int   $id
 	 * @return int
 	 */
 	private function set_product_image_as_attachment( $upload, $id ) {
@@ -2126,7 +2122,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * Check if is a variable.
 	 *
 	 * @since 2.6.2
-	 * @param array $data
+	 * @param  array $data
 	 * @return bool
 	 */
 	private function is_variable( $data ) {
@@ -2138,4 +2134,5 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		return false;
 	}
+
 }
