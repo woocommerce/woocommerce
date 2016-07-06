@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $items as $item_id => $item ) :
-	$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-	$item_meta    = new WC_Order_Item_Meta( $item, $_product );
+	$_product  = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+	$item_meta = new WC_Order_Item_Meta( $item, $_product );
 
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		?>
@@ -31,7 +31,7 @@ foreach ( $items as $item_id => $item ) :
 
 				// Show title/image etc
 				if ( $show_image ) {
-					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
+					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail' ) ) : wc_placeholder_img_src() ) . '" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
 				}
 
 				// Product name
@@ -71,4 +71,4 @@ foreach ( $items as $item_id => $item ) :
 		</tr>
 	<?php endif; ?>
 
-<?php endforeach; ?>
+<?php endforeach;
