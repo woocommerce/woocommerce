@@ -26,9 +26,9 @@ class WC_REST_Exception extends Exception {
 	/**
 	 * Setup exception.
 	 *
-	 * @param string $error_code Machine-readable error code.
-	 * @param string $error_message User-friendly translated error message.
-	 * @param int $http_status_code HTTP status code to respond with.
+	 * @param string $error_code       Machine-readable error code.
+	 * @param string $error_message    User-friendly translated error message.
+	 * @param int    $http_status_code HTTP status code to respond with.
 	 */
 	public function __construct( $error_code, $error_message, $http_status_code ) {
 		$this->error_code = $error_code;
@@ -44,4 +44,5 @@ class WC_REST_Exception extends Exception {
 	public function getErrorCode() {
 		return $this->error_code;
 	}
+
 }
