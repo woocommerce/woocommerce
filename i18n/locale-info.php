@@ -50,7 +50,7 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
 			'' => array(
-			  array(
+				array(
 					'country'  => 'BE',
 					'state'    => '',
 					'rate'     => '20.0000',
@@ -119,7 +119,7 @@ return array(
 					'priority' => 2
 				)
 			),
-			'*' => array(
+			'*'  => array(
 				array(
 					'country'  => 'CA',
 					'state'    => 'ON',
@@ -276,19 +276,19 @@ return array(
 	),
 	'GB' => array(
 		'currency_code'  => 'GBP',
-		'currency_pos'	=> 'left',
-		'thousand_sep'	=> ',',
-		'decimal_sep'	 => '.',
-		'num_decimals'	=> 2,
-		'weight_unit'	 => 'kg',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
-		'tax_rates'		=> array(
+		'tax_rates'      => array(
 			'' => array(
 				array(
 					'country'  => 'GB',
-					'state'	 => '',
-					'rate'	  => '20.0000',
-					'name'	  => 'VAT',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'VAT',
 					'shipping' => true
 				)
 			)
@@ -424,7 +424,7 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
 			'' => array(
-			 	array(
+				array(
 					'country'  => 'PL',
 					'state'    => '',
 					'rate'     => '23.0000',
@@ -476,13 +476,13 @@ return array(
 	),
 	'US' => array(
 		'currency_code'  => 'USD',
-		'currency_pos'	=> 'left',
-		'thousand_sep'	=> ',',
-		'decimal_sep'	 => '.',
-		'num_decimals'	=> 2,
-		'weight_unit'	 => 'lbs',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'lbs',
 		'dimension_unit' => 'in',
-		'tax_rates'		=> array(
+		'tax_rates'      => array(
 			'AL' => array(
 				array(
 					'country'  => 'US',
