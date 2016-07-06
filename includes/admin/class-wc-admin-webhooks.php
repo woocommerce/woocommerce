@@ -190,12 +190,12 @@ class WC_Admin_Webhooks {
 		}
 
 		$webhook_id = wp_insert_post( array(
-			'post_type'     => 'shop_webhook',
-			'post_status'   => 'pending',
-			'ping_status'   => 'closed',
-			'post_author'   => get_current_user_id(),
-			'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
-			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
+			'post_type'      => 'shop_webhook',
+			'post_status'    => 'pending',
+			'ping_status'    => 'closed',
+			'post_author'    => get_current_user_id(),
+			'post_password'  => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+			'post_title'     => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
 			'comment_status' => 'open'
 		) );
 
@@ -463,7 +463,7 @@ class WC_Admin_Webhooks {
 
 			if ( 'action' === $resource ) {
 				$topic = 'action';
-			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
+			} elseif ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
 				$topic = 'custom';
 			}
 		}
@@ -478,7 +478,7 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the logs navigation.
 	 *
-	 * @param  int $total
+	 * @param  int    $total
 	 *
 	 * @return string
 	 */
@@ -512,6 +512,7 @@ class WC_Admin_Webhooks {
 
 		return $html;
 	}
+
 }
 
 new WC_Admin_Webhooks();
