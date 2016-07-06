@@ -843,6 +843,25 @@ class WC_Cart {
 		}
 
 		/**
+		 * Check if product is in the cart based on product ID.
+		 *
+		 * @param mixed $product_id - id of product to find in the cart
+		 * @return bool
+		 */
+		public function is_product_in_cart( $product_id = false ) {
+			if ( $product_id !== false ) {
+				if ( is_array( $this->cart_contents ) ) {
+					foreach ( $this->cart_contents as $cart_item_key => $cart_item ) {
+						if ( $product_id === $cart_item['product_id'] ) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		/**
 		 * Generate a unique ID for the cart item being added.
 		 *
 		 * @param int $product_id - id of the product the key is being generated for
