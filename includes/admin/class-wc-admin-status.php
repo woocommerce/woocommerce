@@ -51,21 +51,21 @@ class WC_Admin_Status {
 				break;
 				case 'clear_expired_transients' :
 
-					/*
+					/**
 					 * Deletes all expired transients. The multi-table delete syntax is used.
 					 * to delete the transient record from table a, and the corresponding.
 					 * transient_timeout record from table b.
 					 *
 					 * Based on code inside core's upgrade_network() function.
 					 */
-					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+					$sql  = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 						WHERE a.option_name LIKE %s
 						AND a.option_name NOT LIKE %s
 						AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
 						AND b.option_value < %d";
 					$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
 
-					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+					$sql   = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 						WHERE a.option_name LIKE %s
 						AND a.option_name NOT LIKE %s
 						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
@@ -123,7 +123,7 @@ class WC_Admin_Status {
 					$action = esc_attr( $_GET['action'] );
 					if ( isset( $tools[ $action ]['callback'] ) ) {
 						$callback = $tools[ $action ]['callback'];
-						$return = call_user_func( $callback );
+						$return   = call_user_func( $callback );
 						if ( $return === false ) {
 							$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
 							echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string ) . '</p></div>';
@@ -147,45 +147,45 @@ class WC_Admin_Status {
 	 */
 	public static function get_tools() {
 		$tools = array(
-			'clear_transients' => array(
-				'name'    => __( 'WC Transients', 'woocommerce' ),
-				'button'  => __( 'Clear transients', 'woocommerce' ),
-				'desc'    => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+			'clear_transients'         => array(
+				'name'   => __( 'WC Transients', 'woocommerce' ),
+				'button' => __( 'Clear transients', 'woocommerce' ),
+				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
 			'clear_expired_transients' => array(
-				'name'    => __( 'Expired Transients', 'woocommerce' ),
-				'button'  => __( 'Clear expired transients', 'woocommerce' ),
-				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
+				'name'   => __( 'Expired Transients', 'woocommerce' ),
+				'button' => __( 'Clear expired transients', 'woocommerce' ),
+				'desc'   => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
-			'recount_terms' => array(
-				'name'    => __( 'Term counts', 'woocommerce' ),
-				'button'  => __( 'Recount terms', 'woocommerce' ),
-				'desc'    => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+			'recount_terms'            => array(
+				'name'   => __( 'Term counts', 'woocommerce' ),
+				'button' => __( 'Recount terms', 'woocommerce' ),
+				'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 			),
-			'reset_roles' => array(
-				'name'    => __( 'Capabilities', 'woocommerce' ),
-				'button'  => __( 'Reset capabilities', 'woocommerce' ),
-				'desc'    => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
+			'reset_roles'              => array(
+				'name'   => __( 'Capabilities', 'woocommerce' ),
+				'button' => __( 'Reset capabilities', 'woocommerce' ),
+				'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
-			'clear_sessions' => array(
-				'name'    => __( 'Customer Sessions', 'woocommerce' ),
-				'button'  => __( 'Clear all sessions', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+			'clear_sessions'           => array(
+				'name'   => __( 'Customer Sessions', 'woocommerce' ),
+				'button' => __( 'Clear all sessions', 'woocommerce' ),
+				'desc'   => __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 			),
-			'install_pages' => array(
-				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
-				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+			'install_pages'            => array(
+				'name'   => __( 'Install WooCommerce Pages', 'woocommerce' ),
+				'button' => __( 'Install pages', 'woocommerce' ),
+				'desc'   => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
-			'delete_taxes' => array(
-				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
-				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+			'delete_taxes'             => array(
+				'name'   => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
+				'button' => __( 'Delete ALL tax rates', 'woocommerce' ),
+				'desc'   => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
 			),
-			'reset_tracking' => array(
-				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
-				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
-				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
+			'reset_tracking'           => array(
+				'name'   => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
+				'button' => __( 'Reset usage tracking settings', 'woocommerce' ),
+				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			)
 		);
 
@@ -196,7 +196,6 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-
 		$logs = self::scan_log_files();
 
 		if ( ! empty( $_REQUEST['log_file'] ) && isset( $logs[ sanitize_title( $_REQUEST['log_file'] ) ] ) ) {
@@ -215,7 +214,6 @@ class WC_Admin_Status {
 	 * @return string
 	 */
 	public static function get_file_version( $file ) {
-
 		// Avoid notices if file does not exist
 		if ( ! file_exists( $file ) ) {
 			return '';
@@ -234,8 +232,9 @@ class WC_Admin_Status {
 		$file_data = str_replace( "\r", "\n", $file_data );
 		$version   = '';
 
-		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
 			$version = _cleanup_header_comment( $match[1] );
+		}
 
 		return $version ;
 	}
@@ -246,7 +245,6 @@ class WC_Admin_Status {
 	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
-
 		$files  = @scandir( $template_path );
 		$result = array();
 
@@ -254,7 +252,7 @@ class WC_Admin_Status {
 
 			foreach ( $files as $key => $value ) {
 
-				if ( ! in_array( $value, array( ".",".." ) ) ) {
+				if ( ! in_array( $value, array( '.', '..' ) ) ) {
 
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
 						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
@@ -297,12 +295,12 @@ class WC_Admin_Status {
 	/**
 	 * Get latest version of a theme by slug.
 	 * @param  object $theme WP_Theme object.
-	 * @return string Version number if found.
+	 * @return string        Version number if found.
 	 */
 	public static function get_latest_theme_version( $theme ) {
 		$api = themes_api( 'theme_information', array(
-			'slug'     => $theme->get_stylesheet(),
-			'fields'   => array(
+			'slug'   => $theme->get_stylesheet(),
+			'fields' => array(
 				'sections' => false,
 				'tags'     => false,
 			)
@@ -316,19 +314,19 @@ class WC_Admin_Status {
 
 		// Check WooThemes Theme Version.
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) {
-			$theme_dir = substr( strtolower( str_replace( ' ','', $theme->Name ) ), 0, 45 );
+			$theme_dir = substr( strtolower( str_replace( ' ', '', $theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
 				$theme_changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
-				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
+				$cl_lines        = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) {
 					foreach ( $cl_lines as $line_num => $cl_line ) {
 						if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
-							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
-							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
-							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
-							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
+							$theme_date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
+							$theme_version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
+							$theme_update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
+							$theme_version_data = array( 'date' => $theme_date, 'version' => $theme_version, 'update' => $theme_update, 'changelog' => $theme_changelog );
+							set_transient( $theme_dir . '_version_data', $theme_version_data, DAY_IN_SECONDS );
 							break;
 						}
 					}
@@ -342,4 +340,5 @@ class WC_Admin_Status {
 
 		return $update_theme_version;
 	}
+
 }
