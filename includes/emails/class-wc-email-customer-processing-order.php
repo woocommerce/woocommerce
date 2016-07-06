@@ -23,14 +23,14 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'customer_processing_order';
-		$this->customer_email   = true;
-		$this->title            = __( 'Processing order', 'woocommerce' );
-		$this->description      = __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
-		$this->heading          = __( 'Thank you for your order', 'woocommerce' );
-		$this->subject          = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
-		$this->template_html    = 'emails/customer-processing-order.php';
-		$this->template_plain   = 'emails/plain/customer-processing-order.php';
+		$this->id             = 'customer_processing_order';
+		$this->customer_email = true;
+		$this->title          = __( 'Processing order', 'woocommerce' );
+		$this->description    = __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
+		$this->heading        = __( 'Thank you for your order', 'woocommerce' );
+		$this->subject        = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
+		$this->template_html  = 'emails/customer-processing-order.php';
+		$this->template_plain = 'emails/plain/customer-processing-order.php';
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
@@ -45,13 +45,12 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 * @param int $order_id
 	 */
 	public function trigger( $order_id ) {
-
 		if ( $order_id ) {
-			$this->object       = wc_get_order( $order_id );
-			$this->recipient    = $this->object->billing_email;
+			$this->object    = wc_get_order( $order_id );
+			$this->recipient = $this->object->billing_email;
 
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
+			$this->find['order-date']   = '{order_date}';
+			$this->find['order-number'] = '{order_number}';
 
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
@@ -76,7 +75,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
 
@@ -92,9 +91,10 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
+
 }
 
 endif;
