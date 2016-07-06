@@ -25,18 +25,18 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id 			         = 'free_shipping';
-		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Free Shipping', 'woocommerce' );
-		$this->method_description    = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
-		$this->supports              = array(
+		$this->id                 = 'free_shipping';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Free Shipping', 'woocommerce' );
+		$this->method_description = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
+		$this->supports           = array(
 			'shipping-zones',
 			'instance-settings',
 			'instance-settings-modal',
 		);
-		$this->title 		         = $this->get_option( 'title' );
-		$this->min_amount 	         = $this->get_option( 'min_amount', 0 );
-		$this->requires		         = $this->get_option( 'requires' );
+		$this->title              = $this->get_option( 'title' );
+		$this->min_amount         = $this->get_option( 'min_amount', 0 );
+		$this->requires           = $this->get_option( 'requires' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
@@ -59,40 +59,40 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		" );
 
 		return array(
-			'title' => array(
-				'title' 		=> __( 'Title', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> $this->method_title,
-				'desc_tip'		=> true,
+			'title'      => array(
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default'     => $this->method_title,
+				'desc_tip'    => true,
 			),
-			'requires' => array(
-				'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
-				'type' 			=> 'select',
-				'class'         => 'wc-enhanced-select',
-				'default' 		=> '',
-				'options'		=> array(
-					'' 				=> __( 'N/A', 'woocommerce' ),
-					'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-					'min_amount' 	=> __( 'A minimum order amount', 'woocommerce' ),
-					'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-					'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+			'requires'   => array(
+				'title'   => __( 'Free Shipping Requires...', 'woocommerce' ),
+				'type'    => 'select',
+				'class'   => 'wc-enhanced-select',
+				'default' => '',
+				'options' => array(
+					''           => __( 'N/A', 'woocommerce' ),
+					'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
+					'min_amount' => __( 'A minimum order amount', 'woocommerce' ),
+					'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
+					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 				)
 			),
 			'min_amount' => array(
-				'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-				'type' 			=> 'price',
-				'placeholder'	=> wc_format_localized_price( 0 ),
-				'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
-				'default' 		=> '0',
-				'desc_tip'		=> true
+				'title'       => __( 'Minimum Order Amount', 'woocommerce' ),
+				'type'        => 'price',
+				'placeholder' => wc_format_localized_price( 0 ),
+				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
+				'default'     => '0',
+				'desc_tip'    => true
 			)
 		);
 	}
 
 	/**
 	 * See if free shipping is available based on the package and cart.
-	 * @param array $package
+	 * @param  array $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {
@@ -152,9 +152,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	public function calculate_shipping( $package = array() ) {
 		$this->add_rate( array(
 			'label'   => $this->title,
-			'cost' 	  => 0,
+			'cost'    => 0,
 			'taxes'   => false,
 			'package' => $package,
 		) );
 	}
+
 }
