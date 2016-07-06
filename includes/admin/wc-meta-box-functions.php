@@ -1,12 +1,12 @@
 <?php
 /**
-* WooCommerce Meta Box Functions
-*
-* @author      WooThemes
-* @category    Core
-* @package     WooCommerce/Admin/Functions
-* @version     2.3.0
-*/
+ * WooCommerce Meta Box Functions
+ *
+ * @author      WooThemes
+ * @category    Core
+ * @package     WooCommerce/Admin/Functions
+ * @version     2.3.0
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -56,7 +56,7 @@ function woocommerce_wp_text_input( $field ) {
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
@@ -82,11 +82,11 @@ function woocommerce_wp_text_input( $field ) {
 function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
 
-	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid      = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
-	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
+	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 }
 
 /**
@@ -109,7 +109,7 @@ function woocommerce_wp_textarea_input( $field ) {
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
@@ -148,7 +148,7 @@ function woocommerce_wp_checkbox( $field ) {
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
@@ -187,7 +187,7 @@ function woocommerce_wp_select( $field ) {
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
