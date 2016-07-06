@@ -25,7 +25,7 @@ class WC_Admin_Assets {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_head',            array( $this, 'product_taxonomy_styles' ) );
+		add_action( 'admin_head', array( $this, 'product_taxonomy_styles' ) );
 	}
 
 	/**
@@ -72,7 +72,6 @@ class WC_Admin_Assets {
 			_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 		}
 	}
-
 
 	/**
 	 * Enqueue scripts.
@@ -143,12 +142,12 @@ class WC_Admin_Assets {
 			$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
 
 			$params = array(
-				'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
-				'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
-				'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
-				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
-				'decimal_point'                     => $decimal,
-				'mon_decimal_point'                 => wc_get_price_decimal_separator()
+				'i18n_decimal_error'               => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+				'i18n_mon_decimal_error'           => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
+				'i18n_country_iso_error'           => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
+				'i18_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
+				'decimal_point'                    => $decimal,
+				'mon_decimal_point'                => wc_get_price_decimal_separator()
 			);
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
@@ -193,9 +192,9 @@ class WC_Admin_Assets {
 				'i18n_last_warning'                   => esc_js( __( 'Last warning, are you sure?', 'woocommerce' ) ),
 				'i18n_choose_image'                   => esc_js( __( 'Choose an image', 'woocommerce' ) ),
 				'i18n_set_image'                      => esc_js( __( 'Set variation image', 'woocommerce' ) ),
-				'i18n_variation_added'                => esc_js( __( "variation added", 'woocommerce' ) ),
-				'i18n_variations_added'               => esc_js( __( "variations added", 'woocommerce' ) ),
-				'i18n_no_variations_added'            => esc_js( __( "No variations added", 'woocommerce' ) ),
+				'i18n_variation_added'                => esc_js( __( 'variation added', 'woocommerce' ) ),
+				'i18n_variations_added'               => esc_js( __( 'variations added', 'woocommerce' ) ),
+				'i18n_no_variations_added'            => esc_js( __( 'No variations added', 'woocommerce' ) ),
 				'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
 				'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 				'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
@@ -269,7 +268,7 @@ class WC_Admin_Assets {
 				'revoke_access_nonce'           => wp_create_nonce( 'revoke-access' ),
 				'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 				'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
-				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
+				'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),
@@ -363,18 +362,18 @@ class WC_Admin_Assets {
 	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
 	 */
 	public function product_taxonomy_styles() {
-
 		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 		?>
 		<style type="text/css">
-			<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
+			<?php if ( isset( $_GET['taxonomy'] ) && $_GET['taxonomy']=='product_cat' ) : ?>
 				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_tag' ) : ?>
+			<?php elseif ( isset( $_GET['taxonomy'] ) && $_GET['taxonomy']=='product_tag' ) : ?>
 				.icon32-posts-product { background-position: -301px -5px !important; }
 			<?php endif; ?>
 		</style>
 		<?php
 	}
+
 }
 
 endif;
