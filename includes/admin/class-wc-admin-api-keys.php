@@ -75,7 +75,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Get key data.
 	 *
-	 * @param  int $key_id
+	 * @param  int   $key_id
 	 * @return array
 	 */
 	private static function get_key_data( $key_id ) {
@@ -177,7 +177,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Remove key.
 	 *
-	 * @param  int $key_id
+	 * @param  int  $key_id
 	 * @return bool
 	 */
 	private function remove_key( $key_id ) {
@@ -187,6 +187,7 @@ class WC_Admin_API_Keys {
 
 		return $delete;
 	}
+
 }
 
 new WC_Admin_API_Keys();
