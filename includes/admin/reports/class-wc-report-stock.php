@@ -29,11 +29,10 @@ class WC_Report_Stock extends WP_List_Table {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		parent::__construct( array(
-			'singular'  => __( 'Stock', 'woocommerce' ),
-			'plural'    => __( 'Stock', 'woocommerce' ),
-			'ajax'      => false
+			'singular' => __( 'Stock', 'woocommerce' ),
+			'plural'   => __( 'Stock', 'woocommerce' ),
+			'ajax'     => false
 		) );
 	}
 
@@ -50,7 +49,6 @@ class WC_Report_Stock extends WP_List_Table {
 	 * @param string $position
 	 */
 	public function display_tablenav( $position ) {
-
 		if ( $position != 'top' ) {
 			parent::display_tablenav( $position );
 		}
@@ -60,7 +58,6 @@ class WC_Report_Stock extends WP_List_Table {
 	 * Output the report.
 	 */
 	public function output_report() {
-
 		$this->prepare_items();
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 		$this->display();
@@ -70,7 +67,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
-	 * @param mixed $item
+	 * @param mixed  $item
 	 * @param string $column_name
 	 */
 	public function column_default( $item, $column_name ) {
@@ -80,7 +77,7 @@ class WC_Report_Stock extends WP_List_Table {
 			$product = wc_get_product( $item->id );
 		}
 
-		switch( $column_name ) {
+		switch ( $column_name ) {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {
@@ -92,7 +89,7 @@ class WC_Report_Stock extends WP_List_Table {
 				// Get variation data
 				if ( $product->is_type( 'variation' ) ) {
 					$list_attributes = array();
-					$attributes = $product->get_variation_attributes();
+					$attributes      = $product->get_variation_attributes();
 
 					foreach ( $attributes as $name => $attribute ) {
 						$list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
@@ -126,20 +123,20 @@ class WC_Report_Stock extends WP_List_Table {
 			case 'wc_actions' :
 				?><p>
 					<?php
-						$actions = array();
+						$actions   = array();
 						$action_id = $product->is_type( 'variation' ) ? $item->parent : $item->id;
 
 						$actions['edit'] = array(
-							'url'       => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
-							'name'      => __( 'Edit', 'woocommerce' ),
-							'action'    => "edit"
+							'url'    => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
+							'name'   => __( 'Edit', 'woocommerce' ),
+							'action' => 'edit'
 						);
 
 						if ( $product->is_visible() ) {
 							$actions['view'] = array(
-								'url'       => get_permalink( $action_id ),
-								'name'      => __( 'View', 'woocommerce' ),
-								'action'    => "view"
+								'url'    => get_permalink( $action_id ),
+								'name'   => __( 'View', 'woocommerce' ),
+								'action' => 'view'
 							);
 						}
 
@@ -160,7 +157,6 @@ class WC_Report_Stock extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
-
 		$columns = array(
 			'product'      => __( 'Product', 'woocommerce' ),
 			'parent'       => __( 'Parent', 'woocommerce' ),
@@ -176,7 +172,6 @@ class WC_Report_Stock extends WP_List_Table {
 	 * Prepare customer list items.
 	 */
 	public function prepare_items() {
-
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
 		$per_page              = apply_filters( 'woocommerce_admin_stock_report_products_per_page', 20 );
@@ -192,4 +187,5 @@ class WC_Report_Stock extends WP_List_Table {
 			'total_pages' => ceil( $this->max_items / $per_page )
 		) );
 	}
+
 }
