@@ -34,4 +34,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 </p>
 <p></p>
 
-<?php do_action( 'woocommerce_email_footer', $email ); ?>
+<?php do_action( 'woocommerce_email_footer', $email );
