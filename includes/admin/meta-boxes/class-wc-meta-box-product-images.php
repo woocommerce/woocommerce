@@ -33,8 +33,8 @@ class WC_Meta_Box_Product_Images {
 						$product_image_gallery = get_post_meta( $post->ID, '_product_image_gallery', true );
 					} else {
 						// Backwards compat
-						$attachment_ids = get_posts( 'post_parent=' . $post->ID . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-						$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
+						$attachment_ids        = get_posts( 'post_parent=' . $post->ID . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
+						$attachment_ids        = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 						$product_image_gallery = implode( ',', $attachment_ids );
 					}
 
@@ -83,7 +83,7 @@ class WC_Meta_Box_Product_Images {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
@@ -91,4 +91,5 @@ class WC_Meta_Box_Product_Images {
 
 		update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
 	}
+
 }
