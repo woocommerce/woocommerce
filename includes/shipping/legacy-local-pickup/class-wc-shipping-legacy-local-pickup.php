@@ -32,12 +32,12 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
@@ -51,17 +51,16 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 * init function.
 	 */
 	public function init() {
-
 		// Load the settings.
 		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables
-		$this->enabled		= $this->get_option( 'enabled' );
-		$this->title		= $this->get_option( 'title' );
-		$this->codes		= $this->get_option( 'codes' );
-		$this->availability	= $this->get_option( 'availability' );
-		$this->countries	= $this->get_option( 'countries' );
+		$this->enabled      = $this->get_option( 'enabled' );
+		$this->title        = $this->get_option( 'title' );
+		$this->codes        = $this->get_option( 'codes' );
+		$this->availability = $this->get_option( 'availability' );
+		$this->countries    = $this->get_option( 'countries' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -72,9 +71,9 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id' 		 => $this->id,
-			'label' 	 => $this->title,
-			'package'    => $package,
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'package' => $package,
 		);
 		$this->add_rate( $rate );
 	}
@@ -84,20 +83,20 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled' => array(
+			'enabled'      => array(
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 				'default' => 'no'
 			),
-			'title' => array(
+			'title'        => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Local Pickup', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
-			'codes' => array(
+			'codes'        => array(
 				'title'       => __( 'Allowed ZIP/Post Codes', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => __( 'What ZIP/post codes are available for local pickup?', 'woocommerce' ),
@@ -106,16 +105,16 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'placeholder' => 'e.g. 12345, 56789'
 			),
 			'availability' => array(
-				'title'    => __( 'Method availability', 'woocommerce' ),
-				'type'     => 'select',
-				'default'  => 'all',
-				'class'    => 'availability wc-enhanced-select',
-				'options'  => array(
+				'title'   => __( 'Method availability', 'woocommerce' ),
+				'type'    => 'select',
+				'default' => 'all',
+				'class'   => 'availability wc-enhanced-select',
+				'options' => array(
 					'all'      => __( 'All allowed countries', 'woocommerce' ),
 					'specific' => __( 'Specific Countries', 'woocommerce' )
 				)
 			),
-			'countries' => array(
+			'countries'    => array(
 				'title'             => __( 'Specific Countries', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
@@ -123,7 +122,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'default'           => '',
 				'options'           => WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(
-					'data-placeholder'  => __( 'Select some countries', 'woocommerce' )
+					'data-placeholder' => __( 'Select some countries', 'woocommerce' )
 				)
 			)
 		);
@@ -137,7 +136,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 		$codes = array();
 
 		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
+			foreach ( explode( ',', $this->codes ) as $code ) {
 				$codes[] = strtoupper( trim( $code ) );
 			}
 		}
@@ -147,8 +146,8 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * See if a given postcode matches valid postcodes.
-	 * @param  string postcode
-	 * @param  string country code
+	 * @param  string  postcode
+	 * @param  string  country code
 	 * @return boolean
 	 */
 	public function is_valid_postcode( $postcode, $country ) {
@@ -185,11 +184,11 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	/**
 	 * See if the method is available.
 	 *
-	 * @param array $package
+	 * @param  array $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		$is_available = "yes" === $this->enabled;
+		$is_available = 'yes' === $this->enabled;
 
 		if ( $is_available && $this->get_valid_postcodes() ) {
 			$is_available = $this->is_valid_postcode( $package['destination']['postcode'], $package['destination']['country'] );
@@ -213,10 +212,11 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 * clean function.
 	 *
 	 * @access public
-	 * @param mixed $code
+	 * @param  mixed  $code
 	 * @return string
 	 */
 	public function clean( $code ) {
 		return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
 	}
+
 }
