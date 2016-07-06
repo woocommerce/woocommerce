@@ -35,7 +35,7 @@ class WC_Template_Loader {
 	 * this to the theme (containing a woocommerce() inside) this will be used for all.
 	 * woocommerce templates.
 	 *
-	 * @param mixed $template
+	 * @param  mixed  $template
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
@@ -48,13 +48,13 @@ class WC_Template_Loader {
 
 		if ( is_single() && get_post_type() == 'product' ) {
 
-			$file 	= 'single-product.php';
+			$file   = 'single-product.php';
 			$find[] = $file;
 			$find[] = WC()->template_path() . $file;
 
 		} elseif ( is_product_taxonomy() ) {
 
-			$term   = get_queried_object();
+			$term = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 				$file = 'taxonomy-' . $term->taxonomy . '.php';
@@ -71,14 +71,14 @@ class WC_Template_Loader {
 
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
 
-			$file 	= 'archive-product.php';
+			$file   = 'archive-product.php';
 			$find[] = $file;
 			$find[] = WC()->template_path() . $file;
 
 		}
 
 		if ( $file ) {
-			$template       = locate_template( array_unique( $find ) );
+			$template = locate_template( array_unique( $find ) );
 			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
 				$template = WC()->plugin_path() . '/templates/' . $file;
 			}
@@ -90,7 +90,7 @@ class WC_Template_Loader {
 	/**
 	 * Load comments template.
 	 *
-	 * @param mixed $template
+	 * @param  mixed  $template
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
@@ -116,6 +116,7 @@ class WC_Template_Loader {
 			}
 		}
 	}
+
 }
 
 WC_Template_Loader::init();
