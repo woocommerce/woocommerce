@@ -36,8 +36,8 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
-			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -61,8 +61,8 @@ class WC_Query {
 		// Query vars to add to WP.
 		$this->query_vars = array(
 			// Checkout actions.
-			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 			// My account actions.
 			'orders'                     => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'                 => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
@@ -167,7 +167,7 @@ class WC_Query {
 	 * Add query vars.
 	 *
 	 * @access public
-	 * @param array $vars
+	 * @param  array $vars
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
@@ -211,9 +211,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
@@ -289,13 +287,13 @@ class WC_Query {
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
-			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 
-			$wp_post_types['product']->ID 			= $shop_page->ID;
-			$wp_post_types['product']->post_title 	= $shop_page->post_title;
-			$wp_post_types['product']->post_name 	= $shop_page->post_name;
-			$wp_post_types['product']->post_type    = $shop_page->post_type;
-			$wp_post_types['product']->ancestors    = get_ancestors( $shop_page->ID, $shop_page->post_type );
+			$wp_post_types['product']->ID         = $shop_page->ID;
+			$wp_post_types['product']->post_title = $shop_page->post_title;
+			$wp_post_types['product']->post_name  = $shop_page->post_name;
+			$wp_post_types['product']->post_type  = $shop_page->post_type;
+			$wp_post_types['product']->ancestors  = get_ancestors( $shop_page->ID, $shop_page->post_type );
 
 			// Fix conditional Functions like is_front_page
 			$q->is_singular          = false;
@@ -332,19 +330,20 @@ class WC_Query {
 	 * Search post excerpt.
 	 *
 	 * @access public
-	 * @param string $where (default: '')
-	 * @return string (modified where clause)
+	 * @param  string $where (default: '')
+	 * @return string        (modified where clause)
 	 */
 	public function search_post_excerpt( $where = '' ) {
 		global $wp_the_query;
 
 		// If this is not a WC Query, do not modify the query
-		if ( empty( $wp_the_query->query_vars['wc_query'] ) || empty( $wp_the_query->query_vars['s'] ) )
+		if ( empty( $wp_the_query->query_vars['wc_query'] ) || empty( $wp_the_query->query_vars['s'] ) ) {
 			return $where;
+		}
 
 		$where = preg_replace(
 			"/post_title\s+LIKE\s*(\'\%[^\%]+\%\')/",
-			"post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
+			'post_title LIKE $1) OR (post_excerpt LIKE $1', $where );
 
 		return $where;
 	}
@@ -380,7 +379,7 @@ class WC_Query {
 	 */
 	public function product_query( $q ) {
 		// Ordering query vars
-		$ordering  = $this->get_catalog_ordering_args();
+		$ordering = $this->get_catalog_ordering_args();
 		$q->set( 'orderby', $ordering['orderby'] );
 		$q->set( 'order', $ordering['order'] );
 		if ( isset( $ordering['meta_key'] ) ) {
@@ -396,7 +395,6 @@ class WC_Query {
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
-
 
 	/**
 	 * Remove the query.
@@ -448,14 +446,14 @@ class WC_Query {
 
 		switch ( $orderby ) {
 			case 'rand' :
-				$args['orderby']  = 'rand';
+				$args['orderby'] = 'rand';
 			break;
 			case 'date' :
-				$args['orderby']  = 'date ID';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
+				$args['orderby'] = 'date ID';
+				$args['order']   = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = "meta_value_num ID";
+				$args['orderby']  = 'meta_value_num ID';
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;
@@ -470,8 +468,8 @@ class WC_Query {
 				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 			break;
 			case 'title' :
-				$args['orderby']  = 'title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+				$args['orderby'] = 'title';
+				$args['order']   = $order == 'DESC' ? 'DESC' : 'ASC';
 			break;
 		}
 
@@ -484,7 +482,7 @@ class WC_Query {
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
 	 * @access public
-	 * @param array $args
+	 * @param  array $args
 	 * @return array
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
@@ -497,20 +495,20 @@ class WC_Query {
 	 * Order by rating post clauses.
 	 *
 	 * @access public
-	 * @param array $args
+	 * @param  array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
-		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
-		$args['join']   .= "
+		$args['fields']  .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
+		$args['where']   .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
+		$args['join']    .= "
 			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
 			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
 		";
-		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
-		$args['groupby'] = "$wpdb->posts.ID";
+		$args['orderby']  = "average_rating DESC, $wpdb->posts.post_date DESC";
+		$args['groupby']  = "$wpdb->posts.ID";
 
 		return $args;
 	}
@@ -518,7 +516,7 @@ class WC_Query {
 	/**
 	 * Appends meta queries to an array.
 	 * @access public
-	 * @param array $meta_query
+	 * @param  array $meta_query
 	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
@@ -588,7 +586,7 @@ class WC_Query {
 
 	/**
 	 * Returns a meta query to handle product visibility.
-	 * @param string $compare (default: 'IN')
+	 * @param  string $compare (default: 'IN')
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
@@ -603,20 +601,20 @@ class WC_Query {
 	 * Returns a meta query to handle product stock status.
 	 *
 	 * @access public
-	 * @param string $status (default: 'instock')
+	 * @param  string $status (default: 'instock')
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
 		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
-			'key' 		=> '_stock_status',
-			'value' 	=> $status,
-			'compare' 	=> '=',
+			'key'     => '_stock_status',
+			'value'   => $status,
+			'compare' => '=',
 		) : array();
 	}
 
 	/**
 	 * Appends tax queries to an array.
-	 * @param array $tax_query
+	 * @param  array $tax_query
 	 * @return array
 	 */
 	public function get_tax_query( $tax_query = array() ) {
@@ -628,10 +626,10 @@ class WC_Query {
 		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
 			foreach ( $_chosen_attributes as $taxonomy => $data ) {
 				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'slug',
-					'terms'    => $data['terms'],
-					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
 					'include_children' => false,
 				);
 			}
@@ -659,7 +657,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query[ 'product_cat' ] = array(
+			$tax_query['product_cat'] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array( $args['product_cat'] ),
 				'field'    => 'slug',
@@ -667,7 +665,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query[ 'product_tag' ] = array(
+			$tax_query['product_tag'] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',
@@ -707,7 +705,7 @@ class WC_Query {
 						continue;
 					}
 
-					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
+					$query_type                                          = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
 					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
 					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 				}
@@ -738,4 +736,5 @@ class WC_Query {
 	public function layered_nav_query( $filtered_posts ) {
 		_deprecated_function( 'layered_nav_query', '2.6', '' );
 	}
+
 }
