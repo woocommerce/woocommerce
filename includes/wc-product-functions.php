@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
- * @param mixed $the_product Post object or post ID of the product.
- * @param array $args (default: array()) Contains all arguments to be used to get this product.
+ * @param  mixed      $the_product Post object or post ID of the product.
+ * @param  array      $args        (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
  */
 function wc_get_product( $the_product = false, $args = array() ) {
@@ -32,8 +32,8 @@ function wc_get_product( $the_product = false, $args = array() ) {
 /**
  * Update a product's stock amount.
  *
- * @param  int $product_id
- * @param  int $new_stock_level
+ * @param int $product_id
+ * @param int $new_stock_level
  */
 function wc_update_product_stock( $product_id, $new_stock_level ) {
 	$product = wc_get_product( $product_id );
@@ -46,8 +46,8 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
 /**
  * Update a product's stock status.
  *
- * @param  int $product_id
- * @param  int $status
+ * @param int $product_id
+ * @param int $status
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
@@ -103,7 +103,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	);
 
 	if ( $post_id > 0 ) {
-		foreach( $post_transient_names as $transient ) {
+		foreach ( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
 
@@ -114,7 +114,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	}
 
 	// Delete transients
-	foreach( $transients_to_clear as $transient ) {
+	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
@@ -171,13 +171,13 @@ function wc_get_product_ids_on_sale() {
  * @return array
  */
 function wc_get_featured_product_ids() {
-
 	// Load from cache
 	$featured_product_ids = get_transient( 'wc_featured_products' );
 
 	// Valid cache found
-	if ( false !== $featured_product_ids )
+	if ( false !== $featured_product_ids ) {
 		return $featured_product_ids;
+	}
 
 	$featured = get_posts( array(
 		'post_type'      => array( 'product', 'product_variation' ),
@@ -185,16 +185,16 @@ function wc_get_featured_product_ids() {
 		'post_status'    => 'publish',
 		'meta_query'     => array(
 			array(
-				'key' 		=> '_visibility',
-				'value' 	=> array('catalog', 'visible'),
-				'compare' 	=> 'IN'
+				'key'     => '_visibility',
+				'value'   => array( 'catalog', 'visible' ),
+				'compare' => 'IN'
 			),
 			array(
-				'key' 	=> '_featured',
+				'key'   => '_featured',
 				'value' => 'yes'
 			)
 		),
-		'fields' => 'id=>parent'
+		'fields'         => 'id=>parent'
 	) );
 
 	$product_ids          = array_keys( $featured );
@@ -276,7 +276,6 @@ function wc_product_post_type_link( $permalink, $post ) {
 }
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
-
 /**
  * Get the placeholder image URL for products etc.
  *
@@ -296,7 +295,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -305,8 +304,8 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * Gets a formatted version of variation data or item meta.
  *
  * @access public
- * @param string $variation
- * @param bool $flat (default: false)
+ * @param  string $variation
+ * @param  bool   $flat      (default: false)
  * @return string
  */
 function wc_get_formatted_variation( $variation, $flat = false ) {
@@ -450,7 +449,7 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * Get attachment image attributes.
  *
  * @access public
- * @param array $attr
+ * @param  array $attr
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
@@ -462,20 +461,18 @@ function wc_get_attachment_image_attributes( $attr ) {
 }
 add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attributes' );
 
-
 /**
  * Prepare attachment for JavaScript.
  *
  * @access public
- * @param array $response
+ * @param  array $response
  * @return array
  */
 function wc_prepare_attachment_for_js( $response ) {
-
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
 		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
-			foreach( $response['sizes'] as $size => $value ) {
+			foreach ( $response['sizes'] as $size => $value ) {
 				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
 			}
 		}
@@ -495,10 +492,11 @@ function wc_track_product_view() {
 
 	global $post;
 
-	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
+	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) ) {
 		$viewed_products = array();
-	else
+	} else {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
+	}
 
 	if ( ! in_array( $post->ID, $viewed_products ) ) {
 		$viewed_products[] = $post->ID;
@@ -533,8 +531,8 @@ function wc_get_product_types() {
  * Check if product sku is unique.
  *
  * @since 2.2
- * @param int $product_id
- * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
+ * @param  int    $product_id
+ * @param  string $sku        Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
@@ -548,7 +546,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 		AND $wpdb->posts.post_status = 'publish'
 		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
 		AND $wpdb->postmeta.post_id <> %d LIMIT 1
-	 ", wp_slash( $sku ), $product_id ) );
+	", wp_slash( $sku ), $product_id ) );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -574,7 +572,7 @@ function wc_get_product_id_by_sku( $sku ) {
 		WHERE posts.post_type IN ( 'product', 'product_variation' )
 		AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
 		LIMIT 1
-	 ", $sku ) );
+	", $sku ) );
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }
@@ -587,14 +585,14 @@ function wc_get_product_id_by_sku( $sku ) {
  * @since 2.4.0
  * @todo  look into Data manipulation API
  *
- * @param int $product_id
- * @param float $regular_price
- * @param float $sale_price
+ * @param int    $product_id
+ * @param float  $regular_price
+ * @param float  $sale_price
  * @param string $date_from
  * @param string $date_to
  */
 function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
-	$product_id  = absint( $product_id );
+	$product_id    = absint( $product_id );
 	$regular_price = wc_format_decimal( $regular_price );
 	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
 	$date_from     = wc_clean( $date_from );
@@ -632,7 +630,7 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 /**
  * Get attibutes/data for an individual variation from the database and maintain it's integrity.
  * @since  2.4.0
- * @param  int $variation_id
+ * @param  int   $variation_id
  * @return array
  */
 function wc_get_product_variation_attributes( $variation_id ) {
@@ -690,11 +688,11 @@ function wc_get_product_variation_attributes( $variation_id ) {
 /**
  * Get all product cats for a product by ID, including hierarchy
  * @since  2.5.0
- * @param  int $product_id
+ * @param  int   $product_id
  * @return array
  */
 function wc_get_product_cat_ids( $product_id ) {
-	$product_cats = wp_get_post_terms( $product_id, 'product_cat', array( "fields" => "ids" ) );
+	$product_cats = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
 
 	foreach ( $product_cats as $product_cat ) {
 		$product_cats = array_merge( $product_cats, get_ancestors( $product_cat, 'product_cat' ) );
@@ -706,7 +704,7 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param object|bool $product
+ * @param  object|bool $product
  * @return array
  */
 function wc_get_product_attachment_props( $attachment_id, $product = false ) {
@@ -724,9 +722,9 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
 		// Alt text fallbacks
-		$props['alt']     = empty( $props['alt'] ) ? $props['caption'] : $props['alt'];
-		$props['alt']     = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) ) : $props['alt'];
-		$props['alt']     = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) ? $props['caption'] : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) ) : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
 	}
 	return $props;
 }
