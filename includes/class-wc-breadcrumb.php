@@ -174,8 +174,8 @@ class WC_Breadcrumb {
 			$parent_id     = $post->post_parent;
 
 			while ( $parent_id ) {
-				$page          = get_post( $parent_id );
-				$parent_id     = $page->post_parent;
+				$page            = get_post( $parent_id );
+				$parent_id       = $page->post_parent;
 				$parent_crumbs[] = array( get_the_title( $page->ID ), get_permalink( $page->ID ) );
 			}
 
@@ -223,7 +223,7 @@ class WC_Breadcrumb {
 
 		if ( ! $_name ) {
 			$product_post_type = get_post_type_object( 'product' );
-			$_name = $product_post_type->labels->singular_name;
+			$_name             = $product_post_type->labels->singular_name;
 		}
 
 		$this->add_crumb( $_name, get_post_type_archive_link( 'product' ) );
@@ -347,4 +347,5 @@ class WC_Breadcrumb {
 			$this->add_crumb( sprintf( __( 'Page %d', 'woocommerce' ), get_query_var( 'paged' ) ) );
 		}
 	}
+
 }
