@@ -47,7 +47,7 @@ class WC_API extends WC_Legacy_API {
 	 * Add new query vars.
 	 *
 	 * @since 2.0
-	 * @param array $vars
+	 * @param  array    $vars
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
@@ -201,4 +201,5 @@ class WC_API extends WC_Legacy_API {
 			$this->$controller->register_routes();
 		}
 	}
+
 }
