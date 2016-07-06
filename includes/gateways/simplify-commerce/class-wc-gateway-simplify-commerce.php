@@ -20,12 +20,12 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'simplify_commerce';
-		$this->method_title       = __( 'Simplify Commerce', 'woocommerce' );
-		$this->method_description = __( 'Take payments via Simplify Commerce - uses simplify.js to create card tokens and the Simplify Commerce SDK. Requires SSL when sandbox is disabled.', 'woocommerce' );
-		$this->new_method_label   = __( 'Use a new card', 'woocommerce' );
-		$this->has_fields         = true;
-		$this->supports           = array(
+		$this->id                   = 'simplify_commerce';
+		$this->method_title         = __( 'Simplify Commerce', 'woocommerce' );
+		$this->method_description   = __( 'Take payments via Simplify Commerce - uses simplify.js to create card tokens and the Simplify Commerce SDK. Requires SSL when sandbox is disabled.', 'woocommerce' );
+		$this->new_method_label     = __( 'Use a new card', 'woocommerce' );
+		$this->has_fields           = true;
+		$this->supports             = array(
 			'subscriptions',
 			'products',
 			'subscription_cancellation',
@@ -51,14 +51,14 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		$this->init_settings();
 
 		// Get setting values
-		$this->title           = $this->get_option( 'title' );
-		$this->description     = $this->get_option( 'description' );
-		$this->enabled         = $this->get_option( 'enabled' );
-		$this->mode            = $this->get_option( 'mode', 'standard' );
-		$this->modal_color     = $this->get_option( 'modal_color', '#a46497' );
-		$this->sandbox         = $this->get_option( 'sandbox' );
-		$this->public_key      = $this->sandbox == 'no' ? $this->get_option( 'public_key' ) : $this->get_option( 'sandbox_public_key' );
-		$this->private_key     = $this->sandbox == 'no' ? $this->get_option( 'private_key' ) : $this->get_option( 'sandbox_private_key' );
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
+		$this->enabled     = $this->get_option( 'enabled' );
+		$this->mode        = $this->get_option( 'mode', 'standard' );
+		$this->modal_color = $this->get_option( 'modal_color', '#a46497' );
+		$this->sandbox     = $this->get_option( 'sandbox' );
+		$this->public_key  = $this->sandbox == 'no' ? $this->get_option( 'public_key' ) : $this->get_option( 'sandbox_public_key' );
+		$this->private_key = $this->sandbox == 'no' ? $this->get_option( 'private_key' ) : $this->get_option( 'sandbox_private_key' );
 
 		$this->init_simplify_sdk();
 
@@ -154,7 +154,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 
 		// Show message when using standard mode and no SSL on the checkout page
 		elseif ( 'standard' == $this->mode && ! wc_checkout_is_https() ) {
-			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Simplify Commerce will only work in sandbox mode.', 'woocommerce'), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
+			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Simplify Commerce will only work in sandbox mode.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
 		}
 	}
 
@@ -184,28 +184,28 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled' => array(
+			'enabled'             => array(
 				'title'       => __( 'Enable/Disable', 'woocommerce' ),
 				'label'       => __( 'Enable Simplify Commerce', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no'
 			),
-			'title' => array(
+			'title'               => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Credit card', 'woocommerce' ),
 				'desc_tip'    => true
 			),
-			'description' => array(
+			'description'         => array(
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
 				'default'     => 'Pay with your credit card via Simplify Commerce by MasterCard.',
 				'desc_tip'    => true
 			),
-			'mode' => array(
+			'mode'                => array(
 				'title'       => __( 'Payment Mode', 'woocommerce' ),
 				'label'       => __( 'Enable Hosted Payments', 'woocommerce' ),
 				'type'        => 'select',
@@ -216,21 +216,21 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 					'hosted'   => __( 'Hosted Payments', 'woocommerce' )
 				)
 			),
-			'modal_color' => array(
+			'modal_color'         => array(
 				'title'       => __( 'Modal Color', 'woocommerce' ),
 				'type'        => 'color',
 				'description' => __( 'Set the color of the buttons and titles on the modal dialog.', 'woocommerce' ),
 				'default'     => '#a46497',
 				'desc_tip'    => true
 			),
-			'sandbox' => array(
+			'sandbox'             => array(
 				'title'       => __( 'Sandbox', 'woocommerce' ),
 				'label'       => __( 'Enable Sandbox Mode', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Place the payment gateway in sandbox mode using sandbox API keys (real payments will not be taken).', 'woocommerce' ),
 				'default'     => 'yes'
 			),
-			'sandbox_public_key' => array(
+			'sandbox_public_key'  => array(
 				'title'       => __( 'Sandbox Public Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
@@ -244,14 +244,14 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'default'     => '',
 				'desc_tip'    => true
 			),
-			'public_key' => array(
+			'public_key'          => array(
 				'title'       => __( 'Public Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true
 			),
-			'private_key' => array(
+			'private_key'         => array(
 				'title'       => __( 'Private Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
@@ -311,7 +311,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	}
 
 	public function add_payment_method() {
-		if ( empty ( $_POST['simplify_token'] ) ) {
+		if ( empty( $_POST['simplify_token'] ) ) {
 			wc_add_notice( __( 'There was a problem adding this card.', 'woocommerce' ), 'error' );
 			return;
 		}
@@ -339,32 +339,32 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Actualy saves a customer token to the database.
 	 *
-	 * @param  WC_Payment_Token   $customer_token Payment Token
-	 * @param  string             $cart_token     CC Token
-	 * @param  array              $customer_info  'email', 'name'
+	 * @param WC_Payment_Token $customer_token Payment Token
+	 * @param string           $cart_token     CC Token
+	 * @param array            $customer_info  'email', 'name'
 	 */
 	public function save_token( $customer_token, $cart_token, $customer_info ) {
 		if ( ! is_null( $customer_token ) ) {
 			$customer = Simplify_Customer::findCustomer( $customer_token->get_token() );
-			$updates = array( 'token' => $cart_token );
+			$updates  = array( 'token' => $cart_token );
 			$customer->setAll( $updates );
 			$customer->updateCustomer();
 			$customer = Simplify_Customer::findCustomer( $customer_token->get_token() ); // get updated customer with new set card
-			$token = $customer_token;
+			$token    = $customer_token;
 		} else {
 			$customer = Simplify_Customer::createCustomer( array(
-				'token'     => $cart_token,
-				'email'     => $customer_info['email'],
-				'name'      => $customer_info['name'],
+				'token' => $cart_token,
+				'email' => $customer_info['email'],
+				'name'  => $customer_info['name'],
 			) );
-			$token = new WC_Payment_Token_CC();
+			$token    = new WC_Payment_Token_CC();
 			$token->set_token( $customer->id );
 		}
 
 		// If we were able to create an save our card, save the data on our side too
 		if ( is_object( $customer ) && '' != $customer->id ) {
 			$customer_properties = $customer->getProperties();
-			$card = $customer_properties['card'];
+			$card                = $customer_properties['card'];
 			$token->set_gateway_id( $this->id );
 			$token->set_card_type( strtolower( $card->type ) );
 			$token->set_last4( $card->last4 );
@@ -384,9 +384,9 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Process customer: updating or creating a new customer/saved CC
 	 *
-	 * @param  WC_Order           $order          Order object
-	 * @param  WC_Payment_Token   $customer_token Payment Token
-	 * @param  string             $cart_token     CC Token
+	 * @param WC_Order         $order          Order object
+	 * @param WC_Payment_Token $customer_token Payment Token
+	 * @param string           $cart_token     CC Token
 	 */
 	protected function process_customer( $order, $customer_token = null, $cart_token = '' ) {
 		// Are we saving a new payment method?
@@ -395,7 +395,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'email' => $order->billing_email,
 				'name'  => trim( $order->get_formatted_billing_full_name() ),
 			);
-			$token = $this->save_token( $customer_token, $cart_token, $customer_info );
+			$token         = $this->save_token( $customer_token, $cart_token, $customer_info );
 			if ( ! is_null( $token ) ) {
 				$order->add_payment_token( $token );
 			}
@@ -405,8 +405,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Process standard payments.
 	 *
-	 * @param  WC_Order $order
-	 * @param  string   $cart_token
+	 * @param WC_Order $order
+	 * @param string   $cart_token
 	 * @uses   Simplify_ApiException
 	 * @uses   Simplify_BadRequestException
 	 * @return array
@@ -428,11 +428,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			// or the customer token (just saved method, previously saved method)
 			$pass_tokens = array();
 
-			if ( ! empty ( $cart_token ) ) {
+			if ( ! empty( $cart_token ) ) {
 				$pass_tokens['token'] = $cart_token;
 			}
 
-			if ( ! empty ( $customer_token ) ) {
+			if ( ! empty( $customer_token ) ) {
 				$pass_tokens['customer'] = $customer_token;
 				// Use the customer token only, since we already saved the (one time use) card token to the customer
 				if ( isset( $_POST['wc-simplify_commerce-new-payment-method'] ) && true === (bool) $_POST['wc-simplify_commerce-new-payment-method'] ) {
@@ -441,7 +441,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			}
 
 			// Did we create an account and save a payment method? We might need to use the customer token instead of the card token
-			if ( isset( $_POST['createaccount'] ) && true === (bool) $_POST['createaccount'] && empty ( $customer_token ) ) {
+			if ( isset( $_POST['createaccount'] ) && true === (bool) $_POST['createaccount'] && empty( $customer_token ) ) {
 				$user_token = $this->get_users_token();
 				if ( ! is_null( $user_token ) ) {
 					$pass_tokens['customer'] = $user_token->get_token();
@@ -480,11 +480,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		}
 	}
 
- 	/**
+	/**
 	 * do payment function.
 	 *
 	 * @param WC_order $order
-	 * @param int $amount (default: 0)
+	 * @param int      $amount (default: 0)
 	 * @uses  Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
@@ -496,13 +496,13 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		try {
 			// Charge the customer
 			$data = array(
-				'amount'              => $amount * 100, // In cents.
-				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
-				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id
+				'amount'      => $amount * 100, // In cents.
+				'description' => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
+				'currency'    => strtoupper( get_woocommerce_currency() ),
+				'reference'   => $order->id
 			);
 
-			$data = array_merge( $data, $token );
+			$data    = array_merge( $data, $token );
 			$payment = Simplify_Payment::createPayment( $data );
 
 		} catch ( Exception $e ) {
@@ -539,7 +539,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Process standard payments.
 	 *
-	 * @param WC_Order $order
+	 * @param  WC_Order $order
 	 * @return array
 	 */
 	protected function process_hosted_payments( $order ) {
@@ -550,7 +550,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	}
 
 	protected function get_users_token() {
-		$customer_token  = null;
+		$customer_token = null;
 		if ( is_user_logged_in() ) {
 			$tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id() ) ;
 			foreach ( $tokens as $token ) {
@@ -629,7 +629,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Receipt page.
 	 *
-	 * @param  int $order_id
+	 * @param int $order_id
 	 */
 	public function receipt_page( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -706,9 +706,9 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 * Process refunds.
 	 * WooCommerce 2.2 or later.
 	 *
-	 * @param  int $order_id
-	 * @param  float $amount
-	 * @param  string $reason
+	 * @param int    $order_id
+	 * @param float  $amount
+	 * @param string $reason
 	 * @uses   Simplify_ApiException
 	 * @uses   Simplify_BadRequestException
 	 * @return bool|WP_Error
@@ -758,4 +758,5 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
+
 }
