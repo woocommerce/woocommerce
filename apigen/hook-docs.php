@@ -11,37 +11,36 @@ class WC_HookFinder {
 	private static $custom_hooks_found     = '';
 
 	private static function get_files( $pattern, $flags = 0, $path = '' ) {
+		if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
 
-	    if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
+			if ( $dir == '\\' || $dir == '/' ) { $dir = ''; } // End IF Statement
 
-	        if ($dir == '\\' || $dir == '/') { $dir = ''; } // End IF Statement
+			return self::get_files(basename( $pattern ), $flags, $dir . '/' );
 
-	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
+		} // End IF Statement
 
-	    } // End IF Statement
+		$paths = glob( $path . '*', GLOB_ONLYDIR | GLOB_NOSORT );
+		$files = glob( $path . $pattern, $flags );
 
-	    $paths = glob( $path . '*', GLOB_ONLYDIR | GLOB_NOSORT );
-	    $files = glob( $path . $pattern, $flags );
+		if ( is_array( $paths ) ) {
+			foreach ( $paths as $p ) {
+				$found_files = array();
+				$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
+				foreach ( $retrieved_files as $file ) {
+					if ( ! in_array( $file, self::$found_files ) )
+						$found_files[] = $file;
+				}
 
-	    if ( is_array( $paths ) ) {
-		    foreach ( $paths as $p ) {
-			    $found_files = array();
-		   		$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
-		   		foreach ( $retrieved_files as $file ) {
-			   		if ( ! in_array( $file, self::$found_files ) )
-			   			$found_files[] = $file;
-		   		}
+				self::$found_files = array_merge( self::$found_files, $found_files );
 
-		   		self::$found_files = array_merge( self::$found_files, $found_files );
+				if ( is_array( $files ) && is_array( $found_files ) ) {
+					$files = array_merge( $files, $found_files );
+				}
 
-		   		if ( is_array( $files ) && is_array( $found_files ) ) {
-		   			$files = array_merge( $files, $found_files );
-		   		}
-
-		    } // End FOREACH Loop
-	    }
-	    return $files;
-    }
+			} // End FOREACH Loop
+		}
+		return $files;
+	}
 
 	private static function get_hook_link( $hook, $details = array() ) {
 		if ( ! empty( $details['class'] ) ) {
@@ -57,15 +56,15 @@ class WC_HookFinder {
 
 	public static function process_hooks() {
 		// If we have one, get the PHP files from it.
-		$template_files 	= self::get_files( '*.php', GLOB_MARK, '../templates/' );
-		$template_files[]	= '../includes/wc-template-functions.php';
-		$template_files[]	= '../includes/wc-template-hooks.php';
+		$template_files   = self::get_files( '*.php', GLOB_MARK, '../templates/' );
+		$template_files[] = '../includes/wc-template-functions.php';
+		$template_files[] = '../includes/wc-template-hooks.php';
 
-		$shortcode_files 	= self::get_files( '*.php', GLOB_MARK, '../includes/shortcodes/' );
-		$widget_files	 	= self::get_files( '*.php', GLOB_MARK, '../includes/widgets/' );
-		$admin_files 		= self::get_files( '*.php', GLOB_MARK, '../includes/admin/' );
-		$class_files 		= self::get_files( '*.php', GLOB_MARK, '../includes/' );
-		$other_files		= array(
+		$shortcode_files = self::get_files( '*.php', GLOB_MARK, '../includes/shortcodes/' );
+		$widget_files    = self::get_files( '*.php', GLOB_MARK, '../includes/widgets/' );
+		$admin_files     = self::get_files( '*.php', GLOB_MARK, '../includes/admin/' );
+		$class_files     = self::get_files( '*.php', GLOB_MARK, '../includes/' );
+		$other_files     = array(
 			'../woocommerce.php'
 		);
 
@@ -126,11 +125,11 @@ class WC_HookFinder {
 
 									if ( '_' === substr( $hook, '-1', 1 ) ) {
 										$hook .= '{';
-										$open = true;
+										$open  = true;
 										// Keep adding to hook until we find a comma or colon
 										while ( 1 ) {
 											$loop ++;
-											$next_hook  = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
+											$next_hook = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
 
 											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ) ) ) {
 												continue;
@@ -142,19 +141,19 @@ class WC_HookFinder {
 											if ( in_array( $next_hook, array( ',', ';' ) ) ) {
 												if ( $open ) {
 													$hook .= '}';
-													$open = false;
+													$open  = false;
 												}
 												break;
 											}
 
 											if ( '_' === $hook_first ) {
 												$next_hook = '}' . $next_hook;
-												$open = false;
+												$open      = false;
 											}
 
 											if ( '_' === $hook_last ) {
 												$next_hook .= '{';
-												$open = true;
+												$open       = true;
 											}
 
 											$hook .= $next_hook;
@@ -164,7 +163,7 @@ class WC_HookFinder {
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
 										self::$custom_hooks_found[ $hook ]['file'][] = self::$current_file;
 									} else {
-    									self::$custom_hooks_found[ $hook ] = array(
+										self::$custom_hooks_found[ $hook ] = array(
 											'line'     => $token[2],
 											'class'    => $current_class,
 											'function' => $current_function,
@@ -217,6 +216,7 @@ class WC_HookFinder {
 		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . end( $footer ) );
 		echo "Hook docs generated :)\n";
 	}
+
 }
 
 WC_HookFinder::process_hooks();
