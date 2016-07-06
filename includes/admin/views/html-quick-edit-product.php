@@ -75,10 +75,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						$tax_classes = WC_Tax::get_tax_classes();
 
-						if ( ! empty( $tax_classes ) )
+						if ( ! empty( $tax_classes ) ) {
 							foreach ( $tax_classes as $class ) {
 								$options[ sanitize_title( $class ) ] = esc_html( $class );
 							}
+						}
 
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -126,7 +127,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
-						echo '<option value="' . esc_attr( $value->slug ) . '">'. $value->name .'</option>';
+						echo '<option value="' . esc_attr( $value->slug ) . '">' . $value->name . '</option>';
 					}
 				?>
 				</select>
@@ -146,7 +147,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'hidden'  => __( 'Hidden', 'woocommerce' )
 					) );
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -167,7 +168,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'outofstock' => __( 'Out of stock', 'woocommerce' )
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) .'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -176,7 +177,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="stock_fields">
 
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+			<?php if ( get_option( 'woocommerce_manage_stock' )=='yes' ) : ?>
 				<label class="alignleft manage_stock">
 					<input type="checkbox" name="_manage_stock" value="1">
 					<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
@@ -203,7 +204,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'yes'    => __( 'Allow', 'woocommerce' )
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
