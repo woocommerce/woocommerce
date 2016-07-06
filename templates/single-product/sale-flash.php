@@ -27,4 +27,4 @@ global $post, $product;
 
 	<?php echo apply_filters( 'woocommerce_sale_flash', '<span class="onsale">' . __( 'Sale!', 'woocommerce' ) . '</span>', $post, $product ); ?>
 
-<?php endif; ?>
+<?php endif;
