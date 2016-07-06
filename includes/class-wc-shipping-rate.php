@@ -42,11 +42,11 @@ class WC_Shipping_Rate {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $id
-	 * @param string $label
+	 * @param string  $id
+	 * @param string  $label
 	 * @param integer $cost
-	 * @param array $taxes
-	 * @param string $method_id
+	 * @param array   $taxes
+	 * @param string  $method_id
 	 */
 	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '' ) {
 		$this->id        = $id;
@@ -91,4 +91,5 @@ class WC_Shipping_Rate {
 	public function get_meta_data() {
 		return $this->meta_data;
 	}
+
 }
