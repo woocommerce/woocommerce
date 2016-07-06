@@ -24,7 +24,7 @@ class WC_Widget_Product_Search extends WC_Widget {
 		$this->widget_id          = 'woocommerce_product_search';
 		$this->widget_name        = __( 'WooCommerce Product Search', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title' => array(
 				'type'  => 'text',
 				'std'   => '',
 				'label' => __( 'Title', 'woocommerce' )
@@ -49,4 +49,5 @@ class WC_Widget_Product_Search extends WC_Widget {
 
 		$this->widget_end( $args );
 	}
+
 }
