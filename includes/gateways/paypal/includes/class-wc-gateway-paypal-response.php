@@ -14,8 +14,8 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Get the order from the PayPal 'Custom' variable.
-	 * @param  string $raw_custom JSON Data passed back by PayPal
-	 * @return bool|WC_Order object
+	 * @param  string        $raw_custom JSON Data passed back by PayPal
+	 * @return bool|WC_Order             object
 	 */
 	protected function get_paypal_order( $raw_custom ) {
 		// We have the data in the correct format, so get the order.
@@ -50,9 +50,9 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Complete order, add transaction ID and note.
-	 * @param  WC_Order $order
-	 * @param  string   $txn_id
-	 * @param  string   $note
+	 * @param WC_Order $order
+	 * @param string   $txn_id
+	 * @param string   $note
 	 */
 	protected function payment_complete( $order, $txn_id = '', $note = '' ) {
 		$order->add_order_note( $note );
@@ -61,8 +61,8 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Hold order and add note.
-	 * @param  WC_Order $order
-	 * @param  string   $reason
+	 * @param WC_Order $order
+	 * @param string   $reason
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( 'on-hold', $reason );
