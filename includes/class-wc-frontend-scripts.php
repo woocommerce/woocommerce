@@ -52,7 +52,7 @@ class WC_Frontend_Scripts {
 	 */
 	public static function get_styles() {
 		return apply_filters( 'woocommerce_enqueue_styles', array(
-			'woocommerce-layout' => array(
+			'woocommerce-layout'      => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
@@ -64,7 +64,7 @@ class WC_Frontend_Scripts {
 				'version' => WC_VERSION,
 				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
 			),
-			'woocommerce-general' => array(
+			'woocommerce-general'     => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
@@ -78,11 +78,11 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_register_script()
 	 * @access private
-	 * @param  string   $handle
-	 * @param  string   $path
-	 * @param  string[] $deps
-	 * @param  string   $version
-	 * @param  boolean  $in_footer
+	 * @param string   $handle
+	 * @param string   $path
+	 * @param string[] $deps
+	 * @param string   $version
+	 * @param boolean  $in_footer
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		self::$scripts[] = $handle;
@@ -94,11 +94,11 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_enqueue_script()
 	 * @access private
-	 * @param  string   $handle
-	 * @param  string   $path
-	 * @param  string[] $deps
-	 * @param  string   $version
-	 * @param  boolean  $in_footer
+	 * @param string   $handle
+	 * @param string   $path
+	 * @param string[] $deps
+	 * @param string   $version
+	 * @param boolean  $in_footer
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		if ( ! in_array( $handle, self::$scripts ) && $path ) {
@@ -112,11 +112,11 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_register_style()
 	 * @access private
-	 * @param  string   $handle
-	 * @param  string   $path
-	 * @param  string[] $deps
-	 * @param  string   $version
-	 * @param  string   $media
+	 * @param string   $handle
+	 * @param string   $path
+	 * @param string[] $deps
+	 * @param string   $version
+	 * @param string   $media
 	 */
 	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all' ) {
 		self::$styles[] = $handle;
@@ -128,11 +128,11 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_enqueue_style()
 	 * @access private
-	 * @param  string   $handle
-	 * @param  string   $path
-	 * @param  string[] $deps
-	 * @param  string   $version
-	 * @param  string   $media
+	 * @param string   $handle
+	 * @param string   $path
+	 * @param string[] $deps
+	 * @param string   $version
+	 * @param string   $media
 	 */
 	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all' ) {
 		if ( ! in_array( $handle, self::$styles ) && $path ) {
@@ -197,7 +197,7 @@ class WC_Frontend_Scripts {
 		}
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			self::enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
-			self::enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery','prettyPhoto' ) );
+			self::enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
 			self::enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 		}
 		if ( is_product() ) {
@@ -228,7 +228,7 @@ class WC_Frontend_Scripts {
 	 * Localize a WC script once.
 	 * @access private
 	 * @since  2.3.0 this needs less wp_script_is() calls due to https://core.trac.wordpress.org/ticket/28404 being added in WP 4.0.
-	 * @param  string $handle
+	 * @param string $handle
 	 */
 	private static function localize_script( $handle ) {
 		if ( ! in_array( $handle, self::$wp_localize_scripts ) && wp_script_is( $handle ) && ( $data = self::get_script_data( $handle ) ) ) {
@@ -241,7 +241,7 @@ class WC_Frontend_Scripts {
 	/**
 	 * Return data for script handles.
 	 * @access private
-	 * @param  string $handle
+	 * @param  string     $handle
 	 * @return array|bool
 	 */
 	private static function get_script_data( $handle ) {
@@ -251,12 +251,12 @@ class WC_Frontend_Scripts {
 			case 'woocommerce' :
 				return array(
 					'ajax_url'    => WC()->ajax_url(),
-					'wc_ajax_url' => WC_AJAX::get_endpoint( "%%endpoint%%" )
+					'wc_ajax_url' => WC_AJAX::get_endpoint( '%%endpoint%%' )
 				);
 			break;
 			case 'wc-geolocation' :
 				return array(
-					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'home_url'     => home_url(),
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
 					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
@@ -271,14 +271,14 @@ class WC_Frontend_Scripts {
 			case 'wc-checkout' :
 				return array(
 					'ajax_url'                  => WC()->ajax_url(),
-					'wc_ajax_url'               => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'wc_ajax_url'               => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
 					'apply_coupon_nonce'        => wp_create_nonce( 'apply-coupon' ),
 					'remove_coupon_nonce'       => wp_create_nonce( 'remove-coupon' ),
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
-					'checkout_url'              => WC_AJAX::get_endpoint( "checkout" ),
+					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
 					'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-					'debug_mode'                => defined('WP_DEBUG') && WP_DEBUG,
+					'debug_mode'                => defined( 'WP_DEBUG' ) && WP_DEBUG,
 					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please try again.', 'woocommerce' ),
 				);
 			break;
@@ -292,23 +292,23 @@ class WC_Frontend_Scripts {
 			case 'wc-cart' :
 				return array(
 					'ajax_url'                     => WC()->ajax_url(),
-					'wc_ajax_url'                  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
-					'apply_coupon_nonce'           => wp_create_nonce( "apply-coupon" ),
-					'remove_coupon_nonce'          => wp_create_nonce( "remove-coupon" ),
+					'wc_ajax_url'                  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'update_shipping_method_nonce' => wp_create_nonce( 'update-shipping-method' ),
+					'apply_coupon_nonce'           => wp_create_nonce( 'apply-coupon' ),
+					'remove_coupon_nonce'          => wp_create_nonce( 'remove-coupon' ),
 				);
 			break;
 			case 'wc-cart-fragments' :
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
-					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'wc_ajax_url'   => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
 				);
 			break;
 			case 'wc-add-to-cart' :
 				return array(
 					'ajax_url'                => WC()->ajax_url(),
-					'wc_ajax_url'             => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'wc_ajax_url'             => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
 					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', wc_get_cart_url() ),
 					'is_cart'                 => is_cart(),
@@ -362,6 +362,7 @@ class WC_Frontend_Scripts {
 			self::localize_script( $handle );
 		}
 	}
+
 }
 
 WC_Frontend_Scripts::init();
