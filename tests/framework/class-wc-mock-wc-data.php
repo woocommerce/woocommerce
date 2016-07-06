@@ -116,7 +116,6 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple read.
 	 */
 	public function read( $id ) {
-
 		if ( 'user' === $this->_meta_type ) {
 			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
 				return;
