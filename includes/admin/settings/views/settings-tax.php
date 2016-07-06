@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return apply_filters( 'woocommerce_tax_settings', array(
 
-	array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
+	array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'tax_options' ),
 
 	array(
 		'title'    => __( 'Prices Entered With Tax', 'woocommerce' ),
@@ -55,12 +55,12 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Additional Tax Classes', 'woocommerce' ),
-		'desc_tip'    => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard Rate".', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_classes',
-		'css'     => 'width:100%; height: 65px;',
-		'type'    => 'textarea',
-		'default' => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
+		'title'    => __( 'Additional Tax Classes', 'woocommerce' ),
+		'desc_tip' => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard Rate".', 'woocommerce' ),
+		'id'       => 'woocommerce_tax_classes',
+		'css'      => 'width:100%; height: 65px;',
+		'type'     => 'textarea',
+		'default'  => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
 	),
 
 	array(
@@ -70,22 +70,22 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'type'    => 'select',
 		'class'   => 'wc-enhanced-select',
 		'options' => array(
-			'incl'   => __( 'Including tax', 'woocommerce' ),
-			'excl'   => __( 'Excluding tax', 'woocommerce' ),
+			'incl' => __( 'Including tax', 'woocommerce' ),
+			'excl' => __( 'Excluding tax', 'woocommerce' ),
 		)
 	),
 
 	array(
-		'title'   => __( 'Display Prices During Cart and Checkout', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_display_cart',
-		'default' => 'excl',
-		'type'    => 'select',
-		'class'   => 'wc-enhanced-select',
-		'options' => array(
-			'incl'   => __( 'Including tax', 'woocommerce' ),
-			'excl'   => __( 'Excluding tax', 'woocommerce' ),
+		'title'    => __( 'Display Prices During Cart and Checkout', 'woocommerce' ),
+		'id'       => 'woocommerce_tax_display_cart',
+		'default'  => 'excl',
+		'type'     => 'select',
+		'class'    => 'wc-enhanced-select',
+		'options'  => array(
+			'incl' => __( 'Including tax', 'woocommerce' ),
+			'excl' => __( 'Excluding tax', 'woocommerce' ),
 		),
-		'autoload'      => false
+		'autoload' => false
 	),
 
 	array(
@@ -98,14 +98,14 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Tax Totals', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_total_display',
-		'default' => 'itemized',
-		'type'    => 'select',
-		'class'   => 'wc-enhanced-select',
-		'options' => array(
-			'single'     => __( 'As a single total', 'woocommerce' ),
-			'itemized'   => __( 'Itemized', 'woocommerce' ),
+		'title'    => __( 'Display Tax Totals', 'woocommerce' ),
+		'id'       => 'woocommerce_tax_total_display',
+		'default'  => 'itemized',
+		'type'     => 'select',
+		'class'    => 'wc-enhanced-select',
+		'options'  => array(
+			'single'   => __( 'As a single total', 'woocommerce' ),
+			'itemized' => __( 'Itemized', 'woocommerce' ),
 		),
 		'autoload' => false
 	),
