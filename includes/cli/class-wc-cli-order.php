@@ -163,7 +163,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			// Set order currency.
 			if ( isset( $data['currency'] ) ) {
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce') );
+					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ) );
 				}
 
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
@@ -387,7 +387,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		if ( 'ids' === $formatter->format ) {
 			$query_args['fields'] = 'ids';
-			$query = new WP_Query( $query_args );
+			$query                = new WP_Query( $query_args );
 			echo implode( ' ', $query->posts );
 		} else {
 			$query = new WP_Query( $query_args );
@@ -577,8 +577,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 		if ( ! empty( $args['customer_id'] ) ) {
 			$query_args['meta_query'] = array(
 				array(
-					'key'   => '_customer_user',
-					'value' => (int) $args['customer_id'],
+					'key'     => '_customer_user',
+					'value'   => (int) $args['customer_id'],
 					'compare' => '='
 				)
 			);
@@ -603,7 +603,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $posts Array of post
-	 * @return array Items
+	 * @return array        Items
 	 */
 	protected function format_posts_to_items( $posts ) {
 		$items = array();
@@ -645,12 +645,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
-			'payment_details' => array(
+			'payment_details'           => array(
 				'method_id'    => $order->payment_method,
 				'method_title' => $order->payment_method_title,
 				'paid'         => isset( $order->paid_date ),
 			),
-			'billing_address' => array(
+			'billing_address'           => array(
 				'first_name' => $order->billing_first_name,
 				'last_name'  => $order->billing_last_name,
 				'company'    => $order->billing_company,
@@ -663,7 +663,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'email'      => $order->billing_email,
 				'phone'      => $order->billing_phone,
 			),
-			'shipping_address' => array(
+			'shipping_address'          => array(
 				'first_name' => $order->shipping_first_name,
 				'last_name'  => $order->shipping_last_name,
 				'company'    => $order->shipping_company,
@@ -699,11 +699,11 @@ class WC_CLI_Order extends WC_CLI_Command {
 				$product_sku = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
+			$meta      = new WC_Order_Item_Meta( $item, $product );
 			$item_meta = array();
 			foreach ( $meta->get_formatted( null ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key' => $meta_key,
+					'key'   => $meta_key,
 					'label' => $formatted_meta['label'],
 					'value' => $formatted_meta['value'],
 				);
@@ -776,7 +776,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Creates new WC_Order.
 	 *
 	 * @since  2.5.0
-	 * @param  $args array
+	 * @param           $args array
 	 * @return WC_Order
 	 */
 	protected function create_base_order( $args ) {
@@ -788,10 +788,10 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * @since 2.5.0
 	 * @param WC_Order $order
-	 * @param array $data
+	 * @param array    $data
 	 */
 	protected function set_order_addresses( $order, $data ) {
-		$address_fields = array(
+		$address_fields  = array(
 			'first_name',
 			'last_name',
 			'company',
@@ -848,14 +848,13 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * 2) Meta values must be scalar (int, string, bool)
 	 *
 	 * @since 2.5.0
-	 * @param int $order_id valid order ID
+	 * @param int   $order_id   valid order ID
 	 * @param array $order_meta order meta in array( 'meta_key' => 'meta_value' ) format
 	 */
 	protected function set_order_meta( $order_id, $order_meta ) {
-
 		foreach ( $order_meta as $meta_key => $meta_value ) {
 
-			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+			if ( is_string( $meta_key ) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
 				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
@@ -868,10 +867,10 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * with the order.
 	 *
 	 * @since  2.5.0
-	 * @param  WC_Order $order order
-	 * @param  string $item_type
-	 * @param  array $item item provided in the request body
-	 * @param  string $action either 'create' or 'update'
+	 * @param WC_Order $order     order
+	 * @param string   $item_type
+	 * @param array    $item      item provided in the request body
+	 * @param string   $action    either 'create' or 'update'
 	 * @throws WC_CLI_Exception if item ID is not associated with order
 	 */
 	protected function set_item( $order, $item_type, $item, $action ) {
@@ -899,13 +898,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Create or update a line item
 	 *
 	 * @since  2.5.0
-	 * @param  WC_Order $order
-	 * @param  array $item line item data
-	 * @param  string $action 'create' to add line item or 'update' to update it
+	 * @param WC_Order $order
+	 * @param array    $item   line item data
+	 * @param string   $action 'create' to add line item or 'update' to update it
 	 * @throws WC_CLI_Exception invalid data, server error
 	 */
 	protected function set_line_item( $order, $item, $action ) {
-
 		$creating = ( 'create' === $action );
 
 		// product is always required
@@ -939,7 +937,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				}
 			}
 			$item_args['variation'] = $item['variations'];
-			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
+			$variation_id           = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
 		}
 
 		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
@@ -1017,22 +1015,22 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * @return int                 Returns an ID if a valid variation was found for this product
 	 */
 	protected function get_variation_id( $product, $variations = array() ) {
-		$variation_id = null;
+		$variation_id          = null;
 		$variations_normalized = array();
 
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
 			if ( isset( $variations ) && is_array( $variations ) ) {
 				// start by normalizing the passed variations
 				foreach ( $variations as $key => $value ) {
-					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$key                           = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
 					$variations_normalized[ $key ] = strtolower( $value );
 				}
 				// now search through each product child and see if our passed variations match anything
 				foreach ( $product->get_children() as $variation ) {
 					$meta = array();
 					foreach ( get_post_meta( $variation ) as $key => $value ) {
-						$value = $value[0];
-						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
+						$value        = $value[0];
+						$key          = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
 						$meta[ $key ] = strtolower( $value );
 					}
 					// if the variation array is a part of the $meta array, we found our match
@@ -1051,7 +1049,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Utility function to see if the meta array contains data from variations.
 	 *
 	 * @since  2.5.0
-	 * @return bool  Returns true if meta array contains data from variations
+	 * @return bool Returns true if meta array contains data from variations
 	 */
 	protected function array_contains( $needles, $haystack ) {
 		foreach ( $needles as $key => $value ) {
@@ -1066,13 +1064,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Create or update an order shipping method
 	 *
 	 * @since  2.5.0
-	 * @param  \WC_Order $order
-	 * @param  array $shipping item data
-	 * @param  string $action 'create' to add shipping or 'update' to update it
+	 * @param \WC_Order $order
+	 * @param array     $shipping item data
+	 * @param string    $action   'create' to add shipping or 'update' to update it
 	 * @throws WC_CLI_Exception invalid data, server error
 	 */
 	protected function set_shipping( $order, $shipping, $action ) {
-
 		// total must be a positive float
 		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 ) {
 			throw new WC_CLI_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount', 'woocommerce' ) );
@@ -1121,13 +1118,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Create or update an order fee.
 	 *
 	 * @since  2.5.0
-	 * @param  \WC_Order $order
-	 * @param  array $fee item data
-	 * @param  string $action 'create' to add fee or 'update' to update it
+	 * @param \WC_Order $order
+	 * @param array     $fee    item data
+	 * @param string    $action 'create' to add fee or 'update' to update it
 	 * @throws WC_CLI_Exception invalid data, server error
 	 */
 	protected function set_fee( $order, $fee, $action ) {
-
 		if ( 'create' === $action ) {
 
 			// fee title is required
@@ -1202,13 +1198,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * Create or update an order coupon
 	 *
 	 * @since  2.5.0
-	 * @param  \WC_Order $order
-	 * @param  array $coupon item data
-	 * @param  string $action 'create' to add coupon or 'update' to update it
+	 * @param \WC_Order $order
+	 * @param array     $coupon item data
+	 * @param string    $action 'create' to add coupon or 'update' to update it
 	 * @throws WC_CLI_Exception invalid data, server error
 	 */
 	protected function set_coupon( $order, $coupon, $action ) {
-
 		// coupon amount must be positive float.
 		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 ) {
 			throw new WC_CLI_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount', 'woocommerce' ) );
@@ -1246,4 +1241,5 @@ class WC_CLI_Order extends WC_CLI_Command {
 			}
 		}
 	}
+
 }
