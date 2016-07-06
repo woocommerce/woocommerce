@@ -27,15 +27,14 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * GET /coupons/<id>
 	 *
 	 * @since 2.1
-	 * @param array $routes
+	 * @param  array $routes
 	 * @return array
 	 */
 	public function register_routes( $routes ) {
-
 		# GET/POST /coupons
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_coupons' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_coupon' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
@@ -45,8 +44,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		# GET/PUT/DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_coupon' ),    WC_API_Server::READABLE ),
-			array( array( $this, 'edit_coupon' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'get_coupon' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_coupon' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
 			array( array( $this, 'delete_coupon' ), WC_API_SERVER::DELETABLE ),
 		);
 
@@ -67,13 +66,12 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get all coupons
 	 *
 	 * @since 2.1
-	 * @param string $fields
-	 * @param array $filter
-	 * @param int $page
+	 * @param  string $fields
+	 * @param  array  $filter
+	 * @param  int    $page
 	 * @return array
 	 */
 	public function get_coupons( $fields = null, $filter = array(), $page = 1 ) {
-
 		$filter['page'] = $page;
 
 		$query = $this->query_coupons( $filter );
@@ -98,8 +96,8 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given ID
 	 *
 	 * @since 2.1
-	 * @param int $id the coupon ID
-	 * @param string $fields fields to include in response
+	 * @param  int            $id     the coupon ID
+	 * @param  string         $fields fields to include in response
 	 * @return array|WP_Error
 	 */
 	public function get_coupon( $id, $fields = null ) {
@@ -157,7 +155,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the total number of coupons
 	 *
 	 * @since 2.1
-	 * @param array $filter
+	 * @param  array $filter
 	 * @return array
 	 */
 	public function get_coupons_count( $filter = array() ) {
@@ -178,8 +176,8 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given code
 	 *
 	 * @since 2.1
-	 * @param string $code the coupon code
-	 * @param string $fields fields to include in response
+	 * @param  string       $code   the coupon code
+	 * @param  string       $fields fields to include in response
 	 * @return int|WP_Error
 	 */
 	public function get_coupon_by_code( $code, $fields = null ) {
@@ -202,7 +200,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Create a coupon
 	 *
 	 * @since 2.2
-	 * @param array $data
+	 * @param  array $data
 	 * @return array
 	 */
 	public function create_coupon( $data ) {
@@ -236,7 +234,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				WHERE $wpdb->posts.post_type = 'shop_coupon'
 				AND $wpdb->posts.post_status = 'publish'
 				AND $wpdb->posts.post_title = '%s'
-			 ", $coupon_code ) );
+			", $coupon_code ) );
 
 			if ( $coupon_found ) {
 				throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
@@ -277,7 +275,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
 				'post_excerpt' => $coupon_data['description']
-	 		);
+			);
 
 			$id = wp_insert_post( $new_coupon, true );
 
@@ -318,12 +316,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Edit a coupon
 	 *
 	 * @since 2.2
-	 * @param int $id the coupon ID
-	 * @param array $data
+	 * @param  int   $id   the coupon ID
+	 * @param  array $data
 	 * @return array
 	 */
 	public function edit_coupon( $id, $data ) {
-
 		try {
 			if ( ! isset( $data['coupon'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'coupon' ), 400 );
@@ -352,7 +349,7 @@ class WC_API_Coupons extends WC_API_Resource {
 					AND $wpdb->posts.post_status = 'publish'
 					AND $wpdb->posts.post_title = '%s'
 					AND $wpdb->posts.ID != %s
-				 ", $coupon_code, $id ) );
+				", $coupon_code, $id ) );
 
 				if ( $coupon_found ) {
 					throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
@@ -457,12 +454,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Delete a coupon
 	 *
 	 * @since  2.2
-	 * @param int $id the coupon ID
-	 * @param bool $force true to permanently delete coupon, false to move to trash
+	 * @param  int   $id    the coupon ID
+	 * @param  bool  $force true to permanently delete coupon, false to move to trash
 	 * @return array
 	 */
 	public function delete_coupon( $id, $force = false ) {
-
 		$id = $this->validate_request( $id, 'shop_coupon', 'delete' );
 
 		if ( is_wp_error( $id ) ) {
@@ -493,11 +489,10 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Helper method to get coupon post objects
 	 *
 	 * @since 2.1
-	 * @param array $args request arguments for filtering query
+	 * @param  array    $args request arguments for filtering query
 	 * @return WP_Query
 	 */
 	private function query_coupons( $args ) {
-
 		// set base query arguments
 		$query_args = array(
 			'fields'      => 'ids',
@@ -516,11 +511,10 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * WC_API_Coupons->create_coupon() and WC_API_Coupons->edit_coupon()
 	 *
 	 * @since 2.4.0
-	 * @param array $data
+	 * @param  array $data
 	 * @return array
 	 */
 	public function bulk( $data ) {
-
 		try {
 			if ( ! isset( $data['coupons'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupons_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'coupons' ), 400 );
@@ -578,4 +572,5 @@ class WC_API_Coupons extends WC_API_Resource {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
+
 }
