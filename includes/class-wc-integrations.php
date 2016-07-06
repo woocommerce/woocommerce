@@ -24,11 +24,10 @@ class WC_Integrations {
 	 */
 	public $integrations = array();
 
-    /**
-     * Initialize integrations.
-     */
-    public function __construct() {
-
+	/**
+	 * Initialize integrations.
+	 */
+	public function __construct() {
 		do_action( 'woocommerce_integrations_init' );
 
 		$load_integrations = apply_filters( 'woocommerce_integrations', array() );
@@ -51,4 +50,5 @@ class WC_Integrations {
 	public function get_integrations() {
 		return $this->integrations;
 	}
+
 }
