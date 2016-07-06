@@ -26,7 +26,6 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * @since 2.1
 	 */
 	public function __construct() {
-
 		// tweak sales report response data
 		add_filter( 'woocommerce_api_report_response', array( $this, 'format_sales_report_data' ), 100 );
 
@@ -41,7 +40,6 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * @return string
 	 */
 	public function get_content_type() {
-
 		return 'application/xml; charset=' . get_option( 'blog_charset' );
 	}
 
@@ -49,11 +47,10 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * Parse the raw request body entity
 	 *
 	 * @since 2.1
-	 * @param string $data the raw request body
+	 * @param  string $data the raw request body
 	 * @return array
 	 */
 	public function parse_body( $data ) {
-
 		// TODO: implement simpleXML parsing
 	}
 
@@ -61,16 +58,15 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * Generate an XML response given an array of data
 	 *
 	 * @since 2.1
-	 * @param array $data the response data
+	 * @param  array  $data the response data
 	 * @return string
 	 */
 	public function generate_response( $data ) {
-
 		$this->xml = new XMLWriter();
 
 		$this->xml->openMemory();
 
-		$this->xml->setIndent(true);
+		$this->xml->setIndent( true );
 
 		$this->xml->startDocument( '1.0', 'UTF-8' );
 
@@ -121,12 +117,11 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * Convert array into XML by recursively generating child elements
 	 *
 	 * @since 2.1
-	 * @param string|array $element_key - name for element, e.g. <OrderID>
-	 * @param string|array $element_value - value for element, e.g. 1234
-	 * @return string - generated XML
+	 * @param  string|array $element_key   - name for element, e.g. <OrderID>
+	 * @param  string|array $element_value - value for element, e.g. 1234
+	 * @return string                      - generated XML
 	 */
 	private function array_to_xml( $element_key, $element_value = array() ) {
-
 		if ( is_array( $element_value ) ) {
 
 			// handle attributes
@@ -201,11 +196,10 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * attribute for the totals element instead
 	 *
 	 * @since 2.1
-	 * @param array $data
+	 * @param  array $data
 	 * @return array
 	 */
 	public function format_sales_report_data( $data ) {
-
 		if ( ! empty( $data['totals'] ) ) {
 
 			foreach ( $data['totals'] as $date => $totals ) {
@@ -226,11 +220,10 @@ class WC_API_XML_Handler implements WC_API_Handler {
 	 * Note that the parent product data for variations is also adjusted in the same manner as needed
 	 *
 	 * @since 2.1
-	 * @param array $data
+	 * @param  array $data
 	 * @return array
 	 */
 	public function format_product_data( $data ) {
-
 		// handle attribute values
 		if ( ! empty( $data['attributes'] ) ) {
 
