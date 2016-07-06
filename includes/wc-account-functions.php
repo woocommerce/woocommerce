@@ -47,10 +47,10 @@ function wc_customer_edit_account_url() {
 /**
  * Get the edit address slug translation.
  *
- * @param  string  $id   Address ID.
- * @param  bool    $flip Flip the array to make it possible to retrieve the values ​​from both sides.
+ * @param  string $id   Address ID.
+ * @param  bool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
  *
- * @return string        Address slug i18n.
+ * @return string       Address slug i18n.
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
@@ -124,7 +124,7 @@ function wc_get_account_menu_items() {
  * Get account menu item classes.
  *
  * @since 2.6.0
- * @param string $endpoint
+ * @param  string $endpoint
  * @return string
  */
 function wc_get_account_menu_item_classes( $endpoint ) {
@@ -154,7 +154,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
  * Get account endpoint URL.
  *
  * @since 2.6.0
- * @param string $endpoint
+ * @param  string $endpoint
  * @return string
  */
 function wc_get_account_endpoint_url( $endpoint ) {
@@ -230,9 +230,9 @@ function wc_get_account_payment_methods_types() {
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6
- * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list()
- * @param  int   $customer_id  The customer to fetch payment methods for
- * @return array               Filtered list of customers payment methods
+ * @param  array $list        List of payment methods passed from wc_get_customer_saved_methods_list()
+ * @param  int   $customer_id The customer to fetch payment methods for
+ * @return array              Filtered list of customers payment methods
  */
 function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $customer_id );
@@ -244,7 +244,7 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 
 		$type            = strtolower( $payment_token->get_type() );
 		$list[ $type ][] = array(
-			'method' => array(
+			'method'     => array(
 				'gateway' => $payment_token->get_gateway_id(),
 			),
 			'expires'    => esc_html__( 'N/A', 'woocommerce' ),
@@ -256,11 +256,11 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 				),
 			),
 		);
-		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
+		$key             = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
-			$list[ $type ][$key]['actions']['default'] = array(
-				'url' => $set_default_url,
+			$list[ $type ][ $key ]['actions']['default'] = array(
+				'url'  => $set_default_url,
 				'name' => esc_html__( 'Make Default', 'woocommerce' ),
 			);
 		}
@@ -276,7 +276,7 @@ add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_paym
  * Controls the output for credit cards on the my account page.
  *
  * @since 2.6
- * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
+ * @param  array            $item          Individual list item from woocommerce_saved_payment_methods_list
  * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
  * @return array                           Filtered item
  */
@@ -299,7 +299,7 @@ add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payme
  * Controls the output for eChecks on the my account page.
  *
  * @since 2.6
- * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
+ * @param  array            $item          Individual list item from woocommerce_saved_payment_methods_list
  * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
  * @return array                           Filtered item
  */
