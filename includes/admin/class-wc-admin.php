@@ -141,7 +141,7 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
+		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 
@@ -169,14 +169,13 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function preview_emails() {
-
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
-			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail') ) {
+			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail' ) ) {
 				die( 'Security check' );
 			}
 
 			// load the mailer class
-			$mailer        = WC()->mailer();
+			$mailer = WC()->mailer();
 
 			// get the preview email subject
 			$email_heading = __( 'HTML Email Template', 'woocommerce' );
@@ -184,13 +183,13 @@ class WC_Admin {
 			// get the preview email content
 			ob_start();
 			include( 'views/html-email-template-preview.php' );
-			$message       = ob_get_clean();
+			$message = ob_get_clean();
 
 			// create a new email
-			$email         = new WC_Email();
+			$email = new WC_Email();
 
 			// wrap the content with the email template and then add styles
-			$message       = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
+			$message = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email
 			echo $message;
@@ -240,6 +239,7 @@ class WC_Admin {
 
 		return $footer_text;
 	}
+
 }
 
 return new WC_Admin();
