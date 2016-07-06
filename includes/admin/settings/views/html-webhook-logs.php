@@ -39,4 +39,4 @@ $total          = $count_comments->approved;
 	</tbody>
 </table>
 
-<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook ); ?>
+<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook );
