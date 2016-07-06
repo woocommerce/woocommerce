@@ -133,7 +133,7 @@ class WC_CLI_Report extends WC_CLI_Command {
 				if ( date( ( 'day' == $reporter->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
 					$customer_count++;
 				}
- 			}
+			}
 
 			$period_totals[ $time ] = array(
 				'sales'     => wc_format_decimal( 0.00, 2 ),
@@ -166,7 +166,7 @@ class WC_CLI_Report extends WC_CLI_Command {
 				continue;
 			}
 
-			$period_totals[ $time ]['orders']   = (int) $order->count;
+			$period_totals[ $time ]['orders'] = (int) $order->count;
 		}
 
 		// add total order items for each period
@@ -191,7 +191,7 @@ class WC_CLI_Report extends WC_CLI_Command {
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
-		$sales_data  = array(
+		$sales_data = array(
 			'total_sales'       => $report_data->total_sales,
 			'net_sales'         => $report_data->net_sales,
 			'average_sales'     => $report_data->average_sales,
@@ -266,14 +266,14 @@ class WC_CLI_Report extends WC_CLI_Command {
 	public function top_sellers( $__, $assoc_args ) {
 		$reporter    = $this->get_reporter( $assoc_args );
 		$top_sellers = $reporter->get_order_report_data( array(
-			'data' => array(
+			'data'         => array(
 				'_product_id' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
 					'name'            => 'product_id'
 				),
-				'_qty' => array(
+				'_qty'        => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
@@ -314,11 +314,10 @@ class WC_CLI_Report extends WC_CLI_Command {
 	 * Setup the report object and parse any date filtering
 	 *
 	 * @since  2.5.0
-	 * @param  array $assoc_args Arguments provided in when invoking the command
+	 * @param  array                   $assoc_args Arguments provided in when invoking the command
 	 * @return WC_Report_Sales_By_Date
 	 */
 	private function get_reporter( $assoc_args ) {
-
 		include_once( WC()->plugin_path() . '/includes/admin/reports/class-wc-admin-report.php' );
 		include_once( WC()->plugin_path() . '/includes/admin/reports/class-wc-report-sales-by-date.php' );
 
@@ -333,7 +332,7 @@ class WC_CLI_Report extends WC_CLI_Command {
 
 				// overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges
 				$_GET['start_date'] = $this->parse_datetime( $assoc_args['date_min'] );
-				$_GET['end_date'] = isset( $assoc_args['date_max'] ) ? $this->parse_datetime( $assoc_args['date_max'] ) : null;
+				$_GET['end_date']   = isset( $assoc_args['date_max'] ) ? $this->parse_datetime( $assoc_args['date_max'] ) : null;
 
 			} else {
 
@@ -369,4 +368,5 @@ class WC_CLI_Report extends WC_CLI_Command {
 	protected function get_default_format_fields() {
 		return 'title,product_id,quantity';
 	}
+
 }
