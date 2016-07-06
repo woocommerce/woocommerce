@@ -53,7 +53,6 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-
 		if ( $this->get_cached_widget( $args ) ) {
 			return;
 		}
@@ -62,7 +61,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		add_filter( 'posts_clauses',  array( WC()->query, 'order_by_rating_post_clauses' ) );
+		add_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
 
 		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 
@@ -96,4 +95,5 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$this->cache_widget( $args, $content );
 	}
+
 }
