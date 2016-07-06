@@ -8,7 +8,7 @@
  * @category    Admin
  * @package     WooCommerce/Admin
  * @version     2.6.0
-*/
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -55,17 +55,17 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 		$this->steps = array(
-			'introduction' => array(
+			'introduction'   => array(
 				'name'    =>  __( 'Introduction', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_introduction' ),
 				'handler' => ''
 			),
-			'pages' => array(
+			'pages'          => array(
 				'name'    =>  __( 'Page Setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' )
 			),
-			'locale' => array(
+			'locale'         => array(
 				'name'    =>  __( 'Store Locale', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
 				'handler' => array( $this, 'wc_setup_locale_save' )
@@ -75,19 +75,19 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
-			'payments' => array(
+			'payments'       => array(
 				'name'    =>  __( 'Payments', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_payments' ),
 				'handler' => array( $this, 'wc_setup_payments_save' ),
 			),
-			'next_steps' => array(
+			'next_steps'     => array(
 				'name'    =>  __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
 				'handler' => ''
 			)
 		);
-		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
-		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
+		$suffix      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
@@ -277,10 +277,10 @@ class WC_Admin_Setup_Wizard {
 	 * Locale settings.
 	 */
 	public function wc_setup_locale() {
-		$user_location  = WC_Geolocation::geolocate_ip();
-		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
-		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
-		$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+		$user_location = WC_Geolocation::geolocate_ip();
+		$country       = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
+		$state         = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
+		$state         = 'US' === $country && '*' === $state ? 'AL' : $state;
 
 		// Defaults
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
@@ -570,21 +570,21 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
-			'paypal-ec' => array(
+			'paypal-ec'        => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
-			'stripe' => array(
+			'stripe'           => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-stripe/" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-first',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
-			'paypal' => array(
+			'paypal'           => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
@@ -598,19 +598,19 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'cheque' => array(
+			'cheque'           => array(
 				'name'        => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			'bacs' => array(
+			'bacs'             => array(
 				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
 				'description' => __( 'An simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			'cod' => array(
+			'cod'              => array(
 				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
 				'description' => __( 'An simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
@@ -778,6 +778,7 @@ class WC_Admin_Setup_Wizard {
 		</div>
 		<?php
 	}
+
 }
 
 new WC_Admin_Setup_Wizard();
