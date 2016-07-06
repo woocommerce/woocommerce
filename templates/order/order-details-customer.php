@@ -74,4 +74,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div><!-- /.col-2 -->
 </div><!-- /.col2-set -->
 
-<?php endif; ?>
+<?php endif;
