@@ -112,7 +112,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * Get product category properties from given term ID.
 	 *
 	 * @since  2.5.0
-	 * @param  int $term_id Category term ID
+	 * @param  int   $term_id Category term ID
 	 * @return array
 	 * @throws WC_CLI_Exception
 	 */
@@ -156,4 +156,5 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	protected function get_default_format_fields() {
 		return 'id,name,slug,parent,description,display,image,count';
 	}
+
 }
