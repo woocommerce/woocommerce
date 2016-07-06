@@ -54,8 +54,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
-	 * @param mixed $term_id
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -127,9 +127,9 @@ class WC_Admin_Taxonomies {
 
 					// Create the media frame.
 					file_frame = wp.media.frames.downloadable_file = wp.media({
-						title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+						title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 						button: {
-							text: '<?php _e( "Use image", "woocommerce" ); ?>'
+							text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 						},
 						multiple: false
 					});
@@ -184,7 +184,6 @@ class WC_Admin_Taxonomies {
 	 * @param mixed $term Term (category) being edited
 	 */
 	public function edit_category_fields( $term ) {
-
 		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
 
@@ -236,9 +235,9 @@ class WC_Admin_Taxonomies {
 
 						// Create the media frame.
 						file_frame = wp.media.frames.downloadable_file = wp.media({
-							title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+							title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 							button: {
-								text: '<?php _e( "Use image", "woocommerce" ); ?>'
+								text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 							},
 							multiple: false
 						});
@@ -273,8 +272,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @param mixed $term_id Term ID being saved
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id  Term ID being saved
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -303,7 +302,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column added to category admin.
 	 *
-	 * @param mixed $columns
+	 * @param  mixed $columns
 	 * @return array
 	 */
 	public function product_cat_columns( $columns ) {
@@ -322,13 +321,12 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column value added to category admin.
 	 *
-	 * @param string $columns
-	 * @param string $column
-	 * @param int $id
+	 * @param  string $columns
+	 * @param  string $column
+	 * @param  int    $id
 	 * @return array
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
-
 		if ( 'thumb' == $column ) {
 
 			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
@@ -357,13 +355,13 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function disable_checked_ontop( $args ) {
-
 		if ( 'product_cat' == $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;
 		}
 
 		return $args;
 	}
+
 }
 
 new WC_Admin_Taxonomies();
