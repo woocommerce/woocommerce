@@ -46,8 +46,8 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	/**
 	 * Prepare a single product shipping class output for response.
 	 *
-	 * @param obj $item Term object.
-	 * @param WP_REST_Request $request
+	 * @param  obj              $item     Term object.
+	 * @param  WP_REST_Request  $request
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -72,9 +72,9 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 		 *
 		 * Allows modification of the term data right before it is returned.
 		 *
-		 * @param WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original term object.
-		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @param WP_REST_Response $response The response object.
+		 * @param object           $item     The original term object.
+		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
@@ -86,17 +86,17 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->taxonomy,
-			'type'                 => 'object',
-			'properties'           => array(
-				'id' => array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => $this->taxonomy,
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'        => array(
 					'description' => __( 'Shipping class name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -104,7 +104,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -120,7 +120,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'count' => array(
+				'count'       => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -131,4 +131,5 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
 }
