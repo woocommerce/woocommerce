@@ -15,14 +15,12 @@ class WC_Helper_Product {
 	 * @todo check for variations, attributes, etc.
 	 */
 	public static function delete_product( $product_id ) {
-
 		/**
 		 * @todo check for variations, attributes, etc.
 		 */
 
 		// Delete the psot
 		wp_delete_post( $product_id, true );
-
 	}
 
 	/**
@@ -33,7 +31,6 @@ class WC_Helper_Product {
 	 * @return WC_Product_Simple
 	 */
 	public static function create_simple_product() {
-
 		// Create the product
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
