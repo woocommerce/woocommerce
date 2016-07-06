@@ -56,4 +56,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @deprecated 2.6.0
 	 */
 	do_action( 'woocommerce_after_my_account' );
-?>
