@@ -99,7 +99,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read taxes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -127,7 +127,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read a tax.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -183,13 +183,13 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Get all taxes.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
 
-		$prepared_args = array();
+		$prepared_args            = array();
 		$prepared_args['exclude'] = $request['exclude'];
 		$prepared_args['include'] = $request['include'];
 		$prepared_args['order']   = $request['order'];
@@ -199,7 +199,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		} else {
 			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
 		}
-		$orderby_possibles = array(
+		$orderby_possibles        = array(
 			'id'    => 'tax_rate_id',
 			'order' => 'tax_rate_order',
 		);
@@ -222,7 +222,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $prepared_args['class'] ) ) {
-			$class = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
+			$class  = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
 			$query .= " AND tax_rate_class = '$class'";
 		}
 
@@ -237,7 +237,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 
 		$taxes = array();
 		foreach ( $results as $tax ) {
-			$data = $this->prepare_item_for_response( $tax, $request );
+			$data    = $this->prepare_item_for_response( $tax, $request );
 			$taxes[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -245,7 +245,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 
 		// Store pagation values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
-		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
 		// Query only for ids.
 		$wpdb->get_results( str_replace( 'SELECT *', 'SELECT tax_rate_id', $query ) );
@@ -278,14 +278,14 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	 * Take tax data from the request and return the updated or newly created rate.
 	 *
 	 * @todo Replace with CRUD in 2.7.0
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @param stdClass|null $current Existing tax object.
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  stdClass|null   $current Existing tax object.
 	 * @return stdClass
 	 */
 	protected function create_or_update_tax( $request, $current = null ) {
-		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );
-		$data        = array();
-		$fields      = array(
+		$id     = absint( isset( $request['id'] ) ? $request['id'] : 0 );
+		$data   = array();
+		$fields = array(
 			'tax_rate_country',
 			'tax_rate_state',
 			'tax_rate',
@@ -348,7 +348,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Create a single tax.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -363,9 +363,9 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a tax is created or updated via the REST API.
 		 *
-		 * @param stdClass        $tax       Data used to create the tax.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @param stdClass        $tax      Data used to create the tax.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating tax, false when updating tax.
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, true );
 
@@ -381,7 +381,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Get a single tax.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -401,7 +401,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Update a single tax.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -419,9 +419,9 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a tax is created or updated via the REST API.
 		 *
-		 * @param stdClass        $tax       Data used to create the tax.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @param stdClass        $tax      Data used to create the tax.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating tax, false when updating tax.
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, false );
 
@@ -435,7 +435,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Delete a single tax.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
@@ -479,8 +479,8 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single tax output for response.
 	 *
-	 * @param stdClass $tax Tax object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param  stdClass         $tax      Tax object.
+	 * @param  WP_REST_Request  $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $tax, $request ) {
@@ -537,12 +537,12 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param stdClass $tax Tax object.
-	 * @return array Links for the given tax.
+	 * @param  stdClass $tax Tax object.
+	 * @return array         Links for the given tax.
 	 */
 	protected function prepare_links( $tax ) {
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $tax->tax_rate_id ) ),
 			),
 			'collection' => array(
@@ -564,18 +564,18 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 			'title'      => 'tax',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'       => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'country' => array(
+				'country'  => array(
 					'description' => __( 'Country ISO 3166 code.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'state' => array(
+				'state'    => array(
 					'description' => __( 'State code.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -585,17 +585,17 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'city' => array(
+				'city'     => array(
 					'description' => __( 'City name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'rate' => array(
+				'rate'     => array(
 					'description' => __( 'Tax rate.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'name' => array(
+				'name'     => array(
 					'description' => __( 'Tax rate name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -618,12 +618,12 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'order' => array(
+				'order'    => array(
 					'description' => __( 'Indicates the order that will appear in queries.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'class' => array(
+				'class'    => array(
 					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'standard',
@@ -647,50 +647,51 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-			'type'               => 'integer',
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['offset']  = array(
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order'] = array(
-			'default'            => 'asc',
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'enum'               => array( 'asc', 'desc' ),
-			'sanitize_callback'  => 'sanitize_key',
-			'type'               => 'string',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['order']   = array(
+			'default'           => 'asc',
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'enum'              => array( 'asc', 'desc' ),
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'default'            => 'order',
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'enum'               => array(
+			'default'           => 'order',
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'enum'              => array(
 				'id',
 				'order',
 			),
-			'sanitize_callback'  => 'sanitize_key',
-			'type'               => 'string',
-			'validate_callback'  => 'rest_validate_request_arg',
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['class'] = array(
-			'description'        => __( 'Sort by tax class.', 'woocommerce' ),
-			'enum'               => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
-			'sanitize_callback'  => 'sanitize_title',
-			'type'               => 'string',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['class']   = array(
+			'description'       => __( 'Sort by tax class.', 'woocommerce' ),
+			'enum'              => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
+			'sanitize_callback' => 'sanitize_title',
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
 	}
+
 }
