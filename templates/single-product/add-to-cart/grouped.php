@@ -39,7 +39,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						continue;
 					}
 
-					$post    = $product->post;
+					$post = $product->post;
 					setup_postdata( $post );
 					?>
 					<tr>
@@ -51,7 +51,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 									$quantites_required = true;
 									woocommerce_quantity_input( array(
 										'input_name'  => 'quantity[' . $product_id . ']',
-										'input_value' => ( isset( $_POST['quantity'][$product_id] ) ? wc_stock_amount( $_POST['quantity'][$product_id] ) : 0 ),
+										'input_value' => ( isset( $_POST['quantity'][ $product_id ] ) ? wc_stock_amount( $_POST['quantity'][ $product_id ] ) : 0 ),
 										'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
 										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
 									) );
@@ -65,7 +65,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							</label>
 						</td>
 
-						<?php do_action ( 'woocommerce_grouped_product_list_before_price', $product ); ?>
+						<?php do_action( 'woocommerce_grouped_product_list_before_price', $product ); ?>
 
 						<td class="price">
 							<?php
@@ -102,4 +102,4 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 	<?php endif; ?>
 </form>
 
-<?php do_action( 'woocommerce_after_add_to_cart_form' ); ?>
+<?php do_action( 'woocommerce_after_add_to_cart_form' );
