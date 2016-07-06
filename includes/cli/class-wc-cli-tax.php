@@ -600,7 +600,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 
 		// Filter by tax class
 		if ( ! empty( $args['class'] ) ) {
-			$class = 'standard' !== $args['class'] ? sanitize_title( $args['class'] ) : '';
+			$class  = 'standard' !== $args['class'] ? sanitize_title( $args['class'] ) : '';
 			$query .= " AND tax_rate_class = '$class'";
 		}
 
@@ -631,7 +631,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $taxes Array of tax rate.
-	 * @return array Items
+	 * @return array        Items
 	 */
 	protected function format_taxes_to_items( $taxes ) {
 		global $wpdb;
@@ -682,4 +682,5 @@ class WC_CLI_Tax extends WC_CLI_Command {
 
 		return $items;
 	}
+
 }
