@@ -46,11 +46,11 @@ class WC_Gateway_Paypal_Refund {
 
 	/**
 	 * Refund an order via PayPal.
-	 * @param  WC_Order $order
-	 * @param  float    $amount
-	 * @param  string   $reason
-	 * @param  bool     $sandbox
-	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
+	 * @param  WC_Order       $order
+	 * @param  float          $amount
+	 * @param  string         $reason
+	 * @param  bool           $sandbox
+	 * @return array|wp_error          The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
 		$response = wp_safe_remote_post(
@@ -78,4 +78,5 @@ class WC_Gateway_Paypal_Refund {
 
 		return $response_array;
 	}
+
 }
