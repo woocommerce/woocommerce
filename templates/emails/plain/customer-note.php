@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo "= " . $email_heading . " =\n\n";
+echo '= ' . $email_heading . " =\n\n";
 
-echo __( "Hello, a note has just been added to your order:", 'woocommerce' ) . "\n\n";
+echo __( 'Hello, a note has just been added to your order:', 'woocommerce' ) . "\n\n";
 
 echo "----------\n\n";
 
@@ -30,7 +30,7 @@ echo wptexturize( $customer_note ) . "\n\n";
 
 echo "----------\n\n";
 
-echo __( "For your reference, your order details are shown below.", 'woocommerce' ) . "\n\n";
+echo __( 'For your reference, your order details are shown below.', 'woocommerce' ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
