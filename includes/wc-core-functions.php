@@ -53,9 +53,9 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
- * @param  array $args
+ * @param  array             $args
  *
- * @return WC_Order|WP_Error WC_Order on success, WP_Error on failure.
+ * @return WC_Order|WP_Error       WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -89,7 +89,7 @@ function wc_create_order( $args = array() ) {
 		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
 			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
 		}
-		$order_data['post_status']  = 'wc-' . $args['status'];
+		$order_data['post_status'] = 'wc-' . $args['status'];
 	}
 
 	if ( ! is_null( $args['customer_note'] ) ) {
@@ -129,8 +129,8 @@ function wc_create_order( $args = array() ) {
 /**
  * Update an order. Uses wc_create_order.
  *
- * @param  array $args
- * @return string | WC_Order
+ * @param  array  $args
+ * @return string       | WC_Order
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
@@ -145,7 +145,7 @@ function wc_update_order( $args ) {
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
  *
  * @access public
- * @param mixed $slug
+ * @param mixed  $slug
  * @param string $name (default: '')
  */
 function wc_get_template_part( $slug, $name = '' ) {
@@ -179,9 +179,9 @@ function wc_get_template_part( $slug, $name = '' ) {
  *
  * @access public
  * @param string $template_name
- * @param array $args (default: array())
+ * @param array  $args          (default: array())
  * @param string $template_path (default: '')
- * @param string $default_path (default: '')
+ * @param string $default_path  (default: '')
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	if ( ! empty( $args ) && is_array( $args ) ) {
@@ -227,9 +227,9 @@ function wc_get_template_html( $template_name, $args = array(), $template_path =
  *		$default_path	/	$template_name
  *
  * @access public
- * @param string $template_name
- * @param string $template_path (default: '')
- * @param string $default_path (default: '')
+ * @param  string $template_name
+ * @param  string $template_path (default: '')
+ * @param  string $default_path  (default: '')
  * @return string
  */
 function wc_locate_template( $template_name, $template_path = '', $default_path = '' ) {
@@ -264,7 +264,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @return string
  */
 function get_woocommerce_currency() {
-	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
 /**
@@ -444,7 +444,7 @@ function get_woocommerce_currencies() {
 /**
  * Get Currency symbol.
  *
- * @param string $currency (default: '')
+ * @param  string $currency (default: '')
  * @return string
  */
 function get_woocommerce_currency_symbol( $currency = '' ) {
@@ -625,13 +625,13 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 /**
  * Send HTML emails from WooCommerce.
  *
- * @param mixed $to
- * @param mixed $subject
- * @param mixed $message
- * @param string $headers (default: "Content-Type: text/html\r\n")
+ * @param mixed  $to
+ * @param mixed  $subject
+ * @param mixed  $message
+ * @param string $headers     (default: "Content-Type: text/html\r\n")
  * @param string $attachments (default: "")
  */
-function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
+function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = '' ) {
 	$mailer = WC()->mailer();
 
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
@@ -642,7 +642,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  *
  * Variable is filtered by woocommerce_get_image_size_{image_size}.
  *
- * @param mixed $image_size
+ * @param  mixed $image_size
  * @return array
  */
 function wc_get_image_size( $image_size ) {
@@ -720,10 +720,10 @@ function wc_print_js() {
 /**
  * Set a cookie - wrapper for setcookie using WP constants.
  *
- * @param  string  $name   Name of the cookie being set.
- * @param  string  $value  Value of the cookie.
- * @param  integer $expire Expiry of the cookie.
- * @param  string  $secure Whether the cookie should be served only over https.
+ * @param string  $name   Name of the cookie being set.
+ * @param string  $value  Value of the cookie.
+ * @param integer $expire Expiry of the cookie.
+ * @param string  $secure Whether the cookie should be served only over https.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
@@ -738,11 +738,11 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  * Get the URL to the WooCommerce REST API.
  *
  * @since 2.1
- * @param string $path an endpoint to include in the URL.
- * @return string the URL.
+ * @param  string $path an endpoint to include in the URL.
+ * @return string       the URL.
  */
 function get_woocommerce_api_url( $path ) {
-	$version  = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
+	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
@@ -757,8 +757,8 @@ function get_woocommerce_api_url( $path ) {
  * Get a log file path.
  *
  * @since 2.2
- * @param string $handle name.
- * @return string the log file path.
+ * @param  string $handle name.
+ * @return string         the log file path.
  */
 function wc_get_log_file_path( $handle ) {
 	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
@@ -780,7 +780,7 @@ add_action( 'init', 'wc_fix_rewrite_rules_init' );
  * Various rewrite rule fixes.
  *
  * @since 2.2
- * @param array $rules
+ * @param  array $rules
  * @return array
  */
 function wc_fix_rewrite_rules( $rules ) {
@@ -790,7 +790,7 @@ function wc_fix_rewrite_rules( $rules ) {
 	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
 	// Fix the rewrite rules when the product permalink have %product_cat% flag.
-	if ( preg_match( '`/(.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
+	if ( preg_match( '`/(.+)(/%product_cat%)`', $product_permalink, $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
 
 			if ( preg_match( '`^' . preg_quote( $matches[1], '`' ) . '/\(`', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
@@ -813,7 +813,7 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * Prevent product attachment links from breaking when using complex rewrite structures.
  *
  * @param  string $link
- * @param  id $post_id
+ * @param  id     $post_id
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
@@ -823,7 +823,7 @@ function wc_fix_product_attachment_link( $link, $post_id ) {
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
 		$permalinks        = get_option( 'woocommerce_permalinks' );
 		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $product_permalink, $matches ) ) {
 			$link = home_url( '/?attachment_id=' . $post->ID );
 		}
 	}
@@ -834,7 +834,7 @@ add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
 /**
  * Protect downloads from ms-files.php in multisite.
  *
- * @param mixed $rewrite
+ * @param  mixed  $rewrite
  * @return string
  */
 function wc_ms_protect_download_rewite_rules( $rewrite ) {
@@ -868,11 +868,10 @@ function wc_get_core_supported_themes() {
  * hook, see WC_Webhook::process().
  *
  * @since 2.2
- * @param int $webhook_id webhook ID to deliver.
- * @param mixed $arg hook argument.
+ * @param int   $webhook_id webhook ID to deliver.
+ * @param mixed $arg        hook argument.
  */
 function wc_deliver_webhook_async( $webhook_id, $arg ) {
-
 	$webhook = new WC_Webhook( $webhook_id );
 
 	$webhook->deliver( $arg );
@@ -977,9 +976,9 @@ if ( ! function_exists( 'hash_equals' ) ) :
 	 *
 	 * @since 3.9.2
 	 *
-	 * @param string $a Expected string.
-	 * @param string $b Actual string.
-	 * @return bool Whether strings are equal.
+	 * @param  string $a Expected string.
+	 * @param  string $b Actual string.
+	 * @return bool      Whether strings are equal.
 	 */
 	function hash_equals( $a, $b ) {
 		$a_length = strlen( $a );
@@ -995,6 +994,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 
 		return $result === 0;
 	}
+
 endif;
 
 /**
@@ -1025,7 +1025,7 @@ function wc_api_hash( $data ) {
 /**
  * Find all possible combinations of values from the input array and return in a logical order.
  * @since 2.5.0
- * @param array $input
+ * @param  array $input
  * @return array
  */
 function wc_array_cartesian( $input ) {
@@ -1163,12 +1163,13 @@ if ( ! function_exists( 'wc_get_shipping_zone' ) ) {
 	 *
 	 * @since  2.6.0
 	 * @uses   WC_Shipping_Zones::get_zone_matching_package
-	 * @param  array $package
+	 * @param  array            $package
 	 * @return WC_Shipping_Zone
 	 */
 	function wc_get_shipping_zone( $package ) {
 		return WC_Shipping_Zones::get_zone_matching_package( $package );
 	}
+
 }
 
 /**
@@ -1228,8 +1229,8 @@ function wc_help_tip( $tip, $allow_html = false ) {
 /**
  * Return a list of potential postcodes for wildcard searching.
  * @since 2.6.0
- * @param  string $postcode
- * @param  string $country to format postcode for matching.
+ * @param  string   $postcode
+ * @param  string   $country  to format postcode for matching.
  * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
@@ -1249,12 +1250,12 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
  * Used by shipping zones and taxes to compare a given $postcode to stored
  * postcodes to find matches for numerical ranges, and wildcards.
  * @since 2.6.0
- * @param string $postcode Postcode you want to match against stored postcodes
- * @param array  $objects Array of postcode objects from Database
- * @param string $object_id_key DB column name for the ID.
- * @param string $object_compare_key DB column name for the value.
- * @param string $country Country from which this postcode belongs. Allows for formatting.
- * @return array Array of matching object ID and matching values.
+ * @param  string $postcode           Postcode you want to match against stored postcodes
+ * @param  array  $objects            Array of postcode objects from Database
+ * @param  string $object_id_key      DB column name for the ID.
+ * @param  string $object_compare_key DB column name for the value.
+ * @param  string $country            Country from which this postcode belongs. Allows for formatting.
+ * @return array                      Array of matching object ID and matching values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key, $country = '' ) {
 	$postcode           = wc_normalize_postcode( $postcode );
