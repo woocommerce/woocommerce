@@ -38,31 +38,31 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_id          = 'woocommerce_product_categories';
 		$this->widget_name        = __( 'WooCommerce Product Categories', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title'              => array(
 				'type'  => 'text',
 				'std'   => __( 'Product Categories', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
 			),
-			'orderby' => array(
-				'type'  => 'select',
-				'std'   => 'name',
-				'label' => __( 'Order by', 'woocommerce' ),
+			'orderby'            => array(
+				'type'    => 'select',
+				'std'     => 'name',
+				'label'   => __( 'Order by', 'woocommerce' ),
 				'options' => array(
 					'order' => __( 'Category Order', 'woocommerce' ),
 					'name'  => __( 'Name', 'woocommerce' )
 				)
 			),
-			'dropdown' => array(
+			'dropdown'           => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Show as dropdown', 'woocommerce' )
 			),
-			'count' => array(
+			'count'              => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Show product counts', 'woocommerce' )
 			),
-			'hierarchical' => array(
+			'hierarchical'       => array(
 				'type'  => 'checkbox',
 				'std'   => 1,
 				'label' => __( 'Show hierarchy', 'woocommerce' )
@@ -72,7 +72,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'std'   => 0,
 				'label' => __( 'Only show children of the current category', 'woocommerce' )
 			),
-			'hide_empty' => array(
+			'hide_empty'         => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Hide empty categories', 'woocommerce' )
@@ -107,7 +107,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		if ( $orderby == 'order' ) {
 			$list_args['menu_order'] = 'asc';
 		} else {
-			$list_args['orderby']    = 'title';
+			$list_args['orderby'] = 'title';
 		}
 
 		// Setup Current Category
@@ -156,7 +156,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			);
 
 			// Gather siblings of ancestors
-			$siblings  = array();
+			$siblings = array();
 			if ( $this->cat_ancestors ) {
 				foreach ( $this->cat_ancestors as $ancestor ) {
 					$ancestor_siblings = get_terms(
@@ -168,7 +168,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 							'hide_empty'   => false
 						)
 					);
-					$siblings = array_merge( $siblings, $ancestor_siblings );
+					$siblings          = array_merge( $siblings, $ancestor_siblings );
 				}
 			}
 
@@ -205,7 +205,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'orderby'            => $orderby,
 				'selected'           => $this->current_cat ? $this->current_cat->slug : ''
 			);
-			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
+			$dropdown_args     = wp_parse_args( $dropdown_args, $dropdown_defaults );
 
 			// Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258
 			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
@@ -233,7 +233,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$list_args['walker']                     = new WC_Product_Cat_List_Walker;
 			$list_args['title_li']                   = '';
 			$list_args['pad_counts']                 = 1;
-			$list_args['show_option_none']           = __('No product categories exist.', 'woocommerce' );
+			$list_args['show_option_none']           = __( 'No product categories exist.', 'woocommerce' );
 			$list_args['current_category']           = ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$list_args['current_category_ancestors'] = $this->cat_ancestors;
 
@@ -246,4 +246,5 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		$this->widget_end( $args );
 	}
+
 }
