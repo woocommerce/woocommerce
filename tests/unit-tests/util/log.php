@@ -37,4 +37,5 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '', $this->read_content( 'unit-tests' ) );
 	}
+
 }
