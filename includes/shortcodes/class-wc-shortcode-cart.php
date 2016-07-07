@@ -79,4 +79,5 @@ class WC_Shortcode_Cart {
 			wc_get_template( 'cart/cart.php' );
 		}
 	}
+
 }

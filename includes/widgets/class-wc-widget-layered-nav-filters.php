@@ -24,7 +24,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		$this->widget_id          = 'woocommerce_layered_nav_filters';
 		$this->widget_name        = __( 'WooCommerce Layered Nav Filters', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title' => array(
 				'type'  => 'text',
 				'std'   => __( 'Active Filters', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
@@ -69,7 +69,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 						$filter_name    = 'filter_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) );
 						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( $_GET[ $filter_name ] ) ) : array();
 						$current_filter = array_map( 'sanitize_title', $current_filter );
-						$new_filter      = array_diff( $current_filter, array( $term_slug ) );
+						$new_filter     = array_diff( $current_filter, array( $term_slug ) );
 
 						$link = remove_query_arg( array( 'add-to-cart', $filter_name ) );
 
@@ -102,4 +102,5 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			$this->widget_end( $args );
 		}
 	}
+
 }

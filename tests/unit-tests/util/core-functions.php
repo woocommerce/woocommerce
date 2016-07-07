@@ -13,7 +13,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_currency() {
-
 		$this->assertEquals( 'GBP', get_woocommerce_currency() );
 	}
 
@@ -23,7 +22,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_currencies() {
-
 		$expected_currencies = array(
 			'AED' => __( 'United Arab Emirates dirham', 'woocommerce' ),
 			'AFN' => __( 'Afghan afghani', 'woocommerce' ),
@@ -196,7 +194,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_currency_symbol() {
-
 		// default currency
 		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol() );
 
@@ -215,7 +212,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_api_url() {
-
 		$base_uri = get_home_url();
 
 		// base uri
@@ -243,7 +239,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_core_supported_themes() {
-
 		$expected_themes = array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
@@ -285,4 +280,5 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// With legacy methods.
 		$this->assertEquals( 0, wc_get_shipping_method_count( true ) );
 	}
+
 }

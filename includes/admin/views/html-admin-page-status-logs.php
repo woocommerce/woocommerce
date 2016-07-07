@@ -11,13 +11,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php if ( $logs ) : ?>
 	<div id="log-viewer-select">
 		<div class="alignleft">
-			<h2><?php printf( __( 'Log file: %s (%s)', 'woocommerce' ), esc_html( $viewed_log ), date_i18n( get_option( 'date_format') . ' ' . get_option( 'time_format'), filemtime( WC_LOG_DIR . $viewed_log ) ) ); ?></h2>
+			<h2><?php printf( __( 'Log file: %s (%s)', 'woocommerce' ), esc_html( $viewed_log ), date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $viewed_log ) ) ); ?></h2>
 		</div>
 		<div class="alignright">
 			<form action="<?php echo admin_url( 'admin.php?page=wc-status&tab=logs' ); ?>" method="post">
 				<select name="log_file">
 					<?php foreach ( $logs as $log_key => $log_file ) : ?>
-						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo date_i18n( get_option( 'date_format') . ' ' . get_option( 'time_format'), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
+						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
 					<?php endforeach; ?>
 				</select>
 				<input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
@@ -30,4 +30,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 <?php else : ?>
 	<div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
-<?php endif; ?>
+<?php endif;

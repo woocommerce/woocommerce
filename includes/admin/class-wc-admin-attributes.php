@@ -90,8 +90,8 @@ class WC_Admin_Attributes {
 
 	/**
 	 * See if an attribute name is valid.
-	 * @param  string $attribute_name
-	 * @return bool|WP_error result
+	 * @param  string        $attribute_name
+	 * @return bool|WP_error                 result
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
 		if ( strlen( $attribute_name ) >= 28 ) {
@@ -248,12 +248,12 @@ class WC_Admin_Attributes {
 
 		$edit = absint( $_GET['edit'] );
 
-		$attribute_to_edit = $wpdb->get_row( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'" );
+		$attribute_to_edit = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'" );
 
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
+			<h1><?php _e( 'Edit Attribute', 'woocommerce' ); ?></h1>
 
 			<?php
 
@@ -427,7 +427,7 @@ class WC_Admin_Attributes {
 											</tr><?php
 										endforeach;
 									else :
-										?><tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ) ?></td></tr><?php
+										?><tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ); ?></td></tr><?php
 									endif;
 								?>
 							</tbody>
@@ -500,7 +500,7 @@ class WC_Admin_Attributes {
 			/* <![CDATA[ */
 
 				jQuery( 'a.delete' ).click( function() {
-					if ( window.confirm( '<?php _e( "Are you sure you want to delete this attribute?", "woocommerce" ); ?>' ) ) {
+					if ( window.confirm( '<?php _e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>' ) ) {
 						return true;
 					}
 					return false;
@@ -511,4 +511,5 @@ class WC_Admin_Attributes {
 		</div>
 		<?php
 	}
+
 }

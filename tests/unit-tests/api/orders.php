@@ -24,5 +24,4 @@ class WC_Tests_API_Orders extends WC_API_Unit_Test_Case {
 		$this->assertSame( ( $product->id + 2 ), $variation_id );
 	}
 
-
 }

@@ -20,11 +20,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                    = 'flat_rate';
-		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Flat Rate', 'woocommerce' );
-		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
-		$this->supports              = array(
+		$this->id                 = 'flat_rate';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Flat Rate', 'woocommerce' );
+		$this->method_description = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
+		$this->supports           = array(
 			'shipping-zones',
 			'instance-settings',
 			'instance-settings-modal',
@@ -92,7 +92,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Work out fee (shortcode).
-	 * @param  array $atts
+	 * @param  array  $atts
 	 * @return string
 	 */
 	public function fee( $atts ) {
@@ -219,7 +219,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Finds and returns shipping classes and the products with said class.
-	 * @param mixed $package
+	 * @param  mixed $package
 	 * @return array
 	 */
 	public function find_shipping_classes( $package ) {
@@ -239,4 +239,5 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		return $found_shipping_classes;
 	}
+
 }

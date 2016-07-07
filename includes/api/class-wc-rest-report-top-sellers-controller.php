@@ -39,7 +39,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 	/**
 	 * Get sales reports.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request $request
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
@@ -52,14 +52,14 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 		$this->setup_report( $filter );
 
 		$report_data = $this->report->get_order_report_data( array(
-			'data' => array(
+			'data'         => array(
 				'_product_id' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
 					'name'            => 'product_id',
 				),
-				'_qty' => array(
+				'_qty'        => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
@@ -80,7 +80,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 
 			if ( $product ) {
 				$top_sellers[] = array(
-					'name'      => $product->get_title(),
+					'name'       => $product->get_title(),
 					'product_id' => (int) $item->product_id,
 					'quantity'   => wc_stock_amount( $item->order_item_qty ),
 				);
@@ -99,9 +99,9 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @param stdClass $top_seller
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @param  stdClass         $top_seller
+	 * @param  WP_REST_Request  $request    Request object.
+	 * @return WP_REST_Response $response   Response data.
 	 */
 	public function prepare_item_for_response( $top_seller, $request ) {
 		$data = array(
@@ -117,7 +117,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 		$response->add_links( array(
-			'about' => array(
+			'about'   => array(
 				'href' => rest_url( sprintf( '%s/reports', $this->namespace ) ),
 			),
 			'product' => array(
@@ -148,7 +148,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 			'title'      => 'top_sellers_report',
 			'type'       => 'object',
 			'properties' => array(
-				'name' => array(
+				'name'       => array(
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -160,7 +160,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'quantity' => array(
+				'quantity'   => array(
 					'description' => __( 'Total number of purchases.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
@@ -171,4 +171,5 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
 }

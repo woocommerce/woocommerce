@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><strong><?php _e( 'Duration', 'woocommerce' ); ?>: </strong><?php echo esc_html( $log['duration'] ); ?></p>
 		<p><strong><?php _e( 'Headers', 'woocommerce' ); ?>:</strong></p>
 		<ul>
-			<?php foreach ( ( array ) $log['request_headers'] as $key => $value ) : ?>
+			<?php foreach ( (array) $log['request_headers'] as $key => $value ) : ?>
 				<li><strong><em><?php echo strtolower( esc_html( $key ) ); ?>: </em></strong><code><?php echo esc_html( $value ); ?></code></li>
-			<?php endforeach ?>
+			<?php endforeach; ?>
 		</ul>
 		<p><strong><?php _e( 'Content', 'woocommerce' ); ?>: </strong></p>
 		<pre><code><?php echo esc_html( $log['request_body'] ); ?></code></pre>
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<ul>
 			<?php foreach ( (array) $log['response_headers'] as $key => $value ) : ?>
 				<li><strong><em><?php echo strtolower( esc_html( $key ) ); ?>: </em></strong><code><?php echo esc_html( $value ); ?></code></li>
-			<?php endforeach ?>
+			<?php endforeach; ?>
 		</ul>
 		<?php if ( ! empty( $log['response_body'] ) ) : ?>
 			<h4><?php _e( 'Content', 'woocommerce' ); ?>:</h4>

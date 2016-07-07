@@ -23,7 +23,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'products';
 		$this->label = __( 'Products', 'woocommerce' );
 
@@ -39,12 +38,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
-
 		$sections = array(
-			''          	=> __( 'General', 'woocommerce' ),
-			'display'       => __( 'Display', 'woocommerce' ),
-			'inventory' 	=> __( 'Inventory', 'woocommerce' ),
-			'downloadable' 	=> __( 'Downloadable Products', 'woocommerce' ),
+			''             => __( 'General', 'woocommerce' ),
+			'display'      => __( 'Display', 'woocommerce' ),
+			'inventory'    => __( 'Inventory', 'woocommerce' ),
+			'downloadable' => __( 'Downloadable Products', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -83,9 +81,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title' => __( 'Shop & Product Pages', 'woocommerce' ),
-					'type' 	=> 'title',
-					'desc' 	=> '',
-					'id' 	=> 'catalog_options'
+					'type'  => 'title',
+					'desc'  => '',
+					'id'    => 'catalog_options'
 				),
 
 				array(
@@ -168,15 +166,15 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'catalog_options'
+					'type' => 'sectionend',
+					'id'   => 'catalog_options'
 				),
 
 				array(
 					'title' => __( 'Product Images', 'woocommerce' ),
-					'type' 	=> 'title',
-					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
-					'id' 	=> 'image_options'
+					'type'  => 'title',
+					'desc'  => sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
+					'id'    => 'image_options'
 				),
 
 				array(
@@ -222,29 +220,29 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Product Image Gallery', 'woocommerce' ),
-					'desc'          => __( 'Enable Lightbox for product images', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_lightbox',
-					'default'       => 'yes',
-					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
-					'type'          => 'checkbox'
+					'title'    => __( 'Product Image Gallery', 'woocommerce' ),
+					'desc'     => __( 'Enable Lightbox for product images', 'woocommerce' ),
+					'id'       => 'woocommerce_enable_lightbox',
+					'default'  => 'yes',
+					'desc_tip' => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
+					'type'     => 'checkbox'
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'image_options'
+					'type' => 'sectionend',
+					'id'   => 'image_options'
 				)
 
-			));
+			) );
 		} elseif ( 'inventory' == $current_section ) {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
 				array(
 					'title' => __( 'Inventory', 'woocommerce' ),
-					'type' 	=> 'title',
-					'desc' 	=> '',
-					'id' 	=> 'product_inventory_options'
+					'type'  => 'title',
+					'desc'  => '',
+					'id'    => 'product_inventory_options'
 				),
 
 				array(
@@ -327,11 +325,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Out Of Stock Visibility', 'woocommerce' ),
-					'desc'     => __( 'Hide out of stock items from the catalog', 'woocommerce' ),
-					'id'       => 'woocommerce_hide_out_of_stock_items',
-					'default'  => 'no',
-					'type'     => 'checkbox'
+					'title'   => __( 'Out Of Stock Visibility', 'woocommerce' ),
+					'desc'    => __( 'Hide out of stock items from the catalog', 'woocommerce' ),
+					'id'      => 'woocommerce_hide_out_of_stock_items',
+					'default' => 'no',
+					'type'    => 'checkbox'
 				),
 
 				array(
@@ -351,18 +349,18 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'product_inventory_options'
+					'type' => 'sectionend',
+					'id'   => 'product_inventory_options'
 				),
 
-			));
+			) );
 
 		} elseif ( 'downloadable' == $current_section ) {
 			$settings = apply_filters( 'woocommerce_downloadable_products_settings', array(
 				array(
 					'title' => __( 'Downloadable Products', 'woocommerce' ),
-					'type' 	=> 'title',
-					'id' 	=> 'digital_download_options'
+					'type'  => 'title',
+					'id'    => 'digital_download_options'
 				),
 
 				array(
@@ -404,18 +402,18 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'digital_download_options'
+					'type' => 'sectionend',
+					'id'   => 'digital_download_options'
 				),
 
-			));
+			) );
 
 		} else {
 			$settings = apply_filters( 'woocommerce_products_general_settings', array(
 				array(
-					'title' 	=> __( 'Measurements', 'woocommerce' ),
-					'type' 		=> 'title',
-					'id' 		=> 'product_measurement_options'
+					'title' => __( 'Measurements', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'product_measurement_options'
 				),
 
 				array(
@@ -454,15 +452,15 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'product_measurement_options',
+					'type' => 'sectionend',
+					'id'   => 'product_measurement_options',
 				),
 
 				array(
 					'title' => __( 'Reviews', 'woocommerce' ),
-					'type' 	=> 'title',
-					'desc' 	=> '',
-					'id' 	=> 'product_rating_options',
+					'type'  => 'title',
+					'desc'  => '',
+					'id'    => 'product_rating_options',
 				),
 
 				array(
@@ -506,15 +504,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'type' 	=> 'sectionend',
-					'id' 	=> 'product_rating_options'
+					'type' => 'sectionend',
+					'id'   => 'product_rating_options'
 				),
 
-			));
+			) );
 		}
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
+
 }
 
 endif;

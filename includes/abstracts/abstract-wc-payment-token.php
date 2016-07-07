@@ -16,18 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Abstract Class
  * @author		WooThemes
  */
- abstract class WC_Payment_Token extends WC_Data {
+	abstract class WC_Payment_Token extends WC_Data {
 
 	/**
 	 * Token Data (stored in the payment_tokens table).
 	 * @var array
 	 */
 	protected $_data = array(
-		 'id'         => 0,
-		 'gateway_id' => '',
-		 'token'      => '',
-		 'is_default' => 0,
-		 'user_id'    => 0,
+		'id'         => 0,
+		'gateway_id' => '',
+		'token'      => '',
+		'is_default' => 0,
+		'user_id'    => 0,
 	);
 
 	/**
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 */
 	protected $_meta_type = 'payment_token';
 
-	 /**
+	/**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:
@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	public function __construct( $token = '' ) {
 		if ( is_numeric( $token ) ) {
 			$this->read( $token );
-		} else if ( is_object( $token ) ) {
+		} elseif ( is_object( $token ) ) {
 			$token_id = $token->get_id();
 			if ( ! empty( $token_id ) ) {
 				$this->read( $token->get_id() );
@@ -181,15 +181,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	/**
 	 * Get a token from the database.
 	 * @since 2.6.0
-	 * @param  int $token_id Token ID
+	 * @param int $token_id Token ID
 	 */
 	public function read( $token_id ) {
 		global $wpdb;
 		if ( $token = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d LIMIT 1;", $token_id ) ) ) {
 			$token_id = $token->token_id;
-			$token = (array) $token;
+			$token    = (array) $token;
 			unset( $token['token_id'] );
-			$this->_data = $token;
+			$this->_data       = $token;
 			$this->_data['id'] = $token_id;
 			$this->read_meta_data();
 		}

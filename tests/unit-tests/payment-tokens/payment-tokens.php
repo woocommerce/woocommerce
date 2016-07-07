@@ -24,7 +24,6 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		update_post_meta( $order->id, '_payment_tokens', array( $token->get_id() ) );
 
 		$this->assertCount( 1, WC_Payment_Tokens::get_order_tokens( $order->id ) );
-
 	}
 
 	/**
@@ -119,8 +118,8 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get() {
-		$token = WC_Helper_Payment_Token::create_cc_token();
-		$token_id = $token->get_id();
+		$token     = WC_Helper_Payment_Token::create_cc_token();
+		$token_id  = $token->get_id();
 		$get_token = WC_Payment_Tokens::get( $token_id );
 		$this->assertEquals( $token->get_token(), $get_token->get_token() );
 	}
@@ -130,7 +129,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_delete() {
-		$token = WC_Helper_Payment_Token::create_cc_token();
+		$token    = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
 
 		WC_Payment_Tokens::delete( $token_id );
@@ -144,7 +143,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_type_by_id() {
-		$token = WC_Helper_Payment_Token::create_cc_token();
+		$token    = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
 		$this->assertEquals( 'CC', WC_Payment_Tokens::get_token_type_by_id( $token_id ) );
 	}
@@ -154,11 +153,11 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_set_users_default() {
-		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token    = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token_id = $token->get_id();
 		$token->save();
 
-		$token2 = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token2     = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token_id_2 = $token2->get_id();
 		$token2->save();
 

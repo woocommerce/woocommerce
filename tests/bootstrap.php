@@ -24,8 +24,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-
-		ini_set( 'display_errors','on' );
+		ini_set( 'display_errors', 'on' );
 		error_reporting( E_ALL );
 
 		// Ensure server variable is set for WP email functions.
@@ -68,7 +67,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function install_wc() {
-
 		// clean existing install first
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
@@ -79,7 +77,7 @@ class WC_Unit_Tests_Bootstrap {
 		// reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
 		$GLOBALS['wp_roles']->reinit();
 
-		echo "Installing WooCommerce..." . PHP_EOL;
+		echo 'Installing WooCommerce...' . PHP_EOL;
 	}
 
 	/**
@@ -88,7 +86,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function includes() {
-
 		// factories
 		require_once( $this->tests_dir . '/framework/factories/class-wc-unit-test-factory-for-webhook.php' );
 		require_once( $this->tests_dir . '/framework/factories/class-wc-unit-test-factory-for-webhook-delivery.php' );

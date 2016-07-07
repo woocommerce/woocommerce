@@ -25,8 +25,8 @@ global $post, $product, $woocommerce;
 $attachment_ids = $product->get_gallery_attachment_ids();
 
 if ( $attachment_ids ) {
-	$loop 		= 0;
-	$columns 	= apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
+	$loop    = 0;
+	$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
 	?>
 	<div class="thumbnails <?php echo 'columns-' . $columns; ?>"><?php
 
@@ -34,23 +34,26 @@ if ( $attachment_ids ) {
 
 			$classes = array( 'zoom' );
 
-			if ( $loop === 0 || $loop % $columns === 0 )
+			if ( $loop === 0 || $loop % $columns === 0 ) {
 				$classes[] = 'first';
+			}
 
-			if ( ( $loop + 1 ) % $columns === 0 )
+			if ( ( $loop + 1 ) % $columns === 0 ) {
 				$classes[] = 'last';
+			}
 
 			$image_link = wp_get_attachment_url( $attachment_id );
 
-			if ( ! $image_link )
+			if ( ! $image_link ) {
 				continue;
+			}
 
-			$image_title 	= esc_attr( get_the_title( $attachment_id ) );
-			$image_caption 	= esc_attr( get_post_field( 'post_excerpt', $attachment_id ) );
+			$image_title   = esc_attr( get_the_title( $attachment_id ) );
+			$image_caption = esc_attr( get_post_field( 'post_excerpt', $attachment_id ) );
 
-			$image       = wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $attr = array(
-				'title'	=> $image_title,
-				'alt'	=> $image_title
+			$image = wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $attr = array(
+				'title' => $image_title,
+				'alt'   => $image_title
 				) );
 
 			$image_class = esc_attr( implode( ' ', $classes ) );

@@ -43,4 +43,5 @@ class WC_CLI_Exception extends Exception {
 	public function getErrorCode() {
 		return $this->error_code;
 	}
+
 }

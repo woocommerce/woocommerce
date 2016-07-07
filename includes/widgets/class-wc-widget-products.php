@@ -24,12 +24,12 @@ class WC_Widget_Products extends WC_Widget {
 		$this->widget_id          = 'woocommerce_products';
 		$this->widget_name        = __( 'WooCommerce Products', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title'       => array(
 				'type'  => 'text',
 				'std'   => __( 'Products', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
 			),
-			'number' => array(
+			'number'      => array(
 				'type'  => 'number',
 				'step'  => 1,
 				'min'   => 1,
@@ -37,37 +37,37 @@ class WC_Widget_Products extends WC_Widget {
 				'std'   => 5,
 				'label' => __( 'Number of products to show', 'woocommerce' )
 			),
-			'show' => array(
-				'type'  => 'select',
-				'std'   => '',
-				'label' => __( 'Show', 'woocommerce' ),
+			'show'        => array(
+				'type'    => 'select',
+				'std'     => '',
+				'label'   => __( 'Show', 'woocommerce' ),
 				'options' => array(
 					''         => __( 'All Products', 'woocommerce' ),
 					'featured' => __( 'Featured Products', 'woocommerce' ),
 					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
 				)
 			),
-			'orderby' => array(
-				'type'  => 'select',
-				'std'   => 'date',
-				'label' => __( 'Order by', 'woocommerce' ),
+			'orderby'     => array(
+				'type'    => 'select',
+				'std'     => 'date',
+				'label'   => __( 'Order by', 'woocommerce' ),
 				'options' => array(
-					'date'   => __( 'Date', 'woocommerce' ),
-					'price'  => __( 'Price', 'woocommerce' ),
-					'rand'   => __( 'Random', 'woocommerce' ),
-					'sales'  => __( 'Sales', 'woocommerce' ),
+					'date'  => __( 'Date', 'woocommerce' ),
+					'price' => __( 'Price', 'woocommerce' ),
+					'rand'  => __( 'Random', 'woocommerce' ),
+					'sales' => __( 'Sales', 'woocommerce' ),
 				)
 			),
-			'order' => array(
-				'type'  => 'select',
-				'std'   => 'desc',
-				'label' => _x( 'Order', 'Sorting order', 'woocommerce' ),
+			'order'       => array(
+				'type'    => 'select',
+				'std'     => 'desc',
+				'label'   => _x( 'Order', 'Sorting order', 'woocommerce' ),
 				'options' => array(
 					'asc'  => __( 'ASC', 'woocommerce' ),
 					'desc' => __( 'DESC', 'woocommerce' ),
 				)
 			),
-			'hide_free' => array(
+			'hide_free'   => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Hide free products', 'woocommerce' )
@@ -84,8 +84,8 @@ class WC_Widget_Products extends WC_Widget {
 
 	/**
 	 * Query the products and return them.
-	 * @param  array $args
-	 * @param  array $instance
+	 * @param  array    $args
+	 * @param  array    $instance
 	 * @return WP_Query
 	 */
 	public function get_products( $args, $instance ) {
@@ -140,14 +140,14 @@ class WC_Widget_Products extends WC_Widget {
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'rand' :
-				$query_args['orderby']  = 'rand';
+				$query_args['orderby'] = 'rand';
 				break;
 			case 'sales' :
 				$query_args['meta_key'] = 'total_sales';
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			default :
-				$query_args['orderby']  = 'date';
+				$query_args['orderby'] = 'date';
 		}
 
 		return new WP_Query( apply_filters( 'woocommerce_products_widget_query_args', $query_args ) );
@@ -187,4 +187,5 @@ class WC_Widget_Products extends WC_Widget {
 
 		echo $this->cache_widget( $args, ob_get_clean() );
 	}
+
 }

@@ -56,7 +56,6 @@ class WC_Product_Simple extends WC_Product {
 	 * @return string
 	 */
 	public function get_title() {
-
 		$title = $this->post->post_title;
 
 		if ( $this->get_parent() > 0 ) {
@@ -80,7 +79,7 @@ class WC_Product_Simple extends WC_Product {
 			'posts_per_page' => 1,
 			'post_type'      => 'product',
 			'fields'         => 'ids'
-		));
+		) );
 		if ( $children_by_price ) {
 			foreach ( $children_by_price as $child ) {
 				$child_price = get_post_meta( $child, '_price', true );
@@ -92,4 +91,5 @@ class WC_Product_Simple extends WC_Product {
 
 		do_action( 'woocommerce_grouped_product_sync', $this->id, $children_by_price );
 	}
+
 }

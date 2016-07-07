@@ -23,7 +23,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'account';
 		$this->label = __( 'Accounts', 'woocommerce' );
 
@@ -55,7 +54,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
+			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
 				'title'         => __( 'Enable Registration', 'woocommerce' ),
@@ -173,7 +172,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Logout', 'woocommerce' ),
+				'title'    => __( 'Logout', 'woocommerce' ),
 				'desc'     => __( 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true', 'woocommerce' ),
 				'id'       => 'woocommerce_logout_endpoint',
 				'type'     => 'text',
@@ -187,6 +186,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
+
 }
 
 endif;

@@ -33,7 +33,7 @@ if ( wc_tax_enabled() ) {
 		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
 	} elseif ( $line_items_shipping ) {
 		$check_item = current( $line_items_shipping );
-		$tax_data = maybe_unserialize( isset( $check_item['taxes'] ) ? $check_item['taxes'] : '' );
+		$tax_data   = maybe_unserialize( isset( $check_item['taxes'] ) ? $check_item['taxes'] : '' );
 	} elseif ( $line_items_fee ) {
 		$check_item = current( $line_items_fee );
 		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
@@ -134,7 +134,7 @@ if ( wc_tax_enabled() ) {
 
 						$link = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item['name'], 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item['discount_amount'], array( 'currency' => $order->get_order_currency() ) ) ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item['discount_amount'], array( 'currency' => $order->get_order_currency() ) ) ) . '"><span>' . esc_html( $item['name'] ) . '</span></a></li>';
 					}
 				?></ul>
 			</div>

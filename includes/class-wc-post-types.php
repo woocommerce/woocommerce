@@ -61,7 +61,7 @@ class WC_Post_types {
 				'hierarchical'          => true,
 				'update_count_callback' => '_wc_term_recount',
 				'label'                 => __( 'Product Categories', 'woocommerce' ),
-				'labels' => array(
+				'labels'                => array(
 						'name'              => __( 'Product Categories', 'woocommerce' ),
 						'singular_name'     => __( 'Product Category', 'woocommerce' ),
 						'menu_name'         => _x( 'Categories', 'Admin menu name', 'woocommerce' ),
@@ -108,7 +108,7 @@ class WC_Post_types {
 						'add_new_item'               => __( 'Add New Product Tag', 'woocommerce' ),
 						'new_item_name'              => __( 'New Product Tag Name', 'woocommerce' ),
 						'popular_items'              => __( 'Popular Product Tags', 'woocommerce' ),
-						'separate_items_with_commas' => __( 'Separate Product Tags with commas', 'woocommerce'  ),
+						'separate_items_with_commas' => __( 'Separate Product Tags with commas', 'woocommerce' ),
 						'add_or_remove_items'        => __( 'Add or remove Product Tags', 'woocommerce' ),
 						'choose_from_most_used'      => __( 'Choose from the most used Product tags', 'woocommerce' ),
 						'not_found'                  => __( 'No Product Tags found', 'woocommerce' ),
@@ -134,7 +134,7 @@ class WC_Post_types {
 				'hierarchical'          => false,
 				'update_count_callback' => '_update_post_term_count',
 				'label'                 => __( 'Shipping Classes', 'woocommerce' ),
-				'labels' => array(
+				'labels'                => array(
 						'name'              => __( 'Shipping Classes', 'woocommerce' ),
 						'singular_name'     => __( 'Shipping Class', 'woocommerce' ),
 						'menu_name'         => _x( 'Shipping Classes', 'Admin menu name', 'woocommerce' ),
@@ -187,17 +187,17 @@ class WC_Post_types {
 								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
 								'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
 							),
-						'show_ui'            => true,
-						'show_in_quick_edit' => false,
-						'show_in_menu'       => false,
-						'show_in_nav_menus'  => false,
-						'meta_box_cb'        => false,
-						'query_var'          => 1 === $tax->attribute_public,
-						'rewrite'            => false,
-						'sort'               => false,
-						'public'             => 1 === $tax->attribute_public,
-						'show_in_nav_menus'  => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
-						'capabilities'       => array(
+						'show_ui'               => true,
+						'show_in_quick_edit'    => false,
+						'show_in_menu'          => false,
+						'show_in_nav_menus'     => false,
+						'meta_box_cb'           => false,
+						'query_var'             => 1 === $tax->attribute_public,
+						'rewrite'               => false,
+						'sort'                  => false,
+						'public'                => 1 === $tax->attribute_public,
+						'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
+						'capabilities'          => array(
 							'manage_terms' => 'manage_product_terms',
 							'edit_terms'   => 'edit_product_terms',
 							'delete_terms' => 'delete_product_terms',
@@ -225,7 +225,7 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists('product') ) {
+		if ( post_type_exists( 'product' ) ) {
 			return;
 		}
 
@@ -282,10 +282,10 @@ class WC_Post_types {
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'label'        => __( 'Variations', 'woocommerce' ),
-					'public'       => false,
-					'hierarchical' => false,
-					'supports'     => false,
+					'label'           => __( 'Variations', 'woocommerce' ),
+					'public'          => false,
+					'hierarchical'    => false,
+					'supports'        => false,
 					'capability_type' => 'product'
 				)
 			)
@@ -435,7 +435,6 @@ class WC_Post_types {
 	 * Register our custom post statuses, used for order status.
 	 */
 	public static function register_post_status() {
-
 		$order_statuses = apply_filters( 'woocommerce_register_shop_order_post_statuses',
 			array(
 				'wc-pending'    => array(
@@ -522,6 +521,7 @@ class WC_Post_types {
 
 		return $post_types;
 	}
+
 }
 
 WC_Post_types::init();

@@ -42,12 +42,12 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	public function init_form_fields() {
 		parent::init_form_fields();
 		$this->form_fields['availability'] = array(
-			'title'			=> __( 'Availability', 'woocommerce' ),
-			'type'			=> 'select',
-			'class'         => 'wc-enhanced-select',
-			'description'	=> '',
-			'default'		=> 'including',
-			'options'		=> array(
+			'title'       => __( 'Availability', 'woocommerce' ),
+			'type'        => 'select',
+			'class'       => 'wc-enhanced-select',
+			'description' => '',
+			'default'     => 'including',
+			'options'     => array(
 				'including' => __( 'Selected countries', 'woocommerce' ),
 				'excluding' => __( 'Excluding selected countries', 'woocommerce' ),
 			)
@@ -57,11 +57,11 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	/**
 	 * is_available function.
 	 *
-	 * @param array $package
+	 * @param  array $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		if ( "no" === $this->enabled ) {
+		if ( 'no' === $this->enabled ) {
 			return false;
 		}
 		if ( 'including' === $this->availability ) {
@@ -75,4 +75,5 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 		}
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 	}
+
 }

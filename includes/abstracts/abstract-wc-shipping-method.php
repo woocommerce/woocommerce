@@ -128,8 +128,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * Methods should override this to declare support (or lack of support) for a feature.
 	 *
-	 * @param $feature string The name of a feature to test support for.
-	 * @return bool True if the shipping method supports the feature, false otherwise.
+	 * @param       $feature string The name of a feature to test support for.
+	 * @return bool          True if the shipping method supports the feature, false otherwise.
 	 */
 	public function supports( $feature ) {
 		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ), $feature, $this );
@@ -196,7 +196,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Return calculated rates for a package.
 	 * @since 2.6.0
-	 * @param object $package
+	 * @param  object $package
 	 * @return array
 	 */
 	public function get_rates_for_package( $package ) {
@@ -211,7 +211,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Returns a rate ID based on this methods ID and instance, with an optional
 	 * suffix if distinguishing between multiple rates.
 	 * @since 2.6.0
-	 * @param string $suffix
+	 * @param  string $suffix
 	 * @return string
 	 */
 	public function get_rate_id( $suffix = '' ) {
@@ -273,7 +273,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		if ( $args['package'] ) {
 			$items_in_package = array();
 			foreach ( $args['package']['contents'] as $item ) {
-				$product = $item['data'];
+				$product            = $item['data'];
 				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
 			}
 			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
@@ -287,7 +287,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @access protected
 	 * @param  array $costs
-	 * @return array of taxes
+	 * @return array        of taxes
 	 */
 	protected function get_taxes_per_item( $costs ) {
 		$taxes = array();
@@ -326,7 +326,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Is this method available?
-	 * @param array $package
+	 * @param  array $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {
@@ -355,8 +355,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Get fee to add to shipping cost.
-	 * @param string|float $fee
-	 * @param float $total
+	 * @param  string|float $fee
+	 * @param  float        $total
 	 * @return float
 	 */
 	public function get_fee( $fee, $total ) {
@@ -409,7 +409,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
-	 * @return mixed  The value specified for the option or a default value for the option.
+	 * @return mixed               The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options
@@ -426,7 +426,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
-	 * @return mixed  The value specified for the option or a default value for the option.
+	 * @return mixed               The value specified for the option or a default value for the option.
 	 */
 	public function get_instance_option( $key, $empty_value = null ) {
 		if ( empty( $this->instance_settings ) ) {
@@ -506,4 +506,5 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			return parent::process_admin_options();
 		}
 	}
+
 }

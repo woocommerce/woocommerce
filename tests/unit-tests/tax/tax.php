@@ -47,7 +47,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$customer_location = WC_Tax::get_tax_location();
-		$tax_rate = array(
+		$tax_rate          = array(
 			'tax_rate_country'  => $customer_location[0],
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',
@@ -213,8 +213,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	* Test compound tax amounts
-	*/
+	 * Test compound tax amounts
+	 */
 	public function test_calc_compound_tax() {
 		global $wpdb;
 
@@ -225,38 +225,38 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_state', 'QC' );
 
 		$tax_rate_1 = array(
-		  'tax_rate_country'  => 'CA',
-		  'tax_rate_state'    => '',
-		  'tax_rate'          => '5.0000',
-		  'tax_rate_name'     => 'GST',
-		  'tax_rate_priority' => '1',
-		  'tax_rate_compound' => '0',
-		  'tax_rate_shipping' => '1',
-		  'tax_rate_order'    => '1',
-		  'tax_rate_class'    => ''
+			'tax_rate_country'  => 'CA',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.0000',
+			'tax_rate_name'     => 'GST',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		$tax_rate_2 = array(
-		  'tax_rate_country'  => 'CA',
-		  'tax_rate_state'    => 'QC',
-		  'tax_rate'          => '8.5000',
-		  'tax_rate_name'     => 'PST',
-		  'tax_rate_priority' => '2',
-		  'tax_rate_compound' => '1',
-		  'tax_rate_shipping' => '1',
-		  'tax_rate_order'    => '2',
-		  'tax_rate_class'    => ''
+			'tax_rate_country'  => 'CA',
+			'tax_rate_state'    => 'QC',
+			'tax_rate'          => '8.5000',
+			'tax_rate_name'     => 'PST',
+			'tax_rate_priority' => '2',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '2',
+			'tax_rate_class'    => ''
 		);
 
 		$tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
 		$tax_rate_2_id = WC_Tax::_insert_tax_rate( $tax_rate_2 );
 
 		$tax_rates = WC_Tax::find_rates( array(
-		  'country'   => 'CA',
-		  'state'     => 'QC',
-		  'postcode'  => '12345',
-		  'city'      => '',
-		  'tax_class' => ''
+			'country'   => 'CA',
+			'state'     => 'QC',
+			'postcode'  => '12345',
+			'city'      => '',
+			'tax_class' => ''
 		) );
 
 		// prices exclusive of tax
@@ -338,7 +338,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
+		$this->assertEquals( WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -363,7 +363,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
+		$this->assertEquals( WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -388,7 +388,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
+		$this->assertEquals( WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -413,7 +413,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertTrue(WC_Tax::is_compound( $tax_rate_id ) );
+		$this->assertTrue( WC_Tax::is_compound( $tax_rate_id ) );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -422,7 +422,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 * Test the rounding method.
 	 */
 	public function test_round() {
-		$this->assertEquals(WC_Tax::round( '2.1234567' ), '2.1235' );
+		$this->assertEquals( WC_Tax::round( '2.1234567' ), '2.1235' );
 	}
 
 	/**
@@ -434,7 +434,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'2' => '2',
 		);
 
-		$this->assertEquals(WC_Tax::get_tax_total( $to_total ), '3.665' );
+		$this->assertEquals( WC_Tax::get_tax_total( $to_total ), '3.665' );
 	}
 
 	/**
@@ -509,7 +509,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Update a rate
 		$tax_rate = array(
-			'tax_rate_country'  => 'US'
+			'tax_rate_country' => 'US'
 		);
 
 		// Run function
@@ -556,8 +556,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test__update_tax_rate_postcodes() {
 		global $wpdb;
 
-		$to_save = '12345;90210...90215';
-		$tax_rate          = array(
+		$to_save  = '12345;90210...90215';
+		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',
@@ -611,4 +611,5 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
+
 }

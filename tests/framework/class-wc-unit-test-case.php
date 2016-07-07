@@ -18,7 +18,6 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * @since 2.2
 	 */
 	public function setUp() {
-
 		parent::setUp();
 
 		// Add custom factories
@@ -53,7 +52,6 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * @since 2.2
 	 */
 	public function filter_output( $output ) {
-
 		$output = preg_replace( '/[\n]+/S', '', $output );
 		$output = preg_replace( '/[\t]+/S', '', $output );
 
@@ -85,12 +83,11 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
 	 *
 	 * @since  2.2
-	 * @param  $condition
+	 * @param         $condition
 	 * @param  string $message
 	 * @return mixed
 	 */
 	public static function assertNotFalse( $condition, $message = '' ) {
-
 		if ( version_compare( phpversion(), '5.3', '<' ) ) {
 
 			self::assertThat( $condition, self::logicalNot( self::isFalse() ), $message );

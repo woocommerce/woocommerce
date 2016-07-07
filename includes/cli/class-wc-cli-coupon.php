@@ -47,7 +47,6 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp wc coupon create --code=new-coupon --type=percent
-	 *
 	 */
 	public function create( $__, $assoc_args ) {
 		global $wpdb;
@@ -72,7 +71,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				WHERE $wpdb->posts.post_type = 'shop_coupon'
 				AND $wpdb->posts.post_status = 'publish'
 				AND $wpdb->posts.post_title = '%s'
-			 ", $coupon_code ) );
+			", $coupon_code ) );
 
 			if ( $coupon_found ) {
 				throw new WC_CLI_Exception( 'woocommerce_cli_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ) );
@@ -113,7 +112,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
 				'post_excerpt' => $coupon_data['description']
-	 		);
+			);
 
 			$id = wp_insert_post( $new_coupon, $wp_error = false );
 
@@ -165,7 +164,6 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	 *     wp wc coupon delete 123
 	 *
 	 *     wp wc coupon delete $(wp wc coupon list --format=ids)
-	 *
 	 */
 	public function delete( $args, $assoc_args ) {
 		$exit_code = 0;
@@ -356,7 +354,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 
 		if ( 'ids' === $formatter->format ) {
 			$query_args['fields'] = 'ids';
-			$query = new WP_Query( $query_args );
+			$query                = new WP_Query( $query_args );
 			echo implode( ' ', $query->posts );
 		} else {
 			$query = new WP_Query( $query_args );
@@ -447,7 +445,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 					AND $wpdb->posts.post_status = 'publish'
 					AND $wpdb->posts.post_title = '%s'
 					AND $wpdb->posts.ID != %s
-				 ", $coupon_code, $id ) );
+				", $coupon_code, $id ) );
 
 				if ( $coupon_found ) {
 					throw new WC_CLI_Exception( 'woocommerce_cli_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ) );
@@ -570,7 +568,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $posts Array of post
-	 * @return array Items
+	 * @return array        Items
 	 */
 	protected function format_posts_to_items( $posts ) {
 		$items = array();
@@ -661,4 +659,5 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 
 		return $coupons;
 	}
+
 }

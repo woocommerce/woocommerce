@@ -102,21 +102,21 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
+		if ( in_array( $order->billing_country, array( 'US', 'CA' ) ) ) {
 			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
 				'night_phone_a' => substr( $phone_number, 0, 3 ),
 				'night_phone_b' => substr( $phone_number, 3, 3 ),
 				'night_phone_c' => substr( $phone_number, 6, 4 ),
-				'day_phone_a' 	=> substr( $phone_number, 0, 3 ),
-				'day_phone_b' 	=> substr( $phone_number, 3, 3 ),
-				'day_phone_c' 	=> substr( $phone_number, 6, 4 )
+				'day_phone_a'   => substr( $phone_number, 0, 3 ),
+				'day_phone_b'   => substr( $phone_number, 3, 3 ),
+				'day_phone_c'   => substr( $phone_number, 6, 4 )
 			);
 		} else {
 			$phone_args = array(
 				'night_phone_b' => $order->billing_phone,
-				'day_phone_b' 	=> $order->billing_phone
+				'day_phone_b'   => $order->billing_phone
 			);
 		}
 		return $phone_args;
@@ -135,17 +135,17 @@ class WC_Gateway_Paypal_Request {
 			$shipping_args['no_shipping']      = 0;
 
 			// If we are sending shipping, send shipping address instead of billing
-			$shipping_args['first_name']       = $order->shipping_first_name;
-			$shipping_args['last_name']        = $order->shipping_last_name;
-			$shipping_args['company']          = $order->shipping_company;
-			$shipping_args['address1']         = $order->shipping_address_1;
-			$shipping_args['address2']         = $order->shipping_address_2;
-			$shipping_args['city']             = $order->shipping_city;
-			$shipping_args['state']            = $this->get_paypal_state( $order->shipping_country, $order->shipping_state );
-			$shipping_args['country']          = $order->shipping_country;
-			$shipping_args['zip']              = $order->shipping_postcode;
+			$shipping_args['first_name'] = $order->shipping_first_name;
+			$shipping_args['last_name']  = $order->shipping_last_name;
+			$shipping_args['company']    = $order->shipping_company;
+			$shipping_args['address1']   = $order->shipping_address_1;
+			$shipping_args['address2']   = $order->shipping_address_2;
+			$shipping_args['city']       = $order->shipping_city;
+			$shipping_args['state']      = $this->get_paypal_state( $order->shipping_country, $order->shipping_state );
+			$shipping_args['country']    = $order->shipping_country;
+			$shipping_args['zip']        = $order->shipping_postcode;
 		} else {
-			$shipping_args['no_shipping']      = 1;
+			$shipping_args['no_shipping'] = 1;
 		}
 
 		return $shipping_args;
@@ -157,7 +157,6 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_line_item_args( $order ) {
-
 		/**
 		 * Try passing a line item per product if supported.
 		 */
@@ -227,7 +226,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get order item names as a string.
 	 * @param  WC_Order $order
-	 * @param  array $item
+	 * @param  array    $item
 	 * @return string
 	 */
 	protected function get_order_item_name( $order, $item ) {
@@ -267,14 +266,14 @@ class WC_Gateway_Paypal_Request {
 		// Products
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			if ( 'fee' === $item['type'] ) {
-				$item_line_total  = $this->number_format( $item['line_total'], $order );
-				$line_item        = $this->add_line_item( $item['name'], 1, $item_line_total );
+				$item_line_total   = $this->number_format( $item['line_total'], $order );
+				$line_item         = $this->add_line_item( $item['name'], 1, $item_line_total );
 				$calculated_total += $item_line_total;
 			} else {
-				$product          = $order->get_product_from_item( $item );
-				$sku              = $product ? $product->get_sku() : '';
-				$item_line_total  = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
-				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $item_line_total, $sku );
+				$product           = $order->get_product_from_item( $item );
+				$sku               = $product ? $product->get_sku() : '';
+				$item_line_total   = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
+				$line_item         = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $item_line_total, $sku );
 				$calculated_total += $item_line_total * $item['qty'];
 			}
 
@@ -293,11 +292,11 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Add PayPal Line Item.
-	 * @param  string  $item_name
-	 * @param  int     $quantity
-	 * @param  int     $amount
-	 * @param  string  $item_number
-	 * @return bool successfully added or not
+	 * @param  string $item_name
+	 * @param  int    $quantity
+	 * @param  int    $amount
+	 * @param  string $item_number
+	 * @return bool                successfully added or not
 	 */
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0, $item_number = '' ) {
 		$index = ( sizeof( $this->line_items ) / 4 ) + 1;
@@ -349,7 +348,7 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Round prices.
-	 * @param  double $price
+	 * @param  double   $price
 	 * @param  WC_Order $order
 	 * @return double
 	 */
@@ -366,7 +365,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Format prices.
 	 * @param  float|int $price
-	 * @param  WC_Order $order
+	 * @param  WC_Order  $order
 	 * @return string
 	 */
 	protected function number_format( $price, $order ) {
@@ -378,4 +377,5 @@ class WC_Gateway_Paypal_Request {
 
 		return number_format( $price, $decimals, '.', '' );
 	}
+
 }

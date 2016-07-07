@@ -22,7 +22,6 @@ class WC_API_Authentication {
 	 * @return WC_API_Authentication
 	 */
 	public function __construct() {
-
 		// To disable authentication, hook into this filter at a later priority and return a valid WP_User
 		add_filter( 'woocommerce_api_check_authentication', array( $this, 'authenticate' ), 0 );
 	}
@@ -31,11 +30,10 @@ class WC_API_Authentication {
 	 * Authenticate the request. The authentication method varies based on whether the request was made over SSL or not.
 	 *
 	 * @since 2.1
-	 * @param WP_User $user
+	 * @param  WP_User               $user
 	 * @return null|WP_Error|WP_User
 	 */
 	public function authenticate( $user ) {
-
 		// Allow access to the index by default
 		if ( '/' === WC()->api->server->path ) {
 			return new WP_User( 0 );
@@ -133,7 +131,6 @@ class WC_API_Authentication {
 	 * @throws Exception
 	 */
 	private function perform_oauth_authentication() {
-
 		$params = WC()->api->server->params['GET'];
 
 		$param_names =  array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
@@ -161,7 +158,7 @@ class WC_API_Authentication {
 	 * Return the keys for the given consumer key
 	 *
 	 * @since 2.4.0
-	 * @param string $consumer_key
+	 * @param  string $consumer_key
 	 * @return array
 	 * @throws Exception
 	 */
@@ -187,7 +184,7 @@ class WC_API_Authentication {
 	 * Get user by ID
 	 *
 	 * @since  2.4.0
-	 * @param  int $user_id
+	 * @param  int     $user_id
 	 * @return WC_User
 	 * @throws Exception
 	 */
@@ -205,8 +202,8 @@ class WC_API_Authentication {
 	 * Check if the consumer secret provided for the given user is valid
 	 *
 	 * @since 2.1
-	 * @param string $keys_consumer_secret
-	 * @param string $consumer_secret
+	 * @param  string $keys_consumer_secret
+	 * @param  string $consumer_secret
 	 * @return bool
 	 */
 	private function is_consumer_secret_valid( $keys_consumer_secret, $consumer_secret ) {
@@ -243,7 +240,7 @@ class WC_API_Authentication {
 		}
 
 		// Normalize parameter key/values
-		$params = $this->normalize_parameters( $params );
+		$params           = $this->normalize_parameters( $params );
 		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
 			if ( is_array( $param_value ) ) {
@@ -264,7 +261,7 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$secret = $keys['consumer_secret'] . '&';
+		$secret    = $keys['consumer_secret'] . '&';
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
@@ -289,12 +286,12 @@ class WC_API_Authentication {
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param array $parameters un-normalized pararmeters
-	 * @return array normalized parameters
+	 * @param  array $parameters un-normalized pararmeters
+	 * @return array             normalized parameters
 	 */
 	private function normalize_parameters( $parameters ) {
-		$keys = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
-		$values = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
+		$keys       = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
+		$values     = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
 		$parameters = array_combine( $keys, $values );
 		return $parameters;
 	}
@@ -322,9 +319,9 @@ class WC_API_Authentication {
 	 * - A timestamp is valid if it is within 15 minutes of now
 	 * - A nonce is valid if it has not been used within the last 15 minutes
 	 *
-	 * @param array $keys
-	 * @param int $timestamp the unix timestamp for when the request was made
-	 * @param string $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
+	 * @param array  $keys
+	 * @param int    $timestamp the unix timestamp for when the request was made
+	 * @param string $nonce     a unique (for the given user) 32 alphanumeric string, consumer-generated
 	 * @throws Exception
 	 */
 	private function check_oauth_timestamp_and_nonce( $keys, $timestamp, $nonce ) {
@@ -411,4 +408,5 @@ class WC_API_Authentication {
 			array( '%d' )
 		);
 	}
+
 }

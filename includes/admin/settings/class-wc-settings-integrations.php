@@ -23,7 +23,6 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'integration';
 		$this->label = __( 'Integration', 'woocommerce' );
 
@@ -54,7 +53,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 			if ( sizeof( $integrations ) > 1 ) {
 				foreach ( $integrations as $integration ) {
-					$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
+					$title                                      = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
 					$sections[ strtolower( $integration->id ) ] = esc_html( $title );
 				}
 			}
@@ -71,9 +70,11 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 		$integrations = WC()->integrations->get_integrations();
 
-		if ( isset( $integrations[ $current_section ] ) )
+		if ( isset( $integrations[ $current_section ] ) ) {
 			$integrations[ $current_section ]->admin_options();
+		}
 	}
+
 }
 
 endif;

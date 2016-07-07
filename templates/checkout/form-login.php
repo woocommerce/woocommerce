@@ -37,4 +37,3 @@ wc_print_notice( $info_message, 'notice' );
 			'hidden'   => true
 		)
 	);
-?>

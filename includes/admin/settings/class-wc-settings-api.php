@@ -74,7 +74,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 
 			array(
 				'type' => 'sectionend',
-				'id' => 'general_options'
+				'id'   => 'general_options'
 			),
 		) );
 
@@ -135,7 +135,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 
 		if ( 'webhooks' == $current_section ) {
 			WC_Admin_Webhooks::page_output();
-		} else if ( 'keys' == $current_section ) {
+		} elseif ( 'keys' == $current_section ) {
 			WC_Admin_API_Keys::page_output();
 		} else {
 			$settings = $this->get_settings( $current_section );
@@ -154,6 +154,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 			WC_Admin_Settings::save_fields( $settings );
 		}
 	}
+
 }
 
 endif;

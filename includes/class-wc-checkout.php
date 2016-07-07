@@ -60,8 +60,9 @@ class WC_Checkout {
 	 * @return WC_Checkout Main instance
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) )
+		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
+		}
 		return self::$_instance;
 	}
 
@@ -88,42 +89,42 @@ class WC_Checkout {
 	 *
 	 * @access public
 	 */
-	public function __construct () {
-		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
+	public function __construct() {
+		add_action( 'woocommerce_checkout_billing', array( $this, 'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
 
 		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
 		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;
 		$this->must_create_account   = $this->enable_guest_checkout || is_user_logged_in() ? false : true;
 
 		// Define all Checkout fields
-		$this->checkout_fields['billing'] 	= WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' );
-		$this->checkout_fields['shipping'] 	= WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' );
+		$this->checkout_fields['billing']  = WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' );
+		$this->checkout_fields['shipping'] = WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' );
 
 		if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) {
 			$this->checkout_fields['account']['account_username'] = array(
-				'type' 			=> 'text',
-				'label' 		=> __( 'Account username', 'woocommerce' ),
-				'required'      => true,
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
+				'type'        => 'text',
+				'label'       => __( 'Account username', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => _x( 'Username', 'placeholder', 'woocommerce' )
 			);
 		}
 
 		if ( get_option( 'woocommerce_registration_generate_password' ) == 'no' ) {
 			$this->checkout_fields['account']['account_password'] = array(
-				'type' 				=> 'password',
-				'label' 			=> __( 'Account password', 'woocommerce' ),
-				'required'          => true,
-				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
+				'type'        => 'password',
+				'label'       => __( 'Account password', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => _x( 'Password', 'placeholder', 'woocommerce' )
 			);
 		}
 
-		$this->checkout_fields['order']	= array(
+		$this->checkout_fields['order'] = array(
 			'order_comments' => array(
-				'type' => 'textarea',
-				'class' => array('notes'),
-				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order Notes', 'woocommerce' ),
+				'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' )
 			)
 		);
 
@@ -137,7 +138,7 @@ class WC_Checkout {
 	 */
 	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
-		do_action('woocommerce_check_cart_items');
+		do_action( 'woocommerce_check_cart_items' );
 	}
 
 	/**
@@ -292,7 +293,7 @@ class WC_Checkout {
 			$billing_address = array();
 			if ( $this->checkout_fields['billing'] ) {
 				foreach ( array_keys( $this->checkout_fields['billing'] ) as $field ) {
-					$field_name = str_replace( 'billing_', '', $field );
+					$field_name                     = str_replace( 'billing_', '', $field );
 					$billing_address[ $field_name ] = $this->get_posted_address_data( $field_name );
 				}
 			}
@@ -301,7 +302,7 @@ class WC_Checkout {
 			$shipping_address = array();
 			if ( $this->checkout_fields['shipping'] ) {
 				foreach ( array_keys( $this->checkout_fields['shipping'] ) as $field ) {
-					$field_name = str_replace( 'shipping_', '', $field );
+					$field_name                      = str_replace( 'shipping_', '', $field );
 					$shipping_address[ $field_name ] = $this->get_posted_address_data( $field_name, 'shipping' );
 				}
 			}
@@ -361,7 +362,7 @@ class WC_Checkout {
 			}
 
 			// Prevent timeout
-			@set_time_limit(0);
+			@set_time_limit( 0 );
 
 			do_action( 'woocommerce_before_checkout_process' );
 
@@ -386,7 +387,7 @@ class WC_Checkout {
 
 			// Ship to billing only option
 			if ( wc_ship_to_billing_address_only() ) {
-				$this->posted['ship_to_different_address']  = false;
+				$this->posted['ship_to_different_address'] = false;
 			}
 
 			// Update customer shipping and payment method to posted method
@@ -426,13 +427,13 @@ class WC_Checkout {
 
 					// Get Value
 					switch ( $field['type'] ) {
-						case "checkbox" :
+						case 'checkbox' :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 						break;
-						case "multiselect" :
+						case 'multiselect' :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'wc_clean', $_POST[ $key ] ) ) : '';
 						break;
-						case "textarea" :
+						case 'textarea' :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? wp_strip_all_tags( wp_check_invalid_utf8( stripslashes( $_POST[ $key ] ) ) ) : '';
 						break;
 						default :
@@ -445,7 +446,7 @@ class WC_Checkout {
 					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 					// Validation: Required fields
-					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || "" === $this->posted[ $key ] ) ) {
+					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || '' === $this->posted[ $key ] ) ) {
 						switch ( $fieldset_key ) {
 							case 'shipping' :
 								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
@@ -478,14 +479,16 @@ class WC_Checkout {
 									case 'phone' :
 										$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
-										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
+										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) ) {
 											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+										}
 									break;
 									case 'email' :
 										$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
-										if ( ! is_email( $this->posted[ $key ] ) )
+										if ( ! is_email( $this->posted[ $key ] ) ) {
 											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+										}
 									break;
 									case 'state' :
 										// Get valid states
@@ -496,7 +499,7 @@ class WC_Checkout {
 
 											// Convert value to key if set
 											if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) ) {
-												 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
+												$this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
 											}
 										}
 
@@ -642,8 +645,9 @@ class WC_Checkout {
 				$this->check_cart_items();
 
 				// Abort if errors are present
-				if ( wc_notice_count( 'error' ) > 0 )
+				if ( wc_notice_count( 'error' ) > 0 ) {
 					throw new Exception();
+				}
 
 				$order_id = $this->create_order();
 
@@ -694,8 +698,8 @@ class WC_Checkout {
 					// Redirect to success/confirmation/payment page
 					if ( is_ajax() ) {
 						wp_send_json( array(
-							'result' 	=> 'success',
-							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+							'result'   => 'success',
+							'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
 						) );
 					} else {
 						wp_safe_redirect(
@@ -725,10 +729,10 @@ class WC_Checkout {
 			}
 
 			$response = array(
-				'result'	=> 'failure',
-				'messages' 	=> isset( $messages ) ? $messages : '',
-				'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
+				'result'   => 'failure',
+				'messages' => isset( $messages ) ? $messages : '',
+				'refresh'  => isset( WC()->session->refresh_totals ) ? 'true' : 'false',
+				'reload'   => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
 			);
 
 			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
@@ -739,8 +743,8 @@ class WC_Checkout {
 
 	/**
 	 * Get a posted address field after sanitization and validation.
-	 * @param string $key
-	 * @param string $type billing for shipping
+	 * @param  string $key
+	 * @param  string $type billing for shipping
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
@@ -762,7 +766,7 @@ class WC_Checkout {
 	 * Gets the value either from the posted data, or from the users meta data.
 	 *
 	 * @access public
-	 * @param string $input
+	 * @param  string      $input
 	 * @return string|null
 	 */
 	public function get_value( $input ) {
@@ -815,4 +819,5 @@ class WC_Checkout {
 			}
 		}
 	}
+
 }

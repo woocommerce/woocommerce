@@ -84,9 +84,9 @@ class WC_Post_Data {
 
 	/**
 	 * When editing a term, check for product attributes.
-	 * @param  id $term_id
-	 * @param  id $tt_id
-	 * @param  string $taxonomy
+	 * @param id     $term_id
+	 * @param id     $tt_id
+	 * @param string $taxonomy
 	 */
 	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -98,9 +98,9 @@ class WC_Post_Data {
 
 	/**
 	 * When a term is edited, check for product attributes and update variations.
-	 * @param  id $term_id
-	 * @param  id $tt_id
-	 * @param  string $taxonomy
+	 * @param id     $term_id
+	 * @param id     $tt_id
+	 * @param string $taxonomy
 	 */
 	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
 		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -119,11 +119,11 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null $check
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $meta_value
-	 * @param  mixed $prev_value
+	 * @param  null      $check
+	 * @param  int       $object_id
+	 * @param  string    $meta_key
+	 * @param  mixed     $meta_value
+	 * @param  mixed     $prev_value
 	 * @return null|bool
 	 */
 	public static function update_order_item_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
@@ -144,11 +144,11 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null $check
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $meta_value
-	 * @param  mixed $prev_value
+	 * @param  null      $check
+	 * @param  int       $object_id
+	 * @param  string    $meta_key
+	 * @param  mixed     $meta_value
+	 * @param  mixed     $prev_value
 	 * @return null|bool
 	 */
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
@@ -168,10 +168,10 @@ class WC_Post_Data {
 
 	/**
 	 * When setting stock level, ensure the stock status is kept in sync.
-	 * @param  int $meta_id
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $_meta_value
+	 * @param int    $meta_id
+	 * @param int    $object_id
+	 * @param string $meta_key
+	 * @param mixed  $_meta_value
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
 		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
@@ -184,19 +184,17 @@ class WC_Post_Data {
 	 * Forces the order posts to have a title in a certain format (containing the date).
 	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
 	 *
-	 * @param array $data
+	 * @param  array $data
 	 * @return array
 	 */
 	public static function wp_insert_post_data( $data ) {
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {
-				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		}
-
-		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
 			$product_type = stripslashes( $_POST['product-type'] );
 			switch ( $product_type ) {
 				case 'grouped' :
@@ -226,6 +224,7 @@ class WC_Post_Data {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 	}
+
 }
 
 WC_Post_Data::init();

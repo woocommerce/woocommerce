@@ -47,7 +47,7 @@ class WC_REST_Authentication {
 	/**
 	 * Authenticate user.
 	 *
-	 * @param int|false $user_id User ID if one has been determined, false otherwise.
+	 * @param  int|false $user_id User ID if one has been determined, false otherwise.
 	 * @return int|false
 	 */
 	public function authenticate( $user_id ) {
@@ -66,7 +66,7 @@ class WC_REST_Authentication {
 	/**
 	 * Check for authentication error.
 	 *
-	 * @param WP_Error|null|bool $error
+	 * @param  WP_Error|null|bool $error
 	 * @return WP_Error|null|bool
 	 */
 	public function check_authentication_error( $error ) {
@@ -200,8 +200,8 @@ class WC_REST_Authentication {
 	 * Verify that the consumer-provided request signature matches our generated signature,
 	 * this ensures the consumer has a valid key/secret.
 	 *
-	 * @param stdClass $user
-	 * @param array $params The request parameters.
+	 * @param  stdClass      $user
+	 * @param  array         $params The request parameters.
 	 * @return null|WP_Error
 	 */
 	private function check_oauth_signature( $user, $params ) {
@@ -268,8 +268,8 @@ class WC_REST_Authentication {
 	 * should be URL encoded.
 	 *
 	 * @see rawurlencode()
-	 * @param array $parameters Un-normalized pararmeters.
-	 * @return array Normalized parameters.
+	 * @param  array $parameters Un-normalized pararmeters.
+	 * @return array             Normalized parameters.
 	 */
 	private function normalize_parameters( $parameters ) {
 		$keys       = wc_rest_urlencode_rfc3986( array_keys( $parameters ) );
@@ -286,9 +286,9 @@ class WC_REST_Authentication {
 	 * - A timestamp is valid if it is within 15 minutes of now.
 	 * - A nonce is valid if it has not been used within the last 15 minutes.
 	 *
-	 * @param stdClass $user
-	 * @param int $timestamp the unix timestamp for when the request was made
-	 * @param string $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
+	 * @param  stdClass      $user
+	 * @param  int           $timestamp the unix timestamp for when the request was made
+	 * @param  string        $nonce     a unique (for the given user) 32 alphanumeric string, consumer-generated
 	 * @return bool|WP_Error
 	 */
 	private function check_oauth_timestamp_and_nonce( $user, $timestamp, $nonce ) {
@@ -335,7 +335,7 @@ class WC_REST_Authentication {
 	/**
 	 * Return the user data for the given consumer_key.
 	 *
-	 * @param string $consumer_key
+	 * @param  string $consumer_key
 	 * @return array
 	 */
 	private function get_user_data_by_consumer_key( $consumer_key ) {
@@ -354,7 +354,7 @@ class WC_REST_Authentication {
 	/**
 	 * Check that the API keys provided have the proper key-specific permissions to either read or write API resources.
 	 *
-	 * @param string $permissions
+	 * @param  string $permissions
 	 * @return bool
 	 */
 	private function check_permissions( $permissions ) {
@@ -372,7 +372,7 @@ class WC_REST_Authentication {
 			case 'GET' :
 				if ( 'read' !== $permissions && 'read_write' !== $permissions ) {
 					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have read permissions.', 'woocommerce' ), array( 'status' => 401 ) );
-					$valid = false;
+					$valid                        = false;
 				}
 				break;
 
@@ -382,7 +382,7 @@ class WC_REST_Authentication {
 			case 'DELETE' :
 				if ( 'write' !== $permissions && 'read_write' !== $permissions ) {
 					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions.', 'woocommerce' ), array( 'status' => 401 ) );
-					$valid = false;
+					$valid                        = false;
 				}
 				break;
 		}
@@ -412,7 +412,7 @@ class WC_REST_Authentication {
 	 * and the Basic auth headers are either not present or the consumer secret does not match the consumer
 	 * key provided, then return the correct Basic headers and an error message.
 	 *
-	 * @param WP_REST_Response $response Current response being served.
+	 * @param  WP_REST_Response $response Current response being served.
 	 * @return WP_REST_Response
 	 */
 	public function send_unauthorized_headers( $response ) {
@@ -425,6 +425,7 @@ class WC_REST_Authentication {
 
 		return $response;
 	}
+
 }
 
 new WC_REST_Authentication();

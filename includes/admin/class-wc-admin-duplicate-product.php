@@ -31,7 +31,7 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Show the "Duplicate" link in admin products list.
 	 * @param  array   $actions
-	 * @param  WP_Post $post Post object
+	 * @param  WP_Post $post    Post object
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
@@ -44,7 +44,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
-			. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
+			. '" rel="permalink">' . __( 'Duplicate', 'woocommerce' ) . '</a>';
 
 		return $actions;
 	}
@@ -68,7 +68,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		if ( isset( $_GET['post'] ) ) {
-			$notify_url = wp_nonce_url( admin_url( "edit.php?post_type=product&action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+			$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 			?>
 			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 			<?php
@@ -79,7 +79,6 @@ class WC_Admin_Duplicate_Product {
 	 * Duplicate a product action.
 	 */
 	public function duplicate_product_action() {
-
 		if ( empty( $_REQUEST['post'] ) ) {
 			wp_die( __( 'No product to duplicate has been supplied!', 'woocommerce' ) );
 		}
@@ -110,51 +109,51 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Function to create the duplicate of the product.
 	 *
-	 * @param mixed $post
-	 * @param int $parent (default: 0)
-	 * @param string $post_status (default: '')
+	 * @param  mixed  $post
+	 * @param  int    $parent      (default: 0)
+	 * @param  string $post_status (default: '')
 	 * @return int
 	 */
 	public function duplicate_product( $post, $parent = 0, $post_status = '' ) {
 		global $wpdb;
 
-		$new_post_author    = wp_get_current_user();
-		$new_post_date      = current_time( 'mysql' );
-		$new_post_date_gmt  = get_gmt_from_date( $new_post_date );
+		$new_post_author   = wp_get_current_user();
+		$new_post_date     = current_time( 'mysql' );
+		$new_post_date_gmt = get_gmt_from_date( $new_post_date );
 
 		if ( $parent > 0 ) {
-			$post_parent        = $parent;
-			$post_status        = $post_status ? $post_status : 'publish';
-			$suffix             = '';
+			$post_parent = $parent;
+			$post_status = $post_status ? $post_status : 'publish';
+			$suffix      = '';
 		} else {
-			$post_parent        = $post->post_parent;
-			$post_status        = $post_status ? $post_status : 'draft';
-			$suffix             = ' ' . __( '(Copy)', 'woocommerce' );
+			$post_parent = $post->post_parent;
+			$post_status = $post_status ? $post_status : 'draft';
+			$suffix      = ' ' . __( '(Copy)', 'woocommerce' );
 		}
 
 		// Insert the new template in the post table
 		$wpdb->insert(
 			$wpdb->posts,
 			array(
-				'post_author'               => $new_post_author->ID,
-				'post_date'                 => $new_post_date,
-				'post_date_gmt'             => $new_post_date_gmt,
-				'post_content'              => $post->post_content,
-				'post_content_filtered'     => $post->post_content_filtered,
-				'post_title'                => $post->post_title . $suffix,
-				'post_excerpt'              => $post->post_excerpt,
-				'post_status'               => $post_status,
-				'post_type'                 => $post->post_type,
-				'comment_status'            => $post->comment_status,
-				'ping_status'               => $post->ping_status,
-				'post_password'             => $post->post_password,
-				'to_ping'                   => $post->to_ping,
-				'pinged'                    => $post->pinged,
-				'post_modified'             => $new_post_date,
-				'post_modified_gmt'         => $new_post_date_gmt,
-				'post_parent'               => $post_parent,
-				'menu_order'                => $post->menu_order,
-				'post_mime_type'            => $post->post_mime_type
+				'post_author'           => $new_post_author->ID,
+				'post_date'             => $new_post_date,
+				'post_date_gmt'         => $new_post_date_gmt,
+				'post_content'          => $post->post_content,
+				'post_content_filtered' => $post->post_content_filtered,
+				'post_title'            => $post->post_title . $suffix,
+				'post_excerpt'          => $post->post_excerpt,
+				'post_status'           => $post_status,
+				'post_type'             => $post->post_type,
+				'comment_status'        => $post->comment_status,
+				'ping_status'           => $post->ping_status,
+				'post_password'         => $post->post_password,
+				'to_ping'               => $post->to_ping,
+				'pinged'                => $post->pinged,
+				'post_modified'         => $new_post_date,
+				'post_modified_gmt'     => $new_post_date_gmt,
+				'post_parent'           => $post_parent,
+				'menu_order'            => $post->menu_order,
+				'post_mime_type'        => $post->post_mime_type
 			)
 		);
 
@@ -181,7 +180,7 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Get a product from the database to duplicate.
 	 *
-	 * @param mixed $id
+	 * @param  mixed        $id
 	 * @return WP_Post|bool
 	 * @todo Returning false? Need to check for it in...
 	 * @see duplicate_product
@@ -197,7 +196,7 @@ class WC_Admin_Duplicate_Product {
 
 		$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
 
-		if ( isset( $post->post_type ) && $post->post_type == "revision" ) {
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
 			$id   = $post->post_parent;
 			$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
 		}
@@ -249,13 +248,14 @@ class WC_Admin_Duplicate_Product {
 			$sql_query     = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
 
 			foreach ( $post_meta as $post_meta_row ) {
-				$sql_query_sel[] = $wpdb->prepare( "SELECT %d, %s, %s", $new_id, $post_meta_row->meta_key, $post_meta_row->meta_value );
+				$sql_query_sel[] = $wpdb->prepare( 'SELECT %d, %s, %s', $new_id, $post_meta_row->meta_key, $post_meta_row->meta_value );
 			}
 
-			$sql_query .= implode( " UNION ALL ", $sql_query_sel );
+			$sql_query .= implode( ' UNION ALL ', $sql_query_sel );
 			$wpdb->query( $sql_query );
 		}
 	}
+
 }
 
 endif;

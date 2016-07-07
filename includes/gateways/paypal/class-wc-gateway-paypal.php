@@ -53,7 +53,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
 		$this->identity_token = $this->get_option( 'identity_token' );
 
-		self::$log_enabled    = $this->debug;
+		self::$log_enabled = $this->debug;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
@@ -107,12 +107,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	protected function get_icon_url( $country ) {
 		$url           = 'https://www.paypal.com/' . strtolower( $country );
-		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR');
+		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR' );
 		$countries     = array( 'DZ', 'AU', 'BH', 'BQ', 'BW', 'CA', 'CN', 'CW', 'FI', 'FR', 'DE', 'GR', 'HK', 'IN', 'ID', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'TW', 'TH', 'AE', 'GB', 'US', 'VN' );
 
 		if ( in_array( $country, $home_counties ) ) {
 			return  $url . '/webapps/mpp/home';
-		} else if ( in_array( $country, $countries ) ) {
+		} elseif ( in_array( $country, $countries ) ) {
 			return $url . '/webapps/mpp/paypal-popup';
 		} else {
 			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
@@ -122,7 +122,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get PayPal images for a country.
 	 * @param  string $country
-	 * @return array of image URLs
+	 * @return array           of image URLs
 	 */
 	protected function get_icon_image( $country ) {
 		switch ( $country ) {
@@ -232,7 +232,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Process the payment and return the result.
-	 * @param  int $order_id
+	 * @param  int   $order_id
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
@@ -261,7 +261,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  int    $order_id
 	 * @param  float  $amount
 	 * @param  string $reason
-	 * @return bool True or false based on success, or a WP_Error object
+	 * @return bool             True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
@@ -296,4 +296,5 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
 	}
+
 }

@@ -26,4 +26,5 @@ class WC_CLI_Tool extends WC_CLI_Command {
 
 		WP_CLI::success( 'Product transients and shop order transients were cleared.' );
 	}
+
 }

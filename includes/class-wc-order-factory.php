@@ -20,7 +20,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order.
 	 *
-	 * @param bool $the_order (default: false)
+	 * @param  bool          $the_order (default: false)
 	 * @return WC_Order|bool
 	 */
 	public function get_order( $the_order = false ) {
@@ -56,4 +56,5 @@ class WC_Order_Factory {
 
 		return new $classname( $the_order );
 	}
+
 }

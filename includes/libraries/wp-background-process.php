@@ -81,9 +81,9 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Push to queue
 		 *
-		 * @param mixed $data Data.
+		 * @param  mixed $data Data.
 		 *
-		 * @return $this
+		 * @return       $this
 		 */
 		public function push_to_queue( $data ) {
 			$this->data[] = $data;
@@ -109,10 +109,10 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Update queue
 		 *
-		 * @param string $key Key.
-		 * @param array  $data Data.
+		 * @param  string $key  Key.
+		 * @param  array  $data Data.
 		 *
-		 * @return $this
+		 * @return        $this
 		 */
 		public function update( $key, $data ) {
 			if ( ! empty( $data ) ) {
@@ -125,9 +125,9 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Delete queue
 		 *
-		 * @param string $key Key.
+		 * @param  string $key  Key.
 		 *
-		 * @return $this
+		 * @return        $this
 		 */
 		public function delete( $key ) {
 			delete_site_option( $key );
@@ -141,7 +141,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * Generates a unique key based on microtime. Queue items are
 		 * given a unique key so that they can be merged upon save.
 		 *
-		 * @param int $length Length.
+		 * @param  int    $length Length.
 		 *
 		 * @return string
 		 */
@@ -404,7 +404,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * Schedule cron healthcheck
 		 *
 		 * @access public
-		 * @param mixed $schedules Schedules.
+		 * @param  mixed $schedules Schedules.
 		 * @return mixed
 		 */
 		public function schedule_cron_healthcheck( $schedules ) {
@@ -470,7 +470,6 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * Cancel Process
 		 *
 		 * Stop processing queue items, clear cronjob and delete batch.
-		 *
 		 */
 		public function cancel_process() {
 			if ( ! $this->is_queue_empty() ) {
@@ -480,7 +479,6 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 
 				wp_clear_scheduled_hook( $this->cron_hook_identifier );
 			}
-
 		}
 
 		/**
@@ -491,7 +489,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * in the next pass through. Or, return false to remove the
 		 * item from the queue.
 		 *
-		 * @param mixed $item Queue item to iterate over.
+		 * @param  mixed $item Queue item to iterate over.
 		 *
 		 * @return mixed
 		 */

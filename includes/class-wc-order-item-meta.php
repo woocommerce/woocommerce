@@ -31,7 +31,7 @@ class WC_Order_Item_Meta {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $item defaults to array()
+	 * @param array       $item    defaults to array()
 	 * @param \WC_Product $product defaults to null
 	 */
 	public function __construct( $item = array(), $product = null ) {
@@ -50,10 +50,10 @@ class WC_Order_Item_Meta {
 	/**
 	 * Display meta in a formatted list.
 	 *
-	 * @param bool $flat (default: false)
-	 * @param bool $return (default: false)
-	 * @param string $hideprefix (default: _)
-	 * @param  string $delimiter Delimiter used to separate items when $flat is true
+	 * @param  bool        $flat       (default: false)
+	 * @param  bool        $return     (default: false)
+	 * @param  string      $hideprefix (default: _)
+	 * @param  string      $delimiter  Delimiter used to separate items when $flat is true
 	 * @return string|void
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_', $delimiter = ", \n" ) {
@@ -96,14 +96,14 @@ class WC_Order_Item_Meta {
 	 * Return an array of formatted item meta in format e.g.
 	 *
 	 * array(
-	 *   'pa_size' => array(
+	 * 'pa_size' => array(
 	 *     'label' => 'Size',
 	 *     'value' => 'Medium',
-	 *   )
+	 * )
 	 * )
 	 *
 	 * @since 2.4
-	 * @param string $hideprefix exclude meta when key is prefixed with this, defaults to `_`
+	 * @param  string $hideprefix exclude meta when key is prefixed with this, defaults to `_`
 	 * @return array
 	 */
 	public function get_formatted( $hideprefix = '_' ) {
@@ -115,7 +115,7 @@ class WC_Order_Item_Meta {
 
 		if ( ! empty( $this->item['item_meta_array'] ) ) {
 			foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-				if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
+				if ( '' === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
 					continue;
 				}
 
@@ -192,4 +192,5 @@ class WC_Order_Item_Meta {
 
 		return $formatted_meta;
 	}
+
 }

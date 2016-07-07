@@ -59,7 +59,6 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Manages the three separate stages of the CSV import process.
 	 */
 	public function dispatch() {
-
 		$this->header();
 
 		$step = empty( $_GET['step'] ) ? 0 : (int) $_GET['step'];
@@ -107,8 +106,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	/**
 	 * UTF-8 encode the data if `$enc` value isn't UTF-8.
 	 *
-	 * @param mixed $data
-	 * @param string $enc
+	 * @param  mixed  $data
+	 * @param  string $enc
 	 * @return string
 	 */
 	public function format_data_from_csv( $data, $enc ) {
@@ -129,7 +128,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		$loop = 0;
 
-		if ( ( $handle = fopen( $file, "r" ) ) !== false ) {
+		if ( ( $handle = fopen( $file, 'r' ) ) !== false ) {
 
 			$header = fgetcsv( $handle, 0, $this->delimiter );
 
@@ -175,7 +174,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Performs post-import cleanup of files and the cache.
 	 */
 	public function import_end() {
-		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=wc-settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
 
 		do_action( 'import_end' );
 	}
@@ -225,23 +224,22 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Output information about the uploading process.
 	 */
 	public function greet() {
-
 		echo '<div class="narrow">';
-		echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
+		echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ) . '</p>';
 
 		echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), WC()->plugin_url() . '/dummy-data/sample_tax_rates.csv' ) . '</p>';
 
 		$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 
-		$bytes = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
-		$size = size_format( $bytes );
+		$bytes      = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
+		$size       = size_format( $bytes );
 		$upload_dir = wp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) :
 			?><div class="error"><p><?php _e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
 			<p><strong><?php echo $upload_dir['error']; ?></strong></p></div><?php
 		else :
 			?>
-			<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr(wp_nonce_url($action, 'import-upload')); ?>">
+			<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr( wp_nonce_url( $action, 'import-upload' ) ); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr>
@@ -252,7 +250,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 								<input type="file" id="upload" name="import" size="25" />
 								<input type="hidden" name="action" value="save" />
 								<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
-								<small><?php printf( __('Maximum size: %s', 'woocommerce' ), $size ); ?></small>
+								<small><?php printf( __( 'Maximum size: %s', 'woocommerce' ), $size ); ?></small>
 							</td>
 						</tr>
 						<tr>
@@ -281,7 +279,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 	/**
 	 * Show import error and quit.
-	 * @param  string $message
+	 * @param string $message
 	 */
 	private function import_error( $message = '' ) {
 		echo '<p><strong>' . __( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
@@ -297,9 +295,10 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Added to http_request_timeout filter to force timeout at 60 seconds during import.
 	 *
 	 * @param  int $val
-	 * @return int 60
+	 * @return int      60
 	 */
 	public function bump_request_timeout( $val ) {
 		return 60;
 	}
+
 }

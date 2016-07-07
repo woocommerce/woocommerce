@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_auth_page_header' ); ?>
 
-<h1><?php printf( __( '%s would like to connect to your store' , 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
+<h1><?php printf( __( '%s would like to connect to your store', 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
 
 <?php wc_print_notices(); ?>
 
@@ -46,4 +46,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</p>
 </form>
 
-<?php do_action( 'woocommerce_auth_page_footer' ); ?>
+<?php do_action( 'woocommerce_auth_page_footer' );

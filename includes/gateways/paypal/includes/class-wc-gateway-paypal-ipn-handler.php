@@ -17,7 +17,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Constructor.
 	 *
-	 * @param bool $sandbox
+	 * @param bool   $sandbox
 	 * @param string $receiver_email
 	 */
 	public function __construct( $sandbox = false, $receiver_email = '' ) {
@@ -44,7 +44,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 	/**
 	 * There was a valid response.
-	 * @param  array $posted Post data after wp_unslash
+	 * @param array $posted Post data after wp_unslash
 	 */
 	public function valid_response( $posted ) {
 		if ( ! empty( $posted['custom'] ) && ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
@@ -73,7 +73,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
-		$validate_ipn = array( 'cmd' => '_notify-validate' );
+		$validate_ipn  = array( 'cmd' => '_notify-validate' );
 		$validate_ipn += wp_unslash( $_POST );
 
 		// Send back post vars to paypal
@@ -123,7 +123,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check currency from IPN matches the order.
 	 * @param WC_Order $order
-	 * @param string $currency
+	 * @param string   $currency
 	 */
 	protected function validate_currency( $order, $currency ) {
 		if ( $order->get_order_currency() != $currency ) {
@@ -138,7 +138,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check payment amount from IPN matches the order.
 	 * @param WC_Order $order
-	 * @param int $amount
+	 * @param int      $amount
 	 */
 	protected function validate_amount( $order, $amount ) {
 		if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $amount, 2, '.', '' ) ) {
@@ -154,7 +154,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check receiver email from PayPal. If the receiver email in the IPN is different than what is stored in.
 	 * WooCommerce -> Settings -> Checkout -> PayPal, it will log an error about it.
 	 * @param WC_Order $order
-	 * @param string $receiver_email
+	 * @param string   $receiver_email
 	 */
 	protected function validate_receiver_email( $order, $receiver_email ) {
 		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) != 0 ) {
@@ -169,7 +169,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a completed payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_completed( $order, $posted ) {
 		if ( $order->has_status( 'completed' ) ) {
@@ -199,7 +199,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a pending payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_pending( $order, $posted ) {
 		$this->payment_status_completed( $order, $posted );
@@ -208,7 +208,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a failed payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_failed( $order, $posted ) {
 		$order->update_status( 'failed', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), wc_clean( $posted['payment_status'] ) ) );
@@ -217,7 +217,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a denied payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_denied( $order, $posted ) {
 		$this->payment_status_failed( $order, $posted );
@@ -226,7 +226,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle an expired payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_expired( $order, $posted ) {
 		$this->payment_status_failed( $order, $posted );
@@ -235,7 +235,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a voided payment.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_voided( $order, $posted ) {
 		$this->payment_status_failed( $order, $posted );
@@ -244,7 +244,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a refunded order.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_refunded( $order, $posted ) {
 		// Only handle full refunds, not partial.
@@ -263,7 +263,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a reveral.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_reversed( $order, $posted ) {
 		$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), wc_clean( $posted['payment_status'] ) ) );
@@ -277,7 +277,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a cancelled reveral.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function payment_status_canceled_reversal( $order, $posted ) {
 		$this->send_ipn_email_notification(
@@ -289,7 +289,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Save important data from the IPN to the order.
 	 * @param WC_Order $order
-	 * @param array $posted
+	 * @param array    $posted
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {
 		if ( ! empty( $posted['payer_email'] ) ) {
@@ -318,4 +318,5 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		$mailer->send( ! empty( $new_order_settings['recipient'] ) ? $new_order_settings['recipient'] : get_option( 'admin_email' ), strip_tags( $subject ), $message );
 	}
+
 }

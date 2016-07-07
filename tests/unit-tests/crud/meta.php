@@ -35,8 +35,8 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		$meta_data = $object->get_meta_data();
@@ -53,11 +53,11 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Test getting meta by ID.
 	 */
 	function test_get_meta() {
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		// test single meta key
@@ -79,7 +79,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 */
 	function test_set_meta_data() {
 		global $wpdb;
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
 		add_metadata( 'post', $object_id, 'test_meta_key_2', 'val2', true );
@@ -110,9 +110,9 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Test adding meta data.
 	 */
 	function test_add_meta_data() {
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
-		$data = 'add_meta_data_' . time();
+		$data      = 'add_meta_data_' . time();
 		$object->add_meta_data( 'test_new_field', $data );
 		$meta = $object->get_meta( 'test_new_field' );
 		$this->assertEquals( $data, $meta );
@@ -123,15 +123,15 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 */
 	function test_update_meta_data() {
 		global $wpdb;
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
 		$object->read( $object_id );
 
 		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
 
-		$metadata     = array();
-		$meta_id = $wpdb->get_var( $wpdb->prepare( "
+		$metadata = array();
+		$meta_id  = $wpdb->get_var( $wpdb->prepare( "
 			SELECT meta_id
 			FROM {$wpdb->prefix}postmeta
 			WHERE post_id = %d LIMIT 1
@@ -145,7 +145,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Test deleting meta.
 	 */
 	function test_delete_meta_data() {
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
 		$object->read( $object_id );
@@ -157,13 +157,12 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
 	}
 
-
 	/**
 	 * Test saving metadata.. (Actually making sure changes are written to DB)
 	 */
 	function test_save_meta_data() {
 		global $wpdb;
-		$object = $this->create_test_post();
+		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
 		add_metadata( 'post', $object_id, 'test_meta_key_2', 'val2', true );
@@ -190,7 +189,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Test reading/getting user meta data too.
 	 */
 	function test_usermeta() {
-		$object = $this->create_test_user();
+		$object    = $this->create_test_user();
 		$object_id = $object->get_id();
 		add_metadata( 'user', $object_id, 'test_meta_key', 'val1', true );
 		add_metadata( 'user', $object_id, 'test_meta_key_2', 'val2', true );

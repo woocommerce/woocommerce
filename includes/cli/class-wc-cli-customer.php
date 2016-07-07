@@ -175,7 +175,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 			$user      = $this->get_user( $args[0] );
 			$downloads = array();
 			foreach ( wc_get_customer_available_downloads( $user['id'] ) as $key => $download ) {
-				$downloads[ $key ] = $download;
+				$downloads[ $key ]                   = $download;
 				$downloads[ $key ]['access_expires'] = $this->format_datetime( $download['access_expires'] );
 			}
 			$downloads = apply_filters( 'woocommerce_cli_customer_downloads', $downloads, $user, $assoc_args );
@@ -373,7 +373,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 
 		if ( 'ids' === $formatter->format ) {
 			$query_args['fields'] = 'ids';
-			$query = new WP_User_Query( $query_args );
+			$query                = new WP_User_Query( $query_args );
 			echo implode( ' ', $query->results );
 		} else {
 			$query = new WP_User_Query( $query_args );
@@ -527,7 +527,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  array $users Array of user
-	 * @return array Items
+	 * @return array        Items
 	 */
 	protected function format_users_to_items( $users ) {
 		$items = array();
@@ -556,7 +556,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 
 		if ( is_numeric( $id_email_or_login ) ) {
 			$user = get_user_by( 'id', $id_email_or_login );
-		} else if ( is_email( $id_email_or_login ) ) {
+		} elseif ( is_email( $id_email_or_login ) ) {
 			$user = get_user_by( 'email', $id_email_or_login );
 		} else {
 			$user = get_user_by( 'login', $id_email_or_login );
@@ -630,7 +630,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 *
 	 * @since  2.5.0
 	 * @param  string $email the customer's email
-	 * @return string the URL to the customer's avatar
+	 * @return string        the URL to the customer's avatar
 	 */
 	protected function get_avatar_url( $email ) {
 		$avatar_html = get_avatar( $email );
@@ -739,4 +739,5 @@ class WC_CLI_Customer extends WC_CLI_Command {
 			'access_expires',
 		) );
 	}
+
 }

@@ -26,20 +26,20 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$this->widget_id          = 'woocommerce_price_filter';
 		$this->widget_name        = __( 'WooCommerce Price Filter', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title' => array(
 				'type'  => 'text',
 				'std'   => __( 'Filter by price', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
 			)
 		);
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix                   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch' ), WC_VERSION, true );
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
+			'currency_symbol' => get_woocommerce_currency_symbol(),
+			'currency_pos'    => get_option( 'woocommerce_currency_pos' ),
+			'min_price'       => isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
+			'max_price'       => isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
 		) );
 		parent::__construct();
 	}
@@ -79,7 +79,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$fields .= '<input type="hidden" name="post_type" value="' . esc_attr( $_GET['post_type'] ) . '" />';
 		}
 
-		if ( ! empty ( $_GET['product_cat'] ) ) {
+		if ( ! empty( $_GET['product_cat'] ) ) {
 			$fields .= '<input type="hidden" name="product_cat" value="' . esc_attr( $_GET['product_cat'] ) . '" />';
 		}
 
@@ -202,4 +202,5 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		return $wpdb->get_row( $sql );
 	}
+
 }

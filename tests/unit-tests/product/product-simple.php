@@ -303,7 +303,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product->backorders = 'notify';
+		$product->backorders   = 'notify';
 		$product->manage_stock = 'yes';
 		$this->assertTrue( $product->backorders_require_notification() );
 
@@ -313,11 +313,12 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product->backorders = 'no';
 		$this->assertFalse( $product->backorders_require_notification() );
 
-		$product->backorders = 'yes';
+		$product->backorders   = 'yes';
 		$product->manage_stock = 'no';
 		$this->assertFalse( $product->backorders_require_notification() );
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );
 	}
+
 }

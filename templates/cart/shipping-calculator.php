@@ -38,8 +38,9 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 			<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
 				<option value=""><?php _e( 'Select a country&hellip;', 'woocommerce' ); ?></option>
 				<?php
-					foreach( WC()->countries->get_shipping_countries() as $key => $value )
+					foreach ( WC()->countries->get_shipping_countries() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '"' . selected( WC()->customer->get_shipping_country(), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
+					}
 				?>
 			</select>
 		</p>
@@ -62,8 +63,9 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 						<select name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / county', 'woocommerce' ); ?>">
 							<option value=""><?php _e( 'Select a state&hellip;', 'woocommerce' ); ?></option>
 							<?php
-								foreach ( $states as $ckey => $cvalue )
-									echo '<option value="' . esc_attr( $ckey ) . '" ' . selected( $current_r, $ckey, false ) . '>' . __( esc_html( $cvalue ), 'woocommerce' ) .'</option>';
+								foreach ( $states as $ckey => $cvalue ) {
+									echo '<option value="' . esc_attr( $ckey ) . '" ' . selected( $current_r, $ckey, false ) . '>' . __( esc_html( $cvalue ), 'woocommerce' ) . '</option>';
+								}
 							?>
 						</select>
 					</span><?php
@@ -99,4 +101,4 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 	</section>
 </form>
 
-<?php do_action( 'woocommerce_after_shipping_calculator' ); ?>
+<?php do_action( 'woocommerce_after_shipping_calculator' );

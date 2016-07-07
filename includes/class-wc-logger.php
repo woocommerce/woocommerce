@@ -44,9 +44,9 @@ class WC_Logger {
 	/**
 	 * Open log file for writing.
 	 *
-	 * @param string $handle
-	 * @param string $mode
-	 * @return bool success
+	 * @param  string $handle
+	 * @param  string $mode
+	 * @return bool           success
 	 */
 	protected function open( $handle, $mode = 'a' ) {
 		if ( isset( $this->_handles[ $handle ] ) ) {
@@ -63,8 +63,8 @@ class WC_Logger {
 	/**
 	 * Close a handle.
 	 *
-	 * @param string $handle
-	 * @return bool success
+	 * @param  string $handle
+	 * @return bool           success
 	 */
 	protected function close( $handle ) {
 		$result = false;
@@ -80,8 +80,8 @@ class WC_Logger {
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param string $handle
-	 * @param string $message
+	 * @param  string $handle
+	 * @param  string $message
 	 *
 	 * @return bool
 	 */
@@ -90,7 +90,7 @@ class WC_Logger {
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
-			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+			$result = fwrite( $this->_handles[ $handle ], $time . ' ' . $message . "\n" );
 		}
 
 		do_action( 'woocommerce_log_add', $handle, $message );
@@ -101,7 +101,7 @@ class WC_Logger {
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @param string $handle
+	 * @param  string $handle
 	 *
 	 * @return bool
 	 */

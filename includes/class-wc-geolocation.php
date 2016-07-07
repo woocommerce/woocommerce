@@ -118,7 +118,7 @@ class WC_Geolocation {
 	/**
 	 * Geolocate an IP address.
 	 * @param  string $ip_address
-	 * @param  bool   $fallback If true, fallbacks to alternative IP detection (can be slower).
+	 * @param  bool   $fallback     If true, fallbacks to alternative IP detection (can be slower).
 	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
@@ -240,7 +240,7 @@ class WC_Geolocation {
 
 	/**
 	 * Use APIs to Geolocate the user.
-	 * @param  string $ip_address
+	 * @param  string      $ip_address
 	 * @return string|bool
 	 */
 	private static function geolocate_via_api( $ip_address ) {
@@ -296,6 +296,7 @@ class WC_Geolocation {
 	private static function is_IPv6( $ip_address ) {
 		return false !== filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
 	}
+
 }
 
 WC_Geolocation::init();

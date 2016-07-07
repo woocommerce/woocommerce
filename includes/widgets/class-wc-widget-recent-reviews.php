@@ -50,7 +50,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 * @param array $args
 	 * @param array $instance
 	 */
-	 public function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		global $comments, $comment;
 
 		if ( $this->get_cached_widget( $args ) ) {
@@ -99,4 +99,5 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 		$this->cache_widget( $args, $content );
 	}
+
 }

@@ -13,7 +13,6 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_coupon_types() {
-
 		$coupon_types = array(
 			'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
 			'percent'         => __( 'Cart % Discount', 'woocommerce' ),
@@ -30,7 +29,6 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_coupon_type() {
-
 		$this->assertEquals( 'Cart Discount', wc_get_coupon_type( 'fixed_cart' ) );
 		$this->assertEmpty( wc_get_coupon_type( 'bogus_type' ) );
 	}

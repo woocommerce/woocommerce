@@ -67,9 +67,9 @@ class WC_Admin_Menus {
 	 */
 	public function reports_menu() {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
-			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
+			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
-			add_menu_page( __( 'Sales Reports', 'woocommerce' ),  __( 'Sales Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
+			add_menu_page( __( 'Sales Reports', 'woocommerce' ), __( 'Sales Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
 		}
 	}
 
@@ -77,7 +77,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function settings_menu() {
-		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
+		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ), __( 'Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
 
 		add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
@@ -94,7 +94,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ), __( 'System Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 		register_setting( 'woocommerce_status_settings_fields', 'woocommerce_status_options' );
 	}
 
@@ -102,7 +102,7 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ), __( 'Add-ons', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -151,7 +151,7 @@ class WC_Admin_Menus {
 	/**
 	 * Reorder the WC menu items in admin.
 	 *
-	 * @param mixed $menu_order
+	 * @param  mixed $menu_order
 	 * @return array
 	 */
 	public function menu_order( $menu_order ) {
@@ -309,6 +309,7 @@ class WC_Admin_Menus {
 			'href'   => wc_get_page_permalink( 'shop' )
 		) );
 	}
+
 }
 
 endif;

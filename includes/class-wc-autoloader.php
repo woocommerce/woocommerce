@@ -26,8 +26,8 @@ class WC_Autoloader {
 	 * The Constructor.
 	 */
 	public function __construct() {
-		if ( function_exists( "__autoload" ) ) {
-			spl_autoload_register( "__autoload" );
+		if ( function_exists( '__autoload' ) ) {
+			spl_autoload_register( '__autoload' );
 		}
 
 		spl_autoload_register( array( $this, 'autoload' ) );
@@ -49,7 +49,7 @@ class WC_Autoloader {
 	 * Include a class file.
 	 *
 	 * @param  string $path
-	 * @return bool successful or not
+	 * @return bool         successful or not
 	 */
 	private function load_file( $path ) {
 		if ( $path && is_readable( $path ) ) {
@@ -91,6 +91,7 @@ class WC_Autoloader {
 			$this->load_file( $this->include_path . $file );
 		}
 	}
+
 }
 
 new WC_Autoloader();

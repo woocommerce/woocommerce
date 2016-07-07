@@ -46,7 +46,7 @@ class WC_Auth {
 	 *
 	 * @since  2.4.0
 	 *
-	 * @param  array $vars
+	 * @param  array    $vars
 	 *
 	 * @return string[]
 	 */
@@ -95,7 +95,7 @@ class WC_Auth {
 	 */
 	protected function get_permissions_in_scope( $scope ) {
 		$permissions = array();
-		switch ( $scope )  {
+		switch ( $scope ) {
 			case 'read' :
 				$permissions[] = __( 'View coupons', 'woocommerce' );
 				$permissions[] = __( 'View customers', 'woocommerce' );
@@ -125,7 +125,7 @@ class WC_Auth {
 	 *
 	 * @since  2.4.0
 	 *
-	 * @param  array $data
+	 * @param  array  $data
 	 * @param  string $endpoint
 	 *
 	 * @return string
@@ -134,11 +134,11 @@ class WC_Auth {
 		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, home_url( '/' ) );
 
 		return add_query_arg( array(
-			'app_name'            => wc_clean( $data['app_name'] ),
-			'user_id'             => wc_clean( $data['user_id'] ),
-			'return_url'          => urlencode( $this->get_formatted_url( $data['return_url'] ) ),
-			'callback_url'        => urlencode( $this->get_formatted_url( $data['callback_url'] ) ),
-			'scope'               => wc_clean( $data['scope'] ),
+			'app_name'     => wc_clean( $data['app_name'] ),
+			'user_id'      => wc_clean( $data['user_id'] ),
+			'return_url'   => urlencode( $this->get_formatted_url( $data['return_url'] ) ),
+			'callback_url' => urlencode( $this->get_formatted_url( $data['callback_url'] ) ),
+			'scope'        => wc_clean( $data['scope'] ),
 		), $url );
 	}
 
@@ -260,9 +260,9 @@ class WC_Auth {
 	 */
 	protected function post_consumer_data( $consumer_data, $url ) {
 		$params = array(
-			'body'      => json_encode( $consumer_data ),
-			'timeout'   => 60,
-			'headers'   => array(
+			'body'    => json_encode( $consumer_data ),
+			'timeout' => 60,
+			'headers' => array(
 				'Content-Type' => 'application/json;charset=' . get_bloginfo( 'charset' ),
 			)
 		);
@@ -271,7 +271,7 @@ class WC_Auth {
 
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( $response->get_error_message() );
-		} else if ( 200 != $response['response']['code'] ) {
+		} elseif ( 200 != $response['response']['code'] ) {
 			throw new Exception( __( 'An error occurred in the request and at the time were unable to send the consumer data', 'woocommerce' ) );
 		}
 
@@ -331,17 +331,17 @@ class WC_Auth {
 				exit;
 
 			// Redirect with user is logged in
-			} else if ( 'login' == $route && is_user_logged_in() ) {
+			} elseif ( 'login' == $route && is_user_logged_in() ) {
 				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'authorize' ) ) );
 				exit;
 
 			// Redirect with user is not logged in and trying to access the authorize endpoint
-			} else if ( 'authorize' == $route && ! is_user_logged_in() ) {
+			} elseif ( 'authorize' == $route && ! is_user_logged_in() ) {
 				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'login' ) ) );
 				exit;
 
 			// Authorize endpoint
-			} else if ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
+			} elseif ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
 				wc_get_template( 'auth/form-grant-access.php', array(
 					'app_name'    => $_REQUEST['app_name'],
 					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), $this->get_formatted_url( $_REQUEST['return_url'] ) ),
@@ -354,7 +354,7 @@ class WC_Auth {
 				exit;
 
 			// Granted access endpoint
-			} else if ( 'access_granted' == $route && current_user_can( 'manage_woocommerce' ) ) {
+			} elseif ( 'access_granted' == $route && current_user_can( 'manage_woocommerce' ) ) {
 				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( $_GET['wc_auth_nonce'], 'wc_auth_grant_access' ) ) {
 					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}
@@ -390,6 +390,7 @@ class WC_Auth {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key['key_id'] ), array( '%d' ) );
 		}
 	}
+
 }
 
 endif;

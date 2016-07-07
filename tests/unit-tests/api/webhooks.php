@@ -23,7 +23,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function setUp() {
-
 		parent::setUp();
 
 		$this->endpoint = WC()->api->WC_API_Webhooks;
@@ -35,14 +34,12 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 		$this->webhook_delivery_id = $this->factory->webhook_delivery->create( array( 'comment_post_ID' => $this->webhook->id ) );
 	}
 
-
 	/**
 	 * Test route registration.
 	 *
 	 * @since 2.2
 	 */
 	public function test_register_routes() {
-
 		$routes = $this->endpoint->register_routes( array() );
 
 		$this->assertArrayHasKey( '/webhooks', $routes );
@@ -58,7 +55,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhook() {
-
 		// invalid ID
 		$response = $this->endpoint->get_webhook( 0 );
 		$this->assertHasAPIError( 'woocommerce_api_invalid_webhook_id', 404, $response );
@@ -78,7 +74,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhook_without_permission() {
-
 		$this->disable_capability( 'read_private_shop_webhooks' );
 
 		$response = $this->endpoint->get_webhook( $this->webhook->id );
@@ -92,7 +87,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhooks() {
-
 		// valid request
 		$response = $this->endpoint->get_webhooks( null, null, 'active' );
 
@@ -109,7 +103,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhooks_without_permission() {
-
 		$this->disable_capability( 'read_private_shop_webhooks' );
 
 		$response = $this->endpoint->get_webhooks();
@@ -124,7 +117,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhooks_count() {
-
 		// paused status
 		$response = $this->endpoint->get_webhooks_count( 'paused' );
 		$this->assertArrayHasKey( 'count', $response );
@@ -152,7 +144,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhooks_count_without_permission() {
-
 		// invalid permissions
 		$this->disable_capability( 'read_private_shop_webhooks' );
 
@@ -167,7 +158,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook() {
-
 		$response = $this->endpoint->create_webhook( $this->get_defaults() );
 
 		$this->check_create_webhook_response( $response );
@@ -179,7 +169,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook_without_permission() {
-
 		$this->disable_capability( 'publish_shop_webhooks' );
 
 		$response = $this->endpoint->create_webhook( $this->get_defaults() );
@@ -193,7 +182,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook_custom_topic() {
-
 		$response = $this->endpoint->create_webhook( $this->get_defaults( array( 'topic' => 'action.woocommerce_cart_updated' ) ) );
 
 		$this->check_edit_webhook_response( $response );
@@ -205,7 +193,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook_invalid_topic() {
-
 		// empty
 		$response = $this->endpoint->create_webhook( $this->get_defaults( array( 'topic' => null ) ) );
 
@@ -228,7 +215,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook_invalid_delivery_url() {
-
 		// empty
 		$response = $this->endpoint->create_webhook( $this->get_defaults( array( 'delivery_url' => null ) ) );
 
@@ -251,7 +237,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_create_webhook_insert_post_failure() {
-
 		add_filter( 'wp_insert_post_empty_content', '__return_true' );
 
 		$response = $this->endpoint->create_webhook( $this->get_defaults() );
@@ -265,7 +250,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_edit_webhook() {
-
 		// invalid ID
 		$response = $this->endpoint->edit_webhook( 0, $this->get_defaults() );
 
@@ -288,7 +272,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_edit_webhook_without_permission() {
-
 		$this->disable_capability( 'edit_published_shop_webhooks' );
 
 		$response = $this->endpoint->edit_webhook( $this->webhook->id, $this->get_defaults() );
@@ -302,7 +285,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_edit_webhook_change_topic() {
-
 		// invalid topic
 		$response = $this->endpoint->edit_webhook( $this->webhook->id, $this->get_defaults( array( 'topic' => 'invalid.topic' ) ) );
 
@@ -320,7 +302,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_edit_webhook_change_delivery_url() {
-
 		// invalid delivery URL
 		$response = $this->endpoint->edit_webhook( $this->webhook->id, $this->get_defaults( array( 'delivery_url' => 'foo://bar' ) ) );
 
@@ -338,7 +319,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_delete_webhook() {
-
 		// invalid ID
 		$response = $this->endpoint->delete_webhook( 0 );
 
@@ -350,14 +330,12 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 		$this->assertEquals( 'Permanently deleted webhook', $response['message'] );
 	}
 
-
 	/**
 	 * Test GET /webhooks/{id}/deliveries.
 	 *
 	 * @since 2.2
 	 */
 	public function test_get_webhook_deliveries() {
-
 		// invalid ID
 		$response = $this->endpoint->get_webhook_deliveries( 0 );
 
@@ -373,14 +351,12 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 		$this->check_get_webhook_delivery_response( $response['webhook_deliveries'][0], $this->webhook->get_delivery_log( $response['webhook_deliveries'][0]['id'] ) );
 	}
 
-
 	/**
 	 * Test GET /webhooks/{id}/deliveries/{id}.
 	 *
 	 * @since 2.2
 	 */
 	public function test_get_webhook_delivery() {
-
 		$response = $this->endpoint->get_webhook_delivery( $this->webhook->id, $this->webhook_delivery_id );
 
 		$this->assertNotWPError( $response );
@@ -396,7 +372,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_webhook_delivery_invalid_ids() {
-
 		// invalid webhook ID
 		$response = $this->endpoint->get_webhook_delivery( 0, 0 );
 
@@ -407,7 +382,7 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 
 		$this->assertHasAPIError( 'woocommerce_api_invalid_webhook_delivery_id', 404, $response );
 
-		$post_id = $this->factory->post->create();
+		$post_id         = $this->factory->post->create();
 		$mock_comment_id = $this->factory->comment->create( array( 'comment_post_ID' => $post_id ) );
 
 		// invalid delivery (valid comment, but not the correct type)
@@ -420,11 +395,10 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * Get default arguments for creating/editing a webhook.
 	 *
 	 * @since 2.2
-	 * @param array $args
+	 * @param  array $args
 	 * @return array
 	 */
 	protected function get_defaults( $args = array() ) {
-
 		$defaults = array(
 			'name'         => rand_str(),
 			'topic'        => 'coupon.created',
@@ -439,8 +413,7 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 * @param $response
 	 */
-	protected function check_create_webhook_response( $response )  {
-
+	protected function check_create_webhook_response( $response ) {
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'webhook', $response );
 
@@ -454,7 +427,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @param $response
 	 */
 	protected function check_edit_webhook_response( $response ) {
-
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'webhook', $response );
 
@@ -465,14 +437,13 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * Ensure valid webhook data response.
 	 *
 	 * @since 2.2
-	 * @param array $response
+	 * @param array      $response
 	 * @param WC_Webhook $webhook
 	 */
 	protected function check_get_webhook_response( $response, $webhook ) {
-
 		$this->assertEquals( $webhook->id, $response['id'] );
 		$this->assertEquals( $webhook->get_name(), $response['name'] );
-		$this->assertEquals( $webhook->get_status() , $response['status'] );
+		$this->assertEquals( $webhook->get_status(), $response['status'] );
 		$this->assertEquals( $webhook->get_topic(), $response['topic'] );
 		$this->assertEquals( $webhook->get_resource(), $response['resource'] );
 		$this->assertEquals( $webhook->get_event(), $response['event'] );
@@ -490,7 +461,6 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @param array $delivery
 	 */
 	protected function check_get_webhook_delivery_response( $response, $delivery ) {
-
 		// normalize data
 		unset( $response['created_at'] );
 		unset( $delivery['comment'] );

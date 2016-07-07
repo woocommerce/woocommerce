@@ -52,7 +52,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param  string $section_id
+	 * @param  string      $section_id
 	 *
 	 * @return object|bool
 	 */
@@ -135,4 +135,5 @@ class WC_Admin_Addons {
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
 		include_once( 'views/html-admin-page-addons.php' );
 	}
+
 }

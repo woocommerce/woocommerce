@@ -30,7 +30,6 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id             = 'customer_note';
 		$this->customer_email = true;
 		$this->title          = __( 'Customer note', 'woocommerce' );
@@ -39,8 +38,8 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->template_html  = 'emails/customer-note.php';
 		$this->template_plain = 'emails/plain/customer-note.php';
 
-		$this->subject        = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce');
-		$this->heading        = __( 'A note has been added to your order', 'woocommerce');
+		$this->subject = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
+		$this->heading = __( 'A note has been added to your order', 'woocommerce' );
 
 		// Triggers
 		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
@@ -55,7 +54,6 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @param array $args
 	 */
 	public function trigger( $args ) {
-
 		if ( ! empty( $args ) ) {
 
 			$defaults = array(
@@ -68,11 +66,11 @@ class WC_Email_Customer_Note extends WC_Email {
 			extract( $args );
 
 			if ( $order_id && ( $this->object = wc_get_order( $order_id ) ) ) {
-				$this->recipient               = $this->object->billing_email;
-				$this->customer_note           = $customer_note;
+				$this->recipient     = $this->object->billing_email;
+				$this->customer_note = $customer_note;
 
-				$this->find['order-date']      = '{order_date}';
-				$this->find['order-number']    = '{order_number}';
+				$this->find['order-date']   = '{order_date}';
+				$this->find['order-number'] = '{order_number}';
 
 				$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 				$this->replace['order-number'] = $this->object->get_order_number();
@@ -101,7 +99,7 @@ class WC_Email_Customer_Note extends WC_Email {
 			'customer_note' => $this->customer_note,
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
 
@@ -118,9 +116,10 @@ class WC_Email_Customer_Note extends WC_Email {
 			'customer_note' => $this->customer_note,
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
+
 }
 
 endif;

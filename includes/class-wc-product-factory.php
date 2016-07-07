@@ -20,9 +20,9 @@ class WC_Product_Factory {
 	/**
 	 * Get a product.
 	 *
-	 * @param bool $the_product (default: false)
-	 * @param array $args (default: array())
-	 * @return WC_Product|bool false if the product cannot be loaded
+	 * @param  bool            $the_product (default: false)
+	 * @param  array           $args        (default: array())
+	 * @return WC_Product|bool              false if the product cannot be loaded
 	 */
 	public function get_product( $the_product = false, $args = array() ) {
 		try {
@@ -51,7 +51,7 @@ class WC_Product_Factory {
 
 	/**
 	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class.
-	 * @param  string $product_type
+	 * @param  string       $product_type
 	 * @return string|false
 	 */
 	private function get_classname_from_product_type( $product_type ) {
@@ -61,7 +61,7 @@ class WC_Product_Factory {
 	/**
 	 * Get the product class name.
 	 * @param  WP_Post $the_product
-	 * @param  array $args (default: array())
+	 * @param  array   $args        (default: array())
 	 * @return string
 	 */
 	private function get_product_class( $the_product, $args = array() ) {
@@ -75,7 +75,7 @@ class WC_Product_Factory {
 				$terms        = get_the_terms( $the_product, 'product_type' );
 				$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
 			}
-		} elseif( 'product_variation' === $post_type ) {
+		} elseif ( 'product_variation' === $post_type ) {
 			$product_type = 'variation';
 		} else {
 			$product_type = false;
@@ -89,7 +89,7 @@ class WC_Product_Factory {
 
 	/**
 	 * Get the product object.
-	 * @param  mixed $the_product
+	 * @param mixed $the_product
 	 * @uses   WP_Post
 	 * @return WP_Post|bool false on failure
 	 */
@@ -106,4 +106,5 @@ class WC_Product_Factory {
 
 		return apply_filters( 'woocommerce_product_object', $the_product );
 	}
+
 }

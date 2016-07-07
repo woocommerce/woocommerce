@@ -39,4 +39,5 @@ class WC_Helper_Shipping {
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		WC()->shipping->unregister_shipping_methods();
 	}
+
 }

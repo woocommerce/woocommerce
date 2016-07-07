@@ -14,7 +14,6 @@ class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_
 	 * @param null $factory
 	 */
 	public function __construct( $factory = null ) {
-
 		parent::__construct( $factory );
 
 		// set defaults
@@ -34,11 +33,10 @@ class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_comment::create_object()
-	 * @param array $args
-	 * @return int webhook delivery (comment) ID
+	 * @param  array $args
+	 * @return int         webhook delivery (comment) ID
 	 */
 	public function create_object( $args ) {
-
 		$id = parent::create_object( $args );
 
 		$comment_meta_args = array(

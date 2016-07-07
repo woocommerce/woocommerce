@@ -25,7 +25,6 @@ class WC_Meta_Box_Product_Short_Description {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-
 		$settings = array(
 			'textarea_name' => 'excerpt',
 			'quicktags'     => array( 'buttons' => 'em,strong,link' ),

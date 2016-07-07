@@ -54,7 +54,7 @@ class WC_Admin_Post_Types {
 
 		// Bulk / quick edit
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
-		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
+		add_action( 'quick_edit_custom_box', array( $this, 'quick_edit' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
@@ -123,48 +123,48 @@ class WC_Admin_Post_Types {
 		global $post, $post_ID;
 
 		$messages['product'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Product updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
-			7 => __( 'Product saved.', 'woocommerce' ),
-			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			0  => '', // Unused. Messages start at index 1.
+			1  => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Product updated.', 'woocommerce' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
+			7  => __( 'Product saved.', 'woocommerce' ),
+			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9  => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
+				date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
 			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
 		$messages['shop_order'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Order updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Order updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => __( 'Order updated.', 'woocommerce' ),
-			7 => __( 'Order saved.', 'woocommerce' ),
-			8 => __( 'Order submitted.', 'woocommerce' ),
-			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Order updated.', 'woocommerce' ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Order updated.', 'woocommerce' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => __( 'Order updated.', 'woocommerce' ),
+			7  => __( 'Order saved.', 'woocommerce' ),
+			8  => __( 'Order submitted.', 'woocommerce' ),
+			9  => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
+				date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and email sent.', 'woocommerce' )
 		);
 
 		$messages['shop_coupon'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Coupon updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Coupon updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => __( 'Coupon updated.', 'woocommerce' ),
-			7 => __( 'Coupon saved.', 'woocommerce' ),
-			8 => __( 'Coupon submitted.', 'woocommerce' ),
-			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Coupon updated.', 'woocommerce' ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Coupon updated.', 'woocommerce' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => __( 'Coupon updated.', 'woocommerce' ),
+			7  => __( 'Coupon saved.', 'woocommerce' ),
+			8  => __( 'Coupon submitted.', 'woocommerce' ),
+			9  => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
+				date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Coupon draft updated.', 'woocommerce' )
 		);
 
@@ -178,7 +178,6 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
-
 		$bulk_messages['product'] = array(
 			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'], 'woocommerce' ),
 			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
@@ -239,7 +238,6 @@ class WC_Admin_Post_Types {
 		$columns['date']         = __( 'Date', 'woocommerce' );
 
 		return array_merge( $columns, $existing_columns );
-
 	}
 
 	/**
@@ -310,7 +308,7 @@ class WC_Admin_Post_Types {
 				echo '</strong>';
 
 				if ( $post->post_parent > 0 ) {
-					echo '&nbsp;&nbsp;&larr; <a href="'. get_edit_post_link( $post->post_parent ) .'">'. get_the_title( $post->post_parent ) .'</a>';
+					echo '&nbsp;&nbsp;&larr; <a href="' . get_edit_post_link( $post->post_parent ) . '">' . get_the_title( $post->post_parent ) . '</a>';
 				}
 
 				// Excerpt view
@@ -391,7 +389,7 @@ class WC_Admin_Post_Types {
 				break;
 			case 'featured' :
 				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
-				echo '<a href="' . esc_url( $url ) . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+				echo '<a href="' . esc_url( $url ) . '" title="' . __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
 					echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
@@ -443,7 +441,7 @@ class WC_Admin_Post_Types {
 		$actions['id'] = 'ID: ' . $post->ID;
 
 		if ( $can_edit_post && 'trash' != $post->post_status ) {
-			$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item', 'woocommerce' ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+			$actions['edit']                 = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item', 'woocommerce' ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 			$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline', 'woocommerce' ) ) . '">' . __( 'Quick&nbsp;Edit', 'woocommerce' ) . '</a>';
 		}
 		if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
@@ -459,8 +457,9 @@ class WC_Admin_Post_Types {
 		}
 		if ( $post_type_object->public ) {
 			if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
-				if ( $can_edit_post )
+				if ( $can_edit_post ) {
 					$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
+				}
 			} elseif ( 'trash' != $post->post_status ) {
 				$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
 			}
@@ -470,7 +469,7 @@ class WC_Admin_Post_Types {
 
 		echo '<div class="row-actions">';
 
-		$i = 0;
+		$i            = 0;
 		$action_count = sizeof( $actions );
 
 		foreach ( $actions as $action => $link ) {
@@ -575,13 +574,13 @@ class WC_Admin_Post_Types {
 		if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 
 			if ( 'trash' == $post->post_status ) {
-				$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
+				$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . '</a>';
 			} elseif ( EMPTY_TRASH_DAYS ) {
-				$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
+				$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . '</a>';
 			}
 
 			if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
+				$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
 			}
 		}
 
@@ -589,7 +588,7 @@ class WC_Admin_Post_Types {
 
 		echo '<div class="row-actions">';
 
-		$i = 0;
+		$i            = 0;
 		$action_count = sizeof( $actions );
 
 		foreach ( $actions as $action => $link ) {
@@ -686,7 +685,7 @@ class WC_Admin_Post_Types {
 			case 'shipping_address' :
 
 				if ( $address = $the_order->get_formatted_shipping_address() ) {
-					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) .'</a>';
+					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
 				} else {
 					echo '&ndash;';
 				}
@@ -704,9 +703,9 @@ class WC_Admin_Post_Types {
 					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
 
 					$latest_notes = get_comments( array(
-						'post_id'   => $post->ID,
-						'number'    => 1,
-						'status'    => $status
+						'post_id' => $post->ID,
+						'number'  => 1,
+						'status'  => $status
 					) );
 
 					$latest_note = current( $latest_notes );
@@ -752,7 +751,7 @@ class WC_Admin_Post_Types {
 				} else {
 					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
 						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
-					} else if ( $the_order->billing_company ) {
+					} elseif ( $the_order->billing_company ) {
 						$username = trim( $the_order->billing_company );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
@@ -778,24 +777,24 @@ class WC_Admin_Post_Types {
 
 						if ( $the_order->has_status( array( 'pending', 'on-hold' ) ) ) {
 							$actions['processing'] = array(
-								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-								'name'      => __( 'Processing', 'woocommerce' ),
-								'action'    => "processing"
+								'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
+								'name'   => __( 'Processing', 'woocommerce' ),
+								'action' => 'processing'
 							);
 						}
 
 						if ( $the_order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
 							$actions['complete'] = array(
-								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-								'name'      => __( 'Complete', 'woocommerce' ),
-								'action'    => "complete"
+								'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
+								'name'   => __( 'Complete', 'woocommerce' ),
+								'action' => 'complete'
 							);
 						}
 
 						$actions['view'] = array(
-							'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-							'name'      => __( 'View', 'woocommerce' ),
-							'action'    => "view"
+							'url'    => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
+							'name'   => __( 'View', 'woocommerce' ),
+							'action' => 'view'
 						);
 
 						$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
@@ -858,11 +857,10 @@ class WC_Admin_Post_Types {
 	/**
 	 * Remove edit from the bulk actions.
 	 *
-	 * @param array $actions
+	 * @param  array $actions
 	 * @return array
 	 */
 	public function shop_order_bulk_actions( $actions ) {
-
 		if ( isset( $actions['edit'] ) ) {
 			unset( $actions['edit'] );
 		}
@@ -880,7 +878,6 @@ class WC_Admin_Post_Types {
 	 * @return string
 	 */
 	public function list_table_primary_column( $default, $screen_id ) {
-
 		if ( 'edit-product' === $screen_id ) {
 			return 'name';
 		}
@@ -899,7 +896,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Set row actions for products and orders.
 	 *
-	 * @param  array $actions
+	 * @param  array   $actions
 	 * @param  WP_Post $post
 	 *
 	 * @return array
@@ -934,9 +931,9 @@ class WC_Admin_Post_Types {
 		}
 
 		$class            = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
-		$query_string     = remove_query_arg(array( 'orderby', 'order' ));
-		$query_string     = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
-		$query_string     = add_query_arg( 'order', urlencode('ASC'), $query_string );
+		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
+		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
+		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
 		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
@@ -949,7 +946,6 @@ class WC_Admin_Post_Types {
 	 * @param mixed $post_type
 	 */
 	public function bulk_edit( $column_name, $post_type ) {
-
 		if ( 'price' != $column_name || 'product' != $post_type ) {
 			return;
 		}
@@ -968,7 +964,6 @@ class WC_Admin_Post_Types {
 	 * @param mixed $post_type
 	 */
 	public function quick_edit( $column_name, $post_type ) {
-
 		if ( 'price' != $column_name || 'product' != $post_type ) {
 			return;
 		}
@@ -983,12 +978,11 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick and bulk edit saving.
 	 *
-	 * @param int $post_id
-	 * @param WP_Post $post
+	 * @param  int     $post_id
+	 * @param  WP_Post $post
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
-
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return $post_id;
@@ -1038,7 +1032,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick edit.
 	 *
-	 * @param integer $post_id
+	 * @param integer    $post_id
 	 * @param WC_Product $product
 	 */
 	private function quick_edit_save( $post_id, $product ) {
@@ -1110,7 +1104,7 @@ class WC_Admin_Post_Types {
 			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
 		}
 
-		if ( $product->is_type('simple') || $product->is_type('external') ) {
+		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) {
 				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
@@ -1164,7 +1158,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle stock
-		if ( ! $product->is_type('grouped') ) {
+		if ( ! $product->is_type( 'grouped' ) ) {
 			if ( isset( $_REQUEST['_manage_stock'] ) ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
 				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
@@ -1183,11 +1177,10 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Bulk edit.
-	 * @param integer $post_id
+	 * @param integer    $post_id
 	 * @param WC_Product $product
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
-
 		$old_regular_price = $product->regular_price;
 		$old_sale_price    = $product->sale_price;
 
@@ -1258,14 +1251,13 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
 			if ( $_REQUEST['_sold_individually'] == 'yes' ) {
 				update_post_meta( $post_id, '_sold_individually', 'yes' );
-			}
-			else {
+			} else {
 				update_post_meta( $post_id, '_sold_individually', '' );
 			}
 		}
 
 		// Handle price - remove dates and set to lowest
-		$change_price_product_types = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
+		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
 		$can_product_type_change_price = false;
 		foreach ( $change_price_product_types as $product_type ) {
 			if ( $product->is_type( $product_type ) ) {
@@ -1281,7 +1273,7 @@ class WC_Admin_Post_Types {
 			if ( ! empty( $_REQUEST['change_regular_price'] ) ) {
 
 				$change_regular_price = absint( $_REQUEST['change_regular_price'] );
-				$regular_price = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
+				$regular_price        = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
 
 				switch ( $change_regular_price ) {
 					case 1 :
@@ -1289,7 +1281,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 2 :
 						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
+							$percent   = str_replace( '%', '', $regular_price ) / 100;
 							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
@@ -1297,8 +1289,8 @@ class WC_Admin_Post_Types {
 						break;
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
+							$percent   = str_replace( '%', '', $regular_price ) / 100;
+							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
 						}
@@ -1310,7 +1302,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
-					$new_price = round( $new_price, wc_get_price_decimals() );
+					$new_price     = round( $new_price, wc_get_price_decimals() );
 					update_post_meta( $post_id, '_regular_price', $new_price );
 					$product->regular_price = $new_price;
 				}
@@ -1327,7 +1319,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 2 :
 						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+							$percent   = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = $old_sale_price + ( $old_sale_price * $percent );
 						} else {
 							$new_price = $old_sale_price + $sale_price;
@@ -1335,7 +1327,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 3 :
 						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+							$percent   = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
 							$new_price = max( 0, $old_sale_price - $sale_price );
@@ -1343,7 +1335,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 4 :
 						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+							$percent   = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
 							$new_price = max( 0, $product->regular_price - $sale_price );
@@ -1356,7 +1348,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
-					$new_price = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
+					$new_price     = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
 				}
@@ -1418,14 +1410,14 @@ class WC_Admin_Post_Types {
 			?>
 			<script type="text/javascript">
 			jQuery(function() {
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action2"]');
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' ); ?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' ); ?>').appendTo('select[name="action2"]');
 
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action2"]');
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' ); ?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' ); ?>').appendTo('select[name="action2"]');
 
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action2"]');
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' ); ?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' ); ?>').appendTo('select[name="action2"]');
 			});
 			</script>
 			<?php
@@ -1494,7 +1486,7 @@ class WC_Admin_Post_Types {
 
 			if ( isset( $_REQUEST[ 'marked_' . str_replace( 'wc-', '', $slug ) ] ) ) {
 
-				$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+				$number  = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
 
@@ -1531,7 +1523,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Change the label when searching orders.
 	 *
-	 * @param mixed $query
+	 * @param  mixed  $query
 	 * @return string
 	 */
 	public function shop_order_search_label( $query ) {
@@ -1555,7 +1547,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Query vars for custom searches.
 	 *
-	 * @param mixed $public_query_vars
+	 * @param  mixed $public_query_vars
 	 * @return array
 	 */
 	public function add_custom_query_var( $public_query_vars ) {
@@ -1575,7 +1567,7 @@ class WC_Admin_Post_Types {
 			$this->shop_order_filters();
 		} elseif ( 'product' == $typenow ) {
 			$this->product_filters();
-		} elseif( 'shop_coupon' == $typenow ) {
+		} elseif ( 'shop_coupon' == $typenow ) {
 			$this->shop_coupon_filters();
 		}
 	}
@@ -1662,8 +1654,9 @@ class WC_Admin_Post_Types {
 				foreach ( $types as $name => $type ) {
 					echo '<option value="' . esc_attr( $name ) . '"';
 
-					if ( isset( $_GET['coupon_type'] ) )
+					if ( isset( $_GET['coupon_type'] ) ) {
 						selected( $name, $_GET['coupon_type'] );
+					}
 
 					echo '>' . esc_html__( $type, 'woocommerce' ) . '</option>';
 				}
@@ -1702,20 +1695,20 @@ class WC_Admin_Post_Types {
 			if ( isset( $vars['orderby'] ) ) {
 				if ( 'price' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
-						'meta_key'  => '_price',
-						'orderby'   => 'meta_value_num'
+						'meta_key' => '_price',
+						'orderby'  => 'meta_value_num'
 					) );
 				}
 				if ( 'featured' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
-						'meta_key'  => '_featured',
-						'orderby'   => 'meta_value'
+						'meta_key' => '_featured',
+						'orderby'  => 'meta_value'
 					) );
 				}
 				if ( 'sku' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
-						'meta_key'  => '_sku',
-						'orderby'   => 'meta_value'
+						'meta_key' => '_sku',
+						'orderby'  => 'meta_value'
 					) );
 				}
 			}
@@ -1733,8 +1726,8 @@ class WC_Admin_Post_Types {
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 				$vars['meta_query'] = array(
 					array(
-						'key'   => '_customer_user',
-						'value' => (int) $_GET['_customer_user'],
+						'key'     => '_customer_user',
+						'value'   => (int) $_GET['_customer_user'],
 						'compare' => '='
 					)
 				);
@@ -1744,8 +1737,8 @@ class WC_Admin_Post_Types {
 			if ( isset( $vars['orderby'] ) ) {
 				if ( 'order_total' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
-						'meta_key'  => '_order_total',
-						'orderby'   => 'meta_value_num'
+						'meta_key' => '_order_total',
+						'orderby'  => 'meta_value_num'
 					) );
 				}
 			}
@@ -1780,15 +1773,15 @@ class WC_Admin_Post_Types {
 			if ( isset( $query->query_vars['product_type'] ) ) {
 				// Subtypes
 				if ( 'downloadable' == $query->query_vars['product_type'] ) {
-					$query->query_vars['product_type']  = '';
-					$query->is_tax = false;
-					$query->query_vars['meta_value']    = 'yes';
-					$query->query_vars['meta_key']      = '_downloadable';
+					$query->query_vars['product_type'] = '';
+					$query->is_tax                     = false;
+					$query->query_vars['meta_value']   = 'yes';
+					$query->query_vars['meta_key']     = '_downloadable';
 				} elseif ( 'virtual' == $query->query_vars['product_type'] ) {
-					$query->query_vars['product_type']  = '';
-					$query->is_tax = false;
-					$query->query_vars['meta_value']    = 'yes';
-					$query->query_vars['meta_key']      = '_virtual';
+					$query->query_vars['product_type'] = '';
+					$query->is_tax                     = false;
+					$query->query_vars['meta_value']   = 'yes';
+					$query->query_vars['meta_key']     = '_virtual';
 				}
 			}
 
@@ -1817,7 +1810,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Search by SKU or ID for products.
 	 *
-	 * @param string $where
+	 * @param  string $where
 	 * @return string
 	 */
 	public function product_search( $where ) {
@@ -1847,7 +1840,7 @@ class WC_Admin_Post_Types {
 		$search_ids = array_filter( array_unique( array_map( 'absint', $search_ids ) ) );
 
 		if ( sizeof( $search_ids ) > 0 ) {
-			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ")) OR ((", $where );
+			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ')) OR ((', $where );
 		}
 
 		return $where;
@@ -1988,7 +1981,7 @@ class WC_Admin_Post_Types {
 
 				delete_transient( 'woocommerce_processing_order_count' );
 				wc_delete_shop_order_transients( $id );
-			} else if ( 'product' === $post_type ) {
+			} elseif ( 'product' === $post_type ) {
 				// Check if SKU is valid before untrash the product.
 				$sku = get_post_meta( $id, '_sku', true );
 
@@ -2094,7 +2087,7 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
-		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : apply_filters( 'woocommerce_product_visibility_default' , 'visible' );
+		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : apply_filters( 'woocommerce_product_visibility_default', 'visible' );
 		$current_featured   = ( $current_featured = get_post_meta( $post->ID, '_featured', true ) ) ? $current_featured : 'no';
 
 		$visibility_options = apply_filters( 'woocommerce_product_visibility_options', array(
@@ -2106,7 +2099,7 @@ class WC_Admin_Post_Types {
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">
 			<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
-				echo isset( $visibility_options[ $current_visibility ]  ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
+				echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
 				if ( 'yes' == $current_featured ) {
 					echo ', ' . __( 'Featured', 'woocommerce' );
@@ -2143,17 +2136,16 @@ class WC_Admin_Post_Types {
 	/**
 	 * Filter the directory for uploads.
 	 *
-	 * @param array $pathdata
+	 * @param  array $pathdata
 	 * @return array
 	 */
 	public function upload_dir( $pathdata ) {
-
 		// Change upload dir for downloadable files
 		if ( isset( $_POST['type'] ) && 'downloadable_product' == $_POST['type'] ) {
 
 			if ( empty( $pathdata['subdir'] ) ) {
 				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url']. '/woocommerce_uploads';
+				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
 				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
@@ -2178,8 +2170,8 @@ class WC_Admin_Post_Types {
 	 * Grant downloadable file access to any newly added files on any existing.
 	 * orders for this product that have previously been granted downloadable file access.
 	 *
-	 * @param int $product_id product identifier
-	 * @param int $variation_id optional product variation identifier
+	 * @param int   $product_id         product identifier
+	 * @param int   $variation_id       optional product variation identifier
 	 * @param array $downloadable_files newly set files
 	 */
 	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
@@ -2193,8 +2185,8 @@ class WC_Admin_Post_Types {
 		$existing_download_ids = array_keys( (array) $product->get_files() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
-		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
-		$removed_download_ids  = array_filter( array_diff( $existing_download_ids, $updated_download_ids ) );
+		$new_download_ids     = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
+		$removed_download_ids = array_filter( array_diff( $existing_download_ids, $updated_download_ids ) );
 
 		if ( ! empty( $new_download_ids ) || ! empty( $removed_download_ids ) ) {
 			// determine whether downloadable file access has been granted via the typical order completion, or via the admin ajax method
@@ -2261,7 +2253,7 @@ class WC_Admin_Post_Types {
 		if ( in_array( $post_type, array( 'shop_order', 'product', 'shop_coupon' ) ) && 'bottom' === $which ) {
 			$counts = (array) wp_count_posts( $post_type );
 			unset( $counts['auto-draft'] );
-			$count  = array_sum( $counts );
+			$count = array_sum( $counts );
 
 			if ( 0 < $count ) {
 				return;
@@ -2293,6 +2285,7 @@ class WC_Admin_Post_Types {
 			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .wrap .subsubsub  { display: none; } </style></div>';
 		}
 	}
+
 }
 
 endif;

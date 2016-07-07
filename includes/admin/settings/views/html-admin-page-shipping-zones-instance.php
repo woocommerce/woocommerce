@@ -9,4 +9,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php echo esc_html( $shipping_method->get_method_title() ); ?>
 </h2>
 
-<?php $shipping_method->admin_options(); ?>
+<?php $shipping_method->admin_options();

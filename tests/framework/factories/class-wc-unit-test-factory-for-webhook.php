@@ -14,7 +14,6 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	 * @param null $factory
 	 */
 	public function __construct( $factory = null ) {
-
 		parent::__construct( $factory );
 
 		// set default
@@ -30,11 +29,10 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_Post::create_object()
-	 * @param array $args
-	 * @return int webhook (post) ID
+	 * @param  array $args
+	 * @return int         webhook (post) ID
 	 */
 	public function create_object( $args ) {
-
 		$id = parent::create_object( $args );
 
 		$meta_args = array(
@@ -60,11 +58,10 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_Post::get_object_by_id()
-	 * @param int $id webhook ID
-	 * @return WC_Webhook webhook instance
+	 * @param  int        $id webhook ID
+	 * @return WC_Webhook     webhook instance
 	 */
 	public function get_object_by_id( $id ) {
-
 		return new WC_Webhook( $id );
 	}
 

@@ -13,7 +13,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_get_order_statuses() {
-
 		$order_statuses = apply_filters( 'wc_order_statuses', array(
 			'wc-pending'    => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -33,8 +32,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_order_status() {
-
-		$this->assertEquals( true,  wc_is_order_status( 'wc-pending' ) );
+		$this->assertEquals( true, wc_is_order_status( 'wc-pending' ) );
 		$this->assertEquals( false, wc_is_order_status( 'wc-another-status' ) );
 	}
 
@@ -44,7 +42,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_get_order_status_name() {
-
 		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
 		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
 	}
@@ -80,7 +77,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_ship_to_billing_address_only() {
-
 		$default = get_option( 'woocommerce_ship_to_destination' );
 
 		update_option( 'woocommerce_ship_to_destination', 'shipping' );
@@ -99,7 +95,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @group test
 	 */
 	public function test_wc_get_order() {
-
 		$order = WC_Helper_Order::create_order();
 
 		// Assert that $order is a WC_Order object
@@ -136,7 +131,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}
-
 
 	/**
 	 * Test adding a payment token to an order

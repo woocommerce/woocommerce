@@ -96,7 +96,7 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Get a fields type. Defaults to "text" if not set.
-	 * @param  array $field
+	 * @param  array  $field
 	 * @return string
 	 */
 	public function get_field_type( $field ) {
@@ -105,7 +105,7 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Get a fields default value. Defaults to "" if not set.
-	 * @param  array $field
+	 * @param  array  $field
 	 * @return string
 	 */
 	public function get_field_default( $field ) {
@@ -114,9 +114,9 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Get a field's posted and validated value.
-	 * @param string $key
-	 * @param array $field
-	 * @param array $post_data
+	 * @param  string $key
+	 * @param  array  $field
+	 * @param  array  $post_data
 	 * @return string
 	 */
 	public function get_field_value( $key, $field, $post_data = array() ) {
@@ -237,7 +237,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
-	 * @return string The value specified for the option or a default value for the option.
+	 * @return string              The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		if ( empty( $this->settings ) ) {
@@ -260,7 +260,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Prefix key for settings.
 	 *
-	 * @param  mixed $key
+	 * @param  mixed  $key
 	 * @return string
 	 */
 	public function get_field_key( $key ) {
@@ -272,7 +272,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
-	 * @param  array $form_fields (default: array())
+	 * @param array $form_fields (default: array())
 	 * @since  1.0.0
 	 * @uses   method_exists()
 	 * @return string the html for the settings
@@ -303,7 +303,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get HTML for tooltips.
 	 *
-	 * @param  array $data
+	 * @param  array  $data
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
@@ -321,7 +321,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get HTML for descriptions.
 	 *
-	 * @param  array $data
+	 * @param  array  $data
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
@@ -341,7 +341,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get custom attributes.
 	 *
-	 * @param  array $data
+	 * @param  array  $data
 	 * @return string
 	 */
 	public function get_custom_attribute_html( $data ) {
@@ -359,8 +359,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Text Input HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -403,8 +403,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Price Input HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -447,8 +447,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Decimal Input HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -491,8 +491,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Password Input HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -504,8 +504,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Color Picker Input HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -549,8 +549,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Textarea HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -593,8 +593,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Checkbox HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -642,8 +642,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Select HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -691,8 +691,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Multiselect HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -745,8 +745,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Generate Title HTML.
 	 *
-	 * @param  mixed $key
-	 * @param  mixed $data
+	 * @param mixed $key
+	 * @param mixed $data
 	 * @since  1.0.0
 	 * @return string
 	 */
@@ -777,7 +777,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key Field key
+	 * @param  string      $key   Field key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -791,7 +791,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key
+	 * @param  string      $key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -805,7 +805,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key
+	 * @param  string      $key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -819,7 +819,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key
+	 * @param  string      $key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -831,7 +831,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
-	 * @param  string $key
+	 * @param  string      $key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -852,7 +852,7 @@ abstract class WC_Settings_API {
 	 *
 	 * If not set, return "no", otherwise return "yes".
 	 *
-	 * @param  string $key
+	 * @param  string      $key
 	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
@@ -901,4 +901,5 @@ abstract class WC_Settings_API {
 		_deprecated_function( 'format_settings', '2.6' );
 		return $value;
 	}
+
 }

@@ -49,7 +49,6 @@ class WC_Customer {
 
 	/**
 	 * Constructor for the customer class loads the customer data.
-	 *
 	 */
 	public function __construct() {
 		$this->_data = (array) WC()->session->get( 'customer' );
@@ -75,7 +74,7 @@ class WC_Customer {
 	/**
 	 * __set function.
 	 *
-	 * @param mixed $property
+	 * @param  mixed $property
 	 * @return bool
 	 */
 	public function __isset( $property ) {
@@ -91,7 +90,7 @@ class WC_Customer {
 	/**
 	 * __get function.
 	 *
-	 * @param string $property
+	 * @param  string $property
 	 * @return string
 	 */
 	public function __get( $property ) {
@@ -118,7 +117,7 @@ class WC_Customer {
 			$property = 'shipping_address_1';
 		}
 		$this->_data[ $property ] = $value;
-		$this->_changed = true;
+		$this->_changed           = true;
 	}
 
 	/**
@@ -408,7 +407,7 @@ class WC_Customer {
 	 * @param string $country
 	 * @param string $state
 	 * @param string $postcode (default: '')
-	 * @param string $city (default: '')
+	 * @param string $city     (default: '')
 	 */
 	public function set_location( $country, $state, $postcode = '', $city = '' ) {
 		$this->country  = $country;
@@ -475,9 +474,9 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @param string $country
-	 * @param string $state (default: '')
+	 * @param string $state    (default: '')
 	 * @param string $postcode (default: '')
-	 * @param string $city (default: '')
+	 * @param string $city     (default: '')
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$this->shipping_country  = $country;
@@ -572,4 +571,5 @@ class WC_Customer {
 
 		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
 	}
+
 }

@@ -38,4 +38,5 @@ class WC_Helper_Fee {
 	public static function remove_cart_fee() {
 		remove_action( 'woocommerce_cart_calculate_fees', array( __CLASS__, 'create_simple_fee' ) );
 	}
+
 }

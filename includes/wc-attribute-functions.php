@@ -31,7 +31,7 @@ function wc_get_attribute_taxonomies() {
 	if ( false === ( $attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' ) ) ) {
 		global $wpdb;
 
-		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies order by attribute_name ASC;" );
+		$attribute_taxonomies = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'woocommerce_attribute_taxonomies order by attribute_name ASC;' );
 
 		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
 	}
@@ -42,7 +42,7 @@ function wc_get_attribute_taxonomies() {
 /**
  * Get a product attribute name.
  *
- * @param string $attribute_name Attribute name.
+ * @param  string $attribute_name Attribute name.
  * @return string
  */
 function wc_attribute_taxonomy_name( $attribute_name ) {
@@ -64,8 +64,8 @@ function wc_variation_attribute_name( $attribute_name ) {
  * Get a product attribute name by ID.
  *
  * @since  2.4.0
- * @param int $attribute_id Attribute ID.
- * @return string Return an empty string if attribute doesn't exist.
+ * @param  int    $attribute_id Attribute ID.
+ * @return string               Return an empty string if attribute doesn't exist.
  */
 function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
 	global $wpdb;
@@ -87,7 +87,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * Get a product attribute ID by name.
  *
  * @since  2.6.0
- * @param string $name Attribute name.
+ * @param  string $name Attribute name.
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
@@ -100,7 +100,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
 /**
  * Get a product attributes label.
  *
- * @param string $name
+ * @param  string $name
  * @param  object $product object Optional
  * @return string
  */
@@ -128,7 +128,7 @@ function wc_attribute_label( $name, $product = '' ) {
 /**
  * Get a product attributes orderby setting.
  *
- * @param mixed $name
+ * @param  mixed  $name
  * @return string
  */
 function wc_attribute_orderby( $name ) {
@@ -139,7 +139,7 @@ function wc_attribute_orderby( $name ) {
 	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
 		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
 	} else {
-		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+		$orderby = $wpdb->get_var( $wpdb->prepare( 'SELECT attribute_orderby FROM ' . $wpdb->prefix . 'woocommerce_attribute_taxonomies WHERE attribute_name = %s;', $name ) );
 	}
 
 	return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
@@ -151,7 +151,7 @@ function wc_attribute_orderby( $name ) {
  * @return array
  */
 function wc_get_attribute_taxonomy_names() {
-	$taxonomy_names = array();
+	$taxonomy_names       = array();
 	$attribute_taxonomies = wc_get_attribute_taxonomies();
 	if ( ! empty( $attribute_taxonomies ) ) {
 		foreach ( $attribute_taxonomies as $tax ) {

@@ -66,13 +66,13 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'topic' => array(
+					'topic'        => array(
 						'required' => true,
 					),
 					'delivery_url' => array(
 						'required' => true,
 					),
-					'secret' => array(
+					'secret'       => array(
 						'required' => true,
 					),
 				) ),
@@ -123,7 +123,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Create a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -147,7 +147,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$post->post_type = $this->post_type;
-		$post_id = wp_insert_post( $post, true );
+		$post_id         = wp_insert_post( $post, true );
 
 		if ( is_wp_error( $post_id ) ) {
 
@@ -182,9 +182,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WP_Post         $post      Inserted object.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param WP_Post         $post     Inserted object.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
 
@@ -206,7 +206,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Update a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -269,9 +269,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WP_Post         $post      Inserted object.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param WP_Post         $post     Inserted object.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
 
@@ -287,7 +287,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Delete a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -332,8 +332,8 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single webhook for create or update.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|stdClass $data Post object.
+	 * @param  WP_REST_Request   $request Request object.
+	 * @return WP_Error|stdClass $data    Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
 		global $wpdb;
@@ -353,7 +353,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 			$data->post_author = get_current_user_id();
 
 			// Post password.
-			$password = strlen( uniqid( 'webhook_' ) );
+			$password            = strlen( uniqid( 'webhook_' ) );
 			$data->post_password = $password > 20 ? substr( $password, 0, 20 ) : $password;
 
 			// Post status.
@@ -378,9 +378,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for insertion.
 		 *
-		 * @param stdClass        $data An object representing a single item prepared
+		 * @param stdClass        $data    An object representing a single item prepared
 		 *                                       for inserting or updating the database.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param WP_REST_Request $request Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
 	}
@@ -388,7 +388,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param  WP_REST_Request  $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $post, $request ) {
@@ -429,8 +429,8 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @param array $args
-	 * @param WP_REST_Request $request
+	 * @param  array           $args
+	 * @param  WP_REST_Request $request
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
@@ -464,18 +464,18 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 			'title'      => 'webhook',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'            => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'          => array(
 					'description' => __( 'A friendly name for the webhook.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status' => array(
+				'status'        => array(
 					'description' => __( 'Webhook status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'active',
@@ -485,43 +485,43 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 						'sanitize_callback' => 'wc_is_webhook_valid_topic',
 					),
 				),
-				'topic' => array(
+				'topic'         => array(
 					'description' => __( 'Webhook topic.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'resource' => array(
+				'resource'      => array(
 					'description' => __( 'Webhook resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'event' => array(
+				'event'         => array(
 					'description' => __( 'Webhook event.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'hooks' => array(
+				'hooks'         => array(
 					'description' => __( 'WooCommerce action names associated with the webhook.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'delivery_url' => array(
+				'delivery_url'  => array(
 					'description' => __( 'The URL where the webhook payload is delivered.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'secret' => array(
+				'secret'        => array(
 					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'edit' ),
 				),
-				'date_created' => array(
+				'date_created'  => array(
 					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
@@ -558,4 +558,5 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 		return $params;
 	}
+
 }

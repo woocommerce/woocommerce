@@ -13,7 +13,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product() {
-
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -183,4 +182,5 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Delete Product
 		WC_Helper_Product::delete_product( $product->id );
 	}
+
 }

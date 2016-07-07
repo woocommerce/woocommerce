@@ -14,7 +14,7 @@ class WC_Shortcode_Checkout {
 	/**
 	 * Get the shortcode content.
 	 *
-	 * @param array $atts
+	 * @param  array  $atts
 	 * @return string
 	 */
 	public static function get( $atts ) {
@@ -71,7 +71,6 @@ class WC_Shortcode_Checkout {
 	 * @param int $order_id
 	 */
 	private static function order_pay( $order_id ) {
-
 		do_action( 'before_woocommerce_pay' );
 
 		wc_print_notices();
@@ -82,8 +81,8 @@ class WC_Shortcode_Checkout {
 		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && $order_id ) {
 
 			// Pay for existing order
-			$order_key            = $_GET[ 'key' ];
-			$order                = wc_get_order( $order_id );
+			$order_key = $_GET['key'];
+			$order     = wc_get_order( $order_id );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
@@ -128,8 +127,8 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step
-			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
-			$order                = wc_get_order( $order_id );
+			$order_key = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
+			$order     = wc_get_order( $order_id );
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
@@ -143,13 +142,13 @@ class WC_Shortcode_Checkout {
 						</li>
 						<li class="date">
 							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
+							<strong><?php echo date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ); ?></strong>
 						</li>
 						<li class="total">
 							<?php _e( 'Total:', 'woocommerce' ); ?>
 							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 						</li>
-						<?php if ($order->payment_method_title) : ?>
+						<?php if ( $order->payment_method_title ) : ?>
 						<li class="method">
 							<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 							<strong><?php
@@ -187,7 +186,6 @@ class WC_Shortcode_Checkout {
 	 * @param int $order_id
 	 */
 	private static function order_received( $order_id = 0 ) {
-
 		wc_print_notices();
 
 		$order = false;
@@ -216,7 +214,6 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
-
 		// Show non-cart errors
 		wc_print_notices();
 
@@ -242,11 +239,13 @@ class WC_Shortcode_Checkout {
 
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
-			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout )
+			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout ) {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
+			}
 
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
 		}
 	}
+
 }

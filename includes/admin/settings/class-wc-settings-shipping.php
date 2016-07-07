@@ -58,7 +58,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				if ( ! $method->has_settings() ) {
 					continue;
 				}
-				$title = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
+				$title                                 = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
 				$sections[ strtolower( $method->id ) ] = esc_html( $title );
 			}
 		}
@@ -96,12 +96,12 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Shipping Destination', 'woocommerce' ),
-				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
-				'id'      => 'woocommerce_ship_to_destination',
-				'default' => 'billing',
-				'type'    => 'radio',
-				'options' => array(
+				'title'           => __( 'Shipping Destination', 'woocommerce' ),
+				'desc'            => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
+				'id'              => 'woocommerce_ship_to_destination',
+				'default'         => 'billing',
+				'type'            => 'radio',
+				'options'         => array(
 					'shipping'     => __( 'Default to customer shipping address', 'woocommerce' ),
 					'billing'      => __( 'Default to customer billing address', 'woocommerce' ),
 					'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
@@ -191,7 +191,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Show method for a zone
-	 * @param  int $zone_id
+	 * @param int $zone_id
 	 */
 	protected function zone_methods_screen( $zone_id ) {
 		$wc_shipping      = WC_Shipping      ::instance();
@@ -231,14 +231,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$method_count      = wc_get_shipping_method_count();
 
 		wp_localize_script( 'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
-			'zones'         => WC_Shipping_Zones::get_zones(),
-			'default_zone'  => array(
+			'zones'                   => WC_Shipping_Zones::get_zones(),
+			'default_zone'            => array(
 				'zone_id'    => 0,
 				'zone_name'  => '',
 				'zone_order' => null,
 			),
-			'wc_shipping_zones_nonce'  => wp_create_nonce( 'wc_shipping_zones_nonce' ),
-			'strings'       => array(
+			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
+			'strings'                 => array(
 				'unload_confirmation_msg'     => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'                 => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
 				'no_shipping_methods_offered' => __( 'No shipping methods offered to this zone.', 'woocommerce' ),
@@ -251,7 +251,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Show instance settings
-	 * @param  int $instance_id
+	 * @param int $instance_id
 	 */
 	protected function instance_settings_screen( $instance_id ) {
 		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
@@ -286,14 +286,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function output_shipping_class_screen() {
 		$wc_shipping = WC_Shipping::instance();
 		wp_localize_script( 'wc-shipping-classes', 'shippingClassesLocalizeScript', array(
-			'classes'         => $wc_shipping->get_shipping_classes(),
-			'default_shipping_class'  => array(
+			'classes'                   => $wc_shipping->get_shipping_classes(),
+			'default_shipping_class'    => array(
 				'term_id'     => 0,
 				'name'        => '',
 				'description' => '',
 			),
 			'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
-			'strings'       => array(
+			'strings'                   => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' )
 			),
@@ -310,6 +310,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		include_once( 'views/html-admin-page-shipping-classes.php' );
 	}
+
 }
 
 endif;

@@ -37,19 +37,18 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-
-		$this->id             = 'customer_invoice';
-		$this->title          = __( 'Customer invoice', 'woocommerce' );
-		$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
+		$this->id          = 'customer_invoice';
+		$this->title       = __( 'Customer invoice', 'woocommerce' );
+		$this->description = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 		$this->template_html  = 'emails/customer-invoice.php';
 		$this->template_plain = 'emails/plain/customer-invoice.php';
 
-		$this->subject        = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce');
-		$this->heading        = __( 'Invoice for order {order_number}', 'woocommerce');
+		$this->subject = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
+		$this->heading = __( 'Invoice for order {order_number}', 'woocommerce' );
 
-		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce');
-		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce');
+		$this->subject_paid = __( 'Your {site_title} order from {order_date}', 'woocommerce' );
+		$this->heading_paid = __( 'Order {order_number} details', 'woocommerce' );
 
 		// Call parent constructor
 		parent::__construct();
@@ -66,17 +65,16 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @param int|WC_Order $order
 	 */
 	public function trigger( $order ) {
-
 		if ( ! is_object( $order ) ) {
 			$order = wc_get_order( absint( $order ) );
 		}
 
 		if ( $order ) {
-			$this->object                  = $order;
-			$this->recipient               = $this->object->billing_email;
+			$this->object    = $order;
+			$this->recipient = $this->object->billing_email;
 
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
+			$this->find['order-date']   = '{order_date}';
+			$this->find['order-number'] = '{order_number}';
 
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
@@ -129,7 +127,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
 
@@ -145,7 +143,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'         => $this
 		) );
 	}
 
@@ -154,49 +152,50 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'subject' => array(
-				'title'         => __( 'Email Subject', 'woocommerce' ),
-				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true
+			'subject'      => array(
+				'title'       => __( 'Email Subject', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				'placeholder' => '',
+				'default'     => '',
+				'desc_tip'    => true
 			),
-			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
-				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true
+			'heading'      => array(
+				'title'       => __( 'Email Heading', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				'placeholder' => '',
+				'default'     => '',
+				'desc_tip'    => true
 			),
 			'subject_paid' => array(
-				'title'         => __( 'Email Subject (paid)', 'woocommerce' ),
-				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true
+				'title'       => __( 'Email Subject (paid)', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
+				'placeholder' => '',
+				'default'     => '',
+				'desc_tip'    => true
 			),
 			'heading_paid' => array(
-				'title'         => __( 'Email Heading (paid)', 'woocommerce' ),
-				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true
+				'title'       => __( 'Email Heading (paid)', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
+				'placeholder' => '',
+				'default'     => '',
+				'desc_tip'    => true
 			),
-			'email_type' => array(
-				'title'         => __( 'Email Type', 'woocommerce' ),
-				'type'          => 'select',
-				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
-				'default'       => 'html',
-				'class'         => 'email_type wc-enhanced-select',
-				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true
+			'email_type'   => array(
+				'title'       => __( 'Email Type', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+				'default'     => 'html',
+				'class'       => 'email_type wc-enhanced-select',
+				'options'     => $this->get_email_type_options(),
+				'desc_tip'    => true
 			)
 		);
 	}
+
 }
 
 endif;

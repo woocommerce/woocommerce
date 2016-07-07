@@ -44,7 +44,7 @@ class WC_Cache_Helper {
 
 	/**
 	 * Increment group cache prefix (invalidates cache).
-	 * @param  string $group
+	 * @param string $group
 	 */
 	public static function incr_cache_prefix( $group ) {
 		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
@@ -112,7 +112,7 @@ class WC_Cache_Helper {
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate
 	 * @param  boolean $refresh true to force a new version
-	 * @return string transient version based on time(), 10 digits
+	 * @return string           transient version based on time(), 10 digits
 	 */
 	public static function get_transient_version( $group, $refresh = false ) {
 		$transient_name  = $group . '-transient-version';
@@ -137,7 +137,7 @@ class WC_Cache_Helper {
 			global $wpdb;
 
 			$limit    = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", "\_transient\_%" . $version, $limit ) );
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) );
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
 			if ( $affected === $limit ) {
@@ -168,14 +168,14 @@ class WC_Cache_Helper {
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
-			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
-	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
+			$wc_page_uris = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
+			set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
 		if ( isset( $_GET['download_file'] ) ) {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
-			foreach( $wc_page_uris as $uri ) {
+			foreach ( $wc_page_uris as $uri ) {
 				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;
@@ -190,13 +190,13 @@ class WC_Cache_Helper {
 	 */
 	private static function nocache() {
 		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-			define( "DONOTCACHEPAGE", true );
+			define( 'DONOTCACHEPAGE', true );
 		}
 		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
-			define( "DONOTCACHEOBJECT", true );
+			define( 'DONOTCACHEOBJECT', true );
 		}
 		if ( ! defined( 'DONOTCACHEDB' ) ) {
-			define( "DONOTCACHEDB", true );
+			define( 'DONOTCACHEDB', true );
 		}
 		nocache_headers();
 	}
@@ -209,7 +209,7 @@ class WC_Cache_Helper {
 			return;
 		}
 
-		$config   = w3_instance('W3_Config');
+		$config   = w3_instance( 'W3_Config' );
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
 		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 
@@ -221,6 +221,7 @@ class WC_Cache_Helper {
 			<?php
 		}
 	}
+
 }
 
 WC_Cache_Helper::init();

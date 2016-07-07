@@ -102,4 +102,5 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	public function test_wc_rest_check_manager_permissions() {
 		$this->isFalse( wc_rest_check_manager_permissions( 'reports' ) );
 	}
+
 }

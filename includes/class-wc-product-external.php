@@ -87,4 +87,5 @@ class WC_Product_External extends WC_Product {
 	public function get_button_text() {
 		return $this->button_text ? $this->button_text : __( 'Buy product', 'woocommerce' );
 	}
+
 }

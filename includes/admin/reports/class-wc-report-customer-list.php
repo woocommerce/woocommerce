@@ -22,11 +22,10 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		parent::__construct( array(
-			'singular'  => __( 'Customer', 'woocommerce' ),
-			'plural'    => __( 'Customers', 'woocommerce' ),
-			'ajax'      => false
+			'singular' => __( 'Customer', 'woocommerce' ),
+			'plural'   => __( 'Customers', 'woocommerce' ),
+			'ajax'     => false
 		) );
 	}
 
@@ -73,8 +72,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
-	 * @param WP_User $user
-	 * @param string $column_name
+	 * @param  WP_User $user
+	 * @param  string  $column_name
 	 * @return string
 	 */
 	public function column_default( $user, $column_name ) {
@@ -149,34 +148,34 @@ class WC_Report_Customer_List extends WP_List_Table {
 						$actions = array();
 
 						$actions['refresh'] = array(
-							'url'       => wp_nonce_url( add_query_arg( 'refresh', $user->ID ), 'refresh' ),
-							'name'      => __( 'Refresh stats', 'woocommerce' ),
-							'action'    => "refresh"
+							'url'    => wp_nonce_url( add_query_arg( 'refresh', $user->ID ), 'refresh' ),
+							'name'   => __( 'Refresh stats', 'woocommerce' ),
+							'action' => 'refresh'
 						);
 
 						$actions['edit'] = array(
-							'url'       => admin_url( 'user-edit.php?user_id=' . $user->ID ),
-							'name'      => __( 'Edit', 'woocommerce' ),
-							'action'    => "edit"
+							'url'    => admin_url( 'user-edit.php?user_id=' . $user->ID ),
+							'name'   => __( 'Edit', 'woocommerce' ),
+							'action' => 'edit'
 						);
 
 						$actions['view'] = array(
-							'url'       => admin_url( 'edit.php?post_type=shop_order&_customer_user=' . $user->ID ),
-							'name'      => __( 'View orders', 'woocommerce' ),
-							'action'    => "view"
+							'url'    => admin_url( 'edit.php?post_type=shop_order&_customer_user=' . $user->ID ),
+							'name'   => __( 'View orders', 'woocommerce' ),
+							'action' => 'view'
 						);
 
 						$orders = wc_get_orders( array(
-							'limit'          => 1,
-							'status'         => array( 'wc-completed', 'wc-processing' ),
-							'customer'       => array( array( 0, $user->user_email ) ),
+							'limit'    => 1,
+							'status'   => array( 'wc-completed', 'wc-processing' ),
+							'customer' => array( array( 0, $user->user_email ) ),
 						) );
 
 						if ( $orders ) {
 							$actions['link'] = array(
-								'url'       => wp_nonce_url( add_query_arg( 'link_orders', $user->ID ), 'link_orders' ),
-								'name'      => __( 'Link previous orders', 'woocommerce' ),
-								'action'    => "link"
+								'url'    => wp_nonce_url( add_query_arg( 'link_orders', $user->ID ), 'link_orders' ),
+								'name'   => __( 'Link previous orders', 'woocommerce' ),
+								'action' => 'link'
 							);
 						}
 
@@ -205,14 +204,14 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 */
 	public function get_columns() {
 		$columns = array(
-			'customer_name'   => __( 'Name (Last, First)', 'woocommerce' ),
-			'username'        => __( 'Username', 'woocommerce' ),
-			'email'           => __( 'Email', 'woocommerce' ),
-			'location'        => __( 'Location', 'woocommerce' ),
-			'orders'          => __( 'Orders', 'woocommerce' ),
-			'spent'           => __( 'Money Spent', 'woocommerce' ),
-			'last_order'      => __( 'Last order', 'woocommerce' ),
-			'user_actions'    => __( 'Actions', 'woocommerce' )
+			'customer_name' => __( 'Name (Last, First)', 'woocommerce' ),
+			'username'      => __( 'Username', 'woocommerce' ),
+			'email'         => __( 'Email', 'woocommerce' ),
+			'location'      => __( 'Location', 'woocommerce' ),
+			'orders'        => __( 'Orders', 'woocommerce' ),
+			'spent'         => __( 'Money Spent', 'woocommerce' ),
+			'last_order'    => __( 'Last order', 'woocommerce' ),
+			'user_actions'  => __( 'Actions', 'woocommerce' )
 		);
 
 		return $columns;
@@ -230,12 +229,12 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
 		$query->query_where   .= " AND meta2.meta_key = 'last_name' ";
-		$query->query_orderby  = " ORDER BY meta2.meta_value, user_login ASC ";
+		$query->query_orderby  = ' ORDER BY meta2.meta_value, user_login ASC ';
 
 		if ( $s ) {
 			$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id)";
 			$query->query_where   .= " AND ( user_login LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR user_nicename LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR meta3.meta_value LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' ) ";
-			$query->query_orderby  = " GROUP BY ID " . $query->query_orderby;
+			$query->query_orderby  = ' GROUP BY ID ' . $query->query_orderby;
 		}
 
 		return $query;
@@ -293,4 +292,5 @@ class WC_Report_Customer_List extends WP_List_Table {
 			'total_pages' => ceil( $query->total_users / $per_page )
 		) );
 	}
+
 }

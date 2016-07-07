@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$found_method = false;
 
 						foreach ( $shipping_methods as $method ) {
-							$method_id = isset( $item['method_id'] ) ? $item['method_id'] : '';
+							$method_id      = isset( $item['method_id'] ) ? $item['method_id'] : '';
 							$current_method = ( 0 === strpos( $method_id, $method->id ) ) ? $method_id : $method->id;
 
 							echo '<option value="' . esc_attr( $current_method ) . '" ' . selected( $method_id == $current_method, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
@@ -47,9 +47,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</select>
 		</div>
 
-		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, null ) ?>
+		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, null ); ?>
 		<?php include( 'html-order-item-meta.php' ); ?>
-		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, null ) ?>
+		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, null ); ?>
 	</td>
 
 	<?php do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) ); ?>
@@ -81,8 +81,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$tax_data       = maybe_unserialize( $shipping_taxes );
 
 			foreach ( $order_taxes as $tax_item ) :
-				$tax_item_id       = $tax_item['rate_id'];
-				$tax_item_total    = isset( $tax_data[ $tax_item_id ] ) ? $tax_data[ $tax_item_id ] : '';
+				$tax_item_id    = $tax_item['rate_id'];
+				$tax_item_total = isset( $tax_data[ $tax_item_id ] ) ? $tax_data[ $tax_item_id ] : '';
 				?>
 					<td class="line_tax" width="1%">
 						<div class="view">

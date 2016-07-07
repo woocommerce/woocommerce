@@ -45,7 +45,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -59,7 +59,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to create an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -73,7 +73,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -89,7 +89,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -144,7 +144,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Get a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -155,7 +155,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$data = $this->prepare_item_for_response( $post, $request );
+		$data     = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $data );
 
 		if ( $this->public ) {
@@ -168,7 +168,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Create a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -210,9 +210,9 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param object          $post     Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
 
@@ -228,8 +228,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Add post meta fields.
 	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
+	 * @param  WP_Post         $post
+	 * @param  WP_REST_Request $request
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
@@ -248,7 +248,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Update a single post.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -286,9 +286,9 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param object          $post     Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request  Request object.
+		 * @param boolean         $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
 
@@ -300,22 +300,22 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Get a collection of posts.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$args                         = array();
-		$args['offset']               = $request['offset'];
-		$args['order']                = $request['order'];
-		$args['orderby']              = $request['orderby'];
-		$args['paged']                = $request['page'];
-		$args['post__in']             = $request['include'];
-		$args['post__not_in']         = $request['exclude'];
-		$args['posts_per_page']       = $request['per_page'];
-		$args['name']                 = $request['slug'];
-		$args['post_parent__in']      = $request['parent'];
-		$args['post_parent__not_in']  = $request['parent_exclude'];
-		$args['s']                    = $request['search'];
+		$args                        = array();
+		$args['offset']              = $request['offset'];
+		$args['order']               = $request['order'];
+		$args['orderby']             = $request['orderby'];
+		$args['paged']               = $request['page'];
+		$args['post__in']            = $request['include'];
+		$args['post__not_in']        = $request['exclude'];
+		$args['posts_per_page']      = $request['per_page'];
+		$args['name']                = $request['slug'];
+		$args['post_parent__in']     = $request['parent'];
+		$args['post_parent__not_in'] = $request['parent_exclude'];
+		$args['s']                   = $request['search'];
 
 		$args['date_query'] = array();
 		// Set before into date query. Date query must be specified as an array of an array.
@@ -345,10 +345,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
 		 */
-		$args = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
+		$args       = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
 		$query_args = $this->prepare_items_query( $args, $request );
 
-		$posts_query = new WP_Query();
+		$posts_query  = new WP_Query();
 		$query_result = $posts_query->query( $query_args );
 
 		$posts = array();
@@ -357,11 +357,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				continue;
 			}
 
-			$data = $this->prepare_item_for_response( $post, $request );
+			$data    = $this->prepare_item_for_response( $post, $request );
 			$posts[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$page = (int) $query_args['paged'];
+		$page        = (int) $query_args['paged'];
 		$total_posts = $posts_query->found_posts;
 
 		if ( $total_posts < 1 ) {
@@ -372,7 +372,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			$total_posts = $count_query->found_posts;
 		}
 
-		$max_pages = ceil( $total_posts / (int) $query_args['posts_per_page'] );
+		$max_pages = ceil( $total_posts / ( int ) $query_args['posts_per_page'] );
 
 		$response = rest_ensure_response( $posts );
 		$response->header( 'X-WP-Total', (int) $total_posts );
@@ -406,7 +406,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Delete a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request           $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -475,12 +475,12 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WP_Post $post Post object.
-	 * @return array Links for the given post.
+	 * @param  WP_Post $post Post object.
+	 * @return array         Links for the given post.
 	 */
 	protected function prepare_links( $post ) {
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
 			),
 			'collection' => array(
@@ -495,12 +495,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * Determine the allowed query_vars for a get_items() response and
 	 * prepare for WP_Query.
 	 *
-	 * @param array           $prepared_args
-	 * @param WP_REST_Request $request
-	 * @return array          $query_args
+	 * @param  array           $prepared_args
+	 * @param  WP_REST_Request $request
+	 * @return array           $query_args
 	 */
 	protected function prepare_items_query( $prepared_args = array(), $request = null ) {
-
 		$valid_vars = array_flip( $this->get_allowed_query_vars() );
 		$query_args = array();
 		foreach ( $valid_vars as $var => $index ) {
@@ -511,7 +510,6 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				 * The dynamic portion of the hook name, $var, refers to the query_var key.
 				 *
 				 * @param mixed $prepared_args[ $var ] The query_var value.
-				 *
 				 */
 				$query_args[ $var ] = apply_filters( "woocommerce_rest_query_var-{$var}", $prepared_args[ $var ] );
 			}
@@ -539,7 +537,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * Allows adjusting of the default query vars that are made public.
 		 *
-		 * @param array  Array of allowed WP_Query query vars.
+		 * @param array Array of allowed WP_Query query vars.
 		 */
 		$valid_vars = apply_filters( 'query_vars', $wp->public_query_vars );
 
@@ -558,9 +556,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			 * @param array $private_query_vars Array of allowed query vars for authorized users.
 			 * }
 			 */
-			$private = apply_filters( 'woocommerce_rest_private_query_vars', $wp->private_query_vars );
+			$private    = apply_filters( 'woocommerce_rest_private_query_vars', $wp->private_query_vars );
 			$valid_vars = array_merge( $valid_vars, $private );
 		}
+
 		// Define our own in addition to WP's normal vars.
 		$rest_valid = array(
 			'date_query',
@@ -584,7 +583,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * list for all requests, including unauthenticated ones. To alter the
 		 * vars for editors only.
 		 *
-		 * @param array {
+		 * @param    array                     {
 		 *    Array of allowed WP_Query query vars.
 		 *
 		 *    @param string $allowed_query_var The query var to allow.
@@ -605,60 +604,60 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		$params['context']['default'] = 'view';
 
-		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['after']   = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['before']  = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-			'type'               => 'integer',
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['offset']  = array(
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'desc',
-			'enum'               => array( 'asc', 'desc' ),
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['order']   = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'date',
-			'enum'               => array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'date',
+			'enum'              => array(
 				'date',
 				'id',
 				'include',
 				'title',
 				'slug',
 			),
-			'validate_callback'  => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
-			$params['parent'] = array(
+			$params['parent']         = array(
 				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
 				'type'              => 'array',
 				'sanitize_callback' => 'wp_parse_id_list',
@@ -682,11 +681,12 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Update post meta fields.
 	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
+	 * @param  WP_Post         $post
+	 * @param  WP_REST_Request $request
 	 * @return bool|WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
 		return true;
 	}
+
 }

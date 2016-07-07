@@ -37,7 +37,7 @@ class WC_Meta_Box_Coupon_Data {
 			<ul class="coupon_data_tabs wc-tabs" style="display:none;">
 				<?php
 					$coupon_data_tabs = apply_filters( 'woocommerce_coupon_data_tabs', array(
-						'general' => array(
+						'general'           => array(
 							'label'  => __( 'General', 'woocommerce' ),
 							'target' => 'general_coupon_data',
 							'class'  => 'general_coupon_data',
@@ -47,7 +47,7 @@ class WC_Meta_Box_Coupon_Data {
 							'target' => 'usage_restriction_coupon_data',
 							'class'  => '',
 						),
-						'usage_limit' => array(
+						'usage_limit'       => array(
 							'label'  => __( 'Usage Limits', 'woocommerce' ),
 							'target' => 'usage_limit_coupon_data',
 							'class'  => '',
@@ -55,7 +55,7 @@ class WC_Meta_Box_Coupon_Data {
 					) );
 
 					foreach ( $coupon_data_tabs as $key => $tab ) {
-						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
+						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ', (array) $tab['class'] ); ?>">
 							<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
 						</li><?php
 					}
@@ -73,7 +73,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woothemes.com/document/free-shipping/' ) ) );
 
 				// Expiry date
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) );
 
 				do_action( 'woocommerce_coupon_options' );
 
@@ -167,8 +167,8 @@ class WC_Meta_Box_Coupon_Data {
 				echo '</div><div class="options_group">';
 
 				// Customers
-				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '', 'custom_attributes' => array(
-						'multiple' 	=> 'multiple'
+				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ), 'value' => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '', 'custom_attributes' => array(
+						'multiple' => 'multiple'
 				) ) );
 
 				echo '</div>';
@@ -181,21 +181,21 @@ class WC_Meta_Box_Coupon_Data {
 				echo '<div class="options_group">';
 
 				// Usage limit per coupons
-				woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit per coupon', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'desc_tip' => true, 'class' => 'short', 'custom_attributes' => array(
-						'step' 	=> '1',
-						'min'	=> '0'
+				woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit per coupon', 'woocommerce' ), 'placeholder' => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'desc_tip' => true, 'class' => 'short', 'custom_attributes' => array(
+						'step' => '1',
+						'min'  => '0'
 				) ) );
 
 				// Usage limit per product
 				woocommerce_wp_text_input( array( 'id' => 'limit_usage_to_x_items', 'label' => __( 'Limit usage to X items', 'woocommerce' ), 'placeholder' => _x( 'Apply to all qualifying items in cart', 'placeholder', 'woocommerce' ), 'description' => __( 'The maximum number of individual items this coupon can apply to when using product discounts. Leave blank to apply to all qualifying items in cart.', 'woocommerce' ), 'desc_tip' => true, 'class' => 'short', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> '1',
-						'min'	=> '0'
+						'step' => '1',
+						'min'  => '0'
 				) ) );
 
 				// Usage limit per users
 				woocommerce_wp_text_input( array( 'id' => 'usage_limit_per_user', 'label' => __( 'Usage limit per user', 'woocommerce' ), 'placeholder' => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ), 'description' => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ), 'desc_tip' => true, 'class' => 'short', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> '1',
-						'min'	=> '0'
+						'step' => '1',
+						'min'  => '0'
 				) ) );
 
 				echo '</div>';
@@ -212,7 +212,7 @@ class WC_Meta_Box_Coupon_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
@@ -230,7 +230,7 @@ class WC_Meta_Box_Coupon_Data {
 			AND $wpdb->posts.post_status = 'publish'
 			AND $wpdb->posts.post_title = '%s'
 			AND $wpdb->posts.ID != %s
-		 ", $post->post_title, $post_id ) );
+		", $post->post_title, $post_id ) );
 
 		if ( $coupon_found ) {
 			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
@@ -278,4 +278,5 @@ class WC_Meta_Box_Coupon_Data {
 
 		do_action( 'woocommerce_coupon_options_save', $post_id );
 	}
+
 }

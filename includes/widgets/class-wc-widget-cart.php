@@ -26,7 +26,7 @@ class WC_Widget_Cart extends WC_Widget {
 		$this->widget_id          = 'woocommerce_widget_cart';
 		$this->widget_name        = __( 'WooCommerce Cart', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title'         => array(
 				'type'  => 'text',
 				'std'   => __( 'Cart', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
@@ -71,4 +71,5 @@ class WC_Widget_Cart extends WC_Widget {
 
 		$this->widget_end( $args );
 	}
+
 }

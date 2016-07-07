@@ -23,7 +23,6 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	 * @return string
 	 */
 	public function get_content_type() {
-
 		return sprintf( '%s; charset=%s', isset( $_GET['_jsonp'] ) ? 'application/javascript' : 'application/json', get_option( 'blog_charset' ) );
 	}
 
@@ -31,11 +30,10 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	 * Parse the raw request body entity
 	 *
 	 * @since 2.1
-	 * @param string $body the raw request body
+	 * @param  string      $body the raw request body
 	 * @return array|mixed
 	 */
 	public function parse_body( $body ) {
-
 		return json_decode( $body, true );
 	}
 
@@ -43,11 +41,10 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	 * Generate a JSON response given an array of data
 	 *
 	 * @since 2.1
-	 * @param array $data the response data
+	 * @param  array  $data the response data
 	 * @return string
 	 */
 	public function generate_response( $data ) {
-
 		if ( isset( $_GET['_jsonp'] ) ) {
 
 			// JSONP enabled by default

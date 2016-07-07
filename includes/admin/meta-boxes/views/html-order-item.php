@@ -23,7 +23,7 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item['name'] ); ?>">
 		<?php
-			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' .  esc_html( $item['name'] ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item['name'] ) . '</div>';
+			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . esc_html( $item['name'] ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item['name'] ) . '</div>';
 
 			if ( $_product && $_product->get_sku() ) {
 				echo '<div class="wc-order-item-sku"><strong>' . __( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $_product->get_sku() ) . '</div>';
@@ -42,9 +42,9 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		<input type="hidden" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" value="<?php echo isset( $item['tax_class'] ) ? esc_attr( $item['tax_class'] ) : ''; ?>" />
 
-		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, $_product ) ?>
+		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, $_product ); ?>
 		<?php include( 'html-order-item-meta.php' ); ?>
-		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, $_product ) ?>
+		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, $_product ); ?>
 	</td>
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>

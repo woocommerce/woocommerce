@@ -115,6 +115,7 @@ abstract class WC_Settings_Page {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
 	}
+
 }
 
 endif;

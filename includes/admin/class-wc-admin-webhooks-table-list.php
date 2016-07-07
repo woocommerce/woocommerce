@@ -56,7 +56,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 	/**
 	 * Get Webhook object.
-	 * @param  object $webhook
+	 * @param  object     $webhook
 	 * @return WC_Webhook
 	 */
 	private function get_webbook_object( $webhook ) {
@@ -117,7 +117,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
 		}
 
-		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
+		$output .= '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>';
 
 		return $output;
 	}
@@ -198,21 +198,21 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_views() {
-		$status_links    = array();
-		$num_posts       = wp_count_posts( 'shop_webhook', 'readable' );
-		$class           = '';
-		$total_posts     = array_sum( (array) $num_posts );
+		$status_links = array();
+		$num_posts    = wp_count_posts( 'shop_webhook', 'readable' );
+		$class        = '';
+		$total_posts  = array_sum( (array) $num_posts );
 
 		// Subtract post types that are not included in the admin all list.
 		foreach ( get_post_stati( array( 'show_in_admin_all_list' => false ) ) as $state ) {
 			$total_posts -= $num_posts->$state;
 		}
 
-		$class = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : '';
+		$class               = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : '';
 		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts', 'woocommerce' ), number_format_i18n( $total_posts ) ) . '</a>';
 
 		foreach ( get_post_stati( array( 'show_in_admin_status_list' => true ), 'objects' ) as $status ) {
-			$class = '';
+			$class       = '';
 			$status_name = $status->name;
 
 			if ( ! in_array( $status_name, array( 'publish', 'draft', 'pending', 'trash', 'future', 'private', 'auto-draft' ) ) ) {
@@ -306,4 +306,5 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			'total_pages' => $webhooks->max_num_pages
 		) );
 	}
+
 }

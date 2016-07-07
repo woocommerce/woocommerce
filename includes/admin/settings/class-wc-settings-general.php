@@ -23,7 +23,6 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'general';
 		$this->label = __( 'General', 'woocommerce' );
 
@@ -38,7 +37,6 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
 		$currency_code_options = get_woocommerce_currencies();
 
 		foreach ( $currency_code_options as $code => $name ) {
@@ -155,11 +153,11 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'       => 'woocommerce_demo_store_notice',
 				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
 				'type'     => 'textarea',
-				'css'     => 'width:350px; height: 65px;',
+				'css'      => 'width:350px; height: 65px;',
 				'autoload' => false
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'general_options'),
+			array( 'type' => 'sectionend', 'id' => 'general_options' ),
 
 			array( 'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
 
@@ -213,13 +211,13 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Number of Decimals', 'woocommerce' ),
-				'desc'     => __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
-				'id'       => 'woocommerce_price_num_decimals',
-				'css'      => 'width:50px;',
-				'default'  => '2',
-				'desc_tip' =>  true,
-				'type'     => 'number',
+				'title'             => __( 'Number of Decimals', 'woocommerce' ),
+				'desc'              => __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
+				'id'                => 'woocommerce_price_num_decimals',
+				'css'               => 'width:50px;',
+				'default'           => '2',
+				'desc_tip'          =>  true,
+				'type'              => 'number',
 				'custom_attributes' => array(
 					'min'  => 0,
 					'step' => 1
@@ -236,14 +234,14 @@ class WC_Settings_General extends WC_Settings_Page {
 	/**
 	 * Output a colour picker input box.
 	 *
-	 * @param mixed $name
+	 * @param mixed  $name
 	 * @param string $id
-	 * @param mixed $value
-	 * @param string $desc (default: '')
+	 * @param mixed  $value
+	 * @param string $desc  (default: '')
 	 */
 	public function color_picker( $name, $id, $value, $desc = '' ) {
 		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
-			<input name="' . esc_attr( $id ). '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
+			<input name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
 	}
 

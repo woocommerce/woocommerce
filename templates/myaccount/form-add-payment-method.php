@@ -57,4 +57,4 @@ if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateway
 	</form>
 <?php else : ?>
 	<p><?php esc_html_e( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ); ?></p>
-<?php endif; ?>
+<?php endif;

@@ -49,4 +49,4 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 <tr class="product-purchase-note">
 	<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 </tr>
-<?php endif; ?>
+<?php endif;

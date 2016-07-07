@@ -101,11 +101,11 @@ extract( $variation_data );
 				<div class="sale_price_dates_fields" style="display: none">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Sale start date', 'woocommerce' ); ?></label>
-						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo esc_attr_x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo esc_attr_x( 'From&hellip;', 'placeholder', 'woocommerce' ); ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Sale end date', 'woocommerce' ); ?></label>
-						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo esc_attr_x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo esc_attr_x( 'To&hellip;', 'placeholder', 'woocommerce' ); ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 				</div>
 
@@ -206,13 +206,13 @@ extract( $variation_data );
 			<div>
 				<p class="form-row hide_if_variation_virtual form-row-full"><label><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php
 					$args = array(
-						'taxonomy' 			=> 'product_shipping_class',
-						'hide_empty'		=> 0,
-						'show_option_none' 	=> __( 'Same as parent', 'woocommerce' ),
-						'name' 				=> 'variable_shipping_class[' . $loop . ']',
-						'id'				=> '',
-						'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
-						'echo'				=> 0
+						'taxonomy'         => 'product_shipping_class',
+						'hide_empty'       => 0,
+						'show_option_none' => __( 'Same as parent', 'woocommerce' ),
+						'name'             => 'variable_shipping_class[' . $loop . ']',
+						'id'               => '',
+						'selected'         => isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
+						'echo'             => 0
 					);
 
 					echo wp_dropdown_categories( $args );
@@ -224,8 +224,9 @@ extract( $variation_data );
 						<select name="variable_tax_class[<?php echo $loop; ?>]">
 							<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
 							<?php
-							foreach ( $parent_data['tax_class_options'] as $key => $value )
+							foreach ( $parent_data['tax_class_options'] as $key => $value ) {
 								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
+							}
 						?></select>
 					</p>
 

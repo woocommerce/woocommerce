@@ -54,7 +54,7 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read reports.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request  $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -68,7 +68,7 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	/**
 	 * Get all reports.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request $request
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
@@ -95,8 +95,8 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass $report Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param  stdClass         $report   Report data.
+	 * @param  WP_REST_Request  $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $report, $request ) {
@@ -106,13 +106,13 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 		$response->add_links( array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $report->slug ) ),
 			),
 			'collection' => array(
@@ -143,7 +143,7 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 			'title'      => 'report',
 			'type'       => 'object',
 			'properties' => array(
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -171,4 +171,5 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
 	}
+
 }

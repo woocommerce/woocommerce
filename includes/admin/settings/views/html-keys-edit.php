@@ -81,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						?></span>
 					</td>
 				</tr>
-			<?php endif ?>
+			<?php endif; ?>
 		</tbody>
 	</table>
 
