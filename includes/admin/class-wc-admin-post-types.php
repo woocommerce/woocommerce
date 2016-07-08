@@ -59,6 +59,7 @@ class WC_Admin_Post_Types {
 		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
+		add_filter( 'bulk_post_updated_messages', array( $this, 'updated_bulk_messages' ), 10, 2 );
 
 		// Order Search
 		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
@@ -1501,6 +1502,33 @@ class WC_Admin_Post_Types {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Modify bulk messages
+	 */
+	public function updated_bulk_messages( $bulk_messages, $bulk_counts ) {
+		
+		$post_types = array( 'product', 'shop_order', 'shop_coupon' );
+
+		foreach( $post_types as $post_type ){
+			$product_obj = get_post_type_object( $post_type );
+			$singular = strtolower( $product_obj->labels->singular_name );
+			$plural = strtolower( $product_obj->labels->name );
+
+			$bulk_messages[ $post_type ] = array(
+				'updated'   => _n( "%s $singular updated.", "%s $plural updated.", $bulk_counts['updated'], 'woocommerce' ),
+				'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( "1 $singular not updated, somebody is editing it." ) :
+				                   _n( "%s $singular not updated, somebody is editing it.", "%s $plural not updated, somebody is editing them.", $bulk_counts['locked'], 'woocommerce' ),
+				'deleted'   => _n( "%s $singular permanently deleted.", "%s $plural permanently deleted.", $bulk_counts['deleted'], 'woocommerce' ),
+				'trashed'   => _n( "%s $singular moved to the Trash.", "%s $plural moved to the Trash.", $bulk_counts['trashed'], 'woocommerce' ),
+				'untrashed' => _n( "%s $singular restored from the Trash.", "%s $plural restored from the Trash.", $bulk_counts['untrashed'], 'woocommerce' ),
+			);
+
+		}
+
+		return $bulk_messages;
+
 	}
 
 	/**
