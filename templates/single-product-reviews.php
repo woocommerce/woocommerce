@@ -15,11 +15,12 @@
  * @package 	WooCommerce/Templates
  * @version     2.3.2
  */
-global $product;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+
+global $product;
 
 if ( ! comments_open() ) {
 	return;
