@@ -334,7 +334,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
-		global $wpdb;
+		global $wpdb, $wp_query;
 
 		$tax_query  = WC_Query::get_main_tax_query();
 		$meta_query = WC_Query::get_main_meta_query();
@@ -367,6 +367,17 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
+		if ( is_search() ) {
+			$search_terms = $wp_query->query_vars['search_terms'];
+			$count = 0;
+			$query['where'] .= " AND (";
+			foreach ( $search_terms as $search_term ) {
+				$query['where'] .= $count > 0 ? " AND " : "";
+				$query['where'] .= "((wp_posts.post_title LIKE '%" . $search_term . "%') OR (wp_posts.post_excerpt LIKE '%" . $search_term . "%') OR (wp_posts.post_content LIKE '%" . $search_term . "%'))";
+				$count++;
+			}
+			$query['where'] .= ")";
+		}
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
