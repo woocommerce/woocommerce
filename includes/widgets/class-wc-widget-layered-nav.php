@@ -368,15 +368,15 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
 		if ( is_search() ) {
-			$search_terms = $wp_query->query_vars['search_terms'];
-			$count = 0;
-			$query['where'] .= " AND (";
+			$search_terms     = $wp_query->query_vars['search_terms'];
+			$count            = 0;
+			$query['search']  = " AND (";
 			foreach ( $search_terms as $search_term ) {
-				$query['where'] .= $count > 0 ? " AND " : "";
-				$query['where'] .= "((wp_posts.post_title LIKE '%" . $search_term . "%') OR (wp_posts.post_excerpt LIKE '%" . $search_term . "%') OR (wp_posts.post_content LIKE '%" . $search_term . "%'))";
+				$query['search'] .= $count > 0 ? " AND " : "";
+				$query['search'] .= "((wp_posts.post_title LIKE '%" . $search_term . "%') OR (wp_posts.post_excerpt LIKE '%" . $search_term . "%') OR (wp_posts.post_content LIKE '%" . $search_term . "%'))";
 				$count++;
 			}
-			$query['where'] .= ")";
+			$query['search'] .= ")";
 		}
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
