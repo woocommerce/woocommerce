@@ -334,7 +334,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
-		global $wpdb;
+		global $wpdb, $wp_query;
 
 		$tax_query  = WC_Query::get_main_tax_query();
 		$meta_query = WC_Query::get_main_meta_query();
@@ -351,6 +351,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$tax_query       = new WP_Tax_Query( $tax_query );
 		$meta_query_sql  = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql   = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$product_ids = wp_list_pluck( $wp_query->posts, 'ID' );
 
 		// Generate query
 		$query           = array();
@@ -365,6 +366,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
+			AND term_relationships.object_id IN (" . implode( ',', array_map( 'absint', $product_ids ) ) . ")
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
 		$query['group_by'] = "GROUP BY terms.term_id";
