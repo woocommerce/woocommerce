@@ -1353,3 +1353,17 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 	}
 	return ( $a['position'] < $b['position'] ) ? -1 : 1;
 }
+
+/**
+ * Get rounding precision.
+ *
+ * @since 2.6.3
+ * @return int
+ */
+function wc_get_rounding_precision() {
+	if ( defined( 'WC_ROUNDING_PRECISION' ) ) {
+		return absint( WC_ROUNDING_PRECISION );
+	}
+
+	return wc_get_price_decimals() + 2;
+}
