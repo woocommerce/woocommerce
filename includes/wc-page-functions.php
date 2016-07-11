@@ -129,7 +129,7 @@ function wc_nav_menu_items( $items ) {
 		}
 	}
 
-    return $items;
+	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10 );
 
@@ -195,16 +195,21 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
  * @return string
  */
 function wc_list_pages( $pages ) {
-    if (is_woocommerce()) {
-        $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
-        $shop_page = 'page-item-' . wc_get_page_id('shop'); // find shop_page_id through woocommerce options
+	if ( is_woocommerce() ) {
+		// Remove current_page_parent class from any item.
+		$pages = str_replace( 'current_page_parent', '', $pages );
+		// Find shop_page_id through woocommerce options.
+		$shop_page = 'page-item-' . wc_get_page_id( 'shop' );
 
-        if (is_shop()) :
-        	$pages = str_replace($shop_page, $shop_page . ' current_page_item', $pages); // add current_page_item class to shop page
-    	else :
-    		$pages = str_replace($shop_page, $shop_page . ' current_page_parent', $pages); // add current_page_parent class to shop page
-    	endif;
-    }
-    return $pages;
+		if ( is_shop() ) {
+			// Add current_page_item class to shop page.
+			$pages = str_replace( $shop_page, $shop_page . ' current_page_item', $pages );
+		} else {
+			// Add current_page_parent class to shop page.
+			$pages = str_replace( $shop_page, $shop_page . ' current_page_parent', $pages );
+		}
+	}
+
+	return $pages;
 }
 add_filter( 'wp_list_pages', 'wc_list_pages' );
