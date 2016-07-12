@@ -1002,6 +1002,50 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_simple_schema_offer' ) ) {
+
+	/**
+	 * Output the schema.org offer information for simple products.
+	 *
+	 * @subpackage	Product
+	 */
+	function woocommerce_simple_schema_offer() {
+		wc_get_template( 'single-product/schema-offers/simple.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_external_schema_offer' ) ) {
+
+	/**
+	 * Output the schema.org offer information for external products.
+	 *
+	 * @subpackage	Product
+	 */
+	function woocommerce_external_schema_offer() {
+		wc_get_template( 'single-product/schema-offers/simple.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_variable_schema_offers' ) ) {
+
+	/**
+	 * Output the schema.org offer information for variable products.
+	 *
+	 * @subpackage	Product
+	 */
+	function woocommerce_variable_schema_offers() {
+		global $product;
+
+		$all_variations = $product->get_available_variations();
+		foreach ( $all_variations as $variation ) {
+			$variable_product = wc_get_product( $variation['variation_id'] );
+			wc_get_template( 'single-product/schema-offers/variation.php', array(
+				'variable_product' => $variable_product
+			) );
+		}
+	}
+}
+
 if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 
 	/**

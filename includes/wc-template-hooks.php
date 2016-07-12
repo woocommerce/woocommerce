@@ -179,6 +179,17 @@ add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 )
 add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
 
 /**
+ * Product schema.org Offer metadata.
+ *
+ * @see woocommerce_simple_schema_offer
+ * @see woocommerce_external_schema_offer
+ * @see woocommerce_variable_schema_offer
+ */
+add_action( 'woocommerce_simple_add_to_cart', 'woocommerce_simple_schema_offer', 30 );
+add_action( 'woocommerce_external_add_to_cart', 'woocommerce_external_schema_offer', 30 );
+add_action( 'woocommerce_variable_add_to_cart', 'woocommerce_variable_schema_offers', 30 );
+
+/**
  * Pagination after shop loops.
  *
  * @see woocommerce_pagination()
