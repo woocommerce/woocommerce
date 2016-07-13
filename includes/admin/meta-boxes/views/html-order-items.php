@@ -120,6 +120,10 @@ if ( wc_tax_enabled() ) {
 	<button type="button" class="button bulk-delete-items"><?php _e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button bulk-decrease-stock"><?php _e( 'Reduce stock', 'woocommerce' ); ?></button>
 	<button type="button" class="button bulk-increase-stock"><?php _e( 'Increase stock', 'woocommerce' ); ?></button>
+	<?php
+		// allow adding custom bulk action buttons
+		do_action( 'woocommerce_order_item_add_bulk_action_buttons', $order );
+	?>	
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
