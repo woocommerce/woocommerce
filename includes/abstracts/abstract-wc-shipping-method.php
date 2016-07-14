@@ -414,7 +414,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options
 		if ( $this->instance_id && array_key_exists( $key, $this->get_instance_form_fields() ) ) {
-			return $this->get_instance_option( $key, $empty_value );
+		    $option = $this->get_instance_option( $key, $empty_value );
+
+            // Return instance option if not empty
+            if( ! empty( $option ) ) {
+                return $option;
+            }
+
+            // Return global option if instance option is empty and there is a global option with same key
+            return parent::get_option( $key, $empty_value );
 		}
 
 		// Return global option
