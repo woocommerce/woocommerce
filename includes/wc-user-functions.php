@@ -317,7 +317,7 @@ function wc_modify_editable_roles( $roles ){
 	if ( ! current_user_can( 'administrator' ) ) {
 		unset( $roles[ 'administrator' ] );
 	}
-    return $roles;
+	return $roles;
 }
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 

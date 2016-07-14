@@ -63,11 +63,11 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-	    $query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'rand' );
+		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'rand' );
 
 		$query_args['meta_query']   = array();
-	    $query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
+		$query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
 		$r = new WP_Query( $query_args );
 

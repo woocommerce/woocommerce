@@ -16,7 +16,7 @@ if ( current_user_can( 'install_plugins' ) ) {
 }
 ?>
 <div id="message" class="updated woocommerce-message">
-    <a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'simplify_commerce' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php _e( 'Dismiss', 'woocommerce' ); ?></a>
+	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'simplify_commerce' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php _e( 'Dismiss', 'woocommerce' ); ?></a>
 
 	<p><?php _e( '<strong>The Simplify Commerce payment gateway is deprecated</strong> &#8211; Please install our new free Simplify Commerce plugin from WordPress.org. Simplify Commerce will be removed from WooCommerce core in a future update.', 'woocommerce' ); ?></p>
 

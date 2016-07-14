@@ -190,11 +190,11 @@ class WC_Admin_Help {
 					__( 'For further assistance with WooCommerce core you can use the %scommunity forum%s. If you need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce">',
 					'</a>',
-					'<a href="https://www.woothemes.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin">',
+					'<a href="https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin">',
 					'</a>'
 				) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Forum', 'woocommerce' ) . '</a> <a href="' . 'https://www.woothemes.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' . '" class="button">' . __( 'WooThemes Helpdesk', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Forum', 'woocommerce' ) . '</a> <a href="' . 'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' . '" class="button">' . __( 'WooThemes Helpdesk', 'woocommerce' ) . '</a></p>'
 		) );
 
 		$screen->add_help_tab( array(
@@ -213,7 +213,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
 				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course ran by one of our educational partners.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'https://www.woothemes.com/educational-partners/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'https://woocommerce.com/educational-partners/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
 		) );
 
 		$screen->add_help_tab( array(
@@ -228,11 +228,11 @@ class WC_Admin_Help {
 
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
-			'<p><a href="' . 'https://www.woothemes.com/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'https://woocommerce.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="' . 'https://wordpress.org/extend/plugins/woocommerce/' . '" target="_blank">' . __( 'WordPress.org Project', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="' . 'https://github.com/woothemes/woocommerce' . '" target="_blank">' . __( 'Github Project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . 'https://www.woothemes.com/product-category/themes/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . 'https://www.woothemes.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
+			'<p><a href="' . 'https://woocommerce.com/product-category/themes/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
 

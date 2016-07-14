@@ -1301,7 +1301,7 @@
 * Tweak - Filterable page installer.
 * Tweak - Order details optimised for small screens.
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
-* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns parameter now affects layout correctly.
 * Tweak - Disabled button styles.
 * Tweak - Hooks for overriding default email inline styles.
@@ -1420,7 +1420,7 @@
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Tweak - Handle pending status for paypal
 * Tweak - Only refresh fragment when cart cookie > 0
-* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total
@@ -1674,7 +1674,7 @@
 * Feature - Filter coupons in admin by type.
 * Feature - Append view cart link on ajax buttons.
 * Feature - Revised the way coupons are stored per order and added new coupon reports on usage.
-* Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Feature - Option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.
 * Feature - Added set_stock() method to product class.
 * Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)

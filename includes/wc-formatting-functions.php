@@ -308,7 +308,7 @@ function wc_sanitize_tooltip( $var ) {
 		'li'     => array(),
 		'ol'     => array(),
 		'p'      => array(),
-    ) ) );
+	) ) );
 }
 
 /**
@@ -829,6 +829,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 	 * @return string
 	 */
 	function wc_make_numeric_postcode( $postcode ) {
+		$postcode           = str_replace( array( ' ', '-' ), '', $postcode );
 		$postcode_length    = strlen( $postcode );
 		$letters_to_numbers = array_merge( array( 0 ), range( 'A', 'Z' ) );
 		$letters_to_numbers = array_flip( $letters_to_numbers );

@@ -727,11 +727,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $images
 	 * @throws WC_REST_Exception
 	 */
-	protected function save_product_images( $product, $images ) {
+	protected function save_product_images( $product_id, $images ) {
 		if ( is_array( $images ) ) {
 			$gallery = array();
 
@@ -745,11 +745,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 					}
 
-					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
+					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
 				}
 
 				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
-					set_post_thumbnail( $product->id, $attachment_id );
+					set_post_thumbnail( $product_id, $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
 				}
@@ -766,62 +766,62 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 
 			if ( ! empty( $gallery ) ) {
-				update_post_meta( $product->id, '_product_image_gallery', implode( ',', $gallery ) );
+				update_post_meta( $product_id, '_product_image_gallery', implode( ',', $gallery ) );
 			}
 		} else {
-			delete_post_meta( $product->id, '_thumbnail_id' );
-			update_post_meta( $product->id, '_product_image_gallery', '' );
+			delete_post_meta( $product_id, '_thumbnail_id' );
+			update_post_meta( $product_id, '_product_image_gallery', '' );
 		}
 	}
 
 	/**
 	 * Save product shipping data.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $data
 	 */
-	private function save_product_shipping_data( $product, $data ) {
+	private function save_product_shipping_data( $product_id, $data ) {
 		// Virtual.
 		if ( isset( $data['virtual'] ) && true === $data['virtual'] ) {
-			update_post_meta( $product->id, '_weight', '' );
-			update_post_meta( $product->id, '_length', '' );
-			update_post_meta( $product->id, '_width', '' );
-			update_post_meta( $product->id, '_height', '' );
+			update_post_meta( $product_id, '_weight', '' );
+			update_post_meta( $product_id, '_length', '' );
+			update_post_meta( $product_id, '_width', '' );
+			update_post_meta( $product_id, '_height', '' );
 		} else {
 			if ( isset( $data['weight'] ) ) {
-				update_post_meta( $product->id, '_weight', '' === $data['weight'] ? '' : wc_format_decimal( $data['weight'] ) );
+				update_post_meta( $product_id, '_weight', '' === $data['weight'] ? '' : wc_format_decimal( $data['weight'] ) );
 			}
 
 			// Height.
 			if ( isset( $data['dimensions']['height'] ) ) {
-				update_post_meta( $product->id, '_height', '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
+				update_post_meta( $product_id, '_height', '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
 			}
 
 			// Width.
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $product->id, '_width', '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
+				update_post_meta( $product_id, '_width', '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length.
 			if ( isset( $data['dimensions']['length'] ) ) {
-				update_post_meta( $product->id, '_length', '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
+				update_post_meta( $product_id, '_length', '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
 			}
 		}
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
-			wp_set_object_terms( $product->id, wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
+			wp_set_object_terms( $product_id, wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
 		}
 	}
 
 	/**
 	 * Save downloadable files.
 	 *
-	 * @param WC_Product $product
+	 * @param in $product_id
 	 * @param array $downloads
 	 * @param int $variation_id
 	 */
-	private function save_downloadable_files( $product, $downloads, $variation_id = 0 ) {
+	private function save_downloadable_files( $product_id, $downloads, $variation_id = 0 ) {
 		$files = array();
 
 		// File paths will be stored in an array keyed off md5(file path).
@@ -849,9 +849,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Grant permission to any newly added files on any existing orders for this product prior to saving.
-		do_action( 'woocommerce_process_product_file_download_paths', $product->id, $variation_id, $files );
+		do_action( 'woocommerce_process_product_file_download_paths', $product_id, $variation_id, $files );
 
-		$id = ( 0 === $variation_id ) ? $product->id : $variation_id;
+		$id = ( 0 === $variation_id ) ? $product_id : $variation_id;
 
 		update_post_meta( $id, '_downloadable_files', $files );
 	}
@@ -859,16 +859,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save taxonomy terms.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $terms
 	 * @param string $taxonomy
 	 * @return array
 	 */
-	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
+	protected function save_taxonomy_terms( $product_id, $terms, $taxonomy = 'cat' ) {
 		$term_ids = wp_list_pluck( $terms, 'id' );
 		$term_ids = array_unique( array_map( 'intval', $term_ids ) );
 
-		wp_set_object_terms( $product->id, $term_ids, 'product_' . $taxonomy );
+		wp_set_object_terms( $product_id, $term_ids, 'product_' . $taxonomy );
 
 		return $terms;
 	}
@@ -931,7 +931,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Shipping data.
-		$this->save_product_shipping_data( $product, $request );
+		$this->save_product_shipping_data( $product->id, $request );
 
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
@@ -1233,12 +1233,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Product categories.
 		if ( isset( $request['categories'] ) && is_array( $request['categories'] ) ) {
-			$this->save_taxonomy_terms( $product, $request['categories'] );
+			$this->save_taxonomy_terms( $product->id, $request['categories'] );
 		}
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
+			$this->save_taxonomy_terms( $product->id, $request['tags'], 'tag' );
 		}
 
 		// Downloadable.
@@ -1254,7 +1254,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Downloadable files.
 			if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
-				$this->save_downloadable_files( $product, $request['downloads'] );
+				$this->save_downloadable_files( $product->id, $request['downloads'] );
 			}
 
 			// Download limit.
@@ -1636,7 +1636,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $request['images'] ) ) {
-				$this->save_product_images( $product, $request['images'] );
+				$this->save_product_images( $product->id, $request['images'] );
 			}
 
 			// Save product meta fields.
@@ -1666,7 +1666,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $request['images'] ) ) {
-				$this->save_product_images( $product, $request['images'] );
+				$this->save_product_images( $product->id, $request['images'] );
 			}
 
 			// Save product meta fields.

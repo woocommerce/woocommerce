@@ -745,14 +745,14 @@ class WC_Admin_Setup_Wizard {
 		$this->wc_setup_ready_actions();
 		shuffle( $this->tweets );
 		?>
-		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://woocommerce.com/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
 		<h1><?php _e( 'Your Store is Ready!', 'woocommerce' ); ?></h1>
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="https://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="https://woocommerce.com/usage-tracking/" target="_blank">', '</a>' ); ?></p>
 				<p class="submit">
 					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
 					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'No thanks', 'woocommerce' ); ?></a>
@@ -771,7 +771,7 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="video-walkthrough"><a href="https://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="https://www.woothemes.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="learn-more"><a href="https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>

@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
 	}
 
 	/**
@@ -2246,7 +2246,7 @@ class WC_AJAX {
 
 						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
 
-						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order );
+						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order, $_product );
 					}
 				}
 			}

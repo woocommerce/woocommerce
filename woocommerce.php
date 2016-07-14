@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce
- * Plugin URI: https://www.woothemes.com/woocommerce/
+ * Plugin URI: https://woocommerce.com/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
  * Version: 2.6.2
  * Author: WooThemes
@@ -181,7 +181,6 @@ final class WooCommerce {
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 		$this->define( 'WC_VERSION', $this->version );
 		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
-		$this->define( 'WC_ROUNDING_PRECISION', 4 );
 		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );

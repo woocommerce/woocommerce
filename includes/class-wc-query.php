@@ -517,8 +517,8 @@ class WC_Query {
 
 	/**
 	 * Appends meta queries to an array.
-	 * @access public
-	 * @param array $meta_query
+	 *
+	 * @param  array $meta_query
 	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
@@ -526,10 +526,10 @@ class WC_Query {
 			$meta_query = array();
 		}
 
-		$meta_query[] = $this->visibility_meta_query();
-		$meta_query[] = $this->stock_status_meta_query();
-		$meta_query[] = $this->price_filter_meta_query();
-		$meta_query[] = $this->rating_filter_meta_query();
+		$meta_query['visibility']    = $this->visibility_meta_query();
+		$meta_query['stock_status']  = $this->stock_status_meta_query();
+		$meta_query['price_filter']  = $this->price_filter_meta_query();
+		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
 
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}

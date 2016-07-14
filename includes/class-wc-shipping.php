@@ -89,10 +89,10 @@ class WC_Shipping {
 		}
 	}
 
-    /**
-     * Initialize shipping.
-     */
-    public function init() {
+	/**
+	 * Initialize shipping.
+	 */
+	public function init() {
 		do_action( 'woocommerce_shipping_init' );
 	}
 

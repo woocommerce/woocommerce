@@ -101,16 +101,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://www.woothemes.com/storefront/';
+			$url         = 'https://woocommerce.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
