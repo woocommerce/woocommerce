@@ -1213,13 +1213,14 @@ if ( ! function_exists( 'woocommerce_review_display_meta' ) ) {
 }
 
 if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
+
 	/**
-	 * Display the review content
-	 *
-	 * @return void
+	 * Display the review content.
 	 */
 	function woocommerce_review_display_comment_text() {
-		echo '<div itemprop="description" class="description">' . get_comment_text() . '</div>';
+		echo '<div itemprop="description" class="description">';
+		comment_text();
+		echo '</div>';
 	}
 }
 
