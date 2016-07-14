@@ -552,6 +552,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'date_on_sale_to'    => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
 				'on_sale'            => $variation->is_on_sale(),
 				'purchasable'        => $variation->is_purchasable(),
+				'visible'            => $variation->is_visible(),
 				'virtual'            => $variation->is_virtual(),
 				'downloadable'       => $variation->is_downloadable(),
 				'downloads'          => $this->get_downloads( $variation ),
@@ -2391,6 +2392,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
+						),
+						'visible' => array(
+							'description' => __( 'If the variation is visible.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' )
 						),
 						'virtual' => array(
 							'description' => __( 'If the variation is virtual.', 'woocommerce' ),
