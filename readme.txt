@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.6.2 - xx/xx/16 =
 * Fix - Fixed how calculate shipping tax rates when using more than one tax class.
 * Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
 * Dev - API - Added support for WP REST API with custom URL prefix.
 * Dev - API - Delete variations when deletes a variable product.
 * Dev - API - Fixed how check for product types.

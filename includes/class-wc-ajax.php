@@ -1012,22 +1012,22 @@ class WC_AJAX {
 	 * Delete download permissions via ajax function.
 	 */
 	public static function revoke_access_to_download() {
-
 		check_ajax_referer( 'revoke-access', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
+			die( -1 );
 		}
 
 		global $wpdb;
 
-		$download_id = $_POST['download_id'];
-		$product_id  = intval( $_POST['product_id'] );
-		$order_id    = intval( $_POST['order_id'] );
+		$download_id   = $_POST['download_id'];
+		$product_id    = intval( $_POST['product_id'] );
+		$order_id      = intval( $_POST['order_id'] );
+		$permission_id = absint( $_POST['permission_id'] );
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s;", $order_id, $product_id, $download_id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d;", $permission_id ) );
 
-		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id );
+		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id, $permission_id );
 
 		die();
 	}
