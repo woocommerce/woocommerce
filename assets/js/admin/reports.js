@@ -145,6 +145,7 @@ jQuery(function( $ ) {
 			$( this ).offsetParent().find( 'thead tr,tbody tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
+                    value = value.replace( '#', '' );
 					value = value.replace( '[?]', '' );
 					csv_data += '"' + value + '"' + ',';
 				});
@@ -155,6 +156,7 @@ jQuery(function( $ ) {
 			$( this ).offsetParent().find( 'tfoot tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
+                    value = value.replace( '#', '' );
 					value = value.replace( '[?]', '' );
 					csv_data += '"' + value + '"' + ',';
 					if ( $( this ).attr( 'colspan' ) > 0 ) {
