@@ -23,11 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 
-	<?php do_action( 'woocommerce_variation_schema_offer_before_schema', $variable_product ); ?>
-	<meta itemprop="price" content="<?php echo esc_attr( $variable_product->get_price() ); ?>" />
+	<?php do_action( 'woocommerce_variation_schema_offer_before_schema', $variation_product ); ?>
+	<meta itemprop="price" content="<?php echo esc_attr( $variation_product->get_price() ); ?>" />
 	<meta itemprop="priceCurrency" content="<?php echo esc_attr( get_woocommerce_currency() ); ?>" />
-	<link itemprop="availability" href="http://schema.org/<?php echo $variable_product->is_in_stock() ? 'InStock' : 'OutOfStock'; ?>" />
-	<meta itemprop="name" content="<?php echo esc_attr( $variable_product->get_title() ) . ' (' . esc_attr( $variable_product->get_formatted_variation_attributes(true) ) . ')'; ?>" />
-	<?php do_action( 'woocommerce_variation_schema_offer_after_schema', $variable_product ); ?>
+	<link itemprop="availability" href="http://schema.org/<?php echo $variation_product->is_in_stock() ? 'InStock' : 'OutOfStock'; ?>" />
+	<meta itemprop="name" content="<?php echo esc_attr( $variation_product->get_title() ) . ' (' . esc_attr( $variation_product->get_formatted_variation_attributes(true) ) . ')'; ?>" />
+	<?php do_action( 'woocommerce_variation_schema_offer_after_schema', $variation_product ); ?>
 
 </div>

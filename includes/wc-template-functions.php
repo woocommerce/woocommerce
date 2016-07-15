@@ -1036,11 +1036,24 @@ if ( ! function_exists( 'woocommerce_variable_schema_offers' ) ) {
 	function woocommerce_variable_schema_offers() {
 		global $product;
 
-		$all_variations = $product->get_available_variations();
-		foreach ( $all_variations as $variation ) {
-			$variable_product = wc_get_product( $variation['variation_id'] );
-			wc_get_template( 'single-product/schema-offers/variation.php', array(
-				'variable_product' => $variable_product
+		$variation_count = sizeof( $product->get_children() );
+		$show_variations = $variation_count <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
+		$show_variations = apply_filters( 'woocommerce_show_variation_schema_data', $show_variations, $product );
+
+		if ( $show_variations ) {
+			$all_variations = $product->get_available_variations();
+			foreach ( $all_variations as $variation ) {
+				$variation_product = wc_get_product( $variation['variation_id'] );
+				wc_get_template( 'single-product/schema-offers/variation.php', array(
+					'variation_product' => $variation_product,
+				) );
+			}
+		} else {
+			wc_get_template( 'single-product/schema-offers/variation-aggregate.php', array(
+				'low_price'        => $product->get_variation_price('min'),
+				'high_price'       => $product->get_variation_price('max'),
+				'offer_count'      => $variation_count,
+				'variable_product' => $product,
 			) );
 		}
 	}
