@@ -138,7 +138,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	protected function get_post_types() {
-		return array( $post->post_type );
+		return array( $this->post_type );
 	}
 
 	/**

@@ -462,15 +462,38 @@ class WC_API_Products extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
-		$parent_id = wp_get_post_parent_id( $id );
-		$result    = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
+
+			if ( ! empty( $child_product_variations ) ) {
+				foreach ( $child_product_variations as $child ) {
+					wp_delete_post( $child->ID, true );
+				}
+			}
+
+			$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
+
+			if ( ! empty( $child_products ) ) {
+				foreach ( $child_products as $child ) {
+					$child_post                = array();
+					$child_post['ID']          = $child->ID;
+					$child_post['post_parent'] = 0;
+					wp_update_post( $child_post );
+				}
+			}
+
+			$result = wp_delete_post( $id, true );
+		} else {
+			$result = wp_trash_post( $id );
+		}
 
 		if ( ! $result ) {
 			return new WP_Error( 'woocommerce_api_cannot_delete_product', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product' ), array( 'status' => 500 ) );
 		}
 
 		// Delete parent product transients.
-		if ( $parent_id ) {
+		if ( $parent_id = wp_get_post_parent_id( $id ) ) {
 			wc_delete_product_transients( $parent_id );
 		}
 

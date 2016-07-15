@@ -37,7 +37,7 @@ One of the biggest risks of using a hosted eCommerce platform is what happens to
 
 [Storefront](https://wordpress.org/themes/storefront/) is a free WordPress theme available to any WooCommerce store. Along with deep WooCommerce integration, Storefront prioritizes speed and uptime while eliminating theme and plugin conflicts during major updates.
 
-Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](https://www.woothemes.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
+Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
 
 = Built with developers in mind =
 
@@ -65,14 +65,14 @@ Keen to see them all? Search WordPress.org for ‘WooCommerce’ to dive in.
 
 If you’re looking for something endorsed and maintained by the developers who built WooCommerce, there are a plethora of premium eCommerce extensions, the most popular of which include:
 
-- [WooCommerce Subscriptions](https://www.woothemes.com/products/woocommerce-subscriptions/)
-- [WooCommerce Memberships](https://www.woothemes.com/products/woocommerce-memberships/)
-- [WooCommerce Bookings](https://www.woothemes.com/products/woocommerce-bookings/)
-- [Dynamic Pricing](https://www.woothemes.com/products/dynamic-pricing/)
-- [Table Rate Shipping](https://www.woothemes.com/products/table-rate-shipping/)
-- [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)
+- [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/)
+- [WooCommerce Memberships](https://woocommerce.com/products/woocommerce-memberships/)
+- [WooCommerce Bookings](https://woocommerce.com/products/woocommerce-bookings/)
+- [Dynamic Pricing](https://woocommerce.com/products/dynamic-pricing/)
+- [Table Rate Shipping](https://woocommerce.com/products/table-rate-shipping/)
+- [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)
 
-And there’s plenty more where they came from. Visit our [extensions page](https://www.woothemes.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
+And there’s plenty more where they came from. Visit our [extensions page](https://woocommerce.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
 
 = Join our growing community =
 
@@ -82,7 +82,7 @@ If you’re interested in contributing to WooCommerce we’ve got more than 350 
 
 Want to add a new language to WooCommerce? Swell! You can contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce).
 
-And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](https://www.woothemes.com/woocommerce/meetups/).
+And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](https://woocommerce.com/woocommerce/meetups/).
 
 == Installation ==
 
@@ -111,7 +111,7 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 
 = Dummy data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://www.woothemes.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
 
 == Frequently Asked Questions ==
 
@@ -129,7 +129,7 @@ For help with premium add-ons from WooThemes, use [our helpdesk](https://support
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://www.woothemes.com/storefront/).
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
 
 = Where can I request new features, eCommerce themes and extensions? =
 
@@ -159,7 +159,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.2 - xx/xx/16 =
+* Fix - Fixed how calculate shipping tax rates when using more than one tax class.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
 * Dev - API - Added support for WP REST API with custom URL prefix.
+* Dev - API - Delete variations when deletes a variable product.
+* Dev - API - Fixed how check for product types.
 
 = 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.

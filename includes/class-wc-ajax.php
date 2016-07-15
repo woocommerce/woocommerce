@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
 	}
 
 	/**
@@ -1012,22 +1012,22 @@ class WC_AJAX {
 	 * Delete download permissions via ajax function.
 	 */
 	public static function revoke_access_to_download() {
-
 		check_ajax_referer( 'revoke-access', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
+			die( -1 );
 		}
 
 		global $wpdb;
 
-		$download_id = $_POST['download_id'];
-		$product_id  = intval( $_POST['product_id'] );
-		$order_id    = intval( $_POST['order_id'] );
+		$download_id   = $_POST['download_id'];
+		$product_id    = intval( $_POST['product_id'] );
+		$order_id      = intval( $_POST['order_id'] );
+		$permission_id = absint( $_POST['permission_id'] );
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s;", $order_id, $product_id, $download_id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d;", $permission_id ) );
 
-		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id );
+		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id, $permission_id );
 
 		die();
 	}
@@ -2246,7 +2246,7 @@ class WC_AJAX {
 
 						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
 
-						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order );
+						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order, $_product );
 					}
 				}
 			}

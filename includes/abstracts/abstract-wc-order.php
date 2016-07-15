@@ -658,6 +658,24 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get all tax classes for items in the order.
+	 *
+	 * @since 2.6.3
+	 * @return array
+	 */
+	public function get_items_tax_classes() {
+		$found_tax_classes = array();
+
+		foreach ( $this->get_items() as $item ) {
+			if ( $_product = $this->get_product_from_item( $item ) ) {
+				$found_tax_classes[] = $_product->get_tax_class();
+			}
+		}
+
+		return array_unique( $found_tax_classes );
+	}
+
+	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * Will use the base country unless customer addresses are set.
@@ -739,7 +757,8 @@ abstract class WC_Abstract_Order {
 
 			// Inherit tax class from items
 			if ( '' === $shipping_tax_class ) {
-				$tax_classes = WC_Tax::get_tax_classes();
+				$tax_classes       = WC_Tax::get_tax_classes();
+				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
 					$tax_class = sanitize_title( $tax_class );
@@ -1465,7 +1484,7 @@ abstract class WC_Abstract_Order {
 				$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
 			}
 		}
-		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
+		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, wc_get_rounding_precision() ), $this );
 	}
 
 	/**

@@ -1266,9 +1266,10 @@ jQuery( function ( $ ) {
 
 		revoke_access: function () {
 			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_permission_revoke ) ) {
-				var el      = $( this ).parent().parent();
-				var product = $( this ).attr( 'rel' ).split( ',' )[0];
-				var file    = $( this ).attr( 'rel' ).split( ',' )[1];
+				var el            = $( this ).parent().parent();
+				var product       = $( this ).attr( 'rel' ).split( ',' )[0];
+				var file          = $( this ).attr( 'rel' ).split( ',' )[1];
+				var permission_id = $( this ).data( 'permission_id' );
 
 				if ( product > 0 ) {
 					$( el ).block({
@@ -1280,11 +1281,12 @@ jQuery( function ( $ ) {
 					});
 
 					var data = {
-						action:      'woocommerce_revoke_access_to_download',
-						product_id:  product,
-						download_id: file,
-						order_id:    woocommerce_admin_meta_boxes.post_id,
-						security:    woocommerce_admin_meta_boxes.revoke_access_nonce
+						action:        'woocommerce_revoke_access_to_download',
+						product_id:    product,
+						download_id:   file,
+						permission_id: permission_id,
+						order_id:      woocommerce_admin_meta_boxes.post_id,
+						security:      woocommerce_admin_meta_boxes.revoke_access_nonce
 					};
 
 					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {

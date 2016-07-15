@@ -484,9 +484,9 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 		$page_title = apply_filters( 'woocommerce_page_title', $page_title );
 
 		if ( $echo )
-	    	echo $page_title;
-	    else
-	    	return $page_title;
+			echo $page_title;
+		else
+			return $page_title;
 	}
 }
 
@@ -1151,8 +1151,8 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 		if ( ! function_exists( '_sort_priority_callback' ) ) {
 			function _sort_priority_callback( $a, $b ) {
 				if ( $a['priority'] === $b['priority'] )
-			        return 0;
-			    return ( $a['priority'] < $b['priority'] ) ? -1 : 1;
+					return 0;
+				return ( $a['priority'] < $b['priority'] ) ? -1 : 1;
 			}
 		}
 
@@ -1213,13 +1213,14 @@ if ( ! function_exists( 'woocommerce_review_display_meta' ) ) {
 }
 
 if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
+
 	/**
-	 * Display the review content
-	 *
-	 * @return void
+	 * Display the review content.
 	 */
 	function woocommerce_review_display_comment_text() {
-		echo '<div itemprop="description" class="description">' . get_comment_text() . '</div>';
+		echo '<div itemprop="description" class="description">';
+		comment_text();
+		echo '</div>';
 	}
 }
 

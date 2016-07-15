@@ -413,7 +413,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options
-		if ( array_key_exists( $key, $this->get_instance_form_fields() ) ) {
+		if ( $this->instance_id && array_key_exists( $key, $this->get_instance_form_fields() ) ) {
 			return $this->get_instance_option( $key, $empty_value );
 		}
 
