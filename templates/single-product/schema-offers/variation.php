@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<meta itemprop="price" content="<?php echo esc_attr( $variation_product->get_price() ); ?>" />
 	<meta itemprop="priceCurrency" content="<?php echo esc_attr( get_woocommerce_currency() ); ?>" />
 	<link itemprop="availability" href="http://schema.org/<?php echo $variation_product->is_in_stock() ? 'InStock' : 'OutOfStock'; ?>" />
-	<meta itemprop="name" content="<?php echo esc_attr( $variation_product->get_title() ) . ' (' . esc_attr( $variation_product->get_formatted_variation_attributes(true) ) . ')'; ?>" />
+	<meta itemprop="name" content="<?php echo esc_attr( $variation_product->get_title() ) . ' (' . esc_attr( $variation_product->get_formatted_variation_attributes( true ) ) . ')'; ?>" />
 	<?php do_action( 'woocommerce_variation_schema_offer_after_schema', $variation_product ); ?>
 
 </div>
