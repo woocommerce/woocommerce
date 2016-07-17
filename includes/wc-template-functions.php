@@ -686,36 +686,6 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_get_product_schema' ) ) {
-
-	/**
-	 * Get a products Schema.
-	 * @return string
-	 */
-	function woocommerce_get_product_schema() {
-		global $product;
-
-		$schema = "Product";
-
-		// Downloadable product schema handling
-		if ( $product->is_downloadable() ) {
-			switch ( $product->download_type ) {
-				case 'application' :
-					$schema = "SoftwareApplication";
-				break;
-				case 'music' :
-					$schema = "MusicAlbum";
-				break;
-				default :
-					$schema = "Product";
-				break;
-			}
-		}
-
-		return 'http://schema.org/' . $schema;
-	}
-}
-
 if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 
 	/**
@@ -1218,7 +1188,7 @@ if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
 	 * Display the review content.
 	 */
 	function woocommerce_review_display_comment_text() {
-		echo '<div itemprop="description" class="description">';
+		echo '<div class="description">';
 		comment_text();
 		echo '</div>';
 	}

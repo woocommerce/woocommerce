@@ -295,6 +295,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-embed.php' );                          // Embeds
+    include_once( 'includes/class-wc-data-structurer.php' );                // Data Structurer class
 	}
 
 	/**
@@ -328,8 +329,9 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
+			$this->cart             = new WC_Cart();                              // Cart class, stores the cart contents
+			$this->customer         = new WC_Customer();                          // Customer class, handles data such as customer location
+      $this->data_structurer  = new WC_Data_Structurer();                   // Microdata class, generates and encodes a JSON-LD
 		}
 
 		$this->load_webhooks();
