@@ -1474,6 +1474,19 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#poststuff #woocommerce-order-navigation {
+	.inside {
+		padding-bottom: 0;
+		margin: 0;
+
+		ul.order_navigation {
+			li {
+				display: inline-block;
+			}
+		}
+	}
+}
+
 #woocommerce_customers {
 	p.search-box {
 		margin: 6px 0 4px;
