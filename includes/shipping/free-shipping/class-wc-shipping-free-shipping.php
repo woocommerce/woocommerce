@@ -58,7 +58,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			});
 		" );
 
-		return array(
+		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), array(
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ),
 				'type' 			=> 'text',
@@ -87,7 +87,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'default' 		=> '0',
 				'desc_tip'		=> true
 			)
-		);
+		) ) );
 	}
 
 	/**
