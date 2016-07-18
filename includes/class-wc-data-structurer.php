@@ -14,18 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author 		Clement Cazaud
  */
 class WC_Data_Structurer {
+  
   /**
    * @var array Partially formatted structured data
    */
   private $structured_data;
-  
+
   /**
    * Checks if the passed $json variable is an array and stores it into $this->structured_data...
    *
    * @param array $json Partially formatted JSON-LD
    * @return false If the param $json is not an array
    */
-  public function set_structured_data( $json ) {
+  private function set_structured_data( $json ) {
     if ( ! is_array( $json ) ) {
       return false;
     }
@@ -35,35 +36,36 @@ class WC_Data_Structurer {
   /**
    * Formats and returns the structured data...
    *
-   * @return mixed bool|array If $this->structured_data is set, returns the fully formatted and encoded JSON-LD, otherwise returns false
+   * @return mixed bool|array If structured data is set, returns the fully formatted and encoded JSON-LD, otherwise returns false
    */
-  public function get_structured_data() {
+  private function get_structured_data() {
     if ( ! $this->structured_data ) {
+      return false;
+    }
+    $product_count = 0;
+
+    foreach ( $this->structured_data as $value ) {
+      $type = isset( $value['@type'] ) ? $value['@type'] : false;
+        
+      if ( 'Product' === $type || 'SoftwareApplication' === $type || 'MusicAlbum' === $type ) {
+        $products[] = $value;
+        $product_count ++;
+      }
+      elseif ( 'Review' === $type ) {
+        $reviews[] = $value;
+      }
+    }
+    if ( $product_count === 1 ) {
+      $structured_data = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
+    }
+    elseif ( $product_count > 1 ) {
+      $structured_data = array( '@graph' => $products );
+    }
+    if ( ! isset( $structured_data ) ) {
       return false;
     }
     $context['@context'] = 'http://schema.org/';
     
-    if ( count( $this->structured_data ) > 1 ) {
-      if ( is_product() ) {
-        foreach ( $this->structured_data as $value ) {
-          if ( isset( $value['@type'] ) ) {
-            if ( 'Product' === $value['@type'] ) {
-              $product = $value;
-            }
-            elseif ( 'Review' === $value['@type'] ) {
-              $reviews[] = $value;
-            }
-          }
-        }
-        $structured_data = isset( $reviews ) ? $product + array( 'review' => $reviews ) : $product;
-      }
-      elseif ( is_product_category() ) {
-        $structured_data = array( '@graph' => $this->structured_data );
-      }
-    }
-    else {
-      $structured_data = $this->structured_data[0];
-    }
     return wp_json_encode( $context + $structured_data );
   }
 
@@ -96,6 +98,7 @@ class WC_Data_Structurer {
     }
     $this->init_product_structured_data();
   }
+  
   /**
    * Generates the product structured data...
    * Hooked into the `woocommerce_single_product_summary` action hook...
@@ -104,17 +107,35 @@ class WC_Data_Structurer {
   public function init_product_structured_data() {
     global $product;
 
-    $json['@type']             = 'Product';
-    $json['@id']               = 'product-' . get_the_ID();
+    if ( $product->is_downloadable() ) {
+      switch ( $product->download_type ) {
+        case 'application' :
+          $type = "SoftwareApplication";
+        break;
+        case 'music' :
+          $type = "MusicAlbum";
+        break;
+        default :
+          $type = "Product";
+        break;
+      }
+    } else {
+      $type = "Product";
+    }
+    $json['@type']             = $type;
+    $json['@id']               = get_the_permalink();
     $json['name']              = get_the_title();
     $json['image']             = wp_get_attachment_url( $product->get_image_id() );
     $json['description']       = get_the_excerpt();
     $json['url']               = get_the_permalink();
     $json['sku']               = $product->get_sku();
-    $json['brand']             = array(
-      '@type'                  => 'Thing',
-      'name'                   => $product->get_attribute( __( 'brand', 'woocommerce' ) )
-    );
+
+    if ( $brand = $product->get_attribute( __( 'brand', 'woocommerce' ) ) ) {
+      $json['brand']             = array(
+        '@type'                  => 'Thing',
+        'name'                   => $brand
+      );
+    }
     if ( $product->get_rating_count() ) {
       $json['aggregateRating'] = array(
         '@type'                => 'AggregateRating',
@@ -127,12 +148,7 @@ class WC_Data_Structurer {
       '@type'                  => 'Offer',
       'priceCurrency'          => get_woocommerce_currency(),
       'price'                  => $product->get_price(),
-      'itemCondition'          => 'http://schema.org/NewCondition',
-      'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-      'seller'                 => array(
-        '@type'                => 'Organization',
-        'name'                 => get_bloginfo( 'name' )
-      )
+      'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' )
     );
     $this->set_structured_data( apply_filters( 'woocommerce_product_structured_data', $json ) );
   }
@@ -148,7 +164,7 @@ class WC_Data_Structurer {
     $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
     $json['@type']             = 'Review';
-    $json['@id']               = 'li-comment-' . get_comment_ID();
+    $json['@id']               = '#li-comment-' . get_comment_ID();
     $json['datePublished']     = get_comment_date( 'c' );
     $json['description']       = get_comment_text();
     $json['reviewRating']      = array(
