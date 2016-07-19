@@ -361,23 +361,18 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
 			" . $tax_query_sql['join'] . $meta_query_sql['join'];
+
 		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
-		if ( is_search() ) {
-			$search_terms     = $wp_query->query_vars['search_terms'];
-			$count            = 0;
-			$query['search']  = " AND (";
-			foreach ( $search_terms as $search_term ) {
-				$query['search'] .= $count > 0 ? " AND " : "";
-				$query['search'] .= "(({$wpdb->posts}.post_title LIKE '%" . $search_term . "%') OR ({$wpdb->posts}.post_excerpt LIKE '%" . $search_term . "%') OR ({$wpdb->posts}.post_content LIKE '%" . $search_term . "%'))";
-				$count++;
-			}
-			$query['search'] .= ")";
+
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$query['where'] .= ' AND ' . $search;
 		}
+
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
