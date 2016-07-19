@@ -1557,16 +1557,6 @@ p.demo_store {
 		@include clearfix();
 	}
 
-	.woocommerce-MyAccount-navigation {
-		float: left;
-		width: 30%;
-	}
-
-	.woocommerce-MyAccount-content {
-		float: right;
-		width: 68%;
-	}
-
 	.addresses {
 		.title {
 			@include clearfix();
