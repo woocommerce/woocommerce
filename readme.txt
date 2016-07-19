@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Include child prices in grouped_price_html filter.
 * Dev - Allow filtering of variation stock quantity.
 * Dev - Added $_product argument to 'woocommerce_restock_refunded_item' hook.
+* Dev - Added a filter hook for the wc_ajax endpoint url.
 * Tweak - Include account page link in new customer account emails.
 * Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
 * Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
