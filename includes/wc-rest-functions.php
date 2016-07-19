@@ -124,10 +124,10 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 
 	if ( $image_meta = wp_read_image_metadata( $upload['file'] ) ) {
 		if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
-			$title = $image_meta['title'];
+			$title = wc_clean( $image_meta['title'] );
 		}
 		if ( trim( $image_meta['caption'] ) ) {
-			$content = $image_meta['caption'];
+			$content = wc_clean( $image_meta['caption'] );
 		}
 	}
 

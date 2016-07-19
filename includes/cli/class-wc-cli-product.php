@@ -2073,10 +2073,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		if ( $image_meta = @wp_read_image_metadata( $upload['file'] ) ) {
 			if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
-				$title = $image_meta['title'];
+				$title = wc_clean( $image_meta['title'] );
 			}
 			if ( trim( $image_meta['caption'] ) ) {
-				$content = $image_meta['caption'];
+				$content = wc_clean( $image_meta['caption'] );
 			}
 		}
 

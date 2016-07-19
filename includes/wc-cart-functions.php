@@ -96,7 +96,7 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 	}
 
 	if ( ! $show_qty ) {
-		$products = array_fill_keys( array_values( $products ), 1 );
+		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
 	foreach ( $products as $product_id => $qty ) {

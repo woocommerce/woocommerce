@@ -5,9 +5,9 @@ Welcome to the WooCommerce repository on GitHub. Here you can browse the source,
 If you are not a developer, please use the [WooCommerce plugin page](https://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
 ## Documentation
-* [WooCommerce Documentation](https://docs.woothemes.com/documentation/plugins/woocommerce/)
+* [WooCommerce Documentation](https://docs.woocommerce.com/documentation/plugins/woocommerce/)
 * [WooCommerce Knowledge Base](https://support.woothemes.com/hc/en-us/categories/200146917-WooCommerce)
-* [WooCommerce Code Reference](https://docs.woothemes.com/wc-apidocs/)
+* [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woothemes.github.io/woocommerce-rest-api-docs/)
 
 ## Support

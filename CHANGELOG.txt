@@ -1,5 +1,38 @@
 == Changelog ==
 
+= 2.6.3 - 19/07/16 =
+* Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
+* Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Normalized 'read more' buttons.
+* Fix - Add to cart notices for grouped products.
+* Fix - Do not sanitize passwords in the settings API.
+* Fix - Handle shipping zone location range conversion during update (dashes to ...).
+* Fix - Always remove commas while processing flat rate costs.
+* Fix - Ensures account page layout is only applied to desktop-sized displays.
+* Fix - When getting layered nav counts, take search parameters into consideration.
+* Fix - Free shipping show/hide javascript.
+* Fix - Strip hash characters when exporting reports.
+* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Set more appropriate default rounding precision based on currency decimal places.
+* Fix - Fix message styles for empty carts.
+* Fix - Fixed the load of the WC_Email_Customer_On_Hold_Order class.
+* Fix - Don't perform cart update on search submit.
+* Dev - API - Added support for WP REST API with custom URL prefixes.
+* Dev - API - Delete variations when deleting a variable product.
+* Dev - API - Fixed how we check for product types.
+* Dev - Added woocommerce_cart_id filter.
+* Dev - Add shortcode name param to shortcode_atts function calls.
+* Dev - Post custom data when fetching a variation via ajax.
+* Dev - Include child prices in grouped_price_html filter.
+* Dev - Allow filtering of variation stock quantity.
+* Dev - Added $_product argument to 'woocommerce_restock_refunded_item' hook.
+* Dev - Added a filter hook for the wc_ajax endpoint url.
+* Tweak - Include account page link in new customer account emails.
+* Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
+* Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
+
 = 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
@@ -475,7 +508,7 @@
 * Fix - Datepicker range for variations.
 
 = 2.3.12 - 06/07/2015 =
-* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woothemes.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
+* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woocommerce.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
 * Fix - Escaped shop url in empty cart template.
 * Fix - Escaped product tabs titles.
 * Fix - Removed deprecated PHP4 constructor on Widget classes.

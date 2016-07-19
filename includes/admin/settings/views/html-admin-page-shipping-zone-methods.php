@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="wc-shipping-zone-method-blank-state" colspan="5">
 			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
 			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'Choose a method from the dropdown below and click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>
 </script>

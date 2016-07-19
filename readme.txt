@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.5
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -117,9 +117,9 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 
 = Where can I find WooCommerce documentation and user guides? =
 
-For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/)
+For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/)
 
-For extending or theming WooCommerce, see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
+For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
 = Where can I get support or talk to other users? =
 
@@ -129,7 +129,7 @@ For help with premium add-ons from WooThemes, use [our helpdesk](https://support
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
 
 = Where can I request new features, eCommerce themes and extensions? =
 
@@ -158,13 +158,38 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.2 - xx/xx/16 =
-* Fix - Fixed how calculate shipping tax rates when using more than one tax class.
+= 2.6.3 - 19/07/16 =
+* Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
+* Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
 * Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Normalized 'read more' buttons.
+* Fix - Add to cart notices for grouped products.
+* Fix - Do not sanitize passwords in the settings API.
+* Fix - Handle shipping zone location range conversion during update (dashes to ...).
+* Fix - Always remove commas while processing flat rate costs.
+* Fix - Ensures account page layout is only applied to desktop-sized displays.
+* Fix - When getting layered nav counts, take search parameters into consideration.
+* Fix - Free shipping show/hide javascript.
+* Fix - Strip hash characters when exporting reports.
 * Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
-* Dev - API - Added support for WP REST API with custom URL prefix.
-* Dev - API - Delete variations when deletes a variable product.
-* Dev - API - Fixed how check for product types.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Set more appropriate default rounding precision based on currency decimal places.
+* Fix - Fix message styles for empty carts.
+* Fix - Fixed the load of the WC_Email_Customer_On_Hold_Order class.
+* Fix - Don't perform cart update on search submit.
+* Dev - API - Added support for WP REST API with custom URL prefixes.
+* Dev - API - Delete variations when deleting a variable product.
+* Dev - API - Fixed how we check for product types.
+* Dev - Added woocommerce_cart_id filter.
+* Dev - Add shortcode name param to shortcode_atts function calls.
+* Dev - Post custom data when fetching a variation via ajax.
+* Dev - Include child prices in grouped_price_html filter.
+* Dev - Allow filtering of variation stock quantity.
+* Dev - Added $_product argument to 'woocommerce_restock_refunded_item' hook.
+* Dev - Added a filter hook for the wc_ajax endpoint url.
+* Tweak - Include account page link in new customer account emails.
+* Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
+* Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
 
 = 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.

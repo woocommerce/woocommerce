@@ -1013,7 +1013,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					foreach ( $request[ $line ] as $item ) {
 						// Item ID is always required.
 						if ( ! array_key_exists( 'id', $item ) ) {
-							throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID is required.', 'woocommerce' ), 400 );
+							$item['id'] = null;
 						}
 
 						// Create item.

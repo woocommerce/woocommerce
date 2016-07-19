@@ -127,7 +127,7 @@ return array(
 	),
 	'api_password' => array(
 		'title'       => __( 'API Password', 'woocommerce' ),
-		'type'        => 'text',
+		'type'        => 'password',
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,

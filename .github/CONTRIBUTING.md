@@ -95,5 +95,5 @@ By translating video tutorials you'll be helping non-English speaking users and 
 * [General GitHub documentation](https://help.github.com/)
 * [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
 * [Translator Handbook](https://make.wordpress.org/polyglots/handbook/)
-* [WooCommerce Docs](https://docs.woothemes.com/)
+* [WooCommerce Docs](https://docs.woocommerce.com/)
 * [WooThemes Support](https://support.woothemes.com)
