@@ -29,6 +29,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Controller {
 
 	/**
 	 * Register routes.
+	 *
 	 * @since 2.7.0
 	 */
 	public function register_routes() {
@@ -101,6 +102,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
+	 * @since  2.7.0
 	 * @param array $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -194,14 +196,14 @@ class WC_Rest_Settings_Controller extends WC_REST_Controller {
 					),
 				),
 				'label'            => array(
-					'description'  => __( 'A human readable label. This is a translated string that can be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description'      => array(
-					'description'  => __( 'A human readable description. This is a translated string that can be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',

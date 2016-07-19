@@ -29,6 +29,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * Register routes.
+	 *
 	 * @since 2.7.0
 	 */
 	public function register_routes() {
@@ -69,6 +70,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * Return a single setting.
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
@@ -87,6 +89,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * Return all settings in a group.
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
@@ -112,19 +115,19 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings in a group.
 	 *
+	 * @since  2.7.0
 	 * @param string $group_id Group ID.
-	 *
 	 * @return array|WP_Error
 	 */
 	public function get_group_settings( $group_id ) {
 		if ( empty( $group_id ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
 
 		if ( empty( $settings ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$filtered_settings = array();
@@ -143,9 +146,9 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get setting data.
 	 *
+	 * @since  2.7.0
 	 * @param string $group_id Group ID.
 	 * @param string $setting_id Setting ID.
-	 *
 	 * @return stdClass|WP_Error
 	 */
 	public function get_setting( $group_id, $setting_id ) {
@@ -177,6 +180,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Bulk create, update and delete items.
 	 *
+	 * @since  2.7.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
@@ -202,6 +206,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * Update a single setting in a group.
+
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
@@ -226,6 +231,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single setting object for response.
 	 *
+	 * @since  2.7.0
 	 * @param object $item Setting object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -248,6 +254,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
+	 * @since  2.7.0
 	 * @param string $setting_id Setting ID.
 	 * @param string $group_id Group ID.
 	 * @return array Links for the given setting.
@@ -366,14 +373,14 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 					),
 				),
 				'label'            => array(
-					'description'  => __( 'A human readable label. This is a translated string that can be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description'      => array(
-					'description'  => __( 'A human readable description. This is a translated string that can be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',

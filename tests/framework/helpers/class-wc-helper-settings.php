@@ -9,6 +9,7 @@ class WC_Helper_Settings {
 
 	/**
 	 * Hooks in some dummy data for testing the settings REST API.
+	 *
 	 * @since 2.7.0
 	 */
 	public static function register() {
@@ -18,6 +19,7 @@ class WC_Helper_Settings {
 
 	/**
 	 * Registers some example setting groups, including invalid ones that should not show up in JSON responses.
+	 *
 	 * @since  2.7.0
 	 * @param  array $groups
 	 * @return array
@@ -47,6 +49,7 @@ class WC_Helper_Settings {
 
 	/**
 	 * Registers some example settings.
+	 *
 	 * @since  2.7.0
 	 * @param  array $settings
 	 * @return array
