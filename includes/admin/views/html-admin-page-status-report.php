@@ -12,7 +12,7 @@ global $wpdb;
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
-	<a class="button-secondary docs" href="https://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
+	<a class="button-secondary docs" href="https://docs.woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
@@ -130,7 +130,7 @@ global $wpdb;
 					$php_version = phpversion();
 
 					if ( version_compare( $php_version, '5.6', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="https://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}
@@ -788,7 +788,7 @@ global $wpdb;
 				<tr>
 					<td>&nbsp;</td>
 					<td class="help">&nbsp;</td>
-					<td><a href="https://docs.woothemes.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
+					<td><a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
 				</tr>
 				<?php
 			}

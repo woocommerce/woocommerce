@@ -117,9 +117,9 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 
 = Where can I find WooCommerce documentation and user guides? =
 
-For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/)
+For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/)
 
-For extending or theming WooCommerce, see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
+For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
 = Where can I get support or talk to other users? =
 
@@ -129,7 +129,7 @@ For help with premium add-ons from WooThemes, use [our helpdesk](https://support
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
 
 = Where can I request new features, eCommerce themes and extensions? =
 

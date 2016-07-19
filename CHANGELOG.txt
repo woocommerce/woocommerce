@@ -475,7 +475,7 @@
 * Fix - Datepicker range for variations.
 
 = 2.3.12 - 06/07/2015 =
-* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woothemes.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
+* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woocommerce.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
 * Fix - Escaped shop url in empty cart template.
 * Fix - Escaped product tabs titles.
 * Fix - Removed deprecated PHP4 constructor on Widget classes.

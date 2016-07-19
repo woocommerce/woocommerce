@@ -2273,13 +2273,13 @@ class WC_Admin_Post_Types {
 				case 'shop_order' :
 					?>
 					<h2 class="woocommerce-BlankState-message"><?php _e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?></h2>
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woothemes.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about orders', 'woocommerce' ); ?></a>
 					<?php
 				break;
 				case 'shop_coupon' :
 					?>
 					<h2 class="woocommerce-BlankState-message"><?php _e( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ); ?></h2>
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woothemes.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about coupons', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about coupons', 'woocommerce' ); ?></a>
 					<?php
 				break;
 				case 'product' :
