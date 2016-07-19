@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  2.7.0
  * @since    2.7.0
- * @package	 WooCommerce/Classes
+ * @package  WooCommerce/Classes
  * @category Class
  */
 class WC_Register_Legacy_Settings {
@@ -19,6 +19,7 @@ class WC_Register_Legacy_Settings {
 
 	/**
 	 * Hooks into the settings API and starts registering our settings registered via legacy hooks/filters.
+	 *
 	 * @since 2.7.0
 	 */
 	public function __construct( $page ) {
@@ -29,6 +30,7 @@ class WC_Register_Legacy_Settings {
 
 	/**
 	* Registers a setting group.
+	*
 	* @since  2.7.0
 	* @param  array $group
 	* @return array
@@ -43,6 +45,7 @@ class WC_Register_Legacy_Settings {
 
 	/**
 	* Registers the actual settings to the group they came from.
+	*
 	* @since  2.7.0
 	* @param  array $settings Existing registered settings
 	* @return array
@@ -67,10 +70,10 @@ class WC_Register_Legacy_Settings {
 
 	/**
 	 * Convert a "legacy" setting (WC_Settings_Page::get_settings()) into the format expected
-	 * for the REST API Settings Controller
+	 * for the REST API Settings Controller.
 	 *
+	 * @since 2.7.0
 	 * @param $legacy_setting Settings array, as produced by a subclass of WC_Settings_Page.
-	 *
 	 * @return array|bool Boolean false if legacy setting has no ID, Array of converted new setting otherwise.
 	 */
 	public function new_setting_from_legacy( $legacy_setting ) {

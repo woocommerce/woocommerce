@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Settings API Tests
+ * Settings API Tests.
+ *
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
@@ -35,6 +36,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test route registration.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_register_routes() {
@@ -46,6 +48,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting all groups.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_groups() {
@@ -91,6 +94,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test /settings without valid permissions/creds.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_groups_without_permission() {
@@ -102,6 +106,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test /settings without valid permissions/creds.
+	 *
 	 * @since 2.7.0
 	 * @covers WC_Rest_Settings_Controller::get_items
 	 */
@@ -118,6 +123,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test groups schema.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_group_schema() {
@@ -135,6 +141,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test settings schema.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_setting_schema() {
@@ -155,6 +162,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a single group.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_group() {
@@ -210,6 +218,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a single group without permission.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_group_without_permission() {
@@ -221,6 +230,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test updating a single setting.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_update_setting() {
@@ -290,6 +300,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test updating multiple settings at once.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_update_settings() {
@@ -345,6 +356,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a single setting.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_setting() {
@@ -376,6 +388,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a single setting without valid user permissions.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_get_setting_without_permission() {
@@ -387,6 +400,8 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests the GET single setting route handler receiving an empty setting ID.
+	 *
+	 * @since 2.7.0
 	 */
 	public function test_get_setting_empty_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', '' );
@@ -396,6 +411,8 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests the GET single setting route handler receiving an invalid setting ID.
+	 *
+	 * @since 2.7.0
 	 */
 	public function test_get_setting_invalid_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', 'invalid' );
@@ -405,6 +422,8 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests the GET single setting route handler encountering an invalid setting type.
+	 *
+	 * @since 2.7.0
 	 */
 	public function test_get_setting_invalid_setting_type() {
 		$controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
@@ -426,6 +445,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test updating a single setting without valid user permissions.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_update_setting_without_permission() {
@@ -442,6 +462,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test updating multiple settings without valid user permissions.
+	 *
 	 * @since 2.7.0
 	 */
 	public function test_update_settings_without_permission() {
@@ -462,6 +483,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * Test updating a bad setting ID.
+	 *
 	 * @since 2.7.0
 	 * @covers WC_Rest_Settings_Options_Controller::update_item
 	 */
@@ -478,6 +500,7 @@ class Settings extends WC_Unit_Test_Case {
 
 	/**
 	* Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
+	*
 	* @since  2.7.0
 	*/
 	public function test_classic_settings() {

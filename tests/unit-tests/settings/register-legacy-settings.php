@@ -2,6 +2,7 @@
 
 /**
  * Settings API Tests
+ *
  * @package WooCommerce\Tests\Settings
  * @since 2.7.0
  */
@@ -34,16 +35,18 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @since 2.7.0
 	 * @covers WC_Register_Legacy_Settings::__construct
 	 */
 	public function test_constructor() {
 		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
-		
+
 		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $legacy_settings, 'register_legacy_group' ) ), 10 );
 		$this->assertEquals( has_filter( 'woocommerce_settings-' . $this->page->get_id(), array( $legacy_settings, 'register_legacy_settings' ) ), 10 );
 	}
 
 	/**
+	 * @since 2.7.0
 	 * @covers WC_Register_Legacy_Settings::register_legacy_group
 	 */
 	public function test_register_legacy_group() {
@@ -66,6 +69,9 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected, $actual );
 	}
 
+	/**
+	 * @since 2.7.0
+	 */
 	public function new_setting_from_legacy_provider() {
 		return array(
 			// No "id" case
@@ -145,6 +151,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @since 2.7.0
 	 * @dataProvider new_setting_from_legacy_provider
 	 * @covers WC_Register_Legacy_Settings::new_setting_from_legacy
 	 */
@@ -157,6 +164,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @since 2.7.0
 	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
 	 */
 	public function test_register_legacy_settings_one_section() {
@@ -180,6 +188,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @since 2.7.0
 	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
 	 */
 	public function test_register_legacy_settings() {
