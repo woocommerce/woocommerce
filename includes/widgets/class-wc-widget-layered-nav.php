@@ -272,7 +272,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		} elseif ( is_product_tag() ) {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
-			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+			$queried_object = get_queried_object();
+			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max
