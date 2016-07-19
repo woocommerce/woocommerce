@@ -885,6 +885,7 @@ function wc_update_260_zone_methods() {
 	 */
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone_shipping_methods';" ) ) {
 		$old_methods = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
+
 		if ( $old_methods ) {
 			$max_new_id = $wpdb->get_var( "SELECT MAX(instance_id) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" );
 			$max_old_id = $wpdb->get_var( "SELECT MAX(shipping_method_id) FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods" );
@@ -947,6 +948,9 @@ function wc_update_260_zone_methods() {
 			do_action( 'woocommerce_updated_instance_ids', $changes );
 		}
 	}
+
+	// Change ranges used to ...
+	$wpdb->query( "UPDATE {$wpdb->prefix}woocommerce_shipping_zone_locations SET location_code = REPLACE( location_code, '-', '...' );" );
 }
 
 function wc_update_260_refunds() {
