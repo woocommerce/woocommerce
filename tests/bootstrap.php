@@ -115,10 +115,9 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php' );
 
 		/**
-		 * WP-API
-		 * @todo to be removed when the wp-api branch is merged.
+		 * WP-API.
 		 */
-		require_once( $this->tests_dir . '/framework/class-wp-test-spy-rest-server.php' );
+		require_once( $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php' );
 	}
 
 	/**
