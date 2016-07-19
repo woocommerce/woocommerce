@@ -346,11 +346,13 @@ global $wpdb;
 			<td class="help"><?php echo wc_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
+		<?php if( strlen( esc_html( $wpdb->prefix ) ) > 20 ) { ?>
 		<tr>
 			<td data-export-label="WC Database Prefix"><?php _e( 'Database Prefix', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( __( 'We recommend using a prefix having less than 20 characters.', 'woocommerce' ) ); ?></td>
-			<td><?php echo $wpdb->prefix; ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'We recommend using a prefix with less than 20 characters.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $wpdb->prefix; ) ?></td>
 		</tr>
+		<?php } ?>
 		<tr>
 			<?php
 			$tables = array(
