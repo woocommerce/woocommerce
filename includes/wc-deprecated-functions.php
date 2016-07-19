@@ -738,3 +738,30 @@ function woocommerce_calc_shipping_backwards_compatibility( $value ) {
 }
 
 add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_backwards_compatibility' );
+
+/**
+ * @deprecated see `class-wc-structured-data.php`
+ * @return string
+ */
+function woocommerce_get_product_schema() {
+	global $product;
+
+	$schema = "Product";
+
+	// Downloadable product schema handling
+	if ( $product->is_downloadable() ) {
+		switch ( $product->download_type ) {
+			case 'application' :
+				$schema = "SoftwareApplication";
+			break;
+			case 'music' :
+				$schema = "MusicAlbum";
+			break;
+			default :
+				$schema = "Product";
+			break;
+		}
+	}
+
+	return 'http://schema.org/' . $schema;
+}

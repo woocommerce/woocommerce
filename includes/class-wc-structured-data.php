@@ -7,44 +7,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
- * @class 		WC_Data_Structurer
+ * @class 		WC_Structured_Data
  * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		Clement Cazaud
  */
-class WC_Data_Structurer {
+class WC_Structured_Data {
   
   /**
    * @var array Partially formatted structured data
    */
-  private $structured_data;
+  private $data;
 
   /**
-   * Checks if the passed $json variable is an array and stores it into $this->structured_data...
+   * Checks if the passed $json variable is an array and stores it into $this->data...
    *
    * @param array $json Partially formatted JSON-LD
    * @return false If the param $json is not an array
    */
-  private function set_structured_data( $json ) {
+  private function set_data( $json ) {
     if ( ! is_array( $json ) ) {
       return false;
     }
-    $this->structured_data[] = $json;
+    $this->data[] = $json;
   }
   
   /**
    * Formats and returns the structured data...
    *
-   * @return mixed bool|array If structured data is set, returns the fully formatted and encoded JSON-LD, otherwise returns false
+   * @return array If structured data is set, returns the fully formatted JSON-LD, otherwise returns empty array
    */
-  private function get_structured_data() {
-    if ( ! $this->structured_data ) {
-      return false;
+  private function get_data() {
+    if ( ! $this->data ) {
+      return array();
     }
     $product_count = 0;
 
-    foreach ( $this->structured_data as $value ) {
+    foreach ( $this->data as $value ) {
       $type = isset( $value['@type'] ) ? $value['@type'] : false;
         
       if ( 'Product' === $type || 'SoftwareApplication' === $type || 'MusicAlbum' === $type ) {
@@ -62,29 +62,34 @@ class WC_Data_Structurer {
       $structured_data = array( '@graph' => $products );
     }
     if ( ! isset( $structured_data ) ) {
-      return false;
+      return array();
     }
     $context['@context'] = 'http://schema.org/';
-    
-    return wp_json_encode( $context + $structured_data );
+
+    return $context + $structured_data;
   }
 
   /**
    * Contructor
    */
   public function __construct() {
-    add_action( 'woocommerce_before_shop_loop_item', array( $this, 'init_product_category_structured_data' ) );
-    add_action( 'woocommerce_single_product_summary', array( $this, 'init_product_structured_data' ) );
-    add_action( 'woocommerce_review_meta', array( $this, 'init_product_review_structured_data' ) );
-    add_action( 'wp_footer', array( $this, 'enqueue_structured_data' ) );
+    add_action( 'woocommerce_before_shop_loop_item', array( $this, 'generate_product_category_data' ) );
+    add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) );
+    add_action( 'woocommerce_review_meta', array( $this, 'generate_product_review_data' ) );
+    add_action( 'wp_footer', array( $this, 'enqueue_data' ) );
   }
 
   /**
-   * If structured data is set, echoes the encoded structured data into the `wp_footer` action hook.
+   * Sanitizes, encodes and echoes the structured data into `wp_footer` action hook.
    */
-  public function enqueue_structured_data() {
-    if ( $structured_data = $this->get_structured_data() ) {
-      echo '<script type="application/ld+json">' . $structured_data . '</script>';
+  public function enqueue_data() {
+    if ( $structured_data = $this->get_data() ) {
+
+      array_walk_recursive( $structured_data, function( &$value ) {
+        $value = sanitize_text_field( $value );
+      } );
+
+      echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
     }
   }
 
@@ -92,11 +97,11 @@ class WC_Data_Structurer {
    * Generates the product category structured data...
    * Hooked into the `woocommerce_before_shop_loop_item` action hook...
    */
-  public function init_product_category_structured_data() {
+  public function generate_product_category_data() {
     if ( ! is_product_category() ) {
       return;
     }
-    $this->init_product_structured_data();
+    $this->generate_product_data();
   }
   
   /**
@@ -104,7 +109,7 @@ class WC_Data_Structurer {
    * Hooked into the `woocommerce_single_product_summary` action hook...
    * Applies the `woocommerce_product_structured_data` filter hook for clean structured data customization...
    */
-  public function init_product_structured_data() {
+  public function generate_product_data() {
     global $product;
 
     if ( $product->is_downloadable() ) {
@@ -150,7 +155,7 @@ class WC_Data_Structurer {
       'price'                  => $product->get_price(),
       'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' )
     );
-    $this->set_structured_data( apply_filters( 'woocommerce_product_structured_data', $json ) );
+    $this->set_data( apply_filters( 'woocommerce_product_structured_data', $json ) );
   }
 
   /**
@@ -158,7 +163,7 @@ class WC_Data_Structurer {
    * Hooked into the `woocommerce_review_meta` action hook...
    * Applies the `woocommerce_product_review_structured_data` filter hook for clean structured data customization...
    */
-  public function init_product_review_structured_data() {
+  public function generate_product_review_data() {
     global $comment;
     
     $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
@@ -175,6 +180,6 @@ class WC_Data_Structurer {
       '@type'                  => 'Person',
       'name'                   => get_comment_author()
     );
-    $this->set_structured_data( apply_filters( 'woocommerce_product_review_structured_data', $json ) );
+    $this->set_data( apply_filters( 'woocommerce_product_review_structured_data', $json ) );
   }
 }
