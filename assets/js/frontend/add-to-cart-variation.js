@@ -116,7 +116,8 @@
 
 				if ( all_attributes_chosen ) {
 					// Get a matchihng variation via ajax
-					data.product_id = $product_id;
+					data.product_id  = $product_id;
+					data.custom_data = $form.data( 'custom_data' );
 
 					$form.block( {
 						message: null,
