@@ -350,7 +350,7 @@ global $wpdb;
 		<tr>
 			<td data-export-label="WC Database Prefix"><?php _e( 'Database Prefix', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( __( 'We recommend using a prefix with less than 20 characters.', 'woocommerce' ) ); ?></td>
-			<td><?php echo esc_html( $wpdb->prefix; ) ?></td>
+			<td><?php echo esc_html( $wpdb->prefix ) ?></td>
 		</tr>
 		<?php } ?>
 		<tr>
