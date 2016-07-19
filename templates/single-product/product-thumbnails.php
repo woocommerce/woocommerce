@@ -42,22 +42,21 @@ if ( $attachment_ids ) {
 				$classes[] = 'last';
 			}
 
-			if ( ! $image_link = wp_get_attachment_url( $attachment_id ) ) {
+			$image_class = implode( ' ', $classes );
+			$props       = wc_get_product_attachment_props( $attachment_id, $post );
+
+			if ( ! $props['url'] ) {
 				continue;
 			}
-
-			$props       = wc_get_product_attachment_props( $attachment_id, $post );
-			$image       = wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $props );
-			$image_class = implode( ' ', $classes );
 
 			echo apply_filters(
 				'woocommerce_single_product_image_thumbnail_html',
 				sprintf(
 					'<a href="%s" class="%s" title="%s" data-rel="prettyPhoto[product-gallery]">%s</a>',
-					$image_link,
+					esc_url( $props['url'] ),
 					esc_attr( $image_class ),
 					esc_attr( $props['caption'] ),
-					$image
+					wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $props )
 				),
 				$attachment_id,
 				$post->ID,
