@@ -2,9 +2,8 @@
 
 = 2.6.3 - 19/07/16 =
 * Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
-* Fix - Fixed how calculate shipping tax rates when using more than one tax class.
+* Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
 * Fix - When duplicating product variations, set title, name, and guid.
-* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
 * Fix - Normalized 'read more' buttons.
 * Fix - Add to cart notices for grouped products.
 * Fix - Do not sanitize passwords in the settings API.
