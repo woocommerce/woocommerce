@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.3 - 19/07/16 =
+* Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
 * Fix - Fixed how calculate shipping tax rates when using more than one tax class.
 * Fix - When duplicating product variations, set title, name, and guid.
 * Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
