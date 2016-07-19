@@ -1,0 +1,38 @@
+<?php
+/**
+ * Cart item data (when outputting non-flat, and update variations from cart is enabled)
+ *
+ * This template can be overridden by copying it to yourtheme/woocommerce/cart/cart-update-variations-item-data.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version 	2.7.0
+ */
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
+<dl class="variation updateable">
+	<?php
+	$i = 0;
+	foreach ( $attributes as $attribute_name => $options ) :
+		$data = $item_data[ $i ];
+		$i++;
+		?>
+		<dt class="variation-<?php echo sanitize_html_class( $data['key'] ); ?>"><?php echo wp_kses_post( $data['key'] ); ?>:</dt>
+		<dd class="variation-<?php echo sanitize_html_class( $data['key'] ); ?>">
+			<?php
+				$selected = $data['selected'];
+				wc_dropdown_variation_attribute_options( array( 'name' => 'cart['.$data['cart_item_key'].'][attribute_'.$attribute_name.']', 'options' => $options, 'attribute' => $attribute_name, 'product' => $product, 'selected' => $selected, 'show_option_none' => false, 'class' => 'cart-update-variation' ) );
+			?>
+		</dd>
+	<?php endforeach; ?>
+	<input type="hidden" name="cart[<?php echo $data['cart_item_key']; ?>][variation_id]" class="variation_id" value="" data-cart_item_key="<?php echo $data['cart_item_key']; ?>" />
+</dl>
