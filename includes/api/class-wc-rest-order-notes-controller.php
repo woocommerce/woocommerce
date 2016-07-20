@@ -289,7 +289,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $note, $request );
 
-		$result = wp_delete_comment( $note->comment_ID, true );;
+		$result = wp_delete_comment( $note->comment_ID, true );
 
 		if ( ! $result ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );

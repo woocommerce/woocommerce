@@ -213,6 +213,14 @@
 	}
 }
 
+.woocommerce-account {
+	.woocommerce-MyAccount-navigation,
+	.woocommerce-MyAccount-content {
+		float: none;
+		width: 100%;
+	}
+}
+
 /**
  * Twenty Thirteen specific styles
  */

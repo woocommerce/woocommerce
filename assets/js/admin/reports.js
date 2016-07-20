@@ -3,7 +3,7 @@ jQuery(function( $ ) {
 	function showTooltip( x, y, contents ) {
 		$( '<div class="chart-tooltip">' + contents + '</div>' ).css( {
 			top: y - 16,
-	   		left: x + 20
+			left: x + 20
 		}).appendTo( 'body' ).fadeIn( 200 );
 	}
 
@@ -142,20 +142,20 @@ jQuery(function( $ ) {
 
 		if ( 'table' === export_format ) {
 
-			$( this ).closest( 'div' ).find( 'thead tr,tbody tr' ).each( function() {
+			$( this ).offsetParent().find( 'thead tr,tbody tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
-					value = value.replace( '[?]', '' );
+					value = value.replace( '[?]', '' ).replace( '#', '' );
 					csv_data += '"' + value + '"' + ',';
 				});
 				csv_data = csv_data.substring( 0, csv_data.length - 1 );
 				csv_data += '\n';
 			});
 
-			$( this ).closest( 'div' ).find( 'tfoot tr' ).each( function() {
+			$( this ).offsetParent().find( 'tfoot tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
-					value = value.replace( '[?]', '' );
+					value = value.replace( '[?]', '' ).replace( '#', '' );
 					csv_data += '"' + value + '"' + ',';
 					if ( $( this ).attr( 'colspan' ) > 0 ) {
 						for ( i = 1; i < $(this).attr('colspan'); i++ ) {

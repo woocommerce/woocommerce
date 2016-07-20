@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.5
-Stable tag: 2.6.1
+Stable tag: 2.6.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,7 +37,7 @@ One of the biggest risks of using a hosted eCommerce platform is what happens to
 
 [Storefront](https://wordpress.org/themes/storefront/) is a free WordPress theme available to any WooCommerce store. Along with deep WooCommerce integration, Storefront prioritizes speed and uptime while eliminating theme and plugin conflicts during major updates.
 
-Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](https://www.woothemes.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
+Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
 
 = Built with developers in mind =
 
@@ -65,14 +65,14 @@ Keen to see them all? Search WordPress.org for ‘WooCommerce’ to dive in.
 
 If you’re looking for something endorsed and maintained by the developers who built WooCommerce, there are a plethora of premium eCommerce extensions, the most popular of which include:
 
-- [WooCommerce Subscriptions](https://www.woothemes.com/products/woocommerce-subscriptions/)
-- [WooCommerce Memberships](https://www.woothemes.com/products/woocommerce-memberships/)
-- [WooCommerce Bookings](https://www.woothemes.com/products/woocommerce-bookings/)
-- [Dynamic Pricing](https://www.woothemes.com/products/dynamic-pricing/)
-- [Table Rate Shipping](https://www.woothemes.com/products/table-rate-shipping/)
-- [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)
+- [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/)
+- [WooCommerce Memberships](https://woocommerce.com/products/woocommerce-memberships/)
+- [WooCommerce Bookings](https://woocommerce.com/products/woocommerce-bookings/)
+- [Dynamic Pricing](https://woocommerce.com/products/dynamic-pricing/)
+- [Table Rate Shipping](https://woocommerce.com/products/table-rate-shipping/)
+- [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)
 
-And there’s plenty more where they came from. Visit our [extensions page](https://www.woothemes.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
+And there’s plenty more where they came from. Visit our [extensions page](https://woocommerce.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
 
 = Join our growing community =
 
@@ -82,7 +82,7 @@ If you’re interested in contributing to WooCommerce we’ve got more than 350 
 
 Want to add a new language to WooCommerce? Swell! You can contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce).
 
-And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](https://www.woothemes.com/woocommerce/meetups/).
+And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](https://woocommerce.com/woocommerce/meetups/).
 
 == Installation ==
 
@@ -111,15 +111,15 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 
 = Dummy data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://www.woothemes.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
 
 == Frequently Asked Questions ==
 
 = Where can I find WooCommerce documentation and user guides? =
 
-For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/)
+For help setting up and configuring WooCommerce please refer to our [user guide](https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/)
 
-For extending or theming WooCommerce, see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
+For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
 = Where can I get support or talk to other users? =
 
@@ -129,7 +129,7 @@ For help with premium add-ons from WooThemes, use [our helpdesk](https://support
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://www.woothemes.com/storefront/).
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](https://docs.woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](https://woocommerce.com/storefront/).
 
 = Where can I request new features, eCommerce themes and extensions? =
 
@@ -158,11 +158,45 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.2 - xx/xx/16 =
+= 2.6.3 - 19/07/16 =
+* Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
+* Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Normalized 'read more' buttons.
+* Fix - Add to cart notices for grouped products.
+* Fix - Do not sanitize passwords in the settings API.
+* Fix - Handle shipping zone location range conversion during update (dashes to ...).
+* Fix - Always remove commas while processing flat rate costs.
+* Fix - Ensures account page layout is only applied to desktop-sized displays.
+* Fix - When getting layered nav counts, take search parameters into consideration.
+* Fix - Free shipping show/hide javascript.
+* Fix - Strip hash characters when exporting reports.
+* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Set more appropriate default rounding precision based on currency decimal places.
+* Fix - Fix message styles for empty carts.
+* Fix - Fixed the load of the WC_Email_Customer_On_Hold_Order class.
+* Fix - Don't perform cart update on search submit.
+* Dev - API - Added support for WP REST API with custom URL prefixes.
+* Dev - API - Delete variations when deleting a variable product.
+* Dev - API - Fixed how we check for product types.
+* Dev - Added woocommerce_cart_id filter.
+* Dev - Add shortcode name param to shortcode_atts function calls.
+* Dev - Post custom data when fetching a variation via ajax.
+* Dev - Include child prices in grouped_price_html filter.
+* Dev - Allow filtering of variation stock quantity.
+* Dev - Added $_product argument to 'woocommerce_restock_refunded_item' hook.
+* Dev - Added a filter hook for the wc_ajax endpoint url.
+* Tweak - Include account page link in new customer account emails.
+* Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
+* Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
+
+= 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
 * Fix - wc_add_to_cart_message() when non-array is passed.
 * Fix - Maximum coupon check should allow the 'maximum' value.
+* Fix - Product coupon logic to avoid applying non-applicable coupons.
 * Fix - Potential notices when leaving out 'default' field for shipping instances.
 * Fix - wp_cache_flush after term meta migration/update.
 * Fix - wc_add_to_cart_message() when non-array is passed.
@@ -170,12 +204,29 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Javascript show/hide of option in free shipping method.
 * Fix - Convert ellipsis to three periods when saving postcodes.
 * Fix - Prevent get_terms returning duplicates.
+* Fix - Removed non-existent country (Netherlands Antilles) from https://en.wikipedia.org/wiki/ISO_3166-1.
+* Fix - Grouped product range display when child is free.
+* Fix - Remove discount when checking free shipping min amount.
+* Fix - Prevent blocking the same element multiple times on cart page.
+* Fix - Don't sync ratings right after a new comment to prevent rating sync whilst rating meta does not exist yet.
+* Fix - Fix product RSS feeds when using shop base.
+* Fix - woocommerce_local_pickup_methods comparison by stripping instance IDs before the check.
+* Fix - During password resets, use cookie to store reset key and user login to avoid them being exposed in the URL/referer headers.
+* Dev - API - Fixed variable product stock at product level.
+* Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
+* Dev - Allow notices to be grouped on checkout after certain events.
+* Dev - API - Allows save images by ID with product variations.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 * Tweak - Zones - Wording clarifications.
 * Tweak - Zones - Match zones with postcodes but no country.
 * Tweak - Zones - Match zones with no regions as 'everywhere'.
-* Tweak - Validate price format for Flat Rate and Local Pickup.
 * Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
+* Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off and only show available on backorder if notifying customer.
+* Tweak - Allow external product SKUs.
+* Tweak - PT (Portugal) and JP (Japan) postcode formats.
+* Tweak - Sort products from the `[product_category]` shortcode by menu order.
+* Tweak - Improve wc_orders_count() performance by running a query to count only posts of the given status.
+* Tweak - To allow my account page tabs to be disabled without code, you can now set the endpoint value to a blank string.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.

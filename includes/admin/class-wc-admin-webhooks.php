@@ -80,7 +80,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook
 	 */
 	private function update_secret( $webhook ) {
-		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : wc_webhook_generate_secret();
+		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : wp_generate_password( 50, true, true );
 
 		$webhook->set_secret( $secret );
 	}

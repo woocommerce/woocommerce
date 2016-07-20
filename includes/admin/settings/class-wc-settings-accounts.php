@@ -105,9 +105,9 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
+			array( 'type' => 'sectionend', 'id' => 'account_registration_options' ),
 
-			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
+			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique and can be left blank to disable the endpoint.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
 
 			array(
 				'title'    => __( 'Orders', 'woocommerce' ),

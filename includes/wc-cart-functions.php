@@ -70,13 +70,13 @@ function wc_get_raw_referer() {
 		return wp_get_raw_referer();
 	}
 
-    if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) {
-        return wp_unslash( $_REQUEST['_wp_http_referer'] );
-    } else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
-        return wp_unslash( $_SERVER['HTTP_REFERER'] );
-    }
+	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) {
+		return wp_unslash( $_REQUEST['_wp_http_referer'] );
+	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+		return wp_unslash( $_SERVER['HTTP_REFERER'] );
+	}
 
-    return false;
+	return false;
 }
 
 /**
@@ -96,7 +96,7 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 	}
 
 	if ( ! $show_qty ) {
-		$products = array_fill_keys( array_values( $products ), 1 );
+		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
 	foreach ( $products as $product_id => $qty ) {
@@ -356,4 +356,19 @@ function wc_cart_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
+}
+
+/**
+ * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
+ * @since  2.6.2
+ * @return string[]
+ */
+function wc_get_chosen_shipping_method_ids() {
+	$method_ids     = array();
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	foreach ( $chosen_methods as $chosen_method ) {
+		$chosen_method = explode( ':', $chosen_method );
+		$method_ids[]  = current( $chosen_method );
+	}
+	return $method_ids;
 }

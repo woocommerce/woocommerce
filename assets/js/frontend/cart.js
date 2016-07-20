@@ -28,7 +28,7 @@ jQuery( function( $ ) {
 	 * @return {bool} True if the DOM Element is UI Blocked, false if not.
 	 */
 	var is_blocked = function( $node ) {
-		return $node.is( '.processing' );
+		return $node.is( '.processing' ) || $node.parents( '.processing' ).length;
 	};
 
 	/**
@@ -37,13 +37,15 @@ jQuery( function( $ ) {
 	 * @param {JQuery Object} $node
 	 */
 	var block = function( $node ) {
-		$node.addClass( 'processing' ).block( {
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		} );
+		if ( ! is_blocked( $node ) ) {
+			$node.addClass( 'processing' ).block( {
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			} );
+		}
 	};
 
 	/**
@@ -62,7 +64,7 @@ jQuery( function( $ ) {
 	 */
 	var update_wc_div = function( html_str ) {
 		var $html       = $.parseHTML( html_str );
-		var $new_form   = $( 'table.shop_table.cart', $html ).closest( 'form' );
+		var $new_form   = $( '.shop_table.cart', $html ).closest( 'form' );
 		var $new_totals = $( '.cart_totals', $html );
 
 		// Error message collection
@@ -73,18 +75,30 @@ jQuery( function( $ ) {
 		$( '.woocommerce-error, .woocommerce-message' ).remove();
 
 		if ( $new_form.length === 0 ) {
+			// If the checkout is also displayed on this page, trigger reload instead.
+			if ( $( '.woocommerce-checkout' ).length ) {
+				window.location.reload();
+				return;
+			}
+
 			// No items to display now! Replace all cart content.
 			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
-			$( 'table.shop_table.cart' ).closest( '.woocommerce' ).replaceWith( $cart_html );
+			$( '.shop_table.cart' ).closest( '.woocommerce' ).replaceWith( $cart_html );
 
+			// Display errors
 			if ( $error.length > 0 ) {
 				show_notice( $error, $( '.cart-empty' ).closest( '.woocommerce' ) );
 			} else if ( $message.length > 0 ) {
 				show_notice( $message, $( '.cart-empty' ).closest( '.woocommerce' ) );
 			}
 		} else {
-			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
-			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
+			// If the checkout is also displayed on this page, trigger update event.
+			if ( $( '.woocommerce-checkout' ).length ) {
+				$( document.body ).trigger( 'update_checkout' );
+			}
+
+			$( '.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+			$( '.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
@@ -115,7 +129,7 @@ jQuery( function( $ ) {
 	 */
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
-			$target = $( 'table.shop_table.cart' ).closest( 'form' );
+			$target = $( '.shop_table.cart' ).closest( 'form' );
 		}
 		$( '.woocommerce-error, .woocommerce-message' ).remove();
 		$target.before( html_element );
@@ -209,8 +223,8 @@ jQuery( function( $ ) {
 
 			var $form = $( evt.currentTarget );
 
-			block( $form );
 			block( $( 'div.cart_totals' ) );
+			block( $form );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
@@ -261,7 +275,7 @@ jQuery( function( $ ) {
 				this.submit_click );
 			$( document ).on(
 				'submit',
-				'div.woocommerce > form',
+				'div.woocommerce:not(.widget_product_search) > form',
 				this.cart_submit );
 			$( document ).on(
 				'click',
@@ -290,7 +304,7 @@ jQuery( function( $ ) {
 		 * Update entire cart via ajax.
 		 */
 		update_cart: function() {
-			var $form = $( 'table.shop_table.cart' ).closest( 'form' );
+			var $form = $( '.shop_table.cart' ).closest( 'form' );
 
 			block( $form );
 			block( $( 'div.cart_totals' ) );
@@ -339,7 +353,7 @@ jQuery( function( $ ) {
 			var $submit = $( document.activeElement );
 			var $clicked = $( 'input[type=submit][clicked=true]' );
 
-			if ( 0 === $form.find( 'table.shop_table.cart' ).length ) {
+			if ( 0 === $form.find( '.shop_table.cart' ).length ) {
 				return false;
 			}
 			if ( is_blocked( $form ) ) {

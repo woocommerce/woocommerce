@@ -334,7 +334,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$default = array();
 
 		if ( $product->is_type( 'variable' ) ) {
-			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+			foreach ( array_filter( (array) get_post_meta( $product->id, '_default_attributes', true ), 'strlen' ) as $key => $value ) {
 				if ( 0 === strpos( $key, 'pa_' ) ) {
 					$default[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
@@ -552,6 +552,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'date_on_sale_to'    => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
 				'on_sale'            => $variation->is_on_sale(),
 				'purchasable'        => $variation->is_purchasable(),
+				'visible'            => $variation->is_visible(),
 				'virtual'            => $variation->is_virtual(),
 				'downloadable'       => $variation->is_downloadable(),
 				'downloads'          => $this->get_downloads( $variation ),
@@ -727,113 +728,101 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $images
 	 * @throws WC_REST_Exception
 	 */
-	protected function save_product_images( $product, $images ) {
+	protected function save_product_images( $product_id, $images ) {
 		if ( is_array( $images ) ) {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
+				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+
+				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+
+					if ( is_wp_error( $upload ) ) {
+						throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+					}
+
+					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
+				}
+
 				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
-					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-
-					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
-						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
-					}
-
-					set_post_thumbnail( $product->id, $attachment_id );
+					set_post_thumbnail( $product_id, $attachment_id );
 				} else {
-					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-
-					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
-						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
-					}
-
 					$gallery[] = $attachment_id;
 				}
 
 				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) && $attachment_id ) {
+				if ( ! empty( $image['alt'] ) ) {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 				}
 
 				// Set the image name if present.
-				if ( ! empty( $image['name'] ) && $attachment_id ) {
+				if ( ! empty( $image['name'] ) ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
 				}
 			}
 
 			if ( ! empty( $gallery ) ) {
-				update_post_meta( $product->id, '_product_image_gallery', implode( ',', $gallery ) );
+				update_post_meta( $product_id, '_product_image_gallery', implode( ',', $gallery ) );
 			}
 		} else {
-			delete_post_thumbnail( $product->id );
-			update_post_meta( $product->id, '_product_image_gallery', '' );
+			delete_post_meta( $product_id, '_thumbnail_id' );
+			update_post_meta( $product_id, '_product_image_gallery', '' );
 		}
 	}
 
 	/**
 	 * Save product shipping data.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $data
 	 */
-	private function save_product_shipping_data( $product, $data ) {
+	private function save_product_shipping_data( $product_id, $data ) {
 		// Virtual.
 		if ( isset( $data['virtual'] ) && true === $data['virtual'] ) {
-			update_post_meta( $product->id, '_weight', '' );
-			update_post_meta( $product->id, '_length', '' );
-			update_post_meta( $product->id, '_width', '' );
-			update_post_meta( $product->id, '_height', '' );
+			update_post_meta( $product_id, '_weight', '' );
+			update_post_meta( $product_id, '_length', '' );
+			update_post_meta( $product_id, '_width', '' );
+			update_post_meta( $product_id, '_height', '' );
 		} else {
 			if ( isset( $data['weight'] ) ) {
-				update_post_meta( $product->id, '_weight', '' === $data['weight'] ? '' : wc_format_decimal( $data['weight'] ) );
+				update_post_meta( $product_id, '_weight', '' === $data['weight'] ? '' : wc_format_decimal( $data['weight'] ) );
 			}
 
 			// Height.
 			if ( isset( $data['dimensions']['height'] ) ) {
-				update_post_meta( $product->id, '_height', '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
+				update_post_meta( $product_id, '_height', '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
 			}
 
 			// Width.
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $product->id, '_width', '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
+				update_post_meta( $product_id, '_width', '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length.
 			if ( isset( $data['dimensions']['length'] ) ) {
-				update_post_meta( $product->id, '_length', '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
+				update_post_meta( $product_id, '_length', '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
 			}
 		}
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
-			wp_set_object_terms( $product->id, wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
+			wp_set_object_terms( $product_id, wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
 		}
 	}
 
 	/**
 	 * Save downloadable files.
 	 *
-	 * @param WC_Product $product
+	 * @param in $product_id
 	 * @param array $downloads
 	 * @param int $variation_id
 	 */
-	private function save_downloadable_files( $product, $downloads, $variation_id = 0 ) {
+	private function save_downloadable_files( $product_id, $downloads, $variation_id = 0 ) {
 		$files = array();
 
 		// File paths will be stored in an array keyed off md5(file path).
@@ -861,9 +850,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Grant permission to any newly added files on any existing orders for this product prior to saving.
-		do_action( 'woocommerce_process_product_file_download_paths', $product->id, $variation_id, $files );
+		do_action( 'woocommerce_process_product_file_download_paths', $product_id, $variation_id, $files );
 
-		$id = ( 0 === $variation_id ) ? $product->id : $variation_id;
+		$id = ( 0 === $variation_id ) ? $product_id : $variation_id;
 
 		update_post_meta( $id, '_downloadable_files', $files );
 	}
@@ -871,16 +860,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save taxonomy terms.
 	 *
-	 * @param WC_Product $product
+	 * @param int $product_id
 	 * @param array $terms
 	 * @param string $taxonomy
 	 * @return array
 	 */
-	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
+	protected function save_taxonomy_terms( $product_id, $terms, $taxonomy = 'cat' ) {
 		$term_ids = wp_list_pluck( $terms, 'id' );
 		$term_ids = array_unique( array_map( 'intval', $term_ids ) );
 
-		wp_set_object_terms( $product->id, $term_ids, 'product_' . $taxonomy );
+		wp_set_object_terms( $product_id, $term_ids, 'product_' . $taxonomy );
 
 		return $terms;
 	}
@@ -943,7 +932,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Shipping data.
-		$this->save_product_shipping_data( $product, $request );
+		$this->save_product_shipping_data( $product->id, $request );
 
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
@@ -1012,10 +1001,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						$attributes[ $attribute_name ] = array(
 							'name'         => $attribute_name,
 							'value'        => '',
-							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => true,
+							'is_taxonomy'  => 1,
 						);
 					}
 
@@ -1033,10 +1022,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$attributes[ sanitize_title( $attribute_name ) ] = array(
 						'name'         => $attribute_name,
 						'value'        => $values,
-						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => false,
+						'is_taxonomy'  => 0,
 					);
 				}
 			}
@@ -1177,12 +1166,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $product->id, '_stock', '' );
 
 				wc_update_product_stock_status( $product->id, 'instock' );
-			} elseif ( 'variable' === $product_type ) {
-				update_post_meta( $product->id, '_stock', '' );
 			} elseif ( 'yes' === $manage_stock ) {
 				update_post_meta( $product->id, '_backorders', $backorders );
 
-				wc_update_product_stock_status( $product->id, $stock_status );
+				// Stock status is always determined by children so sync later.
+				if ( 'variable' !== $product_type ) {
+					wc_update_product_stock_status( $product->id, $stock_status );
+				}
 
 				// Stock quantity.
 				if ( isset( $request['stock_quantity'] ) ) {
@@ -1244,12 +1234,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Product categories.
 		if ( isset( $request['categories'] ) && is_array( $request['categories'] ) ) {
-			$this->save_taxonomy_terms( $product, $request['categories'] );
+			$this->save_taxonomy_terms( $product->id, $request['categories'] );
 		}
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
+			$this->save_taxonomy_terms( $product->id, $request['tags'], 'tag' );
 		}
 
 		// Downloadable.
@@ -1265,7 +1255,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Downloadable files.
 			if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
-				$this->save_downloadable_files( $product, $request['downloads'] );
+				$this->save_downloadable_files( $product->id, $request['downloads'] );
 			}
 
 			// Download limit.
@@ -1377,14 +1367,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && 0 === $image['position'] ) {
-						$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
+					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
+						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+							$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
+
+							if ( is_wp_error( $upload ) ) {
+								throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+							}
+
+							$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
 						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
 
 						// Set the image alt if present.
 						if ( ! empty( $image['alt'] ) ) {
@@ -1643,7 +1637,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $request['images'] ) ) {
-				$this->save_product_images( $product, $request['images'] );
+				$this->save_product_images( $product->id, $request['images'] );
 			}
 
 			// Save product meta fields.
@@ -1673,7 +1667,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $request['images'] ) ) {
-				$this->save_product_images( $product, $request['images'] );
+				$this->save_product_images( $product->id, $request['images'] );
 			}
 
 			// Save product meta fields.
@@ -1724,6 +1718,99 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Delete product.
 		wp_delete_post( $post->ID, true );
+	}
+
+	/**
+	 * Delete a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$id    = (int) $request['id'];
+		$force = (bool) $request['force'];
+		$post  = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$supports_trash = EMPTY_TRASH_DAYS > 0;
+
+		/**
+		 * Filter whether an item is trashable.
+		 *
+		 * Return false to disable trash support for the item.
+		 *
+		 * @param boolean $supports_trash Whether the item type support trashing.
+		 * @param WP_Post $post           The Post object being considered for trashing support.
+		 */
+		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
+
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
+			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
+
+			if ( ! empty( $child_product_variations ) ) {
+				foreach ( $child_product_variations as $child ) {
+					wp_delete_post( $child->ID, true );
+				}
+			}
+
+			$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
+
+			if ( ! empty( $child_products ) ) {
+				foreach ( $child_products as $child ) {
+					$child_post                = array();
+					$child_post['ID']          = $child->ID;
+					$child_post['post_parent'] = 0;
+					wp_update_post( $child_post );
+				}
+			}
+
+			$result = wp_delete_post( $id, true );
+		} else {
+			// If we don't support trashing for this type, error out.
+			if ( ! $supports_trash ) {
+				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+			}
+
+			// Otherwise, only trash if we haven't already.
+			if ( 'trash' === $post->post_status ) {
+				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+			}
+
+			// (Note that internally this falls through to `wp_delete_post` if
+			// the trash is disabled.)
+			$result = wp_trash_post( $id );
+		}
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+		}
+
+		// Delete parent product transients.
+		if ( $parent_id = wp_get_post_parent_id( $id ) ) {
+			wc_delete_product_transients( $parent_id );
+		}
+
+		/**
+		 * Fires after a single item is deleted or trashed via the REST API.
+		 *
+		 * @param object           $post     The deleted or trashed item.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
+
+		return $response;
 	}
 
 	/**
@@ -2305,6 +2392,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
+						),
+						'visible' => array(
+							'description' => __( 'If the variation is visible.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' )
 						),
 						'virtual' => array(
 							'description' => __( 'If the variation is virtual.', 'woocommerce' ),

@@ -116,15 +116,16 @@
 
 				if ( all_attributes_chosen ) {
 					// Get a matchihng variation via ajax
-					data.product_id = $product_id;
+					data.product_id  = $product_id;
+					data.custom_data = $form.data( 'custom_data' );
 
-					$( '.variations_form' ).block({
+					$form.block( {
 						message: null,
 						overlayCSS: {
 							background: '#fff',
 							opacity: 0.6
 						}
-					});
+					} );
 
 					$xhr = $.ajax( {
 						url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
@@ -140,7 +141,7 @@
 							}
 						},
 						complete: function() {
-							$( '.variations_form' ).unblock();
+							$form.unblock();
 						}
 					} );
 				} else {

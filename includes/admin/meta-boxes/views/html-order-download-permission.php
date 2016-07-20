@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wc-metabox closed">
 	<h3 class="fixed">
-		<button type="button" rel="<?php echo absint( $download->product_id ) . ',' . esc_attr( $download->download_id ); ?>" class="revoke_access button"><?php _e( 'Revoke Access', 'woocommerce' ); ?></button>
+		<button type="button" data-permission_id="<?php echo absint( $download->permission_id ); ?>" rel="<?php echo absint( $download->product_id ) . ',' . esc_attr( $download->download_id ); ?>" class="revoke_access button"><?php _e( 'Revoke Access', 'woocommerce' ); ?></button>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong>
 			<?php echo '#' . absint( $product->id ) . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_title(), $download->product_id, $download->order_id, $download->order_key, $download->download_id ) . ' &mdash; ' . esc_html( $file_count ) . ': ' . wc_get_filename_from_url( $product->get_file_download_path( $download->download_id ) ) . ' &mdash; ' . sprintf( _n( 'Downloaded %s time', 'Downloaded %s times', absint( $download->download_count ), 'woocommerce'), absint( $download->download_count ) ); ?>

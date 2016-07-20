@@ -183,31 +183,35 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function lost_password() {
 		/**
-		 * Process reset key / login from email confirmation link
-		 */
-		if ( ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
-
-			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
-
-			// reset key / login is correct, display reset password form with hidden key / login values
-			if ( is_object( $user ) ) {
-				return wc_get_template( 'myaccount/form-reset-password.php', array(
-					'key'   => wc_clean( $_GET['key'] ),
-					'login' => wc_clean( $_GET['login'] ),
-				) );
-			}
-
-		/**
 		 * After sending the reset link, don't show the form again.
 		 */
-		 } elseif ( ! empty( $_GET['reset-link-sent'] ) ) {
+		if ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
 
 		/**
 		 * After reset, show confirmation message.
 		 */
-		 } elseif ( ! empty( $_GET['reset'] ) ) {
+		} elseif ( ! empty( $_GET['reset'] ) ) {
 			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+
+		/**
+		 * Process reset key / login from email confirmation link
+		 */
+		} elseif ( ! empty( $_GET['show-reset-form'] ) ) {
+			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {
+				list( $rp_login, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) );
+				$user = self::check_password_reset_key( $rp_key, $rp_login );
+
+				// reset key / login is correct, display reset password form with hidden key / login values
+				if ( is_object( $user ) ) {
+					return wc_get_template( 'myaccount/form-reset-password.php', array(
+						'key'   => $rp_key,
+						'login' => $rp_login,
+					) );
+				} else {
+					self::set_reset_password_cookie();
+				}
+			}
 		}
 
 		// Show lost password form by default
@@ -348,8 +352,23 @@ class WC_Shortcode_My_Account {
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
+		self::set_reset_password_cookie();
 
 		wp_password_change_notification( $user );
+	}
+
+	/**
+	 * Set or unset the cookie.
+	 */
+	public static function set_reset_password_cookie( $value = '' ) {
+		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
+		$rp_path   = current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+
+		if ( $value ) {
+			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );
+		} else {
+			setcookie( $rp_cookie, ' ', time() - YEAR_IN_SECONDS, $rp_path, COOKIE_DOMAIN, is_ssl(), true );
+		}
 	}
 
 	/**

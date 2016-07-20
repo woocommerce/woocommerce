@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
  * @version     2.5.0
@@ -40,7 +40,7 @@ if ( $totals = $order->get_order_item_totals() ) {
 }
 
 if ( $sent_to_admin ) {
-    echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . "\n";
+	echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . "\n";
 }
 
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );

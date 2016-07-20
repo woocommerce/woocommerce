@@ -462,15 +462,38 @@ class WC_API_Products extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
-		$parent_id = wp_get_post_parent_id( $id );
-		$result    = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
+
+			if ( ! empty( $child_product_variations ) ) {
+				foreach ( $child_product_variations as $child ) {
+					wp_delete_post( $child->ID, true );
+				}
+			}
+
+			$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
+
+			if ( ! empty( $child_products ) ) {
+				foreach ( $child_products as $child ) {
+					$child_post                = array();
+					$child_post['ID']          = $child->ID;
+					$child_post['post_parent'] = 0;
+					wp_update_post( $child_post );
+				}
+			}
+
+			$result = wp_delete_post( $id, true );
+		} else {
+			$result = wp_trash_post( $id );
+		}
 
 		if ( ! $result ) {
 			return new WP_Error( 'woocommerce_api_cannot_delete_product', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product' ), array( 'status' => 500 ) );
 		}
 
 		// Delete parent product transients.
-		if ( $parent_id ) {
+		if ( $parent_id = wp_get_post_parent_id( $id ) ) {
 			wc_delete_product_transients( $parent_id );
 		}
 
@@ -1399,7 +1422,7 @@ class WC_API_Products extends WC_API_Resource {
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
 							'value'        => '',
-							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 							'is_taxonomy'  => $is_taxonomy
@@ -1420,7 +1443,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attributes[ $attribute_slug ] = array(
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
-						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 						'is_taxonomy'  => $is_taxonomy
@@ -1573,12 +1596,13 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-			} elseif ( 'variable' === $product_type ) {
-				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
-				wc_update_product_stock_status( $product_id, $stock_status );
+				// Stock status is always determined by children so sync later.
+				if ( 'variable' !== $product_type ) {
+					wc_update_product_stock_status( $product_id, $stock_status );
+				}
 
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
@@ -2433,10 +2457,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( $image_meta = @wp_read_image_metadata( $upload['file'] ) ) {
 			if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
-				$title = $image_meta['title'];
+				$title = wc_clean( $image_meta['title'] );
 			}
 			if ( trim( $image_meta['caption'] ) ) {
-				$content = $image_meta['caption'];
+				$content = wc_clean( $image_meta['caption'] );
 			}
 		}
 

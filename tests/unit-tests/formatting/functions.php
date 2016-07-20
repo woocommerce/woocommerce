@@ -29,10 +29,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_filename_from_url() {
 
-		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'https://www.woothemes.com/woocommerce.pdf' ) );
+		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce.pdf' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'ftp://wc' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'http://www.skyverge.com' ) );
-		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'https://www.woothemes.com/woocommerce' ) );
+		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
 	}
 
 	/**

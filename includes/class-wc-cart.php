@@ -879,7 +879,7 @@ class WC_Cart {
 				$id_parts[] = $cart_item_data_key;
 			}
 
-			return md5( implode( '_', $id_parts ) );
+			return apply_filters( 'woocommerce_cart_id', md5( implode( '_', $id_parts ) ), $product_id, $variation_id, $variation, $cart_item_data );
 		}
 
 		/**
@@ -1260,7 +1260,7 @@ class WC_Cart {
 					$line_subtotal_tax     = 0;
 					$line_subtotal         = $line_price;
 					$line_tax              = 0;
-					$line_total            = round( $discounted_price * $values['quantity'], WC_ROUNDING_PRECISION );
+					$line_total            = round( $discounted_price * $values['quantity'], wc_get_rounding_precision() );
 
 				/**
 				 * Prices include tax.
@@ -1283,7 +1283,7 @@ class WC_Cart {
 						$taxes             = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
 
 						// Now we have a new item price (excluding TAX)
-						$line_subtotal     = round( $line_price - array_sum( $taxes ), WC_ROUNDING_PRECISION );
+						$line_subtotal     = round( $line_price - array_sum( $taxes ), wc_get_rounding_precision() );
 						$taxes             = WC_Tax::calc_tax( $line_subtotal, $item_tax_rates );
 						$line_subtotal_tax = array_sum( $taxes );
 

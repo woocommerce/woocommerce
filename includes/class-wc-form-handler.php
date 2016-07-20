@@ -19,6 +19,7 @@ class WC_Form_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -36,6 +37,19 @@ class WC_Form_Handler {
 		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'delete_payment_method_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'set_default_payment_method_action' ), 20 );
+	}
+
+	/**
+	 * Remove key and login from querystring, set cookie, and redirect to account page to show the form.
+	 */
+	public static function redirect_reset_password_link() {
+		if ( is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
+			$value = sprintf( '%s:%s', wp_unslash( $_GET['login'] ), wp_unslash( $_GET['key'] ) );
+			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+
+			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
+			exit;
+		}
 	}
 
 	/**

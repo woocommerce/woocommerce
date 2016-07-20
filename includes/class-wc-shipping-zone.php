@@ -242,7 +242,7 @@ class WC_Shipping_Zone extends WC_Data {
 		$methods         = array();
 
 		foreach ( $raw_methods as $raw_method ) {
-			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ) ) ) {
+			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ), true ) ) {
 				$class_name = $allowed_classes[ $raw_method->method_id ];
 
 				// The returned array may contain instances of shipping methods, as well

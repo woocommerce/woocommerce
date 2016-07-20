@@ -272,7 +272,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		} elseif ( is_product_tag() ) {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
-			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+			$queried_object = get_queried_object();
+			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max
@@ -361,12 +362,18 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
 			" . $tax_query_sql['join'] . $meta_query_sql['join'];
+
 		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
+
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$query['where'] .= ' AND ' . $search;
+		}
+
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );

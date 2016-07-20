@@ -312,7 +312,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
 
 		// Create customer.
-		$customer_id = wc_create_new_customer( $request['email'], $request['username'], $request['password'] );;
+		$customer_id = wc_create_new_customer( $request['email'], $request['username'], $request['password'] );
 		if ( is_wp_error( $customer_id ) ) {
 			return $customer_id;
 		}

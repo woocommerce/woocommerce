@@ -171,7 +171,6 @@ return array(
 	'NR' => __( 'Nauru', 'woocommerce' ),
 	'NP' => __( 'Nepal', 'woocommerce' ),
 	'NL' => __( 'Netherlands', 'woocommerce' ),
-	'AN' => __( 'Netherlands Antilles', 'woocommerce' ),
 	'NC' => __( 'New Caledonia', 'woocommerce' ),
 	'NZ' => __( 'New Zealand', 'woocommerce' ),
 	'NI' => __( 'Nicaragua', 'woocommerce' ),
@@ -264,5 +263,5 @@ return array(
 	'WS' => __( 'Samoa', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
-	'ZW' => __( 'Zimbabwe', 'woocommerce' )
+	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
 );
