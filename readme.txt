@@ -158,6 +158,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.4 - xx/xx/16 =
+* Fix - Shipping method title display in COD settings.
+
 = 2.6.3 - 19/07/16 =
 * Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
 * Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
