@@ -117,8 +117,11 @@ function wc_get_orders( $args ) {
 		$wp_query_args['no_found_rows'] = true;
 	}
 
+	// Make sure to keep arguments possibly used by 3rd party plugins to filter the query
+	$args = array_merge( $args, $wp_query_args );
+
 	// Get results.
-	$orders = new WP_Query( $wp_query_args );
+	$orders = new WP_Query( $args );
 
 	if ( 'objects' === $args['return'] ) {
 		$return = array_map( 'wc_get_order', $orders->posts );
