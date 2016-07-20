@@ -30,6 +30,7 @@ class WC_Structured_Data {
     if ( ! is_array( $json ) ) {
       return false;
     }
+    
     $this->data[] = $json;
   }
   
@@ -42,6 +43,7 @@ class WC_Structured_Data {
     if ( ! $this->data ) {
       return array();
     }
+    
     $product_count = 0;
 
     foreach ( $this->data as $value ) {
@@ -50,20 +52,21 @@ class WC_Structured_Data {
       if ( 'Product' === $type || 'SoftwareApplication' === $type || 'MusicAlbum' === $type ) {
         $products[] = $value;
         $product_count ++;
-      }
-      elseif ( 'Review' === $type ) {
+      } elseif ( 'Review' === $type ) {
         $reviews[] = $value;
       }
     }
+    
     if ( $product_count === 1 ) {
       $structured_data = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
-    }
-    elseif ( $product_count > 1 ) {
+    } elseif ( $product_count > 1 ) {
       $structured_data = array( '@graph' => $products );
     }
+    
     if ( ! isset( $structured_data ) ) {
       return array();
     }
+    
     $context['@context'] = 'http://schema.org/';
 
     return $context + $structured_data;
@@ -85,12 +88,20 @@ class WC_Structured_Data {
   public function enqueue_data() {
     if ( $structured_data = $this->get_data() ) {
 
-      array_walk_recursive( $structured_data, function( &$value ) {
-        $value = sanitize_text_field( $value );
-      } );
+      array_walk_recursive( $structured_data, array( $this, 'sanitize_data' ) );
 
       echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
     }
+  }
+
+  /**
+   * Callback function for sanitizing the structured data.
+   * Can't use anonymous function due to PHP v5.2 incompatibility...
+   *
+   * @param ref
+   */
+  private function sanitize_data( &$value ) {
+    $value = sanitize_text_field( $value );
   }
 
   /**
@@ -101,6 +112,7 @@ class WC_Structured_Data {
     if ( ! is_product_category() ) {
       return;
     }
+    
     $this->generate_product_data();
   }
   
@@ -127,6 +139,7 @@ class WC_Structured_Data {
     } else {
       $type = "Product";
     }
+
     $json['@type']             = $type;
     $json['@id']               = get_the_permalink();
     $json['name']              = get_the_title();
@@ -141,6 +154,7 @@ class WC_Structured_Data {
         'name'                   => $brand
       );
     }
+    
     if ( $product->get_rating_count() ) {
       $json['aggregateRating'] = array(
         '@type'                => 'AggregateRating',
@@ -149,13 +163,15 @@ class WC_Structured_Data {
         'reviewCount'          => $product->get_review_count()
       );
     }
+    
     $json['offers']            = array(
       '@type'                  => 'Offer',
       'priceCurrency'          => get_woocommerce_currency(),
       'price'                  => $product->get_price(),
       'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' )
     );
-    $this->set_data( apply_filters( 'woocommerce_product_structured_data', $json ) );
+    
+    $this->set_data( apply_filters( 'woocommerce_product_structured_data', $json, $product ) );
   }
 
   /**
@@ -180,6 +196,7 @@ class WC_Structured_Data {
       '@type'                  => 'Person',
       'name'                   => get_comment_author()
     );
-    $this->set_data( apply_filters( 'woocommerce_product_review_structured_data', $json ) );
+    
+    $this->set_data( apply_filters( 'woocommerce_product_review_structured_data', $json, $comment ) );
   }
 }
