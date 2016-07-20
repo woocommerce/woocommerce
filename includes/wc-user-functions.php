@@ -525,6 +525,30 @@ function wc_get_customer_order_count( $user_id ) {
 }
 
 /**
+ * Get total orders by customer of a product.
+ * @param  int $user_id
+ * @param  int $product_id
+ * @return int
+ */
+function wc_get_customer_product_count( $user_id , $product_id ) {
+	global $wpdb;
+	$count = $wpdb->get_var( "SELECT SUM(ormeta1.meta_value)
+				from $wpdb->posts as posts
+				JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+				JOIN {$wpdb->woocommerce_order_items} AS order ON posts.ID=order.order_id
+				JOIN {$wpdb->woocommerce_order_itemmeta} AS ormeta ON order.order_item_id=ormeta.order_item_id
+				JOIN {$wpdb->woocommerce_order_itemmeta} AS ormeta1 ON ormeta1.order_item_id=ormeta.order_item_id
+				WHERE meta.meta_key='_customer_user'
+				AND posts.post_type IN  ('" . implode( "','", wc_get_order_types( 'order-count' ) ) . "')
+				AND posts.post_status IN  ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
+				AND meta.meta_value= $user_id
+				AND ormeta.meta_key='_product_id'
+				AND ormeta.meta_value= $product_id
+				AND ormeta1.meta_key='_qty';" );
+	return absint($count);
+}
+
+/**
  * Reset _customer_user on orders when a user is deleted.
  * @param int $user_id
  */
