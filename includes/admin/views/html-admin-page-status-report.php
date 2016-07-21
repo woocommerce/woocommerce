@@ -173,14 +173,7 @@ global $wpdb;
 				<td><?php echo extension_loaded( 'suhosin' ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
 		<?php endif; ?>
-		<?php
-		if ( $wpdb->use_mysqli ) {
-			$ver = mysqli_get_server_info( $wpdb->dbh );
-		} else {
-			$ver = mysql_get_server_info();
-		}
-
-		if ( ! empty( $wpdb->is_mysql ) ) : ?>
+		<?php if ( ! empty( $wpdb->is_mysql ) ) : ?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
