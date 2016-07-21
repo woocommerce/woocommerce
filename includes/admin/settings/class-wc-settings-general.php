@@ -159,6 +159,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload' => false
 			),
 
+			array(
+				'title'   => __( 'Secure Cookies', 'woocommerce' ),
+				'desc'    => __( 'Enable site-wide secure cookies (for PCI Compliance)', 'woocommerce' ),
+				'id'      => 'woocommerce_secure_cookies',
+				'default' => 'no',
+				'type'    => 'checkbox'
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 			array( 'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
