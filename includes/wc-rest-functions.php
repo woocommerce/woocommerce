@@ -306,9 +306,10 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
  */
 function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 	$objects = array(
-		'reports'    => 'view_woocommerce_reports',
-		'settings'   => 'manage_woocommerce',
-		'attributes' => 'manage_product_terms',
+		'reports'       => 'view_woocommerce_reports',
+		'settings'      => 'manage_woocommerce',
+		'system-status' => 'manage_woocommerce',
+		'attributes'    => 'manage_product_terms',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );
