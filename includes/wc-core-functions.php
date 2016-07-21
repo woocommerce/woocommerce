@@ -1355,7 +1355,7 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 }
 
 /**
- * Used to sort products attributes with uasort.
+ * Used to sort shipping zone methods with uasort.
  * @since 2.7.0
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
