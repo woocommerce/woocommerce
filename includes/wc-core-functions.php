@@ -1355,15 +1355,16 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 }
 
 /**
- * Get rounding precision.
+ * Get rounding precision for internal WC calculations.
+ * Will increase the precision of wc_get_price_decimals by 2 decimals, unless WC_ROUNDING_PRECISION is set to a higher number.
  *
  * @since 2.6.3
  * @return int
  */
 function wc_get_rounding_precision() {
-	if ( defined( 'WC_ROUNDING_PRECISION' ) ) {
-		return absint( WC_ROUNDING_PRECISION );
+	$precision = wc_get_price_decimals() + 2;
+	if ( absint( WC_ROUNDING_PRECISION ) > $precision ) {
+		$precision = absint( WC_ROUNDING_PRECISION );
 	}
-
-	return wc_get_price_decimals() + 2;
+	return $precision;
 }
