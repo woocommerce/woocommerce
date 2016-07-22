@@ -159,7 +159,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.4 - xx/xx/16 =
+* Fix - Security - Only allow image MIME type upload via REST APIs.
 * Fix - Shipping method title display in COD settings.
+* Fix - Order date input in Edge browser.
+* Fix - Ensure value is not null in variations to support empty show_option_none setting.
 
 = 2.6.3 - 19/07/16 =
 * Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
