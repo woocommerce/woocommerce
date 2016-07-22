@@ -39,9 +39,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="wc-shipping-zone-region"><?php esc_html_e( 'This zone is used for shipping addresses that aren&lsquo;t included in any other shipping zone. Adding shipping methods to this zone is optional.', 'woocommerce' ); ?></td>
 			<td class="wc-shipping-zone-methods">
 				<ul>
+					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 					<?php
 						$worldwide = new WC_Shipping_Zone( 0 );
 						$methods   = $worldwide->get_shipping_methods();
+						uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
 						if ( ! empty( $methods ) ) {
 							foreach ( $methods as $method ) {
@@ -52,7 +54,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 							echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 						}
 					?>
-					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 				</ul>
 			</td>
 		</tr>

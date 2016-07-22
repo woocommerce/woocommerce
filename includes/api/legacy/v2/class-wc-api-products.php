@@ -1804,9 +1804,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @throws WC_API_Exception
 	 */
 	public function upload_product_image( $image_url ) {
-		$file_name 		= basename( current( explode( '?', $image_url ) ) );
-		$wp_filetype 	= wp_check_filetype( $file_name, null );
-		$parsed_url 	= @parse_url( $image_url );
+		$file_name  = basename( current( explode( '?', $image_url ) ) );
+		$parsed_url = @parse_url( $image_url );
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
@@ -1828,6 +1827,8 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Ensure we have a file name and type
+		$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
+
 		if ( ! $wp_filetype['type'] ) {
 			$headers = wp_remote_retrieve_headers( $response );
 			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
@@ -1838,6 +1839,13 @@ class WC_API_Products extends WC_API_Resource {
 				$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
 			}
 			unset( $headers );
+
+			// Recheck filetype
+			$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
+
+			if ( ! $wp_filetype['type'] ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_image', __( 'Invalid image type.', 'woocommerce' ), 400 );
+			}
 		}
 
 		// Upload the file

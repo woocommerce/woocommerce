@@ -347,6 +347,18 @@ global $wpdb;
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
+			<td data-export-label="WC Database Prefix"><?php _e( 'Database Prefix', 'woocommerce' ); ?></td>
+			<td class="help">&nbsp;</td>
+			<td><?php 
+				if ( strlen( $wpdb->prefix ) > 20 ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend using a prefix with less than 20 characters. See: %s', 'woocommerce' ), esc_html( $wpdb->prefix ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . esc_html( $wpdb->prefix ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
 			<?php
 			$tables = array(
 				'woocommerce_sessions',

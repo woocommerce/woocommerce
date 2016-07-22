@@ -1355,6 +1355,18 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 }
 
 /**
+ * Used to sort shipping zone methods with uasort.
+ * @since 2.7.0
+ */
+function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
+	if ( $a->method_order === $b->method_order ) {
+		return 0;
+	}
+	return ( $a->method_order < $b->method_order ) ? -1 : 1;
+}
+
+
+/**
  * Get rounding precision.
  *
  * @since 2.6.3
