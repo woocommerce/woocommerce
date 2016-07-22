@@ -32,11 +32,11 @@ get_header( 'shop' ); ?>
 		do_action( 'woocommerce_before_main_content' );
 	?>
 
-    <header class="archive-product-header">
+    <header class="woocommerce-products-header archive-product-header">
 
 		<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
 
-			<h1 class="page-title"><?php woocommerce_page_title(); ?></h1>
+			<h1 class="woocommerce-products-header__title page-title"><?php woocommerce_page_title(); ?></h1>
 
 		<?php endif; ?>
 
