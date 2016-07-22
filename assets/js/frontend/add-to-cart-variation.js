@@ -104,14 +104,15 @@
 
 				$form.find( '.variations select' ).each( function() {
 					var attribute_name = $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' );
+					var value          = $( this ).val() || '';
 
-					if ( $( this ).val().length === 0 ) {
+					if ( value.length === 0 ) {
 						all_attributes_chosen = false;
 					} else {
 						some_attributes_chosen = true;
 					}
 
-					data[ attribute_name ] = $( this ).val();
+					data[ attribute_name ] = value;
 				});
 
 				if ( all_attributes_chosen ) {
@@ -266,8 +267,9 @@
 
 			$form.find( '.variations select' ).each( function() {
 				var attribute_name = $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' );
+				var value          = $( this ).val() || '';
 
-				if ( $( this ).val().length === 0 ) {
+				if ( value.length === 0 ) {
 					all_attributes_chosen = false;
 				} else {
 					some_attributes_chosen = true;
@@ -278,7 +280,7 @@
 					current_settings[ attribute_name ] = '';
 				} else {
 					// Add to settings array
-					current_settings[ attribute_name ] = $( this ).val();
+					current_settings[ attribute_name ] = value;
 				}
 			});
 
