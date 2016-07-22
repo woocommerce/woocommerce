@@ -831,12 +831,8 @@ class WC_Cart {
 		 */
 		public function find_product_in_cart( $cart_id = false ) {
 			if ( $cart_id !== false ) {
-				if ( is_array( $this->cart_contents ) ) {
-					foreach ( $this->cart_contents as $cart_item_key => $cart_item ) {
-						if ( $cart_item_key == $cart_id ) {
-							return $cart_item_key;
-						}
-					}
+				if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
+					return $cart_id;
 				}
 			}
 			return '';
