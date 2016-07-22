@@ -181,7 +181,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Catalog Images', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used in product listings', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used in product listings. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_catalog_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
@@ -195,7 +195,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Single Product Image', 'woocommerce' ),
-					'desc'     => __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
+					'desc'     => __( 'This is the size used by the main image on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_single_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
@@ -209,7 +209,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Product Thumbnails', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used for the gallery of images on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_thumbnail_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
