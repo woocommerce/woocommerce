@@ -37,39 +37,38 @@ class WC_Structured_Data {
   /**
    * Formats and returns the structured data...
    *
-   * @return array If structured data is set, returns the fully formatted JSON-LD, otherwise returns empty array
+   * @return array If data is set, returns the fully formatted JSON-LD array, otherwise returns empty array
    */
   private function get_data() {
     if ( ! $this->data ) {
       return array();
     }
     
-    $product_count = 0;
-
     foreach ( $this->data as $value ) {
       $type = isset( $value['@type'] ) ? $value['@type'] : false;
         
       if ( 'Product' === $type || 'SoftwareApplication' === $type || 'MusicAlbum' === $type ) {
         $products[] = $value;
-        $product_count ++;
       } elseif ( 'Review' === $type ) {
         $reviews[] = $value;
       }
     }
-    
+
+    $product_count = isset( $products ) ? count( $products ) : 0;
+
     if ( $product_count === 1 ) {
-      $structured_data = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
+      $data = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
     } elseif ( $product_count > 1 ) {
-      $structured_data = array( '@graph' => $products );
+      $data = array( '@graph' => $products );
     }
     
-    if ( ! isset( $structured_data ) ) {
+    if ( ! isset( $data ) ) {
       return array();
     }
     
-    $context['@context'] = 'http://schema.org/';
+    $context['@context'] = apply_filters( 'woocommerce_structured_data_context', 'http://schema.org/' );
 
-    return $context + $structured_data;
+    return $context + $data;
   }
 
   /**
@@ -96,7 +95,6 @@ class WC_Structured_Data {
 
   /**
    * Callback function for sanitizing the structured data.
-   * Can't use anonymous function due to PHP v5.2 incompatibility...
    *
    * @param ref
    */
@@ -147,14 +145,7 @@ class WC_Structured_Data {
     $json['description']       = get_the_excerpt();
     $json['url']               = get_the_permalink();
     $json['sku']               = $product->get_sku();
-
-    if ( $brand = $product->get_attribute( __( 'brand', 'woocommerce' ) ) ) {
-      $json['brand']             = array(
-        '@type'                  => 'Thing',
-        'name'                   => $brand
-      );
-    }
-    
+ 
     if ( $product->get_rating_count() ) {
       $json['aggregateRating'] = array(
         '@type'                => 'AggregateRating',
@@ -171,32 +162,31 @@ class WC_Structured_Data {
       'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' )
     );
     
-    $this->set_data( apply_filters( 'woocommerce_product_structured_data', $json, $product ) );
+    $this->set_data( apply_filters( 'woocommerce_structured_data_product', $json, $product ) );
   }
 
   /**
    * Generates the product review structured data...
    * Hooked into the `woocommerce_review_meta` action hook...
    * Applies the `woocommerce_product_review_structured_data` filter hook for clean structured data customization...
+   *
+   * @param object $comment
    */
-  public function generate_product_review_data() {
-    global $comment;
-    
-    $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
+  public function generate_product_review_data( $comment ) {
 
     $json['@type']             = 'Review';
-    $json['@id']               = '#li-comment-' . get_comment_ID();
+    $json['@id']               = get_the_permalink() . '#li-comment-' . get_comment_ID();
     $json['datePublished']     = get_comment_date( 'c' );
     $json['description']       = get_comment_text();
     $json['reviewRating']      = array(
       '@type'                  => 'rating',
-      'ratingValue'            => $rating
+      'ratingValue'            => intval( get_comment_meta( $comment->comment_ID, 'rating', true ) )
     );
     $json['author']            = array(
       '@type'                  => 'Person',
       'name'                   => get_comment_author()
     );
     
-    $this->set_data( apply_filters( 'woocommerce_product_review_structured_data', $json, $comment ) );
+    $this->set_data( apply_filters( 'woocommerce_structured_data_product_review', $json, $comment ) );
   }
 }
