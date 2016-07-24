@@ -56,12 +56,11 @@ class WC_Structured_Data {
       }
     }
     
-
     if ( isset( $products ) ) {
-      if ( count( $products ) === 1 ) {
-        $data[] = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
-      } elseif ( count( $products ) > 1 ) {
+      if ( count( $products ) > 1 ) {
         $data[] = array( '@graph' => $products );
+      } else {
+        $data[] = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
       }
     }
  
@@ -209,7 +208,7 @@ class WC_Structured_Data {
    * Applies the `woocommerce_structured_data_breadcrumbs` filter hook for clean structured data customization...
    */
   public function generate_breadcrumbs_data() {
-    if ( is_front_page() || is_search()) {
+    if ( is_front_page() || is_search() ) {
       return;
     }
     
