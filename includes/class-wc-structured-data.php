@@ -7,11 +7,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
- * @class 		WC_Structured_Data
- * @version		2.7.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		Clement Cazaud
+ * @class     WC_Structured_Data
+ * @version   2.7.0
+ * @package   WooCommerce/Classes
+ * @category  Class
+ * @author    Clement Cazaud
  */
 class WC_Structured_Data {
   
@@ -86,10 +86,10 @@ class WC_Structured_Data {
    */
   public function __construct() {
     add_action( 'woocommerce_before_main_content', array( $this, 'generate_shop_data' ) );
-    add_action( 'woocommerce_before_main_content', array( $this, 'generate_breadcrumbs_data' ) );
+    add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumb_data' ), 10, 1 );
     add_action( 'woocommerce_before_shop_loop_item', array( $this, 'generate_product_category_data' ) );
     add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) );
-    add_action( 'woocommerce_review_meta', array( $this, 'generate_product_review_data' ) );
+    add_action( 'woocommerce_review_meta', array( $this, 'generate_product_review_data' ), 10, 1 );
     add_action( 'wp_footer', array( $this, 'enqueue_data' ) );
   }
 
@@ -182,7 +182,7 @@ class WC_Structured_Data {
    * Hooked into the `woocommerce_review_meta` action hook...
    * Applies the `woocommerce_structured_data_product_review` filter hook for clean structured data customization...
    *
-   * @param object $comment
+   * @param object $comment From `woocommerce_review_meta` action hook
    */
   public function generate_product_review_data( $comment ) {
 
@@ -204,17 +204,17 @@ class WC_Structured_Data {
 
   /**
    * Generates the breadcrumbs structured data...
-   * Hooked into the `woocommerce_before_main_content` action hook...
-   * Applies the `woocommerce_structured_data_breadcrumbs` filter hook for clean structured data customization...
+   * Hooked into the `woocommerce_breadcrumb` action hook...
+   * Applies the `woocommerce_structured_data_breadcrumb` filter hook for clean structured data customization...
+   *
+   * @param array $args From `woocommerce_breadcrumb` action hook
    */
-  public function generate_breadcrumbs_data() {
-    if ( is_front_page() || is_search() ) {
+  public function generate_breadcrumb_data( $args ) {
+    if ( empty( $breadcrumb = $args['breadcrumb'] ) ) {
       return;
     }
-    
-    $breadcrumbs = new WC_Breadcrumb();
-    $breadcrumb  = $breadcrumbs->generate();
-    $position    = 1;
+
+    $position = 1;
 
     foreach ( $breadcrumb as $key => $value ) {
       if ( ! empty( $value[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
@@ -238,7 +238,7 @@ class WC_Structured_Data {
     $json['@type']             = 'BreadcrumbList';
     $json['itemListElement']   = $json_crumbs;
 
-    $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumbs', $json, $breadcrumbs ) );
+    $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumb', $json, $breadcrumb ) );
   }
 
   /**
@@ -247,17 +247,18 @@ class WC_Structured_Data {
    * Applies the `woocommerce_structured_data_shop` filter hook for clean structured data customization...
    */
   public function generate_shop_data() {
+    if ( ! is_shop() || ! is_front_page() ) {
+      return;
+    }
+
     $json['@type']             = 'WebSite';
     $json['name']              = get_bloginfo( 'name' );
     $json['url']               = get_bloginfo( 'url' );
-
-    if ( is_shop() && is_front_page() ) {
-      $json['potentialAction'] = array(
-        '@type'                => 'SearchAction',
-        'target'               => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
-        'query-input'          => 'required name=search_term_string'
-      );
-    }
+    $json['potentialAction'] = array(
+      '@type'                => 'SearchAction',
+      'target'               => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
+      'query-input'          => 'required name=search_term_string'
+    );
 
     $this->set_data( apply_filters( 'woocommerce_structured_data_shop', $json ) );
   }
