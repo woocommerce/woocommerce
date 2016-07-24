@@ -210,11 +210,12 @@ class WC_Structured_Data {
    * @param array $args From `woocommerce_breadcrumb` action hook
    */
   public function generate_breadcrumb_data( $args ) {
-    if ( empty( $breadcrumb = $args['breadcrumb'] ) ) {
+    if ( empty( $args['breadcrumb'] ) ) {
       return;
     }
 
-    $position = 1;
+    $breadcrumb = $args['breadcrumb'];
+    $position   = 1;
 
     foreach ( $breadcrumb as $key => $value ) {
       if ( ! empty( $value[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
