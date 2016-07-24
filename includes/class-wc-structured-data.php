@@ -24,7 +24,7 @@ class WC_Structured_Data {
    * Checks if the passed $json variable is an array and stores it into $this->data...
    *
    * @param array $json Partially structured data
-   * @return bool false If the param $json is not an array
+   * @return bool Returns false If the param $json is not an array
    */
   private function set_data( $json ) {
     if ( ! is_array( $json ) ) {
@@ -37,7 +37,7 @@ class WC_Structured_Data {
   /**
    * Structures and returns the data...
    *
-   * @return array If data is set, returns the fully structured JSON-LD array, otherwise returns empty array
+   * @return array If data is set, returns the structured data, otherwise returns empty array
    */
   private function get_data() {
     if ( ! $this->data ) {
@@ -51,19 +51,18 @@ class WC_Structured_Data {
         $products[] = $value;
       } elseif ( 'Review' === $type ) {
         $reviews[] = $value;
-      } elseif ( 'BreadcrumbList' === $type ) {
-        $data[] = $value;
-      } elseif ( 'WebSite' === $type ) {
+      } elseif ( 'WebSite' === $type || 'BreadcrumbList' === $type ) {
         $data[] = $value;
       }
     }
     
-    $product_count = isset( $products ) ? count( $products ) : 0;
 
-    if ( $product_count === 1 ) {
-      $data[] = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
-    } elseif ( $product_count > 1 ) {
-      $data[] = array( '@graph' => $products );
+    if ( isset( $products ) ) {
+      if ( count( $products ) === 1 ) {
+        $data[] = isset( $reviews ) ? $products[0] + array( 'review' => $reviews ) : $products[0];
+      } elseif ( count( $products ) > 1 ) {
+        $data[] = array( '@graph' => $products );
+      }
     }
  
     if ( ! isset( $data ) ) {
@@ -77,10 +76,10 @@ class WC_Structured_Data {
     }
 
     if ( count( $data ) > 1 ) {
-      $data = array( '@graph' => $data );
+      return $data = array( '@graph' => $data );
+    } else {
+      return $data[0];
     }
-
-    return $data;
   }
 
   /**
@@ -121,7 +120,7 @@ class WC_Structured_Data {
    * Hooked into the `woocommerce_before_shop_loop_item` action hook...
    */
   public function generate_product_category_data() {
-    if ( ! is_product_category() ) {
+    if ( ! is_product_category() && ! is_shop() ) {
       return;
     }
     
@@ -208,7 +207,6 @@ class WC_Structured_Data {
    * Generates the breadcrumbs structured data...
    * Hooked into the `woocommerce_before_main_content` action hook...
    * Applies the `woocommerce_structured_data_breadcrumbs` filter hook for clean structured data customization...
-   *
    */
   public function generate_breadcrumbs_data() {
     if ( is_front_page() || is_search()) {
@@ -245,10 +243,9 @@ class WC_Structured_Data {
   }
 
   /**
-   * Generates the shop structured data...
+   * Generates the shop related structured data...
    * Hooked into the `woocommerce_before_main_content` action hook...
    * Applies the `woocommerce_structured_data_shop` filter hook for clean structured data customization...
-   *
    */
   public function generate_shop_data() {
     $json['@type']             = 'WebSite';
