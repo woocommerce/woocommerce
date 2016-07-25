@@ -602,6 +602,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	 * @subpackage	Archives
 	 */
 	function woocommerce_product_archive_description() {
+		// Don't display the description on search results page
+		if ( is_search() ) {
+			return;
+		}
+		
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
