@@ -69,6 +69,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 
+		<?php do_action( 'woocommerce_mini_cart_contents' ); ?>
+		
 	<?php else : ?>
 
 		<li class="empty"><?php _e( 'No products in the cart.', 'woocommerce' ); ?></li>
