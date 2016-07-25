@@ -1448,13 +1448,13 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Product categories
 		if ( isset( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', (array) $data['categories'] ) );
+			$term_ids = array_unique( array_map( 'intval', explode( ',', $data['categories'] ) ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
 		// Product tags
 		if ( isset( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', (array) $data['tags'] ) );
+			$term_ids = array_unique( array_map( 'intval', explode( ',', $data['tags'] ) ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
