@@ -574,6 +574,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'posts_per_page',
 			'meta_query',
 			'tax_query',
+			'meta_key',
+			'meta_value',
+			'meta_compare',
+			'meta_value_num',
 		);
 		$valid_vars = array_merge( $valid_vars, $rest_valid );
 
