@@ -172,15 +172,15 @@ global $wpdb;
 				<td class="help"><?php echo wc_help_tip( __( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); ?></td>
 				<td><?php echo extension_loaded( 'suhosin' ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
-		<?php endif; ?>
-		<?php
+		<?php endif;
+
 		if ( $wpdb->use_mysqli ) {
 			$ver = mysqli_get_server_info( $wpdb->dbh );
 		} else {
 			$ver = mysql_get_server_info();
 		}
 
-		if ( ! empty( $wpdb->is_mysql ) && stristr( $ver, 'MySQL' ) ) : ?>
+		if ( ! empty( $wpdb->is_mysql ) && ! stristr( $ver, 'MariaDB' ) ) : ?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
