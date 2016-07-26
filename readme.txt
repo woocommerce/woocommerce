@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.4 - xx/07/16 =
+= 2.6.4 - 26/07/16 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
 * Fix - Shipping method title display in COD settings.
 * Fix - Order date input in Edge browser.
