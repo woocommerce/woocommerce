@@ -606,13 +606,13 @@ class WC_Admin_Setup_Wizard {
 			),
 			'bacs' => array(
 				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
-				'description' => __( 'An simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
+				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
 			'cod' => array(
 				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
-				'description' => __( 'An simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
+				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			)
