@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
-class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
+class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	protected $server;
 
@@ -20,9 +20,6 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_Test_Spy_REST_Server;
-		do_action( 'rest_api_init' );
 		$this->endpoint = new WC_REST_Shipping_Zones_Controller();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
@@ -31,12 +28,10 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Unset the server.
+	 * Delete zones.
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_rest_server;
-		$wp_rest_server = null;
 		foreach( $this->zones as $zone ) {
 			$zone->delete();
 		}
