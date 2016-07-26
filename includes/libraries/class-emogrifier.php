@@ -370,7 +370,7 @@ class Emogrifier
 				}
 			}
 
-			usort($cssRules, [$this, 'sortBySelectorPrecedence']);
+			usort($cssRules, array( $this, 'sortBySelectorPrecedence' ) );
 
 			$this->caches[self::CACHE_KEY_CSS][$cssKey] = $cssRules;
 		}
@@ -1169,7 +1169,7 @@ class Emogrifier
 	 */
 	private function parseNth(array $match)
 	{
-		if (in_array(strtolower($match[2]), ['even','odd'], true)) {
+		if (in_array(strtolower($match[2]), array( 'even','odd' ), true)) {
 			// we have "even" or "odd"
 			$index = strtolower($match[2]) === 'even' ? 0 : 1;
 			return [self::MULTIPLIER => 2, self::INDEX => $index];
