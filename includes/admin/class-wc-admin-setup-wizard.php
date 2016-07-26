@@ -483,7 +483,7 @@ class WC_Admin_Setup_Wizard {
 										</tbody>
 									</table>
 								</div>
-								<p class="description"><?php printf( __( 'You may you need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
+								<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
 							</td>
 						</tr>
 						<?php
@@ -606,13 +606,13 @@ class WC_Admin_Setup_Wizard {
 			),
 			'bacs' => array(
 				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
-				'description' => __( 'An simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
+				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
 			'cod' => array(
 				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
-				'description' => __( 'An simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
+				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			)
