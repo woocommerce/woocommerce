@@ -117,9 +117,13 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 		}
 
 		$zone->create();
-		$request->set_param( 'id', $zone->get_id() );
 
-		return $this->get_item( $request );
+		if ( $zone->get_id() !== 0 ) {
+			$request->set_param( 'id', $zone->get_id() );
+			return $this->get_item( $request );
+		} else {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( "Resource cannot be created. Check to make sure 'order' and 'name' are present.", 'woocommerce' ), array( 'status' => 500 ) );
+		}
 	}
 
 	/**
