@@ -569,7 +569,7 @@ class Emogrifier
 		// we don't try to call removeChild on a nonexistent child node
 		/** @var \DOMNode $node */
 		foreach ($nodesWithStyleDisplayNone as $node) {
-			if ($node->parentNode && is_callable([$node->parentNode, 'removeChild'])) {
+			if ( $node->parentNode && is_callable( array($node->parentNode, 'removeChild') ) ) {
 				$node->parentNode->removeChild($node);
 			}
 		}
