@@ -203,12 +203,12 @@ class Emogrifier
 	 *
 	 * @return string
 	 *
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function emogrify()
 	{
 		if ($this->html === '') {
-			throw new \BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
+			throw new BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
 		}
 
 		$xmlDocument = $this->createXmlDocument();
@@ -225,12 +225,12 @@ class Emogrifier
 	 *
 	 * @return string
 	 *
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function emogrifyBodyContent()
 	{
 		if ($this->html === '') {
-			throw new \BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
+			throw new BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
 		}
 
 		$xmlDocument = $this->createXmlDocument();
@@ -575,6 +575,10 @@ class Emogrifier
 		}
 	}
 
+	private function normalizeStyleAttributes_callback( $m ) {
+		return strtolower( $m[0] );
+	}
+
 	/**
 	 * Normalizes the value of the "style" attribute and saves it.
 	 *
@@ -586,9 +590,7 @@ class Emogrifier
 	{
 		$normalizedOriginalStyle = preg_replace_callback(
 			'/[A-z\\-]+(?=\\:)/S',
-			function (array $m) {
-				return strtolower($m[0]);
-			},
+			array( $this, 'normalizeStyleAttributes_callback' ),
 			$node->getAttribute('style')
 		);
 
@@ -867,7 +869,7 @@ class Emogrifier
 	 *
 	 * @return string the unified HTML
 	 *
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	private function getUnifiedHtml()
 	{
