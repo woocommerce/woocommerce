@@ -765,16 +765,38 @@ function wc_get_log_file_path( $handle ) {
 }
 
 /**
- * Init for our rewrite rule fixes.
+ * Recursively get page children.
+ * @param  int $page_id
+ * @return int[]
  */
-function wc_fix_rewrite_rules_init() {
-	$permalinks = get_option( 'woocommerce_permalinks' );
+function wc_get_page_children( $page_id ) {
+	$page_ids = get_posts( array(
+		'post_parent' => $page_id,
+		'post_type'   => 'page',
+		'numberposts' => -1,
+		'post_status' => 'any',
+		'fields'      => 'ids',
+	) );
 
-	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
-		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;
+	if ( ! empty( $page_ids ) ) {
+		foreach ( $page_ids as $page_id ) {
+			$page_ids = array_merge( $page_ids, wc_get_page_children( $page_id ) );
+		}
+	}
+
+	return $page_ids;
+}
+
+/**
+ * Flushes rewrite rules when the shop page (or it's children) gets saved.
+ */
+function flush_rewrite_rules_on_shop_page_save( $post_id ) {
+	$shop_page_id = wc_get_page_id( 'shop' );
+	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
+		flush_rewrite_rules();
 	}
 }
-add_action( 'init', 'wc_fix_rewrite_rules_init' );
+add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
 
 /**
  * Various rewrite rule fixes.
@@ -792,17 +814,30 @@ function wc_fix_rewrite_rules( $rules ) {
 	// Fix the rewrite rules when the product permalink have %product_cat% flag.
 	if ( preg_match( '`/(.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
-
 			if ( preg_match( '`^' . preg_quote( $matches[1], '`' ) . '/\(`', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
 				unset( $rules[ $rule ] );
 			}
 		}
 	}
 
-	// If the shop page is used as the base, we need to enable verbose rewrite rules or sub pages will 404.
-	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
-		$page_rewrite_rules = $wp_rewrite->page_rewrite_rules();
-		$rules              = array_merge( $page_rewrite_rules, $rules );
+	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
+	if ( ! empty( $permalinks['use_verbose_page_rules'] ) && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
+		$page_rewrite_rules = array();
+		$subpages           = wc_get_page_children( $shop_page_id );
+
+		// Subpage rules
+		foreach ( $subpages as $subpage ) {
+			$uri = get_page_uri( $subpage );
+			$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
+			$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );
+			foreach ( $wp_generated_rewrite_rules as $key => $value ) {
+				$wp_generated_rewrite_rules[ $key ] = $value . '&pagename=' . $uri;
+			}
+			$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
+		}
+
+		// Merge with rules
+		$rules = array_merge( $page_rewrite_rules, $rules );
 	}
 
 	return $rules;
