@@ -1172,12 +1172,12 @@ class Emogrifier
 		if (in_array(strtolower($match[2]), array( 'even','odd' ), true)) {
 			// we have "even" or "odd"
 			$index = strtolower($match[2]) === 'even' ? 0 : 1;
-			return [self::MULTIPLIER => 2, self::INDEX => $index];
+			return array( self::MULTIPLIER => 2, self::INDEX => $index );
 		}
 		if (stripos($match[2], 'n') === false) {
 			// if there is a multiplier
 			$index = (int) str_replace(' ', '', $match[2]);
-			return [self::INDEX => $index];
+			return array( self::INDEX => $index );
 		}
 
 		if (isset($match[3])) {
