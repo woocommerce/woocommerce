@@ -220,6 +220,22 @@ class WC_Query {
 	}
 
 	/**
+	 * Are we currently on the front page?
+	 * @return boolean
+	 */
+	private function is_showing_page_on_front( $q ) {
+		return $q->is_home() && 'page' === get_option( 'show_on_front' );
+	}
+
+	/**
+	 * Is the front page a page we define?
+	 * @return boolean
+	 */
+	private function page_on_front_is( $page_id ) {
+		return absint( get_option( 'page_on_front' ) ) === absint( $page_id );
+	}
+
+	/**
 	 * Hook into pre_get_posts to do the main product query.
 	 *
 	 * @param mixed $q query object
@@ -230,21 +246,8 @@ class WC_Query {
 			return;
 		}
 
-		// Fix for verbose page rules
-		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object->ID ) && $q->queried_object->ID === wc_get_page_id( 'shop' ) ) {
-			$q->set( 'post_type', 'product' );
-			$q->set( 'page', '' );
-			$q->set( 'pagename', '' );
-
-			// Fix conditional Functions
-			$q->is_archive           = true;
-			$q->is_post_type_archive = true;
-			$q->is_singular          = false;
-			$q->is_page              = false;
-		}
-
 		// Fix for endpoints on the homepage
-		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) !== absint( $q->get( 'page_id' ) ) ) {
+		if ( $this->is_showing_page_on_front( $q ) && ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
 				$q->is_page     = true;
@@ -256,7 +259,7 @@ class WC_Query {
 		}
 
 		// When orderby is set, WordPress shows posts. Get around that here.
-		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( $this->is_showing_page_on_front( $q ) && $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
 				$q->is_page = true;
@@ -272,8 +275,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
-
+		if ( $this->is_showing_page_on_front( $q ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
