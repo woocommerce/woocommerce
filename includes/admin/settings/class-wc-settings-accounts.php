@@ -156,7 +156,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Payment Methods', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the My Account &rarr; %s page', 'woocommerce' ), __( 'Payment Methods', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the My Account &rarr; %s page', 'woocommerce' ), __( 'Payment Methods', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_payment_methods_endpoint',
 				'type'     => 'text',
 				'default'  => 'payment-methods',
