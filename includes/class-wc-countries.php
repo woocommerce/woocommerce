@@ -415,7 +415,7 @@ class WC_Countries {
 				'CA' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 				'CH' => $postcode_before_city,
 				'CL' => "{company}\n{name}\n{address_1}\n{address_2}\n{state}\n{postcode} {city}\n{country}",
-				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
+				'CN' => "{country} {postcode}\n{state}, {city}, {address_1}, {address_2}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
 				'EE' => $postcode_before_city,
