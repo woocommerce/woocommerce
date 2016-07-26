@@ -58,14 +58,14 @@ jQuery( function( $ ) {
 		init_payment_methods: function( selectedPaymentMethod ) {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
+			// If there is one method, we can hide the radio input
+			if ( 1 === $payment_methods.length ) {
+				$payment_methods.eq(0).hide();
+			}
+
 			if ( selectedPaymentMethod ) {
 				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
 			} else {
-				// If there is one method, we can hide the radio input
-				if ( 1 === $payment_methods.length ) {
-					$payment_methods.eq(0).hide();
-				}
-
 				// If there are none selected, select the first.
 				if ( 0 === $payment_methods.filter( ':checked' ).length ) {
 					$payment_methods.eq(0).prop( 'checked', true );
