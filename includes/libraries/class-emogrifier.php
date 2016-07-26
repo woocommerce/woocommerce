@@ -151,6 +151,8 @@ class Emogrifier
 	 */
 	private $shouldKeepInvisibleNodes = true;
 
+	public static $_media = '';
+
 	/**
 	 * The constructor.
 	 *
@@ -211,6 +213,7 @@ class Emogrifier
 			throw new BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
 		}
 
+		self::$_media = ''; // reset
 		$xmlDocument = $this->createXmlDocument();
 		$this->process($xmlDocument);
 
