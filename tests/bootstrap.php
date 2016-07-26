@@ -113,11 +113,6 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php' );
-
-		/**
-		 * WP-API.
-		 */
-		require_once( $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php' );
 	}
 
 	/**
