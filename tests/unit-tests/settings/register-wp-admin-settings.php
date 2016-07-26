@@ -1,12 +1,14 @@
 <?php
 
 /**
- * Settings API Tests
+ * Settings API: WP-Admin Helper Tests
+ * Tests the helper class that makes settings (currently present in wp-admin)
+ * avaiable to the REST API.
  *
  * @package WooCommerce\Tests\Settings
  * @since 2.7.0
  */
-class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
+class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @var WC_Settings_Page $page
@@ -36,21 +38,21 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_Legacy_Settings::__construct
+	 * @covers WC_Register_WP_Admin_Settings::__construct
 	 */
 	public function test_constructor() {
-		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page );
 
-		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $legacy_settings, 'register_legacy_group' ) ), 10 );
-		$this->assertEquals( has_filter( 'woocommerce_settings-' . $this->page->get_id(), array( $legacy_settings, 'register_legacy_settings' ) ), 10 );
+		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $settings, 'register_group' ) ), 10 );
+		$this->assertEquals( has_filter( 'woocommerce_settings-' . $this->page->get_id(), array( $settings, 'register_settings' ) ), 10 );
 	}
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_Legacy_Settings::register_legacy_group
+	 * @covers WC_Register_WP_Admin_Settings::register_group
 	 */
-	public function test_register_legacy_group() {
-		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+	public function test_register_group() {
+		$settings = new WC_Register_WP_Admin_Settings( $this->page );
 
 		$existing = array(
 			'id'    => 'existing-id',
@@ -64,7 +66,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 				'label' => $this->page->get_label(),
 			),
 		);
-		$actual = $legacy_settings->register_legacy_group( $initial );
+		$actual = $settings->register_group( $initial );
 
 		$this->assertEquals( $expected, $actual );
 	}
@@ -72,7 +74,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	/**
 	 * @since 2.7.0
 	 */
-	public function new_setting_from_legacy_provider() {
+	public function register_setting_provider() {
 		return array(
 			// No "id" case
 			array(
@@ -152,22 +154,22 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @dataProvider new_setting_from_legacy_provider
-	 * @covers WC_Register_Legacy_Settings::new_setting_from_legacy
+	 * @dataProvider register_setting_provider
+	 * @covers WC_Register_WP_Admin_Settings::register_setting
 	 */
-	public function test_new_setting_from_legacy( $input, $expected ) {
-		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+	public function test_register_setting( $input, $expected ) {
+		$settings = new WC_Register_WP_Admin_Settings( $this->page );
 
-		$actual = $legacy_settings->new_setting_from_legacy( $input );
+		$actual = $settings->register_setting( $input );
 
 		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_settings
 	 */
-	public function test_register_legacy_settings_one_section() {
+	public function test_register_settings_one_section() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )
@@ -179,19 +181,19 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 			->with( $this->equalTo( 0 ) )
 			->will( $this->returnValue( array() ) );
 
-		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page );
 
 		$expected = array();
-		$actual   = $legacy_settings->register_legacy_settings( array() );
+		$actual   = $settings->register_settings( array() );
 
 		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_settings
 	 */
-	public function test_register_legacy_settings() {
+	public function test_register_settings() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )
@@ -216,7 +218,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 			->method( 'get_settings' )
 			->will( $this->returnValue( $settings ) );
 
-		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page );
 
 		$expected = array(
 			array(
@@ -232,7 +234,7 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 				'description' => '',
 			),
 		);
-		$actual   = $legacy_settings->register_legacy_settings( array() );
+		$actual = $settings->register_settings( array() );
 
 		$this->assertEquals( $expected, $actual );
 	}
