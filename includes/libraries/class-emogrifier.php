@@ -111,7 +111,7 @@ class Emogrifier
 	/**
 	 * the visited nodes with the XPath paths as array keys
 	 *
-	 * @var \DOMElement[]
+	 * @var DoMElement[]
 	 */
 	private $visitedNodes = array();
 
@@ -236,7 +236,7 @@ class Emogrifier
 		$xmlDocument = $this->createXmlDocument();
 		$this->process($xmlDocument);
 
-		$innerDocument = new \DOMDocument();
+		$innerDocument = new DoMDocument();
 		foreach ($xmlDocument->documentElement->getElementsByTagName('body')->item(0)->childNodes as $childNode) {
 			$innerDocument->appendChild($innerDocument->importNode($childNode, true));
 		}
@@ -249,13 +249,13 @@ class Emogrifier
 	 *
 	 * This method places the CSS inline.
 	 *
-	 * @param \DOMDocument $xmlDocument
+	 * @param DoMDocument $xmlDocument
 	 *
 	 * @return void
 	 */
-	protected function process(\DOMDocument $xmlDocument)
+	protected function process(DoMDocument $xmlDocument)
 	{
-		$xpath = new \DOMXPath($xmlDocument);
+		$xpath = new DoMXPath($xmlDocument);
 		$this->clearAllCaches();
 
 		// Before be begin processing the CSS file, parse the document and normalize all existing CSS attributes.
@@ -266,7 +266,7 @@ class Emogrifier
 
 		$nodesWithStyleAttributes = $xpath->query('//*[@style]');
 		if ($nodesWithStyleAttributes !== false) {
-			/** @var \DOMElement $node */
+			/** @var DoMElement $node */
 			foreach ($nodesWithStyleAttributes as $node) {
 				if ($this->isInlineStyleAttributesParsingEnabled) {
 					$this->normalizeStyleAttributes($node);
@@ -295,7 +295,7 @@ class Emogrifier
 				continue;
 			}
 
-			/** @var \DOMElement $node */
+			/** @var DoMElement $node */
 			foreach ($nodesMatchingCssSelectors as $node) {
 				if (in_array($node, $excludedNodes, true)) {
 					continue;
@@ -442,7 +442,7 @@ class Emogrifier
 			self::CACHE_KEY_COMBINED_STYLES,
 		);
 		if (!in_array($key, $allowedCacheKeys, true)) {
-			throw new \InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
+			throw new InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
 		}
 
 		$this->caches[$key] = array();
@@ -552,11 +552,11 @@ class Emogrifier
 	 * not attribute values. Consequently, we need to translate() the letters that would be in 'NONE' ("NOE")
 	 * to lowercase.
 	 *
-	 * @param \DOMXPath $xpath
+	 * @param DoMXPath $xpath
 	 *
 	 * @return void
 	 */
-	private function removeInvisibleNodes(\DOMXPath $xpath)
+	private function removeInvisibleNodes(DoMXPath $xpath)
 	{
 		$nodesWithStyleDisplayNone = $xpath->query(
 			'//*[contains(translate(translate(@style," ",""),"NOE","noe"),"display:none")]'
@@ -567,7 +567,7 @@ class Emogrifier
 
 		// The checks on parentNode and is_callable below ensure that if we've deleted the parent node,
 		// we don't try to call removeChild on a nonexistent child node
-		/** @var \DOMNode $node */
+		/** @var DoMNode $node */
 		foreach ($nodesWithStyleDisplayNone as $node) {
 			if ($node->parentNode && is_callable( array( $node->parentNode, 'removeChild' ) ) ) {
 				$node->parentNode->removeChild($node);
@@ -582,11 +582,11 @@ class Emogrifier
 	/**
 	 * Normalizes the value of the "style" attribute and saves it.
 	 *
-	 * @param \DOMElement $node
+	 * @param DoMElement $node
 	 *
 	 * @return void
 	 */
-	private function normalizeStyleAttributes(\DOMElement $node)
+	private function normalizeStyleAttributes(DoMElement $node)
 	{
 		$normalizedOriginalStyle = preg_replace_callback(
 			'/[A-z\\-]+(?=\\:)/S',
@@ -664,13 +664,13 @@ class Emogrifier
 	/**
 	 * Applies $css to $xmlDocument, limited to the media queries that actually apply to the document.
 	 *
-	 * @param \DOMDocument $xmlDocument the document to match against
-	 * @param \DOMXPath $xpath
+	 * @param DoMDocument $xmlDocument the document to match against
+	 * @param DoMXPath $xpath
 	 * @param string $css a string of CSS
 	 *
 	 * @return void
 	 */
-	private function copyCssWithMediaToStyleNode(\DOMDocument $xmlDocument, \DOMXPath $xpath, $css)
+	private function copyCssWithMediaToStyleNode(DoMDocument $xmlDocument, DoMXPath $xpath, $css)
 	{
 		if ($css === '') {
 			return;
@@ -713,12 +713,12 @@ class Emogrifier
 	/**
 	 * Checks whether there is at least one matching element for $cssSelector.
 	 *
-	 * @param \DOMXPath $xpath
+	 * @param DoMXPath $xpath
 	 * @param string $cssSelector
 	 *
 	 * @return bool
 	 */
-	private function existsMatchForCssSelector(\DOMXPath $xpath, $cssSelector)
+	private function existsMatchForCssSelector(DoMXPath $xpath, $cssSelector)
 	{
 		$nodesMatchingSelector = $xpath->query($this->translateCssToXpath($cssSelector));
 
@@ -728,11 +728,11 @@ class Emogrifier
 	/**
 	 * Returns CSS content.
 	 *
-	 * @param \DOMXPath $xpath
+	 * @param DoMXPath $xpath
 	 *
 	 * @return string
 	 */
-	private function getCssFromAllStyleNodes(\DOMXPath $xpath)
+	private function getCssFromAllStyleNodes(DoMXPath $xpath)
 	{
 		$styleNodes = $xpath->query('//style');
 
@@ -741,7 +741,7 @@ class Emogrifier
 		}
 
 		$css = '';
-		/** @var \DOMNode $styleNode */
+		/** @var DoMNode $styleNode */
 		foreach ($styleNodes as $styleNode) {
 			$css .= "\n\n" . $styleNode->nodeValue;
 			$styleNode->parentNode->removeChild($styleNode);
@@ -757,12 +757,12 @@ class Emogrifier
 	 *
 	 * @see https://github.com/jjriv/emogrifier/issues/103
 	 *
-	 * @param \DOMDocument $document
+	 * @param DoMDocument $document
 	 * @param string $css
 	 *
 	 * @return void
 	 */
-	protected function addStyleElementToDocument(\DOMDocument $document, $css)
+	protected function addStyleElementToDocument(DoMDocument $document, $css)
 	{
 		$styleElement = $document->createElement('style', $css);
 		$styleAttribute = $document->createAttribute('type');
@@ -776,11 +776,11 @@ class Emogrifier
 	/**
 	 * Returns the existing or creates a new head element in $document.
 	 *
-	 * @param \DOMDocument $document
+	 * @param DoMDocument $document
 	 *
-	 * @return \DOMNode the head element
+	 * @return DoMNode the head element
 	 */
-	private function getOrCreateHeadElement(\DOMDocument $document)
+	private function getOrCreateHeadElement(DoMDocument $document)
 	{
 		$head = $document->getElementsByTagName('head')->item(0);
 
@@ -793,15 +793,19 @@ class Emogrifier
 		return $head;
 	}
 
+	private function splitCssAndMediaQuery_callback() {
+
+	}
+
 	/**
 	 * Splits input CSS code to an array where:
 	 *
-	 * - key "css" will be contains clean CSS code
-	 * - key "media" will be contains all valuable media queries
+	 * - key "css" will be contains clean CSS code.
+	 * - key "media" will be contains all valuable media queries.
 	 *
 	 * Example:
 	 *
-	 * The CSS code
+	 * The CSS code.
 	 *
 	 *   "@import "file.css"; h1 { color:red; } @media { h1 {}} @media tv { h1 {}}"
 	 *
@@ -811,46 +815,41 @@ class Emogrifier
 	 *   "media" => "@media { h1 {}}"
 	 *
 	 * @param string $css
-	 *
-	 * @return string[]
+	 * @return array
 	 */
-	private function splitCssAndMediaQuery($css)
-	{
-		$cssWithoutComments = preg_replace('/\\/\\*.*\\*\\//sU', '', $css);
-
-		$mediaTypesExpression = '';
-		if (!empty($this->allowedMediaTypes)) {
-			$mediaTypesExpression = '|' . implode('|', array_keys($this->allowedMediaTypes));
-		}
-
-		$media = '';
-		$cssForAllowedMediaTypes = preg_replace_callback(
-			'#@media\\s+(?:only\\s)?(?:[\\s{\\(]' . $mediaTypesExpression . ')\\s?[^{]+{.*}\\s*}\\s*#misU',
-			function ($matches) use (&$media) {
-				$media .= $matches[0];
-			},
-			$cssWithoutComments
-		);
-
+	private function splitCssAndMediaQuery($css) {
+		$css = preg_replace_callback( '#@media\\s+(?:only\\s)?(?:[\\s{\(]|screen|all)\\s?[^{]+{.*}\\s*}\\s*#misU', array( $this, '_media_concat' ), $css );
 		// filter the CSS
 		$search = array(
-			'import directives' => '/^\\s*@import\\s[^;]+;/misU',
-			'remaining media enclosures' => '/^\\s*@media\\s[^{]+{(.*)}\\s*}\\s/misU',
+			// get rid of css comment code
+			'/\\/\\*.*\\*\\//sU',
+			// strip out any import directives
+			'/^\\s*@import\\s[^;]+;/misU',
+			// strip remains media enclosures
+			'/^\\s*@media\\s[^{]+{(.*)}\\s*}\\s/misU',
 		);
+		$replace = array(
+			'',
+			'',
+			'',
+		);
+		// clean CSS before output
+		$css = preg_replace($search, $replace, $css);
+		return array('css' => $css, 'media' => self::$_media);
+	}
 
-		$cleanedCss = preg_replace($search, '', $cssForAllowedMediaTypes);
-
-		return array( 'css' => $cleanedCss, 'media' => $media );
+	private function _media_concat( $matches ) {
+		self::$_media .= $matches[0];
 	}
 
 	/**
 	 * Creates a DOMDocument instance with the current HTML.
 	 *
-	 * @return \DOMDocument
+	 * @return DoMDocument
 	 */
 	private function createXmlDocument()
 	{
-		$xmlDocument = new \DOMDocument;
+		$xmlDocument = new DoMDocument;
 		$xmlDocument->encoding = 'UTF-8';
 		$xmlDocument->strictErrorChecking = false;
 		$xmlDocument->formatOutput = true;
@@ -1000,6 +999,10 @@ class Emogrifier
 		return $this->caches[self::CACHE_KEY_SELECTOR][$selectorKey];
 	}
 
+	private function translateCssToXpath_callback( $matches ) {
+		return strtolower($matches[0]);
+	}
+
 	/**
 	 * Maps a CSS selector to an XPath query string.
 	 *
@@ -1014,9 +1017,7 @@ class Emogrifier
 		$paddedSelector = ' ' . $cssSelector . ' ';
 		$lowercasePaddedSelector = preg_replace_callback(
 			'/\\s+\\w+\\s+/',
-			function (array $matches) {
-				return strtolower($matches[0]);
-			},
+			array( $this, 'translateCssToXpath_callback' ),
 			$paddedSelector
 		);
 		$trimmedLowercaseSelector = trim($lowercasePaddedSelector);
@@ -1253,11 +1254,11 @@ class Emogrifier
 	/**
 	 * Find the nodes that are not to be emogrified.
 	 *
-	 * @param \DOMXPath $xpath
+	 * @param DoMXPath $xpath
 	 *
-	 * @return \DOMElement[]
+	 * @return DoMElement[]
 	 */
-	private function getNodesToExclude(\DOMXPath $xpath)
+	private function getNodesToExclude(DoMXPath $xpath)
 	{
 		$excludedNodes = array();
 		foreach (array_keys($this->excludedSelectors) as $selectorToExclude) {
