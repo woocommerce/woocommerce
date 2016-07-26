@@ -569,7 +569,7 @@ class Emogrifier
 		// we don't try to call removeChild on a nonexistent child node
 		/** @var \DOMNode $node */
 		foreach ($nodesWithStyleDisplayNone as $node) {
-			if ($node->parentNode && is_callable([$node->parentNode, 'removeChild'])) {
+			if ($node->parentNode && is_callable( array( $node->parentNode, 'removeChild' ) ) ) {
 				$node->parentNode->removeChild($node);
 			}
 		}
@@ -838,7 +838,7 @@ class Emogrifier
 
 		$cleanedCss = preg_replace($search, '', $cssForAllowedMediaTypes);
 
-		return ['css' => $cleanedCss, 'media' => $media];
+		return array( 'css' => $cleanedCss, 'media' => $media );
 	}
 
 	/**
@@ -1045,12 +1045,12 @@ class Emogrifier
 
 			$xpathWithIdAttributeMatchers = preg_replace_callback(
 				self::ID_ATTRIBUTE_MATCHER,
-				[$this, 'matchIdAttributes'],
+				array( $this, 'matchIdAttributes' ),
 				$roughXpath
 			);
 			$xpathWithIdAttributeAndClassMatchers = preg_replace_callback(
 				self::CLASS_ATTRIBUTE_MATCHER,
-				[$this, 'matchClassAttributes'],
+				array( $this, 'matchClassAttributes' ),
 				$xpathWithIdAttributeMatchers
 			);
 
@@ -1058,12 +1058,12 @@ class Emogrifier
 			// When we required PHP 5.3, we could do this with closures.
 			$xpathWithIdAttributeAndClassMatchers = preg_replace_callback(
 				'/([^\\/]+):nth-child\\(\\s*(odd|even|[+\\-]?\\d|[+\\-]?\\d?n(\\s*[+\\-]\\s*\\d)?)\\s*\\)/i',
-				[$this, 'translateNthChild'],
+				array( $this, 'translateNthChild' ),
 				$xpathWithIdAttributeAndClassMatchers
 			);
 			$finalXpath = preg_replace_callback(
 				'/([^\\/]+):nth-of-type\\(\s*(odd|even|[+\\-]?\\d|[+\\-]?\\d?n(\\s*[+\\-]\\s*\\d)?)\\s*\\)/i',
-				[$this, 'translateNthOfType'],
+				array( $this, 'translateNthOfType' ),
 				$xpathWithIdAttributeAndClassMatchers
 			);
 
@@ -1193,7 +1193,7 @@ class Emogrifier
 		if ($multiplier === '') {
 			$multiplier = 1;
 		} elseif ($multiplier === '0') {
-			return [self::INDEX => $index];
+			return array( self::INDEX => $index );
 		} else {
 			$multiplier = (int) $multiplier;
 		}
@@ -1202,7 +1202,7 @@ class Emogrifier
 			$index += abs($multiplier);
 		}
 
-		return [self::MULTIPLIER => $multiplier, self::INDEX => $index];
+		return array( self::MULTIPLIER => $multiplier, self::INDEX => $index );
 	}
 
 	/**
