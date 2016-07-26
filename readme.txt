@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.7.0 =
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
 * Added Nigerian Provinces to i18n/state.
+* Improved handling of shop page rewrite rules to allow subpages.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
