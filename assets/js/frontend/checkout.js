@@ -276,7 +276,7 @@ jQuery( function( $ ) {
 				data:		data,
 				success:	function( data ) {
 
-					var selectedPaymentMethod = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' ).filter( ':checked' ).attr( 'id' );
+					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
 
 					// Reload the page if requested
 					if ( 'true' === data.reload ) {
