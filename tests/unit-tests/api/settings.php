@@ -1,12 +1,12 @@
 <?php
-
 /**
  * Settings API Tests.
  *
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
-class Settings extends WC_Unit_Test_Case {
+
+class Settings extends WC_REST_Unit_Test_Case {
 
 	protected $server;
 
@@ -15,23 +15,11 @@ class Settings extends WC_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_Test_Spy_REST_Server;
-		do_action( 'rest_api_init' );
 		$this->endpoint = new WC_Rest_Settings_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
 		) );
-	}
-
-	/**
-	 * Unset the server.
-	 */
-	public function tearDown() {
-		parent::tearDown();
-		global $wp_rest_server;
-		$wp_rest_server = null;
 	}
 
 	/**
