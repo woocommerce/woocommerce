@@ -54,7 +54,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
-		
+
 		$locations = $zone->get_zone_locations();
 		$data      = array();
 
