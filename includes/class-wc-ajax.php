@@ -3243,7 +3243,10 @@ class WC_AJAX {
 			$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
 
 			if ( isset( $data['deleted'] ) ) {
+				$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+				$option_key      = $shipping_method->get_instance_option_key();
 				if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
+					delete_option( $option_key );
 					do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
 				}
 				continue;
