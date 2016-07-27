@@ -169,7 +169,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
-		include_once( dirname( __FILE__ ) . 'api/class-wc-rest-system-status-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 	}
 
 	/**
