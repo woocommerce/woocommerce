@@ -357,11 +357,9 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function disable_checked_ontop( $args ) {
-
-		if ( 'product_cat' == $args['taxonomy'] ) {
+		if ( ! empty( $args['taxonomy'] ) && 'product_cat' === $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;
 		}
-
 		return $args;
 	}
 }

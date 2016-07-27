@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'libraries/wp-async-request.php' );
-include_once( 'libraries/wp-background-process.php' );
+include_once( dirname( __FILE__ ) . '/libraries/wp-async-request.php' );
+include_once( dirname( __FILE__ ) . '/libraries/wp-background-process.php' );
 
 /**
  * WC_Background_Updater Class.
@@ -99,7 +99,7 @@ class WC_Background_Updater extends WP_Background_Process {
 
 		$logger = new WC_Logger();
 
-		include_once( 'wc-update-functions.php' );
+		include_once( dirname( __FILE__ ) . '/wc-update-functions.php' );
 
 		if ( is_callable( $callback ) ) {
 			$logger->add( 'wc_db_updates', sprintf( 'Running %s callback', $callback ) );

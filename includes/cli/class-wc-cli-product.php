@@ -1448,13 +1448,13 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Product categories
 		if ( isset( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', (array) $data['categories'] ) );
+			$term_ids = array_unique( array_map( 'intval', explode( ',', $data['categories'] ) ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
 		// Product tags
 		if ( isset( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', (array) $data['tags'] ) );
+			$term_ids = array_unique( array_map( 'intval', explode( ',', $data['tags'] ) ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
@@ -1993,6 +1993,22 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
+	 * Returns image mime types users are allowed to upload via the API.
+	 * @since  2.6.4
+	 * @return array
+	 */
+	private function allowed_image_mime_types() {
+		return apply_filters( 'woocommerce_cli_allowed_image_mime_types', array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'gif'          => 'image/gif',
+			'png'          => 'image/png',
+			'bmp'          => 'image/bmp',
+			'tiff|tif'     => 'image/tiff',
+			'ico'          => 'image/x-icon',
+		) );
+	}
+
+	/**
 	 * Upload image from URL
 	 *
 	 * @since  2.5.0
@@ -2002,7 +2018,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 */
 	private function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
-		$wp_filetype 	= wp_check_filetype( $file_name, null );
 		$parsed_url 	= @parse_url( $image_url );
 
 		// Check parsed URL
@@ -2025,6 +2040,8 @@ class WC_CLI_Product extends WC_CLI_Command {
 		}
 
 		// Ensure we have a file name and type
+		$wp_filetype = wp_check_filetype( $file_name, $this->allowed_image_mime_types() );
+
 		if ( ! $wp_filetype['type'] ) {
 			$headers = wp_remote_retrieve_headers( $response );
 			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
@@ -2035,6 +2052,13 @@ class WC_CLI_Product extends WC_CLI_Command {
 				$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
 			}
 			unset( $headers );
+
+			// Recheck filetype
+			$wp_filetype = wp_check_filetype( $file_name, $this->allowed_image_mime_types() );
+
+			if ( ! $wp_filetype['type'] ) {
+				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_image_type', __( 'Invalid image type.', 'woocommerce' ) );
+			}
 		}
 
 		// Upload the file.

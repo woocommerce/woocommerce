@@ -585,7 +585,7 @@ ul.wc_coupon_list_block {
 
 			.hour,
 			.minute {
-				width: 2.5em;
+				width: 3em;
 			}
 
 			small {
@@ -2424,19 +2424,17 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			padding-right: 32px;
 			li {
 				display: inline;
-				margin: 0 0 0 0;
+				margin: 0;
 			}
 			li:before {
 				content: ", ";
 			}
-			li:last-child:before, li:first-child:before {
+			li:first-child:before,
+			li:nth-child(2):before {
 				content: "";
 			}
-			li:last-child {
-				display: block;
-			}
 			li:first-child {
-				margin: 0 !important;
+				display: block;
 			}
 			li.wc-shipping-zone-methods-add-row {
 				position: absolute;
@@ -2537,7 +2535,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 					}
 					input[type="checkbox"] {
 						width: auto;
-						min-width: 0;
+						min-width: 16px;
 					}
 				}
 				td, th {

@@ -46,8 +46,8 @@ class WC_Admin_Dashboard {
 	public function status_widget() {
 		global $wpdb;
 
-		include_once( 'reports/class-wc-admin-report.php' );
-		include_once( 'reports/class-wc-report-sales-by-date.php' );
+		include_once( dirname( __FILE__ ) . '/reports/class-wc-admin-report.php' );
+		include_once( dirname( __FILE__ ) . '/reports/class-wc-report-sales-by-date.php' );
 
 		$reports                       = new WC_Admin_Report();
 		$sales_by_date                 = new WC_Report_Sales_By_Date();

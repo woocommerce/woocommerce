@@ -172,15 +172,15 @@ global $wpdb;
 				<td class="help"><?php echo wc_help_tip( __( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); ?></td>
 				<td><?php echo extension_loaded( 'suhosin' ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
-		<?php endif; ?>
-		<?php
+		<?php endif;
+
 		if ( $wpdb->use_mysqli ) {
 			$ver = mysqli_get_server_info( $wpdb->dbh );
 		} else {
 			$ver = mysql_get_server_info();
 		}
 
-		if ( ! empty( $wpdb->is_mysql ) && stristr( $ver, 'MySQL' ) ) : ?>
+		if ( ! empty( $wpdb->is_mysql ) && ! stristr( $ver, 'MariaDB' ) ) : ?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
@@ -347,6 +347,18 @@ global $wpdb;
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
+			<td data-export-label="WC Database Prefix"><?php _e( 'Database Prefix', 'woocommerce' ); ?></td>
+			<td class="help">&nbsp;</td>
+			<td><?php
+				if ( strlen( $wpdb->prefix ) > 20 ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend using a prefix with less than 20 characters. See: %s', 'woocommerce' ), esc_html( $wpdb->prefix ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . esc_html( $wpdb->prefix ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
 			<?php
 			$tables = array(
 				'woocommerce_sessions',
@@ -387,7 +399,7 @@ global $wpdb;
 						if ( file_exists( WC_Geolocation::get_local_database_path() ) ) {
 							echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( WC_Geolocation::get_local_database_path() ) . '</code></mark> ';
 						} else {
-							printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . WC_Geolocation::get_local_database_path() . '</code>' ) . '</mark>', WC_LOG_DIR );
+							printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to \"Downloads\" and download the \"Binary / gzip\" file next to \"GeoLite Country\"', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . WC_Geolocation::get_local_database_path() . '</code>' ) . '</mark>', WC_LOG_DIR );
 						}
 					?></td>
 				</tr>

@@ -93,7 +93,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Meta-Box Class
-		include_once( 'class-wc-admin-meta-boxes.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( $this, 'process_product_file_download_paths' ), 10, 3 );
@@ -650,7 +650,7 @@ class WC_Admin_Post_Types {
 						$item_meta      = new WC_Order_Item_Meta( $item, $product );
 						$item_meta_html = $item_meta->display( true, true );
 						?>
-						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
+						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
 								<?php  if ( $product ) : ?>

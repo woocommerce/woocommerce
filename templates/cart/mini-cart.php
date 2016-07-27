@@ -30,6 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( ! WC()->cart->is_empty() ) : ?>
 
+		<?php do_action( 'woocommerce_before_mini_cart_contents' ); ?>
+		
 		<?php
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 				$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
@@ -67,6 +69,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 
+		<?php do_action( 'woocommerce_mini_cart_contents' ); ?>
+		
 	<?php else : ?>
 
 		<li class="empty"><?php _e( 'No products in the cart.', 'woocommerce' ); ?></li>

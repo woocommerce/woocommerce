@@ -353,7 +353,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$customer = get_userdata( $id );
 
 		if ( empty( $id ) || empty( $customer->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$customer = $this->prepare_item_for_response( $customer, $request );
@@ -373,7 +373,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$customer = get_userdata( $id );
 
 		if ( ! $customer ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $request['email'] ) && email_exists( $request['email'] ) && $request['email'] !== $customer->user_email ) {
@@ -837,13 +837,13 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'description'        => __( 'Limit result set to specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',

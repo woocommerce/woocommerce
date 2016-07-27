@@ -74,7 +74,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 */
 	protected function init_simplify_sdk() {
 		// Include lib
-		require_once( 'includes/Simplify.php' );
+		require_once( dirname( __FILE__ ) . '/includes/Simplify.php' );
 
 		Simplify::$publicKey  = $this->public_key;
 		Simplify::$privateKey = $this->private_key;

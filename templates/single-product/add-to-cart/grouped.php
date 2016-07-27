@@ -61,7 +61,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 						<td class="label">
 							<label for="product-<?php echo $product_id; ?>">
-								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $product_id ) ) . '">' . esc_html( get_the_title() ) . '</a>' : esc_html( get_the_title() ); ?>
+								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $product_id ) ) . '">' . get_the_title() . '</a>' : get_the_title(); ?>
 							</label>
 						</td>
 
