@@ -19,6 +19,9 @@ class WC_Gateway_Paypal_API_Handler {
 	/** @var string API Signature */
 	public static $api_signature;
 
+	/** @var string API Signature */
+	public static $sandbox = false;
+
 	/**
 	 * Get capture request args.
 	 * See https://developer.paypal.com/docs/classic/api/merchant/DoCapture_API_Operation_NVP/.
@@ -35,7 +38,7 @@ class WC_Gateway_Paypal_API_Handler {
 			'PWD'             => self::$api_password,
 			'METHOD'          => 'DoCapture',
 			'AUTHORIZATIONID' => $order->get_transaction_id(),
-			'AMT'             => number_format( $amount, 2, '.', '' ),
+			'AMT'             => number_format( is_null( $amount ) ? $order->get_total() : $amount, 2, '.', '' ),
 			'CURRENCYCODE'    => $order->get_order_currency(),
 			'COMPLETETYPE'    => 'Complete',
 		);
@@ -43,86 +46,13 @@ class WC_Gateway_Paypal_API_Handler {
 	}
 
 	/**
-	 * Capture an authorization.
-	 * @param  WC_Order $order
-	 * @param  float $amount
-	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
-	 */
-	public static function do_capture( $order, $amount ) {
-		$response = wp_safe_remote_post(
-			$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
-			array(
-				'method'      => 'POST',
-				'body'        => self::get_capture_request( $order, $amount ),
-				'timeout'     => 70,
-				'user-agent'  => 'WooCommerce',
-				'httpversion' => '1.1'
-			)
-		);
-
-		WC_Gateway_Paypal::log( 'DoCapture Response: ' . print_r( $response, true ) );
-
-		if ( empty( $response['body'] ) ) {
-			return new WP_Error( 'paypal-api', 'Empty Response' );
-		} elseif ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		parse_str( $response['body'], $response_array );
-
-		return (object) $response_array;
-	}
-
-
-	/**
-	 * Refund an order via PayPal.
-	 * @param  WC_Order $order
-	 * @param  float    $amount
-	 * @param  string   $reason
-	 * @param  bool     $sandbox
-	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
-	 */
-	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
-		$response = wp_safe_remote_post(
-			$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
-			array(
-				'method'      => 'POST',
-				'body'        => self::get_request( $order, $amount, $reason ),
-				'timeout'     => 70,
-				'user-agent'  => 'WooCommerce',
-				'httpversion' => '1.1'
-			)
-		);
-
-		WC_Gateway_Paypal::log( 'Refund Response: ' . print_r( $response, true ) );
-
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		if ( empty( $response['body'] ) ) {
-			return new WP_Error( 'paypal-refunds', 'Empty Response' );
-		}
-
-		parse_str( $response['body'], $response_array );
-
-		return $response_array;
-	}
-}
-
-/**
- * Here for backwards compatibility.
- * @since 2.7.0
- */
-class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
-	/**
 	 * Get refund request args.
 	 * @param  WC_Order $order
 	 * @param  float    $amount
 	 * @param  string   $reason
 	 * @return array
 	 */
-	public static function get_request( $order, $amount = null, $reason = '' ) {
+	public static function get_refund_request( $order, $amount = null, $reason = '' ) {
 		$request = array(
 			'VERSION'       => '84.0',
 			'SIGNATURE'     => self::$api_signature,
@@ -142,16 +72,86 @@ class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
 	}
 
 	/**
-	 * Handle response from PayPal API.
+	 * Capture an authorization.
+	 * @param  WC_Order $order
+	 * @param  float $amount
+	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
 	 */
-	public static function handle_response( $response, $order ) {
+	public static function do_capture( $order, $amount = null ) {
+		$raw_response = wp_safe_remote_post(
+			self::$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
+			array(
+				'method'      => 'POST',
+				'body'        => self::get_capture_request( $order, $amount ),
+				'timeout'     => 70,
+				'user-agent'  => 'WooCommerce',
+				'httpversion' => '1.1'
+			)
+		);
 
-		switch ( strtolower( $response['ACK'] ) ) {
-			case 'success':
-			case 'successwithwarning':
-				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $response['GROSSREFUNDAMT'], $response['REFUNDTRANSACTIONID'] ) );
-				return true;
-			break;
+		WC_Gateway_Paypal::log( 'DoCapture Response: ' . print_r( $raw_response, true ) );
+
+		if ( empty( $raw_response['body'] ) ) {
+			return new WP_Error( 'paypal-api', 'Empty Response' );
+		} elseif ( is_wp_error( $raw_response ) ) {
+			return $raw_response;
+		}
+
+		parse_str( $raw_response['body'], $response );
+
+		return (object) $response;
+	}
+
+	/**
+	 * Refund an order via PayPal.
+	 * @param  WC_Order $order
+	 * @param  float    $amount
+	 * @param  string   $reason
+	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
+	 */
+	public static function refund_transaction( $order, $amount = null, $reason = '' ) {
+		$raw_response = wp_safe_remote_post(
+			self::$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
+			array(
+				'method'      => 'POST',
+				'body'        => self::get_refund_request( $order, $amount, $reason ),
+				'timeout'     => 70,
+				'user-agent'  => 'WooCommerce',
+				'httpversion' => '1.1'
+			)
+		);
+
+		WC_Gateway_Paypal::log( 'Refund Response: ' . print_r( $raw_response, true ) );
+
+		if ( empty( $raw_response['body'] ) ) {
+			return new WP_Error( 'paypal-api', 'Empty Response' );
+		} elseif ( is_wp_error( $raw_response ) ) {
+			return $raw_response;
+		}
+
+		parse_str( $raw_response['body'], $response );
+
+		return (object) $response;
+	}
+}
+
+/**
+ * Here for backwards compatibility.
+ * @since 2.7.0
+ */
+class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
+	public static function get_request( $order, $amount = null, $reason = '' ) {
+		return self::get_refund_request( $order, $amount, $reason );
+	}
+	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
+		if ( $sandbox ) {
+			self::$sandbox = $sandbox;
+		}
+		$result = self::refund_transaction( $order, $amount, $reason );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} else {
+			return (array) $result;
 		}
 	}
 }

@@ -267,6 +267,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		WC_Gateway_Paypal_API_Handler::$api_username  = $this->get_option( 'api_username' );
 		WC_Gateway_Paypal_API_Handler::$api_password  = $this->get_option( 'api_password' );
 		WC_Gateway_Paypal_API_Handler::$api_signature = $this->get_option( 'api_signature' );
+		WC_Gateway_Paypal_API_Handler::$sandbox       = $this->testmode;
 	}
 
 	/**
@@ -286,7 +287,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$this->init_api();
 
-		$result = WC_Gateway_Paypal_API_Handler::refund_order( $order, $amount, $reason, $this->testmode );
+		$result = WC_Gateway_Paypal_API_Handler::refund_transaction( $order, $amount, $reason );
 
 		if ( is_wp_error( $result ) ) {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
@@ -295,15 +296,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$this->log( 'Refund Result: ' . print_r( $result, true ) );
 
-		switch ( strtolower( $result['ACK'] ) ) {
+		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
 			case 'successwithwarning':
-				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $result['GROSSREFUNDAMT'], $result['REFUNDTRANSACTIONID'] ) );
+				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
 				return true;
 			break;
 		}
 
-		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
+		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false;
 	}
 
 	/**
@@ -314,9 +315,30 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( 'paypal' === $order->payment_method ) {
+		if ( 'paypal' === $order->payment_method && 'pending' === get_post_meta( $order->id, '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
-			WC_Gateway_Paypal_API_Handler::do_capture( $order, $amount );
+			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
+
+			if ( is_wp_error( $result ) ) {
+				$this->log( 'Capture Failed: ' . $result->get_error_message() );
+				$order->add_order_note( sprintf( __( 'Payment could not captured: %s', 'woocommerce' ), $result->get_error_message() ) );
+				return;
+			}
+
+			$this->log( 'Capture Result: ' . print_r( $result, true ) );
+
+			if ( ! empty( $result->PAYMENTSTATUS ) ) {
+				switch ( $result->PAYMENTSTATUS ) {
+					case 'Completed' :
+						$order->add_order_note( sprintf( __( 'Payment of %s was captured - Auth ID: %s, Transaction ID: %s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
+						update_post_meta( $order->id, '_paypal_status', $result->PAYMENTSTATUS );
+						update_post_meta( $order->id, '_transaction_id', $result->TRANSACTIONID );
+					break;
+					default :
+						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %s, Status: %s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
+					break;
+				}
+			}
 		}
 	}
 }
