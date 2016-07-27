@@ -22,7 +22,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_register_routes() {
         $routes = $this->server->get_routes();
-        $this->assertArrayHasKey( '/wc/v1/system-status', $routes );
+        $this->assertArrayHasKey( '/wc/v1/system_status', $routes );
     }
 
     /**
@@ -32,7 +32,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_get_system_status_info_without_permission() {
         wp_set_current_user( 0 );
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $this->assertEquals( 401, $response->get_status() );
     }
 
@@ -44,7 +44,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_get_system_status_info_returns_root_properties() {
         wp_set_current_user( $this->user );
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data = $response->get_data();
 
         $this->assertArrayHasKey( 'environment', $data );
@@ -62,7 +62,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_get_system_status_info_environment() {
         wp_set_current_user( $this->user );
-        $response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data        = $response->get_data();
         $environment = $data['environment'];
 
@@ -83,7 +83,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
     public function test_get_system_status_info_database() {
         global $wpdb;
         wp_set_current_user( $this->user );
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data     = $response->get_data();
         $database = $data['database'];
 
@@ -103,7 +103,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
         $actual_plugins = array( 'hello.php' );
         update_option( 'active_plugins', $actual_plugins );
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         update_option( 'active_plugins', array() );
 
         $data    = $response->get_data();
@@ -122,7 +122,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         wp_set_current_user( $this->user );
     	$active_theme = wp_get_theme();
 
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data     = $response->get_data();
         $theme    = $data['theme'];
 
@@ -144,7 +144,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
             $term_response[ $term->slug ] = strtolower( $term->name );
         }
 
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data     = $response->get_data();
         $settings = $data['settings'];
 
@@ -161,7 +161,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_get_system_status_info_pages() {
         wp_set_current_user( $this->user );
-        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
         $data     = $response->get_data();
         $pages = $data['pages'];
         $this->assertEquals( 4, count( $pages ) );
@@ -173,7 +173,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      * @since 2.7.0
     */
     public function test_system_status_schema() {
-        $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system-status' );
+        $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status' );
         $response = $this->server->dispatch( $request );
         $data = $response->get_data();
         $properties = $data['schema']['properties'];

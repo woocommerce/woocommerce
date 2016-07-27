@@ -308,7 +308,7 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 	$objects = array(
 		'reports'       => 'view_woocommerce_reports',
 		'settings'      => 'manage_woocommerce',
-		'system-status' => 'manage_woocommerce',
+		'system_status' => 'manage_woocommerce',
 		'attributes'    => 'manage_product_terms',
 	);
 

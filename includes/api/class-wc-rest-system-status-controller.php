@@ -2,7 +2,7 @@
 /**
  * REST API WC System Status controller
  *
- * Handles requests to the /system-status endpoint.
+ * Handles requests to the /system_status endpoint.
  *
  * @author   WooThemes
  * @category API
@@ -32,7 +32,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'system-status';
+	protected $rest_base = 'system_status';
 
 	/**
 	 * Register the routes for coupons.
@@ -56,7 +56,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-        if ( ! wc_rest_check_manager_permissions( 'system-status', 'read' ) ) {
+        if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
         	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
@@ -94,7 +94,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'system-status',
+			'title'      => 'system_status',
 			'type'       => 'object',
 			'properties' => array(
 				'environment' => array(
