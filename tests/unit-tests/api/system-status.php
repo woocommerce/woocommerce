@@ -52,7 +52,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'active_plugins', $data );
         $this->assertArrayHasKey( 'theme', $data );
         $this->assertArrayHasKey( 'settings', $data );
-        $this->assertArrayHasKey( 'wc_pages', $data );
+        $this->assertArrayHasKey( 'pages', $data );
     }
 
     /**
@@ -72,7 +72,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         // Test some responses to make sure they match up
         $this->assertEquals( get_option( 'home' ), $environment['home_url'] );
         $this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
-        $this->assertEquals( WC()->version, $environment['wc_version'] );
+        $this->assertEquals( WC()->version, $environment['version'] );
     }
 
     /**
@@ -155,16 +155,16 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
     }
 
     /**
-     * Test to make sure wc_pages response is correct.
+     * Test to make sure pages response is correct.
      *
      * @since 2.7.0
      */
-    public function test_get_system_status_info_wc_pages() {
+    public function test_get_system_status_info_pages() {
         wp_set_current_user( $this->user );
         $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system-status' ) );
         $data     = $response->get_data();
-        $wc_pages = $data['wc_pages'];
-        $this->assertEquals( 4, count( $wc_pages ) );
+        $pages = $data['pages'];
+        $this->assertEquals( 4, count( $pages ) );
     }
 
     /**
@@ -183,7 +183,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'active_plugins', $properties );
         $this->assertArrayHasKey( 'theme', $properties );
         $this->assertArrayHasKey( 'settings', $properties );
-        $this->assertArrayHasKey( 'wc_pages', $properties );
+        $this->assertArrayHasKey( 'pages', $properties );
     }
 
 }
