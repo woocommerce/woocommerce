@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'class-wc-gateway-paypal-response.php' );
+include_once( dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php' );
 
 /**
  * Handle PDT Responses from PayPal.

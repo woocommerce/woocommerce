@@ -50,7 +50,7 @@ class WC_Admin_Importers {
 		}
 
 		// includes
-		require 'importers/class-wc-tax-rate-importer.php';
+		require( dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php' );
 
 		// Dispatch
 		$importer = new WC_Tax_Rate_Importer();

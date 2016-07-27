@@ -47,7 +47,7 @@ class WC_Admin_Settings {
 		if ( empty( self::$settings ) ) {
 			$settings = array();
 
-			include_once( 'settings/class-wc-settings-page.php' );
+			include_once( dirname( __FILE__ ) . '/settings/class-wc-settings-page.php' );
 
 			$settings[] = include( 'settings/class-wc-settings-general.php' );
 			$settings[] = include( 'settings/class-wc-settings-products.php' );
@@ -166,7 +166,7 @@ class WC_Admin_Settings {
 		// Get tabs for the settings page
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-		include 'views/html-admin-settings.php';
+		include( dirname( __FILE__ ) . '/views/html-admin-settings.php' );
 	}
 
 	/**

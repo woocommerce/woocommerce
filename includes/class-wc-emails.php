@@ -129,7 +129,7 @@ class WC_Emails {
 	 */
 	public function init() {
 		// Include email classes
-		include_once( 'emails/class-wc-email.php' );
+		include_once( dirname( __FILE__ ) . '/emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
@@ -147,7 +147,7 @@ class WC_Emails {
 
 		// include css inliner
 		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
-			include_once( 'libraries/class-emogrifier.php' );
+			include_once( dirname( __FILE__ ) . '/libraries/class-emogrifier.php' );
 		}
 	}
 

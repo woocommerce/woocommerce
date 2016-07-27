@@ -135,7 +135,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 function woocommerce_admin_fields( $options ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
 	WC_Admin_Settings::output_fields( $options );
@@ -150,7 +150,7 @@ function woocommerce_admin_fields( $options ) {
 function woocommerce_update_options( $options, $data = null ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
 	WC_Admin_Settings::save_fields( $options, $data );
@@ -166,7 +166,7 @@ function woocommerce_update_options( $options, $data = null ) {
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
 	return WC_Admin_Settings::get_option( $option_name, $default );
