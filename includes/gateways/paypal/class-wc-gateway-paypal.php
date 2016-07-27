@@ -56,6 +56,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled    = $this->debug;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_payment' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_payment' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
@@ -257,6 +259,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Init the API class and set the username/password etc.
+	 */
+	protected function init_api() {
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php' );
+
+		WC_Gateway_Paypal_API_Handler::$api_username  = $this->get_option( 'api_username' );
+		WC_Gateway_Paypal_API_Handler::$api_password  = $this->get_option( 'api_password' );
+		WC_Gateway_Paypal_API_Handler::$api_signature = $this->get_option( 'api_signature' );
+	}
+
+	/**
 	 * Process a refund if supported.
 	 * @param  int    $order_id
 	 * @param  float  $amount
@@ -271,13 +284,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return new WP_Error( 'error', __( 'Refund Failed: No transaction ID', 'woocommerce' ) );
 		}
 
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-refund.php' );
+		$this->init_api();
 
-		WC_Gateway_Paypal_Refund::$api_username  = $this->get_option( 'api_username' );
-		WC_Gateway_Paypal_Refund::$api_password  = $this->get_option( 'api_password' );
-		WC_Gateway_Paypal_Refund::$api_signature = $this->get_option( 'api_signature' );
-
-		$result = WC_Gateway_Paypal_Refund::refund_order( $order, $amount, $reason, $this->testmode );
+		$result = WC_Gateway_Paypal_API_Handler::refund_order( $order, $amount, $reason, $this->testmode );
 
 		if ( is_wp_error( $result ) ) {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
@@ -295,5 +304,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
+	}
+
+	/**
+	 * Capture payment when the order is changed from on-hold to complete or processing
+	 *
+	 * @param  int $order_id
+	 */
+	public function capture_payment( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( 'paypal' === $order->payment_method ) {
+			$this->init_api();
+			WC_Gateway_Paypal_API_Handler::do_capture( $order, $amount );
+		}
 	}
 }
