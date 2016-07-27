@@ -2055,7 +2055,13 @@ table.wc_input_table {
 			padding: 5px 10px;
 			margin: 0;
 			border: 0;
+			outline: 0;
 			background: transparent none;
+
+			&:focus {
+				outline: 0;
+				box-shadow: none;
+			}
 		}
 
 		&.compound,

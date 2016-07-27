@@ -267,18 +267,47 @@ class WC_Tax {
 	}
 
 	/**
+	 * Does the sort comparison.
+	 */
+	private static function sort_rates_callback( $rate1, $rate2 ) {
+		if ( $rate1->tax_rate_priority !== $rate2->tax_rate_priority ) {
+			return $rate1->tax_rate_priority < $rate2->tax_rate_priority ? -1 : 1; // ASC
+		} elseif ( $rate1->tax_rate_country !== $rate2->tax_rate_country ) {
+			if ( '' === $rate1->tax_rate_country ) {
+				return 1;
+			}
+			if ( '' === $rate2->tax_rate_country ) {
+				return -1;
+			}
+			return strcmp( $rate1->tax_rate_country, $rate2->tax_rate_country ) > 0 ? 1 : -1;
+		} elseif ( $rate1->tax_rate_state !== $rate2->tax_rate_state ) {
+			if ( '' === $rate1->tax_rate_state ) {
+				return 1;
+			}
+			if ( '' === $rate2->tax_rate_state ) {
+				return -1;
+			}
+			return strcmp( $rate1->tax_rate_state, $rate2->tax_rate_state ) > 0 ? 1 : -1;
+		} else {
+			return $rate1->tax_rate_id < $rate2->tax_rate_id ? -1 : 1; // Identical - use ID
+		}
+	}
+
+	/**
 	 * Logical sort order for tax rates based on the following in order of priority:
 	 * 		- Priority
 	 * 		- County code
 	 * 		- State code
-	 * 		- # of zip codes
-	 * 		- # of cities
 	 * @param  array $rates
 	 * @return array
 	 * @todo   remove tax_rate_order column
 	 */
 	private static function sort_rates( $rates ) {
-
+		uasort( $rates, __CLASS__ . '::sort_rates_callback' );
+		$i = 0;
+		foreach ( $rates as $key => $rate ) {
+			$rates[ $key ]->tax_rate_order = $i++;
+		}
 		return $rates;
 	}
 
