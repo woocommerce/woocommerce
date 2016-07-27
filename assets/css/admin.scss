@@ -2039,6 +2039,7 @@ table.wc_input_table {
 
 	th {
 		white-space: nowrap;
+		padding: 10px;
 	}
 
 	td {
@@ -2052,7 +2053,7 @@ table.wc_input_table {
 		input[type="text"],
 		input[type="number"] {
 			width: 100%;
-			padding: 5px 10px;
+			padding: 8px 10px;
 			margin: 0;
 			border: 0;
 			outline: 0;
