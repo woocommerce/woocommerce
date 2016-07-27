@@ -144,6 +144,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( 'abstracts/abstract-wc-rest-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-posts-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
+		include_once( 'abstracts/abstract-wc-settings-api.php' );
 
 		// REST API controllers.
 		include_once( 'api/class-wc-rest-coupons-controller.php' );
@@ -162,6 +163,8 @@ class WC_API extends WC_Legacy_API {
 		include_once( 'api/class-wc-rest-report-sales-controller.php' );
 		include_once( 'api/class-wc-rest-report-top-sellers-controller.php' );
 		include_once( 'api/class-wc-rest-reports-controller.php' );
+		include_once( 'api/class-wc-rest-settings-controller.php' );
+		include_once( 'api/class-wc-rest-settings-options-controller.php' );
 		include_once( 'api/class-wc-rest-tax-classes-controller.php' );
 		include_once( 'api/class-wc-rest-taxes-controller.php' );
 		include_once( 'api/class-wc-rest-webhook-deliveries.php' );
@@ -173,6 +176,9 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	public function register_rest_routes() {
+		// Register settings to the REST API.
+		$this->register_wp_admin_settings();
+
 		$controllers = array(
 			'WC_REST_Coupons_Controller',
 			'WC_REST_Customer_Downloads_Controller',
@@ -190,6 +196,8 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Report_Sales_Controller',
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',
+			'WC_REST_Settings_Controller',
+			'WC_REST_Settings_Options_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
 			'WC_REST_Webhook_Deliveries_Controller',
@@ -201,4 +209,16 @@ class WC_API extends WC_Legacy_API {
 			$this->$controller->register_routes();
 		}
 	}
+
+	/**
+	 * Register WC settings from WP-API to the REST API.
+	 * @since  2.7.0
+	 */
+	public function register_wp_admin_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_WP_Admin_Settings( $page );
+		}
+	}
+
 }

@@ -145,14 +145,15 @@ function woocommerce_admin_fields( $options ) {
  * Update all settings which are passed.
  *
  * @param array $options
+ * @param array $data
  */
-function woocommerce_update_options( $options ) {
+function woocommerce_update_options( $options, $data = null ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
 		include 'class-wc-admin-settings.php';
 	}
 
-	WC_Admin_Settings::save_fields( $options );
+	WC_Admin_Settings::save_fields( $options, $data );
 }
 
 /**

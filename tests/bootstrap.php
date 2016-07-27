@@ -98,10 +98,12 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-data.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-payment-token-stub.php' );
+		require_once( $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php' );
 
 		// test cases
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-case.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-api-unit-test-case.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php' );
 
 		// Helpers
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-product.php' );
@@ -112,6 +114,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-order.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php' );
 	}
 
 	/**
