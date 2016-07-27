@@ -267,6 +267,22 @@ class WC_Tax {
 	}
 
 	/**
+	 * Logical sort order for tax rates based on the following in order of priority:
+	 * 		- Priority
+	 * 		- County code
+	 * 		- State code
+	 * 		- # of zip codes
+	 * 		- # of cities
+	 * @param  array $rates
+	 * @return array
+	 * @todo   remove tax_rate_order column
+	 */
+	private static function sort_rates( $rates ) {
+
+		return $rates;
+	}
+
+	/**
 	 * Loop through a set of tax rates and get the matching rates (1 per priority).
 	 *
 	 * @param  string $country
@@ -338,9 +354,10 @@ class WC_Tax {
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
 			WHERE 1=1 AND " . implode( ' AND ', $criteria ) . "
 			GROUP BY tax_rate_id
-			ORDER BY tax_rate_priority, tax_rate_order
+			ORDER BY tax_rate_priority
 		" );
 
+		$found_rates       = self::sort_rates( $found_rates );
 		$matched_tax_rates = array();
 		$found_priority    = array();
 
@@ -892,7 +909,7 @@ class WC_Tax {
 		global $wpdb;
 
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
+		$rates     = self::sort_rates( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		if ( ! empty( $rates ) ) {
