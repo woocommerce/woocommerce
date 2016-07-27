@@ -74,14 +74,14 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			$this->widget_start( $args, $instance );
 
-			echo '<ul class="product_list_widget">';
+			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
 
 			while ( $r->have_posts() ) {
 				$r->the_post();
 				wc_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
 			}
 
-			echo '</ul>';
+			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
 
 			$this->widget_end( $args );
 		}
