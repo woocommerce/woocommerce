@@ -311,7 +311,6 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
         $request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $product->id . '/reviews/' . $product_review_id );
 		$request->set_param( 'force', true );
         $response = $this->server->dispatch( $request );
-
 		$this->assertEquals( 200, $response->get_status() );
     }
 
@@ -345,8 +344,59 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 500, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
     }
+
+	/**
+	 * Test batch managing product reviews.
+	 */
+	public function test_product_reviews_batch() {
+		wp_set_current_user( $this->user );
+		$product = WC_Helper_Product::create_simple_product();
+
+		$review_1_id = WC_Helper_Product::create_product_review( $product->id );
+		$review_2_id = WC_Helper_Product::create_product_review( $product->id );
+		$review_3_id = WC_Helper_Product::create_product_review( $product->id );
+		$review_4_id = WC_Helper_Product::create_product_review( $product->id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->id . '/reviews/batch' );
+		$request->set_body_params( array(
+			'update' => array(
+				array(
+					'id'     => $review_1_id,
+					'review' => 'Updated review.',
+				),
+			),
+			'delete' => array(
+				array(
+					'id' => $review_2_id,
+				),
+				array(
+					'id' => $review_3_id,
+				),
+			),
+			'create' => array(
+				array(
+					'review' => 'New review.',
+					'name'   => 'Justin',
+					'email'  => 'woo3@woo.local',
+				),
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 'Updated review.', $data['update'][0]['review'] );
+		$this->assertEquals( 'New review.', $data['create'][0]['review'] );
+		$this->assertEquals( $review_2_id, $data['delete'][0]['id'] );
+		$this->assertEquals( $review_3_id, $data['delete'][1]['id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->id . '/reviews' );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 3, count( $data ) );
+	}
 
     /**
      * Test the product review schema.

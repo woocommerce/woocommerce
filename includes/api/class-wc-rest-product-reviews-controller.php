@@ -94,6 +94,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
 	}
 
 	/**
@@ -164,6 +174,19 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$post = get_post( (int) $request['product_id'] );
 		if ( $post && ! wc_rest_check_post_permissions( 'product', 'delete', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to batch manage product reviews.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function batch_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( 'product', 'batch' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot manipulate product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -244,15 +267,15 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_product_review_invalid_email', __( 'Product review email is required.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-
 		$data = array(
-			'comment_post_ID'      => $product->id,
+			'comment_post_ID'      => $product->ID,
 			'comment_author'       => $request['name'],
 			'comment_author_email' => $request['email'],
 			'comment_content'      => $request['review'],
 			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
+
 		$product_review_id = wp_insert_comment( $data );
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
 
@@ -287,7 +310,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
 		$product = get_post( (int) $request['product_id'] );
-
 
 		if ( empty( $product->post_type ) || 'product' !== $product->post_type ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -346,6 +368,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
+		$id  = is_array( $request['id'] ) ? $request['id']['id'] : $request['id'];
 		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
@@ -353,21 +376,60 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Product reviews do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$result = wp_delete_comment( $request['id'], true );
+		$comment = get_comment( $id );
+
+		if ( empty( $id ) || empty( $comment->comment_ID ) || empty( $comment->comment_post_ID ) ) {
+			return new WP_Error( 'woocommerce_rest_product_review_invalid_id', __( 'Invalid product review ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $comment, $request );
+
+		$result  = wp_delete_comment( $id, true );
+
+		if ( ! $result ) {
+			return new WP_Error( 'rest_cannot_delete', __( 'The product review cannot be deleted.' ), array( 'status' => 500 ) );
+		}
 
 		/**
 		 * Fires after a product review is deleted via the REST API.
 		 *
-		 * @param object           $post     The deleted item.
+		 * @param object           $comment  The deleted item.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
-		do_action( 'rest_delete_product_revie', $result, $request );
-		if ( $result ) {
-			return true;
-		} else {
-			return new WP_Error( 'rest_cannot_delete', __( 'The product review cannot be deleted.' ), array( 'status' => 500 ) );
+		do_action( 'rest_delete_product_review', $comment, $response, $request );
+
+		return $response;
+	}
+
+	/**
+	 * Bulk create, update and delete items.
+	 *
+	 * @since  2.7.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Of WP_Error or WP_REST_Response.
+	 */
+	public function batch_items( $request ) {
+		$items       = array_filter( $request->get_params() );
+		$params      = $request->get_url_params();
+		$product_id  = $params['product_id'];
+		$body_params = array();
+
+		foreach ( array( 'update', 'create', 'delete' ) as $batch_type ) {
+			if ( ! empty( $items[ $batch_type ] ) ) {
+				$injected_items = array();
+				foreach ( $items[ $batch_type ] as $item ) {
+					$injected_items[] = array_merge( array( 'product_id' => $product_id ), $item );
+				}
+				$body_params[ $batch_type ] = $injected_items;
+			}
 		}
+
+		$request = new WP_REST_Request( $request->get_method() );
+		$request->set_body_params( $body_params );
+
+		return parent::batch_items( $request );
 	}
 
 	/**
