@@ -46,9 +46,9 @@ $woocommerce_loop['columns'] = apply_filters( 'woocommerce_related_products_colu
 
 if ( $products->have_posts() ) : ?>
 
-	<div class="related products">
+	<section class="related products">
 
-		<h2><?php _e( 'Related Products', 'woocommerce' ); ?></h2>
+		<h2><?php echo sprintf( __( 'Other %s...', 'woocommerce' ), $product->get_categories() ); ?></h2>
 
 		<?php woocommerce_product_loop_start(); ?>
 
@@ -60,7 +60,7 @@ if ( $products->have_posts() ) : ?>
 
 		<?php woocommerce_product_loop_end(); ?>
 
-	</div>
+	</section>
 
 <?php endif;
 

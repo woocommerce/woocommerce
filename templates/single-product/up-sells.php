@@ -43,7 +43,7 @@ $woocommerce_loop['columns'] = apply_filters( 'woocommerce_up_sells_columns', $c
 
 if ( $products->have_posts() ) : ?>
 
-	<div class="up-sells upsells products">
+	<section class="up-sells upsells products">
 
 		<h2><?php _e( 'You may also like&hellip;', 'woocommerce' ) ?></h2>
 
@@ -57,7 +57,7 @@ if ( $products->have_posts() ) : ?>
 
 		<?php woocommerce_product_loop_end(); ?>
 
-	</div>
+	</section>
 
 <?php endif;
 
