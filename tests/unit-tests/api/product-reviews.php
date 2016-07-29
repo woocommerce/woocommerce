@@ -31,7 +31,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	}
 
     /**
-     *
+     * Test getting all product reviews.
      *
      * @since 2.7.0
      */
@@ -74,7 +74,6 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
                 ),
             ),
         ), $product_reviews );
-
     }
 
     /**

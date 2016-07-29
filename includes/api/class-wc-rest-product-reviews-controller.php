@@ -1,8 +1,8 @@
 <?php
 /**
- * REST API Product Reviews controller
+ * REST API Product Reviews Controller.
  *
- * Handles requests to the /products/<product_id>/reviews endpoint.
+ * Handles requests to /products/<product_id>/reviews.
  *
  * @author   WooThemes
  * @category API
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * REST API Products controller class.
+ * REST API Product Reviews Controller Class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
@@ -137,7 +137,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to create a new  product review.
+	 * Check if a given request has access to create a new product review.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -186,7 +186,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot manipulate product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot batch manipulate product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -264,7 +264,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		if ( empty( $request['email'] ) ) {
-			return new WP_Error( 'woocommerce_rest_product_review_invalid_email', __( 'Product review email is required.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_product_review_invalid_email', __( 'Product review author email is required.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data = array(
@@ -275,7 +275,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
-
 		$product_review_id = wp_insert_comment( $data );
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
 
@@ -323,22 +322,17 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		// Update fields
 		$commentdata = array( 'comment_ID' => $id );
-
 		if ( ! empty( $request['name'] ) ) {
 			$commentdata['comment_author'] = $request['name' ];
 		}
-
 		if ( ! empty( $request['email'] ) ) {
 			$commentdata['comment_author_email'] = $request['email' ];
 		}
-
 		if ( ! empty( $request['review'] ) ) {
 			$commentdata['comment_content'] = $request['review' ];
 		}
 
-
 		wp_update_comment( $commentdata );
-
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $id, 'rating', $request['rating'] );
 		}
@@ -368,10 +362,9 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		$id  = is_array( $request['id'] ) ? $request['id']['id'] : $request['id'];
+		$id    = is_array( $request['id'] ) ? $request['id']['id'] : $request['id'];
 		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
-		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Product reviews do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
