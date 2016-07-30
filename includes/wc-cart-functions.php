@@ -90,13 +90,13 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 	$titles = array();
 	$count  = 0;
 
+	if ( ! $show_qty && ! is_array( $products ) ) {
+		$products = array_fill_keys( array_keys( $products ), 1 );
+	}
+	
 	if ( ! is_array( $products ) ) {
 		$products = array( $products );
 		$show_qty = false;
-	}
-
-	if ( ! $show_qty ) {
-		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
 	foreach ( $products as $product_id => $qty ) {
