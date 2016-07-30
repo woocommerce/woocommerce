@@ -73,6 +73,8 @@ class WC_Admin_Attributes {
 			'attribute_type'    => isset( $_POST['attribute_type'] )    ? wc_clean( $_POST['attribute_type'] ) : 'select',
 			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( $_POST['attribute_orderby'] ) : '',
 			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0
+			'attribute_description' => isset( $_POST['attribute_description'] ) ? wc_clean( stripslashes( $_POST['attribute_description'] ) ) : '',
+			'attribute_thumbnail_id'=> isset( $_POST['attribute_thumbnail_id'] ) ? absint( $_POST['attribute_thumbnail_id'] ) : ''
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {
@@ -265,6 +267,13 @@ class WC_Admin_Attributes {
 					$att_name    = $attribute_to_edit->attribute_name;
 					$att_orderby = $attribute_to_edit->attribute_orderby;
 					$att_public  = $attribute_to_edit->attribute_public;
+					$att_desc    = $attribute_to_edit->attribute_description;
+					$thumbnail_id = $attribute_to_edit->attribute_thumbnail_id;
+					if ( $thumbnail_id ) {
+							$image = wp_get_attachment_thumb_url( $thumbnail_id );
+					} else {
+							$image = wc_placeholder_img_src();
+					}
 
 				?>
 
@@ -288,6 +297,79 @@ class WC_Admin_Attributes {
 									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
 									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
 								</td>
+							</tr>
+							<tr class="form-field">
+									<th scope="row" valign="top">
+											<label for="attribute_description"><?php _e( 'Description', 'woocommerce' ); ?></label>
+									</th>
+									<td>
+											<textarea name="attribute_description" id="attribute_description" rows="4"><?php echo esc_attr( $att_desc ); ?></textarea>
+											<p class="description"><?php _e( 'Description for the attribute, optional.', 'woocommerce' ); ?></p>
+									</td>
+							</tr>
+							<tr class="form-field">
+									<th scope="row" valign="top">
+										<label><?php _e( 'Attribute Graphic', 'woocommerce' ); ?></label>
+									</th>
+									<td>
+											<div id="attribute_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( $image ); ?>" width="60px" height="60px" /></div>
+											<div style="line-height: 60px;">
+													<input type="hidden" id="attribute_thumbnail_id" name="attribute_thumbnail_id" value="<?php echo $thumbnail_id; ?>" />
+													<button type="button" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
+													<button type="button" class="remove_image_button button"><?php _e( 'Remove image', 'woocommerce' ); ?></button>
+											</div>
+											<script type="text/javascript">
+
+													// Only show the "remove image" button when needed
+													if ( '0' === jQuery( '#attribute_thumbnail_id' ).val() ) {
+															jQuery( '.remove_image_button' ).hide();
+													}
+
+													// Uploading files
+													var file_frame;
+
+													jQuery( document ).on( 'click', '.upload_image_button', function( event ) {
+
+															event.preventDefault();
+
+															// If the media frame already exists, reopen it.
+															if ( file_frame ) {
+																	file_frame.open();
+																	return;
+															}
+
+															// Create the media frame.
+															file_frame = wp.media.frames.downloadable_file = wp.media({
+																	title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+																	button: {
+																			text: '<?php _e( "Use image", "woocommerce" ); ?>'
+																	},
+																	multiple: false
+															});
+
+															// When an image is selected, run a callback.
+															file_frame.on( 'select', function() {
+																	var attachment = file_frame.state().get( 'selection' ).first().toJSON();
+
+																	jQuery( '#attribute_thumbnail_id' ).val( attachment.id );
+																	jQuery( '#attribute_thumbnail' ).find( 'img' ).attr( 'src', attachment.url );
+																	jQuery( '.remove_image_button' ).show();
+															});
+
+															// Finally, open the modal.
+															file_frame.open();
+													});
+
+													jQuery( document ).on( 'click', '.remove_image_button', function() {
+															jQuery( '#attribute_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+															jQuery( '#attribute_thumbnail_id' ).val( '' );
+															jQuery( '.remove_image_button' ).hide();
+															return false;
+													});
+
+											</script>
+											<div class="clear"></div>
+									</td>
 							</tr>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
@@ -362,6 +444,7 @@ class WC_Admin_Attributes {
 						<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
 							<thead>
 								<tr>
+									<th scope="col"><?php _e( 'Image', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Name', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Slug', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Type', 'woocommerce' ); ?></th>
@@ -375,6 +458,18 @@ class WC_Admin_Attributes {
 										foreach ( $attribute_taxonomies as $tax ) :
 											?><tr>
 
+												<td>
+													<?php
+													$thumbnail_id = $tax->attribute_thumbnail_id;
+
+													if ( $thumbnail_id ) {
+															$image = wp_get_attachment_thumb_url( $thumbnail_id );
+													} else {
+															$image = wc_placeholder_img_src();
+													}
+													echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr__( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';
+													?>
+												</td>
 												<td>
 													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
@@ -450,6 +545,91 @@ class WC_Admin_Attributes {
 									<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
 									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
 									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+								</div>
+
+								<div class="form-field">
+										<label for="attribute_description"><?php _e( 'Description', 'woocommerce' ); ?></label>
+										<textarea name="attribute_description" id="attribute_description" value="" rows="4"></textarea>
+										<p class="description"><?php _e( 'Description for the attribute, optional.', 'woocommerce' ); ?></p>
+								</div>
+
+								<div class="form-field term-thumbnail-wrap">
+										<label><?php _e( 'Attribute Graphic', 'woocommerce' ); ?></label>
+										<div id="attribute_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
+										<div style="line-height: 60px;">
+												<input type="hidden" id="attribute_thumbnail_id" name="attribute_thumbnail_id" />
+												<button type="button" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
+												<button type="button" class="remove_image_button button"><?php _e( 'Remove image', 'woocommerce' ); ?></button>
+										</div>
+										<script type="text/javascript">
+
+												// Only show the "remove image" button when needed
+												if ( ! jQuery( '#attribute_thumbnail_id' ).val() ) {
+														jQuery( '.remove_image_button' ).hide();
+												}
+
+												// Uploading files
+												var file_frame;
+
+												jQuery( document ).on( 'click', '.upload_image_button', function( event ) {
+
+														event.preventDefault();
+
+														// If the media frame already exists, reopen it.
+														if ( file_frame ) {
+																file_frame.open();
+																return;
+														}
+
+														// Create the media frame.
+														file_frame = wp.media.frames.downloadable_file = wp.media({
+																title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+																button: {
+																		text: '<?php _e( "Use image", "woocommerce" ); ?>'
+																},
+																multiple: false
+														});
+
+														// When an image is selected, run a callback.
+														file_frame.on( 'select', function() {
+																var attachment = file_frame.state().get( 'selection' ).first().toJSON();
+
+																jQuery( '#attribute_thumbnail_id' ).val( attachment.id );
+																jQuery( '#attribute_thumbnail' ).find( 'img' ).attr( 'src', attachment.thumbnail.url );
+																jQuery( '.remove_image_button' ).show();
+														});
+
+														// Finally, open the modal.
+														file_frame.open();
+												});
+
+												jQuery( document ).on( 'click', '.remove_image_button', function() {
+														jQuery( '#attribute_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+														jQuery( '#attribute_thumbnail_id' ).val( '' );
+														jQuery( '.remove_image_button' ).hide();
+														return false;
+												});
+
+												jQuery( document ).ajaxComplete( function( event, request, options ) {
+														if ( request && 4 === request.readyState && 200 === request.status
+																&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
+																var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+																if ( ! res || res.errors ) {
+																		return;
+																}
+																// Clear Thumbnail fields on submit
+																jQuery( '#attribute_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+																jQuery( '#attribute_thumbnail_id' ).val( '' );
+																jQuery( '.remove_image_button' ).hide();
+																// Clear Display type field on submit
+																jQuery( '#display_type' ).val( '' );
+																return;
+														}
+												} );
+
+										</script>
+										<div class="clear"></div>
 								</div>
 
 								<div class="form-field">
