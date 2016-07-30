@@ -23,7 +23,7 @@ class WC_Structured_Data {
   /**
    * Checks if the passed $json variable is an array and stores it into $this->data...
    *
-   * @param array $json Partially structured data
+   * @param  array $json Partially structured data
    * @return bool Returns false If the param $json is not an array
    */
   private function set_data( $json ) {
@@ -99,19 +99,24 @@ class WC_Structured_Data {
   public function enqueue_data() {
     if ( $data = $this->get_data() ) {
 
-      array_walk_recursive( $data, array( $this, 'sanitize_data' ) );
+      $data = $this->sanitize_data( $data );
 
       echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>';
     }
   }
 
   /**
-   * Callback function for sanitizing the structured data.
+   * Function for sanitizing the structured data.
    *
-   * @param ref $value
+   * @param  array $data
+   * @return array $sanitized_data
    */
-  private function sanitize_data( &$value ) {
-    $value = sanitize_text_field( $value );
+  private function sanitize_data( $data ) {
+    foreach ( $data as $key => $value ) {
+      $sanitized_data[ sanitize_text_field( $key ) ] = is_array( $value ) ? $this->sanitize_data( $value ) : sanitize_text_field( $value );
+    }
+
+    return $sanitized_data;
   }
 
   /**
