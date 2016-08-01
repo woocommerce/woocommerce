@@ -39,9 +39,9 @@ if ( ! empty( $tabs ) ) : ?>
 			<?php endforeach; ?>
 		</ul>
 		<?php foreach ( $tabs as $key => $tab ) : ?>
-			<section class="woocommerce-Tabs-panel woocommerce-Tabs-panel--<?php echo esc_attr( $key ); ?> panel entry-content wc-tab" id="tab-<?php echo esc_attr( $key ); ?>">
+			<div class="woocommerce-Tabs-panel woocommerce-Tabs-panel--<?php echo esc_attr( $key ); ?> panel entry-content wc-tab" id="tab-<?php echo esc_attr( $key ); ?>">
 				<?php call_user_func( $tab['callback'], $key, $tab ); ?>
-			</section>
+			</div>
 		<?php endforeach; ?>
 	</div>
 
