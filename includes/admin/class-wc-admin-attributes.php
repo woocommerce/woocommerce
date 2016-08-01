@@ -440,7 +440,7 @@ class WC_Admin_Attributes {
 							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
-								<?php do_action( 'woocommerce_add_attribute_top' ) ?>
+								<?php do_action( 'woocommerce_add_attribute_fields_before' ) ?>
 								<div class="form-field">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
 									<input name="attribute_label" id="attribute_label" type="text" value="" />
@@ -489,7 +489,7 @@ class WC_Admin_Attributes {
 									</select>
 									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
-								<?php do_action( 'woocommerce_add_attribute_bottom' ) ?>
+								<?php do_action( 'woocommerce_add_attribute_fields_after' ) ?>
 								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 							</form>
