@@ -19,7 +19,7 @@ class WC_Gateway_Paypal_API_Handler {
 	/** @var string API Signature */
 	public static $api_signature;
 
-	/** @var string API Signature */
+	/** @var bool Sandbox */
 	public static $sandbox = false;
 
 	/**
@@ -27,7 +27,6 @@ class WC_Gateway_Paypal_API_Handler {
 	 * See https://developer.paypal.com/docs/classic/api/merchant/DoCapture_API_Operation_NVP/.
 	 * @param  WC_Order $order
 	 * @param  float    $amount
-	 * @param  string   $reason
 	 * @return array
 	 */
 	public static function get_capture_request( $order, $amount = null ) {
@@ -61,7 +60,7 @@ class WC_Gateway_Paypal_API_Handler {
 			'METHOD'        => 'RefundTransaction',
 			'TRANSACTIONID' => $order->get_transaction_id(),
 			'NOTE'          => html_entity_decode( wc_trim_string( $reason, 255 ), ENT_NOQUOTES, 'UTF-8' ),
-			'REFUNDTYPE'    => 'Full'
+			'REFUNDTYPE'    => 'Full',
 		);
 		if ( ! is_null( $amount ) ) {
 			$request['AMT']          = number_format( $amount, 2, '.', '' );
@@ -84,8 +83,8 @@ class WC_Gateway_Paypal_API_Handler {
 				'method'      => 'POST',
 				'body'        => self::get_capture_request( $order, $amount ),
 				'timeout'     => 70,
-				'user-agent'  => 'WooCommerce',
-				'httpversion' => '1.1'
+				'user-agent'  => 'WooCommerce/' . WC()->version,
+				'httpversion' => '1.1',
 			)
 		);
 
@@ -116,8 +115,8 @@ class WC_Gateway_Paypal_API_Handler {
 				'method'      => 'POST',
 				'body'        => self::get_refund_request( $order, $amount, $reason ),
 				'timeout'     => 70,
-				'user-agent'  => 'WooCommerce',
-				'httpversion' => '1.1'
+				'user-agent'  => 'WooCommerce/' . WC()->version,
+				'httpversion' => '1.1',
 			)
 		);
 
