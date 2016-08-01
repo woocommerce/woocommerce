@@ -271,7 +271,8 @@ class WC_Admin_Attributes {
 				<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 					<table class="form-table">
 						<tbody>
-							<tr class="form-field form-required">
+						<?php do_action( 'woocommerce_edit_attribute_fields_before' ) ?>
+						<tr class="form-field form-required">
 								<th scope="row" valign="top">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
 								</th>
@@ -335,6 +336,7 @@ class WC_Admin_Attributes {
 									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
+							<?php do_action( 'woocommerce_edit_attribute_fields_after' ) ?>
 						</tbody>
 					</table>
 					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"></p>
