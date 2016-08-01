@@ -339,11 +339,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 
 /**
  * Outputs hidden form inputs for each query string variable.
- * @param array $values name value pairs
- * @param array $exclude keys to exclude
  * @since 2.7.0
+ * @param array $values Name value pairs.
+ * @param array $exclude Keys to exclude.
+ * @param string $current_key Current key we are outputting.
  */
-function wc_query_string_form_fields( $values = null, $exclude = array(), $currentkey = '' ) {
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '' ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET;
 	}
@@ -351,8 +352,8 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		if ( in_array( $key, $exclude ) ) {
 			continue;
 		}
-		if ( $currentkey ) {
-			$key = $currentkey . '[' . $key . ']';
+		if ( $current_key ) {
+			$key = $current_key . '[' . $key . ']';
 		}
 		if ( is_array( $value ) ) {
 			wc_query_string_form_fields( $value, $exclude, $key );
