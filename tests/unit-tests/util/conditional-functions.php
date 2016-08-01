@@ -98,6 +98,19 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_site_is_https().
+	 */
+	public function test_wc_site_is_https() {
+		$this->assertFalse( wc_site_is_https() );
+
+		add_filter( 'pre_option_home', function () {
+			return 'https://example.org';
+		} );
+
+		$this->assertTrue( wc_site_is_https() );
+	}
+
+	/**
 	 * Test wc_is_valid_url().
 	 *
 	 * @dataProvider data_provider_test_wc_is_valid_url
