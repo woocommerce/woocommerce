@@ -2745,6 +2745,13 @@ abstract class WC_Abstract_Order {
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
+
+			// Added due to shipping zones in 2.6 will set the method_id with a # like local_pickup:2
+			// if 'local_pickup' is in the hide array & there's a string match to 'local_pickup', set method to 'local_pickup'
+			if ( in_array( 'local_pickup', $hide ) && stristr( $shipping_method['method_id'], 'local_pickup' ) ) {
+				$shipping_method['method_id'] = 'local_pickup';
+			}
+
 			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
 				$needs_address = true;
 				break;
