@@ -103,7 +103,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	public function test_wc_site_is_https() {
 		$this->assertFalse( wc_site_is_https() );
 
-		add_filter( 'pre_option_home', [$this, '_https_url'] );
+		add_filter( 'pre_option_home', array( $this, '_https_url' ) );
 
 		$this->assertTrue( wc_site_is_https() );
 	}
