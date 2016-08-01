@@ -446,7 +446,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
-						'email'         => $result->user_email,
+						'email'         => urlencode( $result->user_email ),
 						'key'           => $result->download_id
 					),
 					home_url( '/' )
