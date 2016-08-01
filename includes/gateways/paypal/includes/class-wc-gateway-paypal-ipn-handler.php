@@ -172,7 +172,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param array $posted
 	 */
 	protected function payment_status_completed( $order, $posted ) {
-		if ( $order->has_status( 'completed' ) ) {
+		if ( $order->has_status( array( 'processing', 'completed' ) ) ) {
 			WC_Gateway_Paypal::log( 'Aborting, Order #' . $order->id . ' is already complete.' );
 			exit;
 		}
