@@ -1019,7 +1019,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						// Create item.
 						if ( is_null( $item['id'] ) ) {
 							$this->set_item( $order, $line_type, $item, 'create' );
-						} elseif ( $this->item_is_null( $item ) ) {
+						} elseif ( $this->item_is_null( $item ) || 0 === $item['quantity'] ) {
 							// Delete item.
 							wc_delete_order_item( $item['id'] );
 						} else {

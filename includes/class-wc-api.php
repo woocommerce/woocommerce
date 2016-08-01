@@ -110,10 +110,8 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_init() {
-		global $wp_version;
-
 		// REST API was included starting WordPress 4.4.
-		if ( version_compare( $wp_version, 4.4, '<' ) ) {
+		if ( ! class_exists( 'WP_REST_Server' ) ) {
 			return;
 		}
 

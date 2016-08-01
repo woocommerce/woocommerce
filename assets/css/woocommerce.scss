@@ -1140,6 +1140,10 @@ p.demo_store {
 
 		.buttons {
 			@include clearfix();
+			a {
+				margin-right: 5px;
+				margin-bottom: 5px;
+			}
 		}
 	}
 

@@ -606,7 +606,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_search() ) {
 			return;
 		}
-		
+
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
@@ -1364,7 +1364,29 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) {
 
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_button_view_cart() {
+		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a>';
+	}
+}
+
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' ) ) {
+
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_proceed_to_checkout() {
+		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward">' . __( 'Checkout', 'woocommerce' ) . '</a>';
+	}
+}
 
 /** Mini-Cart *************************************************************/
 
