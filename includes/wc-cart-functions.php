@@ -89,12 +89,11 @@ function wc_get_raw_referer() {
 function wc_add_to_cart_message( $products, $show_qty = false ) {
 	$titles = array();
 	$count  = 0;
-
+	
 	if ( ! is_array( $products ) ) {
-		$products = array( $products );
-		$show_qty = false;
+		$products = array( $products => 1 );
 	}
-
+	
 	if ( ! $show_qty ) {
 		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
