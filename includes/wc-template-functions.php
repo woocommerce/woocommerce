@@ -337,6 +337,32 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	return $classes;
 }
 
+/**
+ * Outputs hidden form inputs for each query string variable.
+ * @since 2.7.0
+ * @param array $values Name value pairs.
+ * @param array $exclude Keys to exclude.
+ * @param string $current_key Current key we are outputting.
+ */
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '' ) {
+	if ( is_null( $values ) ) {
+		$values = $_GET;
+	}
+	foreach ( $values as $key => $value ) {
+		if ( in_array( $key, $exclude ) ) {
+			continue;
+		}
+		if ( $current_key ) {
+			$key = $current_key . '[' . $key . ']';
+		}
+		if ( is_array( $value ) ) {
+			wc_query_string_form_fields( $value, $exclude, $key );
+		} else {
+			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+		}
+	}
+}
+
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
