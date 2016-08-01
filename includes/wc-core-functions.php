@@ -818,7 +818,40 @@ function wc_fix_rewrite_rules( $rules ) {
 				unset( $rules[ $rule ] );
 			}
 		}
+
+	/**
+	 * When the product base is set to %product_cat% (category base), this conflicts
+	 * with posts (using /%postname%/ structure) and pages. To prevent this, unset
+	 * the (.+?)/?$ rule which maps something like /product-cat-name/ to a product
+	 * incorrectly.
+	 * @since 2.7.0
+	 */
+	} elseif ( '/%product_cat%' === $product_permalink ) {
+		unset( $rules[ '(.+?)/?$' ] );
+		unset( $rules[ '(.+?)/feed/(feed|rdf|rss|rss2|atom)/?$' ] );
+		unset( $rules[ '(.+?)/(feed|rdf|rss|rss2|atom)/?$' ] );
 	}
+
+	echo '<pre>';
+	var_dump($rules);
+	echo '</pre>';
+	exit;
+	/*
+	string(43) "index.php?attachment=$matches[1]&embed=true"
+	  ["(.+?)/feed/(feed|rdf|rss|rss2|atom)/?$"]=>
+	  string(50) "index.php?product_cat=$matches[1]&feed=$matches[2]"
+	  ["(.+?)/(feed|rdf|rss|rss2|atom)/?$"]=>
+	  string(50) "index.php?product_cat=$matches[1]&feed=$matches[2]"
+	  ["(.+?)/embed/?$"]=>
+	  string(44) "index.php?product_cat=$matches[1]&embed=true"
+	  ["(.+?)/page/?([0-9]{1,})/?$"]=>
+	  string(51) "index.php?product_cat=$matches[1]&paged=$matches[2]"
+	  ["(.+?)/comment-page-([0-9]{1,})/?$"]=>
+	  string(51) "index.php?product_cat=$matches[1]&cpage=$matches[2]"
+	  ["(.+?)/wc-api(/(.*))?/?$"]=>
+	  string(52) "index.php?product_cat=$matches[1]&wc-api=$matches[3]"
+	  ["product_variation/[^/]+/attachment/([^/]+)/?$"]=>
+	 */
 
 	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
