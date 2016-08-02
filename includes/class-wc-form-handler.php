@@ -873,9 +873,12 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
 
 			try {
-				$creds    = array();
-				$username = trim( $_POST['username'] );
+				$creds = array(
+					'user_password' => $_POST['password'],
+					'remember'      => isset( $_POST['rememberme'] ),
+				);
 
+				$username         = trim( $_POST['username'] );
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -904,10 +907,17 @@ class WC_Form_Handler {
 					$creds['user_login'] = $username;
 				}
 
-				$creds['user_password'] = $_POST['password'];
-				$creds['remember']      = isset( $_POST['rememberme'] );
-				$secure_cookie          = is_ssl() ? true : false;
-				$user                   = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), $secure_cookie );
+				// On multisite, ensure user exists on current site, if not add them before allowing login.
+				if ( is_multisite() ) {
+					$user_data = get_user_by( 'login', $username );
+
+					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
+					}
+				}
+
+				// Perform the login
+				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
