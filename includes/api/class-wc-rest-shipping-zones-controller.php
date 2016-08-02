@@ -35,7 +35,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -120,7 +120,10 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 
 		if ( $zone->get_id() !== 0 ) {
 			$request->set_param( 'id', $zone->get_id() );
-			return $this->get_item( $request );
+			$response = $this->get_item( $request );
+			$response->set_status( 201 );
+			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
+			return $response;
 		} else {
 			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( "Resource cannot be created. Check to make sure 'order' and 'name' are present.", 'woocommerce' ), array( 'status' => 500 ) );
 		}

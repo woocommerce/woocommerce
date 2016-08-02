@@ -196,7 +196,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( array(
 			'id'     => $data['id'],
 			'name'   => 'Test Zone',
@@ -219,6 +219,22 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 				),
 			),
 		), $data );
+	}
+
+	/**
+	 * Test Shipping Zone create endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_create_shipping_zone_without_permission() {
+		wp_set_current_user( 0 );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones' );
+		$request->set_body_params( array(
+			'name'  => 'Test Zone',
+			'order' => 1,
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**

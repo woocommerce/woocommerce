@@ -71,6 +71,24 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	}
 
 	/**
+	 * Check if a given request has access to create Shipping Zones.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check whether a given request has permission to edit Shipping Zones.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
