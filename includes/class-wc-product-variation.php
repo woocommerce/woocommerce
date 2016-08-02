@@ -88,6 +88,11 @@ class WC_Product_Variation extends WC_Product {
 		$this->product_type = 'variation';
 		$this->parent       = ! empty( $args['parent'] ) ? $args['parent'] : wc_get_product( $this->id );
 		$this->post         = ! empty( $this->parent->post ) ? $this->parent->post : array();
+
+		// The post parent is not a valid variable product so we should prevent this being created.
+		if ( ! is_a( $this->parent, 'WC_Product' ) ) {
+			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->variation_id ), 422 );
+		}
 	}
 
 	/**

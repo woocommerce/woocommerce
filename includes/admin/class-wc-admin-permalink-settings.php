@@ -190,8 +190,8 @@ class WC_Admin_Permalink_Settings {
 				}
 
 				// This is an invalid base structure and breaks pages.
-				if ( '%product_cat%' == $product_permalink ) {
-					$product_permalink = '/' . _x( 'product', 'slug', 'woocommerce' ) . '/' . $product_permalink;
+				if ( '/%product_cat%' === $product_permalink ) {
+					$product_permalink = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_permalink;
 				}
 			} elseif ( empty( $product_permalink ) ) {
 				$product_permalink = false;

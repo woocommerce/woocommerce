@@ -275,7 +275,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $this->is_showing_page_on_front( $q ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );

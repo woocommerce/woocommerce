@@ -30,8 +30,8 @@ class WC_Admin_Reports {
 		$current_tab    = ! empty( $_GET['tab'] ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( $_GET['report'] ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
 
-		include_once( 'reports/class-wc-admin-report.php' );
-		include_once( 'views/html-admin-page-reports.php' );
+		include_once( dirname( __FILE__ ) . '/reports/class-wc-admin-report.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-reports.php' );
 	}
 
 	/**

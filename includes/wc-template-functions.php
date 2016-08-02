@@ -27,7 +27,7 @@ function wc_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
@@ -337,6 +337,32 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	return $classes;
 }
 
+/**
+ * Outputs hidden form inputs for each query string variable.
+ * @since 2.7.0
+ * @param array $values Name value pairs.
+ * @param array $exclude Keys to exclude.
+ * @param string $current_key Current key we are outputting.
+ */
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '' ) {
+	if ( is_null( $values ) ) {
+		$values = $_GET;
+	}
+	foreach ( $values as $key => $value ) {
+		if ( in_array( $key, $exclude ) ) {
+			continue;
+		}
+		if ( $current_key ) {
+			$key = $current_key . '[' . $key . ']';
+		}
+		if ( is_array( $value ) ) {
+			wc_query_string_form_fields( $value, $exclude, $key );
+		} else {
+			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+		}
+	}
+}
+
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
@@ -606,7 +632,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_search() ) {
 			return;
 		}
-		
+
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
@@ -1364,7 +1390,29 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) {
 
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_button_view_cart() {
+		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a>';
+	}
+}
+
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' ) ) {
+
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_proceed_to_checkout() {
+		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward">' . __( 'Checkout', 'woocommerce' ) . '</a>';
+	}
+}
 
 /** Mini-Cart *************************************************************/
 

@@ -1169,7 +1169,7 @@ class WC_Geo_IP {
 	 */
 	public static function log( $message ) {
 		if ( ! class_exists( 'WC_Logger' ) ) {
-			include_once( 'class-wc-logger.php' );
+			include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
 		}
 
 		if ( empty( self::$log ) ) {
