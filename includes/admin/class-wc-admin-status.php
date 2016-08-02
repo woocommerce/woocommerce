@@ -186,11 +186,6 @@ class WC_Admin_Status {
 				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
 				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
-			),
-			'delete_geoip_log' => array(
-				'name'    => __( 'Delete GeoIP Log', 'woocommerce' ),
-				'button'  => __( 'Delete GeoIP Log', 'woocommerce' ),
-				'desc'    => __( 'This will delete the GeoIP log created by WooCommerce.', 'woocommerce' ),
 			)
 		);
 
@@ -367,7 +362,7 @@ class WC_Admin_Status {
 	/**
 	 * Remove/delete the chosen file.
 	 */
-	public function remove_log() {
+	public static function remove_log() {
 		if ( empty( $_REQUEST[ '_wpnonce' ] ) || ! wp_verify_nonce( $_REQUEST[ '_wpnonce' ], 'remove_log' ) ) {
 			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}

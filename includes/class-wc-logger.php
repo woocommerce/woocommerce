@@ -138,8 +138,10 @@ class WC_Logger {
 		if ( is_file( $file ) && is_writable( $file ) ) {
 			// Close first to be certain no processes keep it alive after it is unlinked.
 			$this->close( $handle );
-
 			$removed = unlink( $file );
+		} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
+			$this->close( $handle );
+			$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
 		}
 
 		do_action( 'woocommerce_log_remove', $handle, $removed );

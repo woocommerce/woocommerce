@@ -11,7 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php if ( $logs ) : ?>
 	<div id="log-viewer-select">
 		<div class="alignleft">
-			<h2><?php printf( __( 'Log file: %s (%s)', 'woocommerce' ), esc_html( $viewed_log ), date_i18n( get_option( 'date_format') . ' ' . get_option( 'time_format'), filemtime( WC_LOG_DIR . $viewed_log ) ) ); ?></h2>
+			<h2>
+				<?php echo esc_html( $viewed_log ); ?>
+				<?php if ( ! empty( $handle ) ) : ?>
+					<a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => $handle ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete Log', 'woocommerce');?></a>
+				<?php endif; ?>
+			</h2>
 		</div>
 		<div class="alignright">
 			<form action="<?php echo admin_url( 'admin.php?page=wc-status&tab=logs' ); ?>" method="post">
@@ -21,15 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php endforeach; ?>
 				</select>
 				<input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
-				<?php if ( ! empty( $handle ) ) : ?>
-					<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => $handle ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e('Delete', 'woocommerce');?></a>
-				<?php endif; ?>
 			</form>
 		</div>
 		<div class="clear"></div>
 	</div>
 	<div id="log-viewer">
-		<textarea cols="70" rows="25"><?php echo esc_textarea( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
+		<textarea cols="70" rows="40"><?php echo esc_textarea( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
 	</div>
 <?php else : ?>
 	<div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
