@@ -48,7 +48,7 @@ if ( $products->have_posts() ) : ?>
 
 	<section class="related products">
 
-		<h2><?php echo sprintf( __( 'Other %s...', 'woocommerce' ), $product->get_categories() ); ?></h2>
+		<h2><?php esc_html_e( 'Related Products', 'woocommerce' ); ?></h2>
 
 		<?php woocommerce_product_loop_start(); ?>
 
