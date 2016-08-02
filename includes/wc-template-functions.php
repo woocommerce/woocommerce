@@ -2037,11 +2037,19 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @return string
 	 */
 	function get_product_search_form( $echo = true  ) {
+		global $product_search_form_index;
+
 		ob_start();
+
+		if ( empty( $product_search_form_index ) ) {
+			$product_search_form_index = 0;
+		}
 
 		do_action( 'pre_get_product_search_form'  );
 
-		wc_get_template( 'product-searchform.php' );
+		wc_get_template( 'product-searchform.php', array(
+			'index' => $product_search_form_index++,
+		) );
 
 		$form = apply_filters( 'get_product_search_form', ob_get_clean() );
 
