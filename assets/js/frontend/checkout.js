@@ -63,13 +63,14 @@ jQuery( function( $ ) {
 				$payment_methods.eq(0).hide();
 			}
 
+			// If there was a previously selected method, check that one.
 			if ( selectedPaymentMethod ) {
 				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
-			} else {
-				// If there are none selected, select the first.
-				if ( 0 === $payment_methods.filter( ':checked' ).length ) {
-					$payment_methods.eq(0).prop( 'checked', true );
-				}
+			}
+
+			// If there are none selected, select the first.
+			if ( 0 === $payment_methods.filter( ':checked' ).length ) {
+				$payment_methods.eq(0).prop( 'checked', true );
 			}
 
 			// Trigger click event for selected method
