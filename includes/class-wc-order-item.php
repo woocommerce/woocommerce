@@ -195,9 +195,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * Set order item type.
 	 * @param string $value
 	 */
-	public function set_type( $value ) {
+	protected function set_type( $value ) {
 		$this->_data['type'] = wc_clean( $value );
-
 	}
 
 	/*
