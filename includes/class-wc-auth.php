@@ -686,16 +686,20 @@ class WC_Auth {
 	 * Delete an API Key pair data
 	 *
 	 * @param int $key_id Key ID
+	 *
+	 * @return bool
 	 */
 	public static function delete_api_key( $key_id ) {
 		global $wpdb;
-	    $wpdb->delete(
+	    $result = $wpdb->delete(
 			$wpdb->prefix . 'woocommerce_api_keys',
 			array( 'key_id' => $key_id ),
 			array( '%d' )
 		);
 
 		self::clear_api_key_cache( $key_id );
+
+		return $result;
 	}
 
 	public static function clear_api_key_cache( $key_id ) {

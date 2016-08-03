@@ -181,11 +181,7 @@ class WC_Admin_API_Keys {
 	 * @return bool
 	 */
 	private function remove_key( $key_id ) {
-		global $wpdb;
-
-		$delete = $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
-
-		return $delete;
+		return WC_Auth::delete_api_key( $key_id );
 	}
 }
 
