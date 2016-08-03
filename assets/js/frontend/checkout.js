@@ -29,7 +29,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'blur change', '.input-text, select', this.validate_field );
+			this.$checkout_form.on( 'blur change', '.input-text, select, input:checkbox', this.validate_field );
 
 			// Manual trigger
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
@@ -55,12 +55,17 @@ jQuery( function( $ ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
 			}
 		},
-		init_payment_methods: function() {
+		init_payment_methods: function( selectedPaymentMethod ) {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
 			// If there is one method, we can hide the radio input
 			if ( 1 === $payment_methods.length ) {
 				$payment_methods.eq(0).hide();
+			}
+
+			// If there was a previously selected method, check that one.
+			if ( selectedPaymentMethod ) {
+				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
 			}
 
 			// If there are none selected, select the first.
@@ -271,11 +276,17 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
 				data:		data,
 				success:	function( data ) {
+
+					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
+
 					// Reload the page if requested
 					if ( 'true' === data.reload ) {
 						window.location.reload();
 						return;
 					}
+
+					// Remove any notices added previously
+					$( '.woocommerce-NoticeGroup-updateOrderReview' ).remove();
 
 					var termsCheckBoxChecked = $( '#terms' ).prop( 'checked' );
 
@@ -297,17 +308,18 @@ jQuery( function( $ ) {
 
 						var $form = $( 'form.checkout' );
 
+						// Remove notices from all sources
 						$( '.woocommerce-error, .woocommerce-message' ).remove();
 
-						// Add new errors
+						// Add new errors returned by this event
 						if ( data.messages ) {
-							$form.prepend( data.messages );
+							$form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
 						} else {
 							$form.prepend( data );
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).blur();
 
 						// Scroll to top
 						$( 'html, body' ).animate( {
@@ -317,7 +329,7 @@ jQuery( function( $ ) {
 					}
 
 					// Re-init methods
-					wc_checkout_form.init_payment_methods();
+					wc_checkout_form.init_payment_methods( selectedPaymentMethod );
 
 					// Fire updated_checkout e
 					$( document.body ).trigger( 'updated_checkout' );
@@ -436,7 +448,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( error_message );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
 				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
 			}, 1000 );

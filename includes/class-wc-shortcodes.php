@@ -149,7 +149,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Cart shortcode.
+	 * My account page shortcode.
 	 *
 	 * @param mixed $atts
 	 * @return string
@@ -168,11 +168,11 @@ class WC_Shortcodes {
 		$atts = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'desc',
+			'orderby'  => 'menu_order title',
+			'order'    => 'asc',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'product_category' );
 
 		if ( ! $atts['category'] ) {
 			return '';
@@ -223,7 +223,7 @@ class WC_Shortcodes {
 			'hide_empty' => 1,
 			'parent'     => '',
 			'ids'        => ''
-		), $atts );
+		), $atts, 'product_categories' );
 
 		if ( isset( $atts['ids'] ) ) {
 			$ids = explode( ',', $atts['ids'] );
@@ -298,7 +298,7 @@ class WC_Shortcodes {
 			'order'    => 'desc',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'recent_products' );
 
 		$query_args = array(
 			'post_type'           => 'product',
@@ -328,7 +328,7 @@ class WC_Shortcodes {
 			'order'   => 'asc',
 			'ids'     => '',
 			'skus'    => ''
-		), $atts );
+		), $atts, 'products' );
 
 		$query_args = array(
 			'post_type'           => 'product',
@@ -443,7 +443,7 @@ class WC_Shortcodes {
 			'sku'        => '',
 			'style'      => 'border:4px solid #ccc; padding: 12px;',
 			'show_price' => 'true'
-		), $atts );
+		), $atts, 'product_add_to_cart' );
 
 		if ( ! empty( $atts['id'] ) ) {
 			$product_data = get_post( $atts['id'] );
@@ -527,7 +527,7 @@ class WC_Shortcodes {
 			'order'    => 'asc',
 			'category' => '', // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'sale_products' );
 
 		$query_args = array(
 			'posts_per_page' => $atts['per_page'],
@@ -557,7 +557,7 @@ class WC_Shortcodes {
 			'columns'  => '4',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'best_selling_products' );
 
 		$query_args = array(
 			'post_type'           => 'product',
@@ -588,7 +588,7 @@ class WC_Shortcodes {
 			'order'    => 'asc',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'top_rated_products' );
 
 		$query_args = array(
 			'post_type'           => 'product',
@@ -625,7 +625,7 @@ class WC_Shortcodes {
 			'order'    => 'desc',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		), $atts, 'featured_products' );
 
 		$meta_query   = WC()->query->get_meta_query();
 		$meta_query[] = array(
@@ -782,7 +782,7 @@ class WC_Shortcodes {
 			'order'     => 'asc',
 			'attribute' => '',
 			'filter'    => ''
-		), $atts );
+		), $atts, 'product_attribute' );
 
 		$query_args = array(
 			'post_type'           => 'product',
@@ -814,7 +814,7 @@ class WC_Shortcodes {
 			'per_page' => '4',
 			'columns'  => '4',
 			'orderby'  => 'rand'
-		), $atts );
+		), $atts, 'related_products' );
 
 		ob_start();
 

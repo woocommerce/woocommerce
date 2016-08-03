@@ -129,7 +129,7 @@ class WC_Emails {
 	 */
 	public function init() {
 		// Include email classes
-		include_once( 'emails/class-wc-email.php' );
+		include_once( dirname( __FILE__ ) . '/emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
@@ -147,7 +147,7 @@ class WC_Emails {
 
 		// include css inliner
 		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
-			include_once( 'libraries/class-emogrifier.php' );
+			include_once( dirname( __FILE__ ) . '/libraries/class-emogrifier.php' );
 		}
 	}
 
@@ -289,26 +289,29 @@ class WC_Emails {
 				continue;
 			}
 
-			$product = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-			$is_visible = $product && $product->is_visible();
+			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			$product_exists = is_object( $product );
+			$is_visible     = $product_exists && $product->is_visible();
 
 			$item_offered = array(
 				'@type' => 'Product',
-				'name' => apply_filters( 'woocommerce_order_item_name', $item['name'], $item, $is_visible )
+				'name' => apply_filters( 'woocommerce_order_item_name', $item['name'], $item, $is_visible ),
 			);
 
-			if ( $sku = $product->get_sku() ) {
-				$item_offered['sku'] = $sku;
+			if ( $product_exists ) {
+				if ( $sku = $product->get_sku() ) {
+					$item_offered['sku'] = $sku;
+				}
+
+				if ( $image_id = $product->get_image_id() ) {
+					$item_offered['image'] = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+				}
 			}
 
 			if ( $is_visible ) {
 				$item_offered['url'] = get_permalink( $product->get_id() );
 			} else {
 				$item_offered['url'] = get_home_url();
-			}
-
-			if ( $image_id = $product->get_image_id() ) {
-				$item_offered['image'] = wp_get_attachment_image_url( $image_id, 'thumbnail' );
 			}
 
 			$accepted_offer = (object) array(
@@ -320,7 +323,7 @@ class WC_Emails {
 					'@type' => 'QuantitativeValue',
 					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
 				),
-				'url'   => get_home_url(),
+				'url'              => get_home_url(),
 			);
 
 			$accepted_offers[] = $accepted_offer;

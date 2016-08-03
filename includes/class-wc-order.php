@@ -1044,7 +1044,10 @@ class WC_Order extends WC_Abstract_Order {
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
+			// Remove any instance IDs after :
+			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
+
+			if ( ! in_array( $shipping_method_id, $hide ) ) {
 				$needs_address = true;
 				break;
 			}

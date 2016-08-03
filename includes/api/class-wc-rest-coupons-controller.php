@@ -560,7 +560,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			),
 		);
 
-		return $this->add_additional_fields_schema( $schema );;
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

@@ -235,14 +235,14 @@ class WC_Shipping_Zone extends WC_Data {
 	public function get_shipping_methods( $enabled_only = false ) {
 		global $wpdb;
 
-		$raw_methods_sql = $enabled_only ? "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d AND is_enabled = 1 order by method_order ASC;" : "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d order by method_order ASC;";
+		$raw_methods_sql = $enabled_only ? "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d AND is_enabled = 1;" : "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d;";
 		$raw_methods     = $wpdb->get_results( $wpdb->prepare( $raw_methods_sql, $this->get_zone_id() ) );
 		$wc_shipping     = WC_Shipping::instance();
 		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
 		$methods         = array();
 
 		foreach ( $raw_methods as $raw_method ) {
-			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ) ) ) {
+			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ), true ) ) {
 				$class_name = $allowed_classes[ $raw_method->method_id ];
 
 				// The returned array may contain instances of shipping methods, as well

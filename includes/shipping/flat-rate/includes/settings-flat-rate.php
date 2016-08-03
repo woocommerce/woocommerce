@@ -15,7 +15,7 @@ $settings = array(
 		'type' 			=> 'text',
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
-		'desc_tip'		=> true,
+		'desc_tip'		=> true
 	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
@@ -24,16 +24,16 @@ $settings = array(
 		'default' 		=> 'taxable',
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
-		),
+			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
+		)
 	),
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
-		'type' 			=> 'price',
+		'type' 			=> 'text',
 		'placeholder'	=> '',
 		'description'	=> $cost_desc,
 		'default'		=> '0',
-		'desc_tip'		=> true,
+		'desc_tip'		=> true
 	)
 );
 
@@ -44,7 +44,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'title'			 => __( 'Shipping Class Costs', 'woocommerce' ),
 		'type'			 => 'title',
 		'default'        => '',
-		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
+		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' )
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {

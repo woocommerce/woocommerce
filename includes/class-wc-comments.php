@@ -42,6 +42,10 @@ class WC_Comments {
 		// Count comments
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
+		// Delete comments count cache whenever there is a new comment or a comment status changes
+		add_action( 'wp_insert_comment', array( __CLASS__, 'delete_comments_count_cache' ) );
+		add_action( 'wp_set_comment_status', array( __CLASS__, 'delete_comments_count_cache' ) );
+
 		// Support avatars for `review` comment type
 		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
 
@@ -235,7 +239,18 @@ class WC_Comments {
 		delete_post_meta( $post_id, '_wc_average_rating' );
 		delete_post_meta( $post_id, '_wc_rating_count' );
 		delete_post_meta( $post_id, '_wc_review_count' );
-		WC_Product::sync_average_rating( $post_id );
+	}
+
+	/**
+	 * Delete comments count cache whenever there is
+	 * new comment or the status of a comment changes. Cache
+	 * will be regenerated next time WC_Comments::wp_count_comments()
+	 * is called.
+	 *
+	 * @return void
+	 */
+	public static function delete_comments_count_cache() {
+		delete_transient( 'wc_count_comments' );
 	}
 
 	/**
@@ -249,37 +264,37 @@ class WC_Comments {
 		global $wpdb;
 
 		if ( 0 === $post_id ) {
+			$stats = get_transient( 'wc_count_comments' );
 
-			$count = wp_cache_get( 'comments-0', 'counts' );
-			if ( false !== $count ) {
-				return $count;
-			}
+			if ( ! $stats ) {
+				$stats = array();
 
-			$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
+				$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
 
-			$total = 0;
-			$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
+				$total = 0;
+				$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
 
-			foreach ( (array) $count as $row ) {
-				// Don't count post-trashed toward totals
-				if ( 'post-trashed' != $row['comment_approved'] && 'trash' != $row['comment_approved'] ) {
-					$total += $row['num_comments'];
+				foreach ( (array) $count as $row ) {
+					// Don't count post-trashed toward totals
+					if ( 'post-trashed' != $row['comment_approved'] && 'trash' != $row['comment_approved'] ) {
+						$total += $row['num_comments'];
+					}
+					if ( isset( $approved[ $row['comment_approved'] ] ) ) {
+						$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
+					}
 				}
-				if ( isset( $approved[ $row['comment_approved'] ] ) ) {
-					$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
-				}
-			}
 
-			$stats['total_comments'] = $total;
-			$stats['all'] = $total;
-			foreach ( $approved as $key ) {
-				if ( empty( $stats[ $key ] ) ) {
-					$stats[ $key ] = 0;
+				$stats['total_comments'] = $total;
+				$stats['all'] = $total;
+				foreach ( $approved as $key ) {
+					if ( empty( $stats[ $key ] ) ) {
+						$stats[ $key ] = 0;
+					}
 				}
-			}
 
-			$stats = (object) $stats;
-			wp_cache_set( 'comments-0', $stats, 'counts' );
+				$stats = (object) $stats;
+				set_transient( 'wc_count_comments', $stats );
+			}
 		}
 
 		return $stats;

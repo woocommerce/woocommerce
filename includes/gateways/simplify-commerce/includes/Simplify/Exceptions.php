@@ -2,27 +2,27 @@
 /*
  * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- * Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, this list of 
- * conditions and the following disclaimer in the documentation and/or other materials 
+ * Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials
  * provided with the distribution.
- * Neither the name of the MasterCard International Incorporated nor the names of its 
- * contributors may be used to endorse or promote products derived from this software 
+ * Neither the name of the MasterCard International Incorporated nor the names of its
+ * contributors may be used to endorse or promote products derived from this software
  * without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
 
@@ -35,82 +35,82 @@
 class Simplify_ApiException extends Exception
 {
 
-    protected $errorData;
-    protected $status;
-    protected $errorCode;
-    protected $reference;
+	protected $errorData;
+	protected $status;
+	protected $errorCode;
+	protected $reference;
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message);
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message);
 
-        $this->status = $status;
-        $this->errorCode = null;
-        $this->reference = null;
+		$this->status = $status;
+		$this->errorCode = null;
+		$this->reference = null;
 
-        if ($errorData != null) {
-            
-            $this->reference = $errorData['reference'];
-            $this->errorData = $errorData;
+		if ($errorData != null) {
 
-            $error = $errorData['error'];            
-            if ($error != null) {
-    
-                $m = $error['message'];
-                if ($m != null) {
-                    $this->message = $m;
-                }
+			$this->reference = $errorData['reference'];
+			$this->errorData = $errorData;
 
-                $this->errorCode = $error['code'];
-            }
-        }
-    }
-    
-    /**
-     * Returns a map of all error data returned by the API.
-     * @return array a map containing API error data.
-     */
-    function getErrorData() {
-        return $this->errorData;
-    }
+			$error = $errorData['error'];
+			if ($error != null) {
 
-    /**
-     * Returns the HTTP status for the request.
-     * @return string HTTP status code (or null if there is no status).
-     */
-    function getStatus() {
-        return $this->status;
-    }
-    
-    /**
-     * Returns unique reference for the API error.
-     * @return string a reference (or null if there is no reference).
-     */
-    function getReference() {
-        return $this->reference;
-    }
+				$m = $error['message'];
+				if ($m != null) {
+					$this->message = $m;
+				}
 
-    /**
-     * Returns an code for the API error.
-     * @return string the error code.
-     */
-    function getErrorCode() {
-        return $this->errorCode;
-    }
+				$this->errorCode = $error['code'];
+			}
+		}
+	}
 
-    /**
-     * Returns a description of the error.
-     * @return string Description of the error.
-     */
-    function describe() {
-        return get_class($this) . ": \"" 
-            . $this->getMessage() . "\" (status: "
-            . $this->getStatus() . ", error code: "
-            . $this->getErrorCode() . ", reference: "
-            . $this->getReference() . ")";
-    }
+	/**
+	 * Returns a map of all error data returned by the API.
+	 * @return array a map containing API error data.
+	 */
+	function getErrorData() {
+		return $this->errorData;
+	}
+
+	/**
+	 * Returns the HTTP status for the request.
+	 * @return string HTTP status code (or null if there is no status).
+	 */
+	function getStatus() {
+		return $this->status;
+	}
+
+	/**
+	 * Returns unique reference for the API error.
+	 * @return string a reference (or null if there is no reference).
+	 */
+	function getReference() {
+		return $this->reference;
+	}
+
+	/**
+	 * Returns an code for the API error.
+	 * @return string the error code.
+	 */
+	function getErrorCode() {
+		return $this->errorCode;
+	}
+
+	/**
+	 * Returns a description of the error.
+	 * @return string Description of the error.
+	 */
+	function describe() {
+		return get_class($this) . ": \""
+			. $this->getMessage() . "\" (status: "
+			. $this->getStatus() . ", error code: "
+			. $this->getErrorCode() . ", reference: "
+			. $this->getReference() . ")";
+	}
 
 }
 
@@ -120,12 +120,12 @@ class Simplify_ApiException extends Exception
  */
 class Simplify_ApiConnectionException extends Simplify_ApiException {
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
+	}
 }
 
 /**
@@ -133,12 +133,12 @@ class Simplify_ApiConnectionException extends Simplify_ApiException {
  */
 class Simplify_AuthenticationException extends Simplify_ApiException {
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
+	}
 }
 
 /**
@@ -146,57 +146,57 @@ class Simplify_AuthenticationException extends Simplify_ApiException {
  */
 class Simplify_BadRequestException extends Simplify_ApiException {
 
-    protected $fieldErrors;
+	protected $fieldErrors;
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
 
-        $fieldErrors = array();
+		$fieldErrors = array();
 
-        if ($errorData != null) {
-            $error = $errorData['error'];
-            if ($error != null) {
-                $fieldErrors = $error['fieldErrors'];
-                if ($fieldErrors != null) {
-                    $this->fieldErrors = array();                
-                    foreach ($fieldErrors as $fieldError) {
-                        array_push($this->fieldErrors, new Simplify_FieldError($fieldError));
-                    }
-                }
-            }
-        }
-    }
+		if ($errorData != null) {
+			$error = $errorData['error'];
+			if ($error != null) {
+				$fieldErrors = $error['fieldErrors'];
+				if ($fieldErrors != null) {
+					$this->fieldErrors = array();
+					foreach ($fieldErrors as $fieldError) {
+						array_push($this->fieldErrors, new Simplify_FieldError($fieldError));
+					}
+				}
+			}
+		}
+	}
 
-    /**
-     * Returns a boolean indicating whether there are any field errors.
-     * @return boolean true if there are field errors; false otherwise.
-     */
-    function hasFieldErrors() {
-        return count($this->fieldErrors) > 0;
-    }
+	/**
+	 * Returns a boolean indicating whether there are any field errors.
+	 * @return boolean true if there are field errors; false otherwise.
+	 */
+	function hasFieldErrors() {
+		return count($this->fieldErrors) > 0;
+	}
 
-    /**
-     * Returns a list containing all field errors.
-     * @return array list of field errors.
-     */
-    function getFieldErrors() {
-        return $this->fieldErrors;
-    }
+	/**
+	 * Returns a list containing all field errors.
+	 * @return array list of field errors.
+	 */
+	function getFieldErrors() {
+		return $this->fieldErrors;
+	}
 
-    /**
-     * Returns a description of the error.
-     * @return string description of the error.
-     */
-    function describe() {
-        $s = parent::describe();
-        foreach ($this->getFieldErrors() as $fieldError) {
-            $s = $s . "\n" . (string) $fieldError;
-        }
-        return $s . "\n";
-    }
+	/**
+	 * Returns a description of the error.
+	 * @return string description of the error.
+	 */
+	function describe() {
+		$s = parent::describe();
+		foreach ($this->getFieldErrors() as $fieldError) {
+			$s = $s . "\n" . (string) $fieldError;
+		}
+		return $s . "\n";
+	}
 
 }
 
@@ -205,48 +205,48 @@ class Simplify_BadRequestException extends Simplify_ApiException {
  */
 class Simplify_FieldError {
 
-    protected $field;
-    protected $code;
-    protected $message;
+	protected $field;
+	protected $code;
+	protected $message;
 
-    /**
-     * @ignore
-     */
-    function __construct($errorData) {
-    
-        $this->field = $errorData['field'];
-        $this->code = $errorData['code'];
-        $this->message = $errorData['message'];
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($errorData) {
 
-    /**
-     * Returns the name of the field with the error.
-     * @return string the field name.
-     */
-    function getFieldName() {
-        return $this->field;
-    }
+		$this->field = $errorData['field'];
+		$this->code = $errorData['code'];
+		$this->message = $errorData['message'];
+	}
 
-    /**
-     * Returns the code for the error.
-     * @return string the error code.
-     */
-    function getErrorCode() {
-        return $this->code;
-    }
+	/**
+	 * Returns the name of the field with the error.
+	 * @return string the field name.
+	 */
+	function getFieldName() {
+		return $this->field;
+	}
 
-    /**
-     * Returns a description of the error.
-     * @return string description of the error.
-     */
-    function getMessage() {
-        return $this->message;
-    }
+	/**
+	 * Returns the code for the error.
+	 * @return string the error code.
+	 */
+	function getErrorCode() {
+		return $this->code;
+	}
+
+	/**
+	 * Returns a description of the error.
+	 * @return string description of the error.
+	 */
+	function getMessage() {
+		return $this->message;
+	}
 
 
-    function __toString() {
-        return "Field error: " . $this->getFieldName() . "\"" . $this->getMessage() . "\" (" . $this->getErrorCode() . ")";
-    }
+	function __toString() {
+		return "Field error: " . $this->getFieldName() . "\"" . $this->getMessage() . "\" (" . $this->getErrorCode() . ")";
+	}
 
 }
 
@@ -255,12 +255,12 @@ class Simplify_FieldError {
  */
 class Simplify_ObjectNotFoundException extends Simplify_ApiException {
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
+	}
 }
 
 /**
@@ -268,12 +268,12 @@ class Simplify_ObjectNotFoundException extends Simplify_ApiException {
  */
 class Simplify_NotAllowedException extends Simplify_ApiException {
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
+	}
 }
 
 /**
@@ -281,10 +281,10 @@ class Simplify_NotAllowedException extends Simplify_ApiException {
  */
 class Simplify_SystemException extends Simplify_ApiException {
 
-    /**
-     * @ignore
-     */
-    function __construct($message, $status = null, $errorData = null) {
-        parent::__construct($message, $status, $errorData);
-    }
+	/**
+	 * @ignore
+	 */
+	function __construct($message, $status = null, $errorData = null) {
+		parent::__construct($message, $status, $errorData);
+	}
 }

@@ -326,9 +326,9 @@ class WC_Download_Handler {
 		header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
-        if ( $size = @filesize( $file_path ) ) {
-        	header( "Content-Length: " . $size );
-        }
+		if ( $size = @filesize( $file_path ) ) {
+			header( "Content-Length: " . $size );
+		}
 	}
 
 	/**

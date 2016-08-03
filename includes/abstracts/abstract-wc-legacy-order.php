@@ -616,6 +616,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 */
 	public function get_order_currency() {
 		_deprecated_function( 'get_order_currency', '2.7', 'get_currency' );
-		return $this->get_currency();
+		return apply_filters( 'woocommerce_get_order_currency', $this->get_currency(), $this );
 	}
 }

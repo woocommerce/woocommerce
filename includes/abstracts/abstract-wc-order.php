@@ -589,23 +589,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Set order status.
 	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param array details of change
 	 */
 	 public function set_status( $new_status ) {
- 		$old_status = $this->get_status();
- 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		 $old_status = $this->get_status();
+		 $new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
 		// If the old status is unknown (e.g. draft) assume its pending for action usage.
 		if ( ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
 			$old_status = 'pending';
 		}
 
- 		if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $old_status ) {
- 			$this->_data['status'] = 'wc-' . $new_status;
- 		} else {
+		 if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $old_status ) {
+			 $this->_data['status'] = 'wc-' . $new_status;
+		 } else {
 			$new_status = $old_status;
 		}
 
@@ -613,7 +614,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'from' => $old_status,
 			'to'   => $new_status
 		);
- 	}
+	 }
 
 	/**
 	 * Set Order Type
@@ -1120,13 +1121,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get all tax classes for items in the order.
+	 *
+	 * @since 2.6.3
+	 * @return array
+	 */
+	public function get_items_tax_classes() {
+		$found_tax_classes = array();
+
+		foreach ( $this->get_items() as $item ) {
+			if ( $_product = $this->get_product_from_item( $item ) ) {
+				$found_tax_classes[] = $_product->get_tax_class();
+			}
+		}
+
+		return array_unique( $found_tax_classes );
+	}
+
+	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * Will use the base country unless customer addresses are set.
 	 * @param $args array Added in 2.7.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
-		$found_tax_classes = array();
 		$tax_based_on      = get_option( 'woocommerce_tax_based_on' );
 		$args              = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
@@ -1148,7 +1166,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$tax_class           = $item->get_tax_class();
 			$tax_status          = $item->get_tax_status();
-			$found_tax_classes[] = $tax_class;
 
 			if ( '0' !== $tax_class && 'taxable' === $tax_status ) {
 				$tax_rates = WC_Tax::find_rates( array(
@@ -1181,7 +1198,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			// Inherit tax class from items
 			if ( '' === $shipping_tax_class ) {
-				$tax_classes = WC_Tax::get_tax_classes();
+				$tax_classes       = WC_Tax::get_tax_classes();
+				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
 					$tax_class = sanitize_title( $tax_class );

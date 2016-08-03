@@ -63,7 +63,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->subject        = __( 'Your account on {site_title}', 'woocommerce');
 		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce');
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

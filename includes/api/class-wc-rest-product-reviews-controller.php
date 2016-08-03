@@ -103,7 +103,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$product = get_post( (int) $request['product_id'] );
 
 		if ( empty( $product->post_type ) || 'product' !== $product->post_type ) {
-			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$reviews = get_approved_comments( $product->ID );
@@ -128,13 +128,13 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$product = get_post( (int) $request['product_id'] );
 
 		if ( empty( $product->post_type ) || 'product' !== $product->post_type ) {
-			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$review = get_comment( $id );
 
 		if ( empty( $id ) || empty( $review ) || intval( $review->comment_post_ID ) !== intval( $product->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$delivery = $this->prepare_item_for_response( $review, $request );

@@ -49,7 +49,7 @@ class WC_Email_Failed_Order extends WC_Email {
 	 */
 	public function trigger( $order_id ) {
 		if ( $order_id ) {
-            $this->object                  = wc_get_order( $order_id );
+			$this->object                  = wc_get_order( $order_id );
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );

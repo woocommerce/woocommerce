@@ -153,7 +153,7 @@ class WC_Admin_Profile {
 
 		foreach ( $show_fields as $fieldset ) :
 			?>
-			<h3><?php echo $fieldset['title']; ?></h3>
+			<h2><?php echo $fieldset['title']; ?></h2>
 			<table class="form-table">
 				<?php
 				foreach ( $fieldset['fields'] as $key => $field ) :
