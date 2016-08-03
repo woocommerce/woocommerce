@@ -12,7 +12,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_insert_api_keys() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
+		$args   = array(
 			'user_id' => $user_id,
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -26,7 +26,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	}
 
 	public function test_should_not_insert_wrong_user() {
-		$args = array(
+		$args   = array(
 			'user_id' => 500000
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -36,31 +36,31 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_insert_api_keys_scopes() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
+		$args   = array(
 			'user_id' => $user_id
 		);
 		$result = WC_Auth::create_api_key( $args );
 		$this->assertEquals( 'read', $result['key_permissions'] );
 
 		$args['scope'] = 'write';
-		$result = WC_Auth::create_api_key( $args );
+		$result        = WC_Auth::create_api_key( $args );
 		$this->assertEquals( 'write', $result['key_permissions'] );
 
 		$args['scope'] = 'read_write';
-		$result = WC_Auth::create_api_key( $args );
+		$result        = WC_Auth::create_api_key( $args );
 		$this->assertEquals( 'read_write', $result['key_permissions'] );
 
 		// Wrong scope, read is set by default
 		$args['scope'] = 'wrong_scope';
-		$result = WC_Auth::create_api_key( $args );
+		$result        = WC_Auth::create_api_key( $args );
 		$this->assertEquals( 'read', $result['key_permissions'] );
 	}
 
 	public function test_get_api_key_data() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
-			'user_id' => $user_id,
+		$args   = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION'
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -79,12 +79,12 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_get_api_key_data_by_consumer_key() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
+		$args   = array(
 			'user_id' => $user_id
 		);
 		$result = WC_Auth::create_api_key( $args );
 
-		$data_by_ck = WC_Auth::get_api_key_data_by_consumer_key( $result['consumer_key'] );
+		$data_by_ck  = WC_Auth::get_api_key_data_by_consumer_key( $result['consumer_key'] );
 		$data_by_key = WC_Auth::get_api_key_data( $result['key_id'] );
 
 		$this->assertEquals( $data_by_ck, $data_by_key );
@@ -99,26 +99,26 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_get_test_api_keys() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
-			'user_id' => $user_id,
+		$args    = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION1'
 		);
 		$result1 = WC_Auth::create_api_key( $args );
 
-		$args = array(
-			'user_id' => $user_id,
+		$args    = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION2'
 		);
 		$result2 = WC_Auth::create_api_key( $args );
 
-		$args = array(
-			'user_id' => $user_id,
+		$args    = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION3'
 		);
 		$result3 = WC_Auth::create_api_key( $args );
 
-		$args = array(
-			'user_id' => $user_id,
+		$args    = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION4'
 		);
 		$result4 = WC_Auth::create_api_key( $args );
@@ -147,22 +147,22 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_update_api_key() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
-			'user_id' => $user_id,
+		$args   = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION'
 		);
 		$result = WC_Auth::create_api_key( $args );
 		$key_id = $result['key_id'];
 
 		$user_id_2 = $this->factory->user->create();
-		$new_args = array(
-			'user_id' => $user_id_2,
-			'scope' => 'write',
+		$new_args  = array(
+			'user_id'     => $user_id_2,
+			'scope'       => 'write',
 			'description' => 'APP_DESCRIPTION_2',
 			'last_access' => current_time( 'mysql' ),
-			'nonces' => array( 'nonce1' => '1', 'nonce2' => '2' )
+			'nonces'      => array( 'nonce1' => '1', 'nonce2' => '2' )
 		);
-		$result = WC_Auth::update_api_key( $key_id, $new_args );
+		$result    = WC_Auth::update_api_key( $key_id, $new_args );
 		$this->assertTrue( $result );
 
 		$data = WC_Auth::get_api_key_data( $key_id );
@@ -176,7 +176,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_update_last_access() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
+		$args   = array(
 			'user_id' => $user_id
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -190,8 +190,8 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_delete_api_key() {
 		$user_id = $this->factory->user->create();
 
-		$args = array(
-			'user_id' => $user_id,
+		$args   = array(
+			'user_id'     => $user_id,
 			'description' => 'APP_DESCRIPTION'
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -209,7 +209,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 		$user_id = $this->factory->user->create();
 
-		$args = array(
+		$args   = array(
 			'user_id' => $user_id
 		);
 		$result = WC_Auth::create_api_key( $args );
@@ -230,20 +230,20 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 	public function test_get_api_keys_cache() {
 		global $wpdb;
 		$user_id = $this->factory->user->create();
-		$args = array(
-			'user_id' => $user_id,
+		$args    = array(
+			'user_id'     => $user_id,
 			'description' => 'DESCRIPTION1'
 		);
 		$result1 = WC_Auth::create_api_key( $args );
 
 		$args['description'] = 'DESCRIPTION2';
-		$result2 = WC_Auth::create_api_key( $args );
+		$result2             = WC_Auth::create_api_key( $args );
 
 		$args['description'] = 'DESCRIPTION3';
-		$result3 = WC_Auth::create_api_key( $args );
+		$result3             = WC_Auth::create_api_key( $args );
 
 		$args['description'] = 'DESCRIPTION4';
-		$result4 = WC_Auth::create_api_key( $args );
+		$result4             = WC_Auth::create_api_key( $args );
 
 		WC_Auth::get_api_keys();
 		$num_queries = $wpdb->num_queries;
@@ -258,5 +258,40 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$this->assertEquals( $wpdb->num_queries, $num_queries );
 		WC_Auth::get_api_key_data_by_consumer_key( $result1['consumer_key'] );
 		$this->assertEquals( $wpdb->num_queries, $num_queries );
+	}
+
+	public function test_get_api_keys_count_cache() {
+		global $wpdb;
+		$user_id = $this->factory->user->create();
+		$args    = array(
+			'user_id'     => $user_id,
+			'description' => 'DESCRIPTION1'
+		);
+		$result1 = WC_Auth::create_api_key( $args );
+
+		$args['description'] = 'DESCRIPTION2';
+		$result2             = WC_Auth::create_api_key( $args );
+
+		$args['description'] = 'DESCRIPTION3';
+		$result3             = WC_Auth::create_api_key( $args );
+
+		$args['description'] = 'DESCRIPTION4';
+		$result4             = WC_Auth::create_api_key( $args );
+
+		WC_Auth::get_api_keys_count();
+		$num_queries = $wpdb->num_queries;
+
+		// This should not make another query
+		WC_Auth::get_api_keys_count();
+		$this->assertEquals( $wpdb->num_queries, $num_queries );
+
+		// A search should make another query
+		WC_Auth::get_api_keys_count( array( 's' => 'DESCR' ) );
+		$this->assertEquals( $wpdb->num_queries, ++ $num_queries );
+
+		// But not searching twice
+		WC_Auth::get_api_keys_count( array( 's' => 'DESCR' ) );
+		$this->assertEquals( $wpdb->num_queries, $num_queries );
+
 	}
 }

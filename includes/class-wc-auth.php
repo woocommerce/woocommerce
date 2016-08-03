@@ -558,7 +558,7 @@ class WC_Auth {
 		global $wpdb;
 
 		$defaults = array(
-			'per_page' => apply_filters( 'woocommerce_api_keys_settings_items_per_page', 10 ),
+			'per_page' => 10,
 			'page' => 1,
 			's' => '',
 			'count' => false
