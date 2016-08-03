@@ -174,8 +174,6 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		global $wpdb;
-
 		$per_page = apply_filters( 'woocommerce_api_keys_settings_items_per_page', 10 );
 		$columns  = $this->get_columns();
 		$hidden   = array();
@@ -185,25 +183,20 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
 		$current_page = $this->get_pagenum();
-		if ( 1 < $current_page ) {
-			$offset = $per_page * ( $current_page - 1 );
-		} else {
-			$offset = 0;
-		}
-
-		$search = '';
-
-		if ( ! empty( $_REQUEST['s'] ) ) {
-			$search = "AND description LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
-		}
-
-		// Get the API keys
-		$keys = $wpdb->get_results(
-			"SELECT key_id, user_id, description, permissions, truncated_key, last_access FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search}" .
-			$wpdb->prepare( "ORDER BY key_id DESC LIMIT %d OFFSET %d;", $per_page, $offset ), ARRAY_A
+		$args = array(
+			'per_page' => $per_page,
+			'page' => $current_page,
+			's' => ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '',
 		);
 
-		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" );
+		$_keys = WC_Auth::get_api_keys( $args );
+		// Keep backwards compatibility
+		$keys = array();
+		foreach ( $_keys as $key ) {
+			$keys[] = (array) $key;
+		}
+
+		$count = WC_Auth::get_api_keys_count( $args );
 
 		$this->items = $keys;
 
