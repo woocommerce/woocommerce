@@ -530,7 +530,7 @@ class WC_Auth {
 			return false;
 		}
 
-		$wpdb->update(
+		 $wpdb->update(
 			$wpdb->prefix . 'woocommerce_api_keys',
 			$update,
 			array( 'key_id' => $key_id ),

@@ -378,15 +378,7 @@ class WC_REST_Authentication {
 	 * @param int $key_id
 	 */
 	private function update_last_access( $key_id ) {
-		global $wpdb;
-
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_api_keys',
-			array( 'last_access' => current_time( 'mysql' ) ),
-			array( 'key_id' => $key_id ),
-			array( '%s' ),
-			array( '%d' )
-		);
+		WC_Auth::update_last_access( $key_id );
 	}
 
 	/**
