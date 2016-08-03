@@ -79,8 +79,6 @@ class WC_Admin_API_Keys {
 	 * @return array
 	 */
 	private static function get_key_data( $key_id ) {
-		global $wpdb;
-
 		$empty = array(
 			'key_id'        => 0,
 			'user_id'       => '',
@@ -94,13 +92,9 @@ class WC_Admin_API_Keys {
 			return $empty;
 		}
 
-		$key = $wpdb->get_row( $wpdb->prepare( "
-			SELECT key_id, user_id, description, permissions, truncated_key, last_access
-			FROM {$wpdb->prefix}woocommerce_api_keys
-			WHERE key_id = %d
-		", $key_id ), ARRAY_A );
+		$key = WC_Auth::get_api_key_data( $key_id );
 
-		if ( is_null( $key ) ) {
+		if ( ! $key ) {
 			return $empty;
 		}
 
