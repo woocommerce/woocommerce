@@ -567,11 +567,18 @@ class WC_Auth {
 
 		if ( $args['count'] ) {
 			$sql = "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys $where";
+
 			$cache_key = md5( $sql );
-			$count = wp_cache_get( $cache_key, 'wc_api_key_counts' );
+			$cached = wp_cache_get( 'wc_api_key_counts' );
+			if ( false === $cached || ! is_array( $cached ) ) {
+				$cached = array();
+			}
+
+			$count = isset( $cached[ $cache_key ] ) ? $cached[ $cache_key ] : false;
 			if ( false === $count ) {
-				$count =  $wpdb->get_var( $sql );
-				wp_cache_add( $cache_key, $count, 'wc_api_key_counts' );
+				$count = $wpdb->get_var( $sql );
+				$cached[ $cache_key ] = $count;
+				wp_cache_set( 'wc_api_key_counts', $cached );
 			}
 
 			return $count;
@@ -581,7 +588,12 @@ class WC_Auth {
 			$sql = "SELECT * FROM {$wpdb->prefix}woocommerce_api_keys $where ORDER BY key_id DESC $limit";
 
 			$cache_key = md5( $sql );
-			$results = wp_cache_get( $cache_key, 'wc_api_keys' );
+			$cached = wp_cache_get( 'wc_get_api_keys' );
+			if ( false === $cached || ! is_array( $cached ) ) {
+				$cached = array();
+			}
+
+			$results = isset( $cached[ $cache_key ] ) ? $cached[ $cache_key ] : false;
 			if ( false === $results ) {
 				$results = $wpdb->get_results( $sql );
 
@@ -589,7 +601,8 @@ class WC_Auth {
 					$results = array();
 				}
 
-				wp_cache_add( $cache_key, $results, 'wc_api_keys' );
+				$cached[ $cache_key ] = $results;
+				wp_cache_set( 'wc_get_api_keys', $cached );
 			}
 
 			$list = array();
@@ -710,6 +723,8 @@ class WC_Auth {
 
 		wp_cache_delete( $key_id, 'wc_api_keys' );
 		wp_cache_delete( $data->consumer_key, 'wc_api_keys_consumer' );
+		wp_cache_delete( 'wc_get_api_keys' );
+		wp_cache_delete( 'wc_api_key_counts' );
 	}
 }
 

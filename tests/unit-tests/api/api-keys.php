@@ -142,6 +142,14 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$api_keys = WC_Auth::get_api_keys( array( 'per_page' => 1, 'page' => 2 ) );
 		$this->assertCount( 1, $api_keys );
 		$this->assertEquals( $result3['key_id'], $api_keys[0]->key_id );
+
+		// Delete an api key. It should not be returned using the same query again
+		// as cache should have been cleared
+		WC_Auth::delete_api_key( $result2['key_id'] );
+		$api_keys = WC_Auth::get_api_keys();
+		$this->assertCount( 3, $api_keys );
+		$count = WC_Auth::get_api_keys_count();
+		$this->assertEquals( 3, $count );
 	}
 
 	public function test_update_api_key() {
