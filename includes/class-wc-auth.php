@@ -390,6 +390,347 @@ class WC_Auth {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key['key_id'] ), array( '%d' ) );
 		}
 	}
+
+	/**
+	 * Generate a new pair of API Key/Secret
+	 *
+	 * @param array $args {
+	 *     An array of arguments.
+	 *
+	 *     @type string    $description        Application description
+	 *     @type int       $user_id            The user ID that the pair will be assigned to
+	 *     @type string    $scope           Scope of the API Keys ('read', 'write' or 'read_write')
+	 * }
+	 *
+	 * @return array|bool Return an array with the API Keys data. False in case of error.
+	 */
+	public static function create_api_key( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'description' => '',
+			'user_id' => 0,
+			'scope' => 'read'
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		// Sanitize description
+		$description = wc_clean( $args['description'] );
+
+		// If the user is not passed, let's use the current user
+		$user_id = absint( $args['user_id'] );
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$user = get_userdata( $user_id );
+
+		if ( ! $user ) {
+			return false;
+		}
+
+		// Sanitize scope
+		$scope = sanitize_text_field( $args['scope'] );
+		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? $scope : 'read';
+
+		// Created API keys.
+		$consumer_key    = 'ck_' . wc_rand_hash();
+		$consumer_secret = 'cs_' . wc_rand_hash();
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user->ID,
+				'description'     => $description,
+				'permissions'     => $permissions,
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 )
+			),
+			array(
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s'
+			)
+		);
+
+		return array(
+			'key_id'          => $wpdb->insert_id,
+			'user_id'         => $user_id,
+			'consumer_key'    => $consumer_key,
+			'consumer_secret' => $consumer_secret,
+			'key_permissions' => $permissions
+		);
+	}
+
+	/**
+	 * Update a single API Key pair data
+	 *
+	 * @param int $key_id Key ID
+	 * @param array $args {
+	 *      List of arguments to be updated. Must include at least one of these:
+	 *      @type int       $user_id            New User ID
+	 *      @type string    $description        New Application description
+	 *      @type string    $scope              New Scope of the API Keys ('read', 'write' or 'read_write')
+	 *      @type string    $last_access        New last access date in MySQL format
+	 *      @type array     $last_access        New nonces list
+	 * }
+	 *
+	 * @return bool
+	 */
+	public static function update_api_key( $key_id, $args = array() ) {
+		global $wpdb;
+
+		$api_key_data = self::get_api_key_data( $key_id );
+		if ( ! $api_key_data ) {
+			return false;
+		}
+
+		$update = array();
+		$update_format = array();
+
+		if ( isset( $args['user_id'] ) ) {
+			$user = get_userdata( $args['user_id'] );
+			if ( ! $user ) {
+				return false;
+			}
+
+			$update['user_id'] = $args['user_id'];
+			$update_format[] = '%d';
+		}
+
+		if ( isset( $args['scope'] ) ) {
+			$scope = sanitize_text_field( $args['scope'] );
+			$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? $scope : 'read';
+
+			$update['permissions'] = $permissions;
+			$update_format[] = '%s';
+		}
+
+		if ( isset( $args['description'] ) ) {
+			$update['description'] = sanitize_text_field( $args['description'] );
+			$update_format[] = '%s';
+		}
+
+		if ( isset( $args['last_access'] ) ) {
+			$update['last_access'] = $args['last_access'];
+			$update_format[] = '%s';
+		}
+
+		if ( isset( $args['nonces'] ) ) {
+			$update['nonces'] = maybe_serialize( $args['nonces'] );
+			$update_format[] = '%s';
+		}
+
+		if ( empty( $update ) ) {
+			return false;
+		}
+
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			$update,
+			array( 'key_id' => $key_id ),
+			$update_format,
+			array( '%d' )
+		);
+
+		self::clear_api_key_cache( $key_id );
+
+		return true;
+	}
+
+	public static function update_last_access( $key_id ) {
+		return self::update_api_key( $key_id, array( 'last_access' => current_time( 'mysql' ) ) );
+	}
+
+	/**
+	 * Get a list of API Key data rows
+	 *
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	public static function get_api_keys( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'per_page' => apply_filters( 'woocommerce_api_keys_settings_items_per_page', 10 ),
+			'page' => 1,
+			's' => '',
+			'count' => false
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$where = array( "1 = 1" );
+
+		$args['s'] = wc_clean( $args['s'] );
+		if ( $args['s'] ) {
+			$where[] = $wpdb->prepare( "description LIKE %s", '%' . $wpdb->esc_like( $args['s'] ) . '%' );
+		}
+
+		$where = "WHERE " . implode( " AND ", $where );
+
+		if ( $args['per_page'] < 0 ) {
+			$limit = '';
+		}
+		else {
+			if ( 1 < $args['page'] ) {
+				$offset = $args['per_page'] * ( $args['page'] - 1 );
+			} else {
+				$offset = 0;
+			}
+
+			$limit = $wpdb->prepare( "LIMIT %d OFFSET %d", $args['per_page'], $offset );
+		}
+
+
+		if ( $args['count'] ) {
+			$sql = "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys $where";
+			$cache_key = md5( $sql );
+			$count = wp_cache_get( $cache_key, 'wc_api_key_counts' );
+			if ( false === $count ) {
+				$count =  $wpdb->get_var( $sql );
+				wp_cache_add( $cache_key, $count, 'wc_api_key_counts' );
+			}
+
+			return $count;
+
+		}
+		else {
+			$sql = "SELECT * FROM {$wpdb->prefix}woocommerce_api_keys $where ORDER BY key_id DESC $limit";
+
+			$cache_key = md5( $sql );
+			$results = wp_cache_get( $cache_key, 'wc_api_keys' );
+			if ( false === $results ) {
+				$results = $wpdb->get_results( $sql );
+
+				if ( ! $results ) {
+					$results = array();
+				}
+
+				wp_cache_add( $cache_key, $results, 'wc_api_keys' );
+			}
+
+			$list = array();
+			foreach ( $results as $row ) {
+				wp_cache_add( $row->key_id, $row, 'wc_api_keys' );
+				wp_cache_add( $row->consumer_key, $row, 'wc_api_keys_consumer' );
+				$list[] = self::_format_api_key_data( $row );
+			}
+
+			return $list;
+		}
+
+	}
+
+	public static function get_api_keys_count( $args = array() ) {
+		$args['count'] = true;
+		return self::get_api_keys( $args );
+	}
+
+	/**
+	 * Get a single API Key pair data
+	 *
+	 * @param int $key_id Key ID
+	 *
+	 * @return bool|object
+	 */
+	public static function get_api_key_data( $key_id ) {
+		global $wpdb;
+
+		$data = wp_cache_get( $key_id, 'wc_api_keys' );
+		if ( false === $data ) {
+			$table = $wpdb->prefix . 'woocommerce_api_keys';
+
+			$data = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM $table 
+				WHERE key_id = %d
+				LIMIT 1",
+					$key_id
+				)
+			);
+
+			wp_cache_add( $key_id, $data, 'wc_api_keys' );
+		}
+
+		return self::_format_api_key_data( $data );
+	}
+
+	/**
+	 * Return the Api Key data for the given consumer_key.
+	 *
+	 * @param string $consumer_key
+	 * @return array
+	 */
+	public static function get_api_key_data_by_consumer_key( $consumer_key ) {
+		global $wpdb;
+
+		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
+
+		$data = wp_cache_get( $consumer_key, 'wc_api_keys_consumer' );
+		if ( false === $data ) {
+			$data         = $wpdb->get_row(
+				$wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_api_keys
+				WHERE consumer_key = %s ",
+					$consumer_key
+				)
+			);
+
+			wp_cache_add( $consumer_key, $data, 'wc_api_keys_consumer' );
+		}
+
+
+		return self::_format_api_key_data( $data );
+	}
+
+	/**
+	 * Format an API Key Data row object
+	 *
+	 * @param object $data
+	 * @return bool|object
+	 */
+	private static function _format_api_key_data( $data ) {
+		if ( ! $data ) {
+			return false;
+		}
+
+		$data->nonces = maybe_unserialize( $data->nonces );
+		return $data;
+	}
+
+	/**
+	 * Delete an API Key pair data
+	 *
+	 * @param int $key_id Key ID
+	 */
+	public static function delete_api_key( $key_id ) {
+		global $wpdb;
+	    $wpdb->delete(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array( 'key_id' => $key_id ),
+			array( '%d' )
+		);
+
+		self::clear_api_key_cache( $key_id );
+	}
+
+	public static function clear_api_key_cache( $key_id ) {
+		$data = self::get_api_key_data( $key_id );
+		if ( ! $data ) {
+			return;
+		}
+
+		wp_cache_delete( $key_id, 'wc_api_keys' );
+		wp_cache_delete( $data->consumer_key, 'wc_api_keys_consumer' );
+	}
 }
 
 endif;
