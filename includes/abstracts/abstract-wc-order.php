@@ -1603,7 +1603,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', empty( $fee['line_total'] ) && empty( $fee['line_tax'] ), $id ) ) {
 					continue;
 				}
-				$total_rows[ 'fee_' . $fee->get_order_item_id() ] = array(
+				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'label' => $fee->get_name() . ':',
 					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_currency()) )
 				);
