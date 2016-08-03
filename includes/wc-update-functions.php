@@ -970,3 +970,20 @@ function wc_update_260_refunds() {
 function wc_update_260_db_version() {
 	WC_Install::update_db_version( '2.6.0' );
 }
+
+function wc_update_270_webhooks() {
+	/**
+	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
+	 * and woocommerce_product_bulk_edit_save hooks.
+	 */
+	$product_update_webhooks = get_posts( array(
+		'posts_per_page' => -1,
+		'post_type'      => 'shop_webhook',
+		'meta_key'       => '_topic',
+		'meta_value'     => 'product.updated'
+	) );
+	foreach ( $product_update_webhooks as $product_update_webhook ) {
+		$webhook = new WC_Webhook( $product_update_webhook->ID );
+		$webhook->set_topic( 'product.updated' );
+	}
+}
