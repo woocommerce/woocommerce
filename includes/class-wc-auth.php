@@ -208,43 +208,21 @@ class WC_Auth {
 	 * @return array
 	 */
 	protected function create_keys( $app_name, $app_user_id, $scope ) {
-		global $wpdb;
-
 		$description = sprintf( __( '%s - API %s (created on %s at %s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
 		$user        = wp_get_current_user();
 
 		// Created API keys.
-		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $scope ) : 'read';
-		$consumer_key    = 'ck_' . wc_rand_hash();
-		$consumer_secret = 'cs_' . wc_rand_hash();
+		$result = WC_Auth::create_api_key( array(
+			'description' => $description,
+			'user_id' => $user->ID,
+			'scope' => $scope
+		) );
 
-		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_api_keys',
-			array(
-				'user_id'         => $user->ID,
-				'description'     => $description,
-				'permissions'     => $permissions,
-				'consumer_key'    => wc_api_hash( $consumer_key ),
-				'consumer_secret' => $consumer_secret,
-				'truncated_key'   => substr( $consumer_key, -7 )
-			),
-			array(
-				'%d',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s'
-			)
-		);
+		// @TODO: Apparently $app_user_id was not used previously (before 2.6.2) but for return array
+		// @TODO: It could be deprecated and user only current user or actually use $app_user_id instead
 
-		return array(
-			'key_id'          => $wpdb->insert_id,
-			'user_id'         => $app_user_id,
-			'consumer_key'    => $consumer_key,
-			'consumer_secret' => $consumer_secret,
-			'key_permissions' => $permissions
-		);
+		$result['user_id'] = $app_user_id;
+		return $result;
 	}
 
 	/**
