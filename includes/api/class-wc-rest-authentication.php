@@ -114,7 +114,7 @@ class WC_REST_Authentication {
 		}
 
 		// Get user data.
-		$user = $this->get_user_data_by_consumer_key( $consumer_key );
+		$user = WC_Auth::get_api_key_data_by_consumer_key( $consumer_key );
 		if ( empty( $user ) ) {
 			return false;
 		}
@@ -166,7 +166,7 @@ class WC_REST_Authentication {
 		}
 
 		// Fetch WP user by consumer key
-		$user = $this->get_user_data_by_consumer_key( $_GET['oauth_consumer_key'] );
+		$user = WC_Auth::get_api_key_data_by_consumer_key( $_GET['oauth_consumer_key'] );
 
 		if ( empty( $user ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
@@ -292,7 +292,6 @@ class WC_REST_Authentication {
 	 * @return bool|WP_Error
 	 */
 	private function check_oauth_timestamp_and_nonce( $user, $timestamp, $nonce ) {
-		global $wpdb;
 
 		$valid_window = 15 * 60; // 15 minute window.
 
@@ -319,15 +318,7 @@ class WC_REST_Authentication {
 			}
 		}
 
-		$used_nonces = maybe_serialize( $used_nonces );
-
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_api_keys',
-			array( 'nonces' => $used_nonces ),
-			array( 'key_id' => $user->key_id ),
-			array( '%s' ),
-			array( '%d' )
-		);
+		WC_Auth::update_api_key( $user->key_id, array( 'nonces' => $used_nonces ) );
 
 		return true;
 	}
@@ -339,16 +330,7 @@ class WC_REST_Authentication {
 	 * @return array
 	 */
 	private function get_user_data_by_consumer_key( $consumer_key ) {
-		global $wpdb;
-
-		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
-		$user         = $wpdb->get_row( $wpdb->prepare( "
-			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
-			FROM {$wpdb->prefix}woocommerce_api_keys
-			WHERE consumer_key = %s
-		", $consumer_key ) );
-
-		return $user;
+		return WC_Auth::get_api_key_data_by_consumer_key( $consumer_key );
 	}
 
 	/**
