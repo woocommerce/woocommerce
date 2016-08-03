@@ -375,6 +375,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param  array $item
 	 */
 	public function display_item_downloads( $item ) {
+		_deprecated_function( 'display_item_downloads', '2.7', 'wc_display_item_downloads' );
 		$product   = $item->get_product();
 
 		if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
@@ -400,6 +401,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return string
 	 */
 	public function get_download_url( $product_id, $download_id ) {
+		_deprecated_function( 'get_download_url', '2.7', 'WC_Order_Item_Product::get_item_download_url' );
 		return add_query_arg( array(
 			'download_file' => $product_id,
 			'order'         => $this->get_order_key(),
@@ -415,37 +417,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array
 	 */
 	public function get_item_downloads( $item ) {
-		global $wpdb;
-
-		$product = $item->get_product();
-
-		if ( ! $product ) {
-			/**
-			 * $product can be `false`. Example: checking an old order, when a product or variation has been deleted.
-			 * @see \WC_Product_Factory::get_product
-			 */
-			return array();
-		}
-		$download_ids = $wpdb->get_col( $wpdb->prepare("
-			SELECT download_id
-			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-			WHERE user_email = %s
-			AND order_key = %s
-			AND product_id = %d
-			ORDER BY permission_id
-		", $this->get_billing_email(), $this->get_order_key(), $product_id ) );
-
-		$files = array();
-
-		foreach ( $download_ids as $download_id ) {
-
-			if ( $product->has_file( $download_id ) ) {
-				$files[ $download_id ]				 = $product->get_file( $download_id );
-				$files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+		_deprecated_function( 'get_item_downloads', '2.7', 'WC_Order_Item_Product::get_item_downloads' );
+		return $item->get_item_downloads();
 	}
 
 	/**
@@ -607,6 +580,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return string
 	 */
 	public function email_order_items_table( $args = array() ) {
+		_deprecated_function( 'email_order_items_table', '2.7', 'wc_get_email_order_items' );
 		return wc_get_email_order_items( $this, $args );
 	}
 

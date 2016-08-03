@@ -157,6 +157,22 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
+	 * Get the Download URL.
+	 * @param  int $download_id
+	 * @return string
+	 */
+	public function get_item_download_url( $download_id ) {
+		$order = $this->get_order();
+
+		return $order ? add_query_arg( array(
+			'download_file' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+			'order'         => $order->get_order_key(),
+			'email'         => urlencode( $order->get_billing_email() ),
+			'key'           => $download_id
+		), trailingslashit( home_url() ) ) : '';
+	}
+
+	/**
 	 * Get any associated downloadable files.
 	 * @return array
 	 */
@@ -165,28 +181,22 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		$files   = array();
 		$product = $this->get_product();
-		$order   = wc_get_order( $this->get_order_id() );
+		$order   = $this->get_order();
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
-			$download_file_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
-			$download_ids     = $wpdb->get_col(
+			$download_ids        = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT download_id FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE user_email = %s AND order_key = %s AND product_id = %d ORDER BY permission_id",
 					$order->get_billing_email(),
 					$order->get_order_key(),
-					$download_file_id
+					$this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id()
 				)
 			);
 
 			foreach ( $download_ids as $download_id ) {
 				if ( $product->has_file( $download_id ) ) {
-					$files[ $download_id ] = $product->get_file( $download_id );
-					$files[ $download_id ]['download_url'] = add_query_arg( array(
-						'download_file' => $download_file_id,
-						'order'         => $order->get_order_key(),
-						'email'         => urlencode( $order->get_billing_email() ),
-						'key'           => $download_id
-					), trailingslashit( home_url() ) );
+					$files[ $download_id ]                 = $product->get_file( $download_id );
+					$files[ $download_id ]['download_url'] = $this->get_item_download_url( $download_id );
 				}
 			}
 		}
