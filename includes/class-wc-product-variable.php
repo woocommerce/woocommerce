@@ -610,7 +610,7 @@ class WC_Product_Variable extends WC_Product {
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'      => $availability_html,
 			'sku'                    => $variation->get_sku(),
-			'weight'                 => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
 			'min_qty'                => 1,
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
@@ -724,6 +724,33 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Does a child have a weight set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return boolval( get_post_meta( $this->id, '_child_has_weight', true ) );
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		return boolval( get_post_meta( $this->id, '_child_has_dimensions', true ) );
+	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
+
+	/**
 	 * Sync the variable product with it's children.
 	 */
 	public static function sync( $product_id ) {
@@ -740,6 +767,8 @@ class WC_Product_Variable extends WC_Product {
 		// No published variations - product won't be purchasable.
 		if ( ! $children ) {
 			update_post_meta( $product_id, '_price', '' );
+			delete_post_meta( $product_id, '_child_has_weight' );
+			delete_post_meta( $product_id, '_child_has_dimensions' );
 			delete_transient( 'wc_products_onsale' );
 
 			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
@@ -825,6 +854,22 @@ class WC_Product_Variable extends WC_Product {
 			add_post_meta( $product_id, '_price', $min_price, false );
 			add_post_meta( $product_id, '_price', $max_price, false );
 			delete_transient( 'wc_products_onsale' );
+
+			// Sync weights
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_weight', true ) ) {
+					update_post_meta( $product_id, '_child_has_weight', true );
+					break;
+				}
+			}
+
+			// Sync dimensions
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_height', true ) || get_post_meta( $child_id, '_width', true ) || get_post_meta( $child_id, '_length', true ) ) {
+					update_post_meta( $product_id, '_child_has_dimensions', true );
+					break;
+				}
+			}
 
 			// Sync attributes
 			self::sync_attributes( $product_id, $children );

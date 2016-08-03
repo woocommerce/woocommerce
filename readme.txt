@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Redirect to login after password reset.
 * When using authorizations in PayPal standard, automatically capture funds when the order goes processing/completed.
 * On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
+* Show variable weights/dimensions even when parent values are not set.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
