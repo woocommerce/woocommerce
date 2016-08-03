@@ -362,10 +362,8 @@ class WC_Auth {
 	 * @param array $key
 	 */
 	private function maybe_delete_key( $key ) {
-		global $wpdb;
-
 		if ( isset( $key['key_id'] ) ) {
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key['key_id'] ), array( '%d' ) );
+			WC_Auth::delete_api_key( $key['key_id'] );
 		}
 	}
 
