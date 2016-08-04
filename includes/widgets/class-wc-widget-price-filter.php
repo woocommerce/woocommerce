@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  2.3.1
  * @extends  WC_Widget
  */
 class WC_Widget_Price_Filter extends WC_Widget {
@@ -71,28 +71,19 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		// Remember current filters/search
 		$fields = '';
 
-		if ( get_search_query() ) {
-			$fields .= '<input type="hidden" name="s" value="' . get_search_query() . '" />';
-		}
+		$filters = apply_filters('woocommerce_widget_price_filter_remember', array(
+			's' => get_search_query(),
+			'post_type' => $_GET['post_type'],
+			'product_cat' => $_GET['product_cat'],
+			'product_tag' => $_GET['product_tag'],
+			'orderby' => $_GET['orderby'],
+			'min_rating' => $_GET['min_rating'],
+		));
 
-		if ( ! empty( $_GET['post_type'] ) ) {
-			$fields .= '<input type="hidden" name="post_type" value="' . esc_attr( $_GET['post_type'] ) . '" />';
-		}
-
-		if ( ! empty ( $_GET['product_cat'] ) ) {
-			$fields .= '<input type="hidden" name="product_cat" value="' . esc_attr( $_GET['product_cat'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['product_tag'] ) ) {
-			$fields .= '<input type="hidden" name="product_tag" value="' . esc_attr( $_GET['product_tag'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['orderby'] ) ) {
-			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['min_rating'] ) ) {
-			$fields .= '<input type="hidden" name="min_rating" value="' . esc_attr( $_GET['min_rating'] ) . '" />';
+		foreach ($filters as $name => $value) {
+			if(!empty($value)) {
+				$fields .= '<input type="hidden" name="' . $name . '" value="' . esc_attr( $value ) . '" />';
+			}
 		}
 
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
