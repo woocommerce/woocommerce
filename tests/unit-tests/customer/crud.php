@@ -438,7 +438,6 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		add_user_meta( $customer_id, 'test_field', $meta_value, true );
 		$customer->read( $customer_id );
 		$fields = $customer->get_meta_data();
-		$this->assertCount( 1, $fields );
 		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field') );
 	}
 
