@@ -729,7 +729,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_has_weight() {
-		return boolval( get_post_meta( $this->id, '_child_has_weight', true ) );
+		return (bool) get_post_meta( $this->id, '_child_has_weight', true );
 	}
 
 	/**
@@ -738,7 +738,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_has_dimensions() {
-		return boolval( get_post_meta( $this->id, '_child_has_dimensions', true ) );
+		return (bool) get_post_meta( $this->id, '_child_has_dimensions', true );
 	}
 
 	/**
