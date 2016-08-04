@@ -416,6 +416,15 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$session = new \WC_Customer();
 		$session->load_session();
 		$this->assertEquals( '124 South Street', $session->get_billing_address() );
+
+		$session = new \WC_Customer();
+		$session->load_session();
+		$session->set_billing_postcode( '32191' );
+		$session->save();
+
+		// should still be session ID, not a created row, since we are working with guests/sessions
+		$this->assertFalse( is_numeric( $session->get_id() ) );
+		$this->assertEquals( '32191' , $session->get_billing_postcode() );
 	}
 
 	/**

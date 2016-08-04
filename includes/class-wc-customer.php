@@ -1012,10 +1012,16 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Save data (either create or update depending on if we are working on an existing customer).
+	 * Save data. Create when creating a new user/class, update when editing
+	 * an existing user, and save session when working on a logged out guest
+	 * session.
 	 * @since 2.7.0
 	 */
 	public function save() {
+		if ( $this->_from_session && ! $this->_is_user ) {
+			$this->save_session_if_changed();
+			return;
+		}
 		if ( ! $this->_is_user ) {
 			$this->create();
 		} else {
