@@ -133,7 +133,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * Get order item ID this meta belongs to.
 	 * @return int
 	 */
-	public function get_order_item_id() {
+	protected function get_order_item_id() {
 		return absint( $this->_data['order_item_id'] );
 	}
 
@@ -179,7 +179,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * Set order item ID.
 	 * @param int $value
 	 */
-	public function set_order_item_id( $value ) {
+	protected function set_order_item_id( $value ) {
 		$this->_data['order_item_id'] = absint( $value );
 	}
 
