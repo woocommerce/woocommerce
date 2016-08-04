@@ -60,7 +60,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
@@ -78,7 +78,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
@@ -96,7 +96,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
