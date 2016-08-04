@@ -344,10 +344,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
  */
-function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '' ) {
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET;
 	}
+	$html = '';
+
 	foreach ( $values as $key => $value ) {
 		if ( in_array( $key, $exclude, true ) ) {
 			continue;
@@ -356,10 +358,16 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			$key = $current_key . '[' . $key . ']';
 		}
 		if ( is_array( $value ) ) {
-			wc_query_string_form_fields( $value, $exclude, $key );
+			$html .= wc_query_string_form_fields( $value, $exclude, $key, true );
 		} else {
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
 		}
+	}
+
+	if ( $return ) {
+		return $html;
+	} else {
+		echo $html;
 	}
 }
 
