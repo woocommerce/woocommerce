@@ -126,7 +126,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $data     = $response->get_data();
         $theme    = $data['theme'];
 
-        $this->assertEquals( 9, count( $theme ) );
+        $this->assertEquals( 13, count( $theme ) );
         $this->assertEquals( $active_theme->Name, $theme['name'] );
     }
 
