@@ -349,7 +349,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		$values = $_GET;
 	}
 	foreach ( $values as $key => $value ) {
-		if ( in_array( $key, $exclude ) ) {
+		if ( in_array( $key, $exclude, true ) ) {
 			continue;
 		}
 		if ( $current_key ) {
