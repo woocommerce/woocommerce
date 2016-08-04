@@ -306,7 +306,12 @@ table.wc_status_table {
 
 #log-viewer-select {
 	padding: 10px 0 8px;
-	line-height: 180%;
+	line-height: 28px;
+	h2 {
+		a {
+			vertical-align: middle;
+		}
+	}
 }
 
 #log-viewer {

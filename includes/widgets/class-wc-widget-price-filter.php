@@ -68,45 +68,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		wp_enqueue_script( 'wc-price-slider' );
 
-		// Remember current filters/search
-		$fields = '';
-
-		if ( get_search_query() ) {
-			$fields .= '<input type="hidden" name="s" value="' . get_search_query() . '" />';
-		}
-
-		if ( ! empty( $_GET['post_type'] ) ) {
-			$fields .= '<input type="hidden" name="post_type" value="' . esc_attr( $_GET['post_type'] ) . '" />';
-		}
-
-		if ( ! empty ( $_GET['product_cat'] ) ) {
-			$fields .= '<input type="hidden" name="product_cat" value="' . esc_attr( $_GET['product_cat'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['product_tag'] ) ) {
-			$fields .= '<input type="hidden" name="product_tag" value="' . esc_attr( $_GET['product_tag'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['orderby'] ) ) {
-			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
-		}
-
-		if ( ! empty( $_GET['min_rating'] ) ) {
-			$fields .= '<input type="hidden" name="min_rating" value="' . esc_attr( $_GET['min_rating'] ) . '" />';
-		}
-
-		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
-			foreach ( $_chosen_attributes as $attribute => $data ) {
-				$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );
-
-				$fields .= '<input type="hidden" name="' . esc_attr( $taxonomy_filter ) . '" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';
-
-				if ( 'or' == $data['query_type'] ) {
-					$fields .= '<input type="hidden" name="' . esc_attr( str_replace( 'pa_', 'query_type_', $attribute ) ) . '" value="or" />';
-				}
-			}
-		}
-
 		// Find min and max price in current result set
 		$prices = $this->get_filtered_price();
 		$min    = floor( $prices->min_price );
@@ -152,7 +113,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					<div class="price_label" style="display:none;">
 						' . __( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
 					</div>
-					' . $fields . '
+					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price' ), '', true ) . '
 					<div class="clear"></div>
 				</div>
 			</div>

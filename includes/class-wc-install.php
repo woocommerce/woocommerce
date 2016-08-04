@@ -72,6 +72,9 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
+		'2.7.0' => array(
+			'wc_update_270_webhooks',
+		),
 	);
 
 	/** @var object Background update class */

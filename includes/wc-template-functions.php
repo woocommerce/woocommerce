@@ -344,22 +344,30 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
  */
-function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '' ) {
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET;
 	}
+	$html = '';
+
 	foreach ( $values as $key => $value ) {
-		if ( in_array( $key, $exclude ) ) {
+		if ( in_array( $key, $exclude, true ) ) {
 			continue;
 		}
 		if ( $current_key ) {
 			$key = $current_key . '[' . $key . ']';
 		}
 		if ( is_array( $value ) ) {
-			wc_query_string_form_fields( $value, $exclude, $key );
+			$html .= wc_query_string_form_fields( $value, $exclude, $key, true );
 		} else {
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
 		}
+	}
+
+	if ( $return ) {
+		return $html;
+	} else {
+		echo $html;
 	}
 }
 
@@ -1141,7 +1149,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		}
 
 		// Additional information tab - shows attributes
-		if ( $product && ( $product->has_attributes() || ( $product->enable_dimensions_display() && ( $product->has_dimensions() || $product->has_weight() ) ) ) ) {
+		if ( $product && ( $product->has_attributes() || $product->enable_dimensions_display() ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional Information', 'woocommerce' ),
 				'priority' => 20,
@@ -1748,10 +1756,13 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
 
 		if ( $thumbnail_id ) {
-			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
-			$image = $image[0];
+			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
+			$image        = $image[0];
+			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
 		} else {
-			$image = wc_placeholder_img_src();
+			$image        = wc_placeholder_img_src();
+			$image_srcset = $image_sizes = false;
 		}
 
 		if ( $image ) {
@@ -1759,7 +1770,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
-			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+			// Add responsive image markup if available
+			if ( $image_srcset && $image_sizes ) {
+				echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" srcset="' . esc_attr( $image_srcset ) . '" sizes="' . esc_attr( $image_sizes ) . '" />';
+			} else {
+				echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+			}
 		}
 	}
 }
@@ -2037,11 +2053,19 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @return string
 	 */
 	function get_product_search_form( $echo = true  ) {
+		global $product_search_form_index;
+
 		ob_start();
+
+		if ( empty( $product_search_form_index ) ) {
+			$product_search_form_index = 0;
+		}
 
 		do_action( 'pre_get_product_search_form'  );
 
-		wc_get_template( 'product-searchform.php' );
+		wc_get_template( 'product-searchform.php', array(
+			'index' => $product_search_form_index++,
+		) );
 
 		$form = apply_filters( 'get_product_search_form', ob_get_clean() );
 

@@ -167,6 +167,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 	}
 
 	/**
@@ -200,6 +201,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Taxes_Controller',
 			'WC_REST_Webhook_Deliveries_Controller',
 			'WC_REST_Webhooks_Controller',
+			'WC_REST_System_Status_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
