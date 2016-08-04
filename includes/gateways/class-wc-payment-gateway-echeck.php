@@ -18,7 +18,7 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
-		if ( $this->supports( 'tokenization' ) && is_checkout() && is_user_logged_in() ) {
+		if ( $this->supports( 'tokenization' ) && is_checkout() ) {
 			$this->tokenization_script();
 			$this->saved_payment_methods();
 			$this->form();

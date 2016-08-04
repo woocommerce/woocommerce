@@ -306,7 +306,12 @@ table.wc_status_table {
 
 #log-viewer-select {
 	padding: 10px 0 8px;
-	line-height: 180%;
+	line-height: 28px;
+	h2 {
+		a {
+			vertical-align: middle;
+		}
+	}
 }
 
 #log-viewer {
@@ -585,7 +590,7 @@ ul.wc_coupon_list_block {
 
 			.hour,
 			.minute {
-				width: 2.5em;
+				width: 3.5em;
 			}
 
 			small {
@@ -1045,7 +1050,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					margin-top: .5em;
 					font-size: 0.92em !important;
-					color: #c8c8c8;
+					color: #888;
 				}
 			}
 
@@ -1146,7 +1151,7 @@ ul.wc_coupon_list_block {
 
 				small.times, del, .wc-order-item-taxes, .wc-order-item-discount, .wc-order-item-refund-fields {
 					font-size: 0.92em !important;
-					color: #c8c8c8;
+					color: #888;
 				}
 
 				.wc-order-item-taxes, .wc-order-item-refund-fields {
@@ -1197,7 +1202,7 @@ ul.wc_coupon_list_block {
 			table.display_meta {
 				margin: .5em 0 0 0;
 				font-size: 0.92em !important;
-				color: #c8c8c8;
+				color: #888;
 
 				tr {
 					th {
@@ -2424,19 +2429,17 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			padding-right: 32px;
 			li {
 				display: inline;
-				margin: 0 0 0 0;
+				margin: 0;
 			}
 			li:before {
 				content: ", ";
 			}
-			li:last-child:before, li:first-child:before {
+			li:first-child:before,
+			li:nth-child(2):before {
 				content: "";
 			}
-			li:last-child {
-				display: block;
-			}
 			li:first-child {
-				margin: 0 !important;
+				display: block;
 			}
 			li.wc-shipping-zone-methods-add-row {
 				position: absolute;
@@ -2537,7 +2540,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 					}
 					input[type="checkbox"] {
 						width: auto;
-						min-width: 0;
+						min-width: 16px;
 					}
 				}
 				td, th {
@@ -2556,13 +2559,18 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 }
 
 .wc-backbone-modal .wc-shipping-zone-method-selector {
-	padding: 2px;
+	p {
+		margin-top: 0;
+	}
 	.wc-shipping-zone-method-description {
-		margin: 1em 0;
+		margin: .75em 1px 0;
 		line-height: 1.5em;
+		color: #999;
+		font-style: italic;
 	}
 	select {
 		width: 100%;
+		cursor: pointer;
 	}
 }
 
@@ -4941,7 +4949,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 51px;
+	padding-bottom: 55px;
 
 	header,
 	article {
@@ -4950,23 +4958,23 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-header {
-		height: 50px;
+		height: auto;
 		background: #fcfcfc;
-		padding: 0 50px 0 16px;
+		padding: 1em 1.5em;
 		border-bottom: 1px solid #ddd;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
 			font-weight: 700;
-			line-height: 50px;
+			line-height: 1.5em;
 		}
 
 		.modal-close-link {
 			cursor: pointer;
 			color: #777;
-			height: 50px;
-			width: 50px;
+			height: 54px;
+			width: 54px;
 			padding: 0;
 			position: absolute;
 			top: 0;
@@ -5000,8 +5008,18 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 10px 16px;
+		padding: 1.5em;
 
+		p {
+			margin: 1.5em 0;
+		}
+		p:first-child {
+			margin-top: 0;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
 		.pagination {
 			padding: 10px 0 0;
 			text-align: center;
@@ -5014,7 +5032,7 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 10px 16px;
+		padding: 1em 1.5em;
 		background: #fcfcfc;
 		border-top: 1px solid #dfdfdf;
 		box-shadow: 0 -4px 4px -4px rgba(0,0,0,0.1);

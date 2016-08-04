@@ -57,7 +57,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		// Allow 3rd parties to process shipping cost arguments
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
-		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
 		$this->fee_cost = $args['cost'];
 
 		// Expand shortcodes
@@ -98,7 +98,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	public function fee( $atts ) {
 		$atts = shortcode_atts( array(
 			'percent' => '',
-			'min_fee' => ''
+			'min_fee' => '',
+			'max_fee' => '',
 		), $atts );
 
 		$calculated_fee = 0;
@@ -109,6 +110,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		if ( $atts['min_fee'] && $calculated_fee < $atts['min_fee'] ) {
 			$calculated_fee = $atts['min_fee'];
+		}
+
+		if ( $atts['max_fee'] && $calculated_fee > $atts['max_fee'] ) {
+			$calculated_fee = $atts['max_fee'];
 		}
 
 		return $calculated_fee;

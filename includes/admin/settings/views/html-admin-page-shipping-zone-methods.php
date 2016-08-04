@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="wc-shipping-zone-method-blank-state" colspan="5">
 			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
 			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'Choose a method from the dropdown below and click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>
 </script>
@@ -98,13 +98,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<article>
 					<form action="" method="post">
 						<div class="wc-shipping-zone-method-selector">
+							<p><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></p>
+
 							<select name="add_method_id">
 								<?php
 									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
 										if ( ! $method->supports( 'shipping-zones' ) ) {
 											continue;
 										}
-										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+
+										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
 									}
 								?>
 							</select>

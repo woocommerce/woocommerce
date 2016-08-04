@@ -60,7 +60,7 @@ abstract class WC_Settings_API {
 	 * Set default required properties for each field.
 	 * @param array
 	 */
-	private function set_defaults( $field ) {
+	protected function set_defaults( $field ) {
 		if ( ! isset( $field['default'] ) ) {
 			$field['default'] = '';
 		}
@@ -73,6 +73,17 @@ abstract class WC_Settings_API {
 	public function admin_options() {
 		echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
 	}
+
+	/**
+	 * Initialise settings form fields.
+	 *
+	 * Add an array of fields to be displayed
+	 * on the gateway's settings screen.
+	 *
+	 * @since  1.0.0
+	 * @return string
+	 */
+	public function init_form_fields() {}
 
 	/**
 	 * Return the name of the option in the WP DB.
@@ -804,9 +815,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Validate Password Field.
-	 *
-	 * Make sure the data is escaped correctly, etc.
+	 * Validate Password Field. No input sanitization is used to avoid corrupting passwords.
 	 *
 	 * @param  string $key
 	 * @param  string|null $value Posted Value
@@ -814,7 +823,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_password_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses_post( trim( stripslashes( $value ) ) );
+		return trim( stripslashes( $value ) );
 	}
 
 	/**

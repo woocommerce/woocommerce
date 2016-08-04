@@ -37,7 +37,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
@@ -87,7 +87,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 				foreach ( $package['contents'] as $item_id => $values ) {
 					if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
 						$shipping_total += $this->fee * $values['quantity'];
-	                }
+					}
 				}
 			break;
 		}

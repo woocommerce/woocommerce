@@ -133,6 +133,15 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get post types.
+	 *
+	 * @return array
+	 */
+	protected function get_post_types() {
+		return array( $this->post_type );
+	}
+
+	/**
 	 * Get a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -142,8 +151,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $post, $request );
@@ -246,7 +255,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
@@ -405,7 +414,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$force = (bool) $request['force'];
 		$post  = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -565,6 +574,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'posts_per_page',
 			'meta_query',
 			'tax_query',
+			'meta_key',
+			'meta_value',
+			'meta_compare',
+			'meta_value_num',
 		);
 		$valid_vars = array_merge( $valid_vars, $rest_valid );
 
@@ -609,7 +622,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
@@ -648,15 +661,15 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
-		if ( $post_type_obj->hierarchical ) {
+		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
-				'description'       => __( 'Limit result set to all items except those of a particular parent id.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),

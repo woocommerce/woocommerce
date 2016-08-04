@@ -40,7 +40,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Select options', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
@@ -254,7 +254,8 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 
-		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
+		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
 		// If the value has already been generated, we don't need to grab the values again.
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
@@ -609,7 +610,7 @@ class WC_Product_Variable extends WC_Product {
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'      => $availability_html,
 			'sku'                    => $variation->get_sku(),
-			'weight'                 => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
 			'min_qty'                => 1,
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
@@ -723,6 +724,33 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Does a child have a weight set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return (bool) get_post_meta( $this->id, '_child_has_weight', true );
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		return (bool) get_post_meta( $this->id, '_child_has_dimensions', true );
+	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
+
+	/**
 	 * Sync the variable product with it's children.
 	 */
 	public static function sync( $product_id ) {
@@ -739,6 +767,8 @@ class WC_Product_Variable extends WC_Product {
 		// No published variations - product won't be purchasable.
 		if ( ! $children ) {
 			update_post_meta( $product_id, '_price', '' );
+			delete_post_meta( $product_id, '_child_has_weight' );
+			delete_post_meta( $product_id, '_child_has_dimensions' );
 			delete_transient( 'wc_products_onsale' );
 
 			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
@@ -824,6 +854,22 @@ class WC_Product_Variable extends WC_Product {
 			add_post_meta( $product_id, '_price', $min_price, false );
 			add_post_meta( $product_id, '_price', $max_price, false );
 			delete_transient( 'wc_products_onsale' );
+
+			// Sync weights
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_weight', true ) ) {
+					update_post_meta( $product_id, '_child_has_weight', true );
+					break;
+				}
+			}
+
+			// Sync dimensions
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_height', true ) || get_post_meta( $child_id, '_width', true ) || get_post_meta( $child_id, '_length', true ) ) {
+					update_post_meta( $product_id, '_child_has_dimensions', true );
+					break;
+				}
+			}
 
 			// Sync attributes
 			self::sync_attributes( $product_id, $children );

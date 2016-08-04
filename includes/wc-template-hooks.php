@@ -20,10 +20,8 @@ add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 /**
  * WP Header.
  *
- * @see  wc_products_rss_feed()
  * @see  wc_generator_tag()
  */
-add_action( 'wp_head', 'wc_products_rss_feed' );
 add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
 add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 
@@ -206,6 +204,11 @@ add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_for
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 
+/**
+ * Cart widget
+ */
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_button_view_cart', 10 );
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_proceed_to_checkout', 20 );
 
 /**
  * Cart.

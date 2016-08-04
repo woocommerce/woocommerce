@@ -333,7 +333,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$available = $this->is_enabled();
 
 		// Country availability (legacy, for non-zone based methods)
-		if ( ! $this->instance_id ) {
+		if ( ! $this->instance_id && $available ) {
 			$countries = is_array( $this->countries ) ? $this->countries : array();
 
 			switch ( $this->availability ) {
@@ -413,7 +413,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options
-		if ( array_key_exists( $key, $this->get_instance_form_fields() ) ) {
+		if ( $this->instance_id && array_key_exists( $key, $this->get_instance_form_fields() ) ) {
 			return $this->get_instance_option( $key, $empty_value );
 		}
 
@@ -453,7 +453,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
-		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, $this->instance_form_fields );
+		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->instance_form_fields ) );
 	}
 
 	/**

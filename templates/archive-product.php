@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.0.0
@@ -32,9 +32,11 @@ get_header( 'shop' ); ?>
 		do_action( 'woocommerce_before_main_content' );
 	?>
 
+    <header class="woocommerce-products-header">
+
 		<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
 
-			<h1 class="page-title"><?php woocommerce_page_title(); ?></h1>
+			<h1 class="woocommerce-products-header__title page-title"><?php woocommerce_page_title(); ?></h1>
 
 		<?php endif; ?>
 
@@ -47,6 +49,8 @@ get_header( 'shop' ); ?>
 			 */
 			do_action( 'woocommerce_archive_description' );
 		?>
+
+    </header>
 
 		<?php if ( have_posts() ) : ?>
 

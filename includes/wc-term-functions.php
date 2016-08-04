@@ -431,6 +431,11 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		return $clauses;
 	}
 
+	// No need to filter counts
+	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
+		return $clauses;
+	}
+
 	// Wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
 	$found = false;
 	foreach ( (array) $taxonomies as $taxonomy ) {
@@ -451,9 +456,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false )  {
-		$clauses['fields'] = 'tm.*, ' . $clauses['fields'];
-	}
+	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'];
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {

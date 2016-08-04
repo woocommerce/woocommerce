@@ -58,23 +58,46 @@ function wc_load_persistent_cart( $user_login, $user ) {
 }
 
 /**
+ * Retrieves unvalidated referer from '_wp_http_referer' or HTTP referer.
+ *
+ * Do not use for redirects, use {@see wp_get_referer()} instead.
+ *
+ * @since 2.6.1
+ * @return string|false Referer URL on success, false on failure.
+ */
+function wc_get_raw_referer() {
+	if ( function_exists( 'wp_get_raw_referer' ) ) {
+		return wp_get_raw_referer();
+	}
+
+	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) {
+		return wp_unslash( $_REQUEST['_wp_http_referer'] );
+	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+		return wp_unslash( $_SERVER['HTTP_REFERER'] );
+	}
+
+	return false;
+}
+
+/**
  * Add to cart messages.
  *
  * @access public
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
+ * @param bool $return Return message rather than add it.
  */
-function wc_add_to_cart_message( $products, $show_qty = false ) {
+function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
 	$count  = 0;
 
 	if ( ! is_array( $products ) ) {
-		$products = array( $products );
+		$products = array( $products => 1 );
 		$show_qty = false;
 	}
 
-	if ( ! $show_qty && ! is_array( $products ) ) {
-		$products = array_fill_keys( array_values( $products ), 1 );
+	if ( ! $show_qty ) {
+		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
 	foreach ( $products as $product_id => $qty ) {
@@ -87,13 +110,19 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_raw_referer() ? wp_validate_redirect( wp_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
+		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue Shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
+	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+
+	if ( $return ) {
+		return $message;
+	} else {
+		wc_add_notice( $message );
+	}
 }
 
 /**
@@ -334,4 +363,19 @@ function wc_cart_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
+}
+
+/**
+ * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
+ * @since  2.6.2
+ * @return string[]
+ */
+function wc_get_chosen_shipping_method_ids() {
+	$method_ids     = array();
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	foreach ( $chosen_methods as $chosen_method ) {
+		$chosen_method = explode( ':', $chosen_method );
+		$method_ids[]  = current( $chosen_method );
+	}
+	return $method_ids;
 }

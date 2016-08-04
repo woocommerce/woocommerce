@@ -64,9 +64,6 @@ class WC_Admin_Meta_Boxes {
 		// Save Coupon Meta Boxes
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
 
-		// Save Rating Meta Boxes
-		add_action( 'comment_edit_redirect', 'WC_Meta_Box_Order_Reviews::save', 1, 2 );
-
 		// Error handling (for showing errors from meta boxes on next page load)
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
 		add_action( 'shutdown', array( $this, 'save_errors' ) );

@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.2.0
@@ -27,19 +27,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>><?php echo esc_html( $name ); ?></option>
 		<?php endforeach; ?>
 	</select>
-	<?php
-		// Keep query string vars intact
-		foreach ( $_GET as $key => $val ) {
-			if ( 'orderby' === $key || 'submit' === $key ) {
-				continue;
-			}
-			if ( is_array( $val ) ) {
-				foreach( $val as $innerVal ) {
-					echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $innerVal ) . '" />';
-				}
-			} else {
-				echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '" />';
-			}
-		}
-	?>
+	<?php wc_query_string_form_fields( null, array( 'orderby', 'submit' ) ); ?>
 </form>

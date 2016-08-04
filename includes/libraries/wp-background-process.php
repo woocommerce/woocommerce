@@ -327,8 +327,6 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 			} else {
 				$this->complete();
 			}
-
-			wp_die();
 		}
 
 		/**

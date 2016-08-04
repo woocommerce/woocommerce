@@ -129,6 +129,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'parent_id'            => $post->post_parent,
 			'status'               => $order->get_status(),
 			'order_key'            => $order->order_key,
+			'number'               => $order->get_order_number(),
 			'currency'             => $order->get_order_currency(),
 			'version'              => $order->order_version,
 			'prices_include_tax'   => $order->prices_include_tax,
@@ -299,8 +300,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					);
 				}
 
-				foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				if ( isset( $fee_line_taxes['subtotal'] ) ) {
+					foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+						$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+					}
 				}
 
 				$fee_line['taxes'] = array_values( $fee_tax );
@@ -412,6 +415,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
+		// Search by product.
 		if ( ! empty( $request['product'] ) ) {
 			$order_ids = $wpdb->get_col( $wpdb->prepare( "
 				SELECT order_id
@@ -424,6 +428,16 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
 
 			$args['post__in'] = $order_ids;
+		}
+
+		// Search.
+		if ( ! empty( $args['s'] ) ) {
+			$order_ids = wc_order_search( $args['s'] );
+
+			if ( ! empty( $order_ids ) ) {
+				unset( $args['s'] );
+				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
+			}
 		}
 
 		return $args;
@@ -530,7 +544,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
 			}
 			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+				update_post_meta( $order->id, '_payment_method_title', $request['payment_method_title'] );
 			}
 			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
@@ -999,13 +1013,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					foreach ( $request[ $line ] as $item ) {
 						// Item ID is always required.
 						if ( ! array_key_exists( 'id', $item ) ) {
-							throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID is required.', 'woocommerce' ), 400 );
+							$item['id'] = null;
 						}
 
 						// Create item.
 						if ( is_null( $item['id'] ) ) {
 							$this->set_item( $order, $line_type, $item, 'create' );
-						} elseif ( $this->item_is_null( $item ) ) {
+						} elseif ( $this->item_is_null( $item ) || 0 === $item['quantity'] ) {
 							// Delete item.
 							wc_delete_order_item( $item['id'] );
 						} else {
@@ -1141,6 +1155,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'order_key' => array(
 					'description' => __( 'Order key.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'number' => array(
+					'description' => __( 'Order number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

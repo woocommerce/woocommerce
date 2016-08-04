@@ -308,7 +308,7 @@ function wc_sanitize_tooltip( $var ) {
 		'li'     => array(),
 		'ol'     => array(),
 		'p'      => array(),
-    ) ) );
+	) ) );
 }
 
 /**
@@ -665,6 +665,15 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'BR' :
 			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
 			break;
+		case 'JP' :
+			$postcode = trim( substr_replace( $postcode, '-', 3, 0 ) );
+			break;
+		case 'PL' :
+			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+			break;
+		case 'PT' :
+			$postcode = trim( substr_replace( $postcode, '-', 4, 0 ) );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
@@ -680,7 +689,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	return trim( preg_replace( '/[\s\-]/', '', strtoupper( $postcode ) ) );
+	return preg_replace( '/[\s\-]/', '', trim( strtoupper( $postcode ) ) );
 }
 
 /**
@@ -823,6 +832,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 	 * @return string
 	 */
 	function wc_make_numeric_postcode( $postcode ) {
+		$postcode           = str_replace( array( ' ', '-' ), '', $postcode );
 		$postcode_length    = strlen( $postcode );
 		$letters_to_numbers = array_merge( array( 0 ), range( 'A', 'Z' ) );
 		$letters_to_numbers = array_flip( $letters_to_numbers );

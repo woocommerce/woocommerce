@@ -26,7 +26,7 @@ $status_options = get_option( 'woocommerce_status_options', array() );
 
 if ( ! empty( $status_options['uninstall_data'] ) ) {
 	// Roles + caps.
-	include_once( 'includes/class-wc-install.php' );
+	include_once( dirname( __FILE__ ) . '/includes/class-wc-install.php' );
 	WC_Install::remove_roles();
 
 	// Pages.

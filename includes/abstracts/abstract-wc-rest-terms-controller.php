@@ -396,6 +396,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		// Add term data.
 		$meta_fields = $this->update_term_meta_fields( $term, $request );
 		if ( is_wp_error( $meta_fields ) ) {
+			wp_delete_term( $term['term_id'], $taxonomy );
+
 			return $meta_fields;
 		}
 

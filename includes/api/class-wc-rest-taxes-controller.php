@@ -389,7 +389,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax      = $this->prepare_item_for_response( $tax_obj, $request );
@@ -409,7 +409,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax = $this->create_or_update_tax( $request, $tax_obj );
@@ -452,7 +452,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -592,7 +592,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 				),
 				'rate' => array(
 					'description' => __( 'Tax rate.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'name' => array(
@@ -647,13 +647,13 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'description'        => __( 'Limit result set to specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',

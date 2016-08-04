@@ -384,7 +384,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			}
 		}
 
-		$discount = round( $discount, WC_ROUNDING_PRECISION );
+		$discount = round( $discount, wc_get_rounding_precision() );
 
 		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
@@ -916,7 +916,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() <= WC()->cart->get_displayed_subtotal(), $this ) ) {
+		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() < WC()->cart->get_displayed_subtotal(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
@@ -967,30 +967,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_excluded_product_categories() {
-		if ( sizeof( $this->get_excluded_product_categories() ) > 0 ) {
-			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
-
-					// If we find an item with a cat NOT in our disallowed cat list, the coupon is valid
-					if ( empty( $product_cats ) || sizeof( array_diff( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
-						$valid_for_cart = true;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
-			}
-		}
-	}
-
-	/**
 	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
 	 *
 	 * @throws Exception
@@ -1013,6 +989,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			}
 			if ( ! $valid_for_cart ) {
 				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
+			}
+		}
+	}
+
+	/**
+	 * All exclusion rules must pass at the same time for a product coupon to be valid.
+	 */
+	private function validate_excluded_items() {
+		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
+			$valid = false;
+
+			foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
 			}
 		}
 	}
@@ -1114,8 +1110,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->validate_maximum_amount();
 			$this->validate_product_ids();
 			$this->validate_product_categories();
-			$this->validate_excluded_product_categories();
 			$this->validate_sale_items();
+			$this->validate_excluded_items();
 			$this->validate_cart_excluded_items();
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $this ) ) {
@@ -1151,38 +1147,31 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		$valid        = false;
 		$product_cats = wc_get_product_cat_ids( $product->id );
+		$product_ids  = array( $product->id, ( isset( $product->variation_id ) ? $product->variation_id : 0 ), $product->get_parent() );
 
 		// Specific products get the discount
-		if ( sizeof( $this->get_product_ids() ) > 0 ) {
-			if ( in_array( $product->id, $this->get_product_ids() ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $this->get_product_ids() ) ) || in_array( $product->get_parent(), $this->get_product_ids() ) ) {
-				$valid = true;
-			}
+		if ( sizeof( $this->get_product_ids() ) && sizeof( array_intersect( $product_ids, $this->get_product_ids() ) ) ) {
+			$valid = true;
 		}
 
 		// Category discounts
-		if ( sizeof( $this->get_product_categories() ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->get_product_categories() ) ) > 0 ) {
-				$valid = true;
-			}
+		if ( sizeof( $this->get_product_categories() ) && sizeof( array_intersect( $product_cats, $this->get_product_categories() ) ) ) {
+			$valid = true;
 		}
 
+		// No product ids - all items discounted
 		if ( ! sizeof( $this->get_product_ids() ) && ! sizeof( $this->get_product_categories() ) ) {
-			// No product ids - all items discounted
 			$valid = true;
 		}
 
 		// Specific product ID's excluded from the discount
-		if ( sizeof( $this->get_excluded_product_ids() ) > 0 ) {
-			if ( in_array( $product->id, $this->get_excluded_product_ids() ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $this->get_excluded_product_ids() ) ) || in_array( $product->get_parent(), $this->get_excluded_product_ids() ) ) {
-				$valid = false;
-			}
+		if ( sizeof( $this->get_excluded_product_ids()) && sizeof( array_intersect( $product_ids, $this->get_excluded_product_ids() ) ) ) {
+			$valid = false;
 		}
 
 		// Specific categories excluded from the discount
-		if ( sizeof( $this->get_excluded_product_categories() ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
-				$valid = false;
-			}
+		if ( sizeof( $this->get_excluded_product_categories() ) && sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) ) {
+			$valid = false;
 		}
 
 		// Sale Items excluded from discount
@@ -1199,67 +1188,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
-	}
-
-	/**
-	 * Get discount amount for a cart item.
-	 *
-	 * @param  float $discounting_amount Amount the coupon is being applied to
-	 * @param  array|null $cart_item Cart item being discounted if applicable
-	 * @param  boolean $single True if discounting a single qty item, false if its the line
-	 * @return float Amount this coupon has discounted
-	 */
-	public function get_discount_amount( $discounting_amount, $cart_item = null, $single = false ) {
-		$discount      = 0;
-		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
-
-		if ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
-			$discount = $this->coupon_amount * ( $discounting_amount / 100 );
-
-		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
-			/**
-			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
-			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
-			 * with no price (free) don't get discounted.
-			 *
-			 * Get item discount by dividing item cost by subtotal to get a %.
-			 *
-			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
-			 */
-			if ( wc_prices_include_tax() ) {
-				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
-			} else {
-				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
-			}
-			$discount         = ( $this->coupon_amount * $discount_percent ) / $cart_item_qty;
-
-		} elseif ( $this->is_type( 'fixed_product' ) ) {
-			$discount = min( $this->coupon_amount, $discounting_amount );
-			$discount = $single ? $discount : $discount * $cart_item_qty;
-		}
-
-		$discount = min( $discount, $discounting_amount );
-
-		// Handle the limit_usage_to_x_items option
-		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
-			if ( $discounting_amount ) {
-				if ( '' === $this->limit_usage_to_x_items ) {
-					$limit_usage_qty = $cart_item_qty;
-				} else {
-					$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
-					$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
-				}
-				if ( $single ) {
-					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-				} else {
-					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
-				}
-			}
-		}
-
-		$discount = wc_cart_round_discount( $discount, WC_ROUNDING_PRECISION );
-
-		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/**

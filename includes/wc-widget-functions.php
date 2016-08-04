@@ -15,19 +15,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include widget classes.
-include_once( 'abstracts/abstract-wc-widget.php' );
-include_once( 'widgets/class-wc-widget-cart.php' );
-include_once( 'widgets/class-wc-widget-layered-nav-filters.php' );
-include_once( 'widgets/class-wc-widget-layered-nav.php' );
-include_once( 'widgets/class-wc-widget-price-filter.php' );
-include_once( 'widgets/class-wc-widget-product-categories.php' );
-include_once( 'widgets/class-wc-widget-product-search.php' );
-include_once( 'widgets/class-wc-widget-product-tag-cloud.php' );
-include_once( 'widgets/class-wc-widget-products.php' );
-include_once( 'widgets/class-wc-widget-rating-filter.php' );
-include_once( 'widgets/class-wc-widget-recent-reviews.php' );
-include_once( 'widgets/class-wc-widget-recently-viewed.php' );
-include_once( 'widgets/class-wc-widget-top-rated-products.php' );
+include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-widget.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-cart.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav-filters.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-price-filter.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-categories.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-search.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-tag-cloud.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-products.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-rating-filter.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-recent-reviews.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-recently-viewed.php' );
+include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-top-rated-products.php' );
 
 /**
  * Register Widgets.

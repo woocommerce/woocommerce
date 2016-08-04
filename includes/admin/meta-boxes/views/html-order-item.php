@@ -15,7 +15,7 @@ $tax_data      = empty( $legacy_order ) && wc_tax_enabled() ? maybe_unserialize(
 $item_total    = ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : '';
 $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : '';
 ?>
-<tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item ); ?>" data-order_item_id="<?php echo $item_id; ?>">
+<tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item, $order ); ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="thumb">
 		<?php
 			echo '<div class="wc-order-item-thumbnail">' . wp_kses_post( $thumbnail ) . '</div>';
@@ -142,11 +142,11 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 						<div class="split-input">
 							<div class="input">
 								<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
-								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo $tax_item_subtotal; ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo $tax_item_subtotal; ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 							</div>
 							<div class="input">
 								<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
-								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo $tax_item_total; ?>" class="line_tax wc_input_price" data-total_tax="<?php echo $tax_item_total; ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 							</div>
 						</div>
 					</div>

@@ -19,7 +19,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->add_to_cart_text() );
 
 		$product->stock_status = 'outofstock';
-		$this->assertEquals( __( 'Read More', 'woocommerce' ), $product->add_to_cart_text() );
+		$this->assertEquals( __( 'Read more', 'woocommerce' ), $product->add_to_cart_text() );
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );

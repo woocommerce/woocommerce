@@ -44,6 +44,24 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
+	 * Get settings page ID.
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_id() {
+		return $this->id;
+	}
+
+	/**
+	 * Get settings page label.
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_label() {
+		return $this->label;
+	}
+
+	/**
 	 * Add this page to settings.
 	 */
 	public function add_settings_page( $pages ) {

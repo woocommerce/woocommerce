@@ -37,16 +37,9 @@ class WC_Meta_Box_Product_Data {
 			$product_type = apply_filters( 'default_product_type', 'simple' );
 		}
 
-		$product_type_selector = apply_filters( 'product_type_selector', array(
-			'simple'   => __( 'Simple product', 'woocommerce' ),
-			'grouped'  => __( 'Grouped product', 'woocommerce' ),
-			'external' => __( 'External/Affiliate product', 'woocommerce' ),
-			'variable' => __( 'Variable product', 'woocommerce' )
-		), $product_type );
-
 		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product Type', 'woocommerce' ) . '">';
 
-		foreach ( $product_type_selector as $value => $label ) {
+		foreach ( wc_get_product_types() as $value => $label ) {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) .'>' . esc_html( $label ) . '</option>';
 		}
 
@@ -95,7 +88,7 @@ class WC_Meta_Box_Product_Data {
 						'inventory' => array(
 							'label'  => __( 'Inventory', 'woocommerce' ),
 							'target' => 'inventory_product_data',
-							'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped' ),
+							'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
 						),
 						'shipping' => array(
 							'label'  => __( 'Shipping', 'woocommerce' ),
@@ -125,7 +118,7 @@ class WC_Meta_Box_Product_Data {
 					) );
 
 					foreach ( $product_data_tabs as $key => $tab ) {
-						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , $tab['class'] ); ?>">
+						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
 							<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
 						</li><?php
 					}
@@ -331,7 +324,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Stock status
-				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
+				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable hide_if_external', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
 					'instock' => __( 'In stock', 'woocommerce' ),
 					'outofstock' => __( 'Out of stock', 'woocommerce' )
 				), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
@@ -620,7 +613,7 @@ class WC_Meta_Box_Product_Data {
 				<div id="message" class="inline notice woocommerce-message">
 					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 					<p>
-						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
 					</p>
 				</div>
 

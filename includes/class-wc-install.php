@@ -72,6 +72,9 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
+		'2.7.0' => array(
+			'wc_update_270_webhooks',
+		),
 	);
 
 	/** @var object Background update class */
@@ -82,6 +85,7 @@ class WC_Install {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -89,8 +93,13 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+	}
 
-		// Init background updates
+	/**
+	 * Init background updates
+	 */
+	public static function init_background_updater() {
+		include_once( dirname( __FILE__ ) . '/class-wc-background-updater.php' );
 		self::$background_updater = new WC_Background_Updater();
 	}
 
@@ -116,6 +125,10 @@ class WC_Install {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+			do_action( 'wp_wc_updater_cron' );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
+		}
 	}
 
 	/**
@@ -129,7 +142,7 @@ class WC_Install {
 		}
 
 		// Ensure needed classes are loaded
-		include_once( 'admin/class-wc-admin-notices.php' );
+		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
 
 		self::create_options();
 		self::create_tables();
@@ -277,7 +290,7 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page id's in variables.
 	 */
 	public static function create_pages() {
-		include_once( 'admin/wc-admin-functions.php' );
+		include_once( dirname( __FILE__ ) . '/admin/wc-admin-functions.php' );
 
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
@@ -316,7 +329,7 @@ class WC_Install {
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults
-		include_once( 'admin/class-wc-admin-settings.php' );
+		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php' );
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 
@@ -550,7 +563,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY payment_token_id (payment_token_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 		";
 
@@ -835,8 +848,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function plugin_row_meta( $links, $file ) {
 		if ( $file == WC_PLUGIN_BASENAME ) {
 			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
+				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
 				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 

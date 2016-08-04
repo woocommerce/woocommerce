@@ -384,7 +384,7 @@ class WC_Checkout {
 			$this->posted['createaccount']             = isset( $_POST['createaccount'] ) && ! empty( $_POST['createaccount'] ) ? 1 : 0;
 			$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? stripslashes( $_POST['payment_method'] ) : '';
 			$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? $_POST['shipping_method'] : '';
-			$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
+			$this->posted['ship_to_different_address'] = ! empty( $_POST['ship_to_different_address'] );
 
 			if ( isset( $_POST['shiptobilling'] ) ) {
 				_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date' );

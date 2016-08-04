@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * @version 2.0-beta13
+ * @version 2.0-beta13.1
  */
 abstract class WP_REST_Controller {
 
@@ -418,7 +418,7 @@ abstract class WP_REST_Controller {
 	protected function get_object_type() {
 		$schema = $this->get_item_schema();
 
-		if ( empty( $schema ) || ! isset( $schema['title'] ) ) {
+		if ( ! $schema || ! isset( $schema['title'] ) ) {
 			return null;
 		}
 

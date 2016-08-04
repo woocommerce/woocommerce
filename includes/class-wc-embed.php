@@ -109,7 +109,7 @@ class WC_Embed {
 			$buttons[] = sprintf( $button, esc_url( add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ) ), esc_html__( 'Buy Now', 'woocommerce' ) );
 		}
 
-		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read More', 'woocommerce' ) );
+		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read more', 'woocommerce' ) );
 
 		return '<p>' . implode( ' ', $buttons ) . '</p>';
 	}

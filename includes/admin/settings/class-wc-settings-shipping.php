@@ -217,7 +217,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
 
-		include_once( 'views/html-admin-page-shipping-zone-methods.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zone-methods.php' );
 	}
 
 	/**
@@ -239,13 +239,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 			'wc_shipping_zones_nonce'  => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'       => array(
-				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'unload_confirmation_msg'     => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+				'save_failed'                 => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'no_shipping_methods_offered' => __( 'No shipping methods offered to this zone.', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );
 
-		include_once( 'views/html-admin-page-shipping-zones.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones.php' );
 	}
 
 	/**
@@ -276,7 +277,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$shipping_method->display_errors();
 		}
 
-		include_once( 'views/html-admin-page-shipping-zones-instance.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones-instance.php' );
 	}
 
 	/**
@@ -307,7 +308,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc-shipping-class-count'       => __( 'Product Count', 'woocommerce' ),
 		) );
 
-		include_once( 'views/html-admin-page-shipping-classes.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php' );
 	}
 }
 

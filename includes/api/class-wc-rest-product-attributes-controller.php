@@ -344,7 +344,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		if ( ! empty( $args['attribute_name'] ) ) {
 			$args['attribute_name'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $args['attribute_name'] ) ) );
 
-			$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], true );
+			$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], false );
 			if ( is_wp_error( $valid_slug ) ) {
 				return $valid_slug;
 			}

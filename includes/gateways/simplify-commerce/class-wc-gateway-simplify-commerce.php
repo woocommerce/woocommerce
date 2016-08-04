@@ -74,7 +74,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 */
 	protected function init_simplify_sdk() {
 		// Include lib
-		require_once( 'includes/Simplify.php' );
+		require_once( dirname( __FILE__ ) . '/includes/Simplify.php' );
 
 		Simplify::$publicKey  = $this->public_key;
 		Simplify::$privateKey = $this->private_key;
@@ -452,7 +452,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			$payment_response = $this->do_payment( $order, $order->get_total(), $pass_tokens );
 
 			if ( is_wp_error( $payment_response ) ) {
-				throw new Exception( $payment_response->get_error_message() );
+				throw new Simplify_ApiException( $payment_response->get_error_message() );
 			} else {
 				// Remove cart
 				WC()->cart->empty_cart();
