@@ -62,7 +62,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	);
 
 	/**
-	 * Data stored in meta keys, but not considered "meta" for a coupon.
+	 * Data stored in meta keys, but not considered "meta"
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -70,7 +70,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		'billing_postcode', 'billing_city', 'billing_address_1', 'billing_address_2', 'billing_state',
 		'billing_country', 'shipping_postcode', 'shipping_city', 'shipping_address_1',
 		'shipping_address_2', 'shipping_state', 'shipping_country', 'paying_customer',
-		'last_update', 'first_name', 'last_name'
+		'last_update', 'first_name', 'last_name',
 	);
 
 	/**

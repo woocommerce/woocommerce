@@ -310,27 +310,27 @@ class WC_AJAX {
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
 
 		if ( isset( $_POST['country'] ) ) {
-			WC()->customer->set_country( $_POST['country'] );
+			WC()->customer->set_billing_country( $_POST['country'] );
 		}
 
 		if ( isset( $_POST['state'] ) ) {
-			WC()->customer->set_state( $_POST['state'] );
+			WC()->customer->set_billing_state( $_POST['state'] );
 		}
 
 		if ( isset( $_POST['postcode'] ) ) {
-			WC()->customer->set_postcode( $_POST['postcode'] );
+			WC()->customer->set_billing_postcode( $_POST['postcode'] );
 		}
 
 		if ( isset( $_POST['city'] ) ) {
-			WC()->customer->set_city( $_POST['city'] );
+			WC()->customer->set_billing_city( $_POST['city'] );
 		}
 
 		if ( isset( $_POST['address'] ) ) {
-			WC()->customer->set_address( $_POST['address'] );
+			WC()->customer->set_billing_address( $_POST['address'] );
 		}
 
 		if ( isset( $_POST['address_2'] ) ) {
-			WC()->customer->set_address_2( $_POST['address_2'] );
+			WC()->customer->set_billing_address_2( $_POST['address_2'] );
 		}
 
 		if ( wc_ship_to_billing_address_only() ) {

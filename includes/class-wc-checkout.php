@@ -524,13 +524,13 @@ class WC_Checkout {
 
 			// Update customer location to posted location so we can correctly check available shipping methods
 			if ( isset( $this->posted['billing_country'] ) ) {
-				WC()->customer->set_country( $this->posted['billing_country'] );
+				WC()->customer->set_billing_country( $this->posted['billing_country'] );
 			}
 			if ( isset( $this->posted['billing_state'] ) ) {
-				WC()->customer->set_state( $this->posted['billing_state'] );
+				WC()->customer->set_billing_state( $this->posted['billing_state'] );
 			}
 			if ( isset( $this->posted['billing_postcode'] ) ) {
-				WC()->customer->set_postcode( $this->posted['billing_postcode'] );
+				WC()->customer->set_billing_postcode( $this->posted['billing_postcode'] );
 			}
 
 			// Shipping Information
@@ -809,9 +809,9 @@ class WC_Checkout {
 
 			switch ( $input ) {
 				case 'billing_country' :
-					return apply_filters( 'default_checkout_country', WC()->customer->get_country() ? WC()->customer->get_country() : '', 'billing' );
+					return apply_filters( 'default_checkout_country', WC()->customer->get_billing_country() ? WC()->customer->get_billing_country() : '', 'billing' );
 				case 'billing_state' :
-					return apply_filters( 'default_checkout_state', WC()->customer->get_state() ? WC()->customer->get_state() : '', 'billing' );
+					return apply_filters( 'default_checkout_state', WC()->customer->get_billing_state() ? WC()->customer->get_billing_state() : '', 'billing' );
 				case 'billing_postcode' :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_billing_postcode() ? WC()->customer->get_billing_postcode() : '', 'billing' );
 				case 'shipping_country' :
