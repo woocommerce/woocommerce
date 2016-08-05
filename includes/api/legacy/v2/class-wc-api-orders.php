@@ -201,7 +201,7 @@ class WC_API_Orders extends WC_API_Resource {
 			),
 			'note'                      => $order->customer_note,
 			'customer_ip'               => $order->customer_ip_address,
-			'customer_user_agent'       => $order->customer_user_agent,
+			'customer_user_agent'       => $order->get_user_id()_agent,
 			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),

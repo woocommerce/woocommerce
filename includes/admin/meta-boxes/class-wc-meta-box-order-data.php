@@ -219,10 +219,10 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( ! empty( $order->customer_user ) ) {
+								if ( ! empty( $order->get_user_id() ) ) {
 									$args = array( 'post_status' => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->customer_user )
+										'_customer_user' => absint( $order->get_user_id() )
 									);
 									printf( '<a href="%s">%s &rarr;</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -233,8 +233,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( ! empty( $order->customer_user ) ) {
-								$user_id     = absint( $order->customer_user );
+							if ( ! empty( $order->get_user_id() ) ) {
+								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
 								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 							}

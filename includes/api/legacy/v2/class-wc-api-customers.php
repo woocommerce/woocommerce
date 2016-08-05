@@ -622,7 +622,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function add_customer_data( $order_data, $order ) {
 
-		if ( 0 == $order->customer_user ) {
+		if ( 0 == $order->get_user_id() ) {
 
 			// add customer data from order
 			$order_data['customer'] = array(
@@ -658,7 +658,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		} else {
 
-			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
+			$order_data['customer'] = current( $this->get_customer( $order->get_user_id() ) );
 		}
 
 		return $order_data;
