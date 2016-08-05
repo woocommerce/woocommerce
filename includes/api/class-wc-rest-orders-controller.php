@@ -146,7 +146,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'billing'              => array(),
 			'shipping'             => array(),
 			'payment_method'       => $order->payment_method,
-			'payment_method_title' => $order->payment_method_title,
+			'payment_method_title' => $order->get_payment_method_title(),
 			'transaction_id'       => $order->get_transaction_id(),
 			'customer_ip_address'  => $order->customer_ip_address,
 			'customer_user_agent'  => $order->customer_user_agent,

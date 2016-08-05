@@ -727,8 +727,8 @@ class WC_Admin_Post_Types {
 			case 'order_total' :
 				echo $the_order->get_formatted_order_total();
 
-				if ( $the_order->payment_method_title ) {
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				if ( $the_order->get_payment_method_title() ) {
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_payment_method_title() ) . '</small>';
 				}
 			break;
 			case 'order_title' :

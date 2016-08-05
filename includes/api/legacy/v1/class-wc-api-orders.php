@@ -134,7 +134,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
-				'method_title' => $order->payment_method_title,
+				'method_title' => $order->get_payment_method_title(),
 				'paid'         => isset( $order->paid_date ),
 			),
 			'billing_address' => array(
