@@ -733,8 +733,8 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				if ( $the_order->user_id ) {
-					$user_info = get_userdata( $the_order->user_id );
+				if ( $the_order->get_user_id() ) {
+					$user_info = get_userdata( $the_order->get_user_id() );
 				}
 
 				if ( ! empty( $user_info ) ) {
@@ -750,8 +750,8 @@ class WC_Admin_Post_Types {
 					$username .= '</a>';
 
 				} else {
-					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
+					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
+						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->get_billing_last_name() ) );
 					} else if ( $the_order->billing_company ) {
 						$username = trim( $the_order->billing_company );
 					} else {
@@ -761,8 +761,8 @@ class WC_Admin_Post_Types {
 
 				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
-				if ( $the_order->billing_email ) {
-					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
+				if ( $the_order->get_billing_email() ) {
+					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->get_billing_email() ) . '">' . esc_html( $the_order->get_billing_email() ) . '</a></small>';
 				}
 
 				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';

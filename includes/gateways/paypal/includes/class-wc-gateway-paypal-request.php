@@ -80,7 +80,7 @@ class WC_Gateway_Paypal_Request {
 				'custom'        => json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->order_key ) ),
 				'notify_url'    => $this->notify_url,
 				'first_name'    => $order->billing_first_name,
-				'last_name'     => $order->billing_last_name,
+				'last_name'     => $order->get_billing_last_name(),
 				'company'       => $order->billing_company,
 				'address1'      => $order->billing_address_1,
 				'address2'      => $order->billing_address_2,
@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_Request {
 				'state'         => $this->get_paypal_state( $order->billing_country, $order->billing_state ),
 				'zip'           => $order->billing_postcode,
 				'country'       => $order->billing_country,
-				'email'         => $order->billing_email
+				'email'         => $order->get_billing_email()
 			),
 			$this->get_phone_number_args( $order ),
 			$this->get_shipping_args( $order ),

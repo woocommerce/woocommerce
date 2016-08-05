@@ -1061,7 +1061,7 @@ class WC_AJAX {
 			$product = wc_get_product( $product_id );
 			$files   = $product->get_files();
 
-			if ( ! $order->billing_email ) {
+			if ( ! $order->get_billing_email() ) {
 				die();
 			}
 

@@ -458,10 +458,10 @@ class WC_Emails {
 			);
 		}
 
-		if ( $order->billing_email ) {
+		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_email )
+				'value' => wptexturize( $order->get_billing_email() )
 			);
 	    }
 

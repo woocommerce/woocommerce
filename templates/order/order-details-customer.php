@@ -30,10 +30,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	<?php endif; ?>
 
-	<?php if ( $order->billing_email ) : ?>
+	<?php if ( $order->get_billing_email() ) : ?>
 		<tr>
 			<th><?php _e( 'Email:', 'woocommerce' ); ?></th>
-			<td><?php echo esc_html( $order->billing_email ); ?></td>
+			<td><?php echo esc_html( $order->get_billing_email() ); ?></td>
 		</tr>
 	<?php endif; ?>
 

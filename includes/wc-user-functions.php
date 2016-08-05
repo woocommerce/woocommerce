@@ -259,7 +259,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->user_id ) {
+				if ( $order && $user_id == $order->get_user_id() ) {
 					$allcaps['view_order'] = true;
 				}
 			break;
@@ -275,7 +275,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
+				if ( $user_id == $order->get_user_id() || empty( $order->get_user_id() ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
@@ -283,7 +283,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['order_again'] = true;
 				}
 			break;
@@ -291,7 +291,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
 				}
 			break;

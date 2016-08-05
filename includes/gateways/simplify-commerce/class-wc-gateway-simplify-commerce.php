@@ -392,7 +392,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		// Are we saving a new payment method?
 		if ( is_user_logged_in() && isset( $_POST['wc-simplify_commerce-new-payment-method'] ) && true === (bool) $_POST['wc-simplify_commerce-new-payment-method'] ) {
 			$customer_info = array(
-				'email' => $order->billing_email,
+				'email' => $order->get_billing_email(),
 				'name'  => trim( $order->get_formatted_billing_full_name() ),
 			);
 			$token = $this->save_token( $customer_token, $cart_token, $customer_info );

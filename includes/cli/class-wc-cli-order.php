@@ -652,7 +652,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			),
 			'billing_address' => array(
 				'first_name' => $order->billing_first_name,
-				'last_name'  => $order->billing_last_name,
+				'last_name'  => $order->get_billing_last_name(),
 				'company'    => $order->billing_company,
 				'address_1'  => $order->billing_address_1,
 				'address_2'  => $order->billing_address_2,
@@ -660,7 +660,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'state'      => $order->billing_state,
 				'postcode'   => $order->billing_postcode,
 				'country'    => $order->billing_country,
-				'email'      => $order->billing_email,
+				'email'      => $order->get_billing_email(),
 				'phone'      => $order->billing_phone,
 			),
 			'shipping_address' => array(
