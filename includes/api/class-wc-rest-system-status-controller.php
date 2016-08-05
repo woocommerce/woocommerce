@@ -35,7 +35,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	protected $rest_base = 'system_status';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for /system_status
 	 */
 	public function register_routes() {
         register_rest_route( $this->namespace, '/' . $this->rest_base, array(

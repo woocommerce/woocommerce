@@ -23,6 +23,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
     public function test_register_routes() {
         $routes = $this->server->get_routes();
         $this->assertArrayHasKey( '/wc/v1/system_status', $routes );
+        $this->assertArrayHasKey( '/wc/v1/system_status/tools', $routes );
+        $this->assertArrayHasKey( '/wc/v1/system_status/tools/(?P<id>[\w-]+)', $routes );
     }
 
     /**
@@ -184,6 +186,141 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'theme', $properties );
         $this->assertArrayHasKey( 'settings', $properties );
         $this->assertArrayHasKey( 'pages', $properties );
+    }
+
+    /**
+     * Test to make sure get_items (all tools) response is correct.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_tools() {
+        wp_set_current_user( $this->user );
+
+        $tools_controller = new WC_REST_System_Status_Tools_Controller;
+        $raw_tools        = $tools_controller->get_tools();
+
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/tools' ) );
+        $data     = $response->get_data();
+
+        $this->assertEquals( 200, $response->get_status() );
+        $this->assertEquals( count( $raw_tools ), count( $data ) );
+
+		$this->assertContains( array(
+			'id'          => 'reset_tracking',
+			'name'        => 'Reset Usage Tracking Settings',
+			'action'      => 'Reset usage tracking settings',
+			'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+			'_links'      => array(
+				'item' => array(
+					array(
+						'href'       => rest_url( '/wc/v1/system_status/tools/reset_tracking' ),
+						'embeddable' => true,
+					),
+				),
+			),
+		), $data );
+    }
+
+    /**
+     * Test to make sure system status tools cannot be accessed without valid creds
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_status_tools_without_permission() {
+        wp_set_current_user( 0 );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/tools' ) );
+        $this->assertEquals( 401, $response->get_status() );
+    }
+
+    /**
+     * Test to make sure we can load a single tool correctly.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_tool() {
+        wp_set_current_user( $this->user );
+
+        $tools_controller = new WC_REST_System_Status_Tools_Controller;
+        $raw_tools        = $tools_controller->get_tools();
+        $raw_tool         = $raw_tools['recount_terms'];
+
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/tools/recount_terms' ) );
+        $data     = $response->get_data();
+
+        error_log( print_r ( $data, 1 ) );
+
+        $this->assertEquals( 200, $response->get_status() );
+
+        $this->assertEquals( 'recount_terms', $data['id'] );
+        $this->assertEquals( 'Term counts', $data['name'] );
+        $this->assertEquals( 'Recount terms', $data['action'] );
+        $this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+    }
+
+    /**
+     * Test to make sure a single system status toolscannot be accessed without valid creds.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_status_tool_without_permission() {
+        wp_set_current_user( 0 );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/tools/recount_terms' ) );
+        $this->assertEquals( 401, $response->get_status() );
+    }
+
+    /**
+     * Test to make sure we can RUN a tool correctly.
+     *
+     * @since 2.7.0
+     */
+    public function test_execute_system_tool() {
+        wp_set_current_user( $this->user );
+
+        $tools_controller = new WC_REST_System_Status_Tools_Controller;
+        $raw_tools        = $tools_controller->get_tools();
+        $raw_tool         = $raw_tools['recount_terms'];
+
+        $response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v1/system_status/tools/recount_terms' ) );
+        $data     = $response->get_data();
+
+        $this->assertEquals( 'recount_terms', $data['id'] );
+        $this->assertEquals( 'Term counts', $data['name'] );
+        $this->assertEquals( 'Recount terms', $data['action'] );
+        $this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+        $this->assertTrue( $data['success'] );
+
+        $response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v1/system_status/tools/not_a_real_tool' ) );
+        $this->assertEquals( 404, $response->get_status() );
+    }
+
+    /**
+     * Test to make sure a tool cannot be run without valid creds.
+     *
+     * @since 2.7.0
+     */
+    public function test_execute_system_status_tool_without_permission() {
+        wp_set_current_user( 0 );
+        $response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v1/system_status/tools/recount_terms' ) );
+        $this->assertEquals( 401, $response->get_status() );
+    }
+
+    /**
+     * Test system status schema.
+     *
+     * @since 2.7.0
+    */
+    public function test_system_status_tool_schema() {
+        $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
+        $response = $this->server->dispatch( $request );
+        $data = $response->get_data();
+        $properties = $data['schema']['properties'];
+        $this->assertEquals( 6, count( $properties ) );
+        $this->assertArrayHasKey( 'id', $properties );
+        $this->assertArrayHasKey( 'name', $properties );
+        $this->assertArrayHasKey( 'action', $properties );
+        $this->assertArrayHasKey( 'description', $properties );
+        $this->assertArrayHasKey( 'success', $properties );
+        $this->assertArrayHasKey( 'message', $properties );
     }
 
 }

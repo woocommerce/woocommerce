@@ -40,96 +40,13 @@ class WC_Admin_Status {
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+			$tools_controller = new WC_REST_System_Status_Tools_Controller;
+			$response = $tools_controller->execute_tool( $_GET['action'] );
 
-			switch ( $_GET['action'] ) {
-				case 'clear_transients' :
-					wc_delete_product_transients();
-					wc_delete_shop_order_transients();
-					WC_Cache_Helper::get_transient_version( 'shipping', true );
-
-					echo '<div class="updated inline"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'clear_expired_transients' :
-
-					/*
-					 * Deletes all expired transients. The multi-table delete syntax is used.
-					 * to delete the transient record from table a, and the corresponding.
-					 * transient_timeout record from table b.
-					 *
-					 * Based on code inside core's upgrade_network() function.
-					 */
-					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-						WHERE a.option_name LIKE %s
-						AND a.option_name NOT LIKE %s
-						AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-						AND b.option_value < %d";
-					$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-						WHERE a.option_name LIKE %s
-						AND a.option_name NOT LIKE %s
-						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
-						AND b.option_value < %d";
-					$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
-
-					echo '<div class="updated inline"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
-				break;
-				case 'reset_roles' :
-					// Remove then re-add caps and roles
-					WC_Install::remove_roles();
-					WC_Install::create_roles();
-
-					echo '<div class="updated inline"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'recount_terms' :
-
-					$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
-
-					_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
-
-					$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
-
-					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
-
-					echo '<div class="updated inline"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'clear_sessions' :
-
-					$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
-
-					wp_cache_flush();
-
-					echo '<div class="updated inline"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'install_pages' :
-					WC_Install::create_pages();
-					echo '<div class="updated inline"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'delete_taxes' :
-
-					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
-					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
-					WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-
-					echo '<div class="updated inline"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
-				break;
-				case 'reset_tracking' :
-					delete_option( 'woocommerce_allow_tracking' );
-					WC_Admin_Notices::add_notice( 'tracking' );
-
-					echo '<div class="updated inline"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
-				break;
-				default :
-					$action = esc_attr( $_GET['action'] );
-					if ( isset( $tools[ $action ]['callback'] ) ) {
-						$callback = $tools[ $action ]['callback'];
-						$return = call_user_func( $callback );
-						if ( $return === false ) {
-							$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
-							echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string ) . '</p></div>';
-						}
-					}
-				break;
+			if ( $response['success'] ) {
+				echo '<div class="updated inline"><p>' . $response['message'] . '</p></div>';
+			} else {
+				echo '<div class="error inline"><p>' . $response['message'] . '</p></div>';
 			}
 		}
 
@@ -146,50 +63,8 @@ class WC_Admin_Status {
 	 * @return array of tools
 	 */
 	public static function get_tools() {
-		$tools = array(
-			'clear_transients' => array(
-				'name'    => __( 'WC Transients', 'woocommerce' ),
-				'button'  => __( 'Clear transients', 'woocommerce' ),
-				'desc'    => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
-			),
-			'clear_expired_transients' => array(
-				'name'    => __( 'Expired Transients', 'woocommerce' ),
-				'button'  => __( 'Clear expired transients', 'woocommerce' ),
-				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
-			),
-			'recount_terms' => array(
-				'name'    => __( 'Term counts', 'woocommerce' ),
-				'button'  => __( 'Recount terms', 'woocommerce' ),
-				'desc'    => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
-			),
-			'reset_roles' => array(
-				'name'    => __( 'Capabilities', 'woocommerce' ),
-				'button'  => __( 'Reset capabilities', 'woocommerce' ),
-				'desc'    => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
-			),
-			'clear_sessions' => array(
-				'name'    => __( 'Customer Sessions', 'woocommerce' ),
-				'button'  => __( 'Clear all sessions', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
-			),
-			'install_pages' => array(
-				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
-				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
-			),
-			'delete_taxes' => array(
-				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
-				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
-			),
-			'reset_tracking' => array(
-				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
-				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
-				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
-			)
-		);
-
-		return apply_filters( 'woocommerce_debug_tools', $tools );
+		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		return $tools_controller->get_tools();
 	}
 
 	/**
