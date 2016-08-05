@@ -318,7 +318,7 @@ class WC_Emails {
 				'@type'            => 'Offer',
 				'itemOffered'      => $item_offered,
 				'price'            => $order->get_line_subtotal( $item ),
-				'priceCurrency'    => $order->get_order_currency(),
+				'priceCurrency'    => $order->get_currency(),
 				'eligibleQuantity' => (object) array(
 					'@type' => 'QuantitativeValue',
 					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
@@ -337,7 +337,7 @@ class WC_Emails {
 				'name'  => get_bloginfo( 'name' ),
 			),
 			'orderNumber'    => strval( $order->get_order_number() ),
-			'priceCurrency'  => $order->get_order_currency(),
+			'priceCurrency'  => $order->get_currency(),
 			'price'          => $order->get_total(),
 			'acceptedOffer'  => $accepted_offers,
 			'url'            => $order->get_view_order_url(),

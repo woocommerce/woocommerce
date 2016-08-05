@@ -356,7 +356,7 @@ class WC_Gateway_Paypal_Request {
 	protected function round( $price, $order ) {
 		$precision = 2;
 
-		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+		if ( ! $this->currency_has_decimals( $order->get_currency() ) ) {
 			$precision = 0;
 		}
 
@@ -372,7 +372,7 @@ class WC_Gateway_Paypal_Request {
 	protected function number_format( $price, $order ) {
 		$decimals = 2;
 
-		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+		if ( ! $this->currency_has_decimals( $order->get_currency() ) ) {
 			$decimals = 0;
 		}
 
