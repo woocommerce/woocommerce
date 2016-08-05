@@ -648,7 +648,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => isset( $order->paid_date ),
+				'paid'         => 0 < $order->get_date_paid(),
 			),
 			'billing_address' => array(
 				'first_name' => $order->get_billing_first_name(),
