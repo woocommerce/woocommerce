@@ -630,8 +630,8 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'customer_message' :
-				if ( $the_order->customer_message ) {
-					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+				if ( $the_order->get_customer_note() ) {
+					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
