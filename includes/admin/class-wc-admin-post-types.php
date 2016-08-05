@@ -751,7 +751,7 @@ class WC_Admin_Post_Types {
 
 				} else {
 					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->get_billing_last_name() ) );
+						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
 					} else if ( $the_order->billing_company ) {
 						$username = trim( $the_order->billing_company );
 					} else {

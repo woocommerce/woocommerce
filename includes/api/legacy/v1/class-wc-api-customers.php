@@ -365,10 +365,10 @@ class WC_API_Customers extends WC_API_Resource {
 			$order_data['customer'] = array(
 				'id'               => 0,
 				'email'            => $order->get_billing_email(),
-				'first_name'       => $order->billing_first_name,
+				'first_name'       => $order->get_billing_first_name(),
 				'last_name'        => $order->get_billing_last_name(),
 				'billing_address'  => array(
-					'first_name' => $order->billing_first_name,
+					'first_name' => $order->get_billing_first_name(),
 					'last_name'  => $order->get_billing_last_name(),
 					'company'    => $order->billing_company,
 					'address_1'  => $order->billing_address_1,

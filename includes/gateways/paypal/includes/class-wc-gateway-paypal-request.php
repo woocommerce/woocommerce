@@ -79,7 +79,7 @@ class WC_Gateway_Paypal_Request {
 				'invoice'       => $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(),
 				'custom'        => json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->order_key ) ),
 				'notify_url'    => $this->notify_url,
-				'first_name'    => $order->billing_first_name,
+				'first_name'    => $order->get_billing_first_name(),
 				'last_name'     => $order->get_billing_last_name(),
 				'company'       => $order->billing_company,
 				'address1'      => $order->billing_address_1,
