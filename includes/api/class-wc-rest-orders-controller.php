@@ -145,7 +145,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'total_tax'            => wc_format_decimal( $order->get_total_tax(), $dp ),
 			'billing'              => array(),
 			'shipping'             => array(),
-			'payment_method'       => $order->payment_method,
+			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
 			'transaction_id'       => $order->get_transaction_id(),
 			'customer_ip_address'  => $order->customer_ip_address,

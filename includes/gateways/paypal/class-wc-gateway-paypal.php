@@ -315,7 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( 'paypal' === $order->payment_method && 'pending' === get_post_meta( $order->get_id(), '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'paypal' === $order->get_payment_method() && 'pending' === get_post_meta( $order->get_id(), '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 

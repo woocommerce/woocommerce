@@ -962,7 +962,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**

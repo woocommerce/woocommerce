@@ -159,7 +159,7 @@ class WC_Shortcode_Checkout {
 						<?php endif; ?>
 					</ul>
 
-					<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
+					<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
 
 					<div class="clear"></div>
 					<?php

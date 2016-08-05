@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
+		$payment_method = ! empty( $order->get_payment_method() ) ? $order->get_payment_method() : '';
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
