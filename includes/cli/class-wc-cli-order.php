@@ -661,7 +661,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'postcode'   => $order->billing_postcode,
 				'country'    => $order->billing_country,
 				'email'      => $order->get_billing_email(),
-				'phone'      => $order->billing_phone,
+				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
 				'first_name' => $order->shipping_first_name,

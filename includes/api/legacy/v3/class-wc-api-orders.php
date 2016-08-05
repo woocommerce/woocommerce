@@ -192,7 +192,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'postcode'   => $order->billing_postcode,
 				'country'    => $order->billing_country,
 				'email'      => $order->get_billing_email(),
-				'phone'      => $order->billing_phone,
+				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
 				'first_name' => $order->shipping_first_name,

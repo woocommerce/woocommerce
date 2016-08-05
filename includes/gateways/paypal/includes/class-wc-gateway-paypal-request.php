@@ -103,7 +103,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_phone_number_args( $order ) {
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
-			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
+			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
 				'night_phone_a' => substr( $phone_number, 0, 3 ),
@@ -115,8 +115,8 @@ class WC_Gateway_Paypal_Request {
 			);
 		} else {
 			$phone_args = array(
-				'night_phone_b' => $order->billing_phone,
-				'day_phone_b' 	=> $order->billing_phone
+				'night_phone_b' => $order->get_billing_phone(),
+				'day_phone_b' 	=> $order->get_billing_phone()
 			);
 		}
 		return $phone_args;

@@ -465,10 +465,10 @@ class WC_Emails {
 			);
 	    }
 
-	    if ( $order->billing_phone ) {
+	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Tel', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_phone )
+				'value' => wptexturize( $order->get_billing_phone() )
 			);
 	    }
 

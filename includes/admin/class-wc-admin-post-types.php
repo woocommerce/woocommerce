@@ -678,8 +678,8 @@ class WC_Admin_Post_Types {
 					echo '&ndash;';
 				}
 
-				if ( $the_order->billing_phone ) {
-					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->billing_phone ) . '</small>';
+				if ( $the_order->get_billing_phone() ) {
+					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
 				}
 
 			break;

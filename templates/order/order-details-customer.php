@@ -37,10 +37,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	<?php endif; ?>
 
-	<?php if ( $order->billing_phone ) : ?>
+	<?php if ( $order->get_billing_phone() ) : ?>
 		<tr>
 			<th><?php _e( 'Telephone:', 'woocommerce' ); ?></th>
-			<td><?php echo esc_html( $order->billing_phone ); ?></td>
+			<td><?php echo esc_html( $order->get_billing_phone() ); ?></td>
 		</tr>
 	<?php endif; ?>
 
