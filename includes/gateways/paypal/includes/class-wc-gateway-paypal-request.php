@@ -81,7 +81,7 @@ class WC_Gateway_Paypal_Request {
 				'notify_url'    => $this->notify_url,
 				'first_name'    => $order->get_billing_first_name(),
 				'last_name'     => $order->get_billing_last_name(),
-				'company'       => $order->billing_company,
+				'company'       => $order->get_billing_company(),
 				'address1'      => $order->billing_address_1,
 				'address2'      => $order->billing_address_2,
 				'city'          => $order->billing_city,
