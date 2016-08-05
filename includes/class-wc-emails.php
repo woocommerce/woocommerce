@@ -370,7 +370,7 @@ class WC_Emails {
 		if ( $sent_to_admin ) {
 			$markup['potentialAction'] = (object) array(
 				'@type'  => 'ViewAction',
-				'target' => admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ),
+				'target' => admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ),
 			);
 		}
 
@@ -405,7 +405,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) )
 				);
 			}
 		}

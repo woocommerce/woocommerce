@@ -228,7 +228,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$response = $this->prepare_item_for_response( $note, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->id, $this->rest_base ), $note_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->get_id(), $this->rest_base ), $note_id ) ) );
 
 		return $response;
 	}

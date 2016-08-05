@@ -114,7 +114,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 		$refund = wc_get_order( $post );
 
-		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->id ) ) {
+		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 

@@ -125,7 +125,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$dp    = $request['dp'];
 
 		$data = array(
-			'id'                   => $order->id,
+			'id'                   => $order->get_id(),
 			'parent_id'            => $post->post_parent,
 			'status'               => $order->get_status(),
 			'order_key'            => $order->order_key,
@@ -364,7 +364,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected function prepare_links( $order ) {
 		$links = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
@@ -517,7 +517,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Set currency.
-			update_post_meta( $order->id, '_order_currency', $request['currency'] );
+			update_post_meta( $order->get_id(), '_order_currency', $request['currency'] );
 
 			// Set lines.
 			$lines = array(
@@ -541,10 +541,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Set payment method.
 			if ( ! empty( $request['payment_method'] ) ) {
-				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
+				update_post_meta( $order->get_id(), '_payment_method', $request['payment_method'] );
 			}
 			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->id, '_payment_method_title', $request['payment_method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', $request['payment_method_title'] );
 			}
 			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
@@ -552,12 +552,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Set meta data.
 			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
-				$this->update_meta_data( $order->id, $request['meta_data'] );
+				$this->update_meta_data( $order->get_id(), $request['meta_data'] );
 			}
 
 			wc_transaction_query( 'commit' );
 
-			return $order->id;
+			return $order->get_id();
 		} catch ( WC_REST_Exception $e ) {
 			wc_transaction_query( 'rollback' );
 
@@ -934,7 +934,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$result = $wpdb->get_row(
 				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
 				absint( $item['id'] ),
-				absint( $order->id )
+				absint( $order->get_id() )
 			) );
 
 			if ( is_null( $result ) ) {
@@ -975,7 +975,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		try {
 			$update_totals = false;
 			$order         = wc_get_order( $post );
-			$order_args    = array( 'order_id' => $order->id );
+			$order_args    = array( 'order_id' => $order->get_id() );
 
 			// Customer note.
 			if ( isset( $request['customer_note'] ) ) {
@@ -989,7 +989,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
-				update_post_meta( $order->id, '_customer_user', $request['customer_id'] );
+				update_post_meta( $order->get_id(), '_customer_user', $request['customer_id'] );
 			}
 
 			// Update addresses.
@@ -1032,10 +1032,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Set payment method.
 			if ( ! empty( $request['payment_method'] ) ) {
-				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
+				update_post_meta( $order->get_id(), '_payment_method', $request['payment_method'] );
 			}
 			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', $request['payment_method'] );
 			}
 			if ( $order->needs_payment() && isset( $request['set_paid'] ) && true === $request['set_paid'] ) {
 				$order->payment_complete( ! empty( $request['transaction_id'] ) ? $request['transaction_id'] : '' );
@@ -1043,7 +1043,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Set order currency.
 			if ( isset( $request['currency'] ) ) {
-				update_post_meta( $order->id, '_order_currency', $request['currency'] );
+				update_post_meta( $order->get_id(), '_order_currency', $request['currency'] );
 			}
 
 			// If items have changed, recalculate order totals.
@@ -1053,7 +1053,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Update meta data.
 			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
-				$this->update_meta_data( $order->id, $request['meta_data'] );
+				$this->update_meta_data( $order->get_id(), $request['meta_data'] );
 			}
 
 			// Update the order post to set customer note/modified date.
@@ -1064,7 +1064,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				$order->update_status( $request['status'], isset( $request['status_note'] ) ? $request['status_note'] : '' );
 			}
 
-			return $order->id;
+			return $order->get_id();
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

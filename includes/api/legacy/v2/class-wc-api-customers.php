@@ -169,7 +169,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
 			'role'             => $roles[0],
-			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
+			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
