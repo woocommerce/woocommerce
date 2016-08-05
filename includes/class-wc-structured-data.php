@@ -98,7 +98,6 @@ class WC_Structured_Data {
    */
   public function enqueue_data() {
     if ( $data = $this->get_data() ) {
-
       $data = $this->sanitize_data( $data );
 
       echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>';
@@ -106,7 +105,7 @@ class WC_Structured_Data {
   }
 
   /**
-   * Function for sanitizing the structured data.
+   * Sanitizes the structured data.
    *
    * @param  array $data
    * @return array $sanitized_data
@@ -158,10 +157,8 @@ class WC_Structured_Data {
     $json['@type']             = $type;
     $json['@id']               = get_the_permalink();
     $json['name']              = get_the_title();
-    $json['image']             = wp_get_attachment_url( $product->get_image_id() );
     $json['description']       = get_the_excerpt();
     $json['url']               = get_the_permalink();
-    $json['sku']               = $product->get_sku();
  
     if ( $product->get_rating_count() ) {
       $json['aggregateRating'] = array(
@@ -171,13 +168,28 @@ class WC_Structured_Data {
         'reviewCount'          => $product->get_review_count()
       );
     }
-    
-    $json['offers']            = array(
-      '@type'                  => 'Offer',
-      'priceCurrency'          => get_woocommerce_currency(),
-      'price'                  => $product->get_price(),
-      'availability'           => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' )
-    );
+
+    if ( $multi_variation = count( $product->get_children() ) > 1 ? true : false ) {
+      $variations = $product->get_available_variations();
+    } else {
+      $variations[0] = array( 'variation_id' => $product->get_id() );
+    }
+      
+    foreach ( $variations as $key => $variation ) {
+      $product_variation = wc_get_product( $variation['variation_id'] );
+      
+      $json_offers[ $key ]     = array(
+        '@type'                => 'Offer',
+        'priceCurrency'        => get_woocommerce_currency(),
+        'price'                => $product_variation->get_price(),
+        'availability'         => 'http://schema.org/' . $stock = ( $product_variation->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+        'sku'                  => $product_variation->get_sku(),
+        'image'                => wp_get_attachment_url( $product_variation->get_image_id() ),
+        'description'          => $multi_variation ? $product_variation->get_variation_description() : ''
+      );  
+    }
+
+    $json['offers'] = $json_offers;
     
     $this->set_data( apply_filters( 'woocommerce_structured_data_product', $json, $product ) );
   }
@@ -260,10 +272,10 @@ class WC_Structured_Data {
     $json['@type']             = 'WebSite';
     $json['name']              = get_bloginfo( 'name' );
     $json['url']               = get_bloginfo( 'url' );
-    $json['potentialAction'] = array(
-      '@type'                => 'SearchAction',
-      'target'               => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
-      'query-input'          => 'required name=search_term_string'
+    $json['potentialAction']   = array(
+      '@type'                  => 'SearchAction',
+      'target'                 => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
+      'query-input'            => 'required name=search_term_string'
     );
 
     $this->set_data( apply_filters( 'woocommerce_structured_data_shop', $json ) );
