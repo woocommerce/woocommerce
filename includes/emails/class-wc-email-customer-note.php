@@ -68,7 +68,7 @@ class WC_Email_Customer_Note extends WC_Email {
 			extract( $args );
 
 			if ( $order_id && ( $this->object = wc_get_order( $order_id ) ) ) {
-				$this->recipient               = $this->object->billing_email;
+				$this->recipient               = $this->object->get_billing_email();
 				$this->customer_note           = $customer_note;
 
 				$this->find['order-date']      = '{order_date}';
