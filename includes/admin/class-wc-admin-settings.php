@@ -697,7 +697,7 @@ class WC_Admin_Settings {
 			// Format the value based on option type.
 			switch ( $option['type'] ) {
 				case 'checkbox' :
-					$value = in_array( $raw_value, array( 'yes', 'no' ) ) ? $raw_value : 'no';
+					$value = '1' === $raw_value || 'yes' === $raw_value ? 'yes' : 'no';
 					break;
 				case 'textarea' :
 					$value = wp_kses_post( trim( $raw_value ) );

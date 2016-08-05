@@ -85,13 +85,14 @@ function wc_get_raw_referer() {
  * @access public
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
+ * @param bool $return Return message rather than add it.
  */
-function wc_add_to_cart_message( $products, $show_qty = false ) {
+function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
 	$count  = 0;
 
 	if ( ! is_array( $products ) ) {
-		$products = array( $products );
+		$products = array( $products => 1 );
 		$show_qty = false;
 	}
 
@@ -115,7 +116,13 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
+	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+
+	if ( $return ) {
+		return $message;
+	} else {
+		wc_add_notice( $message );
+	}
 }
 
 /**

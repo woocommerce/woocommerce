@@ -41,6 +41,11 @@ class WC_Shortcode_My_Account {
 				wc_add_notice( $message );
 			}
 
+			// After password reset, add confirmation message.
+			if ( ! empty( $_GET['password-reset'] ) ) {
+				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+			}
+
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 				self::lost_password();
 			} else {
@@ -187,12 +192,6 @@ class WC_Shortcode_My_Account {
 		 */
 		if ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
-
-		/**
-		 * After reset, show confirmation message.
-		 */
-		} elseif ( ! empty( $_GET['reset'] ) ) {
-			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 
 		/**
 		 * Process reset key / login from email confirmation link

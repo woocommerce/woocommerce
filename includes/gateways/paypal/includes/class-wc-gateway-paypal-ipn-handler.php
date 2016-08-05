@@ -172,7 +172,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param array $posted
 	 */
 	protected function payment_status_completed( $order, $posted ) {
-		if ( $order->has_status( 'completed' ) ) {
+		if ( $order->has_status( array( 'processing', 'completed' ) ) ) {
 			WC_Gateway_Paypal::log( 'Aborting, Order #' . $order->id . ' is already complete.' );
 			exit;
 		}
@@ -192,7 +192,11 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			}
 
 		} else {
-			$this->payment_on_hold( $order, sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
+			if ( 'authorization' === $posted['pending_reason'] ) {
+				$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );
+			} else {
+				$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $posted['pending_reason'] ) );
+			}
 		}
 	}
 
@@ -303,6 +307,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		}
 		if ( ! empty( $posted['payment_type'] ) ) {
 			update_post_meta( $order->id, 'Payment type', wc_clean( $posted['payment_type'] ) );
+		}
+		if ( ! empty( $posted['txn_id'] ) ) {
+			update_post_meta( $order->id, '_transaction_id', wc_clean( $posted['txn_id'] ) );
+		}
+		if ( ! empty( $posted['payment_status'] ) ) {
+			update_post_meta( $order->id, '_paypal_status', wc_clean( $posted['payment_status'] ) );
 		}
 	}
 

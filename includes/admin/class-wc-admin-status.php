@@ -205,7 +205,13 @@ class WC_Admin_Status {
 			$viewed_log = current( $logs );
 		}
 
-		include_once( dirname( __FILE__ ) . '/views/html-admin-page-status-logs.php' );
+		$handle = ! empty( $viewed_log ) ? self::get_log_file_handle( $viewed_log ) : '';
+
+		if ( ! empty( $_REQUEST[ 'handle' ] ) ) {
+			self::remove_log();
+		}
+
+		include_once( 'views/html-admin-page-status-logs.php' );
 	}
 
 	/**
@@ -238,6 +244,16 @@ class WC_Admin_Status {
 			$version = _cleanup_header_comment( $match[1] );
 
 		return $version ;
+	}
+
+	/**
+	 * Return the log file handle.
+	 *
+	 * @param string $filename
+	 * @return string
+	 */
+	public static function get_log_file_handle( $filename ) {
+		return substr( $filename, 0, strlen( $filename ) > 37 ? strlen( $filename ) - 37 : strlen( $filename ) - 4 );
 	}
 
 	/**
@@ -341,5 +357,22 @@ class WC_Admin_Status {
 		}
 
 		return $update_theme_version;
+	}
+
+	/**
+	 * Remove/delete the chosen file.
+	 */
+	public static function remove_log() {
+		if ( empty( $_REQUEST[ '_wpnonce' ] ) || ! wp_verify_nonce( $_REQUEST[ '_wpnonce' ], 'remove_log' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
+		if ( ! empty( $_REQUEST[ 'handle' ] ) ) {
+			$logger = new WC_Logger();
+			$logger->remove( $_REQUEST[ 'handle' ] );
+		}
+
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+		exit();
 	}
 }

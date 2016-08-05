@@ -306,7 +306,12 @@ table.wc_status_table {
 
 #log-viewer-select {
 	padding: 10px 0 8px;
-	line-height: 180%;
+	line-height: 28px;
+	h2 {
+		a {
+			vertical-align: middle;
+		}
+	}
 }
 
 #log-viewer {
@@ -585,7 +590,7 @@ ul.wc_coupon_list_block {
 
 			.hour,
 			.minute {
-				width: 3em;
+				width: 3.5em;
 			}
 
 			small {
@@ -2037,20 +2042,32 @@ table.wc_input_table {
 		color: $blue;
 	}
 
+	th {
+		white-space: nowrap;
+		padding: 10px;
+	}
+
 	td {
 		padding: 0;
 		border-right: 1px solid #DFDFDF;
 		border-bottom: 1px solid #DFDFDF;
 		border-top: 0;
 		background: #fff;
+		cursor: default;
 
 		input[type="text"],
 		input[type="number"] {
 			width: 100%;
-			padding: 5px 7px;
+			padding: 8px 10px;
 			margin: 0;
 			border: 0;
+			outline: 0;
 			background: transparent none;
+
+			&:focus {
+				outline: 0;
+				box-shadow: none;
+			}
 		}
 
 		&.compound,
@@ -2146,13 +2163,6 @@ table.wc_input_table {
 		.current {
 			background: #bbb;
 			text-shadow: none;
-		}
-	}
-
-	tfoot {
-		th {
-			padding-left: 20px;
-			padding-right: 20px;
 		}
 	}
 

@@ -69,13 +69,13 @@ p.demo_store {
 		text-align: center;
 		line-height: 1;
 		border-radius: 100%;
-		color: red !important;
+		color: red !important; // Required for default theme compatibility
 		text-decoration: none;
 		font-weight: 700;
 		border: 0;
 
 		&:hover {
-			color: #fff !important;
+			color: #fff !important; // Required for default theme compatibility
 			background: red;
 		}
 	}
@@ -1140,6 +1140,10 @@ p.demo_store {
 
 		.buttons {
 			@include clearfix();
+			a {
+				margin-right: 5px;
+				margin-bottom: 5px;
+			}
 		}
 	}
 
@@ -1492,13 +1496,13 @@ p.demo_store {
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
-	padding: 1em 2em 1em 3.5em !important;
-	margin: 0 0 2em !important;
+	padding: 1em 2em 1em 3.5em;
+	margin: 0 0 2em;
 	position: relative;
 	background-color: lighten($secondary,5%);
 	color: $secondarytext;
 	border-top: 3px solid $primary;
-	list-style: none outside !important;
+	list-style: none outside;
 	@include clearfix();
 	width: auto;
 	word-wrap: break-word;
@@ -1517,9 +1521,9 @@ p.demo_store {
 	}
 
 	li {
-		list-style: none outside !important;
-		padding-left: 0 !important;
-		margin-left: 0 !important;
+		list-style: none outside !important; // Required for default theme compatibility
+		padding-left: 0 !important; // Required for default theme compatibility
+		margin-left: 0 !important; // Required for default theme compatibility
 	}
 }
 

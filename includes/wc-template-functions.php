@@ -27,7 +27,7 @@ function wc_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
@@ -337,6 +337,40 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	return $classes;
 }
 
+/**
+ * Outputs hidden form inputs for each query string variable.
+ * @since 2.7.0
+ * @param array $values Name value pairs.
+ * @param array $exclude Keys to exclude.
+ * @param string $current_key Current key we are outputting.
+ */
+function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
+	if ( is_null( $values ) ) {
+		$values = $_GET;
+	}
+	$html = '';
+
+	foreach ( $values as $key => $value ) {
+		if ( in_array( $key, $exclude, true ) ) {
+			continue;
+		}
+		if ( $current_key ) {
+			$key = $current_key . '[' . $key . ']';
+		}
+		if ( is_array( $value ) ) {
+			$html .= wc_query_string_form_fields( $value, $exclude, $key, true );
+		} else {
+			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+		}
+	}
+
+	if ( $return ) {
+		return $html;
+	} else {
+		echo $html;
+	}
+}
+
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
@@ -606,7 +640,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_search() ) {
 			return;
 		}
-		
+
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
@@ -1085,7 +1119,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		}
 
 		// Additional information tab - shows attributes
-		if ( $product && ( $product->has_attributes() || ( $product->enable_dimensions_display() && ( $product->has_dimensions() || $product->has_weight() ) ) ) ) {
+		if ( $product && ( $product->has_attributes() || $product->enable_dimensions_display() ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional Information', 'woocommerce' ),
 				'priority' => 20,
@@ -1334,7 +1368,29 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) {
 
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_button_view_cart() {
+		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a>';
+	}
+}
+
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' ) ) {
+
+	/**
+	 * Output the proceed to checkout button.
+	 *
+	 * @subpackage	Cart
+	 */
+	function woocommerce_widget_shopping_cart_proceed_to_checkout() {
+		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward">' . __( 'Checkout', 'woocommerce' ) . '</a>';
+	}
+}
 
 /** Mini-Cart *************************************************************/
 
@@ -1672,10 +1728,13 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
 
 		if ( $thumbnail_id ) {
-			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
-			$image = $image[0];
+			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
+			$image        = $image[0];
+			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
 		} else {
-			$image = wc_placeholder_img_src();
+			$image        = wc_placeholder_img_src();
+			$image_srcset = $image_sizes = false;
 		}
 
 		if ( $image ) {
@@ -1683,7 +1742,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
-			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+			// Add responsive image markup if available
+			if ( $image_srcset && $image_sizes ) {
+				echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" srcset="' . esc_attr( $image_srcset ) . '" sizes="' . esc_attr( $image_sizes ) . '" />';
+			} else {
+				echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+			}
 		}
 	}
 }
@@ -1961,11 +2025,19 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @return string
 	 */
 	function get_product_search_form( $echo = true  ) {
+		global $product_search_form_index;
+
 		ob_start();
+
+		if ( empty( $product_search_form_index ) ) {
+			$product_search_form_index = 0;
+		}
 
 		do_action( 'pre_get_product_search_form'  );
 
-		wc_get_template( 'product-searchform.php' );
+		wc_get_template( 'product-searchform.php', array(
+			'index' => $product_search_form_index++,
+		) );
 
 		$form = apply_filters( 'get_product_search_form', ob_get_clean() );
 
@@ -2202,5 +2274,128 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 	 */
 	function woocommerce_account_edit_account() {
 		WC_Shortcode_My_Account::edit_account();
+	}
+}
+
+
+if ( ! function_exists( 'wc_get_email_order_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 * @param WC_Order $order
+	 * @param array $args
+	 * @since 2.7.0
+	 */
+	function wc_get_email_order_items( $order, $args = array() ) {
+		ob_start();
+
+		$defaults = array(
+			'show_sku'   => false,
+			'show_image' => false,
+			'image_size' => array( 32, 32 ),
+			'plain_text' => false
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
+
+		wc_get_template( $template, array(
+			'order'               => $order,
+			'items'               => $order->get_items(),
+			'show_download_links' => $order->is_download_permitted(),
+			'show_sku'            => $args['show_sku'],
+			'show_purchase_note'  => $order->is_paid(),
+			'show_image'          => $args['show_image'],
+			'image_size'          => $args['image_size'],
+		) );
+
+		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
+	}
+}
+
+if ( ! function_exists( 'wc_display_item_meta' ) ) {
+	/**
+	 * Display item meta data.
+	 * @since  2.7.0
+	 * @param  WC_Item $item
+	 * @param  array   $args
+	 * @return string|void
+	 */
+	function wc_display_item_meta( $item, $args = array() ) {
+		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class="wc-item-meta"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'autop'     => false,
+		) );
+
+		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+			if ( '_' === substr( $meta->key, 0, 1 ) ) {
+				continue;
+			}
+			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
+			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
+		}
+
+		if ( $strings ) {
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_meta', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
+		}
+	}
+}
+
+if ( ! function_exists( 'wc_display_item_downloads' ) ) {
+	/**
+	 * Display item download links.
+	 * @since  2.7.0
+	 * @param  WC_Item $item
+	 * @param  array   $args
+	 * @return string|void
+	 */
+	function wc_display_item_downloads( $item, $args = array() ) {
+		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class ="wc-item-downloads"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'show_url'  => false,
+		) );
+
+		if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $downloads = $item->get_item_downloads() ) ) {
+			$i = 0;
+			foreach ( $downloads as $file ) {
+				$i ++;
+
+				if ( $args['show_url'] ) {
+					$strings[] = '<strong class="wc-item-download-label">' .  esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
+				} else {
+					$prefix = sizeof( $downloads ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
+					$strings[] = '<strong class="wc-item-download-label">' . $prefix . ':</strong> <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a>';
+				}
+			}
+		}
+
+		if ( $strings ) {
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_downloads', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
+		}
 	}
 }

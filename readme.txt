@@ -1,5 +1,5 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, BFTrick
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, BFTrick, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.5
@@ -162,6 +162,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
 * Added Nigerian Provinces to i18n/state.
 * Improved handling of shop page rewrite rules to allow subpages.
+* Redirect to login after password reset.
+* When using authorizations in PayPal standard, automatically capture funds when the order goes processing/completed.
+* On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
+* Show variable weights/dimensions even when parent values are not set.
+* Automatically sort tax rates rather than allow clunky manual sorting.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 

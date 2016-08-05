@@ -88,14 +88,59 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
+		WC_Helper_Product::delete_product( $product->id );
+
+
+		# Test case 3 #11626
+		update_post_meta( $coupon->id, 'discount_type', 'percent' );
+		update_post_meta( $coupon->id, 'coupon_amount', '50' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product_ids   = array();
+		$products_data = array(
+			'5.17', '3.32', '1.25', '3.50', '5.01', '3.34', '5.99', '5.51'
+		);
+		foreach ( $products_data as $price ) {
+			$loop_product  = WC_Helper_Product::create_simple_product();
+			$product_ids[] = $loop_product->id;
+			update_post_meta( $loop_product->id, '_regular_price', $price );
+			update_post_meta( $loop_product->id, '_price', $price );
+			WC()->cart->add_to_cart( $loop_product->id, 1 );
+		}
+
+		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '16.55', WC()->cart->total );
+
+		// Cleanup
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		foreach ( $product_ids as $product_id ) {
+			WC_Helper_Product::delete_product( $product_id );
+		}
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 
-		// Delete coupon
 		WC_Helper_Coupon::delete_coupon( $coupon->id );
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -123,6 +168,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->empty_cart();
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
