@@ -169,23 +169,23 @@ class WC_Structured_Data {
       );
     }
 
-    if ( $multi_variation = count( $product->get_children() ) > 1 ? true : false ) {
+    if ( $is_multi_variation = count( $product->get_children() ) > 1 ? true : false ) {
       $variations = $product->get_available_variations();
     } else {
-      $variations[0] = array( 'variation_id' => $product->get_id() );
+      $variations = array( null );
     }
+
+    foreach ( $variations as $variation ) {
+      $product_variation = $is_multi_variation ? wc_get_product( $variation['variation_id'] ) : $product;
       
-    foreach ( $variations as $key => $variation ) {
-      $product_variation = wc_get_product( $variation['variation_id'] );
-      
-      $json_offers[ $key ]     = array(
+      $json_offers[]           = array(
         '@type'                => 'Offer',
         'priceCurrency'        => get_woocommerce_currency(),
         'price'                => $product_variation->get_price(),
         'availability'         => 'http://schema.org/' . $stock = ( $product_variation->is_in_stock() ? 'InStock' : 'OutOfStock' ),
         'sku'                  => $product_variation->get_sku(),
         'image'                => wp_get_attachment_url( $product_variation->get_image_id() ),
-        'description'          => $multi_variation ? $product_variation->get_variation_description() : ''
+        'description'          => $is_multi_variation ? $product_variation->get_variation_description() : ''
       );  
     }
 
