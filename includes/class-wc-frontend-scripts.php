@@ -199,6 +199,10 @@ class WC_Frontend_Scripts {
 		self::register_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery','prettyPhoto' ) );
 		self::register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 
+		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+			self::enqueue_script( 'flexslider', $assets_path . 'js/flexslider/jquery.flexslider' . $suffix . '.js', array( 'jquery' ), '2.7.0', true );
+		}
+
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
 		}

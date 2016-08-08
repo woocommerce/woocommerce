@@ -23,14 +23,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $post, $product;
 $columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
 ?>
-<figure class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
-	<?php
-	if ( has_post_thumbnail() ) {
-		echo get_the_post_thumbnail( $post->ID, 'shop_single' );
-	} else {
-		echo sprintf( '<img src="%s" alt="%s" />', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
-	}
+<div class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
+	<figure class="woocommerce-product-gallery__wrapper">
+		<?php
+		if ( has_post_thumbnail() ) {
+			echo '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single' ) . '</figure>';
+		} else {
+			echo sprintf( '<figure><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+		}
 
-	do_action( 'woocommerce_product_thumbnails' );
-	?>
-</figure>
+		do_action( 'woocommerce_product_thumbnails' );
+		?>
+	</figure>
+</div>
