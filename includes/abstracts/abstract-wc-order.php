@@ -92,6 +92,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} elseif ( ! empty( $order->ID ) ) {
 			$this->read( absint( $order->ID ) );
 		}
+		// Set default status if none were read.
+		if ( ! $this->get_status() ) {
+			$this->set_status( apply_filters( 'woocommerce_default_order_status', 'pending' ) );
+		}
 	}
 
 	/*
