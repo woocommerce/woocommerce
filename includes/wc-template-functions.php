@@ -2317,10 +2317,11 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		ob_start();
 
 		$defaults = array(
-			'show_sku'   => false,
-			'show_image' => false,
-			'image_size' => array( 32, 32 ),
-			'plain_text' => false
+			'show_sku'      => false,
+			'show_image'    => false,
+			'image_size'    => array( 32, 32 ),
+			'plain_text'    => false,
+			'sent_to_admin' => false,
 		);
 
 		$args     = wp_parse_args( $args, $defaults );
@@ -2334,6 +2335,8 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 			'show_purchase_note'  => $order->is_paid(),
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
+			'plain_text'          => $args['plain_text'],
+			'sent_to_admin'       => $args['sent_to_admin'],
 		) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
