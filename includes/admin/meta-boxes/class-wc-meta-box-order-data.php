@@ -266,8 +266,8 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'billing_' . $key;
 
-									if ( $order->$field_name ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 									}
 								}
 
@@ -352,8 +352,8 @@ class WC_Meta_Box_Order_Data {
 
 										$field_name = 'shipping_' . $key;
 
-										if ( ! empty( $order->$field_name ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 										}
 									}
 								}
