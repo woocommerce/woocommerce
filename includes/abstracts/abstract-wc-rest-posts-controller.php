@@ -521,6 +521,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		if ( 'include' === $query_args['orderby'] ) {
 			$query_args['orderby'] = 'post__in';
+		} elseif ( 'id' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'ID'; // ID must be capitalized
 		}
 
 		return $query_args;
