@@ -27,7 +27,7 @@ $columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
 		if ( has_post_thumbnail() ) {
-			echo '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single' ) . '</figure>';
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single' ) . '</figure>' );
 		} else {
 			echo sprintf( '<figure><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
 		}

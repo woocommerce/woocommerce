@@ -33,7 +33,7 @@ if ( $attachment_ids ) {
 ?>
 
 <script type="text/javascript" charset="utf-8">
-jQuery(window).load(function() {
+jQuery(document).ready(function() {
 	jQuery('.woocommerce-product-gallery').flexslider({
 		selector: '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
 		animation: 'slide',
@@ -41,6 +41,7 @@ jQuery(window).load(function() {
 		directionNav: false,
 		controlNav: 'thumbnails',
 		slideshow: false,
+		animationSpeed: 500,
 	});
 });
 </script>
