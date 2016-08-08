@@ -33,7 +33,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $_data = array(
 		'id'                 => 0,
 		'parent_id'          => 0,
-		'status'             => 'pending',
+		'status'             => '',
 		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
@@ -588,25 +588,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Set order status.
 	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param array details of change
 	 */
 	 public function set_status( $new_status ) {
-		 $old_status = $this->get_status();
-		 $new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		$old_status = $this->get_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
-		// If the old status is unknown (e.g. draft) assume its pending for action usage.
-		if ( ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
-			$old_status = 'pending';
+		// Only allow valid new status
+		if ( ! in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$new_status = 'pending';
 		}
 
-		 if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $old_status ) {
-			 $this->_data['status'] = 'wc-' . $new_status;
-		 } else {
-			$new_status = $old_status;
+		$this->_data['status'] = 'wc-' . $new_status;
+
+		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$old_status = 'pending';
 		}
 
 		return array(
