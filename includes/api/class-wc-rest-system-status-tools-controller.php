@@ -38,13 +38,6 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
-
-        /**
-		 * @todo implement these routes below (or similar) and remove this comment
-         * GET system_status/tools/options - Get a list of system options that can be toggled (Shipping Debug Mode, Template Debug Mode, Remove All Data)
-         * PUT system_status/tools/options - Change an option
-         */
-
         register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
