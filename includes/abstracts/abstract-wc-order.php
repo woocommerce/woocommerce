@@ -1197,6 +1197,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			// Inherit tax class from items
 			if ( '' === $shipping_tax_class ) {
+				$tax_rates         = array();
 				$tax_classes       = WC_Tax::get_tax_classes();
 				$found_tax_classes = $this->get_items_tax_classes();
 
