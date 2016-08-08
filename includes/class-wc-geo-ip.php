@@ -1168,12 +1168,8 @@ class WC_Geo_IP {
 	 * @param string $message
 	 */
 	public static function log( $message ) {
-		if ( ! class_exists( 'WC_Logger' ) ) {
-			include_once( 'class-wc-logger.php' );
-		}
-
 		if ( empty( self::$log ) ) {
-			self::$log = new WC_Logger();
+			self::$log = wc_get_logger();
 		}
 		self::$log->add( 'geoip', $message );
 	}

@@ -176,17 +176,18 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  * @param int $order_id
  */
 function wc_paying_customer( $order_id ) {
-	$order = wc_get_order( $order_id );
+	$order       = wc_get_order( $order_id );
+	$customer_id = $order->get_customer_id();
 
-	if ( $order->user_id > 0 && 'refund' !== $order->order_type ) {
-		update_user_meta( $order->user_id, 'paying_customer', 1 );
+	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
+		update_user_meta( $customer_id, 'paying_customer', 1 );
 
-		$old_spent = absint( get_user_meta( $order->user_id, '_money_spent', true ) );
-		update_user_meta( $order->user_id, '_money_spent', $old_spent + $order->order_total );
+		$old_spent = absint( get_user_meta( $customer_id, '_money_spent', true ) );
+		update_user_meta( $customer_id, '_money_spent', $old_spent + $order->order_total );
 	}
-	if ( $order->user_id > 0 && 'simple' === $order->order_type ) {
-		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
-		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
+	if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
+		$old_count = absint( get_user_meta( $customer_id, '_order_count', true ) );
+		update_user_meta( $customer_id, '_order_count', $old_count + 1 );
 	}
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
@@ -446,7 +447,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
-						'email'         => $result->user_email,
+						'email'         => urlencode( $result->user_email ),
 						'key'           => $result->download_id
 					),
 					home_url( '/' )

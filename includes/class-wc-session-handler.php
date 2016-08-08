@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Session' ) ) {
-	include_once( 'abstracts/abstract-wc-session.php' );
+	include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-session.php' );
 }
 
 /**

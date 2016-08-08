@@ -354,8 +354,9 @@ jQuery( function( $ ) {
 			var $clicked = $( 'input[type=submit][clicked=true]' );
 
 			if ( 0 === $form.find( '.shop_table.cart' ).length ) {
-				return false;
+				return;
 			}
+
 			if ( is_blocked( $form ) ) {
 				return false;
 			}

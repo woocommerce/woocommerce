@@ -442,7 +442,7 @@ class WC_Admin_Webhooks {
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
 
 		if ( $logs ) {
-			include_once( 'settings/views/html-webhook-logs.php' );
+			include_once( dirname( __FILE__ ) . '/settings/views/html-webhook-logs.php' );
 		} else {
 			echo '<p>' . __( 'This Webhook has no log yet.', 'woocommerce' ) . '</p>';
 		}

@@ -270,6 +270,10 @@ class WC_Webhook {
 					break;
 
 				case 'product':
+					// bulk and quick edit action hooks return a product object instead of an ID
+					if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+						$resource_id = $resource_id->get_id();
+					}
 					$payload = WC()->api->WC_API_Products->get_product( $resource_id );
 					break;
 
@@ -581,6 +585,8 @@ class WC_Webhook {
 			'product.updated' => array(
 				'woocommerce_process_product_meta',
 				'woocommerce_api_edit_product',
+				'woocommerce_product_quick_edit_save',
+				'woocommerce_product_bulk_edit_save',
 			),
 			'product.deleted' => array(
 				'wp_trash_post',

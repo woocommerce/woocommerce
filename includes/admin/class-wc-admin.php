@@ -43,34 +43,34 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once( 'wc-admin-functions.php' );
-		include_once( 'wc-meta-box-functions.php' );
-		include_once( 'class-wc-admin-post-types.php' );
-		include_once( 'class-wc-admin-taxonomies.php' );
-		include_once( 'class-wc-admin-menus.php' );
-		include_once( 'class-wc-admin-notices.php' );
-		include_once( 'class-wc-admin-assets.php' );
-		include_once( 'class-wc-admin-api-keys.php' );
-		include_once( 'class-wc-admin-webhooks.php' );
-		include_once( 'class-wc-admin-pointers.php' );
+		include_once( dirname( __FILE__ ) . '/wc-admin-functions.php' );
+		include_once( dirname( __FILE__ ) . '/wc-meta-box-functions.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-post-types.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-menus.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-notices.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-assets.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once( 'class-wc-admin-help.php' );
+			include_once( dirname( __FILE__ ) . '/class-wc-admin-help.php' );
 		}
 
 		// Setup/welcome
 		if ( ! empty( $_GET['page'] ) ) {
 			switch ( $_GET['page'] ) {
 				case 'wc-setup' :
-					include_once( 'class-wc-admin-setup-wizard.php' );
+					include_once( dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php' );
 				break;
 			}
 		}
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once( 'class-wc-admin-importers.php' );
+			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		}
 	}
 

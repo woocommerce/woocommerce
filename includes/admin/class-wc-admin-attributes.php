@@ -271,6 +271,7 @@ class WC_Admin_Attributes {
 				<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 					<table class="form-table">
 						<tbody>
+							<?php do_action( 'woocommerce_before_edit_attribute_fields' ); ?>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
@@ -309,7 +310,6 @@ class WC_Admin_Attributes {
 										<?php endforeach; ?>
 
 										<?php
-
 											/**
 											 * Deprecated action in favor of product_attributes_type_selector filter.
 											 *
@@ -335,6 +335,7 @@ class WC_Admin_Attributes {
 									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
+							<?php do_action( 'woocommerce_after_edit_attribute_fields' ) ?>
 						</tbody>
 					</table>
 					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"></p>
@@ -374,7 +375,6 @@ class WC_Admin_Attributes {
 									if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) :
 										foreach ( $attribute_taxonomies as $tax ) :
 											?><tr>
-
 												<td>
 													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
@@ -440,6 +440,8 @@ class WC_Admin_Attributes {
 							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
+								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
+
 								<div class="form-field">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
 									<input name="attribute_label" id="attribute_label" type="text" value="" />
@@ -488,6 +490,8 @@ class WC_Admin_Attributes {
 									</select>
 									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
+
+								<?php do_action( 'woocommerce_after_add_attribute_fields' ) ?>
 
 								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>

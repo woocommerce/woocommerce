@@ -74,6 +74,7 @@ add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_desc
  */
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
+add_action( 'woocommerce_no_products_found', 'wc_no_products_found' );
 
 /**
  * Product Loop Items.
@@ -204,6 +205,11 @@ add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_for
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 
+/**
+ * Cart widget
+ */
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_button_view_cart', 10 );
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_proceed_to_checkout', 20 );
 
 /**
  * Cart.

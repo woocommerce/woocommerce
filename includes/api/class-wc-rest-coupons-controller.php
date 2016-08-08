@@ -246,8 +246,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		// Content.
 		$data->post_content = '';
 
-		// Excerpt.
-		if ( ! empty( $schema['properties']['excerpt'] ) && isset( $request['description'] ) ) {
+		// Coupon description (excerpt).
+		if ( ! empty( $schema['properties']['description'] ) && isset( $request['description'] ) ) {
 			$data->post_excerpt = wp_filter_post_kses( $request['description'] );
 		}
 

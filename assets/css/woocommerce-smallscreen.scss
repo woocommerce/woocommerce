@@ -41,7 +41,7 @@
 				text-align: right !important; // Important to overwrite order status inline styling
 
 				&.order-actions {
-					text-align: left !important;
+					text-align: left !important; // This must always align left on handheld
 				}
 
 				&:before {
@@ -109,7 +109,7 @@
 
 				&:nth-child(2n) {
 					float: right;
-					clear: none !important;
+					clear: none !important; // This should never clear.
 				}
 			}
 		}

@@ -1429,7 +1429,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true );
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
 	/**
@@ -1439,6 +1439,15 @@ class WC_Product {
 	 */
 	public function has_dimensions() {
 		return $this->get_dimensions() ? true : false;
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		return false;
 	}
 
 	/**
@@ -1484,6 +1493,15 @@ class WC_Product {
 	}
 
 	/**
+	 * Does a child have a weight set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return false;
+	}
+
+	/**
 	 * Returns formatted dimensions.
 	 * @return string
 	 */
@@ -1498,7 +1516,7 @@ class WC_Product {
 			$dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
 		}
 
-		return  apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
+		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
 	}
 
 	/**

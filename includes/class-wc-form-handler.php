@@ -146,7 +146,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
 		}
 	}
@@ -211,11 +211,6 @@ class WC_Form_Handler {
 			$user->user_email = $account_email;
 		}
 
-		if ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
-			wc_add_notice( __( 'Your current password is incorrect.', 'woocommerce' ), 'error' );
-			$save_pass = false;
-		}
-
 		if ( ! empty( $pass_cur ) && empty( $pass1 ) && empty( $pass2 ) ) {
 			wc_add_notice( __( 'Please fill out all password fields.', 'woocommerce' ), 'error' );
 			$save_pass = false;
@@ -227,6 +222,9 @@ class WC_Form_Handler {
 			$save_pass = false;
 		} elseif ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
 			wc_add_notice( __( 'New passwords do not match.', 'woocommerce' ), 'error' );
+			$save_pass = false;
+		} elseif ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
+			wc_add_notice( __( 'Your current password is incorrect.', 'woocommerce' ), 'error' );
 			$save_pass = false;
 		}
 
@@ -873,9 +871,12 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
 
 			try {
-				$creds    = array();
-				$username = trim( $_POST['username'] );
+				$creds = array(
+					'user_password' => $_POST['password'],
+					'remember'      => isset( $_POST['rememberme'] ),
+				);
 
+				$username         = trim( $_POST['username'] );
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -904,10 +905,17 @@ class WC_Form_Handler {
 					$creds['user_login'] = $username;
 				}
 
-				$creds['user_password'] = $_POST['password'];
-				$creds['remember']      = isset( $_POST['rememberme'] );
-				$secure_cookie          = is_ssl() ? true : false;
-				$user                   = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), $secure_cookie );
+				// On multisite, ensure user exists on current site, if not add them before allowing login.
+				if ( is_multisite() ) {
+					$user_data = get_user_by( 'login', $username );
+
+					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
+					}
+				}
+
+				// Perform the login
+				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
@@ -987,7 +995,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_customer_reset_password', $user );
 
-				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login', 'reset-link-sent' ) ) ) );
+				wp_redirect( add_query_arg( 'password-reset', 'true', wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 			}
 		}
