@@ -25,6 +25,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( '/wc/v1/system_status', $routes );
         $this->assertArrayHasKey( '/wc/v1/system_status/tools', $routes );
         $this->assertArrayHasKey( '/wc/v1/system_status/tools/(?P<id>[\w-]+)', $routes );
+        $this->assertArrayHasKey( '/wc/v1/system_status/modes', $routes );
     }
 
     /**
@@ -247,8 +248,6 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/tools/recount_terms' ) );
         $data     = $response->get_data();
 
-        error_log( print_r ( $data, 1 ) );
-
         $this->assertEquals( 200, $response->get_status() );
 
         $this->assertEquals( 'recount_terms', $data['id'] );
@@ -300,7 +299,106 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      */
     public function test_execute_system_status_tool_without_permission() {
         wp_set_current_user( 0 );
-        $response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v1/system_status/tools/recount_terms' ) );
+        $response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v1/system_status/tools/recount_terms' ) );
+        $this->assertEquals( 401, $response->get_status() );
+    }
+
+    /**
+     * Test getting a list of system status modes.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_status_modes() {
+        wp_set_current_user( $this->user );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/modes' ) );
+        $data     = $response->get_data();
+        $system_status = new WC_REST_System_Status_Controller;
+        $raw_modes     = $system_status->_get_modes();
+        foreach ( $data as $mode ) {
+            $this->assertEquals( $raw_modes[ $mode['id'] ], $mode );
+        }
+    }
+
+    /**
+     * Test getting system status modes without valid permissions.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_status_modes_without_permission() {
+        wp_set_current_user( 0 );
+        $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status/modes' ) );
+        $this->assertEquals( 401, $response->get_status() );
+    }
+
+    /**
+     * Test updating system status modes.
+     *
+     * @since 2.7.0
+     */
+    public function test_update_system_status_modes() {
+        wp_set_current_user( $this->user );
+
+        // test invalid mode
+        $request = new WP_REST_Request( 'POST', '/wc/v1/system_status/modes' );
+        $request->set_body_params( array(
+            'test_mode' => 'test',
+        ) );
+        $response = $this->server->dispatch( $request );
+        $this->assertEquals( 500, $response->get_status() );
+
+        // test updating single mode.
+        $request = new WP_REST_Request( 'POST', '/wc/v1/system_status/modes' );
+        $request->set_body_params( array(
+            'uninstall_data' => true,
+        ) );
+        $response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+        foreach ( $data as $mode ) {
+            if ( 'uninstall_data' === $mode['id'] ) {
+                $this->assertTrue( $mode['enabled'] );
+            } else {
+                $this->assertFalse( $mode['enabled'] );
+            }
+        }
+
+        // test updating multiple
+        $request = new WP_REST_Request( 'POST', '/wc/v1/system_status/modes' );
+        $request->set_body_params( array(
+            'template_debug' => true,
+            'shipping_debug' => true,
+        ) );
+        $response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+        foreach ( $data as $mode ) {
+            $this->assertTrue( $mode['enabled'] ); // all 3 should be true now
+        }
+
+        // test updating multiple, some false
+        $request = new WP_REST_Request( 'POST', '/wc/v1/system_status/modes' );
+        $request->set_body_params( array(
+            'template_debug' => false,
+            'shipping_debug' => true,
+            'uninstall_data' => false,
+        ) );
+        $response = $this->server->dispatch( $request );
+        $data     = $response->get_data();
+        foreach ( $data as $mode ) {
+            if ( 'shipping_debug' === $mode['id'] ) {
+                $this->assertTrue( $mode['enabled'] );
+            } else {
+                $this->assertFalse( $mode['enabled'] );
+            }
+        }
+    }
+
+    /**
+     * Test updating system status modes without permission.
+     *
+     * @since 2.7.0
+     */
+    public function test_update_system_status_modes_without_permission() {
+        wp_set_current_user( 0 );
+        $response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v1/system_status/modes' ) );
         $this->assertEquals( 401, $response->get_status() );
     }
 
@@ -321,6 +419,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'description', $properties );
         $this->assertArrayHasKey( 'success', $properties );
         $this->assertArrayHasKey( 'message', $properties );
+    }
+
+    /**
+     * Test modes schema.
+     *
+     * @since 2.7.0
+     */
+    public function test_get_system_status_mode_schema() {
+        $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/modes' );
+        $response = $this->server->dispatch( $request );
+        $data = $response->get_data();
+        $properties = $data['schema']['properties'];
+        $this->assertEquals( 4, count( $properties ) );
+        $this->assertArrayHasKey( 'id', $properties );
+        $this->assertArrayHasKey( 'name', $properties );
+        $this->assertArrayHasKey( 'description', $properties );
+        $this->assertArrayHasKey( 'enabled', $properties );
     }
 
 }
