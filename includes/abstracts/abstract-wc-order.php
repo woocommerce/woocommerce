@@ -879,17 +879,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['qty'] = $qty;
 		}
 
+		if ( empty( $args['qty'] ) ) {
+			$args['qty'] = 1;
+		}
+
 		$args = wp_parse_args( $args, array(
 			'qty'          => 1,
 			'name'         => $product ? $product->get_title() : '',
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
 			'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
+			'variation'    => $product && isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
 			'subtotal'     => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
 			'total'        => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
 			'subtotal_tax' => 0,
 			'total_tax'    => 0,
-			'variation'    => array(),
 			'taxes'        => array(
 				'subtotal' => array(),
 				'total'    => array(),
