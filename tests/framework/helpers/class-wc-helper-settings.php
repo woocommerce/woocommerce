@@ -67,14 +67,6 @@ class WC_Helper_Settings {
 				'both'          => __( 'Show both', 'woocommerce' ),
 			),
 		);
-		$settings[] = array(
-			'id'            => 'woocommerce_enable_lightbox',
-			'label'         => __( 'Product Image Gallery', 'woocommerce' ),
-			'description'   => __( 'Enable Lightbox for product images', 'woocommerce' ),
-			'default'       => 'yes',
-			'tip'           => __( 'Product gallery images will open in a lightbox.', 'woocommerce' ),
-			'type'          => 'checkbox',
-		);
 		return $settings;
 	}
 

@@ -222,15 +222,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Product Image Gallery', 'woocommerce' ),
-					'desc'          => __( 'Enable Lightbox for product images', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_lightbox',
-					'default'       => 'yes',
-					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
-					'type'          => 'checkbox'
-				),
-
-				array(
 					'type' 	=> 'sectionend',
 					'id' 	=> 'image_options'
 				)
