@@ -423,7 +423,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
-				<?php wc_get_template( 'loop/no-products-found.php' ); ?>
+				<?php do_action( 'woocommerce_no_products_found' ); ?>
 
 			<?php endif;
 
@@ -2302,6 +2302,16 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 	 */
 	function woocommerce_account_edit_account() {
 		WC_Shortcode_My_Account::edit_account();
+	}
+}
+
+if ( ! function_exists( 'wc_no_products_found' ) ) {
+
+	/**
+	 * Show no products found message.
+	 */
+	function wc_no_products_found() {
+		wc_get_template( 'loop/no-products-found.php' );
 	}
 }
 
