@@ -368,7 +368,7 @@ class WC_Admin_Status {
 		}
 
 		if ( ! empty( $_REQUEST[ 'handle' ] ) ) {
-			$logger = new WC_Logger();
+			$logger = wc_get_logger();
 			$logger->remove( $_REQUEST[ 'handle' ] );
 		}
 

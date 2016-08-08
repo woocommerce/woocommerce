@@ -221,7 +221,7 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$logger             = new WC_Logger();
+		$logger             = wc_get_logger();
 		$update_queued      = false;
 
 		foreach ( self::$db_updates as $version => $update_callbacks ) {

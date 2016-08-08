@@ -1415,3 +1415,16 @@ function wc_get_rounding_precision() {
 	}
 	return $precision;
 }
+
+/**
+ * Returns a new instance of a WC Logger.
+ * Use woocommerce_logging_class filter to change the logging class.
+ * @return WC_Logger
+ */
+function wc_get_logger() {
+	if ( ! class_exists( 'WC_Logger' ) ) {
+		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	}
+	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+	return new $class;
+}
