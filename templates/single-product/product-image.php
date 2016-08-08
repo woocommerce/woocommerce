@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.6.3
+ * @version     2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,32 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product;
+$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
 ?>
-<div class="images">
+<figure class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
 	<?php
-		if ( has_post_thumbnail() ) {
-			$attachment_count = count( $product->get_gallery_attachment_ids() );
-			$gallery          = $attachment_count > 0 ? '[product-gallery]' : '';
-			$props            = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
-			$image            = get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ), array(
-				'title'	 => $props['title'],
-				'alt'    => $props['alt'],
-			) );
-			echo apply_filters(
-				'woocommerce_single_product_image_html',
-				sprintf(
-					'<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto%s">%s</a>',
-					esc_url( $props['url'] ),
-					esc_attr( $props['caption'] ),
-					$gallery,
-					$image
-				),
-				$post->ID
-			);
-		} else {
-			echo apply_filters( 'woocommerce_single_product_image_html', sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) ), $post->ID );
-		}
+	if ( has_post_thumbnail() ) {
+		echo get_the_post_thumbnail( $post->ID, 'shop_single' );
+	} else {
+		echo sprintf( '<img src="%s" alt="%s" />', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+	}
 
-		do_action( 'woocommerce_product_thumbnails' );
+	do_action( 'woocommerce_product_thumbnails' );
 	?>
-</div>
+</figure>
