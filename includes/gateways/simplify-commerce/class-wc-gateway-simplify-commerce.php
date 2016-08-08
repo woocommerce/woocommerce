@@ -615,11 +615,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			'receipt'         => 'false',
 			'color'           => $this->modal_color,
 			'redirect-url'    => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' ),
-			'address'         => $order->billing_address_1 . ' ' . $order->billing_address_2,
-			'address-city'    => $order->billing_city,
-			'address-state'   => $order->billing_state,
-			'address-zip'     => $order->billing_postcode,
-			'address-country' => $order->billing_country,
+			'address'         => $order->get_billing_address_1() . ' ' . $order->get_billing_address_2(),
+			'address-city'    => $order->get_billing_city(),
+			'address-state'   => $order->get_billing_state(),
+			'address-zip'     => $order->get_billing_postcode(),
+			'address-country' => $order->get_billing_country(),
 			'operation'       => 'create.token',
 		), $order->get_id() );
 

@@ -270,7 +270,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order 		= wc_get_order( $order_id );
 
 		// Get the order country and country $locale
-		$country 	= $order->billing_country;
+		$country 	= $order->get_billing_country();
 		$locale		= $this->get_country_locale();
 
 		// Get sortcode label in the $locale array and use appropriate one

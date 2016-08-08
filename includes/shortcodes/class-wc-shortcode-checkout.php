@@ -95,14 +95,14 @@ class WC_Shortcode_Checkout {
 				if ( $order->needs_payment() ) {
 
 					// Set customer location to order location
-					if ( $order->billing_country ) {
-						WC()->customer->set_country( $order->billing_country );
+					if ( $order->get_billing_country() ) {
+						WC()->customer->set_country( $order->get_billing_country() );
 					}
-					if ( $order->billing_state ) {
-						WC()->customer->set_state( $order->billing_state );
+					if ( $order->get_billing_state() ) {
+						WC()->customer->set_state( $order->get_billing_state() );
 					}
-					if ( $order->billing_postcode ) {
-						WC()->customer->set_postcode( $order->billing_postcode );
+					if ( $order->get_billing_postcode() ) {
+						WC()->customer->set_postcode( $order->get_billing_postcode() );
 					}
 
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();

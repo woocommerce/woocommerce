@@ -82,12 +82,12 @@ class WC_Gateway_Paypal_Request {
 				'first_name'    => $order->get_billing_first_name(),
 				'last_name'     => $order->get_billing_last_name(),
 				'company'       => $order->get_billing_company(),
-				'address1'      => $order->billing_address_1,
-				'address2'      => $order->billing_address_2,
-				'city'          => $order->billing_city,
-				'state'         => $this->get_paypal_state( $order->billing_country, $order->billing_state ),
-				'zip'           => $order->billing_postcode,
-				'country'       => $order->billing_country,
+				'address1'      => $order->get_billing_address_1(),
+				'address2'      => $order->get_billing_address_2(),
+				'city'          => $order->get_billing_city(),
+				'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
+				'zip'           => $order->get_billing_postcode(),
+				'country'       => $order->get_billing_country(),
 				'email'         => $order->get_billing_email()
 			),
 			$this->get_phone_number_args( $order ),
@@ -102,7 +102,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
+		if ( in_array( $order->get_billing_country(), array( 'US','CA' ) ) ) {
 			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
@@ -135,15 +135,15 @@ class WC_Gateway_Paypal_Request {
 			$shipping_args['no_shipping']      = 0;
 
 			// If we are sending shipping, send shipping address instead of billing
-			$shipping_args['first_name']       = $order->shipping_first_name;
-			$shipping_args['last_name']        = $order->shipping_last_name;
-			$shipping_args['company']          = $order->shipping_company;
-			$shipping_args['address1']         = $order->shipping_address_1;
-			$shipping_args['address2']         = $order->shipping_address_2;
-			$shipping_args['city']             = $order->shipping_city;
-			$shipping_args['state']            = $this->get_paypal_state( $order->shipping_country, $order->shipping_state );
-			$shipping_args['country']          = $order->shipping_country;
-			$shipping_args['zip']              = $order->shipping_postcode;
+			$shipping_args['first_name']       = $order->get_shipping_first_name();
+			$shipping_args['last_name']        = $order->get_shipping_last_name();
+			$shipping_args['company']          = $order->get_shipping_company();
+			$shipping_args['address1']         = $order->get_shipping_address_1();
+			$shipping_args['address2']         = $order->get_shipping_address_2();
+			$shipping_args['city']             = $order->get_shipping_city();
+			$shipping_args['state']            = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
+			$shipping_args['country']          = $order->get_shipping_country();
+			$shipping_args['zip']              = $order->get_shipping_postcode();
 		} else {
 			$shipping_args['no_shipping']      = 1;
 		}
