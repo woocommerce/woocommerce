@@ -841,19 +841,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'coupon'    => 'coupon_lines',
 		);
 
-		if ( is_array( $types ) ) {
-			foreach ( $types as $type ) {
-				if ( isset( $type_to_group[ $type ] ) && is_null( $this->_items[ $type_to_group[ $type ] ] ) ) {
-					$this->_items[ $type_to_group[ $type ] ] = $this->get_items_from_db( $type );
-				}
-			}
-		}
-
 		$items = array();
-		$types = (array) $types;
+		$types = array_filter( (array) $types );
 
 		foreach ( $types as $type ) {
-			if ( isset( $type_to_group[ $type ] ) && isset( $this->_items[ $type_to_group[ $type ] ] ) ) {
+			if ( isset( $type_to_group[ $type ] ) ) {
+				if ( is_null( $this->_items[ $type_to_group[ $type ] ] ) ) {
+					$this->_items[ $type_to_group[ $type ] ] = $this->get_items_from_db( $type );
+				}
+
 				$items = array_merge( $items, $this->_items[ $type_to_group[ $type ] ] );
 			}
 		}
