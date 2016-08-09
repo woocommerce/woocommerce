@@ -41,12 +41,18 @@ class WC_Admin_Status {
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 			$tools_controller = new WC_REST_System_Status_Tools_Controller;
-			$response = $tools_controller->execute_tool( $_GET['action'] );
+			$action           = wc_clean( $_GET['action'] );
+
+			if ( array_key_exists( $action, $tools ) ) {
+				$response = $tools_controller->execute_tool( $action );
+			} else {
+				$response = array( 'success' => false, 'message' => __( 'Tool does not exist.', 'woocommerce' ) );
+			}
 
 			if ( $response['success'] ) {
-				echo '<div class="updated inline"><p>' . $response['message'] . '</p></div>';
+				echo '<div class="updated inline"><p>' . esc_html( $response['message'] ) . '</p></div>';
 			} else {
-				echo '<div class="error inline"><p>' . $response['message'] . '</p></div>';
+				echo '<div class="error inline"><p>' . esc_html( $response['message'] ) . '</p></div>';
 			}
 		}
 

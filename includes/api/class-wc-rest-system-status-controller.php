@@ -35,7 +35,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	protected $rest_base = 'system_status';
 
 	/**
-	 * Register the routes for /system_status and /system_status/modes
+	 * Register the route for /system_status
 	 */
 	public function register_routes() {
         register_rest_route( $this->namespace, '/' . $this->rest_base, array(
@@ -46,20 +46,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				'args'                => $this->get_collection_params(),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/modes', array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_modes' ),
-				'permission_callback' => array( $this, 'get_modes_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_modes' ),
-				'permission_callback' => array( $this, 'update_modes_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_mode_item_schema' ),
 		) );
 	}
 
@@ -72,32 +58,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	public function get_items_permissions_check( $request ) {
         if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
         	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check whether a given request has permission to view system status modes.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_modes_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list system modes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check whether a given request has permission to toggle system status modes.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function update_modes_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update system modes', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -125,104 +85,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		return rest_ensure_response( $response );
 	}
-
-	/**
-	 * A list of modes that can be toggled via WC's system status screens
-	 *
-	 * @return array
-	 */
-	public function _get_modes() {
-		$options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array(
-			'uninstall_data'      => 0,
-			'template_debug_mode' => 0,
-			'shipping_debug_mode' => 0,
-		) );
-		$modes = array(
-			'shipping_debug' => array(
-				'id'          => 'shipping_debug',
-				'name'        => __( 'Shipping Debug Mode', 'woocommerce' ),
-				'description' => __( 'Enable Shipping Debug Mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
-				'enabled'     => (bool) $options['shipping_debug_mode'],
-			),
-			'template_debug' => array(
-				'id'          => 'template_debug',
-				'name'        => __( 'Template Debug Mode', 'woocommerce' ),
-				'description' => __( 'Enable Template Debug Mode to bypass all theme and plugin template overrides for logged-in administrators. Used for debugging purposes.', 'woocommerce' ),
-				'enabled'     => (bool) $options['template_debug_mode'],
-			),
-			'uninstall_data' => array(
-				'id'          => 'uninstall_data',
-				'name'        => __( 'Remove All Data On Uninstall Mode', 'woocommerce' ),
-				'description' => __( 'This mode will remove all WooCommerce, Product and Order data when using the "Delete" link on the plugins screen. It will also remove any setting/option prepended with "woocommerce_" so may also affect installed WooCommerce Extensions.', 'woocommerce' ),
-				'enabled'     => (bool) $options['uninstall_data'],
-			),
-		);
-
-		return $modes;
-	}
-
-	/**
-	 * Get system status modes.
-
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function get_modes( $request ) {
-		$modes_response = array();
-		foreach ( $this->_get_modes() as $id => $mode ) {
-			$modes_response[] = $this->prepare_response_for_collection( $this->prepare_mode_for_response ( $mode, $request ) );
-		}
-		$response = rest_ensure_response( $modes_response );
-		return $response;
-	}
-
-	/**
-	 * Update system status modes.
-
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function update_modes( $request ) {
-		$items   = $request->get_params();
-		$modes   = $this->_get_modes();
-		$options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array(
-			'uninstall_data'      => 0,
-			'template_debug_mode' => 0,
-			'shipping_debug_mode' => 0,
-		) );
-
-		foreach ( $items as $key => $value ) {
-			if ( ! array_key_exists( $key, $modes ) ) {
-				return new WP_Error( 'woocommerce_rest_system_status_mode_invalid', __( 'Invalid mode.', 'woocommerce' ), array( 'status' => 500 ) );
-				break;
-			}
-
-			if ( 'uninstall_data' !== $key ) {
-				$key = $key . '_mode'; // all other modes have a suffix
-			}
-
-			$options[ $key ] = (bool) $value;
-		}
-
-		update_option( 'woocommerce_status_options', $options );
-
-		return $this->get_modes( $request );
-	}
-
-	 /**
-	  * Prepare a mode for serialization.
-	  *
-	  * @param  array $item Object.
-	  * @param  WP_REST_Request $request Request object.
-	  * @return WP_REST_Response $response Response data.
-	  */
-	 public function prepare_mode_for_response( $item, $request ) {
-		 $context  = empty( $request['context'] ) ? 'view' : $request['context'];
-		 $data     = $this->add_additional_fields_to_object( $item, $request );
-		 $data     = $this->filter_response_by_context( $data, $context );
-		 $response = rest_ensure_response( $data );
-		 return $response;
-	 }
 
     /**
 	 * Get the system status schema, conforming to JSON Schema.
@@ -558,52 +420,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 			)
-		);
-
-		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the system status modes schema, conforming to JSON Schema.
-	 *
-	 * @return array
-	 */
-	public function get_mode_item_schema() {
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'system_status_option',
-			'type'       => 'object',
-			'properties' => array(
-				'id'               => array(
-					'description'  => __( 'A unique identifier for the system status mode.', 'woocommerce' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_title',
-					),
-				),
-				'name'      => array(
-					'description'  => __( 'Mode name.', 'woocommerce' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'description'      => array(
-					'description'  => __( 'Mode description.', 'woocommerce' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'enabled'            => array(
-					'description'  => __( 'True if this mode is enabled.', 'woocommerce' ),
-					'type'         => 'boolean',
-					'context'      => array( 'view', 'edit' ),
-				),
-			),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
