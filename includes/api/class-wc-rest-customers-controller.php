@@ -489,7 +489,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			),
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
-			'avatar_url'       => wc_get_customer_avatar_url( $customer->customer_email ),
+			'avatar_url'       => wc_get_customer_avatar_url( $customer->user_email ),
 			'billing'          => array(
 				'first_name' => $customer->billing_first_name,
 				'last_name'  => $customer->billing_last_name,
