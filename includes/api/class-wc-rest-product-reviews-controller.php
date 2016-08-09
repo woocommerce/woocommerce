@@ -145,7 +145,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['product_id'] );
 		if ( $post && ! wc_rest_check_post_permissions( 'product', 'create', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -159,7 +159,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	public function update_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['product_id'] );
 		if ( $post && ! wc_rest_check_post_permissions( 'product', 'edit', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -173,7 +173,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['product_id'] );
 		if ( $post && ! wc_rest_check_post_permissions( 'product', 'delete', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -186,7 +186,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot batch manipulate product reviews.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
