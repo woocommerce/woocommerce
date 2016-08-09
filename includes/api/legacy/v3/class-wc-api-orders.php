@@ -161,7 +161,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'order_key'                 => $order->order_key,
+			'order_key'                 => $order->get_order_key(),
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),

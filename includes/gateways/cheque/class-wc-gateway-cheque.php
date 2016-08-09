@@ -116,7 +116,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();

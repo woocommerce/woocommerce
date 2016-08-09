@@ -128,7 +128,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'id'                   => $order->get_id(),
 			'parent_id'            => $post->post_parent,
 			'status'               => $order->get_status(),
-			'order_key'            => $order->order_key,
+			'order_key'            => $order->get_order_key(),
 			'number'               => $order->get_order_number(),
 			'currency'             => $order->get_currency(),
 			'version'              => $order->order_version,

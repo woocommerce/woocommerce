@@ -203,7 +203,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? 'on-hold' : 'processing', $order ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();

@@ -288,7 +288,7 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			if ( $order->get_id() == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key && $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -660,7 +660,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->order_key === $order_key ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );

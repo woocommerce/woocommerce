@@ -296,35 +296,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function save_items() {
 		foreach ( $this->_items as $item_group => $items ) {
-			foreach ( $items as $item_key => $item ) {
-				$item->set_order_id( $this->get_id() );
-				$item_id = $item->save();
+			if ( is_array( $items ) ) {
+				foreach ( $items as $item_key => $item ) {
+					$item->set_order_id( $this->get_id() );
+					$item_id = $item->save();
 
-				// If ID changed (new item saved to DB)...
-				if ( $item_id !== $item_key ) {
-					$this->_items[ $item_group ][ $item_id ] = $item;
-					unset( $this->_items[ $item_group ][ $item_key ] );
+					// If ID changed (new item saved to DB)...
+					if ( $item_id !== $item_key ) {
+						$this->_items[ $item_group ][ $item_id ] = $item;
+						unset( $this->_items[ $item_group ][ $item_key ] );
 
-					// Legacy action handler
-					switch ( $item_group ) {
-						case 'fee_lines' :
-							if ( has_action( 'woocommerce_add_order_fee_meta' ) && isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-								_deprecated_function( 'Action: woocommerce_add_order_fee_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-								do_action( 'woocommerce_add_order_fee_meta', $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key );
-							}
-						break;
-						case 'shipping_lines' :
-							if ( has_action( 'woocommerce_add_shipping_order_item' ) && isset( $item->legacy_package_key ) ) {
-								_deprecated_function( 'Action: woocommerce_add_shipping_order_item', '2.7', 'Use woocommerce_new_order_item action instead.' );
-								do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->legacy_package_key );
-							}
-						break;
-						case 'line_items' :
-							if ( has_action( 'woocommerce_add_order_item_meta' ) && isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-								_deprecated_function( 'Action: woocommerce_add_order_item_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-								do_action( 'woocommerce_add_order_item_meta', $item_id, $item->legacy_values, $item->legacy_cart_item_key );
-							}
-						break;
+						// Legacy action handler
+						switch ( $item_group ) {
+							case 'fee_lines' :
+								if ( has_action( 'woocommerce_add_order_fee_meta' ) && isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
+									_deprecated_function( 'Action: woocommerce_add_order_fee_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
+									do_action( 'woocommerce_add_order_fee_meta', $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key );
+								}
+							break;
+							case 'shipping_lines' :
+								if ( has_action( 'woocommerce_add_shipping_order_item' ) && isset( $item->legacy_package_key ) ) {
+									_deprecated_function( 'Action: woocommerce_add_shipping_order_item', '2.7', 'Use woocommerce_new_order_item action instead.' );
+									do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->legacy_package_key );
+								}
+							break;
+							case 'line_items' :
+								if ( has_action( 'woocommerce_add_order_item_meta' ) && isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
+									_deprecated_function( 'Action: woocommerce_add_order_item_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
+									do_action( 'woocommerce_add_order_item_meta', $item_id, $item->legacy_values, $item->legacy_cart_item_key );
+								}
+							break;
+						}
 					}
 				}
 			}
@@ -831,18 +833,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return Array of WC_Order_item
 	 */
 	public function get_items( $types = 'line_item' ) {
+		$type_to_group = array(
+			'line_item' => 'line_items',
+			'tax'       => 'tax_lines',
+			'shipping'  => 'shipping_lines',
+			'fee'       => 'fee_lines',
+			'coupon'    => 'coupon_lines',
+		);
+
 		if ( is_array( $types ) ) {
 			foreach ( $types as $type ) {
-				if ( is_null( $this->_items[ $type ] ) ) {
-					$this->_items[ $type ] = $this->get_items_from_db( $type );
+				if ( isset( $type_to_group[ $type ] ) && is_null( $this->_items[ $type_to_group[ $type ] ] ) ) {
+					$this->_items[ $type_to_group[ $type ] ] = $this->get_items_from_db( $type );
 				}
 			}
 		}
 
 		$items = array();
+		$types = (array) $types;
 
 		foreach ( $types as $type ) {
-			$items = array_merge( $items, $this->_items[ $type ] );
+			if ( isset( $type_to_group[ $type ] ) && isset( $this->_items[ $type_to_group[ $type ] ] ) ) {
+				$items = array_merge( $items, $this->_items[ $type_to_group[ $type ] ] );
+			}
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this );
