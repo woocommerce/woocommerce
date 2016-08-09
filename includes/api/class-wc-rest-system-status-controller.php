@@ -57,7 +57,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
         if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -303,6 +303,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
+						'version_latest' => array(
+							'description' => __( 'Latest Version Of Theme', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
 						'author_url' => array(
 							'description' => __( 'Theme Author URL', 'woocommerce' ),
 							'type'        => 'string',
@@ -316,6 +321,16 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						),
 						'has_woocommerce_support' => array(
 							'description' => __( 'Does the theme declare WooCommerce support?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'has_woocommerce_file' => array(
+							'description' => __( 'Does the theme have a woocommerce.php file?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'has_outdated_templates' => array(
+							'description' => __( 'Does this theme have outdated templates?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -563,14 +578,56 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$active_plugins_data = array();
 		foreach ( $active_plugins as $plugin ) {
-			$data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$data                 = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$dirname              = dirname( $plugin );
+			$theme_version_latest = '';
+			if ( strstr( $data['PluginURI'], 'woothemes.com' ) ) {
+				if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
+					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+					if ( ! empty( $cl_lines ) ) {
+						foreach ( $cl_lines as $line_num => $cl_line ) {
+							if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+								$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+								$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+								$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+								$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
+								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+								break;
+							}
+						}
+					}
+				}
+				$theme_version_latest = $version_data['version'];
+			} else {
+				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
+				$slug = explode( '/', $plugin );
+				$slug = explode( '.', end( $slug ) );
+				$slug = $slug[0];
+
+				$api = plugins_api( 'plugin_information', array(
+					'slug'     => $slug,
+					'fields'   => array(
+						'sections' => false,
+						'tags'     => false,
+					)
+				) );
+
+				if ( is_object( $api ) && ! is_wp_error( $api ) ) {
+					$theme_version_latest = $api->version;
+				}
+			}
+
 			// convert plugin data to json response format.
 			$active_plugins_data[] = array(
-				'name'        => $data['Name'],
-				'version'     => $data['Version'],
-				'url'         => $data['PluginURI'],
-				'author_name' => $data['AuthorName'],
-				'author_url'  => esc_url_raw( $data['AuthorURI'] ),
+				'plugin'            => $plugin,
+				'name'              => $data['Name'],
+				'version'           => $data['Version'],
+				'version_latest'    => $theme_version_latest,
+				'url'               => $data['PluginURI'],
+				'author_name'       => $data['AuthorName'],
+				'author_url'        => esc_url_raw( $data['AuthorURI'] ),
+				'network_activated' => $data['Network'],
 			);
 		}
 
@@ -591,20 +648,22 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		if ( is_child_theme() ) {
 			$parent_theme      = wp_get_theme( $active_theme->Template );
 			$parent_theme_info = array(
-				'parent_name'       => $parent_theme->Name,
-				'parentversion'     => $parent_theme->Version,
-				'parent_author_url' => $parent_theme->{'Author URI'},
+				'parent_name'           => $parent_theme->Name,
+				'parent_version'        => $parent_theme->Version,
+				'parent_version_latest' => WC_Admin_Status::get_latest_theme_version( $parent_theme ),
+				'parent_author_url'     => $parent_theme->{'Author URI'},
 			);
 		} else {
-			$parent_theme_info = array( 'parent_theme_name' => '', 'parent_theme_version' => '', 'parent_theme_author_url' => '' );
+			$parent_theme_info = array( 'parent_name' => '', 'parent_version' => '', 'parent_version_latest' => '', 'parent_author_url' => '' );
 		}
 
 		/**
 		 * Scan the theme directory for all WC templates to see if our theme
 		 * overrides any of them.
 		 */
-		$override_files = array();
-		$scan_files  = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+		$override_files     = array();
+		$outdated_templates = false;
+		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
 		foreach ( $scan_files as $file ) {
 			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
@@ -619,16 +678,30 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			}
 
 			if ( ! empty( $theme_file ) ) {
-				$override_files[] = str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file );
+				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
+				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+					if ( ! $outdated_templates ) {
+						$outdated_templates = true;
+					}
+				}
+				$override_files[] =  array(
+					'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
+					'version'      => $theme_version,
+					'core_version' => $core_version,
+				);
 			}
 		}
 
 		$active_theme_info = array(
 			'name'                    => $active_theme->Name,
 			'version'                 => $active_theme->Version,
+			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
 			'has_woocommerce_support' => ( current_theme_supports( 'woocommerce' ) || in_array( $active_theme->template, wc_get_core_supported_themes() ) ),
+			'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
+			'has_outdated_templates'  => $outdated_templates,
 			'overrides'               => $override_files,
 		);
 
@@ -725,6 +798,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'page_set'           => $page_set,
 					'page_exists'        => $page_exists,
 					'page_visible'       => $page_visible,
+					'shortcode'          => $values['shortcode'],
 					'shortcode_required' => $shortcode_required,
 					'shortcode_present'  => $shortcode_present,
 			);

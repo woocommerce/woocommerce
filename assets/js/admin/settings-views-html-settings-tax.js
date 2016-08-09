@@ -120,7 +120,6 @@
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
-					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
@@ -181,13 +180,6 @@
 					} else {
 						$pagination.empty();
 						view.page = 1;
-					}
-
-					// Disable sorting if there is a search term filtering the items.
-					if ( $search_field.val() ) {
-						$tbody.sortable( 'disable' );
-					} else {
-						$tbody.sortable( 'enable' );
 					}
 				},
 				updateUrl: function() {
@@ -363,31 +355,6 @@
 					}
 
 					model.setRateAttribute( id, attribute, val );
-				},
-				updateModelOnSort: function( event ) {
-					var view         = event.data.view,
-						model        = view.model,
-						rates        = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
-						changes      = {};
-
-					_.each( rates, function( rate ) {
-						var new_position = 0;
-						var old_position = parseInt( rate.tax_rate_order, 10 );
-
-						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').length ) {
-							new_position = parseInt( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').index(), 10 ) + parseInt( ( view.page - 1 ) * view.per_page, 10 );
-						} else {
-							new_position = old_position;
-						}
-
-						if ( old_position !== new_position ) {
-							changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : new_position } );
-						}
-					} );
-
-					if ( _.size( changes ) ) {
-						model.logChanges( changes );
-					}
 				},
 				sanitizePage: function( page_num ) {
 					page_num = parseInt( page_num, 10 );

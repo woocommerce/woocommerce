@@ -147,17 +147,17 @@ jQuery( function( $ ) {
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
-				if( $( this ).data( 'sortable' ) == true ){
+				if ( $( this ).data( 'sortable' ) ) {
 					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-					    containment: 'parent',
-					    start: function() { $( this ).select2( 'onSortStart' ); },
-					    update: function() { $( this ).select2( 'onSortEnd' ); }
+						containment: 'parent',
+						start: function() { $( this ).select2( 'onSortStart' ); },
+						update: function() { $( this ).select2( 'onSortEnd' ); }
 					});
 				}
 
 			});
 
-			
+
 
 			// Ajax customer search boxes
 			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
@@ -227,11 +227,11 @@ jQuery( function( $ ) {
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
-				if( $( this ).data( 'sortable' ) == true ){
+				if ( $( this ).data( 'sortable' ) ) {
 					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-					    containment: 'parent',
-					    start: function() { $( this ).select2( 'onSortStart' ); },
-					    update: function() { $( this ).select2( 'onSortEnd' ); }
+						containment: 'parent',
+						start: function() { $( this ).select2( 'onSortStart' ); },
+						update: function() { $( this ).select2( 'onSortEnd' ); }
 					});
 				}
 

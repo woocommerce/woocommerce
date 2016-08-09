@@ -62,9 +62,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	$option_value     = get_option( $option );
 
-	if ( $option_value > 0 ) {
-		$page_object = get_post( $option_value );
-
+	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
 		if ( 'page' === $page_object->post_type && ! in_array( $page_object->post_status, array( 'pending', 'trash', 'future', 'auto-draft' ) ) ) {
 			// Valid page is already in place
 			return $page_object->ID;

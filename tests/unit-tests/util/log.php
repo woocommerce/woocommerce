@@ -16,7 +16,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_add() {
-		$log = new WC_Logger();
+		$log = wc_get_logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
 
@@ -30,7 +30,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$log = new WC_Logger();
+		$log = wc_get_logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
 		$log->clear( 'unit-tests' );

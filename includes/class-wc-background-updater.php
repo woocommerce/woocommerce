@@ -36,7 +36,7 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	public function dispatch() {
 		$dispatched = parent::dispatch();
-		$logger     = new WC_Logger();
+		$logger     = wc_get_logger();
 
 		if ( is_wp_error( $dispatched ) ) {
 			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ) );
@@ -97,7 +97,7 @@ class WC_Background_Updater extends WP_Background_Process {
 			define( 'WC_UPDATING', true );
 		}
 
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 
 		include_once( dirname( __FILE__ ) . '/wc-update-functions.php' );
 
@@ -119,7 +119,7 @@ class WC_Background_Updater extends WP_Background_Process {
 	 * performed, or, call parent::complete().
 	 */
 	protected function complete() {
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 		$logger->add( 'wc_db_updates', 'Data update complete' );
 		WC_Install::update_db_version();
 		parent::complete();

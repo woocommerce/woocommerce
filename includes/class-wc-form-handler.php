@@ -146,7 +146,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
 		}
 	}

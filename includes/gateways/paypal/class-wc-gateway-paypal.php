@@ -79,7 +79,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public static function log( $message ) {
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
-				self::$log = new WC_Logger();
+				self::$log = wc_get_logger();
 			}
 			self::$log->add( 'paypal', $message );
 		}
