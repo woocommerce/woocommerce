@@ -237,6 +237,8 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
 
+		include_once( 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
 		}
@@ -333,6 +335,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
+			$this->customer->load_session();
 		}
 
 		$this->load_webhooks();

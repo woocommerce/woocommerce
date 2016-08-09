@@ -34,7 +34,7 @@ class WC_Helper_Order {
 	 *
 	 * @return WC_Order Order object.
 	 */
-	public static function create_order() {
+	public static function create_order( $customer_id = 1 ) {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
@@ -42,7 +42,7 @@ class WC_Helper_Order {
 
 		$order_data = array(
 			'status'        => 'pending',
-			'customer_id'   => 1,
+			'customer_id'   => $customer_id,
 			'customer_note' => '',
 			'total'         => '',
 		);
