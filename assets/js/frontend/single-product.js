@@ -85,6 +85,9 @@ jQuery( function( $ ) {
 
 	// Init Zoom if present
 	if ( $.isFunction( $.fn.zoom ) ) {
-		jQuery( '.woocommerce-product-gallery__image' ).zoom();
+		// But only zoom if the img is larger than its container
+		if ( jQuery( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > jQuery( '.woocommerce-product-gallery' ).width() ) {
+			jQuery( '.woocommerce-product-gallery__image' ).zoom();
+		}
 	}
 });
