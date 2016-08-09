@@ -109,10 +109,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( $customer instanceof WC_Customer ) {
 			$this->_is_user = true;
 			$this->read( absint( $customer->get_id() ) );
-		} else if ( is_numeric( $customer ) ) {
+		} elseif ( is_numeric( $customer ) ) {
 			$this->_is_user = true;
 			$this->read( $customer );
-		} else if ( empty( $customer ) ) {
+		} elseif ( empty( $customer ) ) {
 			$this->_is_user = true; // unless load_session gets called after.
 		}
 
