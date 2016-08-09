@@ -364,7 +364,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param  array $item
 	 */
 	public function display_item_meta( $item ) {
-		_deprecated_function( 'get_item_meta', '2.7', 'wc_display_item_meta' );
+		_deprecated_function( 'display_item_meta', '2.7', 'wc_display_item_meta' );
 		$product   = $item->get_product();
 		$item_meta = new WC_Order_Item_Meta( $item, $product );
 		$item_meta->display();
