@@ -66,7 +66,25 @@ jQuery( function( $ ) {
 				return false;
 			}
 		});
-	
-	//Init Tabs and Star Ratings	
+
+	//Init Tabs and Star Ratings
 	$( '.wc-tabs-wrapper, .woocommerce-tabs, #rating' ).trigger( 'init' );
+
+	// Init flexslider if present
+	if ( $.isFunction( $.fn.flexslider ) ) {
+		jQuery( '.woocommerce-product-gallery' ).flexslider({
+			selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
+			animation:      'slide',
+			smoothHeight:   true,
+			directionNav:   false,
+			controlNav:     'thumbnails',
+			slideshow:      false,
+			animationSpeed: 500,
+		});
+	}
+
+	// Init Zoom if present
+	if ( $.isFunction( $.fn.zoom ) ) {
+		jQuery( '.woocommerce-product-gallery__image' ).zoom();
+	}
 });
