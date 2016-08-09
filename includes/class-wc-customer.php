@@ -881,9 +881,7 @@ class WC_Customer extends WC_Legacy_Customer {
 					$this->{"set_{$key}"}( $meta_value );
 				}
 			}
-		}
 
-		if ( $this->_is_user ) {
 			$this->set_is_paying_customer( get_user_meta( $id, 'paying_customer', true ) );
 			$wp_user = new WP_User( $id );
 			$this->set_email( $wp_user->user_email );
