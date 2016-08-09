@@ -64,6 +64,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	);
 
 	/**
+	 * Order items will be stored here, sometimes before they persist in the DB.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_items = array(
+		'line_items'     => null,
+		'coupon_lines'   => null,
+		'shipping_lines' => null,
+		'fee_lines'      => null,
+		'tax_lines'      => null,
+	);
+
+	/**
 	 *  Internal meta type used to store order data.
 	 * @var string
 	 */
@@ -271,10 +284,51 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->update();
 		}
 
+		$this->save_items();
 		clean_post_cache( $this->get_id() );
 		wc_delete_shop_order_transients( $this->get_id() );
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Save all order items which are part of this order.
+	 */
+	protected function save_items() {
+		foreach ( $this->_items as $item_group => $items ) {
+			foreach ( $items as $item_key => $item ) {
+				$item->set_order_id( $this->get_id() );
+				$item_id = $item->save();
+
+				// If ID changed (new item saved to DB)...
+				if ( $item_id !== $item_key ) {
+					$this->_items[ $item_group ][ $item_id ] = $item;
+					unset( $this->_items[ $item_group ][ $item_key ] );
+
+					// Legacy action handler
+					switch ( $item_group ) {
+						case 'fee_lines' :
+							if ( has_action( 'woocommerce_add_order_fee_meta' ) && isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
+								_deprecated_function( 'Action: woocommerce_add_order_fee_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
+								do_action( 'woocommerce_add_order_fee_meta', $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key );
+							}
+						break;
+						case 'shipping_lines' :
+							if ( has_action( 'woocommerce_add_shipping_order_item' ) && isset( $item->legacy_package_key ) ) {
+								_deprecated_function( 'Action: woocommerce_add_shipping_order_item', '2.7', 'Use woocommerce_new_order_item action instead.' );
+								do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->legacy_package_key );
+							}
+						break;
+						case 'line_items' :
+							if ( has_action( 'woocommerce_add_order_item_meta' ) && isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
+								_deprecated_function( 'Action: woocommerce_add_order_item_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
+								do_action( 'woocommerce_add_order_item_meta', $item_id, $item->legacy_values, $item->legacy_cart_item_key );
+							}
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	/*
@@ -773,12 +827,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of items/products within this order.
-	 * @param string|array $type Types of line items to get (array or string).
+	 * @param string|array $types Types of line items to get (array or string).
 	 * @return Array of WC_Order_item
 	 */
-	public function get_items( $type = 'line_item' ) {
+	public function get_items( $types = 'line_item' ) {
+		if ( is_array( $types ) ) {
+			foreach ( $types as $type ) {
+				if ( is_null( $this->_items[ $type ] ) ) {
+					$this->_items[ $type ] = $this->get_items_from_db( $type );
+				}
+			}
+		}
+
+		$items = array();
+
+		foreach ( $types as $type ) {
+			$items = array_merge( $items, $this->_items[ $type ] );
+		}
+
+		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+	}
+
+	/**
+	 * Gets items from the database by type.
+	 * @param  string $type
+	 * @return array
+	 */
+	protected function get_items_from_db( $type ) {
 		global $wpdb;
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_id() ) . "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', (array) $type ) ) . "' ) ORDER BY order_item_id;";
+
+		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $this->get_id(), $type ) ;
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {
@@ -787,7 +865,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$items = array();
 		}
 
-		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+		return $items;
 	}
 
 	/**
@@ -865,6 +943,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_item( $item_id ) {
 		return WC_Order_Factory::get_order_item( $item_id );
+	}
+
+	/**
+	 * Adds an order item to this order. The order item will not persist until save.
+	 * @param object Order item (product, shipping, fee, coupon, tax)
+	 */
+	public function add_item( $item ) {
+		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+			$item_type = 'line_item';
+			$items_key = 'line_items';
+		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+			$item_type = 'fee';
+			$items_key = 'fee_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+			$item_type = 'shipping';
+			$items_key = 'shipping_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
+			$item_type = 'tax';
+			$items_key = 'tax_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
+			$item_type = 'coupon';
+			$items_key = 'coupon_lines';
+		} else {
+			return false;
+		}
+
+		// Make sure existing items are loaded so we can append this new one.
+		if ( is_null( $this->_items[ $items_key ] ) ) {
+			$this->_items[ $items_key ] = $this->get_items( $item_type );
+		}
+
+		// Append new row with generated temporary ID
+		$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
 	}
 
 	/**
