@@ -176,7 +176,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	public function get_email() {
-		return sanitize_email( $this->_data['email'] );
+		return $this->_data['email'];
 	}
 
 	/**
