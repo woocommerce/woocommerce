@@ -180,11 +180,11 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
  * @return mixed
  */
 function wc_walk_category_dropdown_tree() {
+	$args = func_get_args();
+
 	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) {
 		include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 	}
-
-	$args = func_get_args();
 
 	// the user's options are the third parameter
 	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) ) {
