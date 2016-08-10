@@ -392,7 +392,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		// Are we saving a new payment method?
 		if ( is_user_logged_in() && isset( $_POST['wc-simplify_commerce-new-payment-method'] ) && true === (bool) $_POST['wc-simplify_commerce-new-payment-method'] ) {
 			$customer_info = array(
-				'email' => $order->billing_email,
+				'email' => $order->get_billing_email(),
 				'name'  => trim( $order->get_formatted_billing_full_name() ),
 			);
 			$token = $this->save_token( $customer_token, $cart_token, $customer_info );
@@ -499,7 +499,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'amount'              => $amount * 100, // In cents.
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id
+				'reference'           => $order->get_id()
 			);
 
 			$data = array_merge( $data, $token );
@@ -608,20 +608,20 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	protected function get_hosted_payments_args( $order ) {
 		$args = apply_filters( 'woocommerce_simplify_commerce_hosted_args', array(
 			'sc-key'          => $this->public_key,
-			'amount'          => $order->order_total * 100,
-			'reference'       => $order->id,
+			'amount'          => $order->get_total() * 100,
+			'reference'       => $order->get_id(),
 			'name'            => esc_html( get_bloginfo( 'name', 'display' ) ),
 			'description'     => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
 			'receipt'         => 'false',
 			'color'           => $this->modal_color,
 			'redirect-url'    => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' ),
-			'address'         => $order->billing_address_1 . ' ' . $order->billing_address_2,
-			'address-city'    => $order->billing_city,
-			'address-state'   => $order->billing_state,
-			'address-zip'     => $order->billing_postcode,
-			'address-country' => $order->billing_country,
+			'address'         => $order->get_billing_address_1() . ' ' . $order->get_billing_address_2(),
+			'address-city'    => $order->get_billing_city(),
+			'address-state'   => $order->get_billing_state(),
+			'address-zip'     => $order->get_billing_postcode(),
+			'address-country' => $order->get_billing_country(),
 			'operation'       => 'create.token',
-		), $order->id );
+		), $order->get_id() );
 
 		return $args;
 	}

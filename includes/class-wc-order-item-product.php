@@ -306,7 +306,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_variation( $data ) {
 		foreach ( $data as $key => $value ) {
-			$this->_meta_data[ str_replace( 'attribute_', '', $key ) ] = $value;
+			$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
 		}
 	}
 

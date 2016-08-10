@@ -316,7 +316,9 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				continue;
 			}
 
-			$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
+			$meta->key     = rawurldecode( $meta->key );
+			$meta->value   = rawurldecode( $meta->value );
+			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
 			$display_value = $meta->value;
 
@@ -329,9 +331,9 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 			$formatted_meta[ $meta->meta_id ] = (object) array(
 				'key'           => $meta->key,
-				'value'         => $meta->key,
+				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ),
+				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
 			);
 		}
 
