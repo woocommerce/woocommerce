@@ -4207,6 +4207,10 @@ img.ui-datepicker-trigger {
 								text-align: center;
 								-webkit-box-shadow: none;
 								box-shadow: none;
+								
+								&.from {
+									margin-right: 0;
+								}
 							}
 						}
 					}
