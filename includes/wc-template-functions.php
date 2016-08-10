@@ -620,7 +620,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * @subpackage	Archives
 	 */
 	function woocommerce_taxonomy_archive_description() {
-		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && 0 === absint( get_query_var( 'paged' ) ) ) {
+		if ( is_product_taxonomy() && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$description = wc_format_content( term_description() );
 			if ( $description ) {
 				echo '<div class="term-description">' . $description . '</div>';
@@ -2327,10 +2327,11 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		ob_start();
 
 		$defaults = array(
-			'show_sku'   => false,
-			'show_image' => false,
-			'image_size' => array( 32, 32 ),
-			'plain_text' => false
+			'show_sku'      => false,
+			'show_image'    => false,
+			'image_size'    => array( 32, 32 ),
+			'plain_text'    => false,
+			'sent_to_admin' => false,
 		);
 
 		$args     = wp_parse_args( $args, $defaults );
@@ -2344,6 +2345,8 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 			'show_purchase_note'  => $order->is_paid(),
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
+			'plain_text'          => $args['plain_text'],
+			'sent_to_admin'       => $args['sent_to_admin'],
 		) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );

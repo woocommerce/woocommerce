@@ -205,7 +205,7 @@ class WC_Frontend_Scripts {
 		}
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			// Exclude common bots from geolocation by user agent.
-			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+			$ua = wc_get_user_agent();
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
 				self::enqueue_script( 'wc-geolocation', $frontend_script_path . 'geolocation' . $suffix . '.js', array( 'jquery' ) );

@@ -35,7 +35,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	protected $rest_base = 'system_status';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the route for /system_status
 	 */
 	public function register_routes() {
         register_rest_route( $this->namespace, '/' . $this->rest_base, array(
@@ -57,7 +57,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
         if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}

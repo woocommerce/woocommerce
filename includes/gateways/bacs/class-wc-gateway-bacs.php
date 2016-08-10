@@ -246,11 +246,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 
-		if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+		if ( ! $sent_to_admin && 'bacs' === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
 			if ( $this->instructions ) {
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
-			$this->bank_details( $order->id );
+			$this->bank_details( $order->get_id() );
 		}
 
 	}
@@ -270,7 +270,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order 		= wc_get_order( $order_id );
 
 		// Get the order country and country $locale
-		$country 	= $order->billing_country;
+		$country 	= $order->get_billing_country();
 		$locale		= $this->get_country_locale();
 
 		// Get sortcode label in the $locale array and use appropriate one
@@ -337,7 +337,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order->update_status( 'on-hold', __( 'Awaiting BACS payment', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();

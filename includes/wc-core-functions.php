@@ -54,76 +54,55 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- *
- * @return WC_Order|WP_Error WC_Order on success, WP_Error on failure.
+ * @return WC_Order
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
-		'status'        => '',
+		'status'        => null,
 		'customer_id'   => null,
 		'customer_note' => null,
+		'parent'        => null,
+		'created_via'   => null,
+		'cart_hash'     => null,
 		'order_id'      => 0,
-		'created_via'   => '',
-		'cart_hash'     => '',
-		'parent'        => 0,
 	);
 
-	$args       = wp_parse_args( $args, $default_args );
-	$order_data = array();
+	$args  = wp_parse_args( $args, $default_args );
+	$order = new WC_Order( $args['order_id'] );
 
-	if ( $args['order_id'] > 0 ) {
-		$updating         = true;
-		$order_data['ID'] = $args['order_id'];
-	} else {
-		$updating                    = false;
-		$order_data['post_type']     = 'shop_order';
-		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
-		$order_data['ping_status']   = 'closed';
-		$order_data['post_author']   = 1;
-		$order_data['post_password'] = uniqid( 'order_' );
-		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		$order_data['post_parent']   = absint( $args['parent'] );
+	// Update props that were set (not null)
+	if ( ! is_null( $args['parent'] ) ) {
+		$order->set_parent_id( absint( $args['parent'] ) );
 	}
 
-	if ( $args['status'] ) {
-		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
-			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
-		}
-		$order_data['post_status']  = 'wc-' . $args['status'];
+	if ( ! is_null( $args['status'] ) ) {
+		$order->set_status( $args['status'] );
 	}
 
 	if ( ! is_null( $args['customer_note'] ) ) {
-		$order_data['post_excerpt'] = $args['customer_note'];
+		$order->set_customer_note( $args['customer_note'] );
 	}
 
-	if ( $updating ) {
-		$order_id = wp_update_post( $order_data );
-	} else {
-		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
+	if ( ! is_null( $args['customer_id'] ) ) {
+		$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
 	}
 
-	if ( is_wp_error( $order_id ) ) {
-		return $order_id;
+	if ( ! is_null( $args['created_via'] ) ) {
+		$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
 	}
 
-	if ( ! $updating ) {
-		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
-		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address', WC_Geolocation::get_ip_address() );
-		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
-		update_post_meta( $order_id, '_customer_user', 0 );
-		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
-		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
+	if ( ! is_null( $args['cart_hash'] ) ) {
+		$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
 	}
 
-	if ( is_numeric( $args['customer_id'] ) ) {
-		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
-	}
+	// Update other order props set automatically
+	$order->set_currency( get_woocommerce_currency() );
+	$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+	$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+	$order->set_customer_user_agent( wc_get_user_agent() );
+	$order->save();
 
-	update_post_meta( $order_id, '_order_version', WC_VERSION );
-
-	return wc_get_order( $order_id );
+	return $order;
 }
 
 /**
@@ -980,7 +959,7 @@ function wc_get_customer_default_location() {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
 			// Exclude common bots from geolocation by user agent.
-			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+			$ua = wc_get_user_agent();
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
 				$location = WC_Geolocation::geolocate_ip( '', true, false );
@@ -1000,6 +979,15 @@ function wc_get_customer_default_location() {
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
+}
+
+/**
+ * Get user agent string.
+ * @since  2.7.0
+ * @return string
+ */
+function wc_get_user_agent() {
+	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.

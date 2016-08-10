@@ -412,7 +412,7 @@ function wc_register_order_type( $type, $args = array() ) {
 function wc_downloadable_file_permission( $download_id, $product_id, $order, $qty = 1 ) {
 	global $wpdb;
 
-	$user_email = sanitize_email( $order->billing_email );
+	$user_email = sanitize_email( $order->get_billing_email() );
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
@@ -429,10 +429,10 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
 		'download_id'			=> $download_id,
 		'product_id' 			=> $product_id,
-		'user_id' 				=> absint( $order->user_id ),
+		'user_id' 				=> absint( $order->get_user_id() ),
 		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->id,
-		'order_key' 			=> $order->order_key,
+		'order_id' 				=> $order->get_id(),
+		'order_key' 			=> $order->get_order_key(),
 		'downloads_remaining' 	=> $limit,
 		'access_granted'		=> current_time( 'mysql' ),
 		'download_count'		=> 0
@@ -962,7 +962,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**
