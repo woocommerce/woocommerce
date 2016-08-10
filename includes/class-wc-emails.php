@@ -93,8 +93,8 @@ class WC_Emails {
 	 * @internal param array $args (default: array())
 	 */
 	public static function send_transactional_email() {
-		self::instance();
 		$args = func_get_args();
+		self::instance();
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
