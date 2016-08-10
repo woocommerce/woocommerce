@@ -102,6 +102,13 @@ final class WooCommerce {
 	public $order_factory = null;
 
 	/**
+	 * Structured data instance.
+	 *
+	 * @var WC_Structured_Data
+	 */
+	public $structured_data = null;
+  
+  /**
 	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
@@ -334,7 +341,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart             = new WC_Cart();                              // Cart class, stores the cart contents
 			$this->customer         = new WC_Customer();                          // Customer class, handles data such as customer location
-                                new WC_Structured_Data();                   // Structured Data class, generates and handles structured data
+      $this->structured_data  = new WC_Structured_Data();                   // Structured Data class, generates and handles structured data
 		}
 
 		$this->load_webhooks();
