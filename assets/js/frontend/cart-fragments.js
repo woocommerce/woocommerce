@@ -97,6 +97,14 @@ jQuery( function( $ ) {
 			}
 		});
 
+		// Refresh when page is shown after back button (safari)
+		$( window ).on( 'pageshow' , function( e ) {
+			if ( e.originalEvent.persisted ) {
+				$( '.widget_shopping_cart_content' ).empty();
+				$( document.body ).trigger( 'wc_fragment_refresh' );
+			}
+		} );
+
 		try {
 			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
 				cart_hash    = sessionStorage.getItem( cart_hash_key ),
