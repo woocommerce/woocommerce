@@ -484,7 +484,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
 			'last_order'       => array(
-				'id'   => is_object( $last_order ) ? $last_order->id : null,
+				'id'   => is_object( $last_order ) ? $last_order->get_id() : null,
 				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( $last_order->post->post_date_gmt ) : null
 			),
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),

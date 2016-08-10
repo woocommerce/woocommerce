@@ -315,7 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( 'paypal' === $order->payment_method && 'pending' === get_post_meta( $order->id, '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'paypal' === $order->get_payment_method() && 'pending' === get_post_meta( $order->get_id(), '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -331,8 +331,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				switch ( $result->PAYMENTSTATUS ) {
 					case 'Completed' :
 						$order->add_order_note( sprintf( __( 'Payment of %s was captured - Auth ID: %s, Transaction ID: %s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						update_post_meta( $order->id, '_paypal_status', $result->PAYMENTSTATUS );
-						update_post_meta( $order->id, '_transaction_id', $result->TRANSACTIONID );
+						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
+						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
 					break;
 					default :
 						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %s, Status: %s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );

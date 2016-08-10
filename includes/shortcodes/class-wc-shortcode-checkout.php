@@ -90,19 +90,19 @@ class WC_Shortcode_Checkout {
 				return;
 			}
 
-			if ( $order->id == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
 					// Set customer location to order location
-					if ( $order->billing_country ) {
-						WC()->customer->set_country( $order->billing_country );
+					if ( $order->get_billing_country() ) {
+						WC()->customer->set_country( $order->get_billing_country() );
 					}
-					if ( $order->billing_state ) {
-						WC()->customer->set_state( $order->billing_state );
+					if ( $order->get_billing_state() ) {
+						WC()->customer->set_state( $order->get_billing_state() );
 					}
-					if ( $order->billing_postcode ) {
-						WC()->customer->set_postcode( $order->billing_postcode );
+					if ( $order->get_billing_postcode() ) {
+						WC()->customer->set_postcode( $order->get_billing_postcode() );
 					}
 
 					WC()->customer->save();
@@ -133,7 +133,7 @@ class WC_Shortcode_Checkout {
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -151,17 +151,17 @@ class WC_Shortcode_Checkout {
 							<?php _e( 'Total:', 'woocommerce' ); ?>
 							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 						</li>
-						<?php if ($order->payment_method_title) : ?>
+						<?php if ($order->get_payment_method_title()) : ?>
 						<li class="method">
 							<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 							<strong><?php
-								echo $order->payment_method_title;
+								echo $order->get_payment_method_title();
 							?></strong>
 						</li>
 						<?php endif; ?>
 					</ul>
 
-					<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
+					<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
 
 					<div class="clear"></div>
 					<?php
@@ -200,7 +200,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( $order->order_key != $order_key ) {
+			if ( $order->get_order_key() != $order_key ) {
 				$order = false;
 			}
 		}

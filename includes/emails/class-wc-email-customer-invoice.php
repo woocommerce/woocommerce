@@ -73,12 +73,12 @@ class WC_Email_Customer_Invoice extends WC_Email {
 
 		if ( $order ) {
 			$this->object                  = $order;
-			$this->recipient               = $this->object->billing_email;
+			$this->recipient               = $this->object->get_billing_email();
 
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 
-			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 

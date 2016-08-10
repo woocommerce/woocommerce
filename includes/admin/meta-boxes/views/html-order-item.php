@@ -9,6 +9,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+$_product      = $order->get_product_from_item( $item );
 $product_link  = $_product ? admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) : '';
 $thumbnail     = $_product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 $tax_data      = empty( $legacy_order ) && wc_tax_enabled() ? maybe_unserialize( isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '' ) : false;
@@ -53,10 +54,10 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {
-					echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_order_currency() ) );
+					echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_currency() ) );
 
 					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) {
-						echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_order_currency() ) ) . '</span>';
+						echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
 					}
 				}
 			?>
@@ -84,15 +85,15 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {
-					echo wc_price( $item['line_total'], array( 'currency' => $order->get_order_currency() ) );
+					echo wc_price( $item['line_total'], array( 'currency' => $order->get_currency() ) );
 				}
 
 				if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] !== $item['line_total'] ) {
-					echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $item['line_subtotal'] - $item['line_total'], '' ), array( 'currency' => $order->get_order_currency() ) ) . '</span>';
+					echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $item['line_subtotal'] - $item['line_total'], '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
 				}
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
-					echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
+					echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 				}
 			?>
 		</div>
@@ -124,17 +125,17 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 					<div class="view">
 						<?php
 							if ( '' != $tax_item_total ) {
-								echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_order_currency() ) );
+								echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) );
 							} else {
 								echo '&ndash;';
 							}
 
 							if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] !== $item['line_total'] ) {
-								echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_order_currency() ) ) . '</span>';
+								echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
 							}
 
 							if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
-								echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
+								echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 							}
 						?>
 					</div>
