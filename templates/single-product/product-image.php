@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product;
-$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
+$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 ?>
 <div class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
 	<figure class="woocommerce-product-gallery__wrapper">
