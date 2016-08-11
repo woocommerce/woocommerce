@@ -307,7 +307,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );                          // Embeds
-    include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );                // Structured Data class
+		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );                // Structured Data class
 	}
 
 	/**
@@ -343,7 +343,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart             = new WC_Cart();                              // Cart class, stores the cart contents
 			$this->customer         = new WC_Customer();                          // Customer class, handles data such as customer location
-      $this->structured_data  = new WC_Structured_Data();                   // Structured Data class, generates and handles structured data
+			$this->structured_data  = new WC_Structured_Data();                   // Structured Data class, generates and handles structured data
 			$this->customer->load_session();
 		}
 

@@ -1474,7 +1474,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 		$args['breadcrumb'] = $breadcrumbs->generate();
 
-    do_action( 'woocommerce_breadcrumb', $args );
+		do_action( 'woocommerce_breadcrumb', $args );
 
 		wc_get_template( 'global/breadcrumb.php', $args );
 	}

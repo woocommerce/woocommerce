@@ -33,7 +33,7 @@ if ( empty( $product ) || ! $product->is_visible() ) {
 	 * woocommerce_before_shop_loop_item hook.
 	 *
 	 * @hooked woocommerce_template_loop_product_link_open - 10
-   * @hooked WC_Structured_Data::generate_product_category_data() - 20
+	 * @hooked WC_Structured_Data::generate_product_category_data() - 20
 	 */
 	do_action( 'woocommerce_before_shop_loop_item' );
 

@@ -453,22 +453,22 @@ class WC_Emails {
 			apply_filters( 'woocommerce_email_headers', '', 'backorder', $args ),
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args )
 		);
-  }
+	}
 
 	/**
 	 * Adds Schema.org markup for order in JSON-LD format.
 	 *
-   * @deprecated 2.7.0 See WC_Structured_Data class
-   *
+	 * @deprecated 2.7.0 See WC_Structured_Data class
+	 *
 	 * @since 2.6.0
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
 	 */
 	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-    _deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_email_order_data' );
+		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_email_order_data' );
 
-    WC()->structured_data->generate_email_order_data( $order, $sent_to_admin, $plain_text );
-    WC()->structured_data->enqueue_data( array( 'Order' ) );
-  }
+		WC()->structured_data->generate_email_order_data( $order, $sent_to_admin, $plain_text );
+		WC()->structured_data->enqueue_data( array( 'Order' ) );
+	}
 }

@@ -508,9 +508,9 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect',
-  'woocommerce_structured_data_email_order' => 'woocommerce_email_order_schema_markup'
+	'woocommerce_add_to_cart_fragments'       => 'add_to_cart_fragments',
+	'woocommerce_add_to_cart_redirect'        => 'add_to_cart_redirect',
+	'woocommerce_structured_data_email_order' => 'woocommerce_email_order_schema_markup'
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
@@ -746,7 +746,7 @@ add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_b
  * @return string
  */
 function woocommerce_get_product_schema() {
-  _deprecated_function( 'woocommerce_get_product_schema', '2.7' );
+	_deprecated_function( 'woocommerce_get_product_schema', '2.7' );
 
 	global $product;
 
@@ -757,13 +757,13 @@ function woocommerce_get_product_schema() {
 		switch ( $product->download_type ) {
 			case 'application' :
 				$schema = "SoftwareApplication";
-			break;
+				break;
 			case 'music' :
 				$schema = "MusicAlbum";
-			break;
+				break;
 			default :
 				$schema = "Product";
-			break;
+				break;
 		}
 	}
 
