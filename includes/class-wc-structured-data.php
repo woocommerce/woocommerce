@@ -8,20 +8,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Structured data's handler and generator using JSON-LD format.
  *
  * @class     WC_Structured_Data
+ * @since     2.7.0
  * @version   2.7.0
  * @package   WooCommerce/Classes
- * @category  Class
- * @author    Clement Cazaud
+ * @author    Clement Cazaud <opportus@gmail.com>
  */
 class WC_Structured_Data {
 	
 	/**
-	 * @var array Partially structured data from `generate_*` methods
+	 * @var null|array $_data Partially structured data from `generate_*` methods
 	 */
 	private $_data;
 
 	/**
-	 * @var array Structured data
+	 * @var null|array $_structured_data
 	 */
 	private $_structured_data;
 
@@ -30,23 +30,23 @@ class WC_Structured_Data {
 	 */
 	public function __construct() {
 		// Generate data...
-		add_action( 'woocommerce_before_main_content', array( $this, 'generate_shop_data' ), 30 );
-		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumb_data' ), 10, 1 );
-		add_action( 'woocommerce_before_shop_loop_item', array( $this, 'generate_product_category_data' ), 20 );
+		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_shop_data' ), 30 );
+		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumb_data' ), 10, 1 );
+		add_action( 'woocommerce_before_shop_loop_item',  array( $this, 'generate_product_category_data' ), 20 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
-		add_action( 'woocommerce_review_meta', array( $this, 'generate_product_review_data' ), 20, 1 );
-		add_action( 'woocommerce_email_order_details', array( $this, 'generate_email_order_data' ), 20, 4 );
+		add_action( 'woocommerce_review_meta',            array( $this, 'generate_product_review_data' ), 20, 1 );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_email_order_data' ), 20, 4 );
 		// Enqueue structured data...
-		add_action( 'woocommerce_email_order_details', array( $this, 'enqueue_data' ), 30 );
-		add_action( 'wp_footer', array( $this, 'enqueue_data' ) );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'enqueue_data' ), 30 );
+		add_action( 'wp_footer',                          array( $this, 'enqueue_data' ) );
 	}
 
 	/**
-	 * Sets `$this->_data` if `$json` is valid.
+	 * Sets `$this->_data`.
 	 *
-	 * @param  array $json Partially structured data from `generate_*` methods
+	 * @param  array $json
 	 * @param  bool  $overwrite (default: false)
-	 * @return bool `false` if invalid `$json`, otherwise `true`
+	 * @return bool
 	 */
 	public function set_data( $json, $overwrite = false ) {
 		if ( ! is_array( $json ) || ! array_key_exists( '@type', $json ) ) {
@@ -65,7 +65,7 @@ class WC_Structured_Data {
 	/**
 	 * Gets `$this->_data`.
 	 *
-	 * @return array $data Or empty array if `$this->_data` is not set
+	 * @return array $data
 	 */
 	public function get_data() {
 		$data = isset( $this->_data ) ? $this->_data : array();
@@ -76,10 +76,10 @@ class WC_Structured_Data {
 	/**
 	 * Sets `$this->_structured_data`.
 	 *
-	 * @return bool `false` if there is no `$this->_data` to structure, otherwise `true`
+	 * @return bool
 	 */
 	public function set_structured_data() {
-		if ( ! isset( $this->_data ) ) {
+		if ( ! $this->get_data() ) {
 			return false;
 		}
 
@@ -112,19 +112,28 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Gets `$this->_structured_data` if `$requested_types` is valid.
+	 * Gets `$this->_structured_data`.
+	 * 
+	 * List of the types available by default for request:
+	 * 'Product',
+	 * 'Review',
+	 * 'BreadcrumbList',
+	 * 'WebSite',
+	 * 'Order',
 	 *
-	 * @param  mixed $requested_types bool|array (default: false) Array of requested types
-	 * @return array $structured_data Or empty array if there is no structured data or if `$requested_types` is not valid
+	 * @param  bool|array $requested_types (default: false)
+	 * @return array
 	 */
 	public function get_structured_data( $requested_types = false ) {
 		if ( ! $this->set_structured_data() ) {
 			return array();
-		} elseif ( $requested_types && ! is_array( $requested_types ) ) {
-			return array();
 		}
 
 		if ( $requested_types ) {
+			if ( ! is_array( $requested_types ) ) {
+				return array();
+			}
+
 			foreach ( $this->_structured_data as $type => $value ) {
 				foreach ( $requested_types as $requested_type ) {
 					if ( $requested_type === $type ) {
@@ -151,8 +160,9 @@ class WC_Structured_Data {
 
 	/**
 	 * Sanitizes, encodes and echoes structured data.
-	 * Hooked into the `wp_footer` action hook.
-	 * Hooked into the `woocommerce_email_order_details` action hook.
+	 * 
+	 * @uses `wp_footer` action hook.
+	 * @uses `woocommerce_email_order_details` action hook.
 	 */
 	public function enqueue_data( $requested_types = false ) {
 		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
@@ -164,10 +174,10 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Sanitizes structured data.
+	 * Sanitizes data.
 	 *
 	 * @param  array $data
-	 * @return array $sanitized_data Or empty array if there is no data to sanitize
+	 * @return array
 	 */
 	public function sanitize_data( $data ) {
 		if ( ! $data ) {
@@ -183,7 +193,8 @@ class WC_Structured_Data {
 
 	/**
 	 * Generates structured data for product categories.
-	 * Hooked into the `woocommerce_before_shop_loop_item` action hook.
+	 *
+	 * @uses `woocommerce_before_shop_loop_item` action hook.
 	 */
 	public function generate_product_category_data() {
 		if ( ! is_product_category() && ! is_shop() ) {
@@ -195,7 +206,8 @@ class WC_Structured_Data {
 	
 	/**
 	 * Generates structured data for single products.
-	 * Hooked into the `woocommerce_single_product_summary` action hook.
+	 *
+	 * @uses `woocommerce_single_product_summary` action hook.
 	 */
 	public function generate_product_data() {
 		global $product;
@@ -262,8 +274,8 @@ class WC_Structured_Data {
 
 	/**
 	 * Generates structured data for product reviews.
-	 * Hooked into the `woocommerce_review_meta` action hook.
 	 *
+	 * @uses  `woocommerce_review_meta` action hook.
 	 * @param object $comment
 	 */
 	public function generate_product_review_data( $comment ) {
@@ -290,8 +302,8 @@ class WC_Structured_Data {
 
 	/**
 	 * Generates structured data for the breadcrumb.
-	 * Hooked into the `woocommerce_breadcrumb` action hook.
 	 *
+	 * @uses  `woocommerce_breadcrumb` action hook.
 	 * @param array $args
 	 */
 	public function generate_breadcrumb_data( $args ) {
@@ -329,7 +341,8 @@ class WC_Structured_Data {
 
 	/**
 	 * Generates structured data related to the shop.
-	 * Hooked into the `woocommerce_before_main_content` action hook.
+	 *
+	 * @uses `woocommerce_before_main_content` action hook.
 	 */
 	public function generate_shop_data() {
 		if ( ! is_shop() || ! is_front_page() ) {
@@ -350,8 +363,8 @@ class WC_Structured_Data {
 	
 	/**
 	 * Generates structured data for the email order.
-	 * Hooked into the `woocommerce_email_order_details` action hook.
-	 * 
+	 *
+	 * @uses  `woocommerce_email_order_details` action hook.
 	 * @param mixed $order
 	 * @param bool	$sent_to_admin (default: false)
 	 * @param bool	$plain_text (default: false)

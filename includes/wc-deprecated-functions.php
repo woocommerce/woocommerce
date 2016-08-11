@@ -741,7 +741,8 @@ function woocommerce_calc_shipping_backwards_compatibility( $value ) {
 add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_backwards_compatibility' );
 
 /**
- * @deprecated 2.7.0 See WC_Structured_Data class
+ * @deprecated 2.7.0
+ * @see WC_Structured_Data class
  *
  * @return string
  */
