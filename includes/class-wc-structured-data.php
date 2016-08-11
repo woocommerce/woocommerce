@@ -30,26 +30,26 @@ class WC_Structured_Data {
 	 */
 	public function __construct() {
 		// Generate data...
-		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_shop_data' ), 30 );
+		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumb_data' ), 10, 1 );
-		add_action( 'woocommerce_before_shop_loop_item',  array( $this, 'generate_product_category_data' ), 20 );
+		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
 		add_action( 'woocommerce_review_meta',            array( $this, 'generate_product_review_data' ), 20, 1 );
 		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_email_order_data' ), 20, 4 );
 		// Enqueue structured data...
 		add_action( 'woocommerce_email_order_details',    array( $this, 'enqueue_data' ), 30 );
-		add_action( 'wp_footer',                          array( $this, 'enqueue_data' ) );
+		add_action( 'wp_footer',                          array( $this, 'enqueue_page_data' ) );
 	}
 
 	/**
 	 * Sets `$this->_data`.
 	 *
-	 * @param  array $json
-	 * @param  bool  $overwrite (default: false)
+	 * @param  array $markup
+	 * @param  bool $overwrite (default: false)
 	 * @return bool
 	 */
-	public function set_data( $json, $overwrite = false ) {
-		if ( ! is_array( $json ) || ! array_key_exists( '@type', $json ) ) {
+	public function set_data( $data, $overwrite = false ) {
+		if ( ! is_array( $data ) || ! array_key_exists( '@type', $data ) ) {
 			return false;
 		}
 
@@ -57,7 +57,7 @@ class WC_Structured_Data {
 			unset( $this->_data );
 		}
 		
-		$this->_data[] = $json;
+		$this->_data[] = $data;
 
 		return true;
 	}
@@ -68,9 +68,7 @@ class WC_Structured_Data {
 	 * @return array $data
 	 */
 	public function get_data() {
-		$data = isset( $this->_data ) ? $this->_data : array();
-			
-		return $data;
+		return $data = isset( $this->_data ) ? $this->_data : array();
 	}
 
 	/**
@@ -79,11 +77,11 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function set_structured_data() {
-		if ( ! $this->get_data() ) {
+		if ( isset( $this->_structured_data ) || ! $structured_data = $this->get_data() ) {
 			return false;
 		}
 
-		foreach ( $this->get_data() as $value ) {
+		foreach ( $structured_data as $value ) {
 			$type = $value['@type'];
 
 			switch ( $type ) {
@@ -93,26 +91,37 @@ class WC_Structured_Data {
 					break;
 			}
 
-			$data[ $type ][] = $value;
+			$structured_data[ $type ][] = $value;
 		}
 
-		foreach ( $data as $type => $value ) {
+		foreach ( $structured_data as $type => $value ) {
 			if ( count( $value ) > 1 ) {
-				$data[ $type ] = array( '@graph' => $value );
+				$structured_data[ $type ] = array( '@graph' => $value );
 			} else {
-				$data[ $type ] = $value[0];
+				$structured_data[ $type ] = $value[0];
 			}
 
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
 		}
 
-		$this->_structured_data = $data;
+		$this->_structured_data = $structured_data;
 
 		return true;
 	}
 
 	/**
 	 * Gets `$this->_structured_data`.
+	 * 
+	 * @return array $structured_data
+	 */
+	public function get_structured_data() {
+		$this->set_structured_data();
+
+		return $structured_data = isset( $this->_structured_data ) ? $this->_structured_data : array();
+	}
+
+	/**
+	 * Sanitizes, encodes and echoes structured data.
 	 * 
 	 * List of the types available by default for request:
 	 * 'Product',
@@ -122,55 +131,66 @@ class WC_Structured_Data {
 	 * 'Order',
 	 *
 	 * @param  bool|array $requested_types (default: false)
-	 * @return array
+	 * @return bool
 	 */
-	public function get_structured_data( $requested_types = false ) {
-		if ( ! $this->set_structured_data() ) {
-			return array();
+	public function enqueue_data( $requested_types = false ) {
+		if ( ! $structured_data = $this->get_structured_data() ) {
+			return false;
 		}
 
 		if ( $requested_types ) {
 			if ( ! is_array( $requested_types ) ) {
-				return array();
+				return false;
 			}
 
-			foreach ( $this->_structured_data as $type => $value ) {
+			foreach ( $structured_data as $type => $value ) {
 				foreach ( $requested_types as $requested_type ) {
 					if ( $requested_type === $type ) {
-						$structured_data[] = $value;
+						$json[] = $value;
 					}
 				}
 			}
 
-			if ( ! isset( $structured_data ) ) {
-				return array();
+			if ( ! isset( $json ) ) {
+				return false;
 			}
 		} else {
-			foreach ( $this->_structured_data as $value ) {
-				$structured_data[] = $value;
+			foreach ( $structured_data as $value ) {
+				$json[] = $value;
 			}
 		}
 
-		if ( count( $structured_data ) > 1 ) {
-			return $structured_data = array( '@graph' => $structured_data );
+		if ( count( $json ) > 1 ) {
+			$json = array( '@graph' => $json );
 		} else {
-			return $structured_data[0];
+			$json = $json[0];
 		}
+
+		$json = $this->sanitize_data( $json );
+		
+		// Testing/Debugging
+		//echo json_encode( $json, JSON_UNESCAPED_SLASHES );
+		echo '<script type="application/ld+json">' . wp_json_encode( $json ) . '</script>';
+
+		return true;
 	}
 
 	/**
 	 * Sanitizes, encodes and echoes structured data.
 	 * 
-	 * @uses `wp_footer` action hook.
-	 * @uses `woocommerce_email_order_details` action hook.
+	 * @uses   `wp_footer` action hook
+	 * @uses   `woocommerce_email_order_details` action hook
+	 * @return bool
 	 */
-	public function enqueue_data( $requested_types = false ) {
-		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
-			// Testing/Debugging
-			//echo json_encode( $structured_data, JSON_UNESCAPED_SLASHES );
-			
-			echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
-		}
+	public function enqueue_page_data() {
+		$requested_types = apply_filters( 'woocommerce_structured_data_page_requested_types', array(
+			is_shop() && is_front_page() ? 'WebSite' : null,
+			                               'BreadcrumbList',
+			                               'Product',
+			                               'Review',
+		) );
+
+		$this->enqueue_data( $requested_types );
 	}
 
 	/**
@@ -192,25 +212,20 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates structured data for product categories.
+	 * Generates Product structured data.
 	 *
-	 * @uses `woocommerce_before_shop_loop_item` action hook.
+	 * @uses   `woocommerce_single_product_summary` action hook
+	 * @param  bool|object $product (default: false)
+	 * @return bool
 	 */
-	public function generate_product_category_data() {
-		if ( ! is_product_category() && ! is_shop() ) {
-			return;
+	public function generate_product_data( $product = false ) {
+		if ( ! $product ) {
+			global $product;
 		}
-		
-		$this->generate_product_data();
-	}
-	
-	/**
-	 * Generates structured data for single products.
-	 *
-	 * @uses `woocommerce_single_product_summary` action hook.
-	 */
-	public function generate_product_data() {
-		global $product;
+
+		if ( ! is_object( $product ) ) {
+			return false;
+		}
 
 		if ( $is_multi_variation = count( $product->get_children() ) > 1 ? true : false ) {
 			$variations = $product->get_available_variations();
@@ -221,7 +236,7 @@ class WC_Structured_Data {
 		foreach ( $variations as $variation ) {
 			$product_variation = $is_multi_variation ? wc_get_product( $variation['variation_id'] ) : $product;
 			
-			$json_offers[] = array(
+			$markup_offers[] = array(
 				'@type'         => 'Offer',
 				'priceCurrency' => get_woocommerce_currency(),
 				'price'         => $product_variation->get_price(),
@@ -253,15 +268,15 @@ class WC_Structured_Data {
 			$type = "Product";
 		}
 
-		$json['@type']       = $type;
-		$json['@id']         = get_the_permalink();
-		$json['name']        = get_the_title();
-		$json['description'] = get_the_excerpt();
-		$json['url']         = get_the_permalink();
-		$json['offers']      = $json_offers;
+		$markup['@type']       = $type;
+		$markup['@id']         = get_the_permalink();
+		$markup['name']        = get_the_title();
+		$markup['description'] = get_the_excerpt();
+		$markup['url']         = get_the_permalink();
+		$markup['offers']      = $markup_offers;
 		
 		if ( $product->get_rating_count() ) {
-			$json['aggregateRating'] = array(
+			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
 				'ratingCount' => $product->get_rating_count(),
@@ -269,42 +284,43 @@ class WC_Structured_Data {
 			);
 		}
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $json, $product ) );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
 	/**
-	 * Generates structured data for product reviews.
+	 * Generates Product Review structured data.
 	 *
-	 * @uses  `woocommerce_review_meta` action hook.
-	 * @param object $comment
+	 * @uses   `woocommerce_review_meta` action hook
+	 * @param  object|array $comment
+	 * @return bool
 	 */
 	public function generate_product_review_data( $comment ) {
-
-		$json['@type']         = 'Review';
-		$json['@id']           = get_the_permalink() . '#li-comment-' . get_comment_ID();
-		$json['datePublished'] = get_comment_date( 'c' );
-		$json['description']   = get_comment_text();
-		$json['itemReviewed']  = array(
+		$markup['@type']         = 'Review';
+		$markup['@id']           = get_the_permalink() . '#li-comment-' . get_comment_ID();
+		$markup['datePublished'] = get_comment_date( 'c' );
+		$markup['description']   = get_comment_text();
+		$markup['itemReviewed']  = array(
 			'@type' => 'Product',
 			'name'  => get_the_title(),
 		);
-		$json['reviewRating']  = array(
+		$markup['reviewRating']  = array(
 			'@type'       => 'rating',
 			'ratingValue' => intval( get_comment_meta( $comment->comment_ID, 'rating', true ) ),
 		);
-		$json['author']        = array(
+		$markup['author']        = array(
 			'@type' => 'Person',
 			'name'  => get_comment_author(),
 		);
 		
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product_review', $json, $comment ) );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_product_review', $markup, $comment ) );
 	}
 
 	/**
-	 * Generates structured data for the breadcrumb.
+	 * Generates BreadcrumbList structured data.
 	 *
-	 * @uses  `woocommerce_breadcrumb` action hook.
-	 * @param array $args
+	 * @uses   `woocommerce_breadcrumb` action hook
+	 * @param  array $args
+	 * @return bool
 	 */
 	public function generate_breadcrumb_data( $args ) {
 		if ( empty( $args['breadcrumb'] ) ) {
@@ -316,58 +332,56 @@ class WC_Structured_Data {
 
 		foreach ( $breadcrumb as $key => $value ) {
 			if ( ! empty( $value[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
-				$json_crumbs_item = array(
+				$markup_crumbs_item = array(
 					'@id'  => $value[1],
 					'name' => $value[0],
 				);
 			} else {
-				$json_crumbs_item = array(
+				$markup_crumbs_item = array(
 					'name' => $value[0]
 				);
 			}
 
-			$json_crumbs[] = array(
+			$markup_crumbs[] = array(
 				'@type'    => 'ListItem',
 				'position' => $position ++,
-				'item'     => $json_crumbs_item,
+				'item'     => $markup_crumbs_item,
 			);
 		}
 
-		$json['@type']           = 'BreadcrumbList';
-		$json['itemListElement'] = $json_crumbs;
+		$markup['@type']           = 'BreadcrumbList';
+		$markup['itemListElement'] = $markup_crumbs;
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumb', $json, $breadcrumb ) );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumb', $markup, $breadcrumb ) );
 	}
 
 	/**
-	 * Generates structured data related to the shop.
+	 * Generates WebSite structured data.
 	 *
-	 * @uses `woocommerce_before_main_content` action hook.
+	 * @uses  `woocommerce_before_main_content` action hook
+	 * @return bool
 	 */
-	public function generate_shop_data() {
-		if ( ! is_shop() || ! is_front_page() ) {
-			return;
-		}
-
-		$json['@type']           = 'WebSite';
-		$json['name']            = get_bloginfo( 'name' );
-		$json['url']             = get_bloginfo( 'url' );
-		$json['potentialAction'] = array(
+	public function generate_website_data() {
+		$markup['@type']           = 'WebSite';
+		$markup['name']            = get_bloginfo( 'name' );
+		$markup['url']             = get_bloginfo( 'url' );
+		$markup['potentialAction'] = array(
 			'@type'       => 'SearchAction',
 			'target'      => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
 			'query-input' => 'required name=search_term_string',
 		);
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_shop', $json ) );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_website', $markup ) );
 	}
 	
 	/**
-	 * Generates structured data for the email order.
+	 * Generates Email Order structured data.
 	 *
-	 * @uses  `woocommerce_email_order_details` action hook.
-	 * @param mixed $order
-	 * @param bool	$sent_to_admin (default: false)
-	 * @param bool	$plain_text (default: false)
+	 * @uses   `woocommerce_email_order_details` action hook
+	 * @param  mixed $order
+	 * @param  bool	$sent_to_admin (default: false)
+	 * @param  bool	$plain_text (default: false)
+	 * @return bool
 	 */
 	public function generate_email_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( $plain_text ) {
@@ -384,7 +398,7 @@ class WC_Structured_Data {
 			$is_visible     = $product_exists && $product->is_visible();
 			$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ) : $order->get_view_order_url();
 
-			$json_offers[]  = array(
+			$markup_offers[]  = array(
 				'@type'              => 'Offer',
 				'price'              => $order->get_line_subtotal( $item ),
 				'priceCurrency'      => $order->get_currency(),
@@ -435,22 +449,22 @@ class WC_Structured_Data {
 				break;
 		}
 
-		$json['@type']              = 'Order';
-		$json['orderStatus']        = $order_status;
-		$json['orderNumber']        = $order->get_order_number();
-		$json['orderDate']          = date( 'c', $order->get_date_created() );
-		$json['url']                = $order_url;
-		$json['acceptedOffer']      = $json_offers;
-		$json['discount']           = $order->get_total_discount();
-		$json['discountCurrency']   = $order->get_currency();
-		$json['price']              = $order->get_total();
-		$json['priceCurrency']      = $order->get_currency();
-		$json['priceSpecification'] = array(
+		$markup['@type']              = 'Order';
+		$markup['orderStatus']        = $order_status;
+		$markup['orderNumber']        = $order->get_order_number();
+		$markup['orderDate']          = date( 'c', $order->get_date_created() );
+		$markup['url']                = $order_url;
+		$markup['acceptedOffer']      = $markup_offers;
+		$markup['discount']           = $order->get_total_discount();
+		$markup['discountCurrency']   = $order->get_currency();
+		$markup['price']              = $order->get_total();
+		$markup['priceCurrency']      = $order->get_currency();
+		$markup['priceSpecification'] = array(
 			'price'                 => $order->get_total(),
 			'priceCurrency'         => $order->get_currency(),
 			'valueAddedTaxIncluded' => true,
 		);
-		$json['billingAddress']     = array(
+		$markup['billingAddress']     = array(
 			'@type'           => 'PostalAddress',
 			'name'            => $order->get_formatted_billing_full_name(),
 			'streetAddress'   => $order->get_billing_address_1(),
@@ -461,22 +475,22 @@ class WC_Structured_Data {
 			'email'           => $order->get_billing_email(),
 			'telephone'       => $order->get_billing_phone(),
 		);
-		$json['customer']           = array(
+		$markup['customer']           = array(
 			'@type' => 'Person',
 			'name'  => $order->get_formatted_billing_full_name(),
 		);
-		$json['merchant']           = array(
+		$markup['merchant']           = array(
 			'@type' => 'Organization',
 			'name'  => get_bloginfo( 'name' ),
 			'url'   => get_bloginfo( 'url' ),
 		);
-		$json['potentialAction']    = array(
+		$markup['potentialAction']    = array(
 			'@type'  => 'ViewAction',
 			'name'   => 'View Order',
 			'url'    => $order_url,
 			'target' => $order_url,
 		);
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_email_order', $json, $sent_to_admin, $order ), true );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_email_order', $markup, $sent_to_admin, $order ), true );
 	}
 }
