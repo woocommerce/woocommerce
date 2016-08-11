@@ -78,12 +78,15 @@ abstract class WC_Session {
 	 *
 	 * @param string $key
 	 * @param mixed $value
+	 * @return bool Was it changed?
 	 */
 	public function set( $key, $value ) {
 		if ( $value !== $this->get( $key ) ) {
 			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
 			$this->_dirty = true;
+			return true;
 		}
+		return false;
 	}
 
 	/**

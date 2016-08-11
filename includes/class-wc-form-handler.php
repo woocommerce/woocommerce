@@ -465,19 +465,18 @@ class WC_Form_Handler {
 	 */
 	public static function update_cart_action() {
 
+		// Add Discount
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
+			WC()->cart->add_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
+		}
 
-			// Add Discount
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
-
-		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-
-			// Remove Coupon Codes
+		// Remove Coupon Codes
+		elseif ( isset( $_GET['remove_coupon'] ) ) {
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
+		}
 
-		} elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-
-			// Remove from cart
+		// Remove from cart
+		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
 
 			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
@@ -490,7 +489,7 @@ class WC_Form_Handler {
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
-					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
+					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
@@ -501,10 +500,10 @@ class WC_Form_Handler {
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
+		}
 
-		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-
-			// Undo Cart Item
+		// Undo Cart Item
+		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( $_GET['undo_item'] );
 
 			WC()->cart->restore_cart_item( $cart_item_key );
@@ -625,7 +624,9 @@ class WC_Form_Handler {
 				continue;
 			}
 
-			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
+			$cart_item_data['variation'] = $variations;
+
+			wc_add_to_cart( $item, $quantity, $cart_item_data );
 		}
 
 		do_action( 'woocommerce_ordered_again', $order->get_id() );
@@ -737,7 +738,7 @@ class WC_Form_Handler {
 		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
+		if ( $passed_validation && wc_add_to_cart( $product_id, $quantity ) !== false ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
@@ -766,7 +767,7 @@ class WC_Form_Handler {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
-				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
+				if ( $passed_validation && wc_add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
 					$added_to_cart[ $item ] = $quantity;
 				}
@@ -845,7 +846,7 @@ class WC_Form_Handler {
 			// Add to cart validation
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
+			if ( $passed_validation && wc_add_to_cart( $variation, $quantity, array( 'variation' => $variations ) ) !== false ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 				return true;
 			}

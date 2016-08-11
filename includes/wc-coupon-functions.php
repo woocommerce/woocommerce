@@ -103,7 +103,8 @@ function wc_get_coupon_code_by_id( $id ) {
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 	global $wpdb;
 
-	$ids = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+	$code = wc_format_coupon_code( $code );
+	$ids  = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
 	if ( false === $ids ) {
 		$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC;", $code );
@@ -117,4 +118,14 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 	$ids = array_diff( array_filter( array_map( 'absint', (array) $ids ) ), array( $exclude ) );
 
 	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude );
+}
+
+/**
+ * Format a coupon code string.
+ * @since  2.7.0
+ * @param  string $code
+ * @return string
+ */
+function wc_format_coupon_code( $code ) {
+	return apply_filters( 'woocommerce_coupon_code', $code );
 }

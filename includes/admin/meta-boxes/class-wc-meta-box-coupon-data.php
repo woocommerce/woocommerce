@@ -262,7 +262,7 @@ class WC_Meta_Box_Coupon_Data {
 		global $wpdb;
 
 		// Check for dupe coupons
-		$coupon_code  = apply_filters( 'woocommerce_coupon_code', $post->post_title );
+		$coupon_code  = wc_format_coupon_code( $post->post_title );
 		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
 
 		if ( $id_from_code ) {
