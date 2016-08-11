@@ -27,7 +27,7 @@ class WC_Structured_Data {
 
 	/**
 	 * Constructor.
-	*/
+	 */
 	public function __construct() {
 		// Generate data...
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_shop_data' ), 30 );
@@ -42,7 +42,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Sets `$this->_data` after `$json` validation.
+	 * Sets `$this->_data` if `$json` is valid.
 	 *
 	 * @param  array $json Partially structured data from `generate_*` methods
 	 * @param  bool  $overwrite (default: false)
@@ -112,7 +112,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Gets `$this->_structured_data` after `$requested_types` validation.
+	 * Gets `$this->_structured_data` if `$requested_types` is valid.
 	 *
 	 * @param  mixed $requested_types bool|array (default: false) Array of requested types
 	 * @return array $structured_data Or empty array if there is no structured data or if `$requested_types` is not valid
@@ -131,6 +131,10 @@ class WC_Structured_Data {
 						$structured_data[] = $value;
 					}
 				}
+			}
+
+			if ( ! isset( $structured_data ) ) {
+				return array();
 			}
 		} else {
 			foreach ( $this->_structured_data as $value ) {
@@ -277,8 +281,8 @@ class WC_Structured_Data {
 			'ratingValue' => intval( get_comment_meta( $comment->comment_ID, 'rating', true ) ),
 		);
 		$json['author']        = array(
-			'@type'       => 'Person',
-			'name'        => get_comment_author(),
+			'@type' => 'Person',
+			'name'  => get_comment_author(),
 		);
 		
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product_review', $json, $comment ) );
@@ -372,9 +376,9 @@ class WC_Structured_Data {
 				'price'              => $order->get_line_subtotal( $item ),
 				'priceCurrency'      => $order->get_currency(),
 				'priceSpecification' => array(
-					'price'                 => $order->get_line_subtotal( $item ),
-					'priceCurrency'         => $order->get_currency(),
-					'eligibleQuantity'      => array(
+					'price'            => $order->get_line_subtotal( $item ),
+					'priceCurrency'    => $order->get_currency(),
+					'eligibleQuantity' => array(
 						'@type' => 'QuantitativeValue',
 						'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ),
 					),
