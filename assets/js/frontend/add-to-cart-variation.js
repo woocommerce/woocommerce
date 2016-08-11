@@ -1,4 +1,4 @@
-/*global wc_add_to_cart_variation_params, wc_cart_fragments_params */
+/*global wc_add_to_cart_variation_params, wc_add_to_cart_variation_params */
 /*!
  * Variations Plugin
  */
