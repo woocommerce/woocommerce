@@ -21,11 +21,6 @@ class WC_Structured_Data {
 	private $_data;
 
 	/**
-	 * @var null|array $_structured_data
-	 */
-	private $_structured_data;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -45,7 +40,7 @@ class WC_Structured_Data {
 	 * Sets `$this->_data`.
 	 *
 	 * @param  array $data
-	 * @param  bool $reset (default: false)
+	 * @param  bool  $reset (default: false)
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
@@ -72,101 +67,68 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Sets `$this->_structured_data`.
+	 * Returns structured data.
 	 *
-	 * @return bool
-	 */
-	public function set_structured_data() {
-		if ( empty( $this->get_data() ) ) {
-			return false;
-		}
-
-		foreach ( $this->get_data() as $value ) {
-			$structured_data[ $value['@type'] ][] = $value;
-		}
-
-		foreach ( $structured_data as $type => $value ) {
-			if ( count( $value ) > 1 ) {
-				$structured_data[ $type ] = array( '@graph' => $value );
-			} else {
-				$structured_data[ $type ] = $value[0];
-			}
-
-			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
-		}
-
-		$this->_structured_data = $structured_data;
-
-		return true;
-	}
-
-	/**
-	 * Gets `$this->_structured_data`.
-	 * 
-	 * @return array $structured_data
-	 */
-	public function get_structured_data() {
-		$this->set_structured_data();
-
-		return $structured_data = isset( $this->_structured_data ) ? $this->_structured_data : array();
-	}
-
-	/**
-	 * Sanitizes, encodes and echoes structured data.
-	 * 
-	 * List of the types available by default for specific request:
+	 * List of types available by default for specific request
 	 * 'Product',
 	 * 'Review',
 	 * 'BreadcrumbList',
 	 * 'WebSite',
 	 * 'Order',
 	 *
+	 * @param  bool|array $requested_types (default: false)
+	 * @return array
+	 */
+	public function get_structured_data( $requested_types = false ) {
+		if ( empty( $this->get_data() ) || ( $requested_types && ! is_array( $requested_types ) ) ) {
+			return array();
+		}
+
+		foreach ( $this->get_data() as $value ) {
+			$data[ $value['@type'] ][] = $value;
+		}
+
+		foreach ( $data as $type => $value ) {
+			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+		}
+
+		foreach ( $data as $type => $value ) {
+			if ( $requested_types ) {
+				foreach ( $requested_types as $requested_type ) {
+					if ( $requested_type === $type ) {
+						$structured_data[] = $value;
+					}
+				}
+			} else {
+				$structured_data[] = $value;
+			}
+		}
+		
+		if ( ! isset( $structured_data ) ) {
+			return array();
+		}
+
+		$structured_data = count( $structured_data ) > 1 ?  array( '@graph' => $structured_data ) : $structured_data[0];
+
+		return $structured_data;
+	}
+
+	/**
+	 * Sanitizes, encodes and echoes structured data.
+	 * 
 	 * @uses   `woocommerce_email_order_details` action hook
 	 * @param  bool|array $requested_types (default: false)
 	 * @return bool
 	 */
 	public function enqueue_data( $requested_types = false ) {
-		if ( ! $structured_data = $this->get_structured_data() ) {
-			return false;
-		}
-
-		if ( $requested_types ) {
-			if ( ! is_array( $requested_types ) ) {
-				return false;
-			}
-
-			foreach ( $structured_data as $type => $value ) {
-				foreach ( $requested_types as $requested_type ) {
-					if ( $requested_type === $type ) {
-						$json[] = $value;
-					}
-				}
-			}
-
-			if ( ! isset( $json ) ) {
-				return false;
-			}
-		} else {
-			foreach ( $structured_data as $value ) {
-				$json[] = $value;
-			}
-		}
-
-		if ( count( $json ) > 1 ) {
-			$json = array( '@graph' => $json );
-		} else {
-			$json = $json[0];
-		}
-
-		if ( $json = $this->sanitize_data( $json ) ) {
-			// Testing/Debugging
-			//echo json_encode( $json, JSON_UNESCAPED_SLASHES );
-			echo '<script type="application/ld+json">' . wp_json_encode( $json ) . '</script>';
+		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
+			echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
 
 			return true;
-		}
-		
-		return false;
+		} else {
+			return false;
+		}	
 	}
 
 	/**
@@ -355,9 +317,9 @@ class WC_Structured_Data {
 	 * Generates Email Order structured data.
 	 *
 	 * @uses   `woocommerce_email_order_details` action hook
-	 * @param  object $order
-	 * @param  bool	$sent_to_admin (default: false)
-	 * @param  bool	$plain_text (default: false)
+	 * @param  object    $order
+	 * @param  bool	     $sent_to_admin (default: false)
+	 * @param  bool	     $plain_text (default: false)
 	 * @return bool|void
 	 */
 	public function generate_email_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
