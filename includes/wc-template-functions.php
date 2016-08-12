@@ -96,6 +96,18 @@ function wc_prevent_endpoint_indexing() {
 add_action( 'template_redirect', 'wc_prevent_endpoint_indexing' );
 
 /**
+ * Remove adjacent_posts_rel_link_wp_head - pointless for products.
+ *
+ * @since 2.7.0
+ */
+function wc_prevent_adjacent_posts_rel_link_wp_head() {
+	if ( is_singular( 'product' ) ) {
+		remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
+	}
+}
+add_action( 'template_redirect', 'wc_prevent_adjacent_posts_rel_link_wp_head' );
+
+/**
  * When the_post is called, put product data into a global.
  *
  * @param mixed $post
