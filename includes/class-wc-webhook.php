@@ -160,8 +160,11 @@ class WC_Webhook {
 			// creation date to determine the actual event
 			$resource = get_post( absint( $arg ) );
 
+			// Drafts don't have post_date_gmt so calculate it here
+			$gmt_date = get_gmt_from_date( $resource->post_date );
+
 			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
-			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
+			$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
 
 			if ( 'created' == $this->get_event() && ! $resource_created ) {
 				$should_deliver = false;
