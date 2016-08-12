@@ -30,15 +30,15 @@ class WC_Structured_Data {
 	 */
 	public function __construct() {
 		// Generate data...
-		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ), 30 );
-		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumb_data' ), 10, 1 );
-		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ), 10 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
+		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ),        30, 0 );
+		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumb_data' ),     10, 1 );
+		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ),        10, 0 );
+		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ),        60, 0 );
 		add_action( 'woocommerce_review_meta',            array( $this, 'generate_product_review_data' ), 20, 1 );
-		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_email_order_data' ), 20, 4 );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_email_order_data' ),    20, 3 );
 		// Enqueue structured data...
-		add_action( 'woocommerce_email_order_details',    array( $this, 'enqueue_data' ), 30 );
-		add_action( 'wp_footer',                          array( $this, 'enqueue_data_type_for_page' ) );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'enqueue_data' ),                 30, 0 );
+		add_action( 'wp_footer',                          array( $this, 'enqueue_data_type_for_page' ),   10, 0 );
 	}
 
 	/**
@@ -77,11 +77,11 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function set_structured_data() {
-		if ( isset( $this->_structured_data ) || ! $structured_data = $this->get_data() ) {
+		if ( empty( $this->get_data() ) ) {
 			return false;
 		}
 
-		foreach ( $structured_data as $value ) {
+		foreach ( $this->get_data() as $value ) {
 			switch ( $type = $value['@type'] ) {
 				case 'MusicAlbum':
 				case 'SoftwareApplication':
