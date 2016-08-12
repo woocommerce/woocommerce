@@ -178,14 +178,6 @@ mark.amount {
 	color: inherit;
 }
 
-.postbox,
-.woocommerce {
-	input: invalid {
-		border: 1px solid #cc010b;
-		background: #ffebe8;
-	}
-}
-
 .simplify-commerce-banner {
 	overflow: hidden;
 
@@ -4206,7 +4198,7 @@ img.ui-datepicker-trigger {
 								text-align: center;
 								-webkit-box-shadow: none;
 								box-shadow: none;
-								
+
 								&.from {
 									margin-right: 0;
 								}
