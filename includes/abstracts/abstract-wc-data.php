@@ -56,13 +56,6 @@ abstract class WC_Data {
 	protected $_internal_meta_keys = array();
 
 	/**
-	 * Should meta objects not present in the keys
-	 * array be purged when updating/saving meta?
-	 * @var boolean
-	 */
-	 protected $_delete_extra_meta_data = false;
-
-	/**
 	 * Returns the unique ID for this object.
 	 * @return int
 	 */
@@ -244,7 +237,7 @@ abstract class WC_Data {
 			return;
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			$cache_key   = WC_Cache_Helper::get_cache_prefix( $this->_cache_group ) . $this->get_id();
 			$cached_meta = wp_cache_get( $cache_key, $this->_cache_group );
 
@@ -274,7 +267,7 @@ abstract class WC_Data {
 				);
 			}
 
-			if ( ! empty ( $this->_cache_group ) ) {
+			if ( ! empty( $this->_cache_group ) ) {
 				wp_cache_set( $cache_key, $this->_meta_data, $this->_cache_group );
 			}
 		}
@@ -306,14 +299,12 @@ abstract class WC_Data {
 		}
 
 		// Delete no longer set meta data
-		if ( $this->_delete_extra_meta_data ) {
-			$delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
-			foreach ( $delete_meta_ids as $meta_id ) {
-				delete_metadata_by_mid( $this->_meta_type, $meta_id );
-			}
+		$delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
+		foreach ( $delete_meta_ids as $meta_id ) {
+			delete_metadata_by_mid( $this->_meta_type, $meta_id );
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->_cache_group );
 		}
 		$this->read_meta_data();
