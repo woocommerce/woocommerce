@@ -821,10 +821,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
+			if ( $group = $this->type_to_group( $type ) ) {
+				$this->_items[ $group ] = null;
+			}
 		} else {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
+			$this->_items = array(
+				'line_items'     => null,
+				'coupon_lines'   => null,
+				'shipping_lines' => null,
+				'fee_lines'      => null,
+				'tax_lines'      => null,
+			);
 		}
+	}
+
+	/**
+	 * Convert a type to a types group.
+	 * @param string $type
+	 * @return string group
+	 */
+	protected function type_to_group( $type ) {
+		$type_to_group = array(
+			'line_item' => 'line_items',
+			'tax'       => 'tax_lines',
+			'shipping'  => 'shipping_lines',
+			'fee'       => 'fee_lines',
+			'coupon'    => 'coupon_lines',
+		);
+		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
 	/**
@@ -833,24 +859,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return Array of WC_Order_item
 	 */
 	public function get_items( $types = 'line_item' ) {
-		$type_to_group = array(
-			'line_item' => 'line_items',
-			'tax'       => 'tax_lines',
-			'shipping'  => 'shipping_lines',
-			'fee'       => 'fee_lines',
-			'coupon'    => 'coupon_lines',
-		);
-
 		$items = array();
 		$types = array_filter( (array) $types );
 
 		foreach ( $types as $type ) {
-			if ( isset( $type_to_group[ $type ] ) ) {
-				if ( is_null( $this->_items[ $type_to_group[ $type ] ] ) ) {
-					$this->_items[ $type_to_group[ $type ] ] = $this->get_items_from_db( $type );
+			if ( $group = $this->type_to_group( $type ) ) {
+				if ( is_null( $this->_items[ $group ] ) ) {
+					$this->_items[ $group ] = $this->get_items_from_db( $type );
 				}
-
-				$items = array_merge( $items, $this->_items[ $type_to_group[ $type ] ] );
+				$items = array_merge( $items, $this->_items[ $group ] );
 			}
 		}
 
