@@ -38,14 +38,14 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_email_order_data' ), 20, 4 );
 		// Enqueue structured data...
 		add_action( 'woocommerce_email_order_details',    array( $this, 'enqueue_data' ), 30 );
-		add_action( 'wp_footer',                          array( $this, 'enqueue_page_data' ) );
+		add_action( 'wp_footer',                          array( $this, 'enqueue_data_type_for_page' ) );
 	}
 
 	/**
 	 * Sets `$this->_data`.
 	 *
 	 * @param  array $data
-	 * @param  bool $overwrite (default: false)
+	 * @param  bool $reset (default: false)
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
@@ -82,9 +82,7 @@ class WC_Structured_Data {
 		}
 
 		foreach ( $structured_data as $value ) {
-			$type = $value['@type'];
-
-			switch ( $type ) {
+			switch ( $type = $value['@type'] ) {
 				case 'MusicAlbum':
 				case 'SoftwareApplication':
 					$type = 'Product';
@@ -173,9 +171,9 @@ class WC_Structured_Data {
 			echo '<script type="application/ld+json">' . wp_json_encode( $json ) . '</script>';
 
 			return true;
-		} else {
-			return false;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -184,8 +182,8 @@ class WC_Structured_Data {
 	 * @uses   `wp_footer` action hook
 	 * @return bool
 	 */
-	public function enqueue_page_data() {
-		$requested_types = apply_filters( 'woocommerce_structured_data_page_request_types', array(
+	public function enqueue_data_type_for_page() {
+		$requested_types = apply_filters( 'woocommerce_structured_data_type_for_page', array(
 			is_shop() && is_front_page() ? 'WebSite' : null,
 			                               'BreadcrumbList',
 			                               'Product',
