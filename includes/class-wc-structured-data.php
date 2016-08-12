@@ -82,14 +82,7 @@ class WC_Structured_Data {
 		}
 
 		foreach ( $this->get_data() as $value ) {
-			switch ( $type = $value['@type'] ) {
-				case 'MusicAlbum':
-				case 'SoftwareApplication':
-					$type = 'Product';
-					break;
-			}
-
-			$structured_data[ $type ][] = $value;
+			$structured_data[ $value['@type'] ][] = $value;
 		}
 
 		foreach ( $structured_data as $type => $value ) {
@@ -253,23 +246,7 @@ class WC_Structured_Data {
 			);
 		}
 		
-		if ( $product->is_downloadable() ) {
-			switch ( $product->download_type ) {
-				case 'application' :
-					$type = "SoftwareApplication";
-					break;
-				case 'music' :
-					$type = "MusicAlbum";
-					break;
-				default :
-					$type = "Product";
-					break;
-			}
-		} else {
-			$type = "Product";
-		}
-
-		$markup['@type']       = $type;
+		$markup['@type']       = 'Product';
 		$markup['@id']         = get_the_permalink();
 		$markup['name']        = get_the_title();
 		$markup['description'] = get_the_excerpt();

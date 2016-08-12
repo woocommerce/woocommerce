@@ -73,7 +73,7 @@ get_header( 'shop' ); ?>
 
 					<?php
 						/**
-						 * woocommerce_shop_loop_hook.
+						 * woocommerce_shop_loop hook.
 						 *
 						 * @hooked WC_Structured_Data::generate_product_data() - 10
 						 */
