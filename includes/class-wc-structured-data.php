@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Structured_Data {
 	
 	/**
-	 * @var null|array $_data Partially structured data from `generate_*` methods
+	 * @var null|array $_data
 	 */
 	private $_data;
 
@@ -44,7 +44,7 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
-		if ( ! is_array( $data ) || ! array_key_exists( '@type', $data ) ) {
+		if ( ! is_array( $data ) || ( is_array( $data ) && ! array_key_exists( '@type', $data ) ) ) {
 			return false;
 		}
 
@@ -67,7 +67,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Returns structured data.
+	 * Structures and returns data.
 	 *
 	 * List of types available by default for specific request
 	 * 'Product',
@@ -124,7 +124,7 @@ class WC_Structured_Data {
 	public function enqueue_data( $requested_types = false ) {
 		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
 			echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
-
+			
 			return true;
 		} else {
 			return false;
@@ -139,10 +139,10 @@ class WC_Structured_Data {
 	 */
 	public function enqueue_data_type_for_page() {
 		$requested_types = apply_filters( 'woocommerce_structured_data_type_for_page', array(
-			is_shop() && is_front_page() ? 'WebSite' : null,
-			                               'BreadcrumbList',
-			                               'Product',
-			                               'Review',
+			  is_shop() || is_product_category() || is_product() ? 'Product'        : null,
+			  is_shop() && is_front_page()                       ? 'WebSite'        : null,
+			  is_product()                                       ? 'Review'         : null,
+			! is_shop()                                          ? 'BreadcrumbList' : null,
 		) );
 
 		return $this->enqueue_data( $requested_types );
@@ -152,11 +152,11 @@ class WC_Structured_Data {
 	 * Sanitizes data.
 	 *
 	 * @param  array $data
-	 * @return array
+	 * @return array|bool
 	 */
 	public function sanitize_data( $data ) {
 		if ( ! $data ) {
-			return array();
+			return false;
 		}
 
 		foreach ( $data as $key => $value ) {
