@@ -1475,7 +1475,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 		$args['breadcrumb'] = $breadcrumbs->generate();
 
 		/**
-		 * @hooked WC_Structured_Data::generate_breadcrumb_data() - 10
+		 * @hooked WC_Structured_Data::generate_breadcrumblist_data() - 10
 		 */
 		do_action( 'woocommerce_breadcrumb', $args );
 
