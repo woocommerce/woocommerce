@@ -34,7 +34,8 @@ module.exports = function( grunt ) {
 				stylelintrc: '.stylelintrc'
 			},
 			all: [
-				'<%= dirs.css %>/*.scss'
+				'<%= dirs.css %>/*.scss',
+				'!<%= dirs.css %>/select2.scss'
 			]
 		},
 

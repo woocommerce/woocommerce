@@ -213,6 +213,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		return $product ? $product->get_tax_status() : 'taxable';
 	}
 
+	/**
+	 * Set meta data for backordered products.
+	 */
+	public function set_backorder_meta() {
+		if ( $this->get_product()->backorders_require_notification() && $this->get_product()->is_on_backorder( $this->get_qty() ) ) {
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_qty() - max( 0, $this->get_product()->get_total_stock() ), true );
+		}
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

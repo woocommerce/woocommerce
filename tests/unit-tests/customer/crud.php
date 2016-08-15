@@ -197,8 +197,9 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$order = \WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
-		$this->assertEquals( $order->id, $customer->get_last_order_id() );
-		$this->assertEquals( strtotime( $order->order_date ), $customer->get_last_order_date() );
+		$this->assertEquals( $order->get_id(), $customer->get_last_order_id() );
+		$this->assertEquals( $order->get_date_created(), $customer->get_last_order_date() );
+		$order->delete();
 	}
 
 	/**
@@ -228,6 +229,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$order->update_status( 'wc-completed' );
 		$customer->read( $customer_id );
 		$this->assertEquals( 40, $customer->get_total_spent() );
+		$order->delete();
 	}
 
 	/**

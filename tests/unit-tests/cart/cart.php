@@ -28,7 +28,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon  = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		// Create dummy product - price will be 10
 		$product = WC_Helper_Product::create_simple_product();
@@ -58,8 +58,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		# Test case 2 #10573
 		update_post_meta( $product->id, '_regular_price', '29.95' );
 		update_post_meta( $product->id, '_price', '29.95' );
-		update_post_meta( $coupon->id, 'discount_type', 'percent' );
-		update_post_meta( $coupon->id, 'coupon_amount', '10' );
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '10' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -77,7 +77,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product->id );
 
 		WC()->cart->add_to_cart( $product->id, 1 );
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
@@ -92,8 +92,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 
 		# Test case 3 #11626
-		update_post_meta( $coupon->id, 'discount_type', 'percent' );
-		update_post_meta( $coupon->id, 'coupon_amount', '50' );
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '50' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -122,7 +122,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC()->cart->add_to_cart( $loop_product->id, 1 );
 		}
 
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
 		$this->assertEquals( '16.55', WC()->cart->total );

@@ -1416,3 +1416,18 @@ function wc_get_logger() {
 	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
 	return new $class;
 }
+
+/**
+ * Runs a deprecated action with notice only if used.
+ * @since  2.7.0
+ * @param  string $action
+ * @param  array $args
+ * @param  string $deprecated_in
+ * @param  string $replacement
+ */
+function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
+	if ( has_action( $action ) ) {
+		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		do_action_ref_array( $action, $args );
+	}
+}

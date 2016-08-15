@@ -1319,8 +1319,14 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
+					} else {
+						$note = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
@@ -1360,8 +1366,14 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock increased from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
+					} else {
+						$note = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
