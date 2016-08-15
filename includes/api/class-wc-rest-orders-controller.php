@@ -150,7 +150,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'transaction_id'       => $order->get_transaction_id(),
 			'customer_ip_address'  => $order->get_customer_ip_address(),
 			'customer_user_agent'  => $order->get_customer_user_agent(),
-			'created_via'          => $order->created_via,
+			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
 			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date ),
 			'date_paid'            => $order->get_date_paid(),
