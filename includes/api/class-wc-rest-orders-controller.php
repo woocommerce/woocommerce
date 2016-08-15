@@ -126,18 +126,18 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		$data = array(
 			'id'                   => $order->get_id(),
-			'parent_id'            => $post->post_parent,
+			'parent_id'            => $order->get_parent_id(),
 			'status'               => $order->get_status(),
 			'order_key'            => $order->get_order_key(),
 			'number'               => $order->get_order_number(),
 			'currency'             => $order->get_currency(),
-			'version'              => $order->order_version,
-			'prices_include_tax'   => $order->prices_include_tax,
-			'date_created'         => wc_rest_prepare_date_response( $post->post_date_gmt ),
-			'date_modified'        => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+			'version'              => $order->get_version(),
+			'prices_include_tax'   => $order->get_prices_include_tax(),
+			'date_created'         => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
+			'date_modified'        => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
 			'customer_id'          => $order->get_user_id(),
 			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
-			'discount_tax'         => wc_format_decimal( $order->cart_discount_tax, $dp ),
+			'discount_tax'         => wc_format_decimal( $order->get_discount_tax(), $dp ),
 			'shipping_total'       => wc_format_decimal( $order->get_total_shipping(), $dp ),
 			'shipping_tax'         => wc_format_decimal( $order->get_shipping_tax(), $dp ),
 			'cart_tax'             => wc_format_decimal( $order->get_cart_tax(), $dp ),
@@ -152,7 +152,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->get_customer_user_agent(),
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date ),
+			'date_completed'       => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
 			'date_paid'            => $order->get_date_paid(),
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
@@ -377,9 +377,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
-		if ( 0 !== (int) $order->post->post_parent ) {
+		if ( 0 !== (int) $order->get_parent_id() ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->post->post_parent ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->get_parent_id() ) ),
 			);
 		}
 
