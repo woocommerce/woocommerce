@@ -72,7 +72,8 @@ class WC_Structured_Data {
 	/**
 	 * Structures and returns data.
 	 *
-	 * List of types available by default for specific request
+	 * List of types available by default for specific request:
+	 *
 	 * 'product',
 	 * 'review',
 	 * 'breadcrumblist',
@@ -135,9 +136,9 @@ class WC_Structured_Data {
 	public function output_structured_data( $requested_types = true ) {
 		if ( $requested_types === true ) {
 			$requested_types = apply_filters( 'woocommerce_structured_data_type_for_page', array(
-			  	is_shop() || is_product_category() || is_product() ? 'product'        : null,
-			  	is_shop() && is_front_page()                       ? 'website'        : null,
-			  	is_product()                                       ? 'review'         : null,
+				  is_shop() || is_product_category() || is_product() ? 'product'        : null,
+				  is_shop() && is_front_page()                       ? 'website'        : null,
+				  is_product()                                       ? 'review'         : null,
 				! is_shop()                                          ? 'breadcrumblist' : null,
 				                                                       'order',
 			) );
@@ -150,30 +151,6 @@ class WC_Structured_Data {
 		} else {
 			return false;
 		}	
-	}
-
-	/**
-	 * Generates, sanitizes, encodes and outputs specific structured data type.
-	 *
-	 * @param  string $type
-	 * @param  mixed  $object
-	 * @param  mixed  $param_1 (default: null)
-	 * @param  mixed  $param_2 (default: null)
-	 * @param  mixed  $param_3 (default: null)
-	 * @return bool
-	 */
-	public function generate_output_structured_data( $type, $object, $param_1 = null, $param_2 = null, $param_3 = null ) {
-		if ( ! is_string( $type ) || ! $object ) {
-			return false;
-		}
-		
-		$generate = 'generate_' . $type . '_data';
-
-		if ( $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
-			return $this->output_structured_data( $type );
-		} else {
-			return false;
-		}
 	}
 
 	/**
@@ -195,6 +172,48 @@ class WC_Structured_Data {
 	}
 
 	/**
+	 * Generates, sanitizes, encodes and outputs specific structured data type.
+	 *
+	 * @param  string $type
+	 * @param  mixed  $object  (default: null)
+	 * @param  mixed  $param_1 (default: null)
+	 * @param  mixed  $param_2 (default: null)
+	 * @param  mixed  $param_3 (default: null)
+	 * @return bool
+	 */
+	public function generate_output_structured_data( $type, $object = null, $param_1 = null, $param_2 = null, $param_3 = null ) {
+		if ( ! is_string( $type ) ) {
+			return false;
+		}
+		
+		$generate = 'generate_' . $type . '_data';
+
+		if ( $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
+			return $this->output_structured_data( $type );
+		} else {
+			return false;
+		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Generators
+	|--------------------------------------------------------------------------
+	|
+	| Methods for generating specific structured data types:
+	|
+	| - Product
+	| - Review
+	| - BreadcrumbList
+	| - WebSite
+	| - Order
+	|
+	| The generated data is stored into `$this->_data`.
+	| See the methods above for handling `$this->_data`.
+	|
+	*/
+
+	/**
 	 * Generates Product structured data.
 	 *
 	 * @uses   `woocommerce_single_product_summary` action hook
@@ -211,14 +230,10 @@ class WC_Structured_Data {
 			return false;
 		}
 
-		if ( $is_multi_variation = count( $product->get_children() ) > 1 ? true : false ) {
-			$variations = $product->get_available_variations();
-		} else {
-			$variations = array( null );
-		}
+		$variations = count( $product->get_children() ) > 1 ? $product->get_available_variations() : array( $product );
 
 		foreach ( $variations as $variation ) {
-			$product_variation = $is_multi_variation ? wc_get_product( $variation['variation_id'] ) : $product;
+			$product_variation = count( $variations ) > 1 ? wc_get_product( $variation['variation_id'] ) : $variation;
 			
 			$markup_offers[] = array(
 				'@type'         => 'Offer',
@@ -227,7 +242,7 @@ class WC_Structured_Data {
 				'availability'  => 'http://schema.org/' . $stock = ( $product_variation->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 				'sku'           => $product_variation->get_sku(),
 				'image'         => wp_get_attachment_url( $product_variation->get_image_id() ),
-				'description'   => $is_multi_variation ? $product_variation->get_variation_description() : '',
+				'description'   => count( $variations ) > 1 ? $product_variation->get_variation_description() : '',
 				'seller'        => array(
 					'@type' => 'Organization',
 					'name'  => get_bloginfo( 'name' ),
