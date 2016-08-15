@@ -242,10 +242,13 @@ class WC_REST_Authentication {
 		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
-		$secret         = $user->consumer_secret . '&';
+		$secret         = $user->consumer_secret;
 		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
-		if ( ! hash_equals( $signature, $consumer_signature ) ) {
+		// $secret used to have & appended which seems odd. Removed that requirement, but handle both cases to avoid breaking bw compat.
+		$signature2     = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret. '&', true ) );
+
+		if ( ! hash_equals( $signature, $consumer_signature ) && ! hash_equals( $signature2, $consumer_signature ) ) {
 			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
