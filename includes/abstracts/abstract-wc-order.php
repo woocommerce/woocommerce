@@ -309,21 +309,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						// Legacy action handler
 						switch ( $item_group ) {
 							case 'fee_lines' :
-								if ( has_action( 'woocommerce_add_order_fee_meta' ) && isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_order_fee_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_order_fee_meta', $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key );
+								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 							case 'shipping_lines' :
-								if ( has_action( 'woocommerce_add_shipping_order_item' ) && isset( $item->legacy_package_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_shipping_order_item', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->legacy_package_key );
+								if ( isset( $item->legacy_package_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $item_id, $item->legacy_package_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 							case 'line_items' :
-								if ( has_action( 'woocommerce_add_order_item_meta' ) && isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_order_item_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_order_item_meta', $item_id, $item->legacy_values, $item->legacy_cart_item_key );
+								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 						}
