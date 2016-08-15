@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = ! empty( $order->get_payment_method() ) ? $order->get_payment_method() : '';
+		$payment_method = $order->get_payment_method() ? $order->get_payment_method() : '';
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -219,7 +219,7 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( ! empty( $order->get_user_id() ) ) {
+								if ( $order->get_user_id() ) {
 									$args = array( 'post_status' => 'all',
 										'post_type'      => 'shop_order',
 										'_customer_user' => absint( $order->get_user_id() )
@@ -233,7 +233,7 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( ! empty( $order->get_user_id() ) ) {
+							if ( $order->get_user_id() ) {
 								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
 								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';

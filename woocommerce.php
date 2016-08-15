@@ -7,7 +7,7 @@
  * Author: WooThemes
  * Author URI: https://woothemes.com
  * Requires at least: 4.4
- * Tested up to: 4.5
+ * Tested up to: 4.6
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
@@ -341,10 +341,9 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			$this->cart             = new WC_Cart();                              // Cart class, stores the cart contents
-			$this->customer         = new WC_Customer();                          // Customer class, handles data such as customer location
-			$this->structured_data  = new WC_Structured_Data();                   // Structured Data class, generates and handles structured data
-			$this->customer->load_session();
+			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents
+			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
+			$this->structured_data = new WC_Structured_Data();                       // Structured Data class, generates and handles structured data
 		}
 
 		$this->load_webhooks();

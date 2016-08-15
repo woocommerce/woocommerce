@@ -253,18 +253,20 @@ abstract class WC_Data {
 			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
 				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
 				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
+				WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
 			", $this->get_id() ) );
 
-			foreach ( $raw_meta_data as $meta ) {
-				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
-					continue;
+			if ( $raw_meta_data ) {
+				foreach ( $raw_meta_data as $meta ) {
+					if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
+						continue;
+					}
+					$this->_meta_data[] = (object) array(
+						'key'     => $meta->meta_key,
+						'value'   => maybe_unserialize( $meta->meta_value ),
+						'meta_id' => $meta->{ $db_info['meta_id_field'] },
+					);
 				}
-				$this->_meta_data[] = (object) array(
-					'key'     => $meta->meta_key,
-					'value'   => $meta->meta_value,
-					'meta_id' => $meta->{ $db_info['meta_id_field'] },
-				);
 			}
 
 			if ( ! empty( $this->_cache_group ) ) {
@@ -283,7 +285,8 @@ abstract class WC_Data {
 		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "
 			SELECT " . $db_info['meta_id_field'] . " FROM " . $db_info['table'] . "
 			WHERE " . $db_info['object_id_field'] . " = %d", $this->get_id() ) . "
-			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');
+			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "')
+			AND meta_key NOT LIKE 'wp\_%%';
 		" ) );
 		$set_meta_ids = array();
 

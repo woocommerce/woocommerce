@@ -230,7 +230,7 @@ class WC_Structured_Data {
 			return false;
 		}
 
-		$variations = count( $product->get_children() ) > 1 ? $product->get_available_variations() : array( $product );
+		$variations = $product->is_type( 'variable' ) ? $product->get_available_variations() : array( $product );
 
 		foreach ( $variations as $variation ) {
 			$product_variation = count( $variations ) > 1 ? wc_get_product( $variation['variation_id'] ) : $variation;
