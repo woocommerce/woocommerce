@@ -161,19 +161,19 @@ class WC_Customer extends WC_Legacy_Customer {
 		$default = wc_get_customer_default_location();
 
 		// Set some defaults if some of our values are still not set.
-		if ( empty( $this->get_billing_country() ) ) {
+		if ( ! $this->get_billing_country() ) {
 			$this->set_billing_country( $default['country'] );
 		}
 
-		if ( empty( $this->get_shipping_country() ) ) {
+		if ( ! $this->get_shipping_country() ) {
 			$this->set_shipping_country( $this->get_billing_country() );
 		}
 
-		if ( empty( $this->get_billing_state() ) ) {
+		if ( ! $this->get_billing_state() ) {
 			$this->set_billing_state( $default['state'] );
 		}
 
-		if ( empty( $this->get_shipping_state() ) ) {
+		if ( ! $this->get_shipping_state() ) {
 			$this->set_shipping_state( $this->get_billing_state() );
 		}
 	}
