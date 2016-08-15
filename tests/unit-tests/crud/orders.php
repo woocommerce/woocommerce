@@ -242,8 +242,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$object  = new WC_Order();
 		$object->save();
-		$item_id = $object->add_product( $product, array( 'qty' => 4 ) );
-		$item_id = $object->add_product( $product, array( 'qty' => 2 ) );
+		$item_id = $object->add_product( $product, 4 );
+		$item_id = $object->add_product( $product, 2 );
 		$this->assertCount( 2, $object->get_items() );
 		$object->remove_order_items();
 		$this->assertCount( 0, $object->get_items() );
@@ -255,8 +255,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_items() {
 		$object  = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 2 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 2 );
 		$this->assertCount( 2, $object->get_items() );
 	}
 
@@ -299,7 +299,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object  = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$object->calculate_totals();
 		$this->assertCount( 1, $object->get_taxes() );
 
@@ -347,13 +347,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_used_coupons() {
 		$object  = new WC_Order();
 		$object->save();
-		$object->add_coupon(
-			array(
-				'code'         => '12345',
-				'discount'     => '10',
-				'discount_tax' => '5',
-			)
-		);
+		$object->add_coupon( '12345', '10', '5' );
 		$this->assertCount( 1, $object->get_used_coupons() );
 	}
 
@@ -363,8 +357,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_item_count() {
 		$object  = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 2 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 2 );
 		$this->assertEquals( 6, $object->get_item_count() );
 	}
 
@@ -375,16 +369,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object  = new WC_Order();
 		$object->save();
 
-		$item_id = $object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$item_id = $object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Product );
 
-		$item_id = $object->add_coupon(
-			array(
-				'code'         => '12345',
-				'discount'     => '10',
-				'discount_tax' => '5',
-			)
-		);
+		$item_id = $object->add_coupon( '12345', '10', '5' );
 		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
 	}
 
@@ -449,7 +437,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
 		$object->calculate_taxes();
 		$this->assertEquals( 5, $object->get_total_tax() );
@@ -481,7 +469,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
 		$object->calculate_totals();
 		$this->assertEquals( 55, $object->get_total() );
@@ -531,12 +519,12 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_has_free_item() {
 		$object  = new WC_Order();
 		$object->save();
-		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$this->assertFalse( $object->has_free_item() );
 
 		$free_product = WC_Helper_Product::create_simple_product();
 		$free_product->set_price( 0 );
-		$object->add_product( $free_product, array( 'qty' => 4 ) );
+		$object->add_product( $free_product, 4 );
 		$this->assertTrue( $object->has_free_item() );
 	}
 
