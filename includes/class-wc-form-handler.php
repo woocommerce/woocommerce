@@ -598,7 +598,7 @@ class WC_Form_Handler {
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
 
-		if ( empty( $order->get_id() ) ) {
+		if ( ! $order->get_id() ) {
 			return;
 		}
 
