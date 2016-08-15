@@ -130,7 +130,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @since 2.7.0
 	 */
 	public function save_session_if_changed() {
-		if ( $this->_is_session && $this->_changed ) {
+		if ( $this->_changed ) {
 			$this->save_to_session();
 		}
 	}
@@ -968,8 +968,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	  */
 	public function create() {
 		$customer_id = wc_create_new_customer( $this->get_email(), $this->get_username(), $this->_data['password'] );
-		unset( $this->_data['password'] );
-		if ( $customer_id ) {
+
+		if ( ! is_wp_error( $customer_id ) ) {
 			$this->_data['id'] = $customer_id;
 			update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
 			update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
@@ -1163,9 +1163,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @since 2.7.0
 	 */
 	public function save_to_session() {
-		if ( ! $this->_is_session ) {
-			return;
-		}
 		$data = array();
 		foreach ( $this->_session_keys as $session_key ) {
 			$function_key = $session_key;
