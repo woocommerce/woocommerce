@@ -34,12 +34,20 @@ class WC_Customer extends WC_Legacy_Customer {
 		'password'            => '', // write only
 		'date_created'        => '', // read only
 		'date_modified'		  => '', // read only
-		'billing_postcode'    => '',
-		'billing_city'        => '',
+		'billing_first_name'  => '',
+		'billing_last_name'   => '',
+		'billing_company'     => '',
+		'billing_phone'       => '',
+		'billing_email'       => '',
 		'billing_address_1'   => '',
 		'billing_address_2'   => '',
 		'billing_state'       => '',
+		'billing_postcode'    => '',
+		'billing_city'        => '',
 		'billing_country'     => '',
+		'shipping_first_name'  => '',
+		'shipping_last_name'   => '',
+		'shipping_company'     => '',
 		'shipping_postcode'   => '',
 		'shipping_city'       => '',
 		'shipping_address_1'  => '',
@@ -59,6 +67,8 @@ class WC_Customer extends WC_Legacy_Customer {
 		'billing_postcode', 'billing_city', 'billing_address_1', 'billing_address', 'billing_address_2',
 		'billing_state', 'billing_country', 'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address',
 		'shipping_address_2', 'shipping_state', 'shipping_country', 'is_vat_exempt', 'calculated_shipping',
+		'billing_first_name', 'billing_last_name', 'billing_company', 'billing_phone', 'billing_email',
+		'shipping_first_name', 'shipping_last_name', 'shipping_company',
 	);
 
 	/**
@@ -73,6 +83,8 @@ class WC_Customer extends WC_Legacy_Customer {
 		'last_update', 'first_name', 'last_name', 'show_admin_bar_front',
 		'use_ssl', 'admin_color', 'rich_editing', 'comment_shortcuts', 'dismissed_wp_pointers', 'show_welcome_panel',
 		'_woocommerce_persistent_cart', 'session_tokens',
+		'billing_first_name', 'billing_last_name', 'billing_company', 'billing_phone', 'billing_email',
+		'shipping_first_name', 'shipping_last_name', 'shipping_company',
 	);
 
 	/**
@@ -300,6 +312,46 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Gets billing first name.
+	 * @return string
+	 */
+	public function get_billing_first_name() {
+		return $this->_data['billing_first_name'];
+	}
+
+	/**
+	 * Gets billing last name.
+	 * @return string
+	 */
+	public function get_billing_last_name() {
+		return $this->_data['billing_last_name'];
+	}
+
+	/**
+	 * Gets billing company.
+	 * @return string
+	 */
+	public function get_billing_company() {
+		return $this->_data['billing_company'];
+	}
+
+	/**
+	 * Gets billing phone.
+	 * @return string
+	 */
+	public function get_billing_phone() {
+		return $this->_data['billing_phone'];
+	}
+
+	/**
+	 * Gets billing email.
+	 * @return string
+	 */
+	public function get_billing_email() {
+		return $this->_data['billing_email'];
+	}
+
+	/**
 	 * Gets customer postcode.
 	 * @return string
 	 */
@@ -353,6 +405,30 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_billing_country() {
 		return $this->_data['billing_country'];
+	}
+
+	/**
+	 * Gets shipping first name.
+	 * @return string
+	 */
+	public function get_shipping_first_name() {
+		return $this->_data['shipping_first_name'];
+	}
+
+	/**
+	 * Gets shipping last name.
+	 * @return string
+	 */
+	public function get_shipping_last_name() {
+		return $this->_data['shipping_last_name'];
+	}
+
+	/**
+	 * Gets shipping company.
+	 * @return string
+	 */
+	public function get_shipping_company() {
+		return $this->_data['shipping_company'];
 	}
 
 	/**
@@ -651,6 +727,46 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Set billing first name.
+	 * @return string
+	 */
+	public function set_billing_first_name( $value ) {
+		$this->_data['billing_first_name'] = $value;
+	}
+
+	/**
+	 * Set billing last name.
+	 * @return string
+	 */
+	public function set_billing_last_name( $value ) {
+		$this->_data['billing_last_name'] = $value;
+	}
+
+	/**
+	 * Set billing company.
+	 * @return string
+	 */
+	public function set_billing_company( $value ) {
+		$this->_data['billing_company'] = $value;
+	}
+
+	/**
+	 * Set billing phone.
+	 * @return string
+	 */
+	public function set_billing_phone( $value ) {
+		$this->_data['billing_phone'] = $value;
+	}
+
+	/**
+	 * Set billing email.
+	 * @return string
+	 */
+	public function set_billing_email( $email ) {
+		$this->_data['billing_email'] = sanitize_email( $email );
+	}
+
+	/**
 	 * Set customer country.
 	 * @param mixed $country
 	 */
@@ -704,6 +820,30 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_billing_address_2( $address ) {
 		$this->_data['billing_address_2'] = $address;
+	}
+
+	/**
+	 * Set shipping first name.
+	 * @return string
+	 */
+	public function set_shipping_first_name( $value ) {
+		$this->_data['shipping_first_name'] = $value;
+	}
+
+	/**
+	 * Set shipping last name.
+	 * @return string
+	 */
+	public function set_shipping_last_name( $value ) {
+		$this->_data['shipping_last_name'] = $value;
+	}
+
+	/**
+	 * Set shipping company.
+	 * @return string
+	 */
+	public function set_shipping_company( $value ) {
+		$this->_data['shipping_company'] = $value;
 	}
 
 	/**
@@ -831,12 +971,20 @@ class WC_Customer extends WC_Legacy_Customer {
 		unset( $this->_data['password'] );
 		if ( $customer_id ) {
 			$this->_data['id'] = $customer_id;
+			update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
+			update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
+			update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
+			update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
+			update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
 			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
 			update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
 			update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
 			update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
 			update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
 			update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
+			update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
+			update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
+			update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
 			update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
 			update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
 			update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
@@ -954,11 +1102,19 @@ class WC_Customer extends WC_Legacy_Customer {
 			unset( $this->_data['password'] );
 		}
 
+		update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
+		update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
+		update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
+		update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
+		update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
 		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
 		update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
 		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
 		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
 		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
+		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
+		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
+		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
 		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
 		update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
 		update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
