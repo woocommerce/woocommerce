@@ -813,6 +813,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	*/
 
 	/**
+	 * Prefixes an item key with a string so arrays are associative rather than numeric.
+	 * @param  int $id
+	 * @return string
+	 */
+	protected function prefix_item_id( $id ) {
+		return 'item-' . $id;
+	}
+
+	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 * @param string $type Order item type. Default null.
 	 */
@@ -886,7 +895,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {
-			$items = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
+			$items = array_map( array( $this, 'get_item' ), array_combine( array_map( array( $this, 'prefix_item_id' ), wp_list_pluck( $items, 'order_item_id' ) ), $items ) );
 		} else {
 			$items = array();
 		}
@@ -1001,38 +1010,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Append new row with generated temporary ID
-		$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
+		if ( $item->get_id() ) {
+			$this->_items[ $items_key ][ $this->prefix_item_id( $item->get_id() ) ] = $item;
+		} else {
+			$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
+		}
 	}
 
 	/**
 	 * Add a product line item to the order.
-	 * Order must be saved prior to adding items.
-	 * @param \WC_Product $product
-	 * @param array $args
-	 * @param array $deprecated qty was passed as arg 2 prior to 2.7.0
+	 * @param  \WC_Product $product
+	 * @param  int $qty
+	 * @param  array $args
 	 * @return int order item ID
 	 */
-	public function add_product( $product, $args = array(), $deprecated = array() ) {
-		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'qty', '2.7', 'Pass only product and args' );
-			$qty         = $args;
-			$args        = $deprecated;
-			$args['qty'] = $qty;
-		}
-
-		if ( empty( $args['qty'] ) ) {
-			$args['qty'] = 1;
-		}
-
+	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'qty'          => 1,
+			'qty'          => $qty,
 			'name'         => $product ? $product->get_title() : '',
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
 			'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
 			'variation'    => $product && isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
-			'subtotal'     => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
-			'total'        => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
+			'subtotal'     => $product ? $product->get_price_excluding_tax( $qty ) : '',
+			'total'        => $product ? $product->get_price_excluding_tax( $qty ) : '',
 			'subtotal_tax' => 0,
 			'total_tax'    => 0,
 			'taxes'        => array(
@@ -1055,63 +1056,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$item = new WC_Order_Item_Product( $args );
-
-		// Handle backorders
-		if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-			$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
-		}
-
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_backorder_meta();
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_product' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_product', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_id(), $product, $qty, $args );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add coupon code to the order.
-	 * Order must be saved prior to adding items.
-	 * @param array $args
-	 * @param int $deprecated1 2.7.0 code, discount, tax were passed.
-	 * @param int $deprecated2 2.7.0 code, discount, tax were passed.
+	 * @param string $code
+	 * @param int $discount tax amount.
+	 * @param int $discount_tax amount.
 	 * @return int order item ID
 	 */
-	public function add_coupon( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
-		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'code', '2.7', 'Pass only an array of args' );
-			$args = array(
-				'code'         => $args,
-				'discount'     => $deprecated1,
-				'discount_tax' => $deprecated2,
-			);
-		}
-
-		$args = wp_parse_args( $args, array(
-			'code'         => '',
-			'discount'     => 0,
-			'discount_tax' => 0,
+	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
+		$item = new WC_Order_Item_Coupon( array(
+			'code'         => $code,
+			'discount'     => $discount,
+			'discount_tax' => $discount_tax,
 		) );
-
-		$item = new WC_Order_Item_Coupon( $args );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_coupon' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_coupon', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_id(), $args['code'], $args['discount'], $args['discount_tax'] );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_coupon', array( $this->get_id(), $item->get_id(), $code, $discount, $discount_tax ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add a tax row to the order.
-	 * Order must be saved prior to adding items.
-	 * @since 2.2
 	 * @param array $args
 	 * @param int $deprecated1 2.7.0 tax_rate_id, amount, shipping amount.
 	 * @param int $deprecated2 2.7.0 tax_rate_id, amount, shipping amount.
@@ -1126,7 +1100,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'shipping_tax_total' => $deprecated2,
 			);
 		}
-
 		$args = wp_parse_args( $args, array(
 			'rate_id'            => '',
 			'tax_total'          => 0,
@@ -1135,22 +1108,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'label'              => isset( $args['rate_id'] ) ? WC_Tax::get_rate_label( $args['rate_id'] ) : '',
 			'compound'           => isset( $args['rate_id'] ) ? WC_Tax::is_compound( $args['rate_id'] ) : '',
 		) );
-
 		$item = new WC_Order_Item_Tax( $args );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_tax' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_tax', array( $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add a shipping row to the order.
-	 * Order must be saved prior to adding items.
 	 * @param WC_Shipping_Rate shipping_rate
 	 * @return int order item ID
 	 */
@@ -1162,14 +1129,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'taxes'        => $shipping_rate->taxes,
 			'meta_data'    => $shipping_rate->get_meta_data(),
 		) );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_shipping' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_shipping', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_id(), $shipping_rate );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_shipping', array( $this->get_id(), $item->get_id(), $shipping_rate ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
@@ -1189,17 +1152,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'total' => $fee->tax_data,
 			),
 		) );
-
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_fee' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_fee', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_id(), $fee );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_fee', array( $this->get_id(), $item->get_id(), $fee ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Payment Token Handling
+	|--------------------------------------------------------------------------
+	|
+	| Payment tokens are hashes used to take payments by certain gateways.
+	|
+	*/
 
 	/**
 	 * Add a payment token to an order
