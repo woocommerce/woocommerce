@@ -334,8 +334,7 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
-			$this->customer->load_session();
+			$this->customer = new WC_Customer( get_current_user_id(), true );   // Customer class, handles data such as customer location
 		}
 
 		$this->load_webhooks();

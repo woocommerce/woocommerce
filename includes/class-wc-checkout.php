@@ -317,8 +317,6 @@ class WC_Checkout {
 			// Save the order
 			$order_id = $order->save();
 
-			$customer = new WC_Customer( $this->customer_id );
-
 			// Update user meta
 			$this->update_customer_data();
 
@@ -818,7 +816,6 @@ class WC_Checkout {
 						return $current_user->user_email;
 					}
 				}
-
 			}
 
 			switch ( $input ) {
