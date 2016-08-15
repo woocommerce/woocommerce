@@ -348,6 +348,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_merge(
 			$this->_data,
 			array(
+				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),

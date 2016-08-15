@@ -44,6 +44,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_order';
 
 	/**
+	 * DP for rounding.
+	 *
+	 * @var int
+	 */
+	protected $dp = '2';
+
+	/**
 	 * Initialize orders actions.
 	 */
 	public function __construct() {
@@ -112,6 +119,24 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Expands an order item to get its data.
+	 * @return array
+	 */
+	protected function get_order_item_data( $item ) {
+		$data           = $item->get_data();
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+
+		// Format decimal values
+		foreach ( $format_decimal as $key ) {
+			if ( isset( $data[ $key ] ) ) {
+				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->dp );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Prepare a single order output for response.
 	 *
 	 * @param WP_Post $post Post object.
@@ -121,47 +146,35 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	public function prepare_item_for_response( $post, $request ) {
 		global $wpdb;
 
-		$order = wc_get_order( $post );
-		$dp    = $request['dp'];
+		$this->dp                = $request['dp'];
+		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
+		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
+		$statuses          = wc_get_order_statuses();
+		$order             = wc_get_order( $post );
+		$data              = $order->get_data();
 
-		$data = array(
-			'id'                   => $order->get_id(),
-			'parent_id'            => $order->get_parent_id(),
-			'status'               => $order->get_status(),
-			'order_key'            => $order->get_order_key(),
-			'number'               => $order->get_order_number(),
-			'currency'             => $order->get_currency(),
-			'version'              => $order->get_version(),
-			'prices_include_tax'   => $order->get_prices_include_tax(),
-			'date_created'         => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'date_modified'        => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'customer_id'          => $order->get_user_id(),
-			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
-			'discount_tax'         => wc_format_decimal( $order->get_discount_tax(), $dp ),
-			'shipping_total'       => wc_format_decimal( $order->get_total_shipping(), $dp ),
-			'shipping_tax'         => wc_format_decimal( $order->get_shipping_tax(), $dp ),
-			'cart_tax'             => wc_format_decimal( $order->get_cart_tax(), $dp ),
-			'total'                => wc_format_decimal( $order->get_total(), $dp ),
-			'total_tax'            => wc_format_decimal( $order->get_total_tax(), $dp ),
-			'billing'              => array(),
-			'shipping'             => array(),
-			'payment_method'       => $order->get_payment_method(),
-			'payment_method_title' => $order->get_payment_method_title(),
-			'transaction_id'       => $order->get_transaction_id(),
-			'customer_ip_address'  => $order->get_customer_ip_address(),
-			'customer_user_agent'  => $order->get_customer_user_agent(),
-			'created_via'          => $order->get_created_via(),
-			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
-			'date_paid'            => $order->get_date_paid(),
-			'cart_hash'            => $order->get_cart_hash(),
-			'line_items'           => array(),
-			'tax_lines'            => array(),
-			'shipping_lines'       => array(),
-			'fee_lines'            => array(),
-			'coupon_lines'         => array(),
-			'refunds'              => array(),
-		);
+		// Format decimal values
+		foreach ( $format_decimal as $key ) {
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->dp );
+		}
+
+		// Format date values
+		foreach ( $format_date as $key ) {
+			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+		}
+
+		// Format the order status
+		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
+
+		// Format line items
+		foreach ( $format_line_items as $key ) {
+			$data[ $key ] = array_map( array( $this, 'get_order_item_data' ), $data[ $key ] );
+		}
+
+		// refunds
+
+/*
 
 		// Add addresses.
 		$data['billing']  = $order->get_address( 'billing' );
@@ -203,11 +216,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'variation_id' => (int) $variation_id,
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
-				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
-				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $this->dp ),
+				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $this->dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $this->dp ),
+				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $this->dp ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $this->dp ),
 				'taxes'        => array(),
 				'meta'         => $item_meta,
 			);
@@ -242,8 +255,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'rate_id'            => $tax['rate_id'],
 				'label'              => isset( $tax['label'] ) ? $tax['label'] : $tax['name'],
 				'compound'           => (bool) $tax['compound'],
-				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $dp ),
-				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $dp ),
+				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $this->dp ),
+				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $this->dp ),
 			);
 
 			$data['tax_lines'][] = $tax_line;
@@ -255,15 +268,15 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'id'           => $shipping_item_id,
 				'method_title' => $shipping_item['name'],
 				'method_id'    => $shipping_item['method_id'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
-				'total_tax'    => wc_format_decimal( '', $dp ),
+				'total'        => wc_format_decimal( $shipping_item['cost'], $this->dp ),
+				'total_tax'    => wc_format_decimal( '', $this->dp ),
 				'taxes'        => array(),
 			);
 
 			$shipping_taxes = maybe_unserialize( $shipping_item['taxes'] );
 
 			if ( ! empty( $shipping_taxes ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $dp );
+				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $this->dp );
 
 				foreach ( $shipping_taxes as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(
@@ -283,8 +296,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'name'       => $fee_item['name'],
 				'tax_class'  => ! empty( $fee_item['tax_class'] ) ? $fee_item['tax_class'] : '',
 				'tax_status' => 'taxable',
-				'total'      => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
-				'total_tax'  => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
+				'total'      => wc_format_decimal( $order->get_line_total( $fee_item ), $this->dp ),
+				'total_tax'  => wc_format_decimal( $order->get_line_tax( $fee_item ), $this->dp ),
 				'taxes'      => array(),
 			);
 
@@ -317,8 +330,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$coupon_line = array(
 				'id'           => $coupon_item_id,
 				'code'         => $coupon_item['name'],
-				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
-				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $dp ),
+				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $this->dp ),
+				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $this->dp ),
 			);
 
 			$data['coupon_lines'][] = $coupon_line;
@@ -329,17 +342,21 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$data['refunds'][] = array(
 				'id'     => $refund->id,
 				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $dp ),
+				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $this->dp ),
 			);
 		}
+*/
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
 
-		// Wrap the data in a response object.
+
+
+
+
+
+		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-
 		$response->add_links( $this->prepare_links( $order ) );
 
 		/**
