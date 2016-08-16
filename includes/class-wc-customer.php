@@ -1007,7 +1007,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function read( $id ) {
 		global $wpdb;
 
+		// User object is required.
 		if ( ! $id || ! ( $user_object = get_user_by( 'id', $id ) ) || empty( $user_object->ID ) ) {
+			$this->set_id( 0 );
+			return;
+		}
+
+		// Only users on this site should be read.
+		if ( is_multisite() && ! is_user_member_of_blog( $id ) ) {
 			$this->set_id( 0 );
 			return;
 		}
