@@ -80,6 +80,10 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$this->assertNotEquals( 0, $customer->get_id() );
 		$customer->delete();
+
+		$user_object = get_user_by( 'id', $customer_id );
+		$this->assertFalse( $user_object );
+
 		$customer->read( $customer_id );
 		$this->assertEquals( 0, $customer->get_id() );
 	}
