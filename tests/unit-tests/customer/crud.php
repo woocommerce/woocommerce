@@ -1,11 +1,10 @@
 <?php
-namespace WooCommerce\Tests\Customer;
 
 /**
  * Class CustomerCRUD.
  * @package WooCommerce\Tests\Customer
  */
-class CustomerCRUD extends \WC_Unit_Test_Case {
+class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test creating a new customer.
@@ -13,12 +12,12 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_customer() {
 		$username = 'testusername-' . time();
-		$customer = new \WC_Customer();
+		$customer = new WC_Customer();
 		$customer->set_username( 'testusername-' . time() );
 		$customer->set_password( 'test123' );
 		$customer->set_email( 'test@woo.local' );
 		$customer->create();
-		$wp_user = new \WP_User( $customer->get_id() );
+		$wp_user = new WP_User( $customer->get_id() );
 
 		$this->assertEquals( $username, $customer->get_username() );
 		$this->assertNotEquals( 0, $customer->get_id() );
@@ -30,7 +29,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_update_customer() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertEquals( 'test@woo.local', $customer->get_email() );
 		$this->assertEquals( 'Apt 1', $customer->get_billing_address_2() );
@@ -39,7 +38,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer->set_billing_address_2( 'Apt 5' );
 		$customer->update();
 
-		$customer = new \WC_Customer( $customer_id ); // so we can read fresh copies from the DB
+		$customer = new WC_Customer( $customer_id ); // so we can read fresh copies from the DB
 		$this->assertEquals( 'test@wc.local', $customer->get_email() );
 		$this->assertEquals( 'Justin', $customer->get_first_name() );
 		$this->assertEquals( 'Apt 5', $customer->get_billing_address_2() );
@@ -52,14 +51,14 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_save_customer() {
 		// test save() -> Create
-		$customer = new \WC_Customer();
+		$customer = new WC_Customer();
 		$customer->set_username( 'testusername-' . time() );
 		$customer->set_password( 'test123' );
 		$customer->set_email( 'test@woo.local' );
 		$this->assertEquals( 0, $customer->get_id() );
 		$customer->save();
 		$customer_id = $customer->get_id();
-		$wp_user = new \WP_User( $customer->get_id() );
+		$wp_user = new WP_User( $customer->get_id() );
 
 		$this->assertNotEquals( 0, $customer->get_id() );
 
@@ -68,7 +67,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer->set_email( 'test@wc.local' );
 		$customer->save();
 
-		$customer = new \WC_Customer( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( 'test@wc.local', $customer->get_email() );
 	}
 
@@ -77,10 +76,14 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_delete_customer() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertNotEquals( 0, $customer->get_id() );
 		$customer->delete();
+
+		$user_object = get_user_by( 'id', $customer_id );
+		$this->assertFalse( $user_object );
+
 		$customer->read( $customer_id );
 		$this->assertEquals( 0, $customer->get_id() );
 	}
@@ -91,7 +94,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_read_customer() {
 		$username = 'user-' . time();
-		$customer = new \WC_Customer();
+		$customer = new WC_Customer();
 		$customer->set_username( $username );
 		$customer->set_email( 'test@woo.local' );
 		$customer->set_password( 'hunter2' );
@@ -99,7 +102,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer->set_last_name( 'Bob' );
 		$customer->create();
 		$customer_id = $customer->get_id();
-		$customer_read = new \WC_Customer();
+		$customer_read = new WC_Customer();
 		$customer_read->read( $customer_id );
 
 		$this->assertEquals( $customer_id, $customer_read->get_id() );
@@ -132,7 +135,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 
 		$this->assertEquals( $customer->get_id(), $customer->id );
 		$this->assertEquals( $customer->get_billing_country(), $customer->country );
@@ -172,8 +175,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$time = time();
 		$standard_getters_and_setters = array(
 			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
-			'role' => 'customer', 'last_order_id' => 5, 'last_order_date' => $time, 'orders_count' => 2,
-			'total_spent' => 10.57, 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
+			'role' => 'customer', 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
 			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
 			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
 			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
@@ -181,7 +183,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 			'is_paying_customer' => true
 		);
 
-		$customer = new \WC_Customer;
+		$customer = new WC_Customer;
 		foreach ( $standard_getters_and_setters as $function => $value ) {
 			$customer->{"set_{$function}"}( $value );
 			$this->assertEquals( $value, $customer->{"get_{$function}"}(), $function );
@@ -193,12 +195,13 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_last_order_info() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$order = \WC_Helper_Order::create_order( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
-		$this->assertEquals( $order->get_id(), $customer->get_last_order_id() );
-		$this->assertEquals( $order->get_date_created(), $customer->get_last_order_date() );
+		$last_order = $customer->get_last_order();
+		$this->assertEquals( $order->get_id(), $last_order ? $last_order->get_id() : 0 );
+		$this->assertEquals( $order->get_date_created(), $last_order ? $last_order->get_date_created() : 0 );
 		$order->delete();
 	}
 
@@ -206,14 +209,14 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * Test getting a customer's order count from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_orders_count_read() {
-		$customer = \WC_Helper_Customer::create_customer();
+	public function test_customer_get_order_count_read() {
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		\WC_Helper_Order::create_order( $customer_id );
-		\WC_Helper_Order::create_order( $customer_id );
-		\WC_Helper_Order::create_order( $customer_id );
+		WC_Helper_Order::create_order( $customer_id );
+		WC_Helper_Order::create_order( $customer_id );
+		WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
-		$this->assertEquals( 3, $customer->get_orders_count() );
+		$this->assertEquals( 3, $customer->get_order_count() );
 	}
 
 	/**
@@ -221,9 +224,9 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_total_spent_read() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$order = \WC_Helper_Order::create_order( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
 		$this->assertEquals( 0, $customer->get_total_spent() );
 		$order->update_status( 'wc-completed' );
@@ -237,7 +240,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_avatar_url() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$this->assertContains( 'gravatar.com/avatar', $customer->get_avatar_url() );
 		$this->assertContains( md5( 'test@woo.local' ), $customer->get_avatar_url() );
 	}
@@ -247,9 +250,9 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_date_created_read() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$user = new \WP_User( $customer_id );
+		$user = new WP_User( $customer_id );
 		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created() );
 	}
 
@@ -258,7 +261,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_date_modified_read() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$last = get_user_meta( $customer_id, 'last_update', true );
 		sleep(1);
@@ -275,7 +278,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_taxable_address() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$customer->set_shipping_postcode( '11111' );
 		$customer->set_shipping_city( 'Test' );
@@ -309,7 +312,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_downloadable_products() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertEquals( wc_get_customer_available_downloads( $customer_id ), $customer->get_downloadable_products() );
 	}
@@ -319,7 +322,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_password() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 
 		$user = get_user_by( 'id', $customer_id );
@@ -337,7 +340,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_address_to_base() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer->set_billing_address_to_base();
 		$base = wc_get_customer_default_location();
 		$this->assertEquals( $base['country'], $customer->get_billing_country() );
@@ -351,7 +354,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_shipping_address_to_base() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer->set_shipping_address_to_base();
 		$base = wc_get_customer_default_location();
 		$this->assertEquals( $base['country'], $customer->get_shipping_country() );
@@ -365,7 +368,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_location() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer->set_billing_location( 'US', 'OH', '12345', 'Cleveland' );
 		$this->assertEquals( 'US', $customer->get_billing_country() );
 		$this->assertEquals( 'OH', $customer->get_billing_state() );
@@ -378,7 +381,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_shipping_location() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer->set_shipping_location( 'US', 'OH', '12345', 'Cleveland' );
 		$this->assertEquals( 'US', $customer->get_shipping_country() );
 		$this->assertEquals( 'OH', $customer->get_shipping_state() );
@@ -391,7 +394,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_is_customer_outside_base() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$this->assertTrue( $customer->is_customer_outside_base() );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		$customer->set_billing_address_to_base();
@@ -403,8 +406,8 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_sessions() {
-		$customer = \WC_Helper_Customer::create_customer();
-		$session  = \WC_Helper_Customer::create_mock_customer(); // set into session....
+		$customer = WC_Helper_Customer::create_customer();
+		$session  = WC_Helper_Customer::create_mock_customer(); // set into session....
 
 		$this->assertEquals( '19123', $session->get_billing_postcode() );
 		$this->assertEquals( '123 South Street', $session->get_billing_address() );
@@ -413,11 +416,11 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$session->set_billing_address( '124 South Street' );
 		$session->save_to_session();
 
-		$session = new \WC_Customer( 0, true );
+		$session = new WC_Customer( 0, true );
 		$session->load_session();
 		$this->assertEquals( '124 South Street', $session->get_billing_address() );
 
-		$session = new \WC_Customer( 0, true );
+		$session = new WC_Customer( 0, true );
 		$session->load_session();
 		$session->set_billing_postcode( '32191' );
 		$session->save();
@@ -432,7 +435,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_get_meta() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id  = $customer->get_id();
 		$meta_value = time() . '-custom-value';
 		add_user_meta( $customer_id, 'test_field', $meta_value, true );
@@ -446,7 +449,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_set_meta() {
-		$customer = \WC_Helper_Customer::create_customer();
+		$customer = WC_Helper_Customer::create_customer();
 		$customer_id  = $customer->get_id();
 		$meta_value = time() . '-custom-value';
 		$customer->add_meta_data( 'my-field', $meta_value, true );

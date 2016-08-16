@@ -253,8 +253,7 @@ abstract class WC_Data {
 			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
 				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
 				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
-				AND meta_key NOT LIKE 'wp\_%%'
+				WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
 			", $this->get_id() ) );
 
 			if ( $raw_meta_data ) {
@@ -264,7 +263,7 @@ abstract class WC_Data {
 					}
 					$this->_meta_data[] = (object) array(
 						'key'     => $meta->meta_key,
-						'value'   => $meta->meta_value,
+						'value'   => maybe_unserialize( $meta->meta_value ),
 						'meta_id' => $meta->{ $db_info['meta_id_field'] },
 					);
 				}

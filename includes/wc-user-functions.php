@@ -275,7 +275,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->get_user_id() || empty( $order->get_user_id() ) ) {
+				if ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
