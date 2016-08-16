@@ -135,12 +135,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		// Format decimal values
 		foreach ( $format_decimal as $key ) {
 			if ( isset( $data[ $key ] ) ) {
-				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->dp );
+				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 			}
 		}
-
-		// Remove order id
-		unset( $data['order_id'] );
 
 		// Format meta data
 		$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
@@ -151,7 +148,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$item_meta[ $key ]->label = $values->display_key;
 		}
 
-		$data['meta'] = $item_meta;
+		$data['meta'] = array_values( $item_meta );
 
 		// Format taxes
 		if ( ! empty( $data['taxes']['total'] ) ) {
@@ -165,7 +162,14 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				);
 			}
 			$data['taxes'] = $taxes;
+		} else {
+			$data['taxes'] = array();
 		}
+
+		// Remove props we don't want to expose.
+		unset( $data['order_id'] );
+		unset( $data['type'] );
+		unset( $data['meta_data'] );
 
 		return $data;
 	}
@@ -178,20 +182,17 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$this->request     = $request;
-		$this->dp          = $request['dp'];
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
-		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 		$statuses          = wc_get_order_statuses();
 		$order             = wc_get_order( $post );
 		$data              = $order->get_data();
+		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
+		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Format decimal values
 		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->dp );
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 		}
 
 		// Format date values
@@ -201,10 +202,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		// Format the order status
 		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
-
-		// Format meta data
-		$data['meta']  = $data['meta_data'];
-		unset( $data['meta_data'] );
 
 		// Format line items
 		foreach ( $format_line_items as $key ) {
@@ -216,140 +213,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$data['refunds'][] = array(
 				'id'     => $refund->id,
 				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $this->dp ),
+				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $this->request['dp'] ),
 			);
 		}
-/*
-
-
-
-			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
-			if ( isset( $item_line_taxes['total'] ) ) {
-				$line_tax = array();
-
-				foreach ( $item_line_taxes['total'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ] = array(
-						'id'       => $tax_rate_id,
-						'total'    => $tax,
-						'subtotal' => '',
-					);
-				}
-
-				foreach ( $item_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ]['subtotal'] = $tax;
-				}
-
-				$line_item['taxes'] = array_values( $line_tax );
-			}
-
-			$data['line_items'][] = $line_item;
-		}
-
-		// Add taxes.
-		foreach ( $order->get_items( 'tax' ) as $key => $tax ) {
-			$tax_line = array(
-				'id'                 => $key,
-				'rate_code'          => $tax['name'],
-				'rate_id'            => $tax['rate_id'],
-				'label'              => isset( $tax['label'] ) ? $tax['label'] : $tax['name'],
-				'compound'           => (bool) $tax['compound'],
-				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $this->dp ),
-				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $this->dp ),
-			);
-
-			$data['tax_lines'][] = $tax_line;
-		}
-
-		// Add shipping.
-		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-			$shipping_line = array(
-				'id'           => $shipping_item_id,
-				'method_title' => $shipping_item['name'],
-				'method_id'    => $shipping_item['method_id'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], $this->dp ),
-				'total_tax'    => wc_format_decimal( '', $this->dp ),
-				'taxes'        => array(),
-			);
-
-			$shipping_taxes = maybe_unserialize( $shipping_item['taxes'] );
-
-			if ( ! empty( $shipping_taxes ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $this->dp );
-
-				foreach ( $shipping_taxes as $tax_rate_id => $tax ) {
-					$shipping_line['taxes'][] = array(
-						'id'       => $tax_rate_id,
-						'total'    => $tax,
-					);
-				}
-			}
-
-			$data['shipping_lines'][] = $shipping_line;
-		}
-
-		// Add fees.
-		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
-			$fee_line = array(
-				'id'         => $fee_item_id,
-				'name'       => $fee_item['name'],
-				'tax_class'  => ! empty( $fee_item['tax_class'] ) ? $fee_item['tax_class'] : '',
-				'tax_status' => 'taxable',
-				'total'      => wc_format_decimal( $order->get_line_total( $fee_item ), $this->dp ),
-				'total_tax'  => wc_format_decimal( $order->get_line_tax( $fee_item ), $this->dp ),
-				'taxes'      => array(),
-			);
-
-			$fee_line_taxes = maybe_unserialize( $fee_item['line_tax_data'] );
-			if ( isset( $fee_line_taxes['total'] ) ) {
-				$fee_tax = array();
-
-				foreach ( $fee_line_taxes['total'] as $tax_rate_id => $tax ) {
-					$fee_tax[ $tax_rate_id ] = array(
-						'id'       => $tax_rate_id,
-						'total'    => $tax,
-						'subtotal' => '',
-					);
-				}
-
-				if ( isset( $fee_line_taxes['subtotal'] ) ) {
-					foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-						$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
-					}
-				}
-
-				$fee_line['taxes'] = array_values( $fee_tax );
-			}
-
-			$data['fee_lines'][] = $fee_line;
-		}
-
-		// Add coupons.
-		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
-			$coupon_line = array(
-				'id'           => $coupon_item_id,
-				'code'         => $coupon_item['name'],
-				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $this->dp ),
-				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $this->dp ),
-			);
-
-			$data['coupon_lines'][] = $coupon_line;
-		}
-
-		// Add refunds.
-		foreach ( $order->get_refunds() as $refund ) {
-			$data['refunds'][] = array(
-				'id'     => $refund->id,
-				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $this->dp ),
-			);
-		}
-*/
-
-
-
-
-
-
 
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
