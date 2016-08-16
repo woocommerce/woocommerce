@@ -991,10 +991,10 @@ class WC_Customer extends WC_Legacy_Customer {
 			update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
 			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
 			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
-			$this->set_date_modified( time() );
 			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
 			$wp_user = new WP_User( $this->get_id() );
 			$this->set_date_created( strtotime( $wp_user->user_registered ) );
+			$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
 			$this->read_meta_data();
 		}
 	}
@@ -1074,11 +1074,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
 		update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
 		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-		$this->set_date_modified( time() );
-		update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
 		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
 		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
+		$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
 		$this->save_meta_data();
 	}
 
