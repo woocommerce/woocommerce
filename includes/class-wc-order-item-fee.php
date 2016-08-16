@@ -19,14 +19,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'name'          => '',
-		'tax_class'     => '',
-		'tax_status'    => 'taxable',
-		'total'         => '',
-		'total_tax'     => '',
-		'taxes'         => array(
+		'order_id'   => 0,
+		'id'         => 0,
+		'name'       => '',
+		'tax_class'  => '',
+		'tax_status' => 'taxable',
+		'total'      => '',
+		'total_tax'  => '',
+		'taxes'      => array(
 			'total' => array()
 		)
 	);

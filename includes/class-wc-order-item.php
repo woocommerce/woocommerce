@@ -89,10 +89,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get qty.
+	 * Get quantity.
 	 * @return int
 	 */
-	public function get_qty() {
+	public function get_quantity() {
 		return 1;
 	}
 

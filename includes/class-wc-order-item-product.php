@@ -19,18 +19,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'name'          => '',
-		'product_id'    => 0,
-		'variation_id'  => 0,
-		'qty'           => 0,
-		'tax_class'     => '',
-		'subtotal'      => 0,
-		'subtotal_tax'  => 0,
-		'total'         => 0,
-		'total_tax'     => 0,
-		'taxes'         => array(
+		'order_id'     => 0,
+		'id'           => 0,
+		'name'         => '',
+		'product_id'   => 0,
+		'variation_id' => 0,
+		'quantity'     => 0,
+		'tax_class'    => '',
+		'subtotal'     => 0,
+		'subtotal_tax' => 0,
+		'total'        => 0,
+		'total_tax'    => 0,
+		'taxes'        => array(
 			'subtotal' => array(),
 			'total'    => array()
 		),
@@ -98,7 +98,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $this->get_id() ) {
 			$this->set_product_id( get_metadata( 'order_item', $this->get_id(), '_product_id', true ) );
 			$this->set_variation_id( get_metadata( 'order_item', $this->get_id(), '_variation_id', true ) );
-			$this->set_qty( get_metadata( 'order_item', $this->get_id(), '_qty', true ) );
+			$this->set_quantity( get_metadata( 'order_item', $this->get_id(), '_qty', true ) );
 			$this->set_tax_class( get_metadata( 'order_item', $this->get_id(), '_tax_class', true ) );
 			$this->set_subtotal( get_metadata( 'order_item', $this->get_id(), '_line_subtotal', true ) );
 			$this->set_subtotal_tax( get_metadata( 'order_item', $this->get_id(), '_line_subtotal_tax', true ) );
@@ -117,7 +117,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $this->get_id() ) {
 			wc_update_order_item_meta( $this->get_id(), '_product_id', $this->get_product_id() );
 			wc_update_order_item_meta( $this->get_id(), '_variation_id', $this->get_variation_id() );
-			wc_update_order_item_meta( $this->get_id(), '_qty', $this->get_qty() );
+			wc_update_order_item_meta( $this->get_id(), '_qty', $this->get_quantity() );
 			wc_update_order_item_meta( $this->get_id(), '_tax_class', $this->get_tax_class() );
 			wc_update_order_item_meta( $this->get_id(), '_line_subtotal', $this->get_subtotal() );
 			wc_update_order_item_meta( $this->get_id(), '_line_subtotal_tax', $this->get_subtotal_tax() );
@@ -217,8 +217,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * Set meta data for backordered products.
 	 */
 	public function set_backorder_meta() {
-		if ( $this->get_product()->backorders_require_notification() && $this->get_product()->is_on_backorder( $this->get_qty() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_qty() - max( 0, $this->get_product()->get_total_stock() ), true );
+		if ( $this->get_product()->backorders_require_notification() && $this->get_product()->is_on_backorder( $this->get_quantity() ) ) {
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $this->get_product()->get_total_stock() ), true );
 		}
 	}
 
@@ -229,11 +229,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	*/
 
 	/**
-	 * Set qty.
+	 * Set quantity.
 	 * @param int $value
 	 */
-	public function set_qty( $value ) {
-		$this->_data['qty'] = wc_stock_amount( $value );
+	public function set_quantity( $value ) {
+		$this->_data['quantity'] = wc_stock_amount( $value );
 	}
 
 	/**
@@ -364,11 +364,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get qty.
+	 * Get quantity.
 	 * @return int
 	 */
-	public function get_qty() {
-		return wc_stock_amount( $this->_data['qty'] );
+	public function get_quantity() {
+		return wc_stock_amount( $this->_data['quantity'] );
 	}
 
 	/**
