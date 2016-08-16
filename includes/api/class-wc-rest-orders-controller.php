@@ -51,6 +51,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected $dp = '2';
 
 	/**
+	 * Stores the request.
+	 * @var array
+	 */
+	protected $request = array();
+
+	/**
 	 * Initialize orders actions.
 	 */
 	public function __construct() {
@@ -133,6 +139,20 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
+		// Remove order id
+		unset( $data['order_id'] );
+
+		// Format meta data
+		$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
+		$item_meta  = $item->get_formatted_meta_data( $hideprefix );
+
+		foreach ( $item_meta as $key => $values ) {
+			// Label was used in previous version of API - set it here
+			$item_meta[ $key ]->label = $values->display_key;
+		}
+
+		$data['meta'] = $item_meta;
+
 		return $data;
 	}
 
@@ -146,7 +166,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	public function prepare_item_for_response( $post, $request ) {
 		global $wpdb;
 
-		$this->dp                = $request['dp'];
+		$this->request     = $request;
+		$this->dp          = $request['dp'];
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
@@ -167,13 +188,23 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		// Format the order status
 		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
 
+		// Format meta data
+		$data['meta']  = $data['meta_data'];
+		unset( $data['meta_data'] );
+
 		// Format line items
 		foreach ( $format_line_items as $key ) {
 			$data[ $key ] = array_map( array( $this, 'get_order_item_data' ), $data[ $key ] );
 		}
 
 		// refunds
-
+		foreach ( $order->get_refunds() as $refund ) {
+			$data['refunds'][] = array(
+				'id'     => $refund->id,
+				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
+				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $this->dp ),
+			);
+		}
 /*
 
 		// Add addresses.
@@ -224,6 +255,25 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'taxes'        => array(),
 				'meta'         => $item_meta,
 			);
+
+	sku
+	price
+
+
+
+			        "product_id": 0,
+			        "variation_id": 0,
+			        "qty": 0,
+			        "tax_class": "",
+			        "subtotal": "0.00",
+			        "subtotal_tax": "0.00",
+			        "total": "0.00",
+			        "total_tax": "0.00",
+			        "taxes": {
+			          "subtotal": [],
+			          "total": []
+			        },
+			        "meta_data":
 
 			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
 			if ( isset( $item_line_taxes['total'] ) ) {

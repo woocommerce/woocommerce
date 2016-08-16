@@ -73,8 +73,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		foreach ( $data as $key => $value ) {
 			if ( is_callable( array( $this, "set_$key" ) ) ) {
 				$this->{"set_$key"}( $value );
-			} else {
-				$this->_data[ $key ] = $value;
 			}
 		}
 	}
@@ -235,7 +233,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( is_numeric( $item ) && ! empty( $item ) ) {
 			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
-		} elseif ( ! empty( $item->id ) ) {
+		} elseif ( ! empty( $item->order_item_id ) ) {
 			$data = $item;
 		} else {
 			$data = false;
