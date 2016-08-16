@@ -663,13 +663,11 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 			break;
 		case 'BR' :
+		case 'PL' :
 			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
 			break;
 		case 'JP' :
 			$postcode = trim( substr_replace( $postcode, '-', 3, 0 ) );
-			break;
-		case 'PL' :
-			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
 			break;
 		case 'PT' :
 			$postcode = trim( substr_replace( $postcode, '-', 4, 0 ) );
