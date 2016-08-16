@@ -22,10 +22,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'name'          => '',
-		'type'          => '',
+		'order_id' => 0,
+		'id'       => 0, // order_item_id
+		'name'     => '',
+		'type'     => '',
 	);
 
 	/**
@@ -118,7 +118,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_id() {
-		return $this->get_order_item_id();
+		return absint( $this->_data['id'] );
 	}
 
 	/**
@@ -127,14 +127,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function get_order_id() {
 		return absint( $this->_data['order_id'] );
-	}
-
-	/**
-	 * Get order item ID this meta belongs to.
-	 * @return int
-	 */
-	protected function get_order_item_id() {
-		return absint( $this->_data['order_item_id'] );
 	}
 
 	/**
@@ -164,7 +156,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int $value
 	 */
 	public function set_id( $value ) {
-		$this->set_order_item_id( $value );
+		$this->_data['id'] = absint( $value );
 	}
 
 	/**
@@ -173,14 +165,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function set_order_id( $value ) {
 		$this->_data['order_id'] = absint( $value );
-	}
-
-	/**
-	 * Set order item ID.
-	 * @param int $value
-	 */
-	protected function set_order_item_id( $value ) {
-		$this->_data['order_item_id'] = absint( $value );
 	}
 
 	/**
@@ -251,7 +235,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( is_numeric( $item ) && ! empty( $item ) ) {
 			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
-		} elseif ( ! empty( $item->order_item_id ) ) {
+		} elseif ( ! empty( $item->id ) ) {
 			$data = $item;
 		} else {
 			$data = false;
