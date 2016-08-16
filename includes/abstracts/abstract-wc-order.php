@@ -34,7 +34,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
 		'version'            => '',
@@ -195,7 +194,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
-		$this->set_order_type( $post_object->post_type );
 		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
 		$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
 		$this->set_currency( get_post_meta( $this->get_id(), '_order_currency', true ) );
@@ -419,14 +417,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_prices_include_tax() {
 		return $this->_data['prices_include_tax'];
-	}
-
-	/**
-	 * Get Order Type
-	 * @return string
-	 */
-	public function get_order_type() {
-		return $this->_data['type'];
 	}
 
 	/**
@@ -672,14 +662,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'to'   => $new_status
 		);
 	 }
-
-	/**
-	 * Set Order Type
-	 * @param string $value
-	 */
-	public function set_order_type( $value ) {
-		$this->_data['type'] = $value;
-	}
 
 	/**
 	 * Set order_key.
