@@ -153,6 +153,20 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		$data['meta'] = $item_meta;
 
+		// Format taxes
+		if ( ! empty( $data['taxes']['total'] ) ) {
+			$taxes = array();
+
+			foreach ( $data['taxes']['total'] as $tax_rate_id => $tax ) {
+				$taxes[] = array(
+					'id'       => $tax_rate_id,
+					'total'    => $tax,
+					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
+				);
+			}
+			$data['taxes'] = $taxes;
+		}
+
 		return $data;
 	}
 
@@ -194,10 +208,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		// Format line items
 		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_map( array( $this, 'get_order_item_data' ), $data[ $key ] );
+			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
-		// refunds
+		// Refunds
 		foreach ( $order->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->id,
@@ -207,73 +221,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 /*
 
-		// Add addresses.
-		$data['billing']  = $order->get_address( 'billing' );
-		$data['shipping'] = $order->get_address( 'shipping' );
 
-		// Add line items.
-		foreach ( $order->get_items() as $item_id => $item ) {
-			$product      = $order->get_product_from_item( $item );
-			$product_id   = 0;
-			$variation_id = 0;
-			$product_sku  = null;
-
-			// Check if the product exists.
-			if ( is_object( $product ) ) {
-				$product_id   = $product->id;
-				$variation_id = $product->variation_id;
-				$product_sku  = $product->get_sku();
-			}
-
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
-			$item_meta = array();
-
-			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
-
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
-				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
-				);
-			}
-
-			$line_item = array(
-				'id'           => $item_id,
-				'name'         => $item['name'],
-				'sku'          => $product_sku,
-				'product_id'   => (int) $product_id,
-				'variation_id' => (int) $variation_id,
-				'quantity'     => wc_stock_amount( $item['qty'] ),
-				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
-				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $this->dp ),
-				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $this->dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $this->dp ),
-				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $this->dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $this->dp ),
-				'taxes'        => array(),
-				'meta'         => $item_meta,
-			);
-
-	sku
-	price
-
-
-
-			        "product_id": 0,
-			        "variation_id": 0,
-			        "qty": 0,
-			        "tax_class": "",
-			        "subtotal": "0.00",
-			        "subtotal_tax": "0.00",
-			        "total": "0.00",
-			        "total_tax": "0.00",
-			        "taxes": {
-			          "subtotal": [],
-			          "total": []
-			        },
-			        "meta_data":
 
 			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
 			if ( isset( $item_line_taxes['total'] ) ) {
