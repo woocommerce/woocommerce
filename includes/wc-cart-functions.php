@@ -85,13 +85,14 @@ function wc_get_raw_referer() {
  * @access public
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
+ * @param bool $return Return message rather than add it.
  */
-function wc_add_to_cart_message( $products, $show_qty = false ) {
+function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
 	$count  = 0;
 
 	if ( ! is_array( $products ) ) {
-		$products = array( $products );
+		$products = array( $products => 1 );
 		$show_qty = false;
 	}
 
@@ -115,7 +116,13 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
+	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+
+	if ( $return ) {
+		return $message;
+	} else {
+		wc_add_notice( $message );
+	}
 }
 
 /**
@@ -155,7 +162,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order->order_key === $order_key ) {
+			if ( $order->get_order_key() === $order_key ) {
 				WC()->cart->empty_cart();
 			}
 		}
@@ -164,7 +171,7 @@ function wc_clear_cart_after_payment() {
 	if ( WC()->session->order_awaiting_payment > 0 ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
-		if ( $order && $order->id > 0 ) {
+		if ( $order && $order->get_id() > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
 			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
 				WC()->cart->empty_cart();
@@ -235,7 +242,7 @@ function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
-	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
 
 	if ( $echo ) {
 		echo $label;
@@ -257,7 +264,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->code, WC()->cart->display_cart_ex_tax ) ) {
+	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
 		$discount_html = '-' . wc_price( $amount );
 	} else {
 		$discount_html = '';
@@ -265,13 +272,13 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value[] = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_html, $coupon );
 
-	if ( $coupon->enable_free_shipping() ) {
+	if ( $coupon->get_free_shipping() ) {
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
 	// get rid of empty array elements
 	$value = array_filter( $value );
-	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->code ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->get_code() ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
@@ -297,7 +304,7 @@ function wc_cart_totals_order_total_html() {
 
 		if ( ! empty( $tax_string_array ) ) {
 			$taxable_address = WC()->customer->get_taxable_address();
-			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
+			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->get_calculated_shipping()
 				? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 				: '';
 			$value .= '<small class="includes_tax">' . sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) . $estimated_text ) . '</small>';

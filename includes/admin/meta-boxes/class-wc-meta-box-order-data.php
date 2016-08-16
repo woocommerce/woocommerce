@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
+		$payment_method = $order->get_payment_method() ? $order->get_payment_method() : '';
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -180,8 +180,8 @@ class WC_Meta_Box_Order_Data {
 							}
 						}
 
-						if ( $order->paid_date ) {
-							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), strtotime( $order->paid_date ) ), date_i18n( get_option( 'time_format' ), strtotime( $order->paid_date ) ) );
+						if ( $order->get_date_paid() ) {
+							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
 						}
 
 						echo '. ';
@@ -219,10 +219,10 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( ! empty( $order->customer_user ) ) {
+								if ( $order->get_user_id() ) {
 									$args = array( 'post_status' => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->customer_user )
+										'_customer_user' => absint( $order->get_user_id() )
 									);
 									printf( '<a href="%s">%s &rarr;</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -233,8 +233,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( ! empty( $order->customer_user ) ) {
-								$user_id     = absint( $order->customer_user );
+							if ( $order->get_user_id() ) {
+								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
 								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 							}
@@ -266,8 +266,8 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'billing_' . $key;
 
-									if ( $order->$field_name ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 									}
 								}
 
@@ -352,8 +352,8 @@ class WC_Meta_Box_Order_Data {
 
 										$field_name = 'shipping_' . $key;
 
-										if ( ! empty( $order->$field_name ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 										}
 									}
 								}

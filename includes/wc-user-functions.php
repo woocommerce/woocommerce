@@ -176,17 +176,18 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  * @param int $order_id
  */
 function wc_paying_customer( $order_id ) {
-	$order = wc_get_order( $order_id );
+	$order       = wc_get_order( $order_id );
+	$customer_id = $order->get_customer_id();
 
-	if ( $order->user_id > 0 && 'refund' !== $order->order_type ) {
-		update_user_meta( $order->user_id, 'paying_customer', 1 );
+	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
+		update_user_meta( $customer_id, 'paying_customer', 1 );
 
-		$old_spent = absint( get_user_meta( $order->user_id, '_money_spent', true ) );
-		update_user_meta( $order->user_id, '_money_spent', $old_spent + $order->order_total );
+		$old_spent = absint( get_user_meta( $customer_id, '_money_spent', true ) );
+		update_user_meta( $customer_id, '_money_spent', $old_spent + $order->get_total( true ) );
 	}
-	if ( $order->user_id > 0 && 'simple' === $order->order_type ) {
-		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
-		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
+	if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
+		$old_count = absint( get_user_meta( $customer_id, '_order_count', true ) );
+		update_user_meta( $customer_id, '_order_count', $old_count + 1 );
 	}
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
@@ -258,7 +259,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->user_id ) {
+				if ( $order && $user_id == $order->get_user_id() ) {
 					$allcaps['view_order'] = true;
 				}
 			break;
@@ -274,7 +275,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
+				if ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
@@ -282,7 +283,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['order_again'] = true;
 				}
 			break;
@@ -290,7 +291,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
 				}
 			break;
@@ -401,7 +402,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
-			if ( ! $order || $order->id != $result->order_id ) {
+			if ( ! $order || $order->get_id() != $result->order_id ) {
 				// new order
 				$order    = wc_get_order( $result->order_id );
 				$_product = null;
@@ -446,7 +447,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
-						'email'         => $result->user_email,
+						'email'         => urlencode( $result->user_email ),
 						'key'           => $result->download_id
 					),
 					home_url( '/' )
@@ -454,8 +455,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'download_id'         => $result->download_id,
 				'product_id'          => $product_id,
 				'download_name'       => $download_name,
-				'order_id'            => $order->id,
-				'order_key'           => $order->order_key,
+				'order_id'            => $order->get_id(),
+				'order_key'           => $order->get_order_key(),
 				'downloads_remaining' => $result->downloads_remaining,
 				'access_expires' 	  => $result->access_expires,
 				'file'                => $download_file

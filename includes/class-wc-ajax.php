@@ -310,34 +310,34 @@ class WC_AJAX {
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
 
 		if ( isset( $_POST['country'] ) ) {
-			WC()->customer->set_country( $_POST['country'] );
+			WC()->customer->set_billing_country( $_POST['country'] );
 		}
 
 		if ( isset( $_POST['state'] ) ) {
-			WC()->customer->set_state( $_POST['state'] );
+			WC()->customer->set_billing_state( $_POST['state'] );
 		}
 
 		if ( isset( $_POST['postcode'] ) ) {
-			WC()->customer->set_postcode( $_POST['postcode'] );
+			WC()->customer->set_billing_postcode( $_POST['postcode'] );
 		}
 
 		if ( isset( $_POST['city'] ) ) {
-			WC()->customer->set_city( $_POST['city'] );
+			WC()->customer->set_billing_city( $_POST['city'] );
 		}
 
 		if ( isset( $_POST['address'] ) ) {
-			WC()->customer->set_address( $_POST['address'] );
+			WC()->customer->set_billing_address( $_POST['address'] );
 		}
 
 		if ( isset( $_POST['address_2'] ) ) {
-			WC()->customer->set_address_2( $_POST['address_2'] );
+			WC()->customer->set_billing_address_2( $_POST['address_2'] );
 		}
 
 		if ( wc_ship_to_billing_address_only() ) {
 
 			if ( ! empty( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
-				WC()->customer->calculated_shipping( true );
+				WC()->customer->set_calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['state'] ) ) {
@@ -363,7 +363,7 @@ class WC_AJAX {
 
 			if ( ! empty( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
-				WC()->customer->calculated_shipping( true );
+				WC()->customer->set_calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['s_state'] ) ) {
@@ -387,6 +387,7 @@ class WC_AJAX {
 			}
 		}
 
+		WC()->customer->save();
 		WC()->cart->calculate_totals();
 
 		// Get order review fragment
@@ -1061,7 +1062,7 @@ class WC_AJAX {
 			$product = wc_get_product( $product_id );
 			$files   = $product->get_files();
 
-			if ( ! $order->billing_email ) {
+			if ( ! $order->get_billing_email() ) {
 				die();
 			}
 
@@ -1147,64 +1148,16 @@ class WC_AJAX {
 			die();
 		}
 
-		$_product    = wc_get_product( $post->ID );
+		$product     = wc_get_product( $post->ID );
 		$order       = wc_get_order( $order_id );
 		$order_taxes = $order->get_taxes();
 		$class       = 'new_row';
+		$item_id     = $order->add_product( $product );
+		$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 
-		// Set values
-		$item = array();
-
-		$item['product_id']        = $_product->id;
-		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
-		$item['variation_data']    = $item['variation_id'] ? $_product->get_variation_attributes() : '';
-		$item['name']              = $_product->get_title();
-		$item['tax_class']         = $_product->get_tax_class();
-		$item['qty']               = 1;
-		$item['line_subtotal']     = wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_subtotal_tax'] = '';
-		$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_tax']          = '';
-		$item['type']              = 'line_item';
-
-		// Add line item
-		$item_id = wc_add_order_item( $order_id, array(
-			'order_item_name' 		=> $item['name'],
-			'order_item_type' 		=> 'line_item'
-		) );
-
-		// Add line item meta
-		if ( $item_id ) {
-			wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
-			wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
-			wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
-			wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
-			wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
-			wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
-			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
-			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
-
-			// Since 2.2
-			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
-
-			// Store variation data in meta
-			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
-				foreach ( $item['variation_data'] as $key => $value ) {
-					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
-				}
-			}
-
-			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-		}
-
-		$item['item_meta']       = $order->get_item_meta( $item_id );
-		$item['item_meta_array'] = $order->get_item_meta_array( $item_id );
-		$item                    = $order->expand_item_meta( $item );
-		$item                    = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 
 		include( 'admin/meta-boxes/views/html-order-item.php' );
-
-		// Quit out
 		die();
 	}
 
@@ -1255,11 +1208,11 @@ class WC_AJAX {
 		$order            = wc_get_order( $order_id );
 		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
-		$item             = array();
 
 		// Add new shipping
-		$shipping        = new WC_Shipping_Rate();
-		$item_id         = $order->add_shipping( $shipping );
+		$shipping = new WC_Shipping_Rate();
+		$item_id  = $order->add_shipping( $shipping );
+		$item     = $order->get_item( $item_id );
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
@@ -1366,8 +1319,14 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
+					} else {
+						$note = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
@@ -1407,8 +1366,14 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock increased from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
+					} else {
+						$note = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -2221,8 +2186,8 @@ class WC_AJAX {
 				if ( WC()->payment_gateways() ) {
 					$payment_gateways = WC()->payment_gateways->payment_gateways();
 				}
-				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount, $refund_reason );
+				if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
+					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund_amount, $refund_reason );
 
 					do_action( 'woocommerce_refund_processed', $refund, $result );
 

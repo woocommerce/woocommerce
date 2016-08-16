@@ -191,7 +191,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -484,12 +484,12 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
 			'last_order'       => array(
-				'id'   => is_object( $last_order ) ? $last_order->id : null,
+				'id'   => is_object( $last_order ) ? $last_order->get_id() : null,
 				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( $last_order->post->post_date_gmt ) : null
 			),
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
-			'avatar_url'       => wc_get_customer_avatar_url( $customer->customer_email ),
+			'avatar_url'       => wc_get_customer_avatar_url( $customer->user_email ),
 			'billing'          => array(
 				'first_name' => $customer->billing_first_name,
 				'last_name'  => $customer->billing_last_name,

@@ -146,7 +146,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
-			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
+			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => (int) $customer->_order_count,
 			'total_spent'      => wc_format_decimal( $customer->_money_spent, 2 ),
@@ -359,43 +359,43 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function add_customer_data( $order_data, $order ) {
 
-		if ( 0 == $order->customer_user ) {
+		if ( 0 == $order->get_user_id() ) {
 
 			// add customer data from order
 			$order_data['customer'] = array(
 				'id'               => 0,
-				'email'            => $order->billing_email,
-				'first_name'       => $order->billing_first_name,
-				'last_name'        => $order->billing_last_name,
+				'email'            => $order->get_billing_email(),
+				'first_name'       => $order->get_billing_first_name(),
+				'last_name'        => $order->get_billing_last_name(),
 				'billing_address'  => array(
-					'first_name' => $order->billing_first_name,
-					'last_name'  => $order->billing_last_name,
-					'company'    => $order->billing_company,
-					'address_1'  => $order->billing_address_1,
-					'address_2'  => $order->billing_address_2,
-					'city'       => $order->billing_city,
-					'state'      => $order->billing_state,
-					'postcode'   => $order->billing_postcode,
-					'country'    => $order->billing_country,
-					'email'      => $order->billing_email,
-					'phone'      => $order->billing_phone,
+					'first_name' => $order->get_billing_first_name(),
+					'last_name'  => $order->get_billing_last_name(),
+					'company'    => $order->get_billing_company(),
+					'address_1'  => $order->get_billing_address_1(),
+					'address_2'  => $order->get_billing_address_2(),
+					'city'       => $order->get_billing_city(),
+					'state'      => $order->get_billing_state(),
+					'postcode'   => $order->get_billing_postcode(),
+					'country'    => $order->get_billing_country(),
+					'email'      => $order->get_billing_email(),
+					'phone'      => $order->get_billing_phone(),
 				),
 				'shipping_address' => array(
-					'first_name' => $order->shipping_first_name,
-					'last_name'  => $order->shipping_last_name,
-					'company'    => $order->shipping_company,
-					'address_1'  => $order->shipping_address_1,
-					'address_2'  => $order->shipping_address_2,
-					'city'       => $order->shipping_city,
-					'state'      => $order->shipping_state,
-					'postcode'   => $order->shipping_postcode,
-					'country'    => $order->shipping_country,
+					'first_name' => $order->get_shipping_first_name(),
+					'last_name'  => $order->get_shipping_last_name(),
+					'company'    => $order->get_shipping_company(),
+					'address_1'  => $order->get_shipping_address_1(),
+					'address_2'  => $order->get_shipping_address_2(),
+					'city'       => $order->get_shipping_city(),
+					'state'      => $order->get_shipping_state(),
+					'postcode'   => $order->get_shipping_postcode(),
+					'country'    => $order->get_shipping_country(),
 				),
 			);
 
 		} else {
 
-			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
+			$order_data['customer'] = current( $this->get_customer( $order->get_user_id() ) );
 		}
 
 		return $order_data;

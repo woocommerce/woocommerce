@@ -93,8 +93,8 @@ class WC_Emails {
 	 * @internal param array $args (default: array())
 	 */
 	public static function send_transactional_email() {
-		self::instance();
 		$args = func_get_args();
+		self::instance();
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
@@ -318,7 +318,7 @@ class WC_Emails {
 				'@type'            => 'Offer',
 				'itemOffered'      => $item_offered,
 				'price'            => $order->get_line_subtotal( $item ),
-				'priceCurrency'    => $order->get_order_currency(),
+				'priceCurrency'    => $order->get_currency(),
 				'eligibleQuantity' => (object) array(
 					'@type' => 'QuantitativeValue',
 					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
@@ -337,7 +337,7 @@ class WC_Emails {
 				'name'  => get_bloginfo( 'name' ),
 			),
 			'orderNumber'    => strval( $order->get_order_number() ),
-			'priceCurrency'  => $order->get_order_currency(),
+			'priceCurrency'  => $order->get_currency(),
 			'price'          => $order->get_total(),
 			'acceptedOffer'  => $accepted_offers,
 			'url'            => $order->get_view_order_url(),
@@ -370,7 +370,7 @@ class WC_Emails {
 		if ( $sent_to_admin ) {
 			$markup['potentialAction'] = (object) array(
 				'@type'  => 'ViewAction',
-				'target' => admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ),
+				'target' => admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ),
 			);
 		}
 
@@ -405,7 +405,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) )
 				);
 			}
 		}
@@ -451,24 +451,24 @@ class WC_Emails {
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
 
-		if ( $order->customer_note ) {
+		if ( $order->get_customer_note() ) {
 			$fields['customer_note'] = array(
 				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->customer_note )
+				'value' => wptexturize( $order->get_customer_note() )
 			);
 		}
 
-		if ( $order->billing_email ) {
+		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_email )
+				'value' => wptexturize( $order->get_billing_email() )
 			);
 	    }
 
-	    if ( $order->billing_phone ) {
+	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Tel', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_phone )
+				'value' => wptexturize( $order->get_billing_phone() )
 			);
 	    }
 

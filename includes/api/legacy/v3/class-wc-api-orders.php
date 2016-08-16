@@ -159,14 +159,14 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		$order_data = array(
-			'id'                        => $order->id,
+			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'order_key'                 => $order->order_key,
+			'order_key'                 => $order->get_order_key(),
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->get_status(),
-			'currency'                  => $order->get_order_currency(),
+			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
 			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
@@ -177,37 +177,37 @@ class WC_API_Orders extends WC_API_Resource {
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
-				'method_id'    => $order->payment_method,
-				'method_title' => $order->payment_method_title,
-				'paid'         => isset( $order->paid_date ),
+				'method_id'    => $order->get_payment_method(),
+				'method_title' => $order->get_payment_method_title(),
+				'paid'         => 0 < $order->get_date_paid(),
 			),
 			'billing_address' => array(
-				'first_name' => $order->billing_first_name,
-				'last_name'  => $order->billing_last_name,
-				'company'    => $order->billing_company,
-				'address_1'  => $order->billing_address_1,
-				'address_2'  => $order->billing_address_2,
-				'city'       => $order->billing_city,
-				'state'      => $order->billing_state,
-				'postcode'   => $order->billing_postcode,
-				'country'    => $order->billing_country,
-				'email'      => $order->billing_email,
-				'phone'      => $order->billing_phone,
+				'first_name' => $order->get_billing_first_name(),
+				'last_name'  => $order->get_billing_last_name(),
+				'company'    => $order->get_billing_company(),
+				'address_1'  => $order->get_billing_address_1(),
+				'address_2'  => $order->get_billing_address_2(),
+				'city'       => $order->get_billing_city(),
+				'state'      => $order->get_billing_state(),
+				'postcode'   => $order->get_billing_postcode(),
+				'country'    => $order->get_billing_country(),
+				'email'      => $order->get_billing_email(),
+				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
-				'first_name' => $order->shipping_first_name,
-				'last_name'  => $order->shipping_last_name,
-				'company'    => $order->shipping_company,
-				'address_1'  => $order->shipping_address_1,
-				'address_2'  => $order->shipping_address_2,
-				'city'       => $order->shipping_city,
-				'state'      => $order->shipping_state,
-				'postcode'   => $order->shipping_postcode,
-				'country'    => $order->shipping_country,
+				'first_name' => $order->get_shipping_first_name(),
+				'last_name'  => $order->get_shipping_last_name(),
+				'company'    => $order->get_shipping_company(),
+				'address_1'  => $order->get_shipping_address_1(),
+				'address_2'  => $order->get_shipping_address_2(),
+				'city'       => $order->get_shipping_city(),
+				'state'      => $order->get_shipping_state(),
+				'postcode'   => $order->get_shipping_postcode(),
+				'country'    => $order->get_shipping_country(),
 			),
-			'note'                      => $order->customer_note,
-			'customer_ip'               => $order->customer_ip_address,
-			'customer_user_agent'       => $order->customer_user_agent,
+			'note'                      => $order->get_customer_note(),
+			'customer_ip'               => $order->get_customer_ip_address(),
+			'customer_user_agent'       => $order->get_customer_user_agent(),
 			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),
@@ -474,7 +474,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// set is vat exempt
 			if ( isset( $data['is_vat_exempt'] ) ) {
-				update_post_meta( $order->id, '_is_vat_exempt', $data['is_vat_exempt'] ? 'yes' : 'no' );
+				update_post_meta( $order->get_id(), '_is_vat_exempt', $data['is_vat_exempt'] ? 'yes' : 'no' );
 			}
 
 			// calculate totals and set them
@@ -488,8 +488,8 @@ class WC_API_Orders extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_invalid_payment_details', __( 'Payment method ID and title are required', 'woocommerce' ), 400 );
 				}
 
-				update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -504,24 +504,24 @@ class WC_API_Orders extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce'), 400 );
 				}
 
-				update_post_meta( $order->id, '_order_currency', $data['currency'] );
+				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
 			}
 
 			// set order meta
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
-				$this->set_order_meta( $order->id, $data['order_meta'] );
+				$this->set_order_meta( $order->get_id(), $data['order_meta'] );
 			}
 
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			wc_delete_shop_order_transients( $order->id );
+			wc_delete_shop_order_transients( $order->get_id() );
 
-			do_action( 'woocommerce_api_create_order', $order->id, $data, $this );
+			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 
 			wc_transaction_query( 'commit' );
 
-			return $this->get_order( $order->id );
+			return $this->get_order( $order->get_id() );
 
 		} catch ( WC_API_Exception $e ) {
 
@@ -575,7 +575,7 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
 			}
 
-			$order_args = array( 'order_id' => $order->id );
+			$order_args = array( 'order_id' => $order->get_id() );
 
 			// Customer note.
 			if ( isset( $data['note'] ) ) {
@@ -589,7 +589,7 @@ class WC_API_Orders extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), 400 );
 				}
 
-				update_post_meta( $order->id, '_customer_user', $data['customer_id'] );
+				update_post_meta( $order->get_id(), '_customer_user', $data['customer_id'] );
 			}
 
 			// Billing/shipping address.
@@ -633,12 +633,12 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Method ID.
 				if ( isset( $data['payment_details']['method_id'] ) ) {
-					update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
+					update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
 				}
 
 				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
 				}
 
 				// Mark as paid if set.
@@ -653,7 +653,7 @@ class WC_API_Orders extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ), 400 );
 				}
 
-				update_post_meta( $order->id, '_order_currency', $data['currency'] );
+				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
 			}
 
 			// If items have changed, recalculate order totals.
@@ -663,7 +663,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Update order meta.
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
-				$this->set_order_meta( $order->id, $data['order_meta'] );
+				$this->set_order_meta( $order->get_id(), $data['order_meta'] );
 			}
 
 			// Update the order post to set customer note/modified date.
@@ -674,9 +674,9 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
-			wc_delete_shop_order_transients( $order->id );
+			wc_delete_shop_order_transients( $order->get_id() );
 
-			do_action( 'woocommerce_api_edit_order', $order->id, $data, $this );
+			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
 
 			return $this->get_order( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -877,7 +877,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$result = $wpdb->get_row(
 				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
 				absint( $item['id'] ),
-				absint( $order->id )
+				absint( $order->get_id() )
 			) );
 
 			if ( is_null( $result ) ) {
@@ -1366,7 +1366,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_create_order_note', $note_id, $order_id, $this );
 
-			return $this->get_order_note( $order->id, $note_id );
+			return $this->get_order_note( $order->get_id(), $note_id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1413,11 +1413,11 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// Ensure note ID is associated with given order
-			if ( $note->comment_post_ID != $order->id ) {
+			if ( $note->comment_post_ID != $order->get_id() ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_note_id', __( 'The order note ID provided is not associated with the order', 'woocommerce' ), 400 );
 			}
 
-			$data = apply_filters( 'woocommerce_api_edit_order_note_data', $data, $note->comment_ID, $order->id, $this );
+			$data = apply_filters( 'woocommerce_api_edit_order_note_data', $data, $note->comment_ID, $order->get_id(), $this );
 
 			// Note content
 			if ( isset( $data['note'] ) ) {
@@ -1436,9 +1436,9 @@ class WC_API_Orders extends WC_API_Resource {
 				update_comment_meta( $note->comment_ID, 'is_customer_note', true === $data['customer_note'] ? 1 : 0 );
 			}
 
-			do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->id, $this );
+			do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->get_id(), $this );
 
-			return $this->get_order_note( $order->id, $note->comment_ID );
+			return $this->get_order_note( $order->get_id(), $note->comment_ID );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1659,8 +1659,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 				$order = wc_get_order( $order_id );
 
-				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+				if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
+					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
 
 					if ( is_wp_error( $result ) ) {
 						return $result;

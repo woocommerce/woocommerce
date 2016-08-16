@@ -146,7 +146,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
 		}
 	}
@@ -211,11 +211,6 @@ class WC_Form_Handler {
 			$user->user_email = $account_email;
 		}
 
-		if ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
-			wc_add_notice( __( 'Your current password is incorrect.', 'woocommerce' ), 'error' );
-			$save_pass = false;
-		}
-
 		if ( ! empty( $pass_cur ) && empty( $pass1 ) && empty( $pass2 ) ) {
 			wc_add_notice( __( 'Please fill out all password fields.', 'woocommerce' ), 'error' );
 			$save_pass = false;
@@ -227,6 +222,9 @@ class WC_Form_Handler {
 			$save_pass = false;
 		} elseif ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
 			wc_add_notice( __( 'New passwords do not match.', 'woocommerce' ), 'error' );
+			$save_pass = false;
+		} elseif ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
+			wc_add_notice( __( 'Your current password is incorrect.', 'woocommerce' ), 'error' );
 			$save_pass = false;
 		}
 
@@ -290,23 +288,25 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key && $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
 				// Set customer location to order location
-				if ( $order->billing_country ) {
-					WC()->customer->set_country( $order->billing_country );
+				if ( $order->get_billing_country() ) {
+					WC()->customer->set_country( $order->get_billing_country() );
 				}
-				if ( $order->billing_state ) {
-					WC()->customer->set_state( $order->billing_state );
+				if ( $order->get_billing_state() ) {
+					WC()->customer->set_state( $order->get_billing_state() );
 				}
-				if ( $order->billing_postcode ) {
-					WC()->customer->set_postcode( $order->billing_postcode );
+				if ( $order->get_billing_postcode() ) {
+					WC()->customer->set_postcode( $order->get_billing_postcode() );
 				}
-				if ( $order->billing_city ) {
-					WC()->customer->set_city( $order->billing_city );
+				if ( $order->get_billing_city() ) {
+					WC()->customer->set_city( $order->get_billing_city() );
 				}
+
+				WC()->customer->save();
 
 				// Terms
 				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
@@ -598,7 +598,7 @@ class WC_Form_Handler {
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
 
-		if ( empty( $order->id ) ) {
+		if ( ! $order->get_id() ) {
 			return;
 		}
 
@@ -608,7 +608,7 @@ class WC_Form_Handler {
 
 		// Make sure the user is allowed to order again. By default it check if the
 		// previous order belonged to the current user.
-		if ( ! current_user_can( 'order_again', $order->id ) ) {
+		if ( ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 
@@ -637,7 +637,7 @@ class WC_Form_Handler {
 			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
 		}
 
-		do_action( 'woocommerce_ordered_again', $order->id );
+		do_action( 'woocommerce_ordered_again', $order->get_id() );
 
 		// Redirect to cart
 		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
@@ -660,7 +660,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->id === $order_id && $order->order_key === $order_key ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -668,7 +668,7 @@ class WC_Form_Handler {
 				// Message
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );
 
-				do_action( 'woocommerce_cancelled_order', $order->id );
+				do_action( 'woocommerce_cancelled_order', $order->get_id() );
 
 			} elseif ( $user_can_cancel && ! $order_can_cancel ) {
 				wc_add_notice( __( 'Your order can no longer be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
@@ -873,9 +873,12 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
 
 			try {
-				$creds    = array();
-				$username = trim( $_POST['username'] );
+				$creds = array(
+					'user_password' => $_POST['password'],
+					'remember'      => isset( $_POST['rememberme'] ),
+				);
 
+				$username         = trim( $_POST['username'] );
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -904,10 +907,17 @@ class WC_Form_Handler {
 					$creds['user_login'] = $username;
 				}
 
-				$creds['user_password'] = $_POST['password'];
-				$creds['remember']      = isset( $_POST['rememberme'] );
-				$secure_cookie          = is_ssl() ? true : false;
-				$user                   = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), $secure_cookie );
+				// On multisite, ensure user exists on current site, if not add them before allowing login.
+				if ( is_multisite() ) {
+					$user_data = get_user_by( 'login', $username );
+
+					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
+					}
+				}
+
+				// Perform the login
+				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();

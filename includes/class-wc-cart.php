@@ -1289,8 +1289,8 @@ class WC_Cart {
 						// Apply discounts and get the discounted price FOR A SINGLE ITEM
 						$discounted_price  = $this->get_discounted_price( $values, $adjusted_price, true );
 
-						// Convert back to line price and round nicely
-						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+						// Convert back to line price
+						$discounted_line_price = $discounted_price * $values['quantity'];
 
 						// Now use rounded line price to get taxes.
 						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
@@ -1312,8 +1312,8 @@ class WC_Cart {
 						// Calc prices and tax (discounted)
 						$discounted_price = $this->get_discounted_price( $values, $base_price, true );
 
-						// Convert back to line price and round nicely
-						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+						// Convert back to line price
+						$discounted_line_price = $discounted_price * $values['quantity'];
 
 						// Now use rounded line price to get taxes.
 						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
@@ -1356,14 +1356,26 @@ class WC_Cart {
 				// Cart contents total is based on discounted prices and is used for the final total calculation
 				$this->cart_contents_total += $line_total;
 
-				// Store costs + taxes for lines
-				$this->cart_contents[ $cart_item_key ]['line_total']        = $line_total;
-				$this->cart_contents[ $cart_item_key ]['line_tax']          = $line_tax;
-				$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $line_subtotal;
-				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
-
-				// Store rates ID and costs - Since 2.2
-				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
+				/**
+				 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
+				 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
+				 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
+				 *
+				 * Tax exclusive prices are not affected.
+				 */
+				if ( ! $_product->is_taxable() || $this->prices_include_tax ) {
+					$this->cart_contents[ $cart_item_key ]['line_total']        = round( $line_total + $line_tax - wc_round_tax_total( $line_tax ), $this->dp );
+					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = round( $line_subtotal + $line_subtotal_tax - wc_round_tax_total( $line_subtotal_tax ), $this->dp );
+					$this->cart_contents[ $cart_item_key ]['line_tax']          = wc_round_tax_total( $line_tax );
+					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = wc_round_tax_total( $line_subtotal_tax );
+					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array_map( 'wc_round_tax_total', $discounted_taxes ), 'subtotal' => array_map( 'wc_round_tax_total', $taxes ) );
+				} else {
+					$this->cart_contents[ $cart_item_key ]['line_total']        = $line_total;
+					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $line_subtotal;
+					$this->cart_contents[ $cart_item_key ]['line_tax']          = $line_tax;
+					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
+					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
+				}
 			}
 
 			// Only calculate the grand total + shipping if on the cart/checkout
@@ -1387,7 +1399,7 @@ class WC_Cart {
 				}
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() ) {
+				if ( WC()->customer->get_is_vat_exempt() ) {
 					$this->remove_taxes();
 				}
 
@@ -1403,7 +1415,7 @@ class WC_Cart {
 				$this->tax_total = WC_Tax::get_tax_total( $this->taxes );
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() ) {
+				if ( WC()->customer->get_is_vat_exempt() ) {
 					$this->remove_taxes();
 				}
 			}
@@ -1551,7 +1563,7 @@ class WC_Cart {
 				return false;
 
 			if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-				if ( ! WC()->customer->has_calculated_shipping() ) {
+				if ( ! WC()->customer->get_calculated_shipping() ) {
 					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
 						return false;
 					}
@@ -1633,10 +1645,8 @@ class WC_Cart {
 					if ( $coupon->is_valid() ) {
 
 						// Limit to defined email addresses
-						if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+						if ( is_array( $coupon->get_email_restrictions() ) && sizeof( $coupon->get_email_restrictions() ) > 0 ) {
 							$check_emails           = array();
-							$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
-
 							if ( is_user_logged_in() ) {
 								$current_user   = wp_get_current_user();
 								$check_emails[] = $current_user->user_email;
@@ -1644,7 +1654,7 @@ class WC_Cart {
 							$check_emails[] = $posted['billing_email'];
 							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
-							if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
+							if ( 0 == sizeof( array_intersect( $check_emails, $coupon->get_email_restrictions() ) ) ) {
 								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 
 								// Remove the coupon
@@ -1656,7 +1666,7 @@ class WC_Cart {
 						}
 
 						// Usage limits per user - check against billing and user email and user ID
-						if ( $coupon->usage_limit_per_user > 0 ) {
+						if ( $coupon->get_usage_limit_per_user() > 0 ) {
 							$check_emails = array();
 							$used_by      = $coupon->get_used_by();
 
@@ -1678,7 +1688,7 @@ class WC_Cart {
 								$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
 							}
 
-							if ( $usage_count >= $coupon->usage_limit_per_user ) {
+							if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
 								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
 
 								// Remove the coupon
@@ -1733,7 +1743,7 @@ class WC_Cart {
 			}
 
 			// If its individual use then remove other coupons
-			if ( $the_coupon->individual_use == 'yes' ) {
+			if ( $the_coupon->get_individual_use() ) {
 				$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
 			}
 
@@ -1741,7 +1751,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( $coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
+					if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
 
 						// Reject new coupon
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
@@ -1754,7 +1764,7 @@ class WC_Cart {
 			$this->applied_coupons[] = $coupon_code;
 
 			// Choose free shipping
-			if ( $the_coupon->enable_free_shipping() ) {
+			if ( $the_coupon->get_free_shipping() ) {
 				$packages = WC()->shipping->get_packages();
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 

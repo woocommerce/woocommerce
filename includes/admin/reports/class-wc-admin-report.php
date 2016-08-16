@@ -242,14 +242,14 @@ class WC_Admin_Report {
 
 				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
 
-				if ( strtolower( $value['operator'] ) == 'in' ) {
+				if ( strtolower( $value['operator'] ) == 'in' || strtolower( $value['operator'] ) == 'not in' ) {
 
 					if ( is_array( $value['meta_value'] ) ) {
 						$value['meta_value'] = implode( "','", $value['meta_value'] );
 					}
 
 					if ( ! empty( $value['meta_value'] ) ) {
-						$where_value = "IN ('{$value['meta_value']}')";
+						$where_value = "{$value['operator']} ('{$value['meta_value']}')";
 					}
 				} else {
 					$where_value = "{$value['operator']} '{$value['meta_value']}'";
@@ -289,14 +289,14 @@ class WC_Admin_Report {
 
 			foreach ( $where as $value ) {
 
-				if ( strtolower( $value['operator'] ) == 'in' ) {
+				if ( strtolower( $value['operator'] ) == 'in' || strtolower( $value['operator'] ) == 'not in' ) {
 
 					if ( is_array( $value['value'] ) ) {
 						$value['value'] = implode( "','", $value['value'] );
 					}
 
 					if ( ! empty( $value['value'] ) ) {
-						$where_value = "IN ('{$value['value']}')";
+						$where_value = "{$value['operator']} ('{$value['value']}')";
 					}
 				} else {
 					$where_value = "{$value['operator']} '{$value['value']}'";

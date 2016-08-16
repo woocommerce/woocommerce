@@ -411,7 +411,7 @@ class WC_Email extends WC_Settings_API {
 				$emogrifier = new Emogrifier( $content, $css );
 				$content    = $emogrifier->emogrify();
 			} catch ( Exception $e ) {
-				$logger = new WC_Logger();
+				$logger = wc_get_logger();
 				$logger->add( 'emogrifier', $e->getMessage() );
 			}
 		}
