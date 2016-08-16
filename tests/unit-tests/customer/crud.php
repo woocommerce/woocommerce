@@ -172,8 +172,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$time = time();
 		$standard_getters_and_setters = array(
 			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
-			'role' => 'customer', 'last_order_id' => 5, 'last_order_date' => $time, 'orders_count' => 2,
-			'total_spent' => 10.57, 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
+			'role' => 'customer', 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
 			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
 			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
 			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
@@ -197,8 +196,9 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$order = \WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
-		$this->assertEquals( $order->get_id(), $customer->get_last_order_id() );
-		$this->assertEquals( $order->get_date_created(), $customer->get_last_order_date() );
+		$last_order = $customer->get_last_order();
+		$this->assertEquals( $order->get_id(), $last_order ? $last_order->get_id() : 0 );
+		$this->assertEquals( $order->get_date_created(), $last_order ? $last_order->get_date_created() : 0 );
 		$order->delete();
 	}
 
@@ -206,14 +206,14 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * Test getting a customer's order count from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_orders_count_read() {
+	public function test_customer_get_order_count_read() {
 		$customer = \WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		\WC_Helper_Order::create_order( $customer_id );
 		\WC_Helper_Order::create_order( $customer_id );
 		\WC_Helper_Order::create_order( $customer_id );
 		$customer->read( $customer_id );
-		$this->assertEquals( 3, $customer->get_orders_count() );
+		$this->assertEquals( 3, $customer->get_order_count() );
 	}
 
 	/**
