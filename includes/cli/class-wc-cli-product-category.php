@@ -70,7 +70,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * : Limit the output to specific product fields.
 	 *
 	 * [--format=<format>]
-	 * : Acceptec values: table, csv, json, count, ids. Default: table.
+	 * : Accepted values: table, csv, json, count, ids. Default: table.
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
@@ -108,6 +108,231 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		}
 	}
 
+
+	/**
+	 * Create a new product category.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <name>
+	 * : Assign a name to the new slug (required)
+	 *
+	 * [--parent=<id>]
+	 * : Assign a parent tag using the parent category using the parent category's ID
+	 *
+	 * [--alias_of=<id>]
+	 * : Assign an alias to this tag using the target tag's ID
+	 *
+	 * [--description=<string>]
+	 * : Assign a description to the new tag
+	 *
+	 * [--slug=<string>]
+	 * : Assign a slug for the new tag
+	 *
+	 * [--order=<sortorder>]
+	 * : Assign the sort order of this category, relative to a parent
+	 *
+	 * [--display_type=<value>]
+	 * : Display type for the Product Category.  default, products, subcategories, both
+	 *
+	 * [--<field>=<value>]
+	 * : Assign any number of associateive key=>value pairs as metadata on the category.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc product category create newcat
+	 *
+	 *     wp wc product category create newcat --parent=50 --description="New Category Field" --order=2 --slug=new-cat
+	 *
+	 * @subcommand create
+	 * @since      2.6.0
+	 */
+	public function create( $args, $assoc_args ) {
+
+		try {
+			$category_name = $args[0];
+
+			// Create the Product Category (term)
+			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $category_name, 'product_cat' ) :
+				wp_insert_term( $category_name, 'product_cat', $assoc_args );
+
+			// Validate the Product Category (term)
+			$this->assert_no_wp_error( $product_category_meta );	
+
+			// Read meta values from assoc args and assign back to term.
+			$default_meta_values = $this->get_default_product_category_meta_field_values();
+			$assignable_meta_values = array_merge( $default_meta_values, $assoc_args );
+			$this->filter_insert_keys_from_assoc_args( $assignable_meta_values );
+
+			// Apply meta key->value pairs to new term.
+            foreach( $assignable_meta_values as $meta_key => $meta_value ) {
+                add_term_meta( $product_category_meta[ 'term_id' ], $meta_key, $assignable_meta_values[ $meta_key ] );
+            }
+
+			// Log successful creation
+			WP_CLI::success( sprintf( __('Product Category "%s" was created successfully.', 'woocommerce' ),
+				$category_name ) );
+
+			return true;
+		}
+		catch ( WC_CLI_Exception $ex ) {
+
+			WP_CLI::error( $ex->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Update an existing product category
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : The ID of the product category being updated
+	 *
+	 * [--name=<name>]
+	 * : Assign a new name to the tag.
+	 *
+	 * [--parent=<id>]
+	 * : Assign a parent tag using the parent category using the parent category's ID
+	 *
+	 * [--alias_of=<id>]
+	 * : Assign an alias to this tag using the target tag's ID
+	 *
+	 * [--description=<string>]
+	 * : Assign a description to the new tag
+	 *
+	 * [--slug=<string>]
+	 * : Assign a slug for the new tag
+	 *
+	 * [--order=<sortorder>]
+	 * : Assign the sort order of this category, relative to a parent
+	 * 
+	 * [--display_type=<value>]
+	 * : Display type for the Product Category.  default, products, subcategories, both
+	 *
+	 * [--<field>=<value>]
+	 * : Assign any number of assocative metadata key=>value pairs.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc product category update 75
+	 *
+	 *     wp wc product category update 75 --name="new_name" --parent=50 --description="New Category Field" --order=2 --slug=new-cat
+	 *
+	 * @subcommand update
+	 * @since      2.6.0
+	 */
+	public function update( $args, $assoc_args ) {
+
+		try {
+			
+			// Ensure the term exists before starting.
+			$this->assert_term_exists( $args[0] );
+			
+			// Load the category (taxonomy term)
+			$term = get_term( $args[0], 'product_cat', ARRAY_A );
+
+			// Merge the CLI arguments with the original term (product category) arguments
+			$this->assert_no_wp_error( $term );
+			$updated_term_values = array_merge( $term, $assoc_args );
+			$this->assert_no_wp_error( $term );
+			
+			// Update the term (product category)
+			$updated_term = wp_update_term( $term[ 'term_id' ], 'product_cat', $updated_term_values );
+			$this->assert_no_wp_error( $updated_term );
+
+			// Filter out the core term values, then use remaining values to update metafields
+			$this->filter_insert_keys_from_assoc_args( $updated_term_values );
+
+			foreach( $updated_term_values as $meta_key => $meta_value ) {
+				update_term_meta( $updated_term_values[ 'term_id' ], $meta_key, $meta_value );
+			}
+			
+			// Reload the category (taxonomy term) to ensure that we're relating about persistent data
+			$term = get_term( $args[0], 'product_cat', ARRAY_A );
+			
+			WP_CLI::success( sprintf( __('Product Category "%s" was updated successfully.', 'woocommerce' ), 
+				$term['name'] ) );
+		}
+		catch ( WC_CLI_Exception $ex ) {
+
+			WP_CLI::error( $ex->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Delete Product Categories by ID
+	 *
+	 * ## OPTIONS
+	 *
+	 * <product_category_id>
+	 * : The ID of the product category you wish to delete.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc product category delete 123
+	 *
+	 * @subcommand delete
+	 * @since      2.5.0
+	 * @return string
+	 * @throws WC_CLI_Exception
+	 */
+	public function delete( $args ) {
+
+		try {
+			foreach ( $args as $cat_id ) {
+				
+				$term_id = absint( $cat_id );
+				$term    = get_term( $term_id, 'product_cat' );
+
+				$this->assert_term_exists( $term_id );
+				$this->assert_no_wp_error( $term );
+
+				$term_id = intval( $term->term_id );
+
+				WP_CLI::confirm(sprintf( __( 'Are you sure you want to delete product category named "%s" with the ID# "%s"', 'woocommerce' ), $term->name,$term->term_id ) );
+
+				if ( wp_delete_term( $term_id,'product_cat' ) ) {
+					WP_CLI::success( "Category #$term_id was successfully deleted" );
+				} else {
+					WP_CLI::warning( "Not able to delete category #$term_id! Make sure it exists and that it's not the default category" );
+				}
+			}
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+	}
+
+	/**
+	 *  Get an array of default term meta key->value pairs that need to be assigned to the new term.
+	 *
+	 *  @return array
+	 */
+	protected function get_default_product_category_meta_field_values() {
+
+		return array (
+			'display_type' => 'default',
+			'thumbnail_id' => 0,
+			'order' => 0,
+		);
+	}
+
+	/**
+	 * Pass in the assoc_args array to filter out the key->value pairs which are applied directly to the new term.
+	 *
+	 * @mutator
+	 *
+	 * @param $assoc_args  The array of associated args to filter
+	 */
+	protected function filter_insert_keys_from_assoc_args( &$assoc_args ) {
+
+		unset( $assoc_args[ 'name' ] );
+		unset( $assoc_args[ 'slug' ] );
+		unset( $assoc_args[ 'parent' ] );
+		unset( $assoc_args[ 'description' ] );
+		unset( $assoc_args[ 'alias_of' ] );
+	}
+
 	/**
 	 * Get product category properties from given term ID.
 	 *
@@ -121,7 +346,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		$term    = get_term( $term_id, 'product_cat' );
 
 		if ( is_wp_error( $term ) || is_null( $term ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_category_id', sprintf( __( 'Invalid product category ID "%s"', 'woocommerce' ), $term_id ) );
+			
 		}
 
 		$term_id = intval( $term->term_id );
@@ -156,4 +381,60 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	protected function get_default_format_fields() {
 		return 'id,name,slug,parent,description,display,image,count';
 	}
+
+
+	/**
+	 * Delete a product category
+	 *
+	 * // display type = (products, subcategories, both)
+	 *
+	 * @param string $term
+	 *
+	 * @since 2.6.0
+	 * @return array
+	 */
+	protected function get_default_product_category_meta() {
+
+		return array (
+			'display_type' => 'both',
+			'thumbnail_id' => 0,
+		);
+	}
+
+	/**
+	 * Ensure that a given term did not error our during loading our processing.  Throws exception if error
+	 * is found.
+	 * 
+	 * @pre  The $term must be an associative array to utilize this method.
+	 *
+	 * @param array $term
+	 * @throws WC_CLI_Exception
+	 */
+	protected function assert_no_wp_error( $term ) {
+
+		// Validate the Product Category (term)
+		if( is_object( $term ) && ( 'WP_Error' == get_class( $term ) ) ) {
+			$error = array_pop( $term->errors );
+			throw new WC_CLI_Exception( $error[0], key( $error ) );
+		}
+	}
+
+	/**
+	 * Ensure that a the given term_id is associated with an existing term.  Throws an error if not found.
+	 * 
+	 * @param int $term_id
+	 * @throws WC_CLI_Exception
+	 */
+	protected function assert_term_exists( $term_id ) {
+		
+		// Load the category (taxonomy term)
+		$term = get_term( $term_id, 'product_cat', ARRAY_A );
+		
+		if ( ! $term ) {
+			
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_category_id', 
+				sprintf( __( 'Invalid product category ID "%s"', 'woocommerce' ), $term_id ) );
+		}
+	}
+	
 }
