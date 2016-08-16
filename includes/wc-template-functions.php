@@ -581,7 +581,7 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
        function woocommerce_template_loop_product_title() {
                $tag = is_product_taxonomy() || is_shop() ? 'h2' : 'h3';
 
-		echo '<' . $tag . '>' . get_the_title() . '</' . $tag . '>';
+		echo '<' . $tag . ' class="woocommerce-loop-product__title">' . get_the_title() . '</' . $tag . '>';
 	}
 }
 if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
@@ -591,7 +591,7 @@ if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 	 */
 	function woocommerce_template_loop_category_title( $category ) {
 		?>
-		<h2>
+		<h2 class="woocommerce-loop-category__title">
 			<?php
 				echo $category->name;
 
