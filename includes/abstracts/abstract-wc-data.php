@@ -348,4 +348,10 @@ abstract class WC_Data {
 		);
 	}
 
+	/**
+	 * Throw an exception due to invalid data.
+	 */
+	protected function throw_exception( $id, $message = '', $code = 400 ) {
+		throw new WC_Data_Exception( $id, $message, $code );
+	}
 }

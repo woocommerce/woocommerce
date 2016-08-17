@@ -684,6 +684,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $value
 	 */
 	public function set_currency( $value ) {
+		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
+			$this->throw_exception( 'invalid_currency', 'Invalid currency code' );
+		}
 		$this->_data['currency'] = $value;
 	}
 
@@ -1006,7 +1009,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'qty'          => $qty,
+			'quantity'     => $qty,
 			'name'         => $product ? $product->get_title() : '',
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
