@@ -139,16 +139,26 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		// Format meta data
-		$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
-		$item_meta  = $item->get_formatted_meta_data( $hideprefix );
+		// Add meta, SKU and PRICE to products
+		if ( is_callable( array( $item, 'get_product' ) ) ) {
+			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
+			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
 
-		foreach ( $item_meta as $key => $values ) {
-			// Label was used in previous version of API - set it here
-			$item_meta[ $key ]->label = $values->display_key;
+			// Format meta data
+			if ( isset( $data['meta_data'] ) ) {
+				$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
+				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
+
+				foreach ( $item_meta as $key => $values ) {
+					// Label was used in previous version of API - set it here
+					$item_meta[ $key ]->label = $values->display_key;
+					unset( $item_meta[ $key ]->display_key );
+					unset( $item_meta[ $key ]->display_value );
+				}
+
+				$data['meta'] = array_values( $item_meta );
+			}
 		}
-
-		$data['meta'] = array_values( $item_meta );
 
 		// Format taxes
 		if ( ! empty( $data['taxes']['total'] ) ) {
@@ -162,14 +172,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				);
 			}
 			$data['taxes'] = $taxes;
-		} else {
+		} elseif ( isset( $data['taxes'] ) ) {
 			$data['taxes'] = array();
 		}
 
 		// Remove props we don't want to expose.
 		unset( $data['order_id'] );
 		unset( $data['type'] );
-		unset( $data['meta_data'] );
 
 		return $data;
 	}
@@ -251,19 +260,16 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
-
 		if ( 0 !== (int) $order->get_user_id() ) {
 			$links['customer'] = array(
 				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $order->get_user_id() ) ),
 			);
 		}
-
 		if ( 0 !== (int) $order->get_parent_id() ) {
 			$links['up'] = array(
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->get_parent_id() ) ),
 			);
 		}
-
 		return $links;
 	}
 
@@ -353,7 +359,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Create base WC Order object.
-	 *
 	 * @param array $data
 	 * @return WC_Order
 	 */
@@ -371,6 +376,19 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		wc_transaction_query( 'start' );
 
 		try {
+			// Make sure request data matching schema naming and only includes non-read only props.
+
+			//$request['parent_id']
+
+
+
+
+
+
+
+
+
+
 			// Make sure customer exists.
 			if ( 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
@@ -381,7 +399,46 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				return $data;
 			}
 
-			$data->created_via = 'rest-api';
+
+			$order = new WC_Order();
+			$order->set_created_via( 'rest-api' );
+			$order->set_currency( $request['currency'] );
+
+			if ( ! empty( $request['payment_method'] ) ) {
+				$order->set_payment_method( $request['payment_method'] );
+			}
+
+			if ( ! empty( $request['payment_method_title'] ) ) {
+				$order->set_payment_method_title( $request['payment_method_title'] );
+			}
+
+
+
+
+			$order->set_cart_hash( $cart_hash );
+			$order->set_customer_id( $request['customer_id'] );
+
+			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+			$order->set_customer_user_agent( wc_get_user_agent() );
+			$order->set_customer_note( $request['customer_note'] );
+
+			$order->set_shipping_total( WC()->cart->shipping_total );
+			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
+			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
+			$order->set_cart_tax( WC()->cart->tax_total );
+			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
+			$order->set_total( WC()->cart->total );
+
+
+
+
+
+
+
+
+
+
 
 			$order = $this->create_base_order( (array) $data );
 
@@ -397,8 +454,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				$this->update_address( $order, $request['shipping'], 'shipping' );
 			}
 
-			// Set currency.
-			update_post_meta( $order->get_id(), '_order_currency', $request['currency'] );
 
 			// Set lines.
 			$lines = array(
@@ -420,28 +475,23 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			// Calculate totals and set them.
 			$order->calculate_totals();
 
-			// Set payment method.
-			if ( ! empty( $request['payment_method'] ) ) {
-				update_post_meta( $order->get_id(), '_payment_method', $request['payment_method'] );
-			}
-			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->get_id(), '_payment_method_title', $request['payment_method_title'] );
-			}
-			if ( true === $request['set_paid'] ) {
-				$order->payment_complete( $request['transaction_id'] );
-			}
+
 
 			// Set meta data.
 			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
 				$this->update_meta_data( $order->get_id(), $request['meta_data'] );
 			}
 
+			$order->save();
+
+			if ( true === $request['set_paid'] ) {
+				$order->payment_complete( $request['transaction_id'] );
+			}
+
 			wc_transaction_query( 'commit' );
-
 			return $order->get_id();
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( Exception $e ) {
 			wc_transaction_query( 'rollback' );
-
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -991,8 +1041,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get order statuses.
-	 *
+	 * Get order statuses without prefixes.
 	 * @return array
 	 */
 	protected function get_order_statuses() {
@@ -1004,6 +1053,23 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		return $order_statuses;
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Get the Order's schema, conforming to JSON Schema.
@@ -1040,12 +1106,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'number' => array(
-					'description' => __( 'Order number.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'currency' => array(
 					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1060,7 +1120,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'prices_include_tax' => array(
-					'description' => __( 'Shows if the prices included tax during checkout.', 'woocommerce' ),
+					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1069,7 +1129,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'date_modified' => array(
 					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
@@ -1250,12 +1309,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'set_paid' => array(
-					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => false,
-					'context'     => array( 'edit' ),
-				),
 				'transaction_id' => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1288,19 +1341,46 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'date_paid' => array(
 					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'cart_hash' => array(
 					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'number' => array(
+					'description' => __( 'Order number.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'meta_data' => array(
+					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'key' => array(
+							'description' => __( 'Meta key.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'value' => array(
+							'description' => __( 'Meta value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'meta_id' => array(
+							'description' => __( 'Meta ID.', 'woocommerce' ),
+							'type'        => 'int',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
 				),
 				'line_items' => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
@@ -1317,13 +1397,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Product name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'sku' => array(
-							'description' => __( 'Product SKU.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'product_id' => array(
 							'description' => __( 'Product ID.', 'woocommerce' ),
@@ -1344,13 +1417,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Tax class of product.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price' => array(
-							'description' => __( 'Product price.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'subtotal' => array(
 							'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
@@ -1376,30 +1442,61 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 							'properties'  => array(
 								'id' => array(
 									'description' => __( 'Tax rate ID.', 'woocommerce' ),
 									'type'        => 'integer',
 									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 								'total' => array(
 									'description' => __( 'Tax total.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 								'subtotal' => array(
 									'description' => __( 'Tax subtotal.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
+								),
+							),
+						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
 							),
 						),
+						'sku' => array(
+							'description' => __( 'Product SKU.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'price' => array(
+							'description' => __( 'Product price.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'meta' => array(
-							'description' => __( 'Line item meta data.', 'woocommerce' ),
+							'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1474,6 +1571,29 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'shipping_lines' => array(
@@ -1528,6 +1648,29 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'fee_lines' => array(
@@ -1565,6 +1708,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
@@ -1587,6 +1731,29 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								'subtotal' => array(
 									'description' => __( 'Tax subtotal.', 'woocommerce' ),
 									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
@@ -1621,6 +1788,29 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'refunds' => array(
@@ -1648,6 +1838,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 					),
+				),
+				'set_paid' => array(
+					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
 				),
 			),
 		);
