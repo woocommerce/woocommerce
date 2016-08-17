@@ -1553,6 +1553,23 @@ p.demo_store {
 	}
 }
 
+/**
+ * Right to left styles
+ */
+.rtl {
+	&.woocommerce {
+		div.product {
+			div.images {
+				.flex-control-thumbs {
+					li {
+						float: right;
+					}
+				}
+			}
+		}
+	}
+}
+
 .woocommerce-message {
 	border-top-color: #8fae1b;
 
