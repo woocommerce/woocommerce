@@ -234,7 +234,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_quantity( $value ) {
 		if ( 0 >= $value ) {
-			$this->throw_exception( __METHOD__, 'Quantity must be positive' );
+			//$this->throw_exception( __METHOD__, 'Quantity must be positive' );
 		}
 		$this->_data['quantity'] = wc_stock_amount( $value );
 	}
@@ -245,7 +245,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
-			$this->throw_exception( __METHOD__, 'Invalid tax class' );
+			//$this->throw_exception( __METHOD__, 'Invalid tax class' );
 		}
 		$this->_data['tax_class'] = $value;
 	}
@@ -331,7 +331,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_product( $product ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
-			$this->throw_exception( __METHOD__, 'Invalid product' );
+			//$this->throw_exception( __METHOD__, 'Invalid product' );
 		}
 		$this->set_product_id( $product->get_id() );
 		$this->set_name( $product->get_title() );

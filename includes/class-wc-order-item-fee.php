@@ -128,7 +128,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
-			$this->throw_exception( __METHOD__, 'Invalid tax class' );
+			//$this->throw_exception( __METHOD__, 'Invalid tax class' );
 		}
 		$this->_data['tax_class'] = $value;
 	}
