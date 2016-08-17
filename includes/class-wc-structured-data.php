@@ -188,7 +188,7 @@ class WC_Structured_Data {
 		
 		$generate = 'generate_' . $type . '_data';
 
-		if ( $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
+		if ( method_exists( $this, $generate ) && $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
 			return $this->output_structured_data( $type );
 		} else {
 			return false;
