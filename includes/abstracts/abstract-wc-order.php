@@ -76,6 +76,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	);
 
 	/**
+	 * Order items that need deleting are stored here.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_items_to_delete = array();
+
+	/**
 	 *  Internal meta type used to store order data.
 	 * @var string
 	 */
@@ -293,6 +300,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Save all order items which are part of this order.
 	 */
 	protected function save_items() {
+		// remove items
+		foreach ( $this->_items_to_delete as $item ) {
+			$item->delete();
+		}
+
+		$this->_items_to_delete = array();
+
+		// Add/save items
 		foreach ( $this->_items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -964,32 +979,55 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get key for where a certain item type is stored in _items.
+	 * @since  2.7.0
+	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
+	 * @return string
+	 */
+	protected function get_items_key( $item ) {
+		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+			return 'line_items';
+		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+			return 'fee_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+			return 'shipping_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
+			return 'tax_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
+			return 'coupon_lines';
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * Remove item from the order.
+	 * @param int $item_id
+	 */
+	public function remove_item( $item_id ) {
+		$item = $this->get_item( $item_id );
+
+		if ( ! $item || ! ( $items_key = $this->get_items_key( $item ) ) ) {
+			return false;
+		}
+
+		// Unset and remove later
+		$this->_items_to_delete[] = $item;
+		unset( $this->_items[ $items_key ][ $this->prefix_item_id( $item->get_id() ) ] );
+	}
+
+	/**
 	 * Adds an order item to this order. The order item will not persist until save.
 	 * @param object Order item (product, shipping, fee, coupon, tax)
 	 */
 	public function add_item( $item ) {
-		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
-			$item_type = 'line_item';
-			$items_key = 'line_items';
-		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
-			$item_type = 'fee';
-			$items_key = 'fee_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
-			$item_type = 'shipping';
-			$items_key = 'shipping_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
-			$item_type = 'tax';
-			$items_key = 'tax_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
-			$item_type = 'coupon';
-			$items_key = 'coupon_lines';
-		} else {
+		if ( ! $items_key = $this->get_items_key( $item ) ) {
 			return false;
 		}
 
 		// Make sure existing items are loaded so we can append this new one.
 		if ( is_null( $this->_items[ $items_key ] ) ) {
-			$this->_items[ $items_key ] = $this->get_items( $item_type );
+			$this->_items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
 		// Append new row with generated temporary ID
