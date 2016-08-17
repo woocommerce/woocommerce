@@ -108,6 +108,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		return $this->get_id();
 	}
 
+	/**
+	 * Internal meta keys we don't want exposed as part of meta_data.
+	 * @return array()
+	 */
+	protected function get_internal_meta_keys() {
+		return array( '_tax_class', '_tax_status', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

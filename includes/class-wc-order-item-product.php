@@ -222,25 +222,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 	}
 
-	/**
-	 * Get all class data in array format.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return array_merge(
-			$this->_data,
-			array(
-				// Return SKU for convenience
-				'sku'       => $this->get_product() ? $this->get_product()->get_sku(): null,
-
-				// Return item price for convenience
-				'price'     => $this->get_total() / max( 1, $this->get_quantity() ),
-				'meta_data' => $this->get_meta_data(),
-			)
-		);
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
