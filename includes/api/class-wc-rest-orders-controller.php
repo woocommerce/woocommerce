@@ -344,15 +344,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		// Handle all writable props
 		foreach ( $data_keys as $key ) {
-			$value = $request->get_param( $key );
+			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
 					case 'billing' :
-						$this->update_address( $order, $value, 'billing' );
-						break;
 					case 'shipping' :
-						$this->update_address( $order, $value, 'shipping' );
+						$this->update_address( $order, $value, $key );
 						break;
 					case 'line_items' :
 					case 'shipping_lines' :
@@ -415,7 +413,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected function create_order( $request ) {
 		try {
 			// Make sure customer exists.
-			if ( 0 !== $request->get_param( 'customer_id' ) && false === get_user_by( 'id', $request->get_param( 'customer_id' ) ) ) {
+			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
@@ -428,7 +426,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$order->save();
 
 			// Handle set paid
-			if ( true === $request->get_param( 'set_paid' ) ) {
+			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request->get_param( 'transaction_id' ) );
 			}
 
@@ -450,7 +448,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$order->save();
 
 			// Handle set paid
-			if ( $order->needs_payment() && true === $request->get_param( 'set_paid' ) ) {
+			if ( $order->needs_payment() && true === $request['set_paid'] ) {
 				$order->payment_complete( $request->get_param( 'transaction_id' ) );
 			}
 
@@ -744,7 +742,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$order_id = $this->create_order( $request );
+			$order_id = $this->update_order( $request );
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
 			}
