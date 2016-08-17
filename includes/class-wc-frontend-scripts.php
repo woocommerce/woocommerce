@@ -206,6 +206,16 @@ class WC_Frontend_Scripts {
 
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
+			$flexslider_options = apply_filters( 'woocommerce_single_product_carousel_options', $options = array(
+				'rtl'            => is_rtl() ? 'true' : 'false',
+				'animation'      => 'slide',
+				'smoothHeight'   => true,
+				'directionNav'   => false,
+				'controlNav'     => 'thumbnails',
+				'slideshow'      => false,
+				'animationSpeed' => 500,
+			) );
+			wp_localize_script( 'wc-single-product', 'flexslider_options', $flexslider_options );
 		}
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			// Exclude common bots from geolocation by user agent.

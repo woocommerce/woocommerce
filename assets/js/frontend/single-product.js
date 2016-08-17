@@ -74,12 +74,12 @@ jQuery( function( $ ) {
 	if ( $.isFunction( $.fn.flexslider ) ) {
 		jQuery( '.woocommerce-product-gallery' ).flexslider({
 			selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
-			animation:      'slide',
-			smoothHeight:   true,
-			directionNav:   false,
-			controlNav:     'thumbnails',
-			slideshow:      false,
-			animationSpeed: 500,
+			animation:      flexslider_options.animation,
+			smoothHeight:   flexslider_options.smoothHeight,
+			directionNav:   flexslider_options.directionNav,
+			controlNav:     flexslider_options.controlNav,
+			slideshow:      flexslider_options.slideshow,
+			animationSpeed: flexslider_options.animationSpeed,
 		});
 	}
 
