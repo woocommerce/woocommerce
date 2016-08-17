@@ -84,43 +84,31 @@ class WC_Structured_Data {
 	 * @return array
 	 */
 	public function get_structured_data( $requested_types = false ) {
-		if ( empty( $this->get_data() ) || ( $requested_types && ! is_array( $requested_types ) && ! is_string( $requested_types ) || is_null( $requested_types ) ) ) {
+		$data = $this->get_data();
+
+		if ( empty( $data ) || ( $requested_types && ! is_array( $requested_types ) && ! is_string( $requested_types ) || is_null( $requested_types ) ) ) {
 			return array();
+		} elseif ( $requested_types && is_string( $requested_types ) ) {
+			$requested_types = array( $requested_types );
 		}
 
-		foreach ( $this->get_data() as $value ) {
-			$type = strtolower( $value['@type'] );
-			$data[ $type ][] = $value;
+		// Puts together the values of same type of structured data.
+		foreach ( $data as $value ) {
+			$structured_data[ strtolower( $value['@type'] ) ][] = $value;
 		}
 
-		foreach ( $data as $type => $value ) {
-			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+		// Wraps the multiple values of each type of structured data inside a graph. Then adds context for each type of value.
+		foreach ( $structured_data as $type => $value ) {
+			$structured_data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
 		}
 
-		if ( $requested_types ) {
-			if ( is_string( $requested_types ) ) {
-				$requested_types = array( $requested_types );
-			}
+		// If requested types, picks them up. Finally changes the associative array into an indexed one.
+		$structured_data = $requested_types ? array_values( array_intersect_key( $structured_data, array_flip( $requested_types ) ) ) : array_values( $structured_data );
 
-			foreach ( $data as $type => $value ) {
-				foreach ( $requested_types as $requested_type ) {
-					if ( $requested_type === $type ) {
-						$structured_data[] = $value;
-					}
-				}	
-			}
-		} else {
-			foreach ( $data as $value ) {
-				$structured_data[] = $value;
-			}
+		if ( ! empty( $structured_data ) ) {
+			$structured_data = count( $structured_data ) > 1 ?  array( '@graph' => $structured_data ) : $structured_data[0];
 		}
-
-		if ( ! isset( $structured_data ) ) {
-			return array();
-		}
-
-		$structured_data = count( $structured_data ) > 1 ?  array( '@graph' => $structured_data ) : $structured_data[0];
 
 		return $structured_data;
 	}
@@ -135,13 +123,13 @@ class WC_Structured_Data {
 	 */
 	public function output_structured_data( $requested_types = true ) {
 		if ( $requested_types === true ) {
-			$requested_types = apply_filters( 'woocommerce_structured_data_type_for_page', array(
+			$requested_types = array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', array(
 				  is_shop() || is_product_category() || is_product() ? 'product'        : null,
 				  is_shop() && is_front_page()                       ? 'website'        : null,
 				  is_product()                                       ? 'review'         : null,
 				! is_shop()                                          ? 'breadcrumblist' : null,
 				                                                       'order',
-			) );
+			) ) );
 		}
 
 		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
