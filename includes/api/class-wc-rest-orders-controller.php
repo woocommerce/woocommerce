@@ -359,10 +359,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					case 'coupon_lines' :
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
-								if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-									$order->remove_item( $item['id'] );
-								} else {
-									$this->set_item( $order, $key, $item );
+								if ( is_array( $item ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+										$order->remove_item( $item['id'] );
+									} else {
+										$this->set_item( $order, $key, $item );
+									}
 								}
 							}
 						}
@@ -439,7 +441,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			return $order->get_id();
-		} catch ( Exception $e ) {
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -466,6 +470,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			return $order->get_id();
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

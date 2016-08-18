@@ -40,7 +40,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
         $product = WC_Helper_Product::create_simple_product();
         // Create 10 products reviews for the product
         for ( $i = 0; $i < 10; $i++ ) {
-            WC_Helper_Product::create_product_review( $product->id );
+            $review_id = WC_Helper_Product::create_product_review( $product->id );
         }
 
         $response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->id . '/reviews' ) );
@@ -49,7 +49,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
         $this->assertEquals( 200, $response->get_status() );
         $this->assertEquals( 10, count( $product_reviews ) );
         $this->assertContains( array(
-            'id'           => 2,
+            'id'           => $review_id,
             'date_created' => '2016-01-01T11:11:11',
             'review'       => 'Review content here',
             'rating'       => 0,
@@ -59,7 +59,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
             '_links' => array(
                 'self'       => array(
                     array(
-                        'href' => rest_url( '/wc/v1/products/' . $product->id . '/reviews/2' ),
+                        'href' => rest_url( '/wc/v1/products/' . $product->id . '/reviews/' . $review_id ),
                     ),
                 ),
                 'collection' => array(
