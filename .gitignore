@@ -8,6 +8,7 @@ project.properties
 .idea
 
 # Grunt
+/vendor/
 /node_modules/
 
 # Sass
