@@ -301,22 +301,29 @@ class WC_Structured_Data {
 		if ( ! is_array( $breadcrumb ) ) {
 			return false;
 		}
-		
-		if ( empty( $breadcrumb = $breadcrumb['breadcrumb'] ) ) {
+
+		if ( isset( $breadcrumb['breadcrumb'] ) ) {
+			$breadcrumb = $breadcrumb['breadcrumb'];
+		}
+
+		if ( empty( $breadcrumb ) ) {
 			return;
 		}
 
 		$position = 1;
 
-		foreach ( $breadcrumb as $key => $value ) {
-			$markup_crumbs[] = array(
+		foreach ( $breadcrumb as $key => $crumb ) {
+			$markup_crumbs[ $key ] = array(
 				'@type'    => 'ListItem',
 				'position' => $position ++,
 				'item'     => array(
-					'@id'  => ! empty( $value[1] ) && sizeof( $breadcrumb ) !== $key + 1 ? $value[1] : '#',
-					'name' => $value[0],
+					'name' => $crumb[0],
 				),
 			);
+
+			if ( ! empty( $crumb[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
+				$markup_crumbs[ $key ]['item'] += array( '@id' => $crumb[1] );
+			}
 		}
 
 		$markup['@type']           = 'BreadcrumbList';
