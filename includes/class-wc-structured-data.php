@@ -210,7 +210,7 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function generate_product_data( $product = false ) {
-		if ( ! $product ) {
+		if ( $product === false ) {
 			global $product;
 		}
 
@@ -240,10 +240,11 @@ class WC_Structured_Data {
 		}
 		
 		$markup['@type']       = 'Product';
-		$markup['@id']         = get_the_permalink();
-		$markup['name']        = get_the_title();
-		$markup['description'] = get_the_excerpt();
-		$markup['url']         = get_the_permalink();
+		$markup['@id']         = get_permalink( $product->get_id() );
+		$markup['url']         = get_permalink( $product->get_id() );
+		$markup['name']        = $product->get_title();
+		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
+		$markup['description'] = get_the_excerpt( $product->get_id() );
 		$markup['offers']      = $markup_offers;
 		
 		if ( $product->get_rating_count() ) {
@@ -271,20 +272,20 @@ class WC_Structured_Data {
 		}
 
 		$markup['@type']         = 'Review';
-		$markup['@id']           = get_the_permalink() . '#li-comment-' . get_comment_ID();
-		$markup['datePublished'] = get_comment_date( 'c' );
-		$markup['description']   = get_comment_text();
+		$markup['@id']           = get_comment_link( $comment->comment_ID );
+		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
+		$markup['description']   = get_comment_text( $comment->comment_ID );
 		$markup['itemReviewed']  = array(
 			'@type' => 'Product',
-			'name'  => get_the_title(),
+			'name'  => get_the_title( $comment->post_ID ),
 		);
 		$markup['reviewRating']  = array(
 			'@type'       => 'rating',
-			'ratingValue' => intval( get_comment_meta( $comment->comment_ID, 'rating', true ) ),
+			'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
 		);
 		$markup['author']        = array(
 			'@type' => 'Person',
-			'name'  => get_comment_author(),
+			'name'  => get_comment_author( $comment->comment_ID ),
 		);
 		
 		return $this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
@@ -431,10 +432,10 @@ class WC_Structured_Data {
 		}
 
 		$markup['@type']              = 'Order';
+		$markup['url']                = $order_url;
 		$markup['orderStatus']        = $order_status;
 		$markup['orderNumber']        = $order->get_order_number();
 		$markup['orderDate']          = date( 'c', $order->get_date_created() );
-		$markup['url']                = $order_url;
 		$markup['acceptedOffer']      = $markup_offers;
 		$markup['discount']           = $order->get_total_discount();
 		$markup['discountCurrency']   = $order->get_currency();
