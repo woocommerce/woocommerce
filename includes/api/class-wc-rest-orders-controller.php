@@ -126,31 +126,32 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Expands an order item to get its data.
+	 * @param WC_Order_item $item
 	 * @return array
 	 */
 	protected function get_order_item_data( $item ) {
 		$data           = $item->get_data();
 		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
 
-		// Format decimal values
+		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
 			if ( isset( $data[ $key ] ) ) {
 				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 			}
 		}
 
-		// Add meta, SKU and PRICE to products
+		// Add meta, SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
 			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
 
-			// Format meta data
+			// Format meta data.
 			if ( isset( $data['meta_data'] ) ) {
 				$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
 				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
 				foreach ( $item_meta as $key => $values ) {
-					// Label was used in previous version of API - set it here
+					// Label was used in previous version of API - set it here.
 					$item_meta[ $key ]->label = $values->display_key;
 					unset( $item_meta[ $key ]->display_key );
 					unset( $item_meta[ $key ]->display_value );
@@ -160,7 +161,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		// Format taxes
+		// Format taxes.
 		if ( ! empty( $data['taxes']['total'] ) ) {
 			$taxes = array();
 
@@ -199,25 +200,25 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
-		// Format decimal values
+		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
 			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 		}
 
-		// Format date values
+		// Format date values.
 		foreach ( $format_date as $key ) {
 			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
 		}
 
-		// Format the order status
+		// Format the order status.
 		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
 
-		// Format line items
+		// Format line items.
 		foreach ( $format_line_items as $key ) {
 			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
-		// Refunds
+		// Refunds.
 		foreach ( $order->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->id,
@@ -382,6 +383,15 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
+		/**
+		 * Filter the data for the insert.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for the response.
+		 *
+		 * @param WC_Order           $order      The prder object.
+		 * @param WP_REST_Request    $request    Request object.
+		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
 	}
 
@@ -420,14 +430,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$order = $this->prepare_item_for_database( $request );
 			$order->set_created_via( 'rest-api' );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->calculate_totals();
 			$order->save();
 
 			// Handle set paid
 			if ( true === $request['set_paid'] ) {
-				$order->payment_complete( $request->get_param( 'transaction_id' ) );
+				$order->payment_complete( $request['transaction_id'] );
 			}
 
 			return $order->get_id();
@@ -449,7 +457,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Handle set paid
 			if ( $order->needs_payment() && true === $request['set_paid'] ) {
-				$order->payment_complete( $request->get_param( 'transaction_id' ) );
+				$order->payment_complete( $request['transaction_id'] );
 			}
 
 			// If items have changed, recalculate order totals.

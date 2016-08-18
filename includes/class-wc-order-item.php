@@ -116,7 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_id() {
-		return absint( $this->_data['id'] );
+		return $this->_data['id'];
 	}
 
 	/**
@@ -124,7 +124,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order_id() {
-		return absint( $this->_data['order_id'] );
+		return $this->_data['order_id'];
 	}
 
 	/**
