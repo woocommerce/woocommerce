@@ -281,6 +281,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 		$data = array(
 			'order_id'   => $order_data->ID,
 			'amount'     => $request['amount'],
+			'reason'     => empty( $request['reason'] ) ? null : $request['reason'],
 			'line_items' => $request['line_items'],
 		);
 
