@@ -1489,7 +1489,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 		/**
 		 * @hooked WC_Structured_Data::generate_breadcrumblist_data() - 10
 		 */
-		do_action( 'woocommerce_breadcrumb', $args );
+		do_action( 'woocommerce_breadcrumb', $breadcrumbs, $args );
 
 		wc_get_template( 'global/breadcrumb.php', $args );
 	}

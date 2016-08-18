@@ -97,13 +97,13 @@ class WC_Structured_Data {
 			$structured_data[ strtolower( $value['@type'] ) ][] = $value;
 		}
 
-		// Wraps the multiple values of each type of structured data inside a graph. Then adds context for each type of value.
+		// Wraps the multiple values of each type of structured data inside a graph. Then adds context to each type of value.
 		foreach ( $structured_data as $type => $value ) {
 			$structured_data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
 			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
 		}
 
-		// If requested types, picks them up. Finally changes the associative array into an indexed one.
+		// If requested types, picks them up. Finally changes the associative array to an indexed one.
 		$structured_data = $requested_types ? array_values( array_intersect_key( $structured_data, array_flip( $requested_types ) ) ) : array_values( $structured_data );
 
 		if ( ! empty( $structured_data ) ) {
@@ -218,11 +218,17 @@ class WC_Structured_Data {
 			return false;
 		}
 
-		$variations = $product->is_type( 'variable' ) ? $product->get_available_variations() : array( $product );
-
-		foreach ( $variations as $variation ) {
-			$product_variation = count( $variations ) > 1 ? wc_get_product( $variation['variation_id'] ) : $variation;
+		if ( $is_variable = $product->is_type( 'variable' ) ) {
+			$variations = $product->get_available_variations();
 			
+			foreach ( $variations as $variation ) {
+				$product_variations[] = wc_get_product( $variation['variation_id'] );
+			}
+		} else {
+			$product_variations[] = $product;
+		}
+
+		foreach ( $product_variations as $product_variation ) {
 			$markup_offers[] = array(
 				'@type'         => 'Offer',
 				'priceCurrency' => get_woocommerce_currency(),
@@ -230,7 +236,7 @@ class WC_Structured_Data {
 				'availability'  => 'http://schema.org/' . $stock = ( $product_variation->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 				'sku'           => $product_variation->get_sku(),
 				'image'         => wp_get_attachment_url( $product_variation->get_image_id() ),
-				'description'   => count( $variations ) > 1 ? $product_variation->get_variation_description() : '',
+				'description'   => $is_variable ? $product_variation->get_variation_description() : '',
 				'seller'        => array(
 					'@type' => 'Organization',
 					'name'  => get_bloginfo( 'name' ),
@@ -295,25 +301,19 @@ class WC_Structured_Data {
 	 * Generates BreadcrumbList structured data.
 	 *
 	 * @uses   `woocommerce_breadcrumb` action hook
-	 * @param  array $breadcrumb
+	 * @param  object $breadcrumbs
 	 * @return bool|void
 	 */
-	public function generate_breadcrumblist_data( $breadcrumb ) {
-		if ( ! is_array( $breadcrumb ) ) {
+	public function generate_breadcrumblist_data( $breadcrumbs ) {
+		if ( ! is_object( $breadcrumbs ) ) {
 			return false;
-		}
-
-		if ( isset( $breadcrumb['breadcrumb'] ) ) {
-			$breadcrumb = $breadcrumb['breadcrumb'];
-		}
-
-		if ( empty( $breadcrumb ) ) {
+		} elseif ( ! $crumbs = $breadcrumbs->get_breadcrumb() ) {
 			return;
 		}
 
 		$position = 1;
 
-		foreach ( $breadcrumb as $key => $crumb ) {
+		foreach ( $crumbs as $key => $crumb ) {
 			$markup_crumbs[ $key ] = array(
 				'@type'    => 'ListItem',
 				'position' => $position ++,
@@ -322,7 +322,7 @@ class WC_Structured_Data {
 				),
 			);
 
-			if ( ! empty( $crumb[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
+			if ( ! empty( $crumb[1] ) && sizeof( $crumbs ) !== $key + 1 ) {
 				$markup_crumbs[ $key ]['item'] += array( '@id' => $crumb[1] );
 			}
 		}
@@ -330,7 +330,7 @@ class WC_Structured_Data {
 		$markup['@type']           = 'BreadcrumbList';
 		$markup['itemListElement'] = $markup_crumbs;
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumb ) );
+		return $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
 	}
 
 	/**
@@ -364,9 +364,7 @@ class WC_Structured_Data {
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( ! is_object( $order ) ) {
 			return false;
-		}
-		
-		if ( $plain_text ) {
+		} elseif ( $plain_text ) {
 			return;
 		}
 
