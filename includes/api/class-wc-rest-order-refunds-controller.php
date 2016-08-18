@@ -300,7 +300,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			$order = wc_get_order( $order_data );
 
 			if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->id, $refund->get_refund_amount(), $refund->get_refund_reason() );
 
 				if ( is_wp_error( $result ) ) {
 					return $result;

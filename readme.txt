@@ -88,7 +88,6 @@ And, finally, consider joining or spearheading a WooCommerce Meetup locally, mor
 
 = Minimum Requirements =
 
-* WordPress 3.8 or greater
 * PHP version 5.2.4 or greater (PHP 5.6 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 * Some payment gateways require fsockopen support (for IPN access)

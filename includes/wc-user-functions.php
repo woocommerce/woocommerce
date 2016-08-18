@@ -453,7 +453,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					home_url( '/' )
 				),
 				'download_id'         => $result->download_id,
-				'product_id'          => $product_id,
+				'product_id'          => $_product->id,
 				'download_name'       => $download_name,
 				'order_id'            => $order->get_id(),
 				'order_key'           => $order->get_order_key(),
