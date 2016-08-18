@@ -311,12 +311,10 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$position = 1;
-
 		foreach ( $crumbs as $key => $crumb ) {
 			$markup_crumbs[ $key ] = array(
 				'@type'    => 'ListItem',
-				'position' => $position ++,
+				'position' => $key + 1,
 				'item'     => array(
 					'name' => $crumb[0],
 				),
