@@ -84,10 +84,16 @@ class WC_Shortcodes {
 	private static function product_loop( $query_args, $atts, $loop_name ) {
 		global $woocommerce_loop;
 
-		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $loop_name;
+		$transient_name              = 'wc_loop_' . $loop_name . '_' . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$products                    = get_transient( $transient_name );
+
+		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
+			$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
+			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+		}
 
 		ob_start();
 
