@@ -269,7 +269,7 @@ class WC_Webhook {
 					break;
 
 				case 'order':
-					$payload = WC()->api->WC_API_Orders->get_order( $resource_id );
+					$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
 					break;
 
 				case 'product':
