@@ -158,7 +158,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 			$line_item = array(
 				'id'           => $item_id,
-				'name'         => $item['name'],
+				'name'         => $item->get_name(),
 				'sku'          => $product_sku,
 				'product_id'   => (int) $product_id,
 				'variation_id' => (int) $variation_id,

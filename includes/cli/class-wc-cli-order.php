@@ -718,7 +718,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'         => $item['name'],
+				'name'         => $item->get_name(),
 				'product_id'   => $product_id,
 				'sku'          => $product_sku,
 				'meta'         => $item_meta,

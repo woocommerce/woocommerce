@@ -295,7 +295,7 @@ class WC_Emails {
 
 			$item_offered = array(
 				'@type' => 'Product',
-				'name' => apply_filters( 'woocommerce_order_item_name', $item['name'], $item, $is_visible ),
+				'name' => apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible ),
 			);
 
 			if ( $product_exists ) {

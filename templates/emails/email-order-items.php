@@ -33,7 +33,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// Product name
-				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
+				echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
 
 				// SKU
 				if ( $show_sku && is_object( $product ) && $product->get_sku() ) {

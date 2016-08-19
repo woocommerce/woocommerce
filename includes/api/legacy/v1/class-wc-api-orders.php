@@ -186,7 +186,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'price'      => wc_format_decimal( $order->get_item_total( $item ), 2 ),
 				'quantity'   => (int) $item['qty'],
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'       => $item['name'],
+				'name'       => $item->get_name(),
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
 				'sku'        => is_object( $product ) ? $product->get_sku() : null,
 			);
