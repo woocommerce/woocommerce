@@ -278,7 +278,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_headers() {
-		return apply_filters( 'woocommerce_email_headers', "Content-Type: " . $this->get_content_type() . "\r\n", $this->id, $this->object );
+		if ( $this->id == 'new_order' ) { 
+			$header = "Content-Type: " . $this->get_content_type() . "\r\n Reply-to:" .$this->object->billing_first_name.' '.$this->object->billing_last_name.' <'.$this->object->billing_email.'>' . "\r\n";
+		} else { 
+			$header = "Content-Type: " . $this->get_content_type() . "\r\n";
+		}
+		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
 	}
 
 	/**
