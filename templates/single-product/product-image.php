@@ -22,18 +22,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $post, $product;
 $columns = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
+
 $post_thumbnail_id = get_post_thumbnail_id( $post->ID );
 
 $full_size_image  = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
-$full_size_width  = $full_size_image[1];
-$full_size_height = $full_size_image[2];
+
+$thumbnail_post   = get_post( $post_thumbnail_id );
+$image_title      = $thumbnail_post->post_content;
 
 ?>
 <div class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
+		$attributes = array(
+			'title'                   => $image_title,
+			'data-large-image'        => $full_size_image[0],
+			'data-large-image-width'  => $full_size_image[1],
+			'data-large-image-height' => $full_size_image[2],
+		);
 		if ( has_post_thumbnail() ) {
-			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '" data-size="' . esc_attr( $full_size_width ) . 'x' . esc_attr( $full_size_height ) . '" class="woocommerce-product-gallery__image-link">' . get_the_post_thumbnail( $post->ID, 'shop_single' ) . '</a></figure>' );
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single', $attributes ) . '</figure>' );
 		} else {
 			echo sprintf( '<figure><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
 		}
@@ -44,209 +52,64 @@ $full_size_height = $full_size_image[2];
 </div>
 
 <script type="text/javascript">
-var initPhotoSwipeFromDOM = function(gallerySelector) {
+function get_gallery_items() {
+	var $slides = jQuery( '.woocommerce-product-gallery__wrapper' ).children(),
+		items = [],
+		index = $slides.filter( '.' + 'flex-active-slide' ).index();
 
-    // parse slide data (url, title, size ...) from DOM elements
-    // (children of gallerySelector)
-    var parseThumbnailElements = function(el) {
-        var thumbElements = el.childNodes,
-            numNodes = thumbElements.length,
-            items = [],
-            figureEl,
-            linkEl,
-            size,
-            item;
+		if ( $slides.length > 0 ) {
+			$slides.each( function( i, el ) {
+				var img = jQuery( el ).find( 'img' ),
+					large_image_src = img.attr( 'data-large-image' ),
+					large_image_w   = img.attr( 'data-large-image-width' ),
+					large_image_h   = img.attr( 'data-large-image-height' ),
+					item            = {
+										src: large_image_src,
+										w:   large_image_w,
+										h:   large_image_h
+									};
 
-        for(var i = 0; i < numNodes; i++) {
+				var title = img.attr('title');
 
-            figureEl = thumbElements[i]; // <figure> element
+				item.title = title;
 
-            // include only element nodes
-            if(figureEl.nodeType !== 1) {
-                continue;
-            }
+				items.push( item );
 
-            linkEl = figureEl.children[0]; // <a> element
+			});
+		}
 
-            size = linkEl.getAttribute('data-size').split('x');
+	return {
+		index: index,
+		items: items
+	};
+}
 
-            // create slide object
-            item = {
-                src: linkEl.getAttribute('href'),
-                w: parseInt(size[0], 10),
-                h: parseInt(size[1], 10)
-            };
+function trigger_photoswipe( last_slide ) {
+	var pswpElement = jQuery( '.pswp' )[0];
 
+	// build items array
+	var items = get_gallery_items();
 
+	// define options (if needed)
+	var options = {
+		index:         typeof last_slide === "undefined" ? items.index : items.items.length-1, // start at first slide
+		shareEl:       false,
+		closeOnScroll: false,
+		history:       false,
+	};
 
-            if(figureEl.children.length > 1) {
-                // <figcaption> content
-                item.title = figureEl.children[1].innerHTML;
-            }
+	// Initializes and opens PhotoSwipe
+	var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items.items, options );
+		gallery.init();
+}
 
-            if(linkEl.children.length > 0) {
-                // <img> thumbnail element, retrieving thumbnail url
-                item.msrc = linkEl.children[0].getAttribute('src');
-            }
-
-            item.el = figureEl; // save link to element for getThumbBoundsFn
-            items.push(item);
-        }
-
-        return items;
-    };
-
-    // find nearest parent element
-    var closest = function closest(el, fn) {
-        return el && ( fn(el) ? el : closest(el.parentNode, fn) );
-    };
-
-    // triggers when user clicks on thumbnail
-    var onThumbnailsClick = function(e) {
-        e = e || window.event;
-        e.preventDefault ? e.preventDefault() : e.returnValue = false;
-
-        var eTarget = e.target || e.srcElement;
-
-        // find root element of slide
-        var clickedListItem = closest(eTarget, function(el) {
-            return (el.tagName && el.tagName.toUpperCase() === 'FIGURE');
-        });
-
-        if(!clickedListItem) {
-            return;
-        }
-
-        // find index of clicked item by looping through all child nodes
-        // alternatively, you may define index via data- attribute
-        var clickedGallery = clickedListItem.parentNode,
-            childNodes = clickedListItem.parentNode.childNodes,
-            numChildNodes = childNodes.length,
-            nodeIndex = 0,
-            index;
-
-        for (var i = 0; i < numChildNodes; i++) {
-            if(childNodes[i].nodeType !== 1) {
-                continue;
-            }
-
-            if(childNodes[i] === clickedListItem) {
-                index = nodeIndex;
-                break;
-            }
-            nodeIndex++;
-        }
-
-
-
-        if(index >= 0) {
-            // open PhotoSwipe if valid index found
-            openPhotoSwipe( index, clickedGallery );
-        }
-        return false;
-    };
-
-    // parse picture index and gallery index from URL (#&pid=1&gid=2)
-    var photoswipeParseHash = function() {
-        var hash = window.location.hash.substring(1),
-        params = {};
-
-        if(hash.length < 5) {
-            return params;
-        }
-
-        var vars = hash.split('&');
-        for (var i = 0; i < vars.length; i++) {
-            if(!vars[i]) {
-                continue;
-            }
-            var pair = vars[i].split('=');
-            if(pair.length < 2) {
-                continue;
-            }
-            params[pair[0]] = pair[1];
-        }
-
-        if(params.gid) {
-            params.gid = parseInt(params.gid, 10);
-        }
-
-        return params;
-    };
-
-    var openPhotoSwipe = function(index, galleryElement, disableAnimation, fromURL) {
-        var pswpElement = document.querySelectorAll('.pswp')[0],
-            gallery,
-            options,
-            items;
-
-        items = parseThumbnailElements(galleryElement);
-
-        // define options (if needed)
-        options = {
-
-            // define gallery index (for URL)
-            galleryUID: galleryElement.getAttribute('data-pswp-uid'),
-
-            getThumbBoundsFn: function(index) {
-                // See Options -> getThumbBoundsFn section of documentation for more info
-                var thumbnail = items[index].el.getElementsByTagName('img')[0], // find thumbnail
-                    pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
-                    rect = thumbnail.getBoundingClientRect();
-
-                return {x:rect.left, y:rect.top + pageYScroll, w:rect.width};
-            }
-
-        };
-
-        // PhotoSwipe opened from URL
-        if(fromURL) {
-            if(options.galleryPIDs) {
-                // parse real index when custom PIDs are used
-                // http://photoswipe.com/documentation/faq.html#custom-pid-in-url
-                for(var j = 0; j < items.length; j++) {
-                    if(items[j].pid == index) {
-                        options.index = j;
-                        break;
-                    }
-                }
-            } else {
-                // in URL indexes start from 1
-                options.index = parseInt(index, 10) - 1;
-            }
-        } else {
-            options.index = parseInt(index, 10);
-        }
-
-        // exit if index not found
-        if( isNaN(options.index) ) {
-            return;
-        }
-
-        if(disableAnimation) {
-            options.showAnimationDuration = 0;
-        }
-
-        // Pass data to PhotoSwipe and initialize it
-        gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
-        gallery.init();
-    };
-
-    // loop through all gallery elements and bind events
-    var galleryElements = document.querySelectorAll( gallerySelector );
-
-    for(var i = 0, l = galleryElements.length; i < l; i++) {
-        galleryElements[i].setAttribute('data-pswp-uid', i+1);
-        galleryElements[i].onclick = onThumbnailsClick;
-    }
-
-    // Parse URL and open gallery if it contains #&pid=3&gid=1
-    var hashData = photoswipeParseHash();
-    if(hashData.pid && hashData.gid) {
-        openPhotoSwipe( hashData.pid ,  galleryElements[ hashData.gid - 1 ], true, true );
-    }
-};
-
-// execute above function
-initPhotoSwipeFromDOM('.woocommerce-product-gallery__wrapper');
 </script>
+
+<?php if ( wp_script_is( 'photoswipe', 'enqueued' ) ) { ?>
+<script type="text/javascript">
+jQuery( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+jQuery( document ).on( 'click', '.woocommerce-product-gallery__trigger', function() {
+	trigger_photoswipe();
+});
+</script>
+<?php } ?>
