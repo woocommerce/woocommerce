@@ -25,8 +25,16 @@ $attachment_ids = $product->get_gallery_attachment_ids();
 
 if ( $attachment_ids ) {
 	foreach ( $attachment_ids as $attachment_id ) {
-		$image_source = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
 
-		echo '<figure data-thumb="' . esc_url( $image_source[0] ) . '" class="woocommerce-product-gallery__image">' . wp_get_attachment_image( $attachment_id, 'shop_single' ) . '</figure>';
+		$full_size_width  = $full_size_image[1];
+		$full_size_height = $full_size_image[2];
+
+		echo '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image">';
+			echo '<a href="' . esc_url( $full_size_image[0] ) . '" data-size="' . esc_attr( $full_size_width ) . 'x' . esc_attr( $full_size_height ) . '" class="woocommerce-product-gallery__image-link">';
+				echo wp_get_attachment_image( $attachment_id, 'shop_single' );
+			echo '</a>';
+		echo '</figure>';
 	}
 }
