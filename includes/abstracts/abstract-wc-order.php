@@ -811,15 +811,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	*/
 
 	/**
-	 * Prefixes an item key with a string so arrays are associative rather than numeric.
-	 * @param  int $id
-	 * @return string
-	 */
-	protected function prefix_item_id( $id ) {
-		return 'item-' . $id;
-	}
-
-	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 * @param string $type Order item type. Default null.
 	 */
@@ -874,7 +865,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( is_null( $this->_items[ $group ] ) ) {
 					$this->_items[ $group ] = $this->get_items_from_db( $type );
 				}
-				$items = array_merge( $items, $this->_items[ $group ] );
+				// Don't use array_merge here because keys are numeric
+				$items = $items + $this->_items[ $group ];
 			}
 		}
 
@@ -893,7 +885,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {
-			$items = array_map( array( $this, 'get_item' ), array_combine( array_map( array( $this, 'prefix_item_id' ), wp_list_pluck( $items, 'order_item_id' ) ), $items ) );
+			$items = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
 		} else {
 			$items = array();
 		}
@@ -1013,7 +1005,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Unset and remove later
 		$this->_items_to_delete[] = $item;
-		unset( $this->_items[ $items_key ][ $this->prefix_item_id( $item->get_id() ) ] );
+		unset( $this->_items[ $items_key ][ $item->get_id() ] );
 	}
 
 	/**
@@ -1032,7 +1024,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Append new row with generated temporary ID
 		if ( $item->get_id() ) {
-			$this->_items[ $items_key ][ $this->prefix_item_id( $item->get_id() ) ] = $item;
+			$this->_items[ $items_key ][ $item->get_id() ] = $item;
 		} else {
 			$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
 		}
@@ -1421,10 +1413,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// line items
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal     += wc_format_decimal( $item->get_subtotal() );
-			$cart_total        += wc_format_decimal( $item->get_total() );
-			$cart_subtotal_tax += wc_format_decimal( $item->get_subtotal_tax() );
-			$cart_total_tax    += wc_format_decimal( $item->get_total_tax() );
+			$cart_subtotal     += $item->get_subtotal();
+			$cart_total        += $item->get_total();
+			$cart_subtotal_tax += $item->get_subtotal_tax();
+			$cart_total_tax    += $item->get_total_tax();
 		}
 
 		$this->calculate_shipping();

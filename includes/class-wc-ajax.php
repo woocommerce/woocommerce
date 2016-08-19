@@ -1388,44 +1388,6 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Add some meta to a line item.
-	 */
-	public static function add_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
-
-		if ( $meta_id ) {
-			echo '<tr data-meta_id="' . esc_attr( $meta_id ) . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
-		}
-
-		die();
-	}
-
-	/**
-	 * Remove meta from a line item.
-	 */
-	public static function remove_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		global $wpdb;
-
-		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array(
-			'meta_id' => absint( $_POST['meta_id'] ),
-		) );
-
-		die();
-	}
-
-	/**
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {

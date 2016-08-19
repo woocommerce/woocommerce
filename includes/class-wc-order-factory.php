@@ -60,7 +60,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 * @param int
-	 * @return WC_Order_Item
+	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
 		global $wpdb;
@@ -99,6 +99,6 @@ class WC_Order_Factory {
 				break;
 			}
 		}
-		return new WC_Order_Item();
+		return false;
 	}
 }

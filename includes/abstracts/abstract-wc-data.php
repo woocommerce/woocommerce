@@ -226,6 +226,16 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Delete meta data.
+	 * @since 2.6.0
+	 * @param int $mid Meta ID
+	 */
+	public function delete_meta_data_by_mid( $mid ) {
+		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $mid );
+		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+	}
+
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * @since 2.6.0
 	 */

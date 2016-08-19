@@ -49,8 +49,8 @@
 					?>
 					<tr data-meta_id="<?php echo esc_attr( $meta_id ); ?>">
 						<td>
-							<input type="text" name="meta_key[<?php echo esc_attr( $meta_id ); ?>]" value="<?php echo esc_attr( $meta->key ); ?>" />
-							<textarea name="meta_value[<?php echo esc_attr( $meta_id ); ?>]"><?php echo esc_textarea( rawurldecode( $meta->value ) ); ?></textarea>
+							<input type="text" name="meta_key[<?php echo esc_attr( $item_id ); ?>][<?php echo esc_attr( $meta_id ); ?>]" value="<?php echo esc_attr( $meta->key ); ?>" />
+							<textarea name="meta_value[<?php echo esc_attr( $item_id ); ?>][<?php echo esc_attr( $meta_id ); ?>]"><?php echo esc_textarea( rawurldecode( $meta->value ) ); ?></textarea>
 						</td>
 						<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>
 					</tr>
