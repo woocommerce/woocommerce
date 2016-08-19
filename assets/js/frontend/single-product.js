@@ -87,18 +87,18 @@ jQuery( function( $ ) {
 	 * Detect if the visitor is using a touch device
 	 * @return bool
 	 */
-	/*function is_touch_device() {
+	function is_touch_device() {
 		return 'ontouchstart' in window // works on most browsers
 		|| navigator.maxTouchPoints;    // works on IE10/11 and Surface
-	};*/
+	};
 
 	// Init Zoom if present
-	/*if ( $.isFunction( $.fn.zoom ) ) {
+	if ( $.isFunction( $.fn.zoom ) ) {
 		// But only zoom if the img is larger than its container and the visitor is not on a touch device.
 		if ( ( jQuery( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > jQuery( '.woocommerce-product-gallery' ).width() ) && ( ! is_touch_device() ) ) {
 			jQuery( '.woocommerce-product-gallery__image' ).zoom();
 		}
-	}*/
+	}
 });
 
 /**

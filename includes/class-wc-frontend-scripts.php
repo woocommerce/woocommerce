@@ -206,7 +206,7 @@ class WC_Frontend_Scripts {
 			self::enqueue_style( 'photoswipe', $assets_path . 'css/photoswipe/photoswipe.css' );
 			self::enqueue_style( 'photoswipe-default-skin', $assets_path . 'css/photoswipe/default-skin/default-skin.css' );
 
-			//self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
+			self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
 		}
 
 		if ( is_product() ) {
