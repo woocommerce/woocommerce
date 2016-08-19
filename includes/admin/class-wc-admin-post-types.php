@@ -651,7 +651,7 @@ class WC_Admin_Post_Types {
 						$item_meta_html = $item_meta->display( true, true );
 						?>
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
-							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
+							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
 							<td class="name">
 								<?php  if ( $product ) : ?>
 									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>

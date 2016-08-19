@@ -162,9 +162,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
 			'order_key'                 => $order->get_order_key(),
-			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
-			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
-			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
+			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
+			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
+			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -215,47 +215,32 @@ class WC_API_Orders extends WC_API_Resource {
 			'tax_lines'                 => array(),
 			'fee_lines'                 => array(),
 			'coupon_lines'              => array(),
-			'is_vat_exempt'             => $order->is_vat_exempt === 'yes' ? true : false,
 		);
 
 		// Add line items.
 		foreach ( $order->get_items() as $item_id => $item ) {
-			$product     = $order->get_product_from_item( $item );
-			$product_id  = null;
-			$product_sku = null;
+			$product    = $item->get_product();
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+			$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
-			// Check if the product exists.
-			if ( is_object( $product ) ) {
-				$product_id  = ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id;
-				$product_sku = $product->get_sku();
-			}
-
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
-			$item_meta = array();
-
-			$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
-
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
-				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
-				);
+			foreach ( $item_meta as $key => $values ) {
+				$item_meta[ $key ]->label = $values->display_key;
+				unset( $item_meta[ $key ]->display_key );
+				unset( $item_meta[ $key ]->display_value );
 			}
 
 			$line_item = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'subtotal_tax' => wc_format_decimal( $item->get_subtotal_tax(), $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'quantity'     => wc_stock_amount( $item['qty'] ),
-				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
+				'quantity'     => $item->get_qty(),
+				'tax_class'    => $item->get_tax_class(),
 				'name'         => $item->get_name(),
-				'product_id'   => $product_id,
-				'sku'          => $product_sku,
+				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
+				'sku'          => is_object( $product ) ? $product->get_sku() : null,
 				'meta'         => $item_meta,
 			);
 
@@ -274,9 +259,9 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
 			$order_data['shipping_lines'][] = array(
 				'id'           => $shipping_item_id,
-				'method_id'    => $shipping_item['method_id'],
-				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
+				'method_id'    => $shipping_item->get_method_id(),
+				'method_title' => $shipping_item->get_name(),
+				'total'        => wc_format_decimal( $shipping_item->get_total(), $dp ),
 			);
 		}
 
@@ -306,8 +291,8 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
 			$order_data['fee_lines'][] = array(
 				'id'        => $fee_item_id,
-				'title'     => $fee_item['name'],
-				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
+				'title'     => $fee_item->get_name(),
+				'tax_class' => $fee_item->get_tax_class(),
 				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
 				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
 			);
@@ -317,12 +302,12 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
 			$coupon_line = array(
 				'id'     => $coupon_item_id,
-				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
+				'code'   => $coupon_item->get_code(),
+				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), $dp ),
 			);
 
 			if ( in_array( 'coupons', $expand ) ) {
-				$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item['name'] );
+				$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item->get_code() );
 
 				if ( ! is_wp_error( $_coupon_data ) && isset( $_coupon_data['coupon'] ) ) {
 					$coupon_line['coupon_data'] = $_coupon_data['coupon'];
@@ -1560,39 +1545,36 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Add line items
 			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
+				$product    = $item->get_product();
+				$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
-				$product   = $order->get_product_from_item( $item );
-				$meta      = new WC_Order_Item_Meta( $item, $product );
-				$item_meta = array();
-
-				foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
-					$item_meta[] = array(
-						'key' => $meta_key,
-						'label' => $formatted_meta['label'],
-						'value' => $formatted_meta['value'],
-					);
+				foreach ( $item_meta as $key => $values ) {
+					$item_meta[ $key ]->label = $values->display_key;
+					unset( $item_meta[ $key ]->display_key );
+					unset( $item_meta[ $key ]->display_value );
 				}
 
 				$line_items[] = array(
 					'id'               => $item_id,
 					'subtotal'         => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
-					'subtotal_tax'     => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
+					'subtotal_tax'     => wc_format_decimal( $item->get_subtotal_tax(), 2 ),
 					'total'            => wc_format_decimal( $order->get_line_total( $item ), 2 ),
 					'total_tax'        => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
 					'price'            => wc_format_decimal( $order->get_item_total( $item ), 2 ),
-					'quantity'         => (int) $item['qty'],
-					'tax_class'        => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
+					'quantity'         => $item->get_quantity(),
+					'tax_class'        => $item->get_tax_class(),
 					'name'             => $item->get_name(),
-					'product_id'       => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
+					'product_id'       => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 					'sku'              => is_object( $product ) ? $product->get_sku() : null,
 					'meta'             => $item_meta,
-					'refunded_item_id' => (int) $item['refunded_item_id'],
+					'refunded_item_id' => (int) $item->get_meta( 'refunded_item_id' ),
 				);
 			}
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( $refund->date ),
+				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
 				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
 				'reason'     => $refund->get_refund_reason(),
 				'line_items' => $line_items

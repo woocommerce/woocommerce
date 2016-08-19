@@ -130,30 +130,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 		// Add line items.
 		foreach ( $refund->get_items() as $item_id => $item ) {
-			$product      = $refund->get_product_from_item( $item );
-			$product_id   = 0;
-			$variation_id = 0;
-			$product_sku  = null;
+			$product    = $item->get_product();
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+			$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
-			// Check if the product exists.
-			if ( is_object( $product ) ) {
-				$product_id   = $product->id;
-				$variation_id = $product->variation_id;
-				$product_sku  = $product->get_sku();
-			}
-
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
-			$item_meta = array();
-
-			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
-
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
-				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
-				);
+			foreach ( $item_meta as $key => $values ) {
+				$item_meta[ $key ]->label = $values->display_key;
+				unset( $item_meta[ $key ]->display_key );
+				unset( $item_meta[ $key ]->display_value );
 			}
 
 			$line_item = array(
@@ -162,13 +146,13 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 				'sku'          => $product_sku,
 				'product_id'   => (int) $product_id,
 				'variation_id' => (int) $variation_id,
-				'quantity'     => wc_stock_amount( $item['qty'] ),
-				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
+				'quantity'     => $item->get_quantity(),
+				'tax_class'    => $item->get_tax_class(),
 				'price'        => wc_format_decimal( $refund->get_item_total( $item, false, false ), $dp ),
 				'subtotal'     => wc_format_decimal( $refund->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'subtotal_tax' => wc_format_decimal( $item->get_subtotal_tax(), $dp ),
 				'total'        => wc_format_decimal( $refund->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
 				'taxes'        => array(),
 				'meta'         => $item_meta,
 			);

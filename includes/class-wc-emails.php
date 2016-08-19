@@ -289,7 +289,7 @@ class WC_Emails {
 				continue;
 			}
 
-			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
 
@@ -321,7 +321,7 @@ class WC_Emails {
 				'priceCurrency'    => $order->get_currency(),
 				'eligibleQuantity' => (object) array(
 					'@type' => 'QuantitativeValue',
-					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
+					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item )
 				),
 				'url'              => get_home_url(),
 			);
