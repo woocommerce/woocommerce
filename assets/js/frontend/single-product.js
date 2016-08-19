@@ -100,3 +100,60 @@ jQuery( function( $ ) {
 		}
 	}*/
 });
+
+/**
+ * Get product gallery image items
+ */
+function get_gallery_items() {
+	var $slides = jQuery( '.woocommerce-product-gallery__wrapper' ).children(),
+		items = [],
+		index = $slides.filter( '.' + 'flex-active-slide' ).index();
+
+		if ( $slides.length > 0 ) {
+			$slides.each( function( i, el ) {
+				var img = jQuery( el ).find( 'img' ),
+					large_image_src = img.attr( 'data-large-image' ),
+					large_image_w   = img.attr( 'data-large-image-width' ),
+					large_image_h   = img.attr( 'data-large-image-height' ),
+					item            = {
+										src: large_image_src,
+										w:   large_image_w,
+										h:   large_image_h
+									};
+
+				var title = img.attr('title');
+
+				item.title = title;
+
+				items.push( item );
+
+			});
+		}
+
+	return {
+		index: index,
+		items: items
+	};
+}
+
+/**
+ * Initialise photoswipe
+ */
+function trigger_photoswipe( last_slide ) {
+	var pswpElement = jQuery( '.pswp' )[0];
+
+	// build items array
+	var items = get_gallery_items();
+
+	// define options (if needed)
+	var options = {
+		index:         typeof last_slide === "undefined" ? items.index : items.items.length-1, // start at first slide
+		shareEl:       false,
+		closeOnScroll: false,
+		history:       false,
+	};
+
+	// Initializes and opens PhotoSwipe
+	var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items.items, options );
+		gallery.init();
+}

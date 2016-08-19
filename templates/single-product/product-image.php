@@ -51,65 +51,11 @@ $image_title      = $thumbnail_post->post_content;
 	</figure>
 </div>
 
-<script type="text/javascript">
-function get_gallery_items() {
-	var $slides = jQuery( '.woocommerce-product-gallery__wrapper' ).children(),
-		items = [],
-		index = $slides.filter( '.' + 'flex-active-slide' ).index();
-
-		if ( $slides.length > 0 ) {
-			$slides.each( function( i, el ) {
-				var img = jQuery( el ).find( 'img' ),
-					large_image_src = img.attr( 'data-large-image' ),
-					large_image_w   = img.attr( 'data-large-image-width' ),
-					large_image_h   = img.attr( 'data-large-image-height' ),
-					item            = {
-										src: large_image_src,
-										w:   large_image_w,
-										h:   large_image_h
-									};
-
-				var title = img.attr('title');
-
-				item.title = title;
-
-				items.push( item );
-
-			});
-		}
-
-	return {
-		index: index,
-		items: items
-	};
-}
-
-function trigger_photoswipe( last_slide ) {
-	var pswpElement = jQuery( '.pswp' )[0];
-
-	// build items array
-	var items = get_gallery_items();
-
-	// define options (if needed)
-	var options = {
-		index:         typeof last_slide === "undefined" ? items.index : items.items.length-1, // start at first slide
-		shareEl:       false,
-		closeOnScroll: false,
-		history:       false,
-	};
-
-	// Initializes and opens PhotoSwipe
-	var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items.items, options );
-		gallery.init();
-}
-
-</script>
-
 <?php if ( wp_script_is( 'photoswipe', 'enqueued' ) ) { ?>
-<script type="text/javascript">
-jQuery( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
-jQuery( document ).on( 'click', '.woocommerce-product-gallery__trigger', function() {
-	trigger_photoswipe();
-});
-</script>
+	<script type="text/javascript">
+		jQuery( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+		jQuery( document ).on( 'click', '.woocommerce-product-gallery__trigger', function() {
+			trigger_photoswipe();
+		});
+	</script>
 <?php } ?>
