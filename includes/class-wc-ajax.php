@@ -1104,22 +1104,19 @@ class WC_AJAX {
 
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
+		$user_data = get_user_meta($user_id);
+		$customer_info_fields = array();
+		$customer_data = array();
 
-        $user_data = get_user_meta($user_id);
+		foreach ( array_keys( $user_data ) as $data ) {
+			if( strpos( $data, $type_to_load ) !== false ) array_push( $customer_info_fields, $data );
+		}
 
-        //Filter to keep only the appropriate data (billing or shipping) depending on $type_to_load variable
-        $filtered_customer_keys = array_filter(array_keys($user_data), function($item) use ($type_to_load){
-            if(strpos($item, $type_to_load) !== false) return true;
-            return false;
-        });
-
-        $customer_data = array();
-        foreach ( $filtered_customer_keys as $item ) {
-            $customer_data[$item] = get_user_meta( $user_id, $item, true );
-        }
+		foreach ( $customer_info_fields as $item ) {
+			$customer_data[$item] = get_user_meta( $user_id, $item, true );
+		}
 
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data, $user_id, $type_to_load );
-
 		wp_send_json( $customer_data );
 	}
 
