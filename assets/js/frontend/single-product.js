@@ -80,18 +80,25 @@ jQuery( function( $ ) {
 			controlNav:     flexslider_options.controlNav,
 			slideshow:      flexslider_options.slideshow,
 			animationSpeed: flexslider_options.animationSpeed,
-			animationLoop:  false, // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
+			animationLoop:  false // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
 		});
 	}
+
+	// Prepend the photoswipe trigger
+	jQuery( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+
+	// Trigger photoswipe
+	jQuery( document ).on( 'click', '.woocommerce-product-gallery__trigger', function() {
+		trigger_photoswipe();
+	});
 
 	/**
 	 * Detect if the visitor is using a touch device
 	 * @return bool
 	 */
 	function is_touch_device() {
-		return 'ontouchstart' in window // works on most browsers
-		|| navigator.maxTouchPoints;    // works on IE10/11 and Surface
-	};
+		return 'ontouchstart' in window || navigator.maxTouchPoints;
+	}
 
 	// Init Zoom if present
 	if ( $.isFunction( $.fn.zoom ) ) {
@@ -146,12 +153,12 @@ function trigger_photoswipe( last_slide ) {
 	// build items array
 	var items = get_gallery_items();
 
-	// define options (if needed)
+	// define options
 	var options = {
-		index:         typeof last_slide === "undefined" ? items.index : items.items.length-1, // start at first slide
+		index:         typeof last_slide === 'undefined' ? items.index : items.items.length-1, // start at first slide
 		shareEl:       false,
 		closeOnScroll: false,
-		history:       false,
+		history:       false
 	};
 
 	// Initializes and opens PhotoSwipe

@@ -50,12 +50,3 @@ $image_title      = $thumbnail_post->post_content;
 		?>
 	</figure>
 </div>
-
-<?php if ( wp_script_is( 'photoswipe', 'enqueued' ) ) { ?>
-	<script type="text/javascript">
-		jQuery( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
-		jQuery( document ).on( 'click', '.woocommerce-product-gallery__trigger', function() {
-			trigger_photoswipe();
-		});
-	</script>
-<?php } ?>
