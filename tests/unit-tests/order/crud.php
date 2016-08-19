@@ -15,15 +15,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: get_type
-	 */
-	function test_get_order_type() {
-		$object = new WC_Order();
-		$id = $object->save();
-		$this->assertEquals( 'shop_order', $object->get_order_type() );
-	}
-
-	/**
 	 * Test: get_data
 	 */
 	function test_get_data() {

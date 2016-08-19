@@ -1365,7 +1365,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$count += $refunded_item->get_qty();
+				$count += $refunded_item->get_quantity();
 			}
 		}
 
@@ -1383,7 +1383,7 @@ class WC_Order extends WC_Abstract_Order {
 		$qty = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$qty += $refunded_item->get_qty();
+				$qty += $refunded_item->get_quantity();
 			}
 		}
 		return $qty;
@@ -1401,7 +1401,7 @@ class WC_Order extends WC_Abstract_Order {
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
 				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$qty += $refunded_item->get_qty();
+					$qty += $refunded_item->get_quantity();
 				}
 			}
 		}

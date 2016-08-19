@@ -19,11 +19,11 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'code'          => '',
-		'discount'      => 0,
-		'discount_tax'  => 0,
+		'order_id'     => 0,
+		'id'           => 0,
+		'code'         => '',
+		'discount'     => 0,
+		'discount_tax' => 0,
 	);
 
 	/**

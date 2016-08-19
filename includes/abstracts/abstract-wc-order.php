@@ -34,7 +34,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
 		'version'            => '',
@@ -75,6 +74,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'fee_lines'      => null,
 		'tax_lines'      => null,
 	);
+
+	/**
+	 * Order items that need deleting are stored here.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_items_to_delete = array();
 
 	/**
 	 *  Internal meta type used to store order data.
@@ -195,7 +201,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
-		$this->set_order_type( $post_object->post_type );
 		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
 		$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
 		$this->set_currency( get_post_meta( $this->get_id(), '_order_currency', true ) );
@@ -295,6 +300,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Save all order items which are part of this order.
 	 */
 	protected function save_items() {
+		// remove items
+		foreach ( $this->_items_to_delete as $item ) {
+			$item->delete();
+		}
+
+		$this->_items_to_delete = array();
+
+		// Add/save items
 		foreach ( $this->_items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -348,6 +361,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_merge(
 			$this->_data,
 			array(
+				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),
@@ -418,14 +432,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_prices_include_tax() {
 		return $this->_data['prices_include_tax'];
-	}
-
-	/**
-	 * Get Order Type
-	 * @return string
-	 */
-	public function get_order_type() {
-		return $this->_data['type'];
 	}
 
 	/**
@@ -673,14 +679,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 }
 
 	/**
-	 * Set Order Type
-	 * @param string $value
-	 */
-	public function set_order_type( $value ) {
-		$this->_data['type'] = $value;
-	}
-
-	/**
 	 * Set order_key.
 	 * @param string $value Max length 20 chars.
 	 */
@@ -701,6 +699,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $value
 	 */
 	public function set_currency( $value ) {
+		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
+			//$this->throw_exception( 'invalid_currency', 'Invalid currency code' );
+		}
 		$this->_data['currency'] = $value;
 	}
 
@@ -961,7 +962,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$count = 0;
 
 		foreach ( $items as $item ) {
-			$count += $item->get_qty();
+			$count += $item->get_quantity();
 		}
 
 		return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
@@ -978,32 +979,55 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get key for where a certain item type is stored in _items.
+	 * @since  2.7.0
+	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
+	 * @return string
+	 */
+	protected function get_items_key( $item ) {
+		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+			return 'line_items';
+		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+			return 'fee_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+			return 'shipping_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
+			return 'tax_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
+			return 'coupon_lines';
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * Remove item from the order.
+	 * @param int $item_id
+	 */
+	public function remove_item( $item_id ) {
+		$item = $this->get_item( $item_id );
+
+		if ( ! $item || ! ( $items_key = $this->get_items_key( $item ) ) ) {
+			return false;
+		}
+
+		// Unset and remove later
+		$this->_items_to_delete[] = $item;
+		unset( $this->_items[ $items_key ][ $this->prefix_item_id( $item->get_id() ) ] );
+	}
+
+	/**
 	 * Adds an order item to this order. The order item will not persist until save.
 	 * @param object Order item (product, shipping, fee, coupon, tax)
 	 */
 	public function add_item( $item ) {
-		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
-			$item_type = 'line_item';
-			$items_key = 'line_items';
-		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
-			$item_type = 'fee';
-			$items_key = 'fee_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
-			$item_type = 'shipping';
-			$items_key = 'shipping_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
-			$item_type = 'tax';
-			$items_key = 'tax_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
-			$item_type = 'coupon';
-			$items_key = 'coupon_lines';
-		} else {
+		if ( ! $items_key = $this->get_items_key( $item ) ) {
 			return false;
 		}
 
 		// Make sure existing items are loaded so we can append this new one.
 		if ( is_null( $this->_items[ $items_key ] ) ) {
-			$this->_items[ $items_key ] = $this->get_items( $item_type );
+			$this->_items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
 		// Append new row with generated temporary ID
@@ -1023,7 +1047,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'qty'          => $qty,
+			'quantity'     => $qty,
 			'name'         => $product ? $product->get_title() : '',
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
@@ -1432,9 +1456,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
 			if ( $inc_tax ) {
-				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_qty() );
+				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$subtotal = ( $item->get_subtotal() / max( 1, $item->get_qty() ) );
+				$subtotal = ( $item->get_subtotal() / max( 1, $item->get_quantity() ) );
 			}
 
 			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
@@ -1480,9 +1504,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_total' ) ) ) {
 			if ( $inc_tax ) {
-				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_qty() );
+				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$total = $item->get_total() / max( 1, $item->get_qty() );
+				$total = $item->get_total() / max( 1, $item->get_quantity() );
 			}
 
 			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;
@@ -1524,7 +1548,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$tax = 0;
 
 		if ( is_callable( array( $item, 'get_total_tax' ) ) ) {
-			$tax = $item->get_total_tax() / max( 1, $item->get_qty() );
+			$tax = $item->get_total_tax() / max( 1, $item->get_quantity() );
 			$tax = $round ? wc_round_tax_total( $tax ) : $tax;
 		}
 
