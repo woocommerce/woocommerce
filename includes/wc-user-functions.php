@@ -275,7 +275,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->get_user_id() || empty( $order->get_user_id() ) ) {
+				if ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
@@ -453,7 +453,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					home_url( '/' )
 				),
 				'download_id'         => $result->download_id,
-				'product_id'          => $product_id,
+				'product_id'          => $_product->id,
 				'download_name'       => $download_name,
 				'order_id'            => $order->get_id(),
 				'order_key'           => $order->get_order_key(),

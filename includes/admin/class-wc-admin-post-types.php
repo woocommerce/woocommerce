@@ -651,12 +651,12 @@ class WC_Admin_Post_Types {
 						$item_meta_html = $item_meta->display( true, true );
 						?>
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
-							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
+							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
 							<td class="name">
 								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?></a>
+									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
 								<?php else : ?>
-									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>
+									<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>
 								<?php endif; ?>
 								<?php if ( ! empty( $item_meta_html ) ) : ?>
 									<?php echo wc_help_tip( $item_meta_html ); ?>
@@ -2203,7 +2203,7 @@ class WC_Admin_Post_Types {
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = wc_get_order( $existing_permission->order_id );
 
-				if ( ! empty( $order->get_id() ) ) {
+				if ( $order->get_id() ) {
 					// Remove permissions
 					if ( ! empty( $removed_download_ids ) ) {
 						foreach ( $removed_download_ids as $download_id ) {

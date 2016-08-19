@@ -26,21 +26,7 @@ if ( wc_tax_enabled() ) {
 		}
 	}
 
-	// Older orders won't have line taxes so we need to handle them differently :(
-	$tax_data = '';
-	if ( $line_items ) {
-		$check_item = current( $line_items );
-		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
-	} elseif ( $line_items_shipping ) {
-		$check_item = current( $line_items_shipping );
-		$tax_data = maybe_unserialize( isset( $check_item['taxes'] ) ? $check_item['taxes'] : '' );
-	} elseif ( $line_items_fee ) {
-		$check_item = current( $line_items_fee );
-		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
-	}
-
-	$legacy_order     = ! empty( $order_taxes ) && empty( $tax_data ) && ! is_array( $tax_data );
-	$show_tax_columns = ! $legacy_order || sizeof( $order_taxes ) === 1;
+	$show_tax_columns = sizeof( $order_taxes ) === 1;
 }
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
@@ -53,7 +39,7 @@ if ( wc_tax_enabled() ) {
 				<th class="quantity sortable" data-sort="int"><?php _e( 'Qty', 'woocommerce' ); ?></th>
 				<th class="line_cost sortable" data-sort="float"><?php _e( 'Total', 'woocommerce' ); ?></th>
 				<?php
-					if ( empty( $legacy_order ) && ! empty( $order_taxes ) ) :
+					if ( ! empty( $order_taxes ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );

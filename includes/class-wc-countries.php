@@ -434,6 +434,7 @@ class WC_Countries {
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 				'NO' => $postcode_before_city,
 				'PL' => $postcode_before_city,
+				'PT' => $postcode_before_city,
 				'SK' => $postcode_before_city,
 				'SI' => $postcode_before_city,
 				'ES' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}",

@@ -19,13 +19,13 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'method_title'  => '',
-		'method_id'     => '',
-		'total'         => 0,
-		'total_tax'     => 0,
-		'taxes'         => array(
+		'order_id'     => 0,
+		'id'           => 0,
+		'method_title' => '',
+		'method_id'    => '',
+		'total'        => 0,
+		'total_tax'    => 0,
+		'taxes'        => array(
 			'total' => array()
 		),
 	);

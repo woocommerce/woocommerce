@@ -118,7 +118,7 @@ class WC_API extends WC_Legacy_API {
 		$this->rest_api_includes();
 
 		// Init REST API routes.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
 	/**
@@ -174,8 +174,6 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );
-
-		do_action( 'woocommerce_api_includes' );
 	}
 
 	/**
@@ -186,7 +184,7 @@ class WC_API extends WC_Legacy_API {
 		// Register settings to the REST API.
 		$this->register_wp_admin_settings();
 
-		$controllers = apply_filters( 'woocommerce_api_controllers', array(
+		$controllers = array(
 			'WC_REST_Coupons_Controller',
 			'WC_REST_Customer_Downloads_Controller',
 			'WC_REST_Customers_Controller',
@@ -214,7 +212,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Webhooks_Controller',
 			'WC_REST_System_Status_Controller',
 			'WC_REST_System_Status_Tools_Controller',
-		) );
+		);
 
 		foreach ( $controllers as $controller ) {
 			$this->$controller = new $controller();

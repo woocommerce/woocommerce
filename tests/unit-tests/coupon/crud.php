@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Coupon;
-
 /**
  * Class CRUD
  * @package WooCommerce\Tests\Coupon
  */
-class CouponCRUD extends \WC_Unit_Test_Case {
+class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Some of our get/setters were renamed. This will return the function
@@ -33,7 +31,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 */
 	function test_coupon_create() {
 		$code = 'coupon-' . time();
-		$coupon = new \WC_Coupon;
+		$coupon = new WC_Coupon;
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test comment.' );
 		$coupon->create();
@@ -47,7 +45,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_coupon_delete() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertNotEquals( 0, $coupon_id  );
 		$coupon->delete();
@@ -60,7 +58,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_coupon_update() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertEquals( 'dummycoupon', $coupon->get_code() );
 		$coupon->set_code( 'dummycoupon2' );
@@ -75,14 +73,14 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 */
 	function test_coupon_read() {
 		$code = 'coupon-' . time();
-		$coupon = new \WC_Coupon;
+		$coupon = new WC_Coupon;
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test coupon.' );
 		$coupon->set_usage_count( 5 );
 		$coupon->create();
 		$coupon_id = $coupon->get_id();
 
-		$coupon_read = new \WC_Coupon;
+		$coupon_read = new WC_Coupon;
 		$coupon_read->read( $coupon_id );
 
 		$this->assertEquals( 5, $coupon_read->get_usage_count() );
@@ -95,7 +93,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_coupon_save() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$coupon->set_code( 'dummycoupon2' );
 		$coupon->save();
@@ -103,7 +101,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'dummycoupon2', $coupon->get_code() );
 		$this->assertEquals( $coupon_id, $coupon->get_id() );
 
-		$new_coupon = new \WC_Coupon;
+		$new_coupon = new WC_Coupon;
 		$new_coupon->set_code( 'dummycoupon3' );
 		$new_coupon->save();
 		$new_coupon_id = $new_coupon->get_id();
@@ -127,7 +125,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		);
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 		add_post_meta( $coupon->get_id(), 'test_coupon_field', 'testing', true );
 		$coupon->read( $coupon->get_id() );
 
@@ -161,7 +159,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_read_manual_coupon() {
 		$code = 'manual_coupon_' . time();
-		$coupon = new \WC_Coupon( $code );
+		$coupon = new WC_Coupon( $code );
 		$coupon->read_manual_coupon( $code, array(
 			'id'                         => true,
 			'type'                       => 'fixed_cart',
@@ -193,7 +191,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$legacy_keys = array( 'product_ids', 'exclude_product_ids', 'individual_use', 'free_shipping', 'exclude_sale_items' );
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 		$code = 'bc_manual_coupon_' . time();
-		$coupon = new \WC_Coupon( $code );
+		$coupon = new WC_Coupon( $code );
 		$coupon->read_manual_coupon( $code, array(
 			'id'                         => true,
 			'type'                       => 'fixed_cart',
@@ -236,7 +234,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 			'customer_email' => array( 'test@woo.local' ), 'used_by' => array( 1 ),
 		);
 
-		$coupon = new \WC_Coupon;
+		$coupon = new WC_Coupon;
 		 foreach ( $standard_getters_and_setters as $function => $value ) {
 		 	$function = $this->get_function_name( $function );
 			$coupon->{"set_{$function}"}( $value );
@@ -249,7 +247,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_get_custom_fields() {
-		$coupon     = \WC_Helper_Coupon::create_coupon();
+		$coupon     = WC_Helper_Coupon::create_coupon();
 		$coupon_id  = $coupon->get_id();
 		$meta_value = time() . '-custom-value';
 		add_post_meta( $coupon_id, 'test_coupon_field', $meta_value, true );
@@ -264,7 +262,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_set_custom_fields() {
-		$coupon     = \WC_Helper_Coupon::create_coupon();
+		$coupon     = WC_Helper_Coupon::create_coupon();
 		$coupon_id  = $coupon->get_id();
 		$meta_value = time() . '-custom-value';
 		$coupon->add_meta_data( 'my-custom-field', $meta_value, true );

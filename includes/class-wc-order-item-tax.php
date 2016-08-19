@@ -20,7 +20,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 */
 	protected $_data = array(
 		'order_id'           => 0,
-		'order_item_id'      => 0,
+		'id'                 => 0,
 		'rate_code'          => '',
 		'rate_id'            => 0,
 		'label'              => '',

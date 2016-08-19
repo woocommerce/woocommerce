@@ -171,7 +171,7 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 }
 
 /**
- * Save order items.
+ * Save order items. Uses the CRUD.
  *
  * @since 2.2
  * @param int $order_id Order ID
@@ -181,200 +181,74 @@ function wc_save_order_items( $order_id, $items ) {
 	// Allow other plugins to check change in order items before they are saved
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	global $wpdb;
+	$order = wc_get_order( $order_id );
 
-	// Order items + fees
-	$subtotal     = 0;
-	$total        = 0;
-	$subtotal_tax = 0;
-	$total_tax    = 0;
-	$taxes        = array( 'items' => array(), 'shipping' => array() );
-
+	// Line items and fees
 	if ( isset( $items['order_item_id'] ) ) {
-		$line_total = $line_subtotal = $line_tax = $line_subtotal_tax = array();
-
 		foreach ( $items['order_item_id'] as $item_id ) {
-
-			$item_id = absint( $item_id );
-
-			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
-				$wpdb->update(
-					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) ),
-					array( 'order_item_id' => $item_id ),
-					array( '%s' ),
-					array( '%d' )
-				);
+			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+				continue;
 			}
 
-			if ( isset( $items['order_item_qty'][ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $items['order_item_qty'][ $item_id ] ) );
+			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
+				$item->set_name( wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) );
+			}
+
+			if ( isset( $items['order_item_qty'][ $item_id ] ) && is_callable( array( $item, 'set_quantity' ) ) ) {
+				$item->set_quantity( $items['order_item_qty'][ $item_id ] );
 			}
 
 			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
+				$item->set_tax_class( wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
 			}
 
-			// Get values. Subtotals might not exist, in which case copy value from total field
-			$line_total[ $item_id ]        = isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0;
-			$line_subtotal[ $item_id ]     = isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $line_total[ $item_id ];
-			$line_tax[ $item_id ]          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ] : array();
-			$line_subtotal_tax[ $item_id ] = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ] : $line_tax[ $item_id ];
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-			// Format taxes
-			$line_taxes          = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
-			$line_subtotal_taxes = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
+					if ( strstr( $meta_id, 'new-' ) ) {
+						if ( $meta_key === '' && $meta_value === '' ) {
+							continue;
+						}
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} elseif ( $meta_key === '' && $meta_value === '' ) {
+						$item->delete_meta_data_by_mid( $meta_id );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
 
-			// Update values
-			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( $line_subtotal_taxes ) );
-			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( $line_taxes ) );
-
-			// Save line tax data - Since 2.2
-			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
-			$taxes['items'][] = $line_taxes;
-
-			// Total up
-			$subtotal     += wc_format_decimal( $line_subtotal[ $item_id ] );
-			$total        += wc_format_decimal( $line_total[ $item_id ] );
-			$subtotal_tax += array_sum( $line_subtotal_taxes );
-			$total_tax    += array_sum( $line_taxes );
-
-			// Clear meta cache
-			wp_cache_delete( $item_id, 'order_item_meta' );
-		}
-	}
-
-	// Save meta
-	$meta_keys   = isset( $items['meta_key'] ) ? $items['meta_key'] : array();
-	$meta_values = isset( $items['meta_value'] ) ? $items['meta_value'] : array();
-
-	foreach ( $meta_keys as $id => $meta_key ) {
-		$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
-
-		// Delele blank item meta entries
-		if ( $meta_key === '' && $meta_value === '' ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $id ) );
-		} else {
-
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				array(
-					'meta_key'   => wp_unslash( $meta_key ),
-					'meta_value' => wp_unslash( $meta_value )
-				),
-				array( 'meta_id' => $id ),
-				array( '%s', '%s' ),
-				array( '%d' )
-			);
+			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]: array();
+			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
+			$item->set_total( isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0 );
+			$item->set_subtotal( isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $item->get_total() );
+			$item->set_total_tax( array_sum( $line_tax ) );
+			$item->set_subtotal_tax( array_sum( $line_subtotal_tax ) );
+			$item->set_taxes( array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ) );
+			$item->save();
 		}
 	}
 
 	// Shipping Rows
-	$order_shipping = 0;
-
 	if ( isset( $items['shipping_method_id'] ) ) {
-
 		foreach ( $items['shipping_method_id'] as $item_id ) {
-			$item_id      = absint( $item_id );
-			$method_id    = isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '';
-			$method_title = isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '';
-			$cost         = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : '';
-			$ship_taxes   = isset( $items['shipping_taxes'][ $item_id ] ) ? array_map( 'wc_format_decimal', $items['shipping_taxes'][ $item_id ] ) : array();
-
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_items',
-				array( 'order_item_name' => $method_title ),
-				array( 'order_item_id' => $item_id ),
-				array( '%s' ),
-				array( '%d' )
-			);
-
-			wc_update_order_item_meta( $item_id, 'method_id', $method_id );
-			wc_update_order_item_meta( $item_id, 'cost', $cost );
-			wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
-
-			$taxes['shipping'][] = $ship_taxes;
-
-			$order_shipping += $cost;
-		}
-	}
-
-	// Taxes
-	$order_taxes        = isset( $items['order_taxes'] ) ? $items['order_taxes'] : array();
-	$taxes_items        = array();
-	$taxes_shipping     = array();
-	$total_tax          = 0;
-	$total_shipping_tax = 0;
-
-	// Sum items taxes
-	foreach ( $taxes['items'] as $rates ) {
-
-		foreach ( $rates as $id => $value ) {
-
-			if ( isset( $taxes_items[ $id ] ) ) {
-				$taxes_items[ $id ] += $value;
-			} else {
-				$taxes_items[ $id ] = $value;
+			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+				continue;
 			}
+			$item->set_method_id( isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '' );
+			$item->set_method_title( isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '' );
+			$item->set_total( isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ] : '' );
+			$item->set_taxes( isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() );
+			$item->save();
 		}
 	}
 
-	// Sum shipping taxes
-	foreach ( $taxes['shipping'] as $rates ) {
+	// Updates tax totals
+	$order->update_taxes();
 
-		foreach ( $rates as $id => $value ) {
-
-			if ( isset( $taxes_shipping[ $id ] ) ) {
-				$taxes_shipping[ $id ] += $value;
-			} else {
-				$taxes_shipping[ $id ] = $value;
-			}
-		}
-	}
-
-	// Update order taxes
-	foreach ( $order_taxes as $item_id => $rate_id ) {
-
-		if ( isset( $taxes_items[ $rate_id ] ) ) {
-			$_total = wc_format_decimal( $taxes_items[ $rate_id ] );
-			wc_update_order_item_meta( $item_id, 'tax_amount', $_total );
-
-			$total_tax += $_total;
-		}
-
-		if ( isset( $taxes_shipping[ $rate_id ] ) ) {
-			$_total = wc_format_decimal( $taxes_shipping[ $rate_id ] );
-			wc_update_order_item_meta( $item_id, 'shipping_tax_amount', $_total );
-
-			$total_shipping_tax += $_total;
-		}
-	}
-
-	// Update order shipping total
-	update_post_meta( $order_id, '_order_shipping', $order_shipping );
-
-	// Update cart discount from item totals
-	update_post_meta( $order_id, '_cart_discount', $subtotal - $total );
-	update_post_meta( $order_id, '_cart_discount_tax', $subtotal_tax - $total_tax );
-
-	// Update totals
-	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
-
-	// Update tax
-	update_post_meta( $order_id, '_order_tax', wc_format_decimal( $total_tax ) );
-	update_post_meta( $order_id, '_order_shipping_tax', wc_format_decimal( $total_shipping_tax ) );
-
-	// Remove old values
-	delete_post_meta( $order_id, '_shipping_method' );
-	delete_post_meta( $order_id, '_shipping_method_title' );
-
-	// Set the currency
-	add_post_meta( $order_id, '_order_currency', get_woocommerce_currency(), true );
-
-	// Update version after saving
-	update_post_meta( $order_id, '_order_version', WC_VERSION );
+	// Calc totals - this also triggers save
+	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );

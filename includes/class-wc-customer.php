@@ -21,42 +21,42 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @var array
 	 */
 	protected $_data = array(
-		'id'				   => 0,
-		'email'                => '',
-		'first_name'           => '',
-		'last_name'            => '',
-		'role'				   => 'customer',
-		'last_order_id'        => null, // read only
-		'last_order_date'      => null, // read only
-		'orders_count'         => 0, // read only
-		'total_spent'          => 0, // read only
-		'username'             => '', // read only on existing users
-		'password'             => '', // write only
-		'date_created'         => '', // read only
-		'date_modified'		   => '', // read only
-		'billing_first_name'   => '',
-		'billing_last_name'    => '',
-		'billing_company'      => '',
-		'billing_phone'        => '',
-		'billing_email'        => '',
-		'billing_postcode'     => '',
-		'billing_city'         => '',
-		'billing_address_1'    => '',
-		'billing_address_2'    => '',
-		'billing_state'        => '',
-		'billing_country'      => '',
-		'shipping_first_name'  => '',
-		'shipping_last_name'   => '',
-		'shipping_company'     => '',
-		'shipping_postcode'    => '',
-		'shipping_city'        => '',
-		'shipping_address_1'   => '',
-		'shipping_address_2'   => '',
-		'shipping_state'       => '',
-		'shipping_country'     => '',
-		'is_paying_customer'   => false,
-		'is_vat_exempt'        => false, // session only.
-		'calculated_shipping'  => false, // session only
+		'id'                  => 0,
+		'email'               => '',
+		'first_name'          => '',
+		'last_name'           => '',
+		'role'                => 'customer',
+		'last_order_id'       => null, // read only
+		'last_order_date'     => null, // read only
+		'orders_count'        => 0, // read only
+		'total_spent'         => 0, // read only
+		'username'            => '', // read only on existing users
+		'password'            => '', // write only
+		'date_created'        => '', // read only
+		'date_modified'       => '', // read only
+		'billing_first_name'  => '',
+		'billing_last_name'   => '',
+		'billing_company'     => '',
+		'billing_phone'       => '',
+		'billing_email'       => '',
+		'billing_postcode'    => '',
+		'billing_city'        => '',
+		'billing_address_1'   => '',
+		'billing_address_2'   => '',
+		'billing_state'       => '',
+		'billing_country'     => '',
+		'shipping_first_name' => '',
+		'shipping_last_name'  => '',
+		'shipping_company'    => '',
+		'shipping_postcode'   => '',
+		'shipping_city'       => '',
+		'shipping_address_1'  => '',
+		'shipping_address_2'  => '',
+		'shipping_state'      => '',
+		'shipping_country'    => '',
+		'is_paying_customer'  => false,
+		'is_vat_exempt'       => false, // session only.
+		'calculated_shipping' => false, // session only
 	);
 
 	/**
@@ -99,37 +99,27 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected $_changed = false;
 
 	/**
-	 * If some of the customer information is loaded by session (instead of just from the DB).
+	 * If this is the customer session, this is true. When true, guest accounts will not be saved to the DB.
 	 * @var boolean
 	 */
-	protected $_from_session = false;
-
-	/**
-	 * WC_Customer can also return an object for a logged out user (session).
-	 * $_is_user will be false in this case. It will be true for all other cases
-	 * (logged in users or getting a WC_Customer for another object)
-	 * @var boolean
-	 */
-	protected $_is_user = false;
+	protected $_is_session = false;
 
 	/**
 	 * Load customer data based on how WC_Customer is called.
-	 * @param mixed $customer WC_Customer object or customer ID is accepted.
-	 * if $customer is 'new', you can build a new WC_Customer object. If it's empty, some
+	 *
+	 * If $customer is 'new', you can build a new WC_Customer object. If it's empty, some
 	 * data will be pulled from the session for the current user/customer.
+	 *
+	 * @param int $customer_id Customer ID
+	 * @param bool $is_session True if this is the customer session
 	 */
-	public function __construct( $customer = '' ) {
-		if ( $customer instanceof WC_Customer ) {
-			$this->_is_user = true;
-			$this->read( absint( $customer->get_id() ) );
-		} elseif ( is_numeric( $customer ) ) {
-			$this->_is_user = true;
-			$this->read( $customer );
-		} elseif ( empty( $customer ) ) {
-			$this->_is_user = true; // unless load_session gets called after.
+	public function __construct( $customer_id = 0, $is_session = false ) {
+		if ( $customer_id > 0 ) {
+			$this->read( $customer_id );
 		}
-
-		if ( $this->_from_session ) {
+		if ( $is_session ) {
+			$this->_is_session = true;
+			$this->load_session();
 			add_action( 'shutdown', array( $this, 'save_session_if_changed' ), 10 );
 		}
 	}
@@ -148,14 +138,131 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Loads a WC session into the customer class.
 	 */
 	public function load_session() {
-		$this->_from_session = true;
-		if ( is_user_logged_in() ) {
-			$this->_is_user = true;
-			$this->read( get_current_user_id() );
-		} else {
-			$this->_is_user = false;
-			$this->read( WC()->session->get_customer_id() );
+		$data = (array) WC()->session->get( 'customer' );
+		if ( ! empty( $data ) ) {
+			foreach ( $this->_session_keys as $session_key ) {
+				$function_key = $session_key;
+				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+					$session_key = str_replace( 'billing_', '', $session_key );
+				}
+				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$function_key}" ) ) ) {
+					$this->{"set_{$function_key}"}( $data[ $session_key ] );
+				}
+			}
 		}
+		$this->load_defaults();
+	}
+
+	/**
+	 * Load default values if props are unset.
+	 */
+	protected function load_defaults() {
+		$default = wc_get_customer_default_location();
+
+		// Set some defaults if some of our values are still not set.
+		if ( ! $this->get_billing_country() ) {
+			$this->set_billing_country( $default['country'] );
+		}
+
+		if ( ! $this->get_shipping_country() ) {
+			$this->set_shipping_country( $this->get_billing_country() );
+		}
+
+		if ( ! $this->get_billing_state() ) {
+			$this->set_billing_state( $default['state'] );
+		}
+
+		if ( ! $this->get_shipping_state() ) {
+			$this->set_shipping_state( $this->get_billing_state() );
+		}
+	}
+
+	/**
+	 * Gets the customers last order.
+	 * @return WC_Order|false
+	 */
+	public function get_last_order() {
+		global $wpdb;
+
+		$last_order = $wpdb->get_var( "SELECT posts.ID
+			FROM $wpdb->posts AS posts
+			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
+			WHERE meta.meta_key = '_customer_user'
+			AND   meta.meta_value = '" . esc_sql( $this->get_id() ) . "'
+			AND   posts.post_type = 'shop_order'
+			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+			ORDER BY posts.ID DESC
+		" );
+
+		if ( $last_order ) {
+			return wc_get_order( absint( $last_order ) );
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Return the number of orders this customer has.
+	 * @since 2.7.0
+	 * @return integer
+	 */
+	public function get_order_count() {
+		global $wpdb;
+
+		$count = $wpdb->get_var( "SELECT COUNT(*)
+			FROM $wpdb->posts as posts
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			WHERE   meta.meta_key = '_customer_user'
+			AND     posts.post_type = 'shop_order'
+			AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+			AND     meta_value = '" . esc_sql( $this->get_id() ) . "'
+		" );
+
+		return absint( $count );
+	}
+
+	/**
+	 * Return how much money this customer has spent.
+	 * @since 2.7.0
+	 * @return float
+	 */
+	public function get_total_spent() {
+		global $wpdb;
+
+		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+			FROM $wpdb->posts as posts
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+			WHERE   meta.meta_key       = '_customer_user'
+			AND     meta.meta_value     = '" . esc_sql( $this->get_id() ) . "'
+			AND     posts.post_type     = 'shop_order'
+			AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
+			AND     meta2.meta_key      = '_order_total'
+		" );
+
+		if ( ! $spent ) {
+			$spent = 0;
+		}
+
+		return wc_format_decimal( $spent );
+	}
+
+	/**
+	 * Is customer outside base country (for tax purposes)?
+	 * @return bool
+	 */
+	public function is_customer_outside_base() {
+		list( $country, $state ) = $this->get_taxable_address();
+		if ( $country ) {
+			$default = wc_get_base_location();
+			if ( $default['country'] !== $country ) {
+				return true;
+			}
+			if ( $default['state'] && $default['state'] !== $state ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/*
@@ -166,9 +273,9 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 
 	/**
-	 * Return a customer's user ID. If the current customer is logged out, this will be a session key.
+	 * Return a customer's user ID. Logged out users have ID 0.
 	 * @since 2.7.0
-	 * @return mixed
+	 * @return int
 	 */
 	public function get_id() {
 		return $this->_data['id'];
@@ -217,42 +324,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_role() {
 		return $this->_data['role'];
-	}
-
-	/**
-	 * Return customer's last order ID.
-	 * @since 2.7.0
-	 * @return integer|null
-	 */
-	public function get_last_order_id() {
-		return ( is_null( $this->_data['last_order_id'] ) ? null : intval( $this->_data['last_order_id'] ) );
-	}
-
-	/**
-	 * Return the date of the customer's last order.
-	 * @since 2.7.0
-	 * @return integer|null
-	 */
-	public function get_last_order_date() {
-		return ( is_null( $this->_data['last_order_date'] ) ? null : intval( $this->_data['last_order_date'] ) );
-	}
-
-	/**
-	 * Return the number of orders this customer has.
-	 * @since 2.7.0
-	 * @return integer
-	 */
-	public function get_orders_count() {
-		return intval( $this->_data['orders_count'] );
-	}
-
-	/**
-	 * Return how much money this customer has spent.
-	 * @since 2.7.0
-	 * @return float
-	 */
-	public function get_total_spent() {
-		return wc_format_decimal( $this->_data['total_spent'] );
 	}
 
 	/**
@@ -316,6 +387,22 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Gets billing phone.
+	 * @return string
+	 */
+	public function get_billing_phone() {
+		return $this->_data['billing_phone'];
+	}
+
+	/**
+	 * Gets billing email.
+	 * @return string
+	 */
+	public function get_billing_email() {
+		return $this->_data['billing_email'];
+	}
+
+	/**
 	 * Gets customer postcode.
 	 * @return string
 	 */
@@ -369,22 +456,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_billing_country() {
 		return $this->_data['billing_country'];
-	}
-
-	/**
-	 * Gets customer billing phone.
-	 * @return string
-	 */
-	public function get_billing_phone() {
-		return $this->_data['billing_phone'];
-	}
-
-	/**
-	 * Gets customer billing email.
-	 * @return string
-	 */
-	public function get_billing_email() {
-		return $this->_data['billing_email'];
 	}
 
 	/**
@@ -522,7 +593,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_downloadable_products() {
 		$downloads = array();
-		if ( $this->_is_user ) {
+		if ( $this->get_id() ) {
 			$downloads = wc_get_customer_available_downloads( $this->get_id() );
 		}
 		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
@@ -545,6 +616,15 @@ class WC_Customer extends WC_Legacy_Customer {
 	| database itself and should only change what is stored in the class
 	| object.
 	*/
+
+	/**
+	 * Set customer ID.
+	 * @since 2.7.0
+	 * @param int $value
+	 */
+	protected function set_id( $value ) {
+		$this->_data['id'] = absint( $value );
+	}
 
 	/**
 	 * Set customer's username.
@@ -589,42 +669,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_role( $role ) {
 		$this->_data['role'] = $role;
-	}
-
-	/**
-	 * Set customer's last order ID.
-	 * @since 2.7.0
-	 * @param integer|null $last_order_id
-	 */
-	public function set_last_order_id( $last_order_id ) {
-		$this->_data['last_order_id'] = $last_order_id;
-	}
-
-	/**
-	 * Set the date of the customer's last order.
-	 * @since 2.7.0
-	 * @param string|null $last_order_date
-	 */
-	public function set_last_order_date( $last_order_date ) {
-		$this->_data['last_order_date'] = $last_order_date;
- 	}
-
-	/**
-	 * Set the number of orders this customer has.
-	 * @since 2.7.0
-	 * @param integer $order_count
-	 */
-	public function set_orders_count( $orders_count ) {
-		$this->_data['orders_count'] = $orders_count;
-	}
-
-	/**
-	 * Return how much money this customer has spent.
-	 * @since 2.7.0
-	 * @param float $total_spent
-	 */
-	public function set_total_spent( $total_spent ) {
-		$this->_data['total_spent'] = $total_spent;
 	}
 
 	/**
@@ -707,6 +751,46 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Set billing first name.
+	 * @return string
+	 */
+	public function set_billing_first_name( $value ) {
+		$this->_data['billing_first_name'] = $value;
+	}
+
+	/**
+	 * Set billing last name.
+	 * @return string
+	 */
+	public function set_billing_last_name( $value ) {
+		$this->_data['billing_last_name'] = $value;
+	}
+
+	/**
+	 * Set billing company.
+	 * @return string
+	 */
+	public function set_billing_company( $value ) {
+		$this->_data['billing_company'] = $value;
+	}
+
+	/**
+	 * Set billing phone.
+	 * @return string
+	 */
+	public function set_billing_phone( $value ) {
+		$this->_data['billing_phone'] = $value;
+	}
+
+	/**
+	 * Set billing email.
+	 * @return string
+	 */
+	public function set_billing_email( $email ) {
+		$this->_data['billing_email'] = sanitize_email( $email );
+	}
+
+	/**
 	 * Set customer country.
 	 * @param mixed $country
 	 */
@@ -720,46 +804,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_billing_state( $state ) {
 		$this->_data['billing_state'] = $state;
-	}
-
-	/**
-	 * Sets customer billing first name.
-	 * @param string $first_name
-	 */
-	public function set_billing_first_name( $first_name ) {
-		$this->_data['billing_first_name'] = $first_name;
-	}
-
-	/**
-	 * Sets customer billing last name.
-	 * @param string $last_name
-	 */
-	public function set_billing_last_name( $last_name ) {
-		$this->_data['billing_last_name'] = $last_name;
-	}
-
-	/**
-	 * Sets customer billing company.
-	 * @param string $company.
-	 */
-	public function set_billing_company( $company ) {
-		$this->_data['billing_company'] = $company;
-	}
-
-	/**
-	 * Sets customer billing phone.
-	 * @param string $phone
-	 */
-	public function set_billing_phone( $phone ) {
-		$this->_data['billing_phone'] = $phone;
-	}
-
-	/**
-	 * Sets customer billing email.
-	 * @param string $email
-	 */
-	public function set_billing_email( $email ) {
-		$this->_data['billing_email'] = $email;
 	}
 
 	/**
@@ -908,31 +952,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/*
-	|--------------------------------------------------------------------------
-	| Other methods
-	|--------------------------------------------------------------------------
-	| Other functions for interacting with customers.
-	*/
-
-	/**
-	 * Is customer outside base country (for tax purposes)?
-	 * @return bool
-	 */
-	public function is_customer_outside_base() {
-		list( $country, $state ) = $this->get_taxable_address();
-		if ( $country ) {
-			$default = wc_get_base_location();
-			if ( $default['country'] !== $country ) {
-				return true;
-			}
-			if ( $default['state'] && $default['state'] !== $state ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
 	 |--------------------------------------------------------------------------
 	 | CRUD methods
 	 |--------------------------------------------------------------------------
@@ -948,8 +967,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	  */
 	public function create() {
 		$customer_id = wc_create_new_customer( $this->get_email(), $this->get_username(), $this->_data['password'] );
-		unset( $this->_data['password'] );
-		if ( $customer_id ) {
+
+		if ( ! is_wp_error( $customer_id ) ) {
 			$this->_data['id'] = $customer_id;
 			update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
 			update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
@@ -972,14 +991,14 @@ class WC_Customer extends WC_Legacy_Customer {
 			update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
 			update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
 			update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-			$this->set_date_modified( time() );
 			update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
 			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
 			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
 			$wp_user = new WP_User( $this->get_id() );
 			$this->set_date_created( strtotime( $wp_user->user_registered ) );
-			$this->save_meta_data();
+			$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
+			$this->read_meta_data();
 		}
 	}
 
@@ -990,124 +1009,35 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function read( $id ) {
 		global $wpdb;
-		$pull_from_db = true;
-		$data         = array();
-		if ( $this->_from_session ) {
-			$data = (array) WC()->session->get( 'customer' );
-			if ( ! empty( $data ) ) {
-				$pull_from_db  = false;
-				foreach ( $this->_session_keys as $session_key ) {
-					$function_key = $session_key;
-					if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-						$session_key = str_replace( 'billing_', '', $session_key );
-					}
-					if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$function_key}" ) ) ) {
-						$this->{"set_{$function_key}"}( $data[ $session_key ] );
-					}
-				}
+
+		// User object is required.
+		if ( ! $id || ! ( $user_object = get_user_by( 'id', $id ) ) || empty( $user_object->ID ) ) {
+			$this->set_id( 0 );
+			return;
+		}
+
+		// Only users on this site should be read.
+		if ( is_multisite() && ! is_user_member_of_blog( $id ) ) {
+			$this->set_id( 0 );
+			return;
+		}
+
+		$this->set_id( $user_object->ID );
+
+		foreach ( array_keys( $this->_data ) as $key ) {
+			$meta_value = get_user_meta( $id, $key, true );
+			if ( $meta_value && is_callable( array( $this, "set_{$key}" ) ) ) {
+				$this->{"set_{$key}"}( $meta_value );
 			}
 		}
 
-		if ( $this->_is_user ) {
-
-			// Only continue reading if the customer exists.
-			$user_object = get_userdata( $id );
-			if ( empty( $user_object ) || empty ( $user_object->ID ) ) {
-				$this->_data['id'] = 0;
-				return;
-			}
-
-			foreach ( array_keys( $this->_data ) as $key ) {
-				if ( 'billing_' === substr( $key, 0, 8 ) ) {
-					$session_key = str_replace( 'billing_', '', $key );
-				}
-				if ( ! $pull_from_db && ! empty( $data[ $session_key ] ) ) {
-					continue;
-				}
-
-				$meta_value = get_user_meta( $id, $key, true );
-				if ( $meta_value && is_callable( array( $this, "set_{$key}" ) ) ) {
-					$this->{"set_{$key}"}( $meta_value );
-				}
-			}
-
-			$this->set_is_paying_customer( get_user_meta( $id, 'paying_customer', true ) );
-			$wp_user = new WP_User( $id );
-			$this->set_email( $wp_user->user_email );
-			$this->set_username( $wp_user->user_login );
-			$this->set_date_created( strtotime( $wp_user->user_registered ) );
-			$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
-			$this->set_role( ( ! empty ( $wp_user->roles[0] ) ? $wp_user->roles[0] : 'customer' ) );
-
-			// Get info about user's last order
-			$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
-				FROM $wpdb->posts AS posts
-				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-				WHERE meta.meta_key = '_customer_user'
-				AND   meta.meta_value = {$id}
-				AND   posts.post_type = 'shop_order'
-				AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-				ORDER BY posts.ID DESC
-			" );
-
-			$this->set_last_order_id( is_object( $last_order ) ? $last_order->id : null );
-			$this->set_last_order_date( is_object( $last_order ) ? strtotime( $last_order->post_date_gmt ) : null );
-
-			// WC_Customer can't use wc_get_customer_order_count because get_order_types might not be loaded by the time a customer/session is
-
-			$count = $wpdb->get_var( "SELECT COUNT(*)
-				FROM $wpdb->posts as posts
-
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-
-				WHERE   meta.meta_key       = '_customer_user'
-				AND     posts.post_type = 'shop_order'
-				AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
-				AND     meta_value          = $id
-			" );
-
-			$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
-				FROM $wpdb->posts as posts
-
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-
-				WHERE   meta.meta_key       = '_customer_user'
-				AND     meta.meta_value     = $id
-				AND     posts.post_type     = 'shop_order'
-				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
-				AND     meta2.meta_key      = '_order_total'
-			" );
-			if ( ! $spent ) {
-				$spent = 0;
-			}
-
-			$this->set_orders_count( $count );
-			$this->set_total_spent( $spent );
-
-			$this->read_meta_data();
-		}
-
-		$this->_data['id'] = $id;
-
-		$default = wc_get_customer_default_location();
-
-		// Set some defaults if some of our values are still not set.
-		if ( empty( $this->get_billing_country() ) ) {
-			$this->set_billing_country( $default['country'] );
-		}
-
-		if ( empty( $this->get_shipping_country() ) ) {
-			$this->set_shipping_country( $this->get_billing_country() );
-		}
-
-		if ( empty( $this->get_billing_state() ) ) {
-			$this->set_billing_state( $default['state'] );
-		}
-
-		if ( empty( $this->get_shipping_state() ) ) {
-			$this->set_shipping_state( $this->get_billing_state() );
-		}
+		$this->set_is_paying_customer( get_user_meta( $id, 'paying_customer', true ) );
+		$this->set_email( $user_object->user_email );
+		$this->set_username( $user_object->user_login );
+		$this->set_date_created( strtotime( $user_object->user_registered ) );
+		$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
+		$this->set_role( ( ! empty ( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer' ) );
+		$this->read_meta_data();
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
 	}
@@ -1136,6 +1066,9 @@ class WC_Customer extends WC_Legacy_Customer {
 		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
 		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
 		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
+		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
+		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
+		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
 		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
 		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
 		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
@@ -1147,11 +1080,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
 		update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
 		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-		$this->set_date_modified( time() );
-		update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
 		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
 		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
+		$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
 		$this->save_meta_data();
 	}
 
@@ -1186,18 +1118,12 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @since 2.7.0
 	 */
 	public function save() {
-		if ( $this->_from_session && ! $this->_is_user ) {
+		if ( $this->_is_session ) {
 			$this->save_session_if_changed();
-			return;
-		}
-		if ( ! $this->_is_user ) {
+		} elseif ( ! $this->get_id() ) {
 			$this->create();
 		} else {
-			if ( ! $this->get_id() ) {
-				$this->create();
-			} else {
-				$this->update();
-			}
+			$this->update();
 		}
 	}
 
@@ -1206,9 +1132,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @since 2.7.0
 	 */
 	public function save_to_session() {
-		if ( ! $this->_from_session ) {
-			return;
-		}
 		$data = array();
 		foreach ( $this->_session_keys as $session_key ) {
 			$function_key = $session_key;

@@ -809,24 +809,16 @@ jQuery( function ( $ ) {
 			add: function() {
 				var $button = $( this );
 				var $item = $button.closest( 'tr.item, tr.shipping' );
-
-				var data = {
-					order_item_id: $item.attr( 'data-order_item_id' ),
-					action:        'woocommerce_add_order_item_meta',
-					security:      woocommerce_admin_meta_boxes.order_item_nonce
-				};
-
-				wc_meta_boxes_order_items.block();
-
-				$.ajax({
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
-						$item.find('tbody.meta_items').append( response );
-						wc_meta_boxes_order_items.unblock();
-					}
-				});
+				var $items = $item.find('tbody.meta_items');
+				var index  = $items.find('tr').length + 1;
+				var $row   = '<tr data-meta_id="0">' +
+					'<td>' +
+						'<input type="text" name="meta_key[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']" />' +
+						'<textarea name="meta_value[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']"></textarea>' +
+					'</td>' +
+					'<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>' +
+				'</tr>';
+				$items.append( $row );
 
 				return false;
 			},
@@ -834,24 +826,8 @@ jQuery( function ( $ ) {
 			remove: function() {
 				if ( window.confirm( woocommerce_admin_meta_boxes.remove_item_meta ) ) {
 					var $row = $( this ).closest( 'tr' );
-
-					var data = {
-						meta_id:  $row.attr( 'data-meta_id' ),
-						action:   'woocommerce_remove_order_item_meta',
-						security: woocommerce_admin_meta_boxes.order_item_nonce
-					};
-
-					wc_meta_boxes_order_items.block();
-
-					$.ajax({
-						url: woocommerce_admin_meta_boxes.ajax_url,
-						data: data,
-						type: 'POST',
-						success: function() {
-							$row.remove();
-							wc_meta_boxes_order_items.unblock();
-						}
-					});
+					$row.find( ':input' ).val( '' );
+					$row.hide();
 				}
 				return false;
 			}

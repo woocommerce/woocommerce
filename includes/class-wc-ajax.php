@@ -1319,8 +1319,14 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
+					} else {
+						$note = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
@@ -1360,8 +1366,14 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock increased from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
+					} else {
+						$note = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -1372,44 +1384,6 @@ class WC_AJAX {
 			}
 			echo implode( ', ', $return );
 		}
-		die();
-	}
-
-	/**
-	 * Add some meta to a line item.
-	 */
-	public static function add_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
-
-		if ( $meta_id ) {
-			echo '<tr data-meta_id="' . esc_attr( $meta_id ) . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
-		}
-
-		die();
-	}
-
-	/**
-	 * Remove meta from a line item.
-	 */
-	public static function remove_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		global $wpdb;
-
-		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array(
-			'meta_id' => absint( $_POST['meta_id'] ),
-		) );
-
 		die();
 	}
 

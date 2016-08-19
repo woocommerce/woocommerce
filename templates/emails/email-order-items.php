@@ -33,7 +33,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// Product name
-				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
+				echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
 
 				// SKU
 				if ( $show_sku && is_object( $product ) && $product->get_sku() ) {
@@ -53,7 +53,7 @@ foreach ( $items as $item_id => $item ) :
 				do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 			?></td>
-			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ); ?></td>
+			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ); ?></td>
 			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 		</tr>
 		<?php

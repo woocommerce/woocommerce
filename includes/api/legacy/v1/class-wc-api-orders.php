@@ -116,11 +116,11 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
-			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
-			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
+			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
+			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
+			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
 			'status'                    => $order->get_status(),
-			'currency'                  => $order->order_currency,
+			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
 			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
@@ -163,7 +163,7 @@ class WC_API_Orders extends WC_API_Resource {
 			),
 			'note'                      => $order->get_customer_note(),
 			'customer_ip'               => $order->get_customer_ip_address(),
-			'customer_user_agent'       => $order->get_user_agent(),
+			'customer_user_agent'       => $order->get_customer_user_agent(),
 			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),
@@ -175,37 +175,33 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// add line items
 		foreach( $order->get_items() as $item_id => $item ) {
-
-			$product = $order->get_product_from_item( $item );
-
+			$product                    = $item->get_product();
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,
 				'subtotal'   => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
 				'total'      => wc_format_decimal( $order->get_line_total( $item ), 2 ),
 				'total_tax'  => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
 				'price'      => wc_format_decimal( $order->get_item_total( $item ), 2 ),
-				'quantity'   => (int) $item['qty'],
-				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'       => $item['name'],
-				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
+				'quantity'   => $item->get_quantity(),
+				'tax_class'  => $item->get_tax_class(),
+				'name'       => $item->get_name(),
+				'product_id' => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 				'sku'        => is_object( $product ) ? $product->get_sku() : null,
 			);
 		}
 
 		// add shipping
 		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-
 			$order_data['shipping_lines'][] = array(
 				'id'           => $shipping_item_id,
-				'method_id'    => $shipping_item['method_id'],
-				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], 2 ),
+				'method_id'    => $shipping_item->get_method_id(),
+				'method_title' => $shipping_item->get_name(),
+				'total'        => wc_format_decimal( $shipping_item->get_total(), 2 ),
 			);
 		}
 
 		// add taxes
 		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
-
 			$order_data['tax_lines'][] = array(
 				'code'     => $tax_code,
 				'title'    => $tax->label,
@@ -216,11 +212,10 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// add fees
 		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
-
 			$order_data['fee_lines'][] = array(
 				'id'        => $fee_item_id,
-				'title'     => $fee_item['name'],
-				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
+				'title'     => $fee_item->get_name(),
+				'tax_class' => $fee_item->get_tax_class(),
 				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), 2 ),
 				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), 2 ),
 			);
@@ -228,11 +223,10 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// add coupons
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
-
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
-				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], 2 ),
+				'code'   => $coupon_item->get_code(),
+				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), 2 ),
 			);
 		}
 
@@ -385,13 +379,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @return float
 	 */
 	private function get_order_subtotal( $order ) {
-
 		$subtotal = 0;
 
 		// subtotal
 		foreach ( $order->get_items() as $item ) {
-
-			$subtotal += ( isset( $item['line_subtotal'] ) ) ? $item['line_subtotal'] : 0;
+			$subtotal += $item->get_subtotal();
 		}
 
 		return $subtotal;

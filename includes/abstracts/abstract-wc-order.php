@@ -34,7 +34,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
 		'version'            => '',
@@ -75,6 +74,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'fee_lines'      => null,
 		'tax_lines'      => null,
 	);
+
+	/**
+	 * Order items that need deleting are stored here.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_items_to_delete = array();
 
 	/**
 	 *  Internal meta type used to store order data.
@@ -195,7 +201,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
-		$this->set_order_type( $post_object->post_type );
 		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
 		$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
 		$this->set_currency( get_post_meta( $this->get_id(), '_order_currency', true ) );
@@ -295,6 +300,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Save all order items which are part of this order.
 	 */
 	protected function save_items() {
+		// remove items
+		foreach ( $this->_items_to_delete as $item ) {
+			$item->delete();
+		}
+
+		$this->_items_to_delete = array();
+
+		// Add/save items
 		foreach ( $this->_items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -309,21 +322,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						// Legacy action handler
 						switch ( $item_group ) {
 							case 'fee_lines' :
-								if ( has_action( 'woocommerce_add_order_fee_meta' ) && isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_order_fee_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_order_fee_meta', $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key );
+								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 							case 'shipping_lines' :
-								if ( has_action( 'woocommerce_add_shipping_order_item' ) && isset( $item->legacy_package_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_shipping_order_item', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->legacy_package_key );
+								if ( isset( $item->legacy_package_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $item_id, $item->legacy_package_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 							case 'line_items' :
-								if ( has_action( 'woocommerce_add_order_item_meta' ) && isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									_deprecated_function( 'Action: woocommerce_add_order_item_meta', '2.7', 'Use woocommerce_new_order_item action instead.' );
-									do_action( 'woocommerce_add_order_item_meta', $item_id, $item->legacy_values, $item->legacy_cart_item_key );
+								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 								}
 							break;
 						}
@@ -351,6 +361,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_merge(
 			$this->_data,
 			array(
+				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),
@@ -421,14 +432,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_prices_include_tax() {
 		return $this->_data['prices_include_tax'];
-	}
-
-	/**
-	 * Get Order Type
-	 * @return string
-	 */
-	public function get_order_type() {
-		return $this->_data['type'];
 	}
 
 	/**
@@ -676,14 +679,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 }
 
 	/**
-	 * Set Order Type
-	 * @param string $value
-	 */
-	public function set_order_type( $value ) {
-		$this->_data['type'] = $value;
-	}
-
-	/**
 	 * Set order_key.
 	 * @param string $value Max length 20 chars.
 	 */
@@ -704,6 +699,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $value
 	 */
 	public function set_currency( $value ) {
+		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
+			//$this->throw_exception( 'invalid_currency', 'Invalid currency code' );
+		}
 		$this->_data['currency'] = $value;
 	}
 
@@ -821,10 +819,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
+			if ( $group = $this->type_to_group( $type ) ) {
+				$this->_items[ $group ] = null;
+			}
 		} else {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
+			$this->_items = array(
+				'line_items'     => null,
+				'coupon_lines'   => null,
+				'shipping_lines' => null,
+				'fee_lines'      => null,
+				'tax_lines'      => null,
+			);
 		}
+	}
+
+	/**
+	 * Convert a type to a types group.
+	 * @param string $type
+	 * @return string group
+	 */
+	protected function type_to_group( $type ) {
+		$type_to_group = array(
+			'line_item' => 'line_items',
+			'tax'       => 'tax_lines',
+			'shipping'  => 'shipping_lines',
+			'fee'       => 'fee_lines',
+			'coupon'    => 'coupon_lines',
+		);
+		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
 	/**
@@ -833,24 +857,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return Array of WC_Order_item
 	 */
 	public function get_items( $types = 'line_item' ) {
-		$type_to_group = array(
-			'line_item' => 'line_items',
-			'tax'       => 'tax_lines',
-			'shipping'  => 'shipping_lines',
-			'fee'       => 'fee_lines',
-			'coupon'    => 'coupon_lines',
-		);
-
 		$items = array();
 		$types = array_filter( (array) $types );
 
 		foreach ( $types as $type ) {
-			if ( isset( $type_to_group[ $type ] ) ) {
-				if ( is_null( $this->_items[ $type_to_group[ $type ] ] ) ) {
-					$this->_items[ $type_to_group[ $type ] ] = $this->get_items_from_db( $type );
+			if ( $group = $this->type_to_group( $type ) ) {
+				if ( is_null( $this->_items[ $group ] ) ) {
+					$this->_items[ $group ] = $this->get_items_from_db( $type );
 				}
-
-				$items = array_merge( $items, $this->_items[ $type_to_group[ $type ] ] );
+				// Don't use array_merge here because keys are numeric
+				$items = $items + $this->_items[ $group ];
 			}
 		}
 
@@ -938,7 +954,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$count = 0;
 
 		foreach ( $items as $item ) {
-			$count += $item->get_qty();
+			$count += $item->get_quantity();
 		}
 
 		return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
@@ -955,67 +971,82 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get key for where a certain item type is stored in _items.
+	 * @since  2.7.0
+	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
+	 * @return string
+	 */
+	protected function get_items_key( $item ) {
+		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+			return 'line_items';
+		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+			return 'fee_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+			return 'shipping_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
+			return 'tax_lines';
+		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
+			return 'coupon_lines';
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * Remove item from the order.
+	 * @param int $item_id
+	 */
+	public function remove_item( $item_id ) {
+		$item = $this->get_item( $item_id );
+
+		if ( ! $item || ! ( $items_key = $this->get_items_key( $item ) ) ) {
+			return false;
+		}
+
+		// Unset and remove later
+		$this->_items_to_delete[] = $item;
+		unset( $this->_items[ $items_key ][ $item->get_id() ] );
+	}
+
+	/**
 	 * Adds an order item to this order. The order item will not persist until save.
 	 * @param object Order item (product, shipping, fee, coupon, tax)
 	 */
 	public function add_item( $item ) {
-		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
-			$item_type = 'line_item';
-			$items_key = 'line_items';
-		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
-			$item_type = 'fee';
-			$items_key = 'fee_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
-			$item_type = 'shipping';
-			$items_key = 'shipping_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
-			$item_type = 'tax';
-			$items_key = 'tax_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
-			$item_type = 'coupon';
-			$items_key = 'coupon_lines';
-		} else {
+		if ( ! $items_key = $this->get_items_key( $item ) ) {
 			return false;
 		}
 
 		// Make sure existing items are loaded so we can append this new one.
 		if ( is_null( $this->_items[ $items_key ] ) ) {
-			$this->_items[ $items_key ] = $this->get_items( $item_type );
+			$this->_items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
 		// Append new row with generated temporary ID
-		$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
+		if ( $item->get_id() ) {
+			$this->_items[ $items_key ][ $item->get_id() ] = $item;
+		} else {
+			$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
+		}
 	}
 
 	/**
 	 * Add a product line item to the order.
-	 * Order must be saved prior to adding items.
-	 * @param \WC_Product $product
-	 * @param array $args
-	 * @param array $deprecated qty was passed as arg 2 prior to 2.7.0
+	 * @param  \WC_Product $product
+	 * @param  int $qty
+	 * @param  array $args
 	 * @return int order item ID
 	 */
-	public function add_product( $product, $args = array(), $deprecated = array() ) {
-		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'qty', '2.7', 'Pass only product and args' );
-			$qty         = $args;
-			$args        = $deprecated;
-			$args['qty'] = $qty;
-		}
-
-		if ( empty( $args['qty'] ) ) {
-			$args['qty'] = 1;
-		}
-
+	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'qty'          => 1,
+			'quantity'     => $qty,
 			'name'         => $product ? $product->get_title() : '',
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
 			'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
 			'variation'    => $product && isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
-			'subtotal'     => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
-			'total'        => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
+			'subtotal'     => $product ? $product->get_price_excluding_tax( $qty ) : '',
+			'total'        => $product ? $product->get_price_excluding_tax( $qty ) : '',
 			'subtotal_tax' => 0,
 			'total_tax'    => 0,
 			'taxes'        => array(
@@ -1038,63 +1069,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$item = new WC_Order_Item_Product( $args );
-
-		// Handle backorders
-		if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-			$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
-		}
-
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_backorder_meta();
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_product' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_product', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_id(), $product, $qty, $args );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add coupon code to the order.
-	 * Order must be saved prior to adding items.
-	 * @param array $args
-	 * @param int $deprecated1 2.7.0 code, discount, tax were passed.
-	 * @param int $deprecated2 2.7.0 code, discount, tax were passed.
+	 * @param string $code
+	 * @param int $discount tax amount.
+	 * @param int $discount_tax amount.
 	 * @return int order item ID
 	 */
-	public function add_coupon( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
-		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'code', '2.7', 'Pass only an array of args' );
-			$args = array(
-				'code'         => $args,
-				'discount'     => $deprecated1,
-				'discount_tax' => $deprecated2,
-			);
-		}
-
-		$args = wp_parse_args( $args, array(
-			'code'         => '',
-			'discount'     => 0,
-			'discount_tax' => 0,
+	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
+		$item = new WC_Order_Item_Coupon( array(
+			'code'         => $code,
+			'discount'     => $discount,
+			'discount_tax' => $discount_tax,
 		) );
-
-		$item = new WC_Order_Item_Coupon( $args );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_coupon' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_coupon', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_id(), $args['code'], $args['discount'], $args['discount_tax'] );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_coupon', array( $this->get_id(), $item->get_id(), $code, $discount, $discount_tax ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add a tax row to the order.
-	 * Order must be saved prior to adding items.
-	 * @since 2.2
 	 * @param array $args
 	 * @param int $deprecated1 2.7.0 tax_rate_id, amount, shipping amount.
 	 * @param int $deprecated2 2.7.0 tax_rate_id, amount, shipping amount.
@@ -1109,7 +1113,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'shipping_tax_total' => $deprecated2,
 			);
 		}
-
 		$args = wp_parse_args( $args, array(
 			'rate_id'            => '',
 			'tax_total'          => 0,
@@ -1118,22 +1121,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'label'              => isset( $args['rate_id'] ) ? WC_Tax::get_rate_label( $args['rate_id'] ) : '',
 			'compound'           => isset( $args['rate_id'] ) ? WC_Tax::is_compound( $args['rate_id'] ) : '',
 		) );
-
 		$item = new WC_Order_Item_Tax( $args );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_tax' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_tax', array( $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
 	/**
 	 * Add a shipping row to the order.
-	 * Order must be saved prior to adding items.
 	 * @param WC_Shipping_Rate shipping_rate
 	 * @return int order item ID
 	 */
@@ -1145,14 +1142,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'taxes'        => $shipping_rate->taxes,
 			'meta_data'    => $shipping_rate->get_meta_data(),
 		) );
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_shipping' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_shipping', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_id(), $shipping_rate );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_shipping', array( $this->get_id(), $item->get_id(), $shipping_rate ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
 
@@ -1172,17 +1165,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'total' => $fee->tax_data,
 			),
 		) );
-
-		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->set_order_id( $this->get_id() );
 		$item->save();
-
-		if ( has_action( 'woocommerce_order_add_fee' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_fee', '2.7', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_id(), $fee );
-		}
-
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_fee', array( $this->get_id(), $item->get_id(), $fee ), '2.7', 'Use woocommerce_new_order_item action instead.' );
 		return $item->get_id();
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Payment Token Handling
+	|--------------------------------------------------------------------------
+	|
+	| Payment tokens are hashes used to take payments by certain gateways.
+	|
+	*/
 
 	/**
 	 * Add a payment token to an order
@@ -1416,10 +1413,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// line items
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal     += wc_format_decimal( $item->get_subtotal() );
-			$cart_total        += wc_format_decimal( $item->get_total() );
-			$cart_subtotal_tax += wc_format_decimal( $item->get_subtotal_tax() );
-			$cart_total_tax    += wc_format_decimal( $item->get_total_tax() );
+			$cart_subtotal     += $item->get_subtotal();
+			$cart_total        += $item->get_total();
+			$cart_subtotal_tax += $item->get_subtotal_tax();
+			$cart_total_tax    += $item->get_total_tax();
 		}
 
 		$this->calculate_shipping();
@@ -1451,9 +1448,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
 			if ( $inc_tax ) {
-				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_qty() );
+				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$subtotal = ( $item->get_subtotal() / max( 1, $item->get_qty() ) );
+				$subtotal = ( $item->get_subtotal() / max( 1, $item->get_quantity() ) );
 			}
 
 			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
@@ -1499,9 +1496,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_total' ) ) ) {
 			if ( $inc_tax ) {
-				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_qty() );
+				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$total = $item->get_total() / max( 1, $item->get_qty() );
+				$total = $item->get_total() / max( 1, $item->get_quantity() );
 			}
 
 			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;
@@ -1543,7 +1540,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$tax = 0;
 
 		if ( is_callable( array( $item, 'get_total_tax' ) ) ) {
-			$tax = $item->get_total_tax() / max( 1, $item->get_qty() );
+			$tax = $item->get_total_tax() / max( 1, $item->get_quantity() );
 			$tax = $round ? wc_round_tax_total( $tax ) : $tax;
 		}
 

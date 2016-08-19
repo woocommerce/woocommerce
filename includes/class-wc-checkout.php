@@ -231,7 +231,7 @@ class WC_Checkout {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = $values['data'];
 				$item    = new WC_Order_Item_Product( array(
-					'qty'          => $values['quantity'],
+					'quantity'     => $values['quantity'],
 					'name'         => $product ? $product->get_title() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
 					'product_id'   => $product ? $product->get_id() : '',
@@ -244,11 +244,7 @@ class WC_Checkout {
 					'taxes'        => $values['line_tax_data'],
 				) );
 
-				// Handle backorders @todo improve how these are handled/stored
-				if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-					$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $values['quantity'] - max( 0, $product->get_total_stock() ), true );
-				}
-
+				$item->set_backorder_meta();
 				// Set this to pass to legacy actions @todo remove in future release
 				$item->legacy_values        = $values;
 				$item->legacy_cart_item_key = $cart_item_key;
@@ -320,8 +316,6 @@ class WC_Checkout {
 
 			// Save the order
 			$order_id = $order->save();
-
-			$customer = new WC_Customer( $this->customer_id );
 
 			// Update user meta
 			$this->update_customer_data();
@@ -822,7 +816,6 @@ class WC_Checkout {
 						return $current_user->user_email;
 					}
 				}
-
 			}
 
 			switch ( $input ) {

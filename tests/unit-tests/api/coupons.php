@@ -1,14 +1,12 @@
 <?php
-namespace WooCommerce\Tests\API;
-
 /**
  * Coupon API Tests
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
-class Coupons extends \WC_API_Unit_Test_Case {
+class WC_Tests_API_Coupons extends WC_API_Unit_Test_Case {
 
-	/** @var \WC_API_Coupons instance */
+	/** @var WC_API_Coupons instance */
 	protected $endpoint;
 
 	/**
@@ -19,7 +17,7 @@ class Coupons extends \WC_API_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = WC()->api->WC_API_Coupons;
-		$this->coupon   = \WC_Helper_Coupon::create_coupon();
+		$this->coupon   = WC_Helper_Coupon::create_coupon();
 	}
 
 	/**
@@ -196,7 +194,7 @@ class Coupons extends \WC_API_Unit_Test_Case {
 		$response = $this->endpoint->create_coupon( $this->get_defaults() );
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], new \WC_Coupon( $response['coupon']['code'] ) );
+		$this->check_get_coupon_response( $response['coupon'], new WC_Coupon( $response['coupon']['code'] ) );
 	}
 
 	/**
@@ -261,7 +259,7 @@ class Coupons extends \WC_API_Unit_Test_Case {
 
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], new \WC_Coupon( $response['coupon']['code'] ) );
+		$this->check_get_coupon_response( $response['coupon'], new WC_Coupon( $response['coupon']['code'] ) );
 	}
 
 	/**
@@ -301,8 +299,8 @@ class Coupons extends \WC_API_Unit_Test_Case {
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'coupons', $response );
 		$this->assertCount( 2, $response['coupons'] );
-		$this->check_get_coupon_response( $response['coupons'][0], new \WC_Coupon( $response['coupons'][0]['code'] ) );
-		$this->check_get_coupon_response( $response['coupons'][1], new \WC_Coupon( $response['coupons'][1]['code'] ) );
+		$this->check_get_coupon_response( $response['coupons'][0], new WC_Coupon( $response['coupons'][0]['code'] ) );
+		$this->check_get_coupon_response( $response['coupons'][1], new WC_Coupon( $response['coupons'][1]['code'] ) );
 	}
 
 	/**
@@ -310,14 +308,14 @@ class Coupons extends \WC_API_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_edit_coupon_bulk() {
-		$coupon_1 = \WC_Helper_Coupon::create_coupon( 'dummycoupon-1-' . time() );
+		$coupon_1 = WC_Helper_Coupon::create_coupon( 'dummycoupon-1-' . time() );
 		$test_coupon_data = $this->get_defaults( array( 'description' => rand_str() ) );
 		$test_coupon_data['coupon']['id'] = $coupon_1->get_id();
 		$coupons = array( 'coupons' => array( $test_coupon_data['coupon'] ) );
 		$response = $this->endpoint->bulk( $coupons );
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'coupons', $response );
-		$this->check_get_coupon_response( $response['coupons'][0], new \WC_Coupon( $response['coupons'][0]['code'] ) );
+		$this->check_get_coupon_response( $response['coupons'][0], new WC_Coupon( $response['coupons'][0]['code'] ) );
 	}
 
 }

@@ -218,7 +218,7 @@ class WC_Gateway_Paypal_Request {
 		$item_names = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$item_names[] = $item['name'] . ' x ' . $item['qty'];
+			$item_names[] = $item->get_name() . ' x ' . $item['qty'];
 		}
 
 		return implode( ', ', $item_names );
@@ -231,7 +231,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	protected function get_order_item_name( $order, $item ) {
-		$item_name = $item['name'];
+		$item_name = $item->get_name();
 		$item_meta = new WC_Order_Item_Meta( $item );
 
 		if ( $meta = $item_meta->display( true, true ) ) {
@@ -268,7 +268,7 @@ class WC_Gateway_Paypal_Request {
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			if ( 'fee' === $item['type'] ) {
 				$item_line_total  = $this->number_format( $item['line_total'], $order );
-				$line_item        = $this->add_line_item( $item['name'], 1, $item_line_total );
+				$line_item        = $this->add_line_item( $item->get_name(), 1, $item_line_total );
 				$calculated_total += $item_line_total;
 			} else {
 				$product          = $order->get_product_from_item( $item );
