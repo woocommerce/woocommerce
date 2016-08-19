@@ -1,4 +1,4 @@
-/*global wc_single_product_params */
+/*global wc_single_product_params, flexslider_options, PhotoSwipe, PhotoSwipeUI_Default */
 jQuery( function( $ ) {
 
 	// wc_single_product_params is required to continue, ensure the object exists
