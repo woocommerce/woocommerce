@@ -80,6 +80,7 @@ jQuery( function( $ ) {
 			controlNav:     flexslider_options.controlNav,
 			slideshow:      flexslider_options.slideshow,
 			animationSpeed: flexslider_options.animationSpeed,
+			animationLoop:  false, // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
 		});
 	}
 
