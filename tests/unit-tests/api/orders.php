@@ -126,42 +126,42 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$request = new WP_REST_Request( 'POST', '/wc/v1/orders' );
 		$request->set_body_params( array(
-			"payment_method" => "bacs",
-			"payment_method_title" => "Direct Bank Transfer",
-			"set_paid" => true,
-			"billing" => array(
-				"first_name" => "John",
-				"last_name"  => "Doe",
-				"address_1"  => "969 Market",
-				"address_2"  => "",
-				"city"       => "San Francisco",
-				"state"      => "CA",
-				"postcode"   => "94103",
-				"country"    => "US",
-				"email"      => "john.doe@example.com",
-				"phone"      => "(555) 555-5555"
+			'payment_method' => 'bacs',
+			'payment_method_title' => 'Direct Bank Transfer',
+			'set_paid' => true,
+			'billing' => array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+				'address_1'  => '969 Market',
+				'address_2'  => '',
+				'city'       => 'San Francisco',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'country'    => 'US',
+				'email'      => 'john.doe@example.com',
+				'phone'      => '(555) 555-5555'
 			),
-			"shipping" => array(
-				"first_name" => "John",
-				"last_name"  => "Doe",
-				"address_1"  => "969 Market",
-				"address_2"  => "",
-				"city"       => "San Francisco",
-				"state"      => "CA",
-				"postcode"   => "94103",
-				"country"    => "US",
+			'shipping' => array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+				'address_1'  => '969 Market',
+				'address_2'  => '',
+				'city'       => 'San Francisco',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'country'    => 'US',
 			),
-			"line_items" => array(
+			'line_items' => array(
 				array(
-					"product_id" => $product->get_id(),
-					"quantity"   => 2
+					'product_id' => $product->get_id(),
+					'quantity'   => 2
 				),
 			),
-			"shipping_lines" => array(
+			'shipping_lines' => array(
 				array(
-					"method_id"    => "flat_rate",
-					"method_title" => "Flat Rate",
-					"total"        => 10
+					'method_id'    => 'flat_rate',
+					'method_title' => 'Flat Rate',
+					'total'        => 10
 				),
 			),
 		) );
@@ -209,43 +209,43 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		// non-existant customer
 		$request = new WP_REST_Request( 'POST', '/wc/v1/orders' );
 		$request->set_body_params( array(
-			"payment_method"       => "bacs",
-			"payment_method_title" => "Direct Bank Transfer",
-			"set_paid"             => true,
-			"customer_id"          => 99999,
-			"billing"              => array(
-				"first_name" => "John",
-				"last_name"  => "Doe",
-				"address_1"  => "969 Market",
-				"address_2"  => "",
-				"city"       => "San Francisco",
-				"state"      => "CA",
-				"postcode"   => "94103",
-				"country"    => "US",
-				"email"      => "john.doe@example.com",
-				"phone"      => "(555) 555-5555"
+			'payment_method'       => 'bacs',
+			'payment_method_title' => 'Direct Bank Transfer',
+			'set_paid'             => true,
+			'customer_id'          => 99999,
+			'billing'              => array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+				'address_1'  => '969 Market',
+				'address_2'  => '',
+				'city'       => 'San Francisco',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'country'    => 'US',
+				'email'      => 'john.doe@example.com',
+				'phone'      => '(555) 555-5555'
 			),
-			"shipping" => array(
-				"first_name" => "John",
-				"last_name"  => "Doe",
-				"address_1"  => "969 Market",
-				"address_2"  => "",
-				"city"       => "San Francisco",
-				"state"      => "CA",
-				"postcode"   => "94103",
-				"country"    => "US",
+			'shipping' => array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+				'address_1'  => '969 Market',
+				'address_2'  => '',
+				'city'       => 'San Francisco',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'country'    => 'US',
 			),
-			"line_items" => array(
+			'line_items' => array(
 				array(
-					"product_id" => $product->get_id(),
-					"quantity"   => 2
+					'product_id' => $product->get_id(),
+					'quantity'   => 2
 				),
 			),
-			"shipping_lines" => array(
+			'shipping_lines' => array(
 				array(
-					"method_id"    => "flat_rate",
-					"method_title" => "Flat Rate",
-					"total"        => 10
+					'method_id'    => 'flat_rate',
+					'method_title' => 'Flat Rate',
+					'total'        => 10
 				),
 			),
 		) );
@@ -264,17 +264,17 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/' . $order->get_id() );
 		$request->set_body_params( array(
-			"payment_method" => "test-update",
-			"billing" => array(
-				"first_name" => "Fish",
-				"last_name"  => "Face",
+			'payment_method' => 'test-update',
+			'billing' => array(
+				'first_name' => 'Fish',
+				'last_name'  => 'Face',
 			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( "test-update", $data['payment_method'] );
+		$this->assertEquals( 'test-update', $data['payment_method'] );
 		$this->assertEquals( 'Fish', $data['billing']['first_name'] );
 		$this->assertEquals( 'Face', $data['billing']['last_name'] );
 
@@ -290,10 +290,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/' . $order->get_id() );
 		$request->set_body_params( array(
-			"payment_method" => "test-update",
-			"billing" => array(
-				"first_name" => "Fish",
-				"last_name"  => "Face",
+			'payment_method' => 'test-update',
+			'billing' => array(
+				'first_name' => 'Fish',
+				'last_name'  => 'Face',
 			),
 		) );
 		$response = $this->server->dispatch( $request );
@@ -308,10 +308,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/999999' );
 		$request->set_body_params( array(
-			"payment_method" => "test-update",
-			"billing" => array(
-				"first_name" => "Fish",
-				"last_name"  => "Face",
+			'payment_method' => 'test-update',
+			'billing' => array(
+				'first_name' => 'Fish',
+				'last_name'  => 'Face',
 			),
 		) );
 		$response = $this->server->dispatch( $request );
@@ -378,12 +378,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				),
 			),
 			'delete' => array(
-				array(
-					'id' => $order2->get_id(),
-				),
-				array(
-					'id' => $order3->get_id(),
-				),
+				$order2->get_id(),
+				$order3->get_id(),
 			),
 		) );
 		$response = $this->server->dispatch( $request );
@@ -396,7 +392,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v1/orders' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
-		$this->assertEquals( 3, count( $data ) );
+		$this->assertEquals( 1, count( $data ) );
 
 		wp_delete_post( $order1->get_id(), true );
 		wp_delete_post( $order2->get_id(), true );
