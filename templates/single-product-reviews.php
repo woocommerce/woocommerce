@@ -30,7 +30,7 @@ if ( ! comments_open() ) {
 	<div id="comments">
 		<h2 class="woocommerce-Reviews-title"><?php
 			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_review_count() ) )
-				printf( _n( '%s review for %s%s%s', '%s reviews for %s%s%s', $count, 'woocommerce' ), $count, '<span>', get_the_title(), '</span>' );
+				printf( esc_html( _n( '%s review for %s%s%s', '%s reviews for %s%s%s', $count, 'woocommerce' ) ), $count, '<span>', get_the_title(), '</span>' );
 			else
 				_e( 'Reviews', 'woocommerce' );
 		?></h2>
@@ -67,7 +67,9 @@ if ( ! comments_open() ) {
 
 					$comment_form = array(
 						'title_reply'          => have_comments() ? __( 'Add a review', 'woocommerce' ) : sprintf( __( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
-						'title_reply_to'       => __( 'Leave a Reply to %s', 'woocommerce' ),
+                                               'title_reply_to'       => __( 'Leave a Reply to %s', 'woocommerce' ),
+                                               'title_reply_before'   => '<span id="reply-title" class="comment-reply-title">',
+                                               'title_reply_after'    => '</span>',
 						'comment_notes_after'  => '',
 						'fields'               => array(
 							'author' => '<p class="comment-form-author">' . '<label for="author">' . __( 'Name', 'woocommerce' ) . ' <span class="required">*</span></label> ' .
