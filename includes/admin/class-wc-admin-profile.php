@@ -170,7 +170,7 @@ class WC_Admin_Profile {
 									<?php endforeach; ?>
 								</select>
 							<?php elseif ( ! empty( $field['type'] ) && 'checkbox' === $field['type'] ) : ?>
-								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) esc_attr( get_user_meta( $user->ID, $key, true ) ), 1, true ); ?> />
+								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
 							<?php else : ?>
 								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
@@ -198,7 +198,7 @@ class WC_Admin_Profile {
 
 			foreach ( $fieldset['fields'] as $key => $field ) {
 
-				if ( 'checkbox' == $field['type'] ) {
+				if ( isset( $field['type'] ) && 'checkbox' === $field['type'] ) {
 					update_user_meta( $user_id, $key, isset( $_POST[ $key ] ) );
 				} elseif ( isset( $_POST[ $key ] ) ) {
 					update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
