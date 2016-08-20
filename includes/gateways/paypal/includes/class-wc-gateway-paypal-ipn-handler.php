@@ -112,7 +112,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param string $txn_type
 	 */
 	protected function validate_transaction_type( $txn_type ) {
-		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
+		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money', 'paypal_here' );
 
 		if ( ! in_array( strtolower( $txn_type ), $accepted_types ) ) {
 			WC_Gateway_Paypal::log( 'Aborting, Invalid type:' . $txn_type );
