@@ -157,20 +157,23 @@ class WC_Admin_Profile {
 			<table class="form-table">
 				<?php
 				foreach ( $fieldset['fields'] as $key => $field ) :
+					$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
+					$key_esc = esc_attr( $key );
 					?>
 					<tr>
-						<th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
+						<th><label for="<?php echo $key_esc; ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
 						<td>
 							<?php if ( ! empty( $field['type'] ) && 'select' == $field['type'] ) : ?>
-								<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
+								<select name="<?php echo $key_esc; ?>" id="<?php echo $key_esc; ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
 									<?php
-										$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
 										foreach ( $field['options'] as $option_key => $option_value ) : ?>
 										<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $selected, $option_key, true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 									<?php endforeach; ?>
 								</select>
+							<?php elseif (! empty( $field['type'] ) && 'checkbox' == $field['type'] ) : ?>
+							<input type="checkbox" name="<?php echo $key_esc; ?>" id="<?php echo $key_esc; ?>" value="1" <?php checked( $selected, 1, true ); ?> class="input-checkbox" />
 							<?php else : ?>
-							<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
+							<input type="text" name="<?php echo $key_esc; ?>" id="<?php echo $key_esc; ?>" value="<?php echo $selected; ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
 							<br/>
 							<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
@@ -196,7 +199,9 @@ class WC_Admin_Profile {
 
 			foreach ( $fieldset['fields'] as $key => $field ) {
 
-				if ( isset( $_POST[ $key ] ) ) {
+				if( "checkbox" == $field['type'] ) {
+					update_user_meta( $user_id, $key, isset($_POST[$key]) ? 1 : 0 );
+				}  else if ( isset( $_POST[ $key ] ) ) {
 					update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
 				}
 			}
