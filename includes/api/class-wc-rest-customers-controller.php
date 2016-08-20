@@ -484,8 +484,18 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
-		$customer = new WC_Customer( $user_data->ID );
-		$data     = array(
+		$customer        = new WC_Customer( $user_data->ID );
+		$last_order_data = $customer->get_last_order();
+		$last_order      = null;
+
+		if ( $last_order_data ) {
+			$last_order = array(
+				'id'   => $last_order_data->get_id(),
+				'date' => wc_rest_prepare_date_response( $last_order_data->get_date_created() ),
+			);
+		}
+
+		$data = array(
 			'id'               => $customer->get_id(),
 			'date_created'     => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer->get_date_created() ) ),
 			'date_modified'    => $customer->get_date_modified() ? wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer->get_date_modified() ) ) : null,
@@ -493,11 +503,8 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'first_name'       => $customer->get_first_name(),
 			'last_name'        => $customer->get_last_name(),
 			'username'         => $customer->get_username(),
-			'last_order'       => array(
-				'id'   => $customer->get_last_order_id(),
-				'date' => wc_rest_prepare_date_response( $customer->get_last_order_date() ),
-			),
-			'orders_count'     => $customer->get_orders_count(),
+			'last_order'       => $last_order,
+			'orders_count'     => $customer->get_order_count(),
 			'total_spent'      => $customer->get_total_spent(),
 			'avatar_url'       => $customer->get_avatar_url(),
 			'billing' => array(
