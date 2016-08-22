@@ -8,7 +8,7 @@
  * @group api-keys
  */
 class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
-
+	
 	public function test_insert_api_keys() {
 		$user_id = $this->factory->user->create();
 

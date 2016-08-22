@@ -551,58 +551,45 @@ class WC_Auth {
 
 		$where = "WHERE " . implode( " AND ", $where );
 
-		if ( $args['per_page'] < 0 ) {
-			$limit = '';
-		}
-		else {
-			if ( 1 < $args['page'] ) {
-				$offset = $args['per_page'] * ( $args['page'] - 1 );
-			} else {
-				$offset = 0;
-			}
-
-			$limit = $wpdb->prepare( "LIMIT %d OFFSET %d", $args['per_page'], $offset );
-		}
-
-
 		if ( $args['count'] ) {
-			$sql = "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys $where";
-
-			$cache_key = md5( $sql );
-			$cached = wp_cache_get( 'wc_api_key_counts' );
-			if ( false === $cached || ! is_array( $cached ) ) {
-				$cached = array();
-			}
-
-			$count = isset( $cached[ $cache_key ] ) ? $cached[ $cache_key ] : false;
+			$cache_key = WC_Cache_Helper::get_cache_prefix( 'api_keys_count' ) . 'wc_api_keys_count_' . $args['s'];
+			$count = wp_cache_get( $cache_key, 'api_keys_count' );
 			if ( false === $count ) {
+				$sql = "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys $where";
 				$count = $wpdb->get_var( $sql );
-				$cached[ $cache_key ] = $count;
-				wp_cache_set( 'wc_api_key_counts', $cached );
+
+				wp_cache_set( $cache_key, $count, 'api_keys_count' );
 			}
 
 			return $count;
 
 		}
 		else {
-			$sql = "SELECT * FROM {$wpdb->prefix}woocommerce_api_keys $where ORDER BY key_id DESC $limit";
+			if ( $args['per_page'] < 0 ) {
+				$limit = '';
+			}
+			else {
+				if ( 1 < $args['page'] ) {
+					$offset = $args['per_page'] * ( $args['page'] - 1 );
+				} else {
+					$offset = 0;
+				}
 
-			$cache_key = md5( $sql );
-			$cached = wp_cache_get( 'wc_get_api_keys' );
-			if ( false === $cached || ! is_array( $cached ) ) {
-				$cached = array();
+				$limit = $wpdb->prepare( "LIMIT %d OFFSET %d", $args['per_page'], $offset );
 			}
 
-			$results = isset( $cached[ $cache_key ] ) ? $cached[ $cache_key ] : false;
+			$cache_key = WC_Cache_Helper::get_cache_prefix( 'api_keys' ) . 'wc_api_keys_' . md5( sprintf( '%d+%d+%s', $args['page'], $args['per_page'], $args['s'] ) );
+			$results = wp_cache_get( $cache_key, 'api_keys' );
+
 			if ( false === $results ) {
+				$sql = "SELECT * FROM {$wpdb->prefix}woocommerce_api_keys $where ORDER BY key_id DESC $limit";
 				$results = $wpdb->get_results( $sql );
 
 				if ( ! $results ) {
 					$results = array();
 				}
 
-				$cached[ $cache_key ] = $results;
-				wp_cache_set( 'wc_get_api_keys', $cached );
+				wp_cache_set( $cache_key, $results, 'api_keys' );
 			}
 
 			$list = array();
@@ -723,8 +710,8 @@ class WC_Auth {
 
 		wp_cache_delete( $key_id, 'wc_api_keys' );
 		wp_cache_delete( $data->consumer_key, 'wc_api_keys_consumer' );
-		wp_cache_delete( 'wc_get_api_keys' );
-		wp_cache_delete( 'wc_api_key_counts' );
+		WC_Cache_Helper::incr_cache_prefix( 'api_keys' );
+		WC_Cache_Helper::incr_cache_prefix( 'api_keys_count' );
 	}
 }
 
