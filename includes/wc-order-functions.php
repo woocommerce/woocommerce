@@ -485,7 +485,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
-			$_product = $order->get_product_from_item( $item );
+			$_product = $item->get_product();
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
 				$downloads = $_product->get_files();

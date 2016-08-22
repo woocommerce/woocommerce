@@ -1314,7 +1314,7 @@ class WC_AJAX {
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
@@ -1360,7 +1360,7 @@ class WC_AJAX {
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
@@ -2012,7 +2012,7 @@ class WC_AJAX {
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
 					$order_item = $order_items[ $item_id ];
-					$_product   = $order->get_product_from_item( $order_item );
+					$_product = $order_item->get_product();
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
 						$old_stock    = wc_stock_amount( $_product->stock );
