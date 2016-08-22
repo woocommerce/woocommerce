@@ -72,6 +72,9 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
+		'2.7.0' => array(
+			'wc_update_270_webhooks',
+		),
 	);
 
 	/** @var object Background update class */
@@ -218,7 +221,7 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$logger             = new WC_Logger();
+		$logger             = wc_get_logger();
 		$update_queued      = false;
 
 		foreach ( self::$db_updates as $version => $update_callbacks ) {
@@ -400,6 +403,14 @@ class WC_Install {
 		}
 
 		dbDelta( self::get_schema() );
+
+		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE Column_name = 'comment_type' and Key_name = 'comment_type'" );
+
+		if ( is_null( $index_exists ) ) {
+			// Add an index to the field comment_type to improve the response time of the query
+			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		}
 	}
 
 	/**

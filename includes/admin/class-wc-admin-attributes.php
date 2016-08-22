@@ -367,7 +367,7 @@ class WC_Admin_Attributes {
 									<th scope="col"><?php _e( 'Slug', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Type', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Order by', 'woocommerce' ); ?></th>
-									<th scope="col" colspan="2"><?php _e( 'Terms', 'woocommerce' ); ?></th>
+									<th scope="col"><?php _e( 'Terms', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -422,8 +422,9 @@ class WC_Admin_Attributes {
 													} else {
 														echo '<span class="na">&ndash;</span>';
 													}
-												?></td>
-												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php esc_attr_e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
+												?>
+												<br /><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php _e( 'Configure terms', 'woocommerce' ); ?></a>
+												</td>
 											</tr><?php
 										endforeach;
 									else :

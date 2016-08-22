@@ -228,7 +228,7 @@ class WC_Admin_Assets {
 
 			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 				$order    = wc_get_order( $post_id );
-				$currency = $order->get_order_currency();
+				$currency = $order->get_currency();
 			}
 
 			$params = array(

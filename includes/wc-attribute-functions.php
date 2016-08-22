@@ -108,8 +108,7 @@ function wc_attribute_label( $name, $product = '' ) {
 	global $wpdb;
 
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
-
+		$name  = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
 		if ( ! $label ) {

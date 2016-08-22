@@ -34,7 +34,7 @@ class WC_Helper_Order {
 	 *
 	 * @return WC_Order Order object.
 	 */
-	public static function create_order() {
+	public static function create_order( $customer_id = 1 ) {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
@@ -42,7 +42,7 @@ class WC_Helper_Order {
 
 		$order_data = array(
 			'status'        => 'pending',
-			'customer_id'   => 1,
+			'customer_id'   => $customer_id,
 			'customer_note' => '',
 			'total'         => '',
 		);
@@ -78,13 +78,14 @@ class WC_Helper_Order {
 		$order->set_payment_method( $payment_gateways['bacs'] );
 
 		// Set totals
-		$order->set_total( 10, 'shipping' );
-		$order->set_total( 0, 'cart_discount' );
-		$order->set_total( 0, 'cart_discount_tax' );
-		$order->set_total( 0, 'tax' );
-		$order->set_total( 0, 'shipping_tax' );
-		$order->set_total( 40, 'total' ); // 4 x $10 simple helper product
+		$order->set_shipping_total( 10 );
+		$order->set_discount_total( 0 );
+		$order->set_discount_tax( 0 );
+		$order->set_cart_tax( 0 );
+		$order->set_shipping_tax( 0 );
+		$order->set_total( 40 ); // 4 x $10 simple helper product
+		$order->save();
 
-		return wc_get_order( $order->id );
+		return $order;
 	}
 }

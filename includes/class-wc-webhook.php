@@ -160,8 +160,11 @@ class WC_Webhook {
 			// creation date to determine the actual event
 			$resource = get_post( absint( $arg ) );
 
+			// Drafts don't have post_date_gmt so calculate it here
+			$gmt_date = get_gmt_from_date( $resource->post_date );
+
 			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
-			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
+			$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
 
 			if ( 'created' == $this->get_event() && ! $resource_created ) {
 				$should_deliver = false;
@@ -266,10 +269,14 @@ class WC_Webhook {
 					break;
 
 				case 'order':
-					$payload = WC()->api->WC_API_Orders->get_order( $resource_id );
+					$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
 					break;
 
 				case 'product':
+					// bulk and quick edit action hooks return a product object instead of an ID
+					if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+						$resource_id = $resource_id->get_id();
+					}
 					$payload = WC()->api->WC_API_Products->get_product( $resource_id );
 					break;
 
@@ -581,6 +588,8 @@ class WC_Webhook {
 			'product.updated' => array(
 				'woocommerce_process_product_meta',
 				'woocommerce_api_edit_product',
+				'woocommerce_product_quick_edit_save',
+				'woocommerce_product_bulk_edit_save',
 			),
 			'product.deleted' => array(
 				'wp_trash_post',

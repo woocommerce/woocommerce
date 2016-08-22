@@ -7,7 +7,7 @@
  * Author: WooThemes
  * Author URI: https://woothemes.com
  * Requires at least: 4.4
- * Tested up to: 4.5
+ * Tested up to: 4.6
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
@@ -237,6 +237,9 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
 
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
+
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
 		}
@@ -332,7 +335,7 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
+			$this->customer = new WC_Customer( get_current_user_id(), true );   // Customer class, handles data such as customer location
 		}
 
 		$this->load_webhooks();

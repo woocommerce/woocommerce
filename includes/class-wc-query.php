@@ -468,8 +468,11 @@ class WC_Query {
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 			break;
 			case 'rating' :
-				// Sorting handled later though a hook
-				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+				$args['meta_key'] = '_wc_average_rating';
+				$args['orderby']  = array(
+					'meta_value_num' => 'DESC',
+					'ID'             => 'ASC',
+				);
 			break;
 			case 'title' :
 				$args['orderby']  = 'title';
@@ -498,12 +501,14 @@ class WC_Query {
 	/**
 	 * Order by rating post clauses.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0
 	 * @param array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
+
+		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";

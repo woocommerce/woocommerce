@@ -317,6 +317,16 @@ class WC_Shipping {
 	}
 
 	/**
+	 * See if package is shippable.
+	 * @param  array  $package
+	 * @return boolean
+	 */
+	protected function is_package_shippable( $package ) {
+		$allowed = array_keys( WC()->countries->get_shipping_countries() );
+		return in_array( $package['destination']['country'], $allowed );
+	}
+
+	/**
 	 * Calculate shipping rates for a package,
 	 *
 	 * Calculates each shipping methods cost. Rates are stored in the session based on the package hash to avoid re-calculation every page load.
@@ -326,12 +336,19 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		if ( ! $this->enabled || empty( $package ) ) {
+		if ( ! $this->enabled || empty( $package ) || ! $this->is_package_shippable( $package ) ) {
 			return false;
 		}
 
 		// Check if we need to recalculate shipping for this package
-		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+		$package_to_hash = $package;
+
+		// Remove data objects so hashes are consistent
+		foreach ( $package_to_hash['contents'] as $item_id => $item ) {
+			unset( $package_to_hash['contents'][ $item_id ]['data'] );
+		}
+
+		$package_hash   = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 		$status_options = get_option( 'woocommerce_status_options', array() );
 		$session_key    = 'shipping_for_package_' . $package_key;
 		$stored_rates   = WC()->session->get( $session_key );

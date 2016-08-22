@@ -38,7 +38,7 @@ class WC_Gateway_Paypal_API_Handler {
 			'METHOD'          => 'DoCapture',
 			'AUTHORIZATIONID' => $order->get_transaction_id(),
 			'AMT'             => number_format( is_null( $amount ) ? $order->get_total() : $amount, 2, '.', '' ),
-			'CURRENCYCODE'    => $order->get_order_currency(),
+			'CURRENCYCODE'    => $order->get_currency(),
 			'COMPLETETYPE'    => 'Complete',
 		);
 		return apply_filters( 'woocommerce_paypal_capture_request', $request, $order, $amount );
@@ -64,7 +64,7 @@ class WC_Gateway_Paypal_API_Handler {
 		);
 		if ( ! is_null( $amount ) ) {
 			$request['AMT']          = number_format( $amount, 2, '.', '' );
-			$request['CURRENCYCODE'] = $order->get_order_currency();
+			$request['CURRENCYCODE'] = $order->get_currency();
 			$request['REFUNDTYPE']   = 'Partial';
 		}
 		return apply_filters( 'woocommerce_paypal_refund_request', $request, $order, $amount, $reason );

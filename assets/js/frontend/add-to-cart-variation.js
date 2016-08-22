@@ -1,4 +1,4 @@
-/*global wc_add_to_cart_variation_params, wc_cart_fragments_params */
+/*global wc_add_to_cart_variation_params */
 /*!
  * Variations Plugin
  */
@@ -129,7 +129,7 @@
 					} );
 
 					$xhr = $.ajax( {
-						url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
+						url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 						type: 'POST',
 						data: data,
 						success: function( variation ) {

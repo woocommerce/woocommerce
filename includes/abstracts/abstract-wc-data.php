@@ -104,7 +104,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Get All Meta Data
+	 * Get All Meta Data.
 	 * @since 2.6.0
 	 * @return array
 	 */
@@ -226,6 +226,16 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Delete meta data.
+	 * @since 2.6.0
+	 * @param int $mid Meta ID
+	 */
+	public function delete_meta_data_by_mid( $mid ) {
+		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $mid );
+		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+	}
+
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * @since 2.6.0
 	 */
@@ -237,7 +247,7 @@ abstract class WC_Data {
 			return;
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			$cache_key   = WC_Cache_Helper::get_cache_prefix( $this->_cache_group ) . $this->get_id();
 			$cached_meta = wp_cache_get( $cache_key, $this->_cache_group );
 
@@ -253,21 +263,23 @@ abstract class WC_Data {
 			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
 				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
 				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
+				WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
 			", $this->get_id() ) );
 
-			foreach ( $raw_meta_data as $meta ) {
-				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
-					continue;
+			if ( $raw_meta_data ) {
+				foreach ( $raw_meta_data as $meta ) {
+					if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
+						continue;
+					}
+					$this->_meta_data[] = (object) array(
+						'key'     => $meta->meta_key,
+						'value'   => maybe_unserialize( $meta->meta_value ),
+						'meta_id' => $meta->{ $db_info['meta_id_field'] },
+					);
 				}
-				$this->_meta_data[] = (object) array(
-					'key'     => $meta->meta_key,
-					'value'   => $meta->meta_value,
-					'meta_id' => $meta->{ $db_info['meta_id_field'] },
-				);
 			}
 
-			if ( ! empty ( $this->_cache_group ) ) {
+			if ( ! empty( $this->_cache_group ) ) {
 				wp_cache_set( $cache_key, $this->_meta_data, $this->_cache_group );
 			}
 		}
@@ -283,7 +295,8 @@ abstract class WC_Data {
 		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "
 			SELECT " . $db_info['meta_id_field'] . " FROM " . $db_info['table'] . "
 			WHERE " . $db_info['object_id_field'] . " = %d", $this->get_id() ) . "
-			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');
+			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "')
+			AND meta_key NOT LIKE 'wp\_%%';
 		" ) );
 		$set_meta_ids = array();
 
@@ -300,12 +313,11 @@ abstract class WC_Data {
 
 		// Delete no longer set meta data
 		$delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
-
 		foreach ( $delete_meta_ids as $meta_id ) {
 			delete_metadata_by_mid( $this->_meta_type, $meta_id );
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->_cache_group );
 		}
 		$this->read_meta_data();
@@ -346,4 +358,10 @@ abstract class WC_Data {
 		);
 	}
 
+	/**
+	 * Throw an exception due to invalid data.
+	 */
+	protected function throw_exception( $id, $message = '', $code = 400 ) {
+		throw new WC_Data_Exception( $id, $message, $code );
+	}
 }

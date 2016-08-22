@@ -183,7 +183,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -197,7 +197,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -360,7 +360,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 
 		// Checks for errors.
 		if ( false === $update ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $id );

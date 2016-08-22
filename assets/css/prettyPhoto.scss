@@ -7,10 +7,10 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
-@import "fonts";
+@import 'bourbon';
+@import 'mixins';
+@import 'variables';
+@import 'fonts';
 
 /**
  * Mixins
@@ -19,7 +19,7 @@
 	border-radius: 100%;
 	height: 1em;
 	width: 1em;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 	background-color: #444;
 	color: #fff !important;
 	font-size: 16px !important;
@@ -38,7 +38,7 @@ div.pp_woocommerce {
 	.pp_content_container {
 		background: #fff;
 		border-radius: 3px;
-		box-shadow: 0 1px 30px rgba(0,0,0,0.25);
+		box-shadow: 0 1px 30px rgba(0, 0, 0, 0.25);
 		padding: 20px 0;
 		@include clearfix();
 	}
@@ -55,9 +55,9 @@ div.pp_woocommerce {
 		ul {
 			li {
 				a {
-					border: 1px solid rgba(0,0,0,0.5);
+					border: 1px solid rgba(0, 0, 0, 0.5);
 					background: #fff;
-					box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+					box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 					border-radius: 2px;
 					display: block;
 
@@ -77,10 +77,10 @@ div.pp_woocommerce {
 
 	.pp_previous,
 	.pp_next {
-		&:before {
+		&::before {
 			@include button();
 			font-family: 'WooCommerce';
-			content: "\e00b";
+			content: '\e00b';
 			text-indent: 0;
 			display: none;
 			position: absolute;
@@ -90,23 +90,23 @@ div.pp_woocommerce {
 		}
 
 		&:hover {
-			&:before {
+			&::before {
 				display: block;
 			}
 		}
 	}
 
 	.pp_previous {
-		&:before {
+		&::before {
 			left: 1em;
 		}
 	}
 
 	.pp_next {
-		&:before {
+		&::before {
 			right: 1em;
 			font-family: 'WooCommerce';
-			content: "\e008";
+			content: '\e008';
 		}
 	}
 
@@ -136,13 +136,13 @@ div.pp_woocommerce {
 
 	.pp_close {
 		@include button();
-		top: -.5em;
-		right: -.5em;
+		top: -0.5em;
+		right: -0.5em;
 		font-size: 1.618em !important;
 
-		&:before {
+		&::before {
 			font-family: 'WooCommerce';
-			content: "\e013";
+			content: '\e013';
 			display: block;
 			position: absolute;
 			top: 0;
@@ -160,9 +160,9 @@ div.pp_woocommerce {
 		position: relative;
 		margin-top: -1px;
 
-		&:before {
+		&::before {
 			font-family: 'WooCommerce';
-			content: "\e00b";
+			content: '\e00b';
 			display: block;
 			position: absolute;
 			top: 0;
@@ -175,14 +175,14 @@ div.pp_woocommerce {
 	}
 
 	.pp_arrow_previous {
-		margin-right: .5em;
+		margin-right: 0.5em;
 	}
 
 	.pp_arrow_next {
-		margin-left: .5em;
+		margin-left: 0.5em;
 
-		&:before {
-			content: "\e008";
+		&::before {
+			content: '\e008';
 		}
 	}
 
@@ -190,13 +190,13 @@ div.pp_woocommerce {
 	a.pp_contract {
 		@include button();
 		right: auto;
-		left: -.5em;
-		top: -.5em;
+		left: -0.5em;
+		top: -0.5em;
 		font-size: 1.618em !important;
 
-		&:before {
+		&::before {
 			font-family: 'WooCommerce';
-			content: "\e005";
+			content: '\e005';
 			display: block;
 			position: absolute;
 			top: 0;
@@ -209,8 +209,8 @@ div.pp_woocommerce {
 	}
 
 	a.pp_contract {
-		&:before {
-			content: "\e004";
+		&::before {
+			content: '\e004';
 		}
 	}
 
@@ -264,7 +264,7 @@ div.pp_woocommerce {
 			font-size: 44px;
 			line-height: 44px;
 
-			&:before {
+			&::before {
 				font-size: 44px;
 			}
 		}
@@ -281,12 +281,12 @@ div.pp_woocommerce {
 	.pp_content {
 		width: 100% !important;
 
-        #pp_full_res{
-			& > img{
+		#pp_full_res {
+			& > img {
 				width: 100% !important;
 				height: auto !important;
 			}
-        }
+		}
 	}
 
 	.currentTextHolder {
@@ -385,7 +385,7 @@ div.pp_pic_holder {
 
 .pp_content_container .pp_details {
 	float: left;
-	margin: 10px 0 2px 0;
+	margin: 10px 0 2px;
 }
 
 .pp_description {
@@ -401,7 +401,8 @@ div.pp_pic_holder {
 .pp_social .facebook {
 	float: left;
 	margin-left: 5px;
-	width: 55px; overflow: hidden;
+	width: 55px;
+	overflow: hidden;
 }
 
 .pp_social .twitter {
@@ -469,7 +470,7 @@ a.pp_arrow_next {
 
 .pp_gallery ul a {
 	border: 1px #000 solid;
-	border: 1px rgba(0,0,0,0.5) solid;
+	border: 1px rgba(0, 0, 0, 0.5) solid;
 	display: block;
 	float: left;
 	height: 33px;
@@ -537,7 +538,9 @@ a.pp_contract {
 }
 
 a.pp_close {
-	position: absolute; right: 0; top: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
 	display: block;
 	text-indent: -10000px;
 }

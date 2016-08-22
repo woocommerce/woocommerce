@@ -176,7 +176,7 @@ class WC_Geolocation {
 	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
 	 */
 	public static function update_database() {
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 
 		if ( ! is_callable( 'gzopen' ) ) {
 			$logger->add( 'geolocation', 'Server does not support gzopen' );
