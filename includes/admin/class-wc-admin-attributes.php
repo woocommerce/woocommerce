@@ -423,7 +423,7 @@ class WC_Admin_Attributes {
 														echo '<span class="na">&ndash;</span>';
 													}
 												?></td>
-												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php esc_attr_e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
+												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button button-primary alignright tips" data-tip="<?php esc_attr_e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
 											</tr><?php
 										endforeach;
 									else :
