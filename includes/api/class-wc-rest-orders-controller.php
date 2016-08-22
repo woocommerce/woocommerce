@@ -486,6 +486,48 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Gets the product ID from the SKU or posted ID.
+	 * @param array $posted Request data
+	 * @return int
+	 */
+	protected function get_product_id( $posted ) {
+		if ( ! empty( $posted['sku'] ) ) {
+			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
+		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
+			$product_id = (int) $posted['product_id'];
+		} elseif ( ! empty( $posted['variation_id'] ) ) {
+			$product_id = (int) $posted['variation_id'];
+		} else {
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+		}
+		return $product_id;
+	}
+
+	/**
+	 * Maybe set an item prop if the value was posted.
+	 * @param WC_Order_Item $item
+	 * @param string $prop
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_prop( $item, $prop, $posted ) {
+		if ( isset( $posted[ $prop ] ) ) {
+			$item->{"set_$prop"}( $posted[ $prop ] );
+		}
+	}
+
+	/**
+	 * Maybe set item props if the values were posted.
+	 * @param WC_Order_Item $item
+	 * @param string[] $props
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_props( $item, $props, $posted ) {
+		foreach ( $props as $prop ) {
+			$this->maybe_set_item_prop( $item, $prop, $posted );
+		}
+	}
+
+	/**
 	 * Create or update a line item.
 	 *
 	 * @param array $posted Line item data.
@@ -493,52 +535,20 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
-		// Product is always required.
-		if ( empty( $posted['product_id'] ) && empty( $posted['sku'] ) && empty( $posted['variation_id'] ) ) {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
-		}
-
-		// Get product from ID or sku
-		if ( ! empty( $posted['sku'] ) ) {
-			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
-		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['product_id'];
-		} elseif ( ! empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['variation_id'];
-		}
-
 		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-		$product = wc_get_product( $product_id );
+		$product = wc_get_product( $this->get_product_id( $posted ) );
 
 		if ( $product !== $item->get_product() ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$qty = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$item->set_total( $product->get_price() * $qty );
-				$item->set_subtotal( $product->get_price() * $qty );
+				$total = $product->get_price() * ( isset( $posted['quantity'] ) ? $posted['quantity'] : 1 );
+				$item->set_total( $total );
+				$item->set_subtotal( $total );
 			}
 		}
 
-		if ( isset( $posted['name'] ) ) {
-			$item->set_name( $posted['name'] );
-		}
-
-		if ( isset( $posted['quantity'] ) ) {
-			$item->set_quantity( $posted['quantity'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
-
-		if ( isset( $posted['subtotal'] ) ) {
-			$item->set_subtotal( floatval( $posted['subtotal'] ) );
-		}
-
-		if ( isset( $posted['tax_class'] ) ) {
-			$item->set_tax_class( $posted['tax_class'] );
-		}
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 
 		return $item;
 	}
@@ -559,17 +569,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['method_id'] ) ) {
-			$item->set_method_id( $posted['method_id'] );
-		}
-
-		if ( isset( $posted['method_title'] ) ) {
-			$item->set_method_title( $posted['method_title'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
 
 		return $item;
 	}
@@ -590,21 +590,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['name'] ) ) {
-			$item->set_name( $posted['name'] );
-		}
-
-		if ( isset( $posted['tax_class'] ) ) {
-			$item->set_tax_class( $posted['tax_class'] );
-		}
-
-		if ( isset( $posted['tax_status'] ) ) {
-			$item->set_tax_status( $posted['tax_status'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
 
 		return $item;
 	}
@@ -625,13 +611,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['code'] ) ) {
-			$item->set_code( $posted['code'] );
-		}
-
-		if ( isset( $posted['discount'] ) ) {
-			$item->set_discount( floatval( $posted['discount'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
 
 		return $item;
 	}
