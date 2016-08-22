@@ -1526,8 +1526,8 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_refund = array(
 				'id'         => $refund->id,
 				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
-				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
-				'reason'     => $refund->get_refund_reason(),
+				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
+				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items
 			);
 
@@ -1593,7 +1593,7 @@ class WC_API_Orders extends WC_API_Resource {
 				$order = wc_get_order( $order_id );
 
 				if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund->get_amount(), $refund->get_reason() );
 
 					if ( is_wp_error( $result ) ) {
 						return $result;

@@ -39,7 +39,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'prices_include_tax' => false,
 		'date_created'       => '',
 		'date_modified'      => '',
-		'customer_id'        => 0,
 		'discount_total'     => 0,
 		'discount_tax'       => 0,
 		'shipping_total'     => 0,
@@ -55,7 +54,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'_customer_user', '_order_currency', '_cart_discount',
+		'_order_currency', '_cart_discount',
 		'_cart_discount_tax', '_order_shipping', '_order_shipping_tax',
 		'_order_tax', '_order_total', '_order_version', '_prices_include_tax',
 		'_payment_tokens',
@@ -169,7 +168,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_id( $order_id );
 
 			// Set meta data
-			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 			$this->update_post_meta( '_order_currency', $this->get_currency() );
 			$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
 			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
@@ -199,7 +197,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
-		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
 		$this->set_currency( get_post_meta( $this->get_id(), '_order_currency', true ) );
 		$this->set_discount_total( get_post_meta( $this->get_id(), '_cart_discount', true ) );
 		$this->set_discount_tax( get_post_meta( $this->get_id(), '_cart_discount_tax', true ) );
@@ -207,6 +204,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_shipping_tax( get_post_meta( $this->get_id(), '_order_shipping_tax', true ) );
 		$this->set_cart_tax( get_post_meta( $this->get_id(), '_order_tax', true ) );
 		$this->set_total( get_post_meta( $this->get_id(), '_order_total', true ) );
+		$this->set_version( get_post_meta( $this->get_id(), '_order_version', true ) );
 
 		// Orders store the state of prices including tax when created.
 		$this->set_prices_include_tax( metadata_exists( 'post', $this->get_id(), '_prices_include_tax' ) ? 'yes' === get_post_meta( $this->get_id(), '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
@@ -251,7 +249,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		);
 
 		// Update meta data
-		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 		$this->update_post_meta( '_order_currency', $this->get_currency() );
 		$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
 		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
@@ -259,6 +256,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax( true ) );
 		$this->update_post_meta( '_order_tax', $this->get_cart_tax( true ) );
 		$this->update_post_meta( '_order_total', $this->get_total( true ) );
+		$this->update_post_meta( '_order_version', $this->get_version() );
 		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 		$this->save_meta_data();
 	}
@@ -357,7 +355,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_merge(
 			$this->_data,
 			array(
-				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),
@@ -384,17 +381,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_parent_id() {
 		return $this->_data['parent_id'];
-	}
-
-	/**
-	 * get_order_number function.
-	 *
-	 * Gets the order number for display (by default, order ID).
-	 *
-	 * @return string
-	 */
-	public function get_order_number() {
-		return apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
 	}
 
 	/**
@@ -438,38 +424,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get customer_id
-	 * @return int
-	 */
-	public function get_customer_id() {
-		return $this->_data['customer_id'];
-	}
-
-	/**
 	 * Return the order statuses without wc- internal prefix.
 	 * @return string
 	 */
 	public function get_status() {
 		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->_data['status'], 0, 3 ) ? substr( $this->_data['status'], 3 ) : $this->_data['status'], $this );
-	}
-
-	/**
-	 * Alias for get_customer_id().
-	 * @since  2.2
-	 * @return int
-	 */
-	public function get_user_id() {
-		return $this->get_customer_id();
-	}
-
-	/**
-	 * Get the user associated with the order. False for guests.
-	 *
-	 * @since  2.2
-	 * @return WP_User|false
-	 */
-	public function get_user() {
-		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
 	}
 
 	/**
@@ -706,14 +665,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_date_modified( $timestamp ) {
 		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-	}
-
-	/**
-	 * Set customer_id
-	 * @param int $value
-	 */
-	public function set_customer_id( $value ) {
-		$this->_data['customer_id'] = absint( $value );
 	}
 
 	/**
@@ -1746,8 +1697,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $refunds = $this->get_refunds() ) {
 			foreach ( $refunds as $id => $refund ) {
 				$total_rows[ 'refund_' . $id ] = array(
-					'label' => $refund->get_refund_reason() ? $refund->get_refund_reason() : __( 'Refund', 'woocommerce' ) . ':',
-					'value'    => wc_price( '-' . $refund->get_refund_amount(), array( 'currency' => $this->get_currency() ) ),
+					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value'    => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}

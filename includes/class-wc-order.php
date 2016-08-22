@@ -49,6 +49,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function __construct( $order = 0 ) {
 		$this->_data = array_merge( $this->_data, array(
+			'customer_id'          => 0,
 			'order_key'            => '',
 			'billing'              => array(
 				'first_name'       => '',
@@ -206,6 +207,7 @@ class WC_Order extends WC_Abstract_Order {
 		// Store additonal order data
 		if ( $this->get_id() ) {
 			$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 			$this->update_post_meta( '_order_key', $this->get_order_key() );
 			$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
 			$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
@@ -253,6 +255,7 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $order_id = $this->get_id() ) {
 			$post_object = get_post( $this->get_id() );
 			$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
+			$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
 			$this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
 			$this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
 			$this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
@@ -299,6 +302,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function update() {
 		// Store additonal order data
 		$this->update_post_meta( '_order_key', $this->get_order_key() );
+		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
 		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
 		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
@@ -437,12 +441,67 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Get all class data in array format.
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge(
+			$this->_data,
+			array(
+				'number'         => $this->get_order_number(),
+				'meta_data'      => $this->get_meta_data(),
+				'line_items'     => $this->get_items( 'line_item' ),
+				'tax_lines'      => $this->get_items( 'tax' ),
+				'shipping_lines' => $this->get_items( 'shipping' ),
+				'fee_lines'      => $this->get_items( 'fee' ),
+				'coupon_lines'   => $this->get_items( 'coupon' ),
+			)
+		);
+	}
+
+	/**
+	 * get_order_number function.
+	 *
+	 * Gets the order number for display (by default, order ID).
+	 *
+	 * @return string
+	 */
+	public function get_order_number() {
+		return apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
+	}
+
+	/**
 	 * Get order key.
 	 * @since 2.7.0
 	 * @return string
 	 */
 	public function get_order_key() {
 		return $this->_data['order_key'];
+	}
+
+	/**
+	 * Get customer_id
+	 * @return int
+	 */
+	public function get_customer_id() {
+		return $this->_data['customer_id'];
+	}
+
+	/**
+	 * Alias for get_customer_id().
+	 * @return int
+	 */
+	public function get_user_id() {
+		return $this->get_customer_id();
+	}
+
+	/**
+	 * Get the user associated with the order. False for guests.
+	 * @return WP_User|false
+	 */
+	public function get_user() {
+		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
 	}
 
 	/**
@@ -759,6 +818,14 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_order_key( $value ) {
 		$this->_data['order_key'] = substr( $value, 0, 20 );
+	}
+
+	/**
+	 * Set customer_id
+	 * @param int $value
+	 */
+	public function set_customer_id( $value ) {
+		$this->_data['customer_id'] = absint( $value );
 	}
 
 	/**
@@ -1491,7 +1558,7 @@ class WC_Order extends WC_Abstract_Order {
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( 'tax' ) as $refunded_item ) {
 				if ( absint( $refunded_item->get_rate_id() ) === $rate_id ) {
-					$total += abs( $refunded_item->tax_total() ) + abs( $refunded_item->shipping_tax_total() );
+					$total += abs( $refunded_item->get_tax_total() ) + abs( $refunded_item->get_shipping_tax_total() );
 				}
 			}
 		}

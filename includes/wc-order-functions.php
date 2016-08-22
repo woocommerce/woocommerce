@@ -825,13 +825,12 @@ function wc_create_refund( $args = array() ) {
 	if ( 0 > $args['amount'] ) {
 		$args['amount'] = 0;
 	}
-
-	$refund->set_refund_amount( $args['amount'] );
+	$refund->set_amount( $args['amount'] );
 	$refund->set_parent_id( absint( $args['order_id'] ) );
 	$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
 
 	if ( ! is_null( $args['reason'] ) ) {
-		$refund->set_refund_reason( $args['reason'] );
+		$refund->set_reason( $args['reason'] );
 	}
 
 	// Negative line items
@@ -849,24 +848,26 @@ function wc_create_refund( $args = array() ) {
 
 			$class         = get_class( $item );
 			$refunded_item = new $class( $item );
+
+			$refunded_item->set_id( 0 );
 			$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 			$refunded_item->set_total( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
 			$refunded_item->set_total_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
 			$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ) ) );
 
-			if ( is_callable( $refunded_item, 'set_subtotal' ) ) {
+			if ( is_callable( array( $refunded_item, 'set_subtotal' ) ) ) {
 				$refunded_item->set_subtotal( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
 				$refunded_item->set_subtotal_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
 			}
-		}
 
-		$refund->update_taxes();
+			$refund->add_item( $refunded_item );
+		}
 	}
 
+	$refund->update_taxes();
 	$refund->calculate_totals( false );
-	$refund->set_total( wc_format_decimal( $args['amount'] ) * -1 );
+	$refund->set_total( $args['amount'] * -1 );
 	$refund->save();
-
 	return $refund;
 }
 

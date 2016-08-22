@@ -19,8 +19,8 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
 			}
 		?>
-		<?php if ( $refund->get_refund_reason() ) : ?>
-			<p class="description"><?php echo esc_html( $refund->get_refund_reason() ); ?></p>
+		<?php if ( $refund->get_reason() ) : ?>
+			<p class="description"><?php echo esc_html( $refund->get_reason() ); ?></p>
 		<?php endif; ?>
 		<input type="hidden" class="order_refund_id" name="order_refund_id[]" value="<?php echo esc_attr( $refund->get_id() ); ?>" />
 	</td>
@@ -32,7 +32,7 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php echo wc_price( '-' . $refund->get_refund_amount() ); ?>
+			<?php echo wc_price( '-' . $refund->get_amount() ); ?>
 		</div>
 	</td>
 

@@ -187,11 +187,13 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
 
-		<tr>
-			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
-			<td width="1%"></td>
-			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
-		</tr>
+		<?php if ( $order->get_total_refunded() ) : ?>
+			<tr>
+				<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
+				<td width="1%"></td>
+				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
+			</tr>
+		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 

@@ -126,8 +126,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 		}
 
 		$data              = $refund->get_data();
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified' );
+		$format_decimal    = array( 'amount' );
+		$format_date       = array( 'date_created' );
 		$format_line_items = array( 'line_items' );
 
 		// Format decimal values.
@@ -145,16 +145,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
-		/*
-		$data = array(
-			'id'           => $refund->get_id(),
-			'date_created' => wc_rest_prepare_date_response( $refund->date ),
-			'amount'       => wc_format_decimal( $refund->get_refund_amount(), $dp ),
-			'reason'       => $refund->get_refund_reason(),
-			'line_items'   => array(),
-		);*/
-
-
+		// Unset unwanted data
+		unset(
+			$data['parent_id'], $data['status'], $data['currency'], $data['prices_include_tax'],
+			$data['version'], $data['date_modified'], $data['discount_total'], $data['discount_tax'],
+			$data['shipping_total'], $data['shipping_tax'], $data['cart_tax'], $data['cart_total'],
+			$data['total'], $data['total_tax'], $data['tax_lines'], $data['shipping_lines'],
+			$data['fee_lines'], $data['coupon_lines']
+	 	);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -262,7 +260,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			$order = wc_get_order( $order_data );
 
 			if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->get_id(), $refund->get_refund_amount(), $refund->get_refund_reason() );
+				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->get_id(), $refund->get_amount(), $refund->get_reason() );
 
 				if ( is_wp_error( $result ) ) {
 					return $result;
@@ -326,6 +324,34 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
+				'refunded_by' => array(
+					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
+					'type'        => 'int',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'meta_data' => array(
+					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'key' => array(
+							'description' => __( 'Meta key.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'value' => array(
+							'description' => __( 'Meta value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'meta_id' => array(
+							'description' => __( 'Meta ID.', 'woocommerce' ),
+							'type'        => 'int',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
+				),
 				'line_items' => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
@@ -339,15 +365,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						),
 						'name' => array(
 							'description' => __( 'Product name.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'sku' => array(
-							'description' => __( 'Product SKU.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'product_id' => array(
 							'description' => __( 'Product ID.', 'woocommerce' ),
@@ -366,15 +385,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						),
 						'tax_class' => array(
 							'description' => __( 'Tax class of product.', 'woocommerce' ),
-							'type'        => 'string',
+							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price' => array(
-							'description' => __( 'Product price.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'subtotal' => array(
 							'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
@@ -385,6 +397,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 							'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
 						),
 						'total' => array(
 							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
@@ -395,6 +408,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
@@ -406,24 +420,56 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 									'description' => __( 'Tax rate ID.', 'woocommerce' ),
 									'type'        => 'integer',
 									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 								'total' => array(
 									'description' => __( 'Tax total.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 								'subtotal' => array(
 									'description' => __( 'Tax subtotal.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
+								),
+							),
+						),
+						'meta_data' => array(
+							'description' => __( 'Order item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'meta_id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
 							),
 						),
+						'sku' => array(
+							'description' => __( 'Product SKU.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'price' => array(
+							'description' => __( 'Product price.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'meta' => array(
-							'description' => __( 'Line item meta data.', 'woocommerce' ),
+							'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
