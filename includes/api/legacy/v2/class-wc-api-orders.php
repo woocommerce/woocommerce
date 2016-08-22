@@ -736,8 +736,8 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$order->set_address( $billing_address, 'billing' );
-		$order->set_address( $shipping_address, 'shipping' );
+		$this->update_address( $order, $billing_address, 'billing' );
+		$this->update_address( $order, $shipping_address, 'shipping' );
 
 		// update user meta
 		if ( $order->get_user_id() ) {
@@ -746,6 +746,21 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 			foreach ( $shipping_address as $key => $value ) {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Update address.
+	 *
+	 * @param WC_Order $order
+	 * @param array $posted
+	 * @param string $type
+	 */
+	protected function update_address( $order, $posted, $type = 'billing' ) {
+		foreach ( $posted as $key => $value ) {
+			if ( is_callable( array( $order, "set_{$type}_{$key}" ) ) ) {
+				$order->{"set_{$type}_{$key}"}( $value );
 			}
 		}
 	}

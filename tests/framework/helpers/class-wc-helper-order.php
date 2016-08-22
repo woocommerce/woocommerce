@@ -58,20 +58,17 @@ class WC_Helper_Order {
 		$order->add_item( $item );
 
 		// Set billing address
-		$billing_address = array(
-			'country'    => 'US',
-			'first_name' => 'Jeroen',
-			'last_name'  => 'Sormani',
-			'company'    => 'WooCompany',
-			'address_1'  => 'WooAddress',
-			'address_2'  => '',
-			'postcode'   => '123456',
-			'city'       => 'WooCity',
-			'state'      => 'NY',
-			'email'      => 'admin@example.org',
-			'phone'      => '555-32123',
-		);
-		$order->set_address( $billing_address, 'billing' );
+		$order->set_billing_first_name( 'Jeroen' );
+		$order->set_billing_last_name( 'Sormani' );
+		$order->set_billing_company( 'WooCompany' );
+		$order->set_billing_address_1( 'WooAddress' );
+		$order->set_billing_address_2( '' );
+		$order->set_billing_city( 'WooCity' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_postcode( '123456' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_email( 'admin@example.org' );
+		$order->set_billing_phone( '555-32123' );
 
 		// Add shipping costs
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
