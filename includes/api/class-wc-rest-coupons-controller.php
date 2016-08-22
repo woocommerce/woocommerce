@@ -149,28 +149,28 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$coupon = new WC_Coupon( $code );
 
 		$data = array(
-			'id'                           => $coupon->id,
-			'code'                         => $coupon->code,
+			'id'                           => $coupon->get_id(),
+			'code'                         => $coupon->get_code(),
 			'date_created'                 => wc_rest_prepare_date_response( $post->post_date_gmt ),
 			'date_modified'                => wc_rest_prepare_date_response( $post->post_modified_gmt ),
-			'discount_type'                => $coupon->type,
-			'description'                  => $post->post_excerpt,
+			'discount_type'                => $coupon->get_discount_type(),
+			'description'                  => $coupon->get_description(),
 			'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
-			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? wc_rest_prepare_date_response( $coupon->expiry_date ) : null,
-			'usage_count'                  => (int) $coupon->usage_count,
-			'individual_use'               => ( 'yes' === $coupon->individual_use ),
-			'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
-			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->exclude_product_ids ),
-			'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
-			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
-			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
-			'free_shipping'                => $coupon->enable_free_shipping(),
-			'product_categories'           => array_map( 'absint', (array) $coupon->product_categories ),
-			'excluded_product_categories'  => array_map( 'absint', (array) $coupon->exclude_product_categories ),
-			'exclude_sale_items'           => $coupon->exclude_sale_items(),
-			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
-			'maximum_amount'               => wc_format_decimal( $coupon->maximum_amount, 2 ),
-			'email_restrictions'           => $coupon->customer_email,
+			'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? wc_rest_prepare_date_response( $coupon->get_expiry_date() ) : null,
+			'usage_count'                  => (int) $coupon->get_usage_count(),
+			'individual_use'               => $coupon->get_individual_use(),
+			'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
+			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
+			'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
+			'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
+			'free_shipping'                => $coupon->get_free_shipping(),
+			'product_categories'           => array_map( 'absint', (array) $coupon->get_product_categories() ),
+			'excluded_product_categories'  => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
+			'exclude_sale_items'           => $coupon->get_exclude_sale_items(),
+			'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
+			'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
+			'email_restrictions'           => $coupon->get_email_restrictions(),
 			'used_by'                      => $coupon->get_used_by(),
 		);
 
@@ -205,17 +205,18 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	protected function prepare_item_for_database( $request ) {
 		global $wpdb;
 
-		$data = new stdClass;
-
 		// ID.
 		if ( isset( $request['id'] ) ) {
-			$data->ID = absint( $request['id'] );
+			$code     = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['id'] ) );
+			$coupon   = new WC_Coupon( $code );
+		} else {
+			$coupon   = new WC_Coupon();
 		}
 
 		$schema = $this->get_item_schema();
 
 		// Validate required POST fields.
-		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
+		if ( 'POST' === $request->get_method() && empty( $coupon->get_id() ) ) {
 			if ( empty( $request['code'] ) ) {
 				return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 			}
@@ -224,7 +225,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		// Code.
 		if ( ! empty( $schema['properties']['code'] ) && ! empty( $request['code'] ) ) {
 			$coupon_code = apply_filters( 'woocommerce_coupon_code', $request['code'] );
-			$id = isset( $data->ID ) ? $data->ID : 0;
+			$id = $coupon->get_id() ? $coupon->get_id() : 0;
 
 			// Check for duplicate coupon codes.
 			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
@@ -240,28 +241,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				return new WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$data->post_title = $coupon_code;
+			$coupon->set_code( $coupon_code );
 		}
-
-		// Content.
-		$data->post_content = '';
 
 		// Coupon description (excerpt).
 		if ( ! empty( $schema['properties']['description'] ) && isset( $request['description'] ) ) {
-			$data->post_excerpt = wp_filter_post_kses( $request['description'] );
+			$coupon->set_description( wp_filter_post_kses( $request['description'] ) );
 		}
-
-		// Post type.
-		$data->post_type = $this->post_type;
-
-		// Post status.
-		$data->post_status = 'publish';
-
-		// Comment status.
-		$data->comment_status = 'closed';
-
-		// Ping status.
-		$data->ping_status = 'closed';
 
 		/**
 		 * Filter the query_vars used in `get_items` for the constructed query.
@@ -273,7 +259,90 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		 *                                       for inserting or updating the database.
 		 * @param WP_REST_Request $request       Request object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
+	}
+
+	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$coupon_id = $this->save_coupon( $request );
+		if ( is_wp_error( $coupon_id ) ) {
+			return $coupon_id;
+		}
+
+		$post = get_post( $coupon_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		$this->add_post_meta_fields( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Update a single coupon.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$post_id = (int) $request['id'];
+
+		if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$coupon_id = $this->save_coupon( $request );
+		if ( is_wp_error( $coupon_id ) ) {
+			return $coupon_id;
+		}
+
+		$post = get_post( $coupon_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		$this->update_post_meta_fields( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Saves a coupon to the database.
+	 */
+	public function save_coupon( $request ) {
+		$coupon = $this->prepare_item_for_database( $request );
+		$coupon->save();
+		return $coupon->get_id();
 	}
 
 	/**
@@ -323,24 +392,28 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		$data = wp_parse_args( $data, $defaults );
 
-		// Set coupon meta.
-		update_post_meta( $post->ID, 'discount_type', $data['discount_type'] );
-		update_post_meta( $post->ID, 'coupon_amount', wc_format_decimal( $data['amount'] ) );
-		update_post_meta( $post->ID, 'individual_use', ( true === $data['individual_use'] ) ? 'yes' : 'no' );
-		update_post_meta( $post->ID, 'product_ids', implode( ',', array_filter( array_map( 'intval', $data['product_ids'] ) ) ) );
-		update_post_meta( $post->ID, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $data['exclude_product_ids'] ) ) ) );
-		update_post_meta( $post->ID, 'usage_limit', absint( $data['usage_limit'] ) );
-		update_post_meta( $post->ID, 'usage_limit_per_user', absint( $data['usage_limit_per_user'] ) );
-		update_post_meta( $post->ID, 'limit_usage_to_x_items', absint( $data['limit_usage_to_x_items'] ) );
-		update_post_meta( $post->ID, 'usage_count', absint( $data['usage_count'] ) );
-		update_post_meta( $post->ID, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
-		update_post_meta( $post->ID, 'free_shipping', ( true === $data['free_shipping'] ) ? 'yes' : 'no' );
-		update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $data['product_categories'] ) ) );
-		update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $data['excluded_product_categories'] ) ) );
-		update_post_meta( $post->ID, 'exclude_sale_items', ( true === $data['exclude_sale_items'] ) ? 'yes' : 'no' );
-		update_post_meta( $post->ID, 'minimum_amount', wc_format_decimal( $data['minimum_amount'] ) );
-		update_post_meta( $post->ID, 'maximum_amount', wc_format_decimal( $data['maximum_amount'] ) );
-		update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $data['email_restrictions'] ) ) );
+		if ( ! empty( $post->post_title ) ) {
+			$coupon = new WC_Coupon( $post->post_title );
+			// Set coupon meta.
+			$coupon->set_discount_type( $data['discount_type'] );
+			$coupon->set_amount( $data['amount'] );
+			$coupon->set_individual_use( $data['individual_use'] );
+			$coupon->set_product_ids( $data['product_ids'] );
+			$coupon->set_excluded_product_ids( $data['exclude_product_ids'] );
+			$coupon->set_usage_limit( $data['usage_limit'] );
+			$coupon->set_usage_limit_per_user( $data['usage_limit_per_user'] );
+			$coupon->set_limit_usage_to_x_items( $data['limit_usage_to_x_items'] );
+			$coupon->set_usage_count( $data['usage_count'] );
+			$coupon->set_expiry_date( $data['expiry_date'] );
+			$coupon->set_free_shipping( $data['free_shipping'] );
+			$coupon->set_product_categories( $data['product_categories'] );
+			$coupon->set_excluded_product_categories( $data['excluded_product_categories'] );
+			$coupon->set_exclude_sale_items( $data['exclude_sale_items'] );
+			$coupon->set_minimum_amount( $data['minimum_amount'] );
+			$coupon->set_maximum_amount( $data['maximum_amount'] );
+			$coupon->set_email_restrictions( $data['email_restrictions'] );
+			$coupon->save();
+		}
 
 		return true;
 	}
@@ -353,69 +426,74 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
+
+		$coupon = new WC_Coupon( $post->post_title );
+
 		if ( isset( $request['amount'] ) ) {
-			update_post_meta( $post->ID, 'coupon_amount', wc_format_decimal( $request['amount'] ) );
+			$coupon->set_amount( $request['amount'] );
 		}
 
 		if ( isset( $request['individual_use'] ) ) {
-			update_post_meta( $post->ID, 'individual_use', ( true === $request['individual_use'] ) ? 'yes' : 'no' );
+			$coupon->set_individual_use( $request['individual_use'] );
 		}
 
 		if ( isset( $request['product_ids'] ) ) {
-			update_post_meta( $post->ID, 'product_ids', implode( ',', array_filter( array_map( 'intval', $request['product_ids'] ) ) ) );
+			$coupon->set_product_ids( $request['product_ids'] );
 		}
 
 		if ( isset( $request['exclude_product_ids'] ) ) {
-			update_post_meta( $post->ID, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $request['exclude_product_ids'] ) ) ) );
+			$coupon->set_excluded_product_ids( $request['exclude_product_ids'] );
 		}
 
 		if ( isset( $request['usage_limit'] ) ) {
-			update_post_meta( $post->ID, 'usage_limit', absint( $request['usage_limit'] ) );
+			$coupon->set_usage_limit( $request['usage_limit'] );
 		}
 
 		if ( isset( $request['usage_limit_per_user'] ) ) {
-			update_post_meta( $post->ID, 'usage_limit_per_user', absint( $request['usage_limit_per_user'] ) );
+			$coupon->set_usage_limit_per_user( $request['usage_limit_per_user'] );
 		}
 
 		if ( isset( $request['limit_usage_to_x_items'] ) ) {
-			update_post_meta( $post->ID, 'limit_usage_to_x_items', absint( $request['limit_usage_to_x_items'] ) );
+			$coupon->set_limit_usage_to_x_items( $request['limit_usage_to_x_items'] );
 		}
 
 		if ( isset( $request['usage_count'] ) ) {
-			update_post_meta( $post->ID, 'usage_count', absint( $request['usage_count'] ) );
+			$coupon->set_usage_count( $request['usage_count'] );
 		}
 
 		if ( isset( $request['expiry_date'] ) ) {
-			update_post_meta( $post->ID, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $request['expiry_date'] ) ) );
+			$coupon->set_expiry_date( $request['expiry_date'] );
 		}
 
 		if ( isset( $request['free_shipping'] ) ) {
-			update_post_meta( $post->ID, 'free_shipping', ( true === $request['free_shipping'] ) ? 'yes' : 'no' );
+			$coupon->set_free_shipping( $request['free_shipping'] );
 		}
 
 		if ( isset( $request['product_categories'] ) ) {
-			update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $request['product_categories'] ) ) );
+			$coupon->set_product_categories( $request['product_categories'] );
 		}
 
 		if ( isset( $request['excluded_product_categories'] ) ) {
-			update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $request['excluded_product_categories'] ) ) );
+			$coupon->set_excluded_product_categories( $request['excluded_product_categories'] );
 		}
 
 		if ( isset( $request['exclude_sale_items'] ) ) {
-			update_post_meta( $post->ID, 'exclude_sale_items', ( true === $request['exclude_sale_items'] ) ? 'yes' : 'no' );
+			$coupon->set_exclude_sale_items( $request['exclude_sale_items'] );
 		}
 
 		if ( isset( $request['minimum_amount'] ) ) {
-			update_post_meta( $post->ID, 'minimum_amount', wc_format_decimal( $request['minimum_amount'] ) );
+			$coupon->set_minimum_amount( $request['minimum_amount'] );
 		}
 
 		if ( isset( $request['maximum_amount'] ) ) {
-			update_post_meta( $post->ID, 'maximum_amount', wc_format_decimal( $request['maximum_amount'] ) );
+			$coupon->set_maximum_amount( $request['maximum_amount'] );
 		}
 
 		if ( isset( $request['email_restrictions'] ) ) {
-			update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $request['email_restrictions'] ) ) );
+			$coupon->set_email_restrictions( $request['email_restrictions'] );
 		}
+
+		$coupon->save();
 
 		return true;
 	}
