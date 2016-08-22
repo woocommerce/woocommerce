@@ -1061,6 +1061,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Meta ID.', 'woocommerce' ),
+							'type'        => 'int',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'key' => array(
 							'description' => __( 'Meta key.', 'woocommerce' ),
 							'type'        => 'string',
@@ -1070,12 +1076,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Meta value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-						),
-						'id' => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'int',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 					),
 				),
@@ -1165,6 +1165,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1174,12 +1180,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1276,6 +1276,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1285,12 +1291,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1353,6 +1353,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1362,12 +1368,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1442,6 +1442,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1451,12 +1457,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1494,6 +1494,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1503,12 +1509,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),

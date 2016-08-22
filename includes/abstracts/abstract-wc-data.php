@@ -165,9 +165,9 @@ abstract class WC_Data {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
 					$this->_meta_data[] = (object) array(
+						'id'    => $meta['id'],
 						'key'   => $meta['key'],
 						'value' => $meta['value'],
-						'id'    => $meta['id'],
 					);
 				}
 			}
@@ -206,9 +206,9 @@ abstract class WC_Data {
 		}
 		if ( $array_key ) {
 			$this->_meta_data[ current( $array_key ) ] = (object) array(
+				'id'    => $meta_id,
 				'key'   => $key,
 				'value' => $value,
-				'id'    => $meta_id,
 			);
 		} else {
 			$this->add_meta_data( $key, $value, true );
@@ -272,9 +272,9 @@ abstract class WC_Data {
 						continue;
 					}
 					$this->_meta_data[] = (object) array(
+						'id'    => $meta->{ $db_info['meta_id_field'] },
 						'key'   => $meta->meta_key,
 						'value' => maybe_unserialize( $meta->meta_value ),
-						'id'    => $meta->{ $db_info['meta_id_field'] },
 					);
 				}
 			}

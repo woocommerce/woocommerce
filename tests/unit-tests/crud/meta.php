@@ -94,9 +94,9 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 
 		foreach ( $raw_metadata as $meta ) {
 			$metadata[] = (object) array(
+				'id'    => $meta->meta_id,
 				'key'   => $meta->meta_key,
 				'value' => $meta->meta_value,
-				'id'    => $meta->meta_id,
 			);
 		}
 
