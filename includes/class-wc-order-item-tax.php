@@ -138,6 +138,17 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		$this->_data['compound'] = (bool) $value;
 	}
 
+	/**
+	 * Set properties based on passed in tax rate by ID.
+	 * @param int $tax_rate_id
+	 */
+	public function set_rate( $tax_rate_id ) {
+		$this->set_rate_id( $tax_rate_id );
+		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
+		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
+		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
