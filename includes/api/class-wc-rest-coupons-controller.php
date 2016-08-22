@@ -155,7 +155,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'date_modified'                => wc_rest_prepare_date_response( $post->post_modified_gmt ),
 			'discount_type'                => $coupon->type,
 			'description'                  => $post->post_excerpt,
-			'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
+			'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
 			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? wc_rest_prepare_date_response( $coupon->expiry_date ) : null,
 			'usage_count'                  => (int) $coupon->usage_count,
 			'individual_use'               => ( 'yes' === $coupon->individual_use ),
