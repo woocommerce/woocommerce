@@ -272,7 +272,7 @@ abstract class WC_Data {
 						continue;
 					}
 					$this->_meta_data[] = (object) array(
-						'id'    => $meta->{ $db_info['meta_id_field'] },
+						'id'    => (int) $meta->{ $db_info['meta_id_field'] },
 						'key'   => $meta->meta_key,
 						'value' => maybe_unserialize( $meta->meta_value ),
 					);
