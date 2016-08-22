@@ -153,13 +153,13 @@ jQuery( function( $ ) {
 							h:   large_image_h
 						};
 
-					var title = img.attr('title');
+					var title = img.attr( 'title' );
 
 					item.title = title;
 
 					items.push( item );
-					});
-				}
+				});
+			}
 
 			return {
 				index: index,
@@ -185,10 +185,12 @@ jQuery( function( $ ) {
 
 			// Define options.
 			var options = {
-				index:         items.index,
-				shareEl:       false,
-				closeOnScroll: false,
-				history:       false
+				index:                 items.index,
+				shareEl:               false,
+				closeOnScroll:         false,
+				history:               false,
+				hideAnimationDuration: 0,
+				showAnimationDuration: 0,
 			};
 
 			// Initializes and opens PhotoSwipe.
