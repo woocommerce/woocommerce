@@ -222,9 +222,13 @@ function wc_save_order_items( $order_id, $items ) {
 			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]: array();
 			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
 			$item->set_total( isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0 );
-			$item->set_subtotal( isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $item->get_total() );
 			$item->set_total_tax( array_sum( $line_tax ) );
-			$item->set_subtotal_tax( array_sum( $line_subtotal_tax ) );
+
+			if ( is_callable( array( $item, 'set_subtotal' ) ) ) {
+				$item->set_subtotal( isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $item->get_total() );
+				$item->set_subtotal_tax( array_sum( $line_subtotal_tax ) );
+			}
+
 			$item->set_taxes( array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ) );
 			$item->save();
 		}
@@ -239,7 +243,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$item->set_method_id( isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '' );
 			$item->set_method_title( isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '' );
 			$item->set_total( isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ] : '' );
-			$item->set_taxes( isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() );
+			$item->set_taxes( array( 'total' => isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() ) );
 			$item->save();
 		}
 	}

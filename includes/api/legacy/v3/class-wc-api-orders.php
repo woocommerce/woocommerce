@@ -883,9 +883,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @throws WC_API_Exception invalid data, server error
 	 */
 	protected function set_line_item( $order, $item, $action ) {
-
 		$creating  = ( 'create' === $action );
-		$item_args = array();
 
 		// product is always required
 		if ( ! isset( $item['product_id'] ) && ! isset( $item['sku'] ) ) {
@@ -917,8 +915,7 @@ class WC_API_Orders extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
 				}
 			}
-			$item_args['variation'] = $item['variations'];
-			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
+			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item['variations'] );
 		}
 
 		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
@@ -939,48 +936,36 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// quantity
-		if ( isset( $item['quantity'] ) ) {
-			$item_args['qty'] = $item['quantity'];
-		}
-
-		// total
-		if ( isset( $item['total'] ) ) {
-			$item_args['totals']['total'] = floatval( $item['total'] );
-		}
-
-		// total tax
-		if ( isset( $item['total_tax'] ) ) {
-			$item_args['totals']['tax'] = floatval( $item['total_tax'] );
-		}
-
-		// subtotal
-		if ( isset( $item['subtotal'] ) ) {
-			$item_args['totals']['subtotal'] = floatval( $item['subtotal'] );
-		}
-
-		// subtotal tax
-		if ( isset( $item['subtotal_tax'] ) ) {
-			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
-		}
-
-		$item_args = apply_filters( 'woocommerce_api_order_line_item_args', $item_args, $item, $order, $action );
-
 		if ( $creating ) {
-
-			$item_id = $order->add_product( $product, $item_args['qty'], $item_args );
-
-			if ( ! $item_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ), 500 );
-			}
-
+			$item = new WC_Order_Item_Product();
 		} else {
-
-			$item_id = $order->update_product( $item['id'], $product, $item_args );
-
-			if ( ! $item_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ), 500 );
-			}
+			$item = new WC_Order_Item_Product( $item['id'] );
 		}
+
+		$item->set_product( $product );
+		$item->set_order_id( $order->id );
+
+		if ( isset( $item['quantity'] ) ) {
+			$item->set_quantity( $item['quantity'] );
+		}
+		if ( isset( $item['total'] ) ) {
+			$item->set_total( floatval( $item['total'] ) );
+		}
+		if ( isset( $item['total_tax'] ) ) {
+			$item->set_total_tax( floatval( $item['total_tax'] ) );
+		}
+		if ( isset( $item['subtotal'] ) ) {
+			$item->set_subtotal( floatval( $item['subtotal'] ) );
+		}
+		if ( isset( $item['subtotal_tax'] ) ) {
+			$item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
+		}
+		if ( $variation_id ) {
+			$item->set_variation_id( $variation_id );
+			$item->set_variation( $item['variations'] );
+		}
+
+		$item_id = $item->save();
 	}
 
 	/**
@@ -1058,8 +1043,9 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
-
-			$shipping_id = $order->add_shipping( $rate );
+			$item = new WC_Order_Item_Shipping();
+			$item->set_shipping_rate( $rate );
+			$shipping_id = $item->save();
 
 			if ( ! $shipping_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ), 500 );
@@ -1067,21 +1053,21 @@ class WC_API_Orders extends WC_API_Resource {
 
 		} else {
 
-			$shipping_args = array();
+			$item = new WC_Order_Item_Shipping( $shipping['id'] );
 
 			if ( isset( $shipping['method_id'] ) ) {
-				$shipping_args['method_id'] = $shipping['method_id'];
+				$item->set_method_id( $shipping['method_id'] );
 			}
 
 			if ( isset( $shipping['method_title'] ) ) {
-				$shipping_args['method_title'] = $shipping['method_title'];
+				$item->set_method_title( $shipping['method_title'] );
 			}
 
 			if ( isset( $shipping['total'] ) ) {
-				$shipping_args['cost'] = floatval( $shipping['total'] );
+				$item->set_total( floatval( $shipping['total'] ) );
 			}
 
-			$shipping_id = $order->update_shipping( $shipping['id'], $shipping_args );
+			$shipping_id = $item->save();
 
 			if ( ! $shipping_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again', 'woocommerce' ), 500 );
@@ -1107,36 +1093,30 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee title is required', 'woocommerce' ), 400 );
 			}
 
-			$order_fee            = new stdClass();
-			$order_fee->id        = sanitize_title( $fee['title'] );
-			$order_fee->name      = $fee['title'];
-			$order_fee->amount    = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
-			$order_fee->taxable   = false;
-			$order_fee->tax       = 0;
-			$order_fee->tax_data  = array();
-			$order_fee->tax_class = '';
+			$item = new WC_Order_Item_Fee();
+			$item->set_name( sanitize_title( $fee['title'] ) );
+			$item->set_total( isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0 );
 
 			// if taxable, tax class and total are required
-			if ( isset( $fee['taxable'] ) && $fee['taxable'] ) {
-
+			if ( ! empty( $fee['taxable'] ) ) {
 				if ( ! isset( $fee['tax_class'] ) ) {
 					throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable', 'woocommerce' ), 400 );
 				}
 
-				$order_fee->taxable   = true;
-				$order_fee->tax_class = $fee['tax_class'];
+				$item->set_tax_status( 'taxable' );
+				$item->set_tax_class( $fee['tax_class'] );
 
 				if ( isset( $fee['total_tax'] ) ) {
-					$order_fee->tax = isset( $fee['total_tax'] ) ? wc_format_refund_total( $fee['total_tax'] ) : 0;
+					$item->set_total_tax( isset( $fee['total_tax'] ) ? wc_format_refund_total( $fee['total_tax'] ) : 0 );
 				}
 
 				if ( isset( $fee['tax_data'] ) ) {
-					$order_fee->tax      = wc_format_refund_total( array_sum( $fee['tax_data'] ) );
-					$order_fee->tax_data = array_map( 'wc_format_refund_total', $fee['tax_data'] );
+					$item->set_total_tax( wc_format_refund_total( array_sum( $fee['tax_data'] ) ) );
+					$item->set_taxes( array_map( 'wc_format_refund_total', $fee['tax_data'] ) );
 				}
 			}
 
-			$fee_id = $order->add_fee( $order_fee );
+			$fee_id = $item->save();
 
 			if ( ! $fee_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ), 500 );
@@ -1144,25 +1124,25 @@ class WC_API_Orders extends WC_API_Resource {
 
 		} else {
 
-			$fee_args = array();
+			$item = new WC_Order_Item_Fee( $fee['id'] );
 
 			if ( isset( $fee['title'] ) ) {
-				$fee_args['name'] = $fee['title'];
+				$item->set_name( sanitize_title( $fee['title'] ) );
 			}
 
 			if ( isset( $fee['tax_class'] ) ) {
-				$fee_args['tax_class'] = $fee['tax_class'];
+				$item->set_tax_class( $fee['tax_class'] );
 			}
 
 			if ( isset( $fee['total'] ) ) {
-				$fee_args['line_total'] = floatval( $fee['total'] );
+				$item->set_total( floatval( $fee['total'] ) );
 			}
 
 			if ( isset( $fee['total_tax'] ) ) {
-				$fee_args['line_tax'] = floatval( $fee['total_tax'] );
+				$item->set_total_tax( floatval( $fee['total_tax'] ) );
 			}
 
-			$fee_id = $order->update_fee( $fee['id'], $fee_args );
+			$fee_id = $item->save();
 
 			if ( ! $fee_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again', 'woocommerce' ), 500 );
@@ -1193,7 +1173,13 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required', 'woocommerce' ), 400 );
 			}
 
-			$coupon_id = $order->add_coupon( $coupon['code'], isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0 );
+			$item = new WC_Order_Item_Coupon( array(
+				'code'         => $coupon['code'],
+				'discount'     => isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0,
+				'discount_tax' => 0,
+				'order_id'     => $order->get_id(),
+			) );
+			$coupon_id = $item->save();
 
 			if ( ! $coupon_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ), 500 );
@@ -1201,17 +1187,17 @@ class WC_API_Orders extends WC_API_Resource {
 
 		} else {
 
-			$coupon_args = array();
+			$item = new WC_Order_Item_Coupon( $coupon['id'] );
 
 			if ( isset( $coupon['code'] ) ) {
-				$coupon_args['code'] = $coupon['code'];
+				$item->set_code( $coupon['code'] );
 			}
 
 			if ( isset( $coupon['amount'] ) ) {
-				$coupon_args['discount_amount'] = floatval( $coupon['amount'] );
+				$item->set_discount( floatval( $coupon['amount'] ) );
 			}
 
-			$coupon_id = $order->update_coupon( $coupon['id'], $coupon_args );
+			$coupon_id = $item->save();
 
 			if ( ! $coupon_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again', 'woocommerce' ), 500 );

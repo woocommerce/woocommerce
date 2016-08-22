@@ -169,6 +169,18 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
 	}
 
+	/**
+	 * Set properties based on passed in shipping rate object.
+	 * @param WC_Shipping_Rate $tax_rate_id
+	 */
+	public function set_shipping_rate( $shipping_rate ) {
+		$this->set_method_title( $shipping_rate->label );
+		$this->set_method_id( $shipping_rate->id );
+		$this->set_total( $shipping_rate->cost );
+		$this->set_taxes( $shipping_rate->taxes );
+		$this->set_meta_data( $shipping_rate->get_meta_data() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters

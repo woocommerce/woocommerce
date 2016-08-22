@@ -1137,6 +1137,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
 				) );
 			}
+
 			$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
 			$item->save();
 		}
@@ -1169,11 +1170,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Now merge to keep tax rows.
 		foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
-			$this->add_tax( array(
-				'rate_id'            => $tax_rate_id,
-				'tax_total'          => isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0,
-				'shipping_tax_total' => isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0,
-			) );
+			$item = new WC_Order_Item_Tax();
+			$item->set_rate( $tax_rate_id );
+			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$item->set_shipping_tax_total( isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+			$this->add_item( $item );
 		}
 
 		// Save tax totals
