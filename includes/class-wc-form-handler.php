@@ -663,7 +663,8 @@ class WC_Form_Handler {
 			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				// Cancel the order + restore stock
-				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
+				WC()->session->set( 'order_awaiting_payment', false );
+				$order->update_status( 'cancelled', __( 'Order cancelled by customer.', 'woocommerce' ) );
 
 				// Message
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );

@@ -125,7 +125,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
+			'total_shipping'            => wc_format_decimal( $order->get_shipping_total(), 2 ),
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),

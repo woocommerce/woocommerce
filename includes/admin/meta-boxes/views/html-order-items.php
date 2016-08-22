@@ -140,9 +140,9 @@ if ( wc_tax_enabled() ) {
 			<td width="1%"></td>
 			<td class="total"><?php
 				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
-					echo '<del>' . strip_tags( wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_total_shipping() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
+					echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
 				} else {
-					echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) );
+					echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
 				}
 			?></td>
 		</tr>

@@ -1328,7 +1328,6 @@ class WC_AJAX {
 
 					$return[]     = $note;
 					$order->add_order_note( $note );
-					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
