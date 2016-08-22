@@ -118,44 +118,44 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Base Colour', 'woocommerce' ),
-				'desc'     => __( 'The base colour for WooCommerce email templates. Default <code>#557da1</code>.', 'woocommerce' ),
+				'desc'     => __( 'The base colour for WooCommerce email templates. Default <code>#96588a</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_base_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#557da1',
+				'default'  => '#96588a',
 				'autoload' => false,
 				'desc_tip' => true
 			),
 
 			array(
 				'title'    => __( 'Background Colour', 'woocommerce' ),
-				'desc'     => __( 'The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>.', 'woocommerce' ),
+				'desc'     => __( 'The background colour for WooCommerce email templates. Default <code>#f7f7f7</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#f5f5f5',
+				'default'  => '#f7f7f7',
 				'autoload' => false,
 				'desc_tip' => true
 			),
 
 			array(
 				'title'    => __( 'Body Background Colour', 'woocommerce' ),
-				'desc'     => __( 'The main body background colour. Default <code>#fdfdfd</code>.', 'woocommerce' ),
+				'desc'     => __( 'The main body background colour. Default <code>#ffffff</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_body_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#fdfdfd',
+				'default'  => '#ffffff',
 				'autoload' => false,
 				'desc_tip' => true
 			),
 
 			array(
 				'title'    => __( 'Body Text Colour', 'woocommerce' ),
-				'desc'     => __( 'The main body text colour. Default <code>#505050</code>.', 'woocommerce' ),
+				'desc'     => __( 'The main body text colour. Default <code>#3c3c3c</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_text_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#505050',
+				'default'  => '#3c3c3c',
 				'autoload' => false,
 				'desc_tip' => true
 			),
