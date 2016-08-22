@@ -1152,12 +1152,8 @@ class WC_AJAX {
 		$order       = wc_get_order( $order_id );
 		$order_taxes = $order->get_taxes();
 		$class       = 'new_row';
-		$item        = new WC_Order_Item_Product( array(
-			'product'  => $product,
-			'order_id' => $order->get_id(),
-		) );
-		$item_id = $item->save();
-		$item    = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		$item_id     = $order->add_product( $product );
+		$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 
 		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 

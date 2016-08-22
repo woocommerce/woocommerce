@@ -244,6 +244,24 @@ function wc_save_order_items( $order_id, $items ) {
 			$item->set_method_title( isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '' );
 			$item->set_total( isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ] : '' );
 			$item->set_taxes( array( 'total' => isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() ) );
+
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+
+					if ( strstr( $meta_id, 'new-' ) ) {
+						if ( $meta_key === '' && $meta_value === '' ) {
+							continue;
+						}
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} elseif ( $meta_key === '' && $meta_value === '' ) {
+						$item->delete_meta_data_by_mid( $meta_id );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
+
 			$item->save();
 		}
 	}
