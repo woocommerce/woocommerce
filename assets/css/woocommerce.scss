@@ -1545,6 +1545,10 @@ p.demo_store {
 	max-width: none; /* 2 */
 }
 
+button.pswp__button {
+	box-shadow: none !important;
+}
+
 button.pswp__button,
 button.pswp__button:hover,
 button.pswp__button--arrow--left:before,
