@@ -177,7 +177,7 @@ jQuery( function( $ ) {
 		/**
 		 * Initialise photoswipe.
 		 */
-		trigger_photoswipe: function( last_slide ) {
+		trigger_photoswipe: function() {
 			var pswpElement = $( '.pswp' )[0];
 
 			// Build items array.
@@ -185,7 +185,7 @@ jQuery( function( $ ) {
 
 			// Define options.
 			var options = {
-				index:         typeof last_slide === 'undefined' ? items.index : items.items.length-1, // Start at first slide.
+				index:         items.index,
 				shareEl:       false,
 				closeOnScroll: false,
 				history:       false
