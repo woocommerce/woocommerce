@@ -25,9 +25,8 @@ $attachment_ids = $product->get_gallery_attachment_ids();
 
 if ( $attachment_ids ) {
 	foreach ( $attachment_ids as $attachment_id ) {
-		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
-
+		$full_size_image  = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$thumbnail        = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
 		$thumbnail_post   = get_post( $attachment_id );
 		$image_title      = $thumbnail_post->post_content;
 

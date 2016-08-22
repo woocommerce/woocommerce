@@ -21,14 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product;
-$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
-
+$columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 $post_thumbnail_id = get_post_thumbnail_id( $post->ID );
-
-$full_size_image  = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
-
-$thumbnail_post   = get_post( $post_thumbnail_id );
-$image_title      = $thumbnail_post->post_content;
+$full_size_image   = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
+$thumbnail_post    = get_post( $post_thumbnail_id );
+$image_title       = $thumbnail_post->post_content;
 
 ?>
 <div class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
@@ -43,7 +40,7 @@ $image_title      = $thumbnail_post->post_content;
 		if ( has_post_thumbnail() ) {
 			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single', $attributes ) . '</figure>' );
 		} else {
-			echo sprintf( '<figure><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+			echo sprintf( '<figure class="woocommerce-product-gallery__image--placeholder"><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
 		}
 
 		do_action( 'woocommerce_product_thumbnails' );
