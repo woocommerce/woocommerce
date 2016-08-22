@@ -548,7 +548,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item_meta_array = array();
 
 		foreach ( $meta_data as $meta ) {
-			$item_meta_array[ $meta->meta_id ] = $meta;
+			$item_meta_array[ $meta->id ] = $meta;
 		}
 
 		return $item_meta_array;

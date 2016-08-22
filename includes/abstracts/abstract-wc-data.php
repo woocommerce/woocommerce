@@ -163,11 +163,11 @@ abstract class WC_Data {
 		if ( ! empty( $data ) && is_array( $data ) ) {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
-				if ( isset( $meta['key'], $meta['value'], $meta['meta_id'] ) ) {
+				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
 					$this->_meta_data[] = (object) array(
-						'key'     => $meta['key'],
-						'value'   => $meta['value'],
-						'meta_id' => $meta['meta_id'],
+						'key'   => $meta['key'],
+						'value' => $meta['value'],
+						'id'    => $meta['id'],
 					);
 				}
 			}
@@ -202,13 +202,13 @@ abstract class WC_Data {
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$array_key = '';
 		if ( $meta_id ) {
-			$array_key = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $meta_id );
+			$array_key = array_keys( wp_list_pluck( $this->_meta_data, 'id' ), $meta_id );
 		}
 		if ( $array_key ) {
 			$this->_meta_data[ current( $array_key ) ] = (object) array(
-				'key'     => $key,
-				'value'   => $value,
-				'meta_id' => $meta_id,
+				'key'   => $key,
+				'value' => $value,
+				'id'    => $meta_id,
 			);
 		} else {
 			$this->add_meta_data( $key, $value, true );
@@ -231,7 +231,7 @@ abstract class WC_Data {
 	 * @param int $mid Meta ID
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
-		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $mid );
+		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'id' ), $mid );
 		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
 	}
 
@@ -272,9 +272,9 @@ abstract class WC_Data {
 						continue;
 					}
 					$this->_meta_data[] = (object) array(
-						'key'     => $meta->meta_key,
-						'value'   => maybe_unserialize( $meta->meta_value ),
-						'meta_id' => $meta->{ $db_info['meta_id_field'] },
+						'key'   => $meta->meta_key,
+						'value' => maybe_unserialize( $meta->meta_value ),
+						'id'    => $meta->{ $db_info['meta_id_field'] },
 					);
 				}
 			}
@@ -301,13 +301,13 @@ abstract class WC_Data {
 		$set_meta_ids = array();
 
 		foreach ( $this->_meta_data as $array_key => $meta ) {
-			if ( empty( $meta->meta_id ) ) {
+			if ( empty( $meta->id ) ) {
 				$new_meta_id    = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
 				$set_meta_ids[] = $new_meta_id;
-				$this->_meta_data[ $array_key ]->meta_id = $new_meta_id;
+				$this->_meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
-				update_metadata_by_mid( $this->_meta_type, $meta->meta_id, $meta->value, $meta->key );
-				$set_meta_ids[] = absint( $meta->meta_id );
+				update_metadata_by_mid( $this->_meta_type, $meta->id, $meta->value, $meta->key );
+				$set_meta_ids[] = absint( $meta->id );
 			}
 		}
 
