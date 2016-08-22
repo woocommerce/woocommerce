@@ -307,9 +307,15 @@ table.wc_status_table {
 }
 
 #log-viewer {
-	textarea {
-		width: 100%;
-		resize: vertical;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 5px 20px;
+
+	pre {
+		font-family: monospace;
+		white-space: pre-wrap;
 	}
 }
 
