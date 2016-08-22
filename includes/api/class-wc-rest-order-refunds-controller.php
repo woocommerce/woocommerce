@@ -344,7 +344,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'meta_id' => array(
+						'id' => array(
 							'description' => __( 'Meta ID.', 'woocommerce' ),
 							'type'        => 'int',
 							'context'     => array( 'view', 'edit' ),
@@ -448,7 +448,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),

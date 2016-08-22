@@ -365,7 +365,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					case 'meta_data' :
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], $meta['meta_id'] );
+								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
 							}
 						}
 						break;
@@ -1071,7 +1071,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'meta_id' => array(
+						'id' => array(
 							'description' => __( 'Meta ID.', 'woocommerce' ),
 							'type'        => 'int',
 							'context'     => array( 'view', 'edit' ),
@@ -1175,7 +1175,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
@@ -1286,7 +1286,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
@@ -1363,7 +1363,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
@@ -1452,7 +1452,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
@@ -1504,7 +1504,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
-								'meta_id' => array(
+								'id' => array(
 									'description' => __( 'Meta ID.', 'woocommerce' ),
 									'type'        => 'int',
 									'context'     => array( 'view', 'edit' ),
