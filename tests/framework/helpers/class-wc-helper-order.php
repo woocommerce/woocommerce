@@ -51,11 +51,7 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$item = new WC_Order_Item_Product( array(
-			'product'  => $product,
-			'quantity' => 4,
-		) );
-		$order->add_item( $item );
+		$order->add_product( $product, 4 );
 
 		// Set billing address
 		$order->set_billing_first_name( 'Jeroen' );

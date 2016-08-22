@@ -957,8 +957,58 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $item->get_id() ) {
 			$this->_items[ $items_key ][ $item->get_id() ] = $item;
 		} else {
-			$this->_items[ $items_key ][ 'new:' . md5( json_encode( $item ) ) ] = $item;
+			$this->_items[ $items_key ][ 'new:' . sizeof( $this->_items[ $items_key ] ) ] = $item;
 		}
+	}
+
+	/**
+	 * Add a product line item to the order. This is the only line item type with
+	 * it's own method because it saves looking up order amounts (costs are added up for you).
+	 * @param  \WC_Product $product
+	 * @param  int $qty
+	 * @param  array $args
+	 * @return int order item ID
+	 */
+	public function add_product( $product, $qty = 1, $args = array() ) {
+		if ( $product ) {
+			$default_args = array(
+				'name'         => $product->get_title(),
+				'tax_class'    => $product->get_tax_class(),
+				'product_id'   => $product->get_id(),
+				'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
+				'variation'    => isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
+				'subtotal'     => $product->get_price_excluding_tax( $qty ),
+				'total'        => $product->get_price_excluding_tax( $qty ),
+				'quantity'     => $qty,
+			);
+		} else {
+			$default_args = array(
+				'quantity'     => $qty,
+			);
+		}
+
+		$args = wp_parse_args( $args, $default_args );
+
+		// BW compatibility with old args
+		if ( isset( $args['totals'] ) ) {
+			foreach ( $args['totals'] as $key => $value ) {
+				if ( 'tax' === $key ) {
+					$args['total_tax'] = $value;
+				} elseif ( 'tax_data' === $key ) {
+					$args['taxes'] = $value;
+				} else {
+					$args[ $key ] = $value;
+				}
+			}
+		}
+
+		$item = new WC_Order_Item_Product( $args );
+		$item->set_backorder_meta();
+		$item->set_order_id( $this->get_id() );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		return $item->get_id();
 	}
 
 	/*

@@ -17,55 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
-	 * Add a product line item to the order.
-	 * @param  \WC_Product $product
-	 * @param  int $qty
-	 * @param  array $args
-	 * @return int order item ID
-	 */
-	public function add_product( $product, $qty = 1, $args = array() ) {
-		_deprecated_function( 'WC_Order::add_product', '2.7', 'Create new WC_Order_Item_Product object and add to order with WC_Order::add_item()' );
-
-		$args = wp_parse_args( $args, array(
-			'quantity'     => $qty,
-			'name'         => $product ? $product->get_title() : '',
-			'tax_class'    => $product ? $product->get_tax_class() : '',
-			'product_id'   => $product ? $product->get_id() : '',
-			'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
-			'variation'    => $product && isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
-			'subtotal'     => $product ? $product->get_price_excluding_tax( $qty ) : '',
-			'total'        => $product ? $product->get_price_excluding_tax( $qty ) : '',
-			'subtotal_tax' => 0,
-			'total_tax'    => 0,
-			'taxes'        => array(
-				'subtotal' => array(),
-				'total'    => array(),
-			),
-		) );
-
-		// BW compatibility with old args
-		if ( isset( $args['totals'] ) ) {
-			foreach ( $args['totals'] as $key => $value ) {
-				if ( 'tax' === $key ) {
-					$args['total_tax'] = $value;
-				} elseif ( 'tax_data' === $key ) {
-					$args['taxes'] = $value;
-				} else {
-					$args[ $key ] = $value;
-				}
-			}
-		}
-
-		$item = new WC_Order_Item_Product( $args );
-		$item->set_backorder_meta();
-		$item->set_order_id( $this->get_id() );
-		$item->save();
-		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-		return $item->get_id();
-	}
-
-	/**
 	 * Add coupon code to the order.
 	 * @param string $code
 	 * @param int $discount tax amount.
