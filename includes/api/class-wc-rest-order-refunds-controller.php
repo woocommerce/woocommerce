@@ -327,7 +327,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				'refunded_by' => array(
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 					'type'        => 'int',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view' ),
 				),
 				'meta_data' => array(
 					'description' => __( 'Order meta data.', 'woocommerce' ),
