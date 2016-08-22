@@ -44,13 +44,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_order';
 
 	/**
-	 * DP for rounding.
-	 *
-	 * @var int
-	 */
-	protected $dp = '2';
-
-	/**
 	 * Stores the request.
 	 * @var array
 	 */

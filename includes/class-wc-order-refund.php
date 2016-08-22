@@ -159,7 +159,6 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
-
 		/**
 		 * Maps legacy vars to new getters.
 		 */

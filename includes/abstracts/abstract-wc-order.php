@@ -34,7 +34,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'order_key'          => '',
 		'currency'           => '',
 		'version'            => '',
 		'prices_include_tax' => false,
@@ -56,7 +55,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'_customer_user', '_order_key', '_order_currency', '_cart_discount',
+		'_customer_user', '_order_currency', '_cart_discount',
 		'_cart_discount_tax', '_order_shipping', '_order_shipping_tax',
 		'_order_tax', '_order_total', '_order_version', '_prices_include_tax',
 		'_payment_tokens',
@@ -151,8 +150,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 2.7.0
 	 */
 	public function create() {
-		$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
 		$this->set_date_created( current_time( 'timestamp' ) );
+		$this->set_currency( $this->get_currency() ? $this->get_currency() : get_woocommerce_currency() );
 
 		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
 			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
@@ -172,7 +171,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Set meta data
 			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 			$this->update_post_meta( '_order_currency', $this->get_currency() );
-			$this->update_post_meta( '_order_key', $this->get_order_key() );
 			$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
 			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
 			$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
@@ -202,7 +200,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
 		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
-		$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
 		$this->set_currency( get_post_meta( $this->get_id(), '_order_currency', true ) );
 		$this->set_discount_total( get_post_meta( $this->get_id(), '_cart_discount', true ) );
 		$this->set_discount_tax( get_post_meta( $this->get_id(), '_cart_discount_tax', true ) );
@@ -256,7 +253,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Update meta data
 		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 		$this->update_post_meta( '_order_currency', $this->get_currency() );
-		$this->update_post_meta( '_order_key', $this->get_order_key() );
 		$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
 		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
 		$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
@@ -399,15 +395,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_order_number() {
 		return apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
-	}
-
-	/**
-	 * Get order key.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_order_key() {
-		return $this->_data['order_key'];
 	}
 
 	/**
@@ -677,14 +664,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'to'   => $new_status
 		);
 	 }
-
-	/**
-	 * Set order_key.
-	 * @param string $value Max length 20 chars.
-	 */
-	public function set_order_key( $value ) {
-		$this->_data['order_key'] = substr( $value, 0, 20 );
-	}
 
 	/**
 	 * Set order_version
@@ -1812,16 +1791,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Check if an order key is valid.
-	 *
-	 * @param mixed $key
-	 * @return bool
-	 */
-	public function key_is_valid( $key ) {
-		return $key === $this->get_order_key();
 	}
 
 	/**

@@ -49,6 +49,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function __construct( $order = 0 ) {
 		$this->_data = array_merge( $this->_data, array(
+			'order_key'            => '',
 			'billing'              => array(
 				'first_name'       => '',
 				'last_name'        => '',
@@ -204,6 +205,8 @@ class WC_Order extends WC_Abstract_Order {
 
 		// Store additonal order data
 		if ( $this->get_id() ) {
+			$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+			$this->update_post_meta( '_order_key', $this->get_order_key() );
 			$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
 			$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
 			$this->update_post_meta( '_billing_company', $this->get_billing_company() );
@@ -249,6 +252,7 @@ class WC_Order extends WC_Abstract_Order {
 		// Read additonal order data
 		if ( $order_id = $this->get_id() ) {
 			$post_object = get_post( $this->get_id() );
+			$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
 			$this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
 			$this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
 			$this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
@@ -294,6 +298,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function update() {
 		// Store additonal order data
+		$this->update_post_meta( '_order_key', $this->get_order_key() );
 		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
 		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
 		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
@@ -430,6 +435,15 @@ class WC_Order extends WC_Abstract_Order {
 	| Methods for getting data from the order object.
 	|
 	*/
+
+	/**
+	 * Get order key.
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_order_key() {
+		return $this->_data['order_key'];
+	}
 
 	/**
 	 * Get billing_first_name
@@ -740,6 +754,14 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Set order_key.
+	 * @param string $value Max length 20 chars.
+	 */
+	public function set_order_key( $value ) {
+		$this->_data['order_key'] = substr( $value, 0, 20 );
+	}
+
+	/**
 	 * Set billing_first_name
 	 * @param string $value
 	 */
@@ -996,6 +1018,16 @@ class WC_Order extends WC_Abstract_Order {
 	| Checks if a condition is true or false.
 	|
 	*/
+
+	/**
+	 * Check if an order key is valid.
+	 *
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function key_is_valid( $key ) {
+		return $key === $this->get_order_key();
+	}
 
 	/**
 	 * See if order matches cart_hash.

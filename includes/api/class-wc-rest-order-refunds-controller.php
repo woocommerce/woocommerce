@@ -14,13 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+include( 'class-wc-rest-orders-controller.php' );
+
 /**
  * REST API Order Refunds controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
+class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -42,6 +44,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 * @var string
 	 */
 	protected $post_type = 'shop_order_refund';
+
+	/**
+	 * Stores the request.
+	 * @var array
+	 */
+	protected $request = array();
 
 	/**
 	 * Order refunds actions.
@@ -104,9 +112,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
-		$order = wc_get_order( (int) $request['order_id'] );
+		$this->request = $request;
+		$order         = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
@@ -114,70 +121,40 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 		$refund = wc_get_order( $post );
 
-		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->get_id() ) ) {
+		if ( ! $refund || $refund->get_parent_id() !== $order->get_id() ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
-		$dp = $request['dp'];
+		$data              = $refund->get_data();
+		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date       = array( 'date_created', 'date_modified' );
+		$format_line_items = array( 'line_items' );
 
+		// Format decimal values.
+		foreach ( $format_decimal as $key ) {
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+		}
+
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+		}
+
+		// Format line items.
+		foreach ( $format_line_items as $key ) {
+			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
+		}
+
+		/*
 		$data = array(
-			'id'           => $refund->id,
+			'id'           => $refund->get_id(),
 			'date_created' => wc_rest_prepare_date_response( $refund->date ),
 			'amount'       => wc_format_decimal( $refund->get_refund_amount(), $dp ),
 			'reason'       => $refund->get_refund_reason(),
 			'line_items'   => array(),
-		);
+		);*/
 
-		// Add line items.
-		foreach ( $refund->get_items() as $item_id => $item ) {
-			$product    = $item->get_product();
-			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
-			$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
-			foreach ( $item_meta as $key => $values ) {
-				$item_meta[ $key ]->label = $values->display_key;
-				unset( $item_meta[ $key ]->display_key );
-				unset( $item_meta[ $key ]->display_value );
-			}
-
-			$line_item = array(
-				'id'           => $item_id,
-				'name'         => $item->get_name(),
-				'sku'          => $product_sku,
-				'product_id'   => (int) $product_id,
-				'variation_id' => (int) $variation_id,
-				'quantity'     => $item->get_quantity(),
-				'tax_class'    => $item->get_tax_class(),
-				'price'        => wc_format_decimal( $refund->get_item_total( $item, false, false ), $dp ),
-				'subtotal'     => wc_format_decimal( $refund->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item->get_subtotal_tax(), $dp ),
-				'total'        => wc_format_decimal( $refund->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
-				'taxes'        => array(),
-				'meta'         => $item_meta,
-			);
-
-			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
-			if ( isset( $item_line_taxes['total'] ) ) {
-				$line_tax = array();
-
-				foreach ( $item_line_taxes['total'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ] = array(
-						'id'       => $tax_rate_id,
-						'total'    => $tax,
-						'subtotal' => '',
-					);
-				}
-
-				foreach ( $item_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ]['subtotal'] = $tax;
-				}
-
-				$line_item['taxes'] = array_values( $line_tax );
-			}
-
-			$data['line_items'][] = $line_item;
-		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -208,11 +185,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 * @return array Links for the given order refund.
 	 */
 	protected function prepare_links( $refund ) {
-		$order_id = $refund->post->post_parent;
+		$order_id = $refund->get_parent_id();
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
 		$links    = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
@@ -233,8 +210,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
-		// Set post_status.
-		$args['post_status'] = 'any';
+		$args['post_status']     = 'any';
+		$args['post_parent__in'] = array( absint( $request['order_id'] ) );
 
 		return $args;
 	}
@@ -285,7 +262,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			$order = wc_get_order( $order_data );
 
 			if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->get_id(), $refund->get_refund_amount(), $refund->get_refund_reason() );
 
 				if ( is_wp_error( $result ) ) {
 					return $result;
@@ -295,7 +272,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		$post = get_post( $refund->id );
+		$post = get_post( $refund->get_id() );
 		$this->update_additional_fields_for_object( $post, $request );
 
 		/**
