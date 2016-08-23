@@ -35,6 +35,9 @@ class WC_Structured_Data {
 		// Output structured data...
 		add_action( 'woocommerce_email_order_details',    array( $this, 'output_structured_data' ),       30, 0 );
 		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),       10, 0 );
+
+		// Filters...
+		add_filter( 'woocommerce_structured_data_product_variable_offers', array( $this, 'disable_variable_product_offers' ), 10, 1 );
 	}
 
 	/**
@@ -63,10 +66,10 @@ class WC_Structured_Data {
 	/**
 	 * Gets `$this->_data`.
 	 *
-	 * @return array $data
+	 * @return array
 	 */
 	public function get_data() {
-		return $data = isset( $this->_data ) ? $this->_data : array();
+		return isset( $this->_data ) ? $this->_data : array();
 	}
 
 	/**
@@ -183,6 +186,16 @@ class WC_Structured_Data {
 		}
 	}
 
+	/**
+	 * Disables variable product offers for looped products.
+	 *
+	 * @param  bool $variable_offers
+	 * @return bool $variable_offers
+	 */
+	public function disable_variable_product_offers( $variable_offers ) {
+		return $variable_offers = is_product_taxonomy() || is_shop() ? false : true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Generators
@@ -206,10 +219,11 @@ class WC_Structured_Data {
 	 *
 	 * @uses   `woocommerce_single_product_summary` action hook
 	 * @uses   `woocommerce_shop_loop` action hook
-	 * @param  bool|object $product (default: false)
+	 * @param  bool|object $product         (default: false)
+	 * @param  bool        $variable_offers (default: true)
 	 * @return bool
 	 */
-	public function generate_product_data( $product = false ) {
+	public function generate_product_data( $product = false, $variable_offers = true ) {
 		if ( $product === false ) {
 			global $product;
 		}
@@ -218,7 +232,9 @@ class WC_Structured_Data {
 			return false;
 		}
 
-		if ( $is_variable = $product->is_type( 'variable' ) ) {
+		$variable_offers = apply_filters( 'woocommerce_structured_data_product_variable_offers', $variable_offers );
+
+		if ( $variable_offers && $is_variable = $product->is_type( 'variable' ) ) {
 			$variations = $product->get_available_variations();
 			
 			foreach ( $variations as $variation ) {
@@ -249,7 +265,6 @@ class WC_Structured_Data {
 		$markup['@id']         = get_permalink( $product->get_id() );
 		$markup['url']         = get_permalink( $product->get_id() );
 		$markup['name']        = $product->get_title();
-		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
 		$markup['description'] = get_the_excerpt( $product->get_id() );
 		$markup['offers']      = $markup_offers;
 		
