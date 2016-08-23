@@ -371,7 +371,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return integer
 	 */
 	public function get_id() {
-		return $this->_data['id'];
+		return $this->get_prop( 'id' );
 	}
 
 	/**
@@ -380,7 +380,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return integer
 	 */
 	public function get_parent_id() {
-		return $this->_data['parent_id'];
+		return $this->get_prop( 'parent_id' );
 	}
 
 	/**
@@ -388,7 +388,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_currency() {
-		return apply_filters( 'woocommerce_get_currency', $this->_data['currency'], $this );
+		return apply_filters( 'woocommerce_get_currency', $this->get_prop( 'currency' ), $this );
 	}
 
 	/**
@@ -396,7 +396,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_version() {
-		return $this->_data['version'];
+		return $this->get_prop( 'version' );
 	}
 
 	/**
@@ -404,7 +404,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function get_prices_include_tax() {
-		return $this->_data['prices_include_tax'];
+		return $this->get_prop( 'prices_include_tax' );
 	}
 
 	/**
@@ -412,7 +412,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int
 	 */
 	public function get_date_created() {
-		return $this->_data['date_created'];
+		return $this->get_prop( 'date_created' );
 	}
 
 	/**
@@ -420,7 +420,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int
 	 */
 	public function get_date_modified() {
-		return $this->_data['date_modified'];
+		return $this->get_prop( 'date_modified' );
 	}
 
 	/**
@@ -428,7 +428,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_status() {
-		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->_data['status'], 0, 3 ) ? substr( $this->_data['status'], 3 ) : $this->_data['status'], $this );
+		$status = $this->get_prop( 'status' );
+		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status, $this );
 	}
 
 	/**
@@ -437,7 +438,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['discount_total'] );
+		$value = wc_format_decimal( $this->get_prop( 'discount_total' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_total', $value, $this );
 	}
 
@@ -447,7 +448,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['discount_tax'] );
+		$value = wc_format_decimal( $this->get_prop( 'discount_tax' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_tax', $value, $this );
 	}
 
@@ -457,7 +458,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['shipping_total'] );
+		$value = wc_format_decimal( $this->get_prop( 'shipping_total' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_total', $value, $this );
 	}
 
@@ -467,7 +468,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['shipping_tax'] );
+		$value = wc_format_decimal( $this->get_prop( 'shipping_tax' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_tax', $value, $this );
 	}
 
@@ -477,7 +478,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_cart_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['cart_tax'] );
+		$value = wc_format_decimal( $this->get_prop( 'cart_tax' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_cart_tax', $value, $this );
 	}
 
@@ -487,7 +488,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['total'], wc_get_price_decimals() );
+		$value = wc_format_decimal( $this->get_prop( 'total' ), wc_get_price_decimals() );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total', $value, $this );
 	}
 
@@ -502,7 +503,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['total_tax'] );
+		$value = wc_format_decimal( $this->get_prop( 'total_tax' ) );
 		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total_tax', $value, $this );
 	}
 
@@ -582,25 +583,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order ID.
 	 * @since 2.7.0
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_id( $value ) {
-		$this->_data['id'] = absint( $value );
+		return $this->set_prop( 'id', absint( $value ) );
 	}
 
 	/**
 	 * Set parent order ID.
 	 * @since 2.7.0
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_parent_id( $value ) {
-		$this->_data['parent_id'] = absint( $value );
+		if ( $value && ! get_post( $value ) ) {
+			return $this->error( 'Invalid parent ID', $value );
+		}
+		return $this->set_prop( 'parent_id', absint( $value ) );
 	}
 
 	/**
 	 * Set order status.
 	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
-	 * @param array details of change
+	 * @return array details of change
 	 */
 	 public function set_status( $new_status ) {
 		$old_status = $this->get_status();
@@ -611,7 +617,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$new_status = 'pending';
 		}
 
-		$this->_data['status'] = 'wc-' . $new_status;
+		$this->set_prop( 'status', 'wc-' . $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
@@ -627,107 +633,121 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order_version
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_version( $value ) {
-		$this->_data['version'] = $value;
+		return $this->set_prop( 'version', $value );
 	}
 
 	/**
 	 * Set order_currency
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_currency( $value ) {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
-			//$this->throw_exception( 'invalid_currency', 'Invalid currency code' );
+			return $this->error( 'Invalid currency code', $value );
 		}
-		$this->_data['currency'] = $value;
+		return $this->set_prop( 'currency', $value );
 	}
 
 	/**
 	 * Set prices_include_tax
 	 * @param bool $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_prices_include_tax( $value ) {
-		$this->_data['prices_include_tax'] = (bool) $value;
+		return $this->set_prop( 'prices_include_tax', (bool) $value );
 	}
 
 	/**
 	 * Set date_created
 	 * @param string $timestamp Timestamp
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_date_created( $timestamp ) {
-		$this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		return $this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set date_modified
 	 * @param string $timestamp
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_date_modified( $timestamp ) {
-		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		return $this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set discount_total
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount_total( $value ) {
-		$this->_data['discount_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'discount_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set discount_tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->_data['discount_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_total
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->_data['shipping_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->_data['shipping_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		return true;
 	}
 
 	/**
 	 * Set cart tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_cart_tax( $value ) {
-		$this->_data['cart_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		return true;
 	}
 
 	/**
 	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	protected function set_total_tax( $value ) {
-		$this->_data['total_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set total
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
 			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
-		$this->_data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
+		return $this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
 	/*

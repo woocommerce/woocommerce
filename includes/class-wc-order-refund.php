@@ -115,9 +115,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded amount.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_amount( $value ) {
-		$this->_data['amount'] = wc_format_decimal( $value );
+		return $this->set_prop( 'amount', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -125,7 +126,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->_data['amount'], $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->get_prop( 'amount' ), $this );
 	}
 
 	/**
@@ -140,9 +141,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refund reason.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_reason( $value ) {
-		$this->_data['reason'] = $value;
+		return $this->set_prop( 'reason', $value );
 	}
 
 	/**
@@ -151,15 +153,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->_data['reason'], $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->get_prop( 'reason' ), $this );
 	}
 
 	/**
 	 * Set refunded by.
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_refunded_by( $value ) {
-		$this->_data['refunded_by'] = absint( $value );
+		return $this->set_prop( 'refunded_by', absint( $value ) );
 	}
 
 	/**
@@ -168,7 +171,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->_data['refunded_by'] );
+		return absint( $this->get_prop( 'refunded_by' ) );
 	}
 
 	/**

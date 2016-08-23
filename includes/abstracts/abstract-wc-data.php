@@ -359,9 +359,57 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Throw an exception due to invalid data.
+	 * Get internal data prop (raw).
+	 * @param string ...$param Prop keys to retrieve. Supports multiple keys to get nested values.
+	 * @return mixed
 	 */
-	protected function throw_exception( $id, $message = '', $code = 400 ) {
-		throw new WC_Data_Exception( $id, $message, $code );
+	protected function get_prop() {
+		$args   = func_get_args();
+		$target = &$this->_data;
+
+		foreach ( $args as $arg ) {
+			if ( ! isset( $target[ $arg ] ) ) {
+				return false;
+			}
+			$target = &$target[ $arg ];
+		}
+
+		return $target;
+	}
+
+	/**
+	 * Set internal data prop to specified value.
+	 * @param int ...$param Prop keys followed by value to set.
+	 * @return bool
+	 */
+	protected function set_prop() {
+		$args = func_get_args();
+
+		if ( sizeof( $args ) < 2 ) {
+			return false;
+		}
+
+		$value  = array_pop( $args );
+		$target = &$this->_data;
+
+		foreach ( $args as $arg ) {
+			if ( ! isset( $target[ $arg ] ) ) {
+				return false;
+			}
+			$target = &$target[ $arg ];
+		}
+
+		$target = $value;
+		return true;
+	}
+
+	/**
+	 * Returns an invalid data WP_Error object.
+	 * @param string $message Error Message.
+	 * @param mixed $data Data the user tried to set.
+	 * @return WP_Error
+	 */
+	protected function error( $message = '', $data = '' ) {
+		return new WP_Error( 'invalid-data', $message, $data );
 	}
 }

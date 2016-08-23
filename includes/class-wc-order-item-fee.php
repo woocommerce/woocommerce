@@ -125,40 +125,44 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set tax class.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
-			//$this->throw_exception( __METHOD__, 'Invalid tax class' );
+			return $this->error( 'Invalid tax class', $value );
 		}
-		$this->_data['tax_class'] = $value;
+		return $this->set_prop( 'tax_class', $value );
 	}
 
 	/**
 	 * Set tax_status.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_status( $value ) {
 		if ( in_array( $value, array( 'taxable', 'none' ) ) ) {
-			$this->_data['tax_status'] = $value;
+			return $this->set_prop( 'tax_status', $value );
 		} else {
-			$this->_data['tax_status'] = 'taxable';
+			return $this->set_prop( 'tax_status', 'taxable' );
 		}
 	}
 
 	/**
 	 * Set total.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total( $value ) {
-		$this->_data['total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set total tax.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total_tax( $value ) {
-		$this->_data['total_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -166,6 +170,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 *
 	 * This is an array of tax ID keys with total amount values.
 	 * @param array $raw_tax_data
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -175,7 +180,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		if ( ! empty( $raw_tax_data['total'] ) ) {
 			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		}
-		$this->_data['taxes'] = $tax_data;
+		return $this->set_prop( 'taxes', $tax_data );
 	}
 
 	/*
@@ -189,7 +194,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_name() {
-		return $this->_data['name'] ? $this->_data['name'] : __( 'Fee', 'woocommerce' );
+		return $this->get_prop( 'name' ) ? $this->get_prop( 'name' ) : __( 'Fee', 'woocommerce' );
 	}
 
 	/**
@@ -205,7 +210,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_tax_class() {
-		return $this->_data['tax_class'];
+		return $this->get_prop( 'tax_class' );
 	}
 
 	/**
@@ -213,7 +218,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_tax_status() {
-		return $this->_data['tax_status'];
+		return $this->get_prop( 'tax_status' );
 	}
 
 	/**
@@ -221,7 +226,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total() {
-		return wc_format_decimal( $this->_data['total'] );
+		return wc_format_decimal( $this->get_prop( 'total' ) );
 	}
 
 	/**
@@ -229,7 +234,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total_tax() {
-		return wc_format_decimal( $this->_data['total_tax'] );
+		return wc_format_decimal( $this->get_prop( 'total_tax' ) );
 	}
 
 	/**
@@ -237,6 +242,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_taxes() {
-		return $this->_data['taxes'];
+		return $this->get_prop( 'taxes' );
 	}
 }

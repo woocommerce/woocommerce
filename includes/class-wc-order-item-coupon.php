@@ -110,33 +110,37 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_name( $value ) {
-		$this->set_code( $value );
+		return $this->set_code( $value );
 	}
 
 	/**
 	 * Set code.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_code( $value ) {
-		$this->_data['code'] = wc_clean( $value );
+		return $this->set_prop( 'code', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set discount amount.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount( $value ) {
-		$this->_data['discount'] =  wc_format_decimal( $value );
+		return $this->set_prop( 'discount', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set discounted tax amount.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->_data['discount_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
 	}
 
 	/*
@@ -166,7 +170,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_code() {
-		return $this->_data['code'];
+		return $this->get_prop( 'code' );
 	}
 
 	/**
@@ -174,7 +178,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_discount() {
-		return wc_format_decimal( $this->_data['discount'] );
+		return wc_format_decimal( $this->get_prop( 'discount' ) );
 	}
 
 	/**
@@ -182,6 +186,6 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_discount_tax() {
-		return wc_format_decimal( $this->_data['discount_tax'] );
+		return wc_format_decimal( $this->get_prop( 'discount_tax' ) );
 	}
 }

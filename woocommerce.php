@@ -236,9 +236,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
-
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
-		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
