@@ -360,20 +360,46 @@ abstract class WC_Data {
 
 	/**
 	 * Get internal data prop (raw).
+	 * @param string ...$param Prop keys to retrieve. Supports multiple keys to get nested values.
 	 * @return mixed
 	 */
-	protected function get_prop( $prop ) {
-		return $this->_data[ $prop ];
+	protected function get_prop() {
+		$args   = func_get_args();
+		$target = &$this->_data;
+
+		foreach ( $args as $arg ) {
+			if ( ! isset( $target[ $arg ] ) ) {
+				return false;
+			}
+			$target = &$target[ $arg ];
+		}
+
+		return $target;
 	}
 
 	/**
 	 * Set internal data prop to specified value.
-	 * @param string $prop to set.
-	 * @param mixed $value to set.
+	 * @param int ...$param Prop keys followed by value to set.
 	 * @return bool
 	 */
-	protected function set_prop( $prop, $value ) {
-		$this->_data[ $prop ] = $value;
+	protected function set_prop() {
+		$args = func_get_args();
+
+		if ( sizeof( $args ) < 2 ) {
+			return false;
+		}
+
+		$value  = array_pop( $args );
+		$target = &$this->_data;
+
+		foreach ( $args as $arg ) {
+			if ( ! isset( $target[ $arg ] ) ) {
+				return false;
+			}
+			$target = &$target[ $arg ];
+		}
+
+		$target = $value;
 		return true;
 	}
 

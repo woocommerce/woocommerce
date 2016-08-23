@@ -217,7 +217,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_method_title() {
-		return $this->_data['method_title'] ? $this->_data['method_title'] : __( 'Shipping', 'woocommerce' );
+		return $this->get_prop( 'method_title' ) ? $this->get_prop( 'method_title' ) : __( 'Shipping', 'woocommerce' );
 	}
 
 	/**
@@ -225,7 +225,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_method_id() {
-		return $this->_data['method_id'];
+		return $this->get_prop( 'method_id' );
 	}
 
 	/**
@@ -233,7 +233,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total() {
-		return wc_format_decimal( $this->_data['total'] );
+		return wc_format_decimal( $this->get_prop( 'total' ) );
 	}
 
 	/**
@@ -241,7 +241,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total_tax() {
-		return wc_format_decimal( $this->_data['total_tax'] );
+		return wc_format_decimal( $this->get_prop( 'total_tax' ) );
 	}
 
 	/**
@@ -249,6 +249,6 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_taxes() {
-		return $this->_data['taxes'];
+		return $this->get_prop( 'taxes' );
 	}
 }

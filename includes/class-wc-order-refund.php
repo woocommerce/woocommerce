@@ -126,7 +126,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->_data['amount'], $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->get_prop( 'amount' ), $this );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->_data['reason'], $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->get_prop( 'reason' ), $this );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->_data['refunded_by'] );
+		return absint( $this->get_prop( 'refunded_by' ) );
 	}
 
 	/**

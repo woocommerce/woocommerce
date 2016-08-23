@@ -116,7 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_id() {
-		return $this->_data['id'];
+		return $this->get_prop( 'id' );
 	}
 
 	/**
@@ -124,7 +124,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order_id() {
-		return $this->_data['order_id'];
+		return $this->get_prop( 'order_id' );
 	}
 
 	/**
@@ -132,7 +132,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_name() {
-		return $this->_data['name'];
+		return $this->get_prop( 'name' );
 	}
 
 	/**
@@ -140,7 +140,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_type() {
-		return $this->_data['type'];
+		return $this->get_prop( 'type' );
 	}
 
 	/*

@@ -170,7 +170,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_code() {
-		return $this->_data['code'];
+		return $this->get_prop( 'code' );
 	}
 
 	/**
@@ -178,7 +178,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_discount() {
-		return wc_format_decimal( $this->_data['discount'] );
+		return wc_format_decimal( $this->get_prop( 'discount' ) );
 	}
 
 	/**
@@ -186,6 +186,6 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_discount_tax() {
-		return wc_format_decimal( $this->_data['discount_tax'] );
+		return wc_format_decimal( $this->get_prop( 'discount_tax' ) );
 	}
 }
