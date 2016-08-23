@@ -231,7 +231,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set quantity.
 	 * @param int $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_quantity( $value ) {
 		if ( 0 >= $value ) {
@@ -243,7 +243,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set tax class.
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
@@ -255,7 +255,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set Product ID
 	 * @param int $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_product_id( $value ) {
 		if ( 0 >= $value || 'product' !== get_post_type( absint( $value ) ) ) {
@@ -267,7 +267,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation ID.
 	 * @param int $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_variation_id( $value ) {
 		if ( 0 >= $value || 'product_variation' !== get_post_type( absint( $value ) ) ) {
@@ -279,7 +279,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line subtotal (before discounts).
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_subtotal( $value ) {
 		return $this->set_prop( 'subtotal', wc_format_decimal( $value ) );
@@ -288,7 +288,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line total (after discounts).
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total( $value ) {
 		return $this->set_prop( 'total', wc_format_decimal( $value ) );
@@ -297,7 +297,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line subtotal tax (before discounts).
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_subtotal_tax( $value ) {
 		return $this->set_prop( 'subtotal_tax', wc_format_decimal( $value ) );
@@ -306,7 +306,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line total tax (after discounts).
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total_tax( $value ) {
 		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
@@ -315,7 +315,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set line taxes.
 	 * @param array $raw_tax_data
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -333,7 +333,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 * @param array $data Key/Value pairs
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_variation( $data ) {
 		foreach ( $data as $key => $value ) {
@@ -345,7 +345,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in product object.
 	 * @param WC_Product $product
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_product( $product ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {

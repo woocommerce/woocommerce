@@ -582,25 +582,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order ID.
 	 * @since 2.7.0
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_id( $value ) {
-		$this->_data['id'] = absint( $value );
+		return $this->set_prop( 'id', absint( $value ) );
 	}
 
 	/**
 	 * Set parent order ID.
 	 * @since 2.7.0
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_parent_id( $value ) {
-		$this->_data['parent_id'] = absint( $value );
+		if ( $value && ! get_post( $value ) ) {
+			return $this->error( 'Invalid parent ID', $value );
+		}
+		return $this->set_prop( 'parent_id', absint( $value ) );
 	}
 
 	/**
 	 * Set order status.
 	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
-	 * @param array details of change
+	 * @return array details of change
 	 */
 	 public function set_status( $new_status ) {
 		$old_status = $this->get_status();
@@ -611,7 +616,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$new_status = 'pending';
 		}
 
-		$this->_data['status'] = 'wc-' . $new_status;
+		$this->set_prop( 'status', 'wc-' . $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
@@ -627,107 +632,121 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order_version
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_version( $value ) {
-		$this->_data['version'] = $value;
+		return $this->set_prop( 'version', $value );
 	}
 
 	/**
 	 * Set order_currency
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_currency( $value ) {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
-			//$this->throw_exception( 'invalid_currency', 'Invalid currency code' );
+			return $this->error( 'Invalid currency code', $value );
 		}
-		$this->_data['currency'] = $value;
+		return $this->set_prop( 'currency', $value );
 	}
 
 	/**
 	 * Set prices_include_tax
 	 * @param bool $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_prices_include_tax( $value ) {
-		$this->_data['prices_include_tax'] = (bool) $value;
+		return $this->set_prop( 'prices_include_tax', (bool) $value );
 	}
 
 	/**
 	 * Set date_created
 	 * @param string $timestamp Timestamp
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_date_created( $timestamp ) {
-		$this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		return $this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set date_modified
 	 * @param string $timestamp
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_date_modified( $timestamp ) {
-		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		return $this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set discount_total
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount_total( $value ) {
-		$this->_data['discount_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'discount_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set discount_tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->_data['discount_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_total
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->_data['shipping_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->_data['shipping_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		return true;
 	}
 
 	/**
 	 * Set cart tax
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_cart_tax( $value ) {
-		$this->_data['cart_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		return true;
 	}
 
 	/**
 	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	protected function set_total_tax( $value ) {
-		$this->_data['total_tax'] = wc_format_decimal( $value );
+		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set total
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
 			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
-		$this->_data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
+		return $this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
 	/*

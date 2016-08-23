@@ -85,68 +85,77 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_name( $value ) {
-		$this->set_rate_code( $value );
+		return $this->set_rate_code( $value );
 	}
 
 	/**
 	 * Set item name.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_rate_code( $value ) {
-		$this->_data['rate_code'] = wc_clean( $value );
+		return $this->set_prop( 'rate_code', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set item name.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_label( $value ) {
-		$this->_data['label'] = wc_clean( $value );
+		return $this->set_prop( 'label', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set tax rate id.
 	 * @param int $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_rate_id( $value ) {
-		$this->_data['rate_id'] = absint( $value );
+		return $this->set_prop( 'rate_id', absint( $value ) );
 	}
 
 	/**
 	 * Set tax total.
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_total( $value ) {
-		$this->_data['tax_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'tax_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_tax_total
 	 * @param string $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_tax_total( $value ) {
-		$this->_data['shipping_tax_total'] = wc_format_decimal( $value );
+		return $this->set_prop( 'shipping_tax_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set compound
 	 * @param bool $value
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_compound( $value ) {
-		$this->_data['compound'] = (bool) $value;
+		return $this->set_prop( 'compound', (bool) $value );
 	}
 
 	/**
 	 * Set properties based on passed in tax rate by ID.
 	 * @param int $tax_rate_id
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_rate( $tax_rate_id ) {
 		$this->set_rate_id( $tax_rate_id );
 		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
 		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
 		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
+		return true;
 	}
 
 	/*

@@ -125,7 +125,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set tax class.
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
@@ -137,7 +137,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set tax_status.
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_tax_status( $value ) {
 		if ( in_array( $value, array( 'taxable', 'none' ) ) ) {
@@ -150,7 +150,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set total.
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total( $value ) {
 		return $this->set_prop( 'total', wc_format_decimal( $value ) );
@@ -159,7 +159,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set total tax.
 	 * @param string $value
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_total_tax( $value ) {
 		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
@@ -170,7 +170,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 *
 	 * This is an array of tax ID keys with total amount values.
 	 * @param array $raw_tax_data
-	 * @return bool|WP_Error Returns sucess true or false/WP Error on failure.
+	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
