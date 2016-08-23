@@ -704,7 +704,7 @@ class WC_Product {
 				break;
 			}
 		} else {
-			$availability = '';
+			$availability = __( 'In stock', 'woocommerce' );
 		}
 		return apply_filters( 'woocommerce_get_availability_text', $availability, $this );
 	}
