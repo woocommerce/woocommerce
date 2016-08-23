@@ -95,8 +95,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @return array|WP_Error
 	 */
 	public function get_coupon( $id, $fields = null ) {
-		global $wpdb;
-
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
 
 		if ( is_wp_error( $id ) )

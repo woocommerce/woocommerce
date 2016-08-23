@@ -141,8 +141,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		// Get the coupon code.
 		$code = wc_get_coupon_code_by_id( $post->ID );
 
