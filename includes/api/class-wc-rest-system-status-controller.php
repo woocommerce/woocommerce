@@ -528,7 +528,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		global $wpdb;
 
 		// WC Core tables to check existence of
-		$tables = array(
+		$tables = apply_filters( 'woocommerce_database_tables', array(
 			'woocommerce_sessions',
 			'woocommerce_api_keys',
 			'woocommerce_attribute_taxonomies',
@@ -542,7 +542,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'woocommerce_shipping_zone_methods',
 			'woocommerce_payment_tokens',
 			'woocommerce_payment_tokenmeta',
-		);
+		) );
 
 		if ( get_option( 'db_version' ) < 34370 ) {
 			$tables[] = 'woocommerce_termmeta';
