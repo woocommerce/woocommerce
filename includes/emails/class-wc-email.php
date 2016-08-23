@@ -279,6 +279,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_headers() {
 		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
+		
 		if ( 'new_order' === $this->id ) {
 			$header .= "Reply-to: {$this->object->billing_first_name} {$this->object->billing_last_name} <{$this->object->billing_email}>\r\n";
 		}
