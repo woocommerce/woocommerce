@@ -359,9 +359,12 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Throw an exception due to invalid data.
+	 * Returns an invalid data WP_Error object.
+	 * @param string $message Error Message.
+	 * @param mixed $data Data the user tried to set.
+	 * @return WP_Error
 	 */
-	protected function throw_exception( $id, $message = '', $code = 400 ) {
-		throw new WC_Data_Exception( $id, $message, $code );
+	protected function error( $message = '', $data = '' ) {
+		return new WP_Error( 'invalid-data', $message, $data );
 	}
 }
