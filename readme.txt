@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Show variable weights/dimensions even when parent values are not set.
 * Automatically sort tax rates rather than allow clunky manual sorting.
 * Made WC_Logger pluggable via wc_get_logger function.
+* Use 'average rating' post meta for 'rating' product sorting option.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 

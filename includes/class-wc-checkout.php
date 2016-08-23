@@ -231,7 +231,7 @@ class WC_Checkout {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = $values['data'];
 				$item    = new WC_Order_Item_Product( array(
-					'qty'          => $values['quantity'],
+					'quantity'     => $values['quantity'],
 					'name'         => $product ? $product->get_title() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
 					'product_id'   => $product ? $product->get_id() : '',

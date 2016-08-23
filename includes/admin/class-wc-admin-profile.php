@@ -161,7 +161,7 @@ class WC_Admin_Profile {
 					<tr>
 						<th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
 						<td>
-							<?php if ( ! empty( $field['type'] ) && 'select' == $field['type'] ) : ?>
+							<?php if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) : ?>
 								<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
 									<?php
 										$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
@@ -169,8 +169,10 @@ class WC_Admin_Profile {
 										<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $selected, $option_key, true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 									<?php endforeach; ?>
 								</select>
+							<?php elseif ( ! empty( $field['type'] ) && 'checkbox' === $field['type'] ) : ?>
+								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
 							<?php else : ?>
-							<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
+								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
 							<br/>
 							<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
@@ -196,7 +198,9 @@ class WC_Admin_Profile {
 
 			foreach ( $fieldset['fields'] as $key => $field ) {
 
-				if ( isset( $_POST[ $key ] ) ) {
+				if ( isset( $field['type'] ) && 'checkbox' === $field['type'] ) {
+					update_user_meta( $user_id, $key, isset( $_POST[ $key ] ) );
+				} elseif ( isset( $_POST[ $key ] ) ) {
 					update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
 				}
 			}

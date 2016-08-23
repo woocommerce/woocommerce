@@ -579,7 +579,9 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H3.
 	 */
 	function woocommerce_template_loop_product_title() {
-		echo '<h3>' . get_the_title() . '</h3>';
+		$tag = is_product_taxonomy() || is_shop() ? 'h2' : 'h3';
+
+		echo '<' . $tag . ' class="woocommerce-loop-product__title">' . get_the_title() . '</' . $tag . '>';
 	}
 }
 if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
@@ -589,14 +591,14 @@ if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 	 */
 	function woocommerce_template_loop_category_title( $category ) {
 		?>
-		<h3>
+		<h2 class="woocommerce-loop-category__title">
 			<?php
 				echo $category->name;
 
 				if ( $category->count > 0 )
 					echo apply_filters( 'woocommerce_subcategory_count_html', ' <mark class="count">(' . $category->count . ')</mark>', $category );
 			?>
-		</h3>
+		</h2>
 		<?php
 	}
 }

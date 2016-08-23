@@ -17,6 +17,98 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
+	 * Add coupon code to the order.
+	 * @param string $code
+	 * @param int $discount tax amount.
+	 * @param int $discount_tax amount.
+	 * @return int order item ID
+	 */
+	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
+		_deprecated_function( 'WC_Order::add_coupon', '2.7', 'Create new WC_Order_Item_Coupon object and add to order with WC_Order::add_item()' );
+
+		$item = new WC_Order_Item_Coupon( array(
+			'code'         => $code,
+			'discount'     => $discount,
+			'discount_tax' => $discount_tax,
+			'order_id'     => $this->get_id(),
+		) );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_coupon', array( $this->get_id(), $item->get_id(), $code, $discount, $discount_tax ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		return $item->get_id();
+	}
+
+	/**
+	 * Add a tax row to the order.
+	 * @param array $args
+	 * @param int $tax_amount amount of tax.
+	 * @param int $shipping_tax_amount shipping amount.
+	 * @return int order item ID
+	 */
+	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
+		_deprecated_function( 'WC_Order::add_tax', '2.7', 'Create new WC_Order_Item_Tax object and add to order with WC_Order::add_item()' );
+
+		$item = new WC_Order_Item_Tax( array(
+			'rate_id'            => $tax_rate_id,
+			'tax_total'          => $tax_amount,
+			'shipping_tax_total' => $shipping_tax_amount,
+		) );
+		$item->set_rate( $tax_rate_id );
+		$item->set_order_id( $this->get_id() );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_tax', array( $this->get_id(), $item->get_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		return $item->get_id();
+	}
+
+	/**
+	 * Add a shipping row to the order.
+	 * @param WC_Shipping_Rate shipping_rate
+	 * @return int order item ID
+	 */
+	public function add_shipping( $shipping_rate ) {
+		_deprecated_function( 'WC_Order::add_shipping', '2.7', 'Create new WC_Order_Item_Shipping object and add to order with WC_Order::add_item()' );
+
+		$item = new WC_Order_Item_Shipping( array(
+			'method_title' => $shipping_rate->label,
+			'method_id'    => $shipping_rate->id,
+			'total'        => wc_format_decimal( $shipping_rate->cost ),
+			'taxes'        => $shipping_rate->taxes,
+			'meta_data'    => $shipping_rate->get_meta_data(),
+			'order_id'     => $this->get_id(),
+		) );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_shipping', array( $this->get_id(), $item->get_id(), $shipping_rate ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		return $item->get_id();
+	}
+
+	/**
+	 * Add a fee to the order.
+	 * Order must be saved prior to adding items.
+	 * @param object $fee
+	 * @return int updated order item ID
+	 */
+	public function add_fee( $fee ) {
+		_deprecated_function( 'WC_Order::add_fee', '2.7', 'Create new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
+
+		$item = new WC_Order_Item_Fee( array(
+			'name'      => $fee->name,
+			'tax_class' => $fee->taxable ? $fee->tax_class : 0,
+			'total'     => $fee->amount,
+			'total_tax' => $fee->tax,
+			'taxes'     => array(
+				'total' => $fee->tax_data,
+			),
+			'order_id'  => $this->get_id(),
+		) );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_fee', array( $this->get_id(), $item->get_id(), $fee ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		return $item->get_id();
+	}
+
+	/**
 	 * Update a line item for the order.
 	 *
 	 * Note this does not update order totals.
@@ -456,7 +548,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item_meta_array = array();
 
 		foreach ( $meta_data as $meta ) {
-			$item_meta_array[ $meta->meta_id ] = $meta;
+			$item_meta_array[ $meta->id ] = $meta;
 		}
 
 		return $item_meta_array;

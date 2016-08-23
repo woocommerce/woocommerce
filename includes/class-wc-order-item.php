@@ -22,10 +22,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @var array
 	 */
 	protected $_data = array(
-		'order_id'      => 0,
-		'order_item_id' => 0,
-		'name'          => '',
-		'type'          => '',
+		'order_id' => 0,
+		'id'       => 0, // order_item_id
+		'name'     => '',
+		'type'     => '',
 	);
 
 	/**
@@ -73,8 +73,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		foreach ( $data as $key => $value ) {
 			if ( is_callable( array( $this, "set_$key" ) ) ) {
 				$this->{"set_$key"}( $value );
-			} else {
-				$this->_data[ $key ] = $value;
 			}
 		}
 	}
@@ -89,10 +87,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get qty.
+	 * Get quantity.
 	 * @return int
 	 */
-	public function get_qty() {
+	public function get_quantity() {
 		return 1;
 	}
 
@@ -118,7 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_id() {
-		return $this->get_order_item_id();
+		return $this->_data['id'];
 	}
 
 	/**
@@ -126,15 +124,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order_id() {
-		return absint( $this->_data['order_id'] );
-	}
-
-	/**
-	 * Get order item ID this meta belongs to.
-	 * @return int
-	 */
-	protected function get_order_item_id() {
-		return absint( $this->_data['order_item_id'] );
+		return $this->_data['order_id'];
 	}
 
 	/**
@@ -164,7 +154,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int $value
 	 */
 	public function set_id( $value ) {
-		$this->set_order_item_id( $value );
+		$this->_data['id'] = absint( $value );
 	}
 
 	/**
@@ -173,14 +163,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function set_order_id( $value ) {
 		$this->_data['order_id'] = absint( $value );
-	}
-
-	/**
-	 * Set order item ID.
-	 * @param int $value
-	 */
-	protected function set_order_item_id( $value ) {
-		$this->_data['order_item_id'] = absint( $value );
 	}
 
 	/**
@@ -329,7 +311,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
-			$formatted_meta[ $meta->meta_id ] = (object) array(
+			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
@@ -408,7 +390,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$return = array();
 
 			foreach ( $this->_meta_data as $meta ) {
-				$return[ $meta->meta_id ] = $meta;
+				$return[ $meta->id ] = $meta;
 			}
 
 			return $return;

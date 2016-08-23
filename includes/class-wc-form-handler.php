@@ -615,17 +615,17 @@ class WC_Form_Handler {
 		// Copy products from the order to the cart
 		foreach ( $order->get_items() as $item ) {
 			// Load all product info including variation data
-			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['product_id'] );
-			$quantity     = (int) $item['qty'];
-			$variation_id = (int) $item['variation_id'];
+			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
+			$quantity     = $item->get_quantity();
+			$variation_id = $item->get_variation_id();
 			$variations   = array();
 			$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
 
-			foreach ( $item['item_meta'] as $meta_name => $meta_value ) {
-				if ( taxonomy_is_product_attribute( $meta_name ) ) {
-					$variations[ $meta_name ] = $meta_value[0];
-				} elseif ( meta_is_product_attribute( $meta_name, $meta_value[0], $product_id ) ) {
-					$variations[ $meta_name ] = $meta_value[0];
+			foreach ( $item->get_meta_data() as $meta ) {
+				if ( taxonomy_is_product_attribute( $meta->meta_key ) ) {
+					$variations[ $meta->meta_key ] = $meta->meta_value;
+				} elseif ( meta_is_product_attribute( $meta->meta_key, $meta->meta_value, $product_id ) ) {
+					$variations[ $meta->meta_key ] = $meta->meta_value;
 				}
 			}
 
@@ -663,7 +663,8 @@ class WC_Form_Handler {
 			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				// Cancel the order + restore stock
-				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
+				WC()->session->set( 'order_awaiting_payment', false );
+				$order->update_status( 'cancelled', __( 'Order cancelled by customer.', 'woocommerce' ) );
 
 				// Message
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );

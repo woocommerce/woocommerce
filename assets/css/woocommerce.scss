@@ -427,7 +427,9 @@ p.demo_store {
 				margin: -0.5em -0.5em 0 0;
 			}
 
-			h3 {
+			h3,
+			.woocommerce-loop-product__title,
+			.woocommerce-loop-category__title {
 				padding: 0.5em 0;
 				margin: 0;
 				font-size: 1em;
