@@ -836,7 +836,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_first_name( $value ) {
-		return $this->set_prop( array( 'billing' => 'first_name' ), $value );
+		$this->_data['billing']['first_name'] = $value;
+		return true;
 	}
 
 	/**
@@ -845,7 +846,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_last_name( $value ) {
-		return $this->set_prop( array( 'billing' => 'last_name' ), $value );
+		$this->_data['billing']['last_name'] = $value;
+		return true;
 	}
 
 	/**
@@ -854,7 +856,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_company( $value ) {
-		return $this->set_prop( array( 'billing' => 'company' ), $value );
+		$this->_data['billing']['company'] = $value;
+		eturn true;
 	}
 
 	/**
@@ -863,7 +866,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_address_1( $value ) {
-		return $this->set_prop( array( 'billing' => 'address_1' ), $value );
+		$this->_data['billing']['address_1'] = $value;
+		return true;
 	}
 
 	/**
@@ -872,7 +876,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_address_2( $value ) {
-		return $this->set_prop( array( 'billing' => 'address_2' ), $value );
+		$this->_data['billing']['address_2'] = $value;
+		return true;
 	}
 
 	/**
@@ -881,7 +886,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_city( $value ) {
-		return $this->set_prop( array( 'billing' => 'city' ), $value );
+		$this->_data['billing']['city'] = $value;
+		return true;
 	}
 
 	/**
@@ -890,7 +896,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_state( $value ) {
-		return $this->set_prop( array( 'billing' => 'state' ), $value );
+		$this->_data['billing']['state'] = $value;
+		return true;
 	}
 
 	/**
@@ -899,7 +906,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_postcode( $value ) {
-		return $this->set_prop( array( 'billing' => 'postcode' ), $value );
+		$this->_data['billing']['postcode'] = $value;
+		return true;
 	}
 
 	/**
@@ -908,7 +916,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_country( $value ) {
-		return $this->set_prop( array( 'billing' => 'country' ), $value );
+		$this->_data['billing']['country'] = $value;
+		return true;
 	}
 
 	/**
@@ -920,7 +929,8 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $value && ! is_email( sanitize_email( $value ) ) ) {
 			return $this->error( 'Invalid email address', $value );
 		}
-		return $this->set_prop( array( 'billing' => 'email' ), sanitize_email( $value ) );
+		$this->_data['billing']['email'] = sanitize_email( $value );
+		return true;
 	}
 
 	/**
@@ -929,7 +939,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_billing_phone( $value ) {
-		return $this->set_prop( array( 'billing' => 'phone' ), $value );
+		$this->_data['billing']['phone'] = $value;
+		return true;
 	}
 
 	/**
@@ -938,7 +949,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_first_name( $value ) {
-		return $this->set_prop( array( 'shipping' => 'first_name' ), $value );
+		$this->_data['shipping']['first_name'] = $value;
+		return true;
 	}
 
 	/**
@@ -947,7 +959,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_last_name( $value ) {
-		return $this->set_prop( array( 'shipping' => 'last_name' ), $value );
+		$this->_data['shipping']['last_name'] = $value;
+		return true;
 	}
 
 	/**
@@ -956,7 +969,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_company( $value ) {
-		return $this->set_prop( array( 'shipping' => 'company' ), $value );
+		$this->_data['shipping']['company'] = $value;
+		return true;
 	}
 
 	/**
@@ -965,7 +979,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_address_1( $value ) {
-		return $this->set_prop( array( 'shipping' => 'address_1' ), $value );
+		$this->_data['shipping']['address_1'] = $value;
+		return true;
 	}
 
 	/**
@@ -974,7 +989,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_address_2( $value ) {
-		return $this->set_prop( array( 'shipping' => 'address_2' ), $value );
+		$this->_data['shipping']['address_2'] = $value;
+		return true;
 	}
 
 	/**
@@ -983,7 +999,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_city( $value ) {
-		return $this->set_prop( array( 'shipping' => 'city' ), $value );
+		$this->_data['shipping']['city'] = $value;
+		return true;
 	}
 
 	/**
@@ -992,7 +1009,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_state( $value ) {
-		return $this->set_prop( array( 'shipping' => 'state' ), $value );
+		$this->_data['shipping']['state'] = $value;
+		return true;
 	}
 
 	/**
@@ -1001,7 +1019,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_postcode( $value ) {
-		return $this->set_prop( array( 'shipping' => 'postcode' ), $value );
+		$this->_data['shipping']['postcode'] = $value;
+		return true;
 	}
 
 	/**
@@ -1010,7 +1029,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
 	 */
 	public function set_shipping_country( $value ) {
-		return $this->set_prop( array( 'shipping' => 'country' ), $value );
+		$this->_data['shipping']['country'] = $value;
+		return true;
 	}
 
 	/**

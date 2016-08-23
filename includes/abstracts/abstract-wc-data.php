@@ -365,9 +365,11 @@ abstract class WC_Data {
 	protected function get_prop( $prop ) {
 		return $this->_data[ $prop ];
 	}
-	
+
 	/**
 	 * Set internal data prop to specified value.
+	 * @param string $prop to set.
+	 * @param mixed $value to set.
 	 * @return bool
 	 */
 	protected function set_prop( $prop, $value ) {
