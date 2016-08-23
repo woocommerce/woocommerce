@@ -359,6 +359,23 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Get internal data prop (raw).
+	 * @return mixed
+	 */
+	protected function get_prop( $prop ) {
+		return $this->_data[ $prop ];
+	}
+	
+	/**
+	 * Set internal data prop to specified value.
+	 * @return bool
+	 */
+	protected function set_prop( $prop, $value ) {
+		$this->_data[ $prop ] = $value;
+		return true;
+	}
+
+	/**
 	 * Returns an invalid data WP_Error object.
 	 * @param string $message Error Message.
 	 * @param mixed $data Data the user tried to set.
