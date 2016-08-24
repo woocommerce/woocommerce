@@ -156,13 +156,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'discount_type'                => $coupon->get_discount_type(),
 			'description'                  => $coupon->get_description(),
 			'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
-			'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? wc_rest_prepare_date_response( $coupon->get_expiry_date() ) : null,
+			'expiry_date'                  => $coupon->get_expiry_date() ? wc_rest_prepare_date_response( $coupon->get_expiry_date() ) : null,
 			'usage_count'                  => (int) $coupon->get_usage_count(),
 			'individual_use'               => $coupon->get_individual_use(),
 			'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
 			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
-			'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
-			'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+			'usage_limit'                  => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : null,
+			'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
 			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 			'free_shipping'                => $coupon->get_free_shipping(),
 			'product_categories'           => array_map( 'absint', (array) $coupon->get_product_categories() ),
@@ -216,7 +216,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$schema = $this->get_item_schema();
 
 		// Validate required POST fields.
-		if ( 'POST' === $request->get_method() && empty( $coupon->get_id() ) ) {
+		if ( 'POST' === $request->get_method() && 0 === $coupon->get_id() ) {
 			if ( empty( $request['code'] ) ) {
 				return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 			}
