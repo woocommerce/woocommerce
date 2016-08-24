@@ -74,10 +74,12 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	public function read( $id ) {
 		parent::read( $id );
 		if ( $this->get_id() ) {
+			$this->_reading = true;
 			$this->set_method_id( get_metadata( 'order_item', $this->get_id(), 'method_id', true ) );
 			$this->set_total( get_metadata( 'order_item', $this->get_id(), 'cost', true ) );
 			$this->set_total_tax( get_metadata( 'order_item', $this->get_id(), 'total_tax', true ) );
 			$this->set_taxes( get_metadata( 'order_item', $this->get_id(), 'taxes', true ) );
+			$this->_reading = false;
 		}
 	}
 

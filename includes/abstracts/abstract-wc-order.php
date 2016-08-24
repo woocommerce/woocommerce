@@ -108,6 +108,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int|object|WC_Order $order Order to init.
 	 */
 	public function __construct( $order = 0 ) {
+		$this->set_defaults();
+
 		if ( is_numeric( $order ) && $order > 0 ) {
 			$this->read( $order );
 		} elseif ( $order instanceof self ) {
@@ -199,6 +201,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return;
 		}
 
+		$this->_reading = true;
 		// Map standard post data
 		$this->set_id( $post_object->ID );
 		$this->set_parent_id( $post_object->post_parent );
@@ -219,6 +222,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Load meta data
 		$this->read_meta_data();
+		$this->_reading = false;
 	}
 
 	/**
@@ -605,7 +609,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_parent_id( $value ) {
 		if ( $value && ! get_post( $value ) ) {
-			$this->throw_exception( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
+			$this->invalid_data( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'parent_id', absint( $value ) );
 	}
@@ -654,7 +658,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_currency( $value ) {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
-			$this->throw_exception( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
+			$this->invalid_data( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
 		$this->set_prop( 'currency', $value );
 	}

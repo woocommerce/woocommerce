@@ -65,6 +65,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 		// Read additonal order data
 		if ( $this->get_id() ) {
+			$this->_reading = true;
 			$post_object = get_post( $id );
 			$this->set_amount( get_post_meta( $this->get_id(), '_refund_amount', true ) );
 
@@ -73,6 +74,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 			// post_excerpt was used before refund_reason meta.
 			$this->set_reason( metadata_exists( 'post', $this->get_id(), '_refund_reason' ) ? get_post_meta( $this->get_id(), '_refund_reason', true ) : absint( $post_object->post_excerpt ) );
+			$this->_reading = false;
 		}
 	}
 

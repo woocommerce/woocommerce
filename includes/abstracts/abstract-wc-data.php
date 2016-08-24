@@ -28,6 +28,12 @@ abstract class WC_Data {
 	protected $_data = array();
 
 	/**
+	 * True when reading from the database.
+	 * @var bool
+	 */
+	protected $_reading = false;
+
+	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -377,33 +383,17 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	protected function get_prop() {
-		$args   = func_get_args();
-		$target = &$this->_data;
+		$args = func_get_args();
+		$prop = &$this->_data;
 
 		foreach ( $args as $arg ) {
-			if ( ! isset( $target[ $arg ] ) ) {
+			if ( ! isset( $prop[ $arg ] ) ) {
 				return false;
 			}
-			$target = &$target[ $arg ];
+			$prop = &$prop[ $arg ];
 		}
 
-		return $target;
-	}
-
-	/**
-	 * Set all props to passed key value pairs using setters and ignoring invalid
-	 * values with the try/catch.
-	 * @param array $values
-	 */
-	protected function set_props( $values = array() ) {
-		foreach ( $values as $prop => $value ) {
-			try {
-				$this->{"set_$prop"}( $value );
-			} catch ( WC_Data_Exception $e ) {
-				// Default value will be left as-is.
-				unset( $e );
-			}
-		}
+		return $prop;
 	}
 
 	/**
@@ -413,7 +403,7 @@ abstract class WC_Data {
 	 */
 	protected function set_prop() {
 		if ( func_num_args() < 2 ) {
-			$this->throw_exception( 'invalid_value', 'set_prop requires at least 2 parameters' );
+			$this->invalid_data( 'invalid_value', 'set_prop requires at least 2 parameters' );
 		}
 
 		$args  = func_get_args();
@@ -428,12 +418,14 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Returns an invalid data WP_Error object.
+	 * When invalid data is found, throw an exception unless reading from the DB.
 	 * @param string $message Error Message.
 	 * @param mixed $data Data the user tried to set.
 	 * @throws WC_Data_Exception
 	 */
-	protected function throw_exception( $error_code, $error_message, $http_status_code = 400 ) {
-		throw new WC_Data_Exception( $error_code, $error_message, $http_status_code );
+	protected function invalid_data( $error_code, $error_message, $http_status_code = 400 ) {
+		if ( ! $this->_reading ) {
+			throw new WC_Data_Exception( $error_code, $error_message, $http_status_code );
+		}
 	}
 }

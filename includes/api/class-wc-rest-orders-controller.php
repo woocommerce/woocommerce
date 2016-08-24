@@ -434,6 +434,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			return $order->get_id();
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

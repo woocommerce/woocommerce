@@ -37,45 +37,6 @@ class WC_Order extends WC_Abstract_Order {
 	);
 
 	/**
-	 * Map of meta data keys to internal prop keys.
-	 * @var array
-	 */
-	protected $prop_to_meta_key = array(
-		'order_key'            => '_order_key',
-		'customer_id'          => '_customer_user',
-		'billing_first_name'   => '_billing_first_name',
-		'billing_last_name'    => '_billing_last_name',
-		'billing_company'      => '_billing_company',
-		'billing_address_1'    => '_billing_address_1',
-		'billing_address_2'    => '_billing_address_2',
-		'billing_city'         => '_billing_city',
-		'billing_state'        => '_billing_state',
-		'billing_postcode'     => '_billing_postcode',
-		'billing_country'      => '_billing_country',
-		'billing_email'        => '_billing_email',
-		'billing_phone'        => '_billing_phone',
-		'shipping_first_name'  => '_shipping_first_name',
-		'shipping_last_name'   => '_shipping_last_name',
-		'shipping_company'     => '_shipping_company',
-		'shipping_address_1'   => '_shipping_address_1',
-		'shipping_address_2'   => '_shipping_address_2',
-		'shipping_city'        => '_shipping_city',
-		'shipping_state'       => '_shipping_state',
-		'shipping_postcode'    => '_shipping_postcode',
-		'shipping_country'     => '_shipping_country',
-		'payment_method'       => '_payment_method',
-		'payment_method_title' => '_payment_method_title',
-		'transaction_id'       => '_transaction_id',
-		'customer_ip_address'  => '_customer_ip_address',
-		'customer_user_agent'  => '_customer_user_agent',
-		'created_via'          => '_created_via',
-		'customer_note'        => '_customer_note',
-		'date_completed'       => '_completed_date',
-		'date_paid'            => '_paid_date',
-		'cart_hash'            => '_cart_hash',
-	);
-
-	/**
 	 * Stores data about status changes so relevant hooks can be fired.
 	 * @var bool|array
 	 */
@@ -308,17 +269,45 @@ class WC_Order extends WC_Abstract_Order {
 			return;
 		}
 
-		$post_object = get_post( $this->get_id() );
-		$values      = array(
-			'customer_note' => $post_object->post_excerpt,
-		);
+		$this->_reading = true;
+		$post_object    = get_post( $this->get_id() );
 
-		foreach ( $this->prop_to_meta_key as $prop => $meta_key ) {
-			$values[ $prop ] = get_post_meta( $this->get_id(), $meta_key, true );
-		}
-
-		$this->set_props( $values );
+		// Read additonal order data
+		$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
+		$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
+		$this->set_billing_first_name( get_post_meta( $this->get_id(), '_billing_first_name', true ) );
+		$this->set_billing_last_name( get_post_meta( $this->get_id(), '_billing_last_name', true ) );
+		$this->set_billing_company( get_post_meta( $this->get_id(), '_billing_company', true ) );
+		$this->set_billing_address_1( get_post_meta( $this->get_id(), '_billing_address_1', true ) );
+		$this->set_billing_address_2( get_post_meta( $this->get_id(), '_billing_address_2', true ) );
+		$this->set_billing_city( get_post_meta( $this->get_id(), '_billing_city', true ) );
+		$this->set_billing_state( get_post_meta( $this->get_id(), '_billing_state', true ) );
+		$this->set_billing_postcode( get_post_meta( $this->get_id(), '_billing_postcode', true ) );
+		$this->set_billing_country( get_post_meta( $this->get_id(), '_billing_country', true ) );
+		$this->set_billing_email( get_post_meta( $this->get_id(), '_billing_email', true ) );
+		$this->set_billing_phone( get_post_meta( $this->get_id(), '_billing_phone', true ) );
+		$this->set_shipping_first_name( get_post_meta( $this->get_id(), '_shipping_first_name', true ) );
+		$this->set_shipping_last_name( get_post_meta( $this->get_id(), '_shipping_last_name', true ) );
+		$this->set_shipping_company( get_post_meta( $this->get_id(), '_shipping_company', true ) );
+		$this->set_shipping_address_1( get_post_meta( $this->get_id(), '_shipping_address_1', true ) );
+		$this->set_shipping_address_2( get_post_meta( $this->get_id(), '_shipping_address_2', true ) );
+		$this->set_shipping_city( get_post_meta( $this->get_id(), '_shipping_city', true ) );
+		$this->set_shipping_state( get_post_meta( $this->get_id(), '_shipping_state', true ) );
+		$this->set_shipping_postcode( get_post_meta( $this->get_id(), '_shipping_postcode', true ) );
+		$this->set_shipping_country( get_post_meta( $this->get_id(), '_shipping_country', true ) );
+		$this->set_payment_method( get_post_meta( $this->get_id(), '_payment_method', true ) );
+		$this->set_payment_method_title( get_post_meta( $this->get_id(), '_payment_method_title', true ) );
+		$this->set_transaction_id( get_post_meta( $this->get_id(), '_transaction_id', true ) );
+		$this->set_customer_ip_address( get_post_meta( $this->get_id(), '_customer_ip_address', true ) );
+		$this->set_customer_user_agent( get_post_meta( $this->get_id(), '_customer_user_agent', true ) );
+		$this->set_created_via( get_post_meta( $this->get_id(), '_created_via', true ) );
+		$this->set_customer_note( get_post_meta( $this->get_id(), '_customer_note', true ) );
+		$this->set_date_completed( get_post_meta( $this->get_id(), '_completed_date', true ) );
+		$this->set_date_paid( get_post_meta( $this->get_id(), '_paid_date', true ) );
+		$this->set_cart_hash( get_post_meta( $this->get_id(), '_cart_hash', true ) );
+		$this->set_customer_note( $post_object->post_excerpt );
 		$this->maybe_set_user_billing_email();
+		$this->_reading = false;
 	}
 
 	/**
@@ -957,7 +946,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
-			$this->throw_exception( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
+			$this->invalid_data( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
 		}
 		$this->set_prop( 'billing', 'email', sanitize_email( $value ) );
 	}

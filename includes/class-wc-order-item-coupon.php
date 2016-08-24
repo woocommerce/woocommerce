@@ -74,8 +74,10 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	public function read( $id ) {
 		parent::read( $id );
 		if ( $this->get_id() ) {
+			$this->_reading = true;
 			$this->set_discount( get_metadata( 'order_item', $this->get_id(), 'discount_amount', true ) );
 			$this->set_discount_tax( get_metadata( 'order_item', $this->get_id(), 'discount_amount_tax', true ) );
+			$this->_reading = false;
 		}
 	}
 

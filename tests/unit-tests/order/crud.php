@@ -799,6 +799,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $set_to, $object->get_billing_email() );
 
 		$set_to = 'not an email';
+		$this->setExpectedException( 'WC_Data_Exception' );
 		$object->set_billing_email( $set_to );
 		$this->assertEquals( 'test@test.com', $object->get_billing_email() );
 	}

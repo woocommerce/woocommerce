@@ -96,6 +96,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function read( $id ) {
 		parent::read( $id );
 		if ( $this->get_id() ) {
+			$this->_reading = true;
 			$this->set_product_id( get_metadata( 'order_item', $this->get_id(), '_product_id', true ) );
 			$this->set_variation_id( get_metadata( 'order_item', $this->get_id(), '_variation_id', true ) );
 			$this->set_quantity( get_metadata( 'order_item', $this->get_id(), '_qty', true ) );
@@ -105,6 +106,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_total( get_metadata( 'order_item', $this->get_id(), '_line_total', true ) );
 			$this->set_total_tax( get_metadata( 'order_item', $this->get_id(), '_line_tax', true ) );
 			$this->set_taxes( get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ) );
+			$this->_reading = false;
 		}
 	}
 
@@ -235,7 +237,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_quantity( $value ) {
 		if ( 0 >= $value ) {
-			$this->throw_exception( 'order_item_product_invalid_quantity', __( 'Quantity must be positive', 'woocommerce' ) );
+			$this->invalid_data( 'order_item_product_invalid_quantity', __( 'Quantity must be positive', 'woocommerce' ) );
 		}
 		$this->set_prop( 'quantity', wc_stock_amount( $value ) );
 	}
@@ -247,7 +249,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
-			$this->throw_exception( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
+			$this->invalid_data( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
 	}
@@ -258,8 +260,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_product_id( $value ) {
-		if ( 0 >= $value || 'product' !== get_post_type( absint( $value ) ) ) {
-			$this->throw_exception( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
+		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
+			$this->invalid_data( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'product_id', absint( $value ) );
 	}
@@ -270,8 +272,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_variation_id( $value ) {
-		if ( 0 >= $value || 'product_variation' !== get_post_type( $value ) ) {
-			$this->throw_exception( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
+		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
+			$this->invalid_data( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'variation_id', absint( $value ) );
 	}
@@ -349,7 +351,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_product( $product ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
-			$this->throw_exception( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
+			$this->invalid_data( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		$this->set_product_id( $product->get_id() );
 		$this->set_name( $product->get_title() );
