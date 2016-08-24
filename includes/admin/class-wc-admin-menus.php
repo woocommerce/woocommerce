@@ -39,7 +39,7 @@ class WC_Admin_Menus {
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
 		// Rename taxonomies at Appearance > Menus > Pages
-		add_action( 'nav_menu_meta_box_object', array( $this, 'rename_nav_menu_meta_boxes' ) );
+		add_filter( 'nav_menu_meta_box_object', array( $this, 'rename_nav_menu_meta_boxes' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages
 		add_action( 'admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
