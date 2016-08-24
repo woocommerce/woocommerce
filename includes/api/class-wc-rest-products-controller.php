@@ -43,12 +43,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected $post_type = 'product';
 
+	protected $image_sizes = array();
+
 	/**
 	 * Initialize product actions.
 	 */
 	public function __construct() {
 		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
 		add_action( "woocommerce_rest_insert_{$this->post_type}", array( $this, 'clear_transients' ) );
+
+
+		/* Get the intermediate image sizes and add the full size to the array. */
+		$this->image_sizes  = get_intermediate_image_sizes();
+		$this->image_sizes [] = 'full';
 	}
 
 	/**
@@ -292,6 +299,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'name'          => get_the_title( $attachment_id ),
 				'alt'           => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 				'position'      => (int) $position,
+				'sizes'         => $this->get_image_sizes( $attachment_id )
 			);
 		}
 
@@ -306,6 +314,31 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'alt'           => __( 'Placeholder', 'woocommerce' ),
 				'position'      => 0,
 			);
+		}
+
+		return $images;
+	}
+
+	protected function get_image_sizes( $attachment_id ) {
+
+		/* Set up an empty array for the links. */
+		$images = array();
+
+		/* Loop through each of the image sizes. */
+		foreach ( $this->image_sizes as $size ) {
+
+			/* Get the image source, width, height, and whether it's intermediate. */
+			$image = wp_get_attachment_image_src( $attachment_id, $size );
+
+			/* Add the link to the array if there's an image and if $is_intermediate (4th array value) is true or full size. */
+			if ( !empty( $image ) && ( true == $image[3] || 'full' == $size ) ) {
+
+				$images[$size] = array(
+					'src' => $image[0],
+					'width' => $image[1],
+					'height' => $image[2],
+				);
+			}
 		}
 
 		return $images;
