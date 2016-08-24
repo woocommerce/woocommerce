@@ -16,7 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Data {
 
 	/**
-	 * Core data for this object, name value pairs (name + default value).
+	 * Core data default values for this object, name value pairs (name + default value).
+	 * @var array
+	 */
+	protected $_default_data = array();
+
+	/**
+	 * Core data for this object.
 	 * @var array
 	 */
 	protected $_data = array();
@@ -359,6 +365,13 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Set all props to default values.
+	 */
+	protected function set_defaults() {
+		$this->_data = $this->_default_data;
+	}
+
+	/**
 	 * Get internal data prop (raw).
 	 * @param string ...$param Prop keys to retrieve. Supports multiple keys to get nested values.
 	 * @return mixed
@@ -375,6 +388,22 @@ abstract class WC_Data {
 		}
 
 		return $target;
+	}
+
+	/**
+	 * Set all props to passed key value pairs using setters and ignoring invalid
+	 * values with the try/catch.
+	 * @param array $values
+	 */
+	protected function set_props( $values = array() ) {
+		foreach ( $values as $prop => $value ) {
+			try {
+				$this->{"set_$prop"}( $value );
+			} catch ( WC_Data_Exception $e ) {
+				// Default value will be left as-is.
+				unset( $e );
+			}
+		}
 	}
 
 	/**

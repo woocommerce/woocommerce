@@ -270,7 +270,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_variation_id( $value ) {
-		if ( 0 >= $value || 'product_variation' !== get_post_type( absint( $value ) ) ) {
+		if ( 0 >= $value || 'product_variation' !== get_post_type( $value ) ) {
 			$this->throw_exception( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'variation_id', absint( $value ) );

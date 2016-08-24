@@ -20,17 +20,15 @@ include_once( 'abstract-wc-legacy-order.php' );
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
-	 * Order Data array, with defaults. This is the core order data exposed
-	 * in APIs since 2.7.0.
+	 * Default data values.
 	 *
-	 * Notes:
-	 * order_tax = Sum of all taxes.
-	 * cart_tax = cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
+	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
+	 * which is the tax for items only, not shipping.
 	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $_default_data = array(
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
@@ -47,6 +45,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'total'              => 0,
 		'total_tax'          => 0,
 	);
+
+	/**
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * This is set the _defaults on load.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_data = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -187,6 +193,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param int $id ID of object to read.
 	 */
 	public function read( $id ) {
+		$this->set_defaults();
+
 		if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
 			return;
 		}
