@@ -70,13 +70,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @access private
 	 */
 	public function set_all( $data ) {
-		$this->_reading = true;
 		foreach ( $data as $key => $value ) {
 			if ( is_callable( array( $this, "set_$key" ) ) ) {
 				$this->{"set_$key"}( $value );
 			}
 		}
-		$this->_reading = false;
 	}
 
 	/**

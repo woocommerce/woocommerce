@@ -419,13 +419,13 @@ abstract class WC_Data {
 
 	/**
 	 * When invalid data is found, throw an exception unless reading from the DB.
-	 * @param string $message Error Message.
-	 * @param mixed $data Data the user tried to set.
+	 * @param string $error_code Error code.
+	 * @param string $data $error_message Error message.
 	 * @throws WC_Data_Exception
 	 */
-	protected function invalid_data( $error_code, $error_message, $http_status_code = 400 ) {
+	protected function invalid_data( $error_code, $error_message ) {
 		if ( ! $this->_reading ) {
-			throw new WC_Data_Exception( $error_code, $error_message, $http_status_code );
+			throw new WC_Data_Exception( $error_code, $error_message );
 		}
 	}
 }

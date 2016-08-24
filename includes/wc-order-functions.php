@@ -813,61 +813,67 @@ function wc_create_refund( $args = array() ) {
 		'line_items' => array(),
 	);
 
-	$args   = wp_parse_args( $args, $default_args );
-	$order  = wc_get_order( $args['order_id'] );
-	$refund = new WC_Order_Refund( $args['refund_id'] );
+	try {
+		$args   = wp_parse_args( $args, $default_args );
+		$order  = wc_get_order( $args['order_id'] );
+		$refund = new WC_Order_Refund( $args['refund_id'] );
 
-	if ( ! $order ) {
+		if ( ! $order ) {
+			return new WP_Error( 'error', __( 'Invalid order ID.', 'woocommerce' ) );
+		}
+
+		// prevent negative refunds
+		if ( 0 > $args['amount'] ) {
+			$args['amount'] = 0;
+		}
+		$refund->set_amount( $args['amount'] );
+		$refund->set_parent_id( absint( $args['order_id'] ) );
+		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+
+		if ( ! is_null( $args['reason'] ) ) {
+			$refund->set_reason( $args['reason'] );
+		}
+
+		// Negative line items
+		if ( sizeof( $args['line_items'] ) > 0 ) {
+			$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
+
+			foreach ( $items as $item_id => $item ) {
+				if ( ! isset( $args['line_items'][ $item_id ] ) || ( empty( $args['line_items'][ $item_id ]['qty'] ) && empty( $args['line_items'][ $item_id ]['refund_total'] ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) ) {
+					continue;
+				}
+
+				if ( ! isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					$args['line_items'][ $item_id ]['refund_tax'] = array();
+				}
+
+				$class         = get_class( $item );
+				$refunded_item = new $class( $item );
+
+				$refunded_item->set_id( 0 );
+				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
+				$refunded_item->set_total( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
+				$refunded_item->set_total_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
+				$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ) ) );
+
+				if ( is_callable( array( $refunded_item, 'set_subtotal' ) ) ) {
+					$refunded_item->set_subtotal( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
+					$refunded_item->set_subtotal_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
+				}
+
+				$refund->add_item( $refunded_item );
+			}
+		}
+
+		$refund->update_taxes();
+		$refund->calculate_totals( false );
+		$refund->set_total( $args['amount'] * -1 );
+		$refund->save();
+
+	} catch ( Exception $e ) {
 		return new WP_Error( 'error', __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 
-	// prevent negative refunds
-	if ( 0 > $args['amount'] ) {
-		$args['amount'] = 0;
-	}
-	$refund->set_amount( $args['amount'] );
-	$refund->set_parent_id( absint( $args['order_id'] ) );
-	$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
-
-	if ( ! is_null( $args['reason'] ) ) {
-		$refund->set_reason( $args['reason'] );
-	}
-
-	// Negative line items
-	if ( sizeof( $args['line_items'] ) > 0 ) {
-		$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
-
-		foreach ( $items as $item_id => $item ) {
-			if ( ! isset( $args['line_items'][ $item_id ] ) || ( empty( $args['line_items'][ $item_id ]['qty'] ) && empty( $args['line_items'][ $item_id ]['refund_total'] ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) ) {
-				continue;
-			}
-
-			if ( ! isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
-				$args['line_items'][ $item_id ]['refund_tax'] = array();
-			}
-
-			$class         = get_class( $item );
-			$refunded_item = new $class( $item );
-
-			$refunded_item->set_id( 0 );
-			$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
-			$refunded_item->set_total( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
-			$refunded_item->set_total_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
-			$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ) ) );
-
-			if ( is_callable( array( $refunded_item, 'set_subtotal' ) ) ) {
-				$refunded_item->set_subtotal( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
-				$refunded_item->set_subtotal_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
-			}
-
-			$refund->add_item( $refunded_item );
-		}
-	}
-
-	$refund->update_taxes();
-	$refund->calculate_totals( false );
-	$refund->set_total( $args['amount'] * -1 );
-	$refund->save();
 	return $refund;
 }
 

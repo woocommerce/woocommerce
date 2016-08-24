@@ -467,10 +467,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 			return $this->get_order( $order->get_id() );
 
-		} catch ( WC_API_Exception $e ) {
-
+		} catch ( WC_Data_Exception $e ) {
 			wc_transaction_query( 'rollback' );
-
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
+		} catch ( WC_API_Exception $e ) {
+			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -625,8 +626,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 			return $this->get_order( $id );
 
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -1309,6 +1311,8 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_order_note', $note_id, $order_id, $this );
 
 			return $this->get_order_note( $order->get_id(), $note_id );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1381,6 +1385,8 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->get_id(), $this );
 
 			return $this->get_order_note( $order->get_id(), $note->comment_ID );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1615,6 +1621,8 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_order_refund', $refund->id, $order_id, $this );
 
 			return $this->get_order_refund( $order_id, $refund->id );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1682,6 +1690,8 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_edit_order_refund', $refund->ID, $order_id, $this );
 
 			return $this->get_order_refund( $order_id, $refund->ID );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1796,6 +1806,8 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			return array( 'orders' => apply_filters( 'woocommerce_api_orders_bulk_response', $orders, $this ) );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
