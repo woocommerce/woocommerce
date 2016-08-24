@@ -348,10 +348,9 @@ class WC_Shipping {
 			unset( $package_to_hash['contents'][ $item_id ]['data'] );
 		}
 
-		$package_hash   = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		$session_key    = 'shipping_for_package_' . $package_key;
-		$stored_rates   = WC()->session->get( $session_key );
+		$package_hash = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+		$session_key  = 'shipping_for_package_' . $package_key;
+		$stored_rates = WC()->session->get( $session_key );
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			// Calculate shipping method rates
