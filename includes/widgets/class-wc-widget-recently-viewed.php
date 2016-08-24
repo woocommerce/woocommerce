@@ -53,7 +53,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 	public function widget( $args, $instance ) {
 
 		$viewed_products = ! empty( $_COOKIE['woocommerce_recently_viewed'] ) ? (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] ) : array();
-		$viewed_products = array_filter( array_map( 'absint', $viewed_products ) );
+		$viewed_products = array_reverse( array_filter( array_map( 'absint', $viewed_products ) ) );
 
 		if ( empty( $viewed_products ) ) {
 			return;
@@ -63,7 +63,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'rand' );
+		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'post__in' );
 
 		$query_args['meta_query']   = array();
 		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
