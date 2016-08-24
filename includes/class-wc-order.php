@@ -815,208 +815,208 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order_key.
 	 * @param string $value Max length 20 chars.
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		return $this->set_prop( 'order_key', substr( $value, 0, 20 ) );
+		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
 	}
 
 	/**
 	 * Set customer_id
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_id( $value ) {
-		return $this->set_prop( 'customer_id', absint( $value ) );
+		$this->set_prop( 'customer_id', absint( $value ) );
 	}
 
 	/**
 	 * Set billing_first_name
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
-		return $this->set_prop( 'billing', 'first_name', $value );
+		$this->set_prop( 'billing', 'first_name', $value );
 	}
 
 	/**
 	 * Set billing_last_name
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
-		return $this->set_prop( 'billing', 'last_name', $value );
+		$this->set_prop( 'billing', 'last_name', $value );
 	}
 
 	/**
 	 * Set billing_company
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
-		return $this->set_prop( 'billing', 'company', $value );
+		$this->set_prop( 'billing', 'company', $value );
 	}
 
 	/**
 	 * Set billing_address_1
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_1( $value ) {
-		return $this->set_prop( 'billing', 'address_1', $value );
+		$this->set_prop( 'billing', 'address_1', $value );
 	}
 
 	/**
 	 * Set billing_address_2
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_2( $value ) {
-		return $this->set_prop( 'billing', 'address_2', $value );
+		$this->set_prop( 'billing', 'address_2', $value );
 	}
 
 	/**
 	 * Set billing_city
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_city( $value ) {
-		return $this->set_prop( 'billing', 'city', $value );
+		$this->set_prop( 'billing', 'city', $value );
 	}
 
 	/**
 	 * Set billing_state
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_state( $value ) {
-		return $this->set_prop( 'billing', 'state', $value );
+		$this->set_prop( 'billing', 'state', $value );
 	}
 
 	/**
 	 * Set billing_postcode
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_postcode( $value ) {
-		return $this->set_prop( 'billing', 'postcode', $value );
+		$this->set_prop( 'billing', 'postcode', $value );
 	}
 
 	/**
 	 * Set billing_country
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_country( $value ) {
-		return $this->set_prop( 'billing', 'country', $value );
+		$this->set_prop( 'billing', 'country', $value );
 	}
 
 	/**
 	 * Set billing_email
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
-			return $this->error( 'Invalid email address', $value );
+			$this->throw_exception( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
 		}
-		return $this->set_prop( 'billing', 'email', sanitize_email( $value ) );
+		$this->set_prop( 'billing', 'email', sanitize_email( $value ) );
 	}
 
 	/**
 	 * Set billing_phone
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_phone( $value ) {
-		return $this->set_prop( 'billing', 'phone', $value );
+		$this->set_prop( 'billing', 'phone', $value );
 	}
 
 	/**
 	 * Set shipping_first_name
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_first_name( $value ) {
-		return $this->set_prop( 'shipping', 'first_name', $value );
+		$this->set_prop( 'shipping', 'first_name', $value );
 	}
 
 	/**
 	 * Set shipping_last_name
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_last_name( $value ) {
-		return $this->set_prop( 'shipping', 'last_name', $value );
+		$this->set_prop( 'shipping', 'last_name', $value );
 	}
 
 	/**
 	 * Set shipping_company
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_company( $value ) {
-		return $this->set_prop( 'shipping', 'company', $value );
+		$this->set_prop( 'shipping', 'company', $value );
 	}
 
 	/**
 	 * Set shipping_address_1
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_1( $value ) {
-		return $this->set_prop( 'shipping', 'address_1', $value );
+		$this->set_prop( 'shipping', 'address_1', $value );
 	}
 
 	/**
 	 * Set shipping_address_2
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_2( $value ) {
-		return $this->set_prop( 'shipping', 'address_2', $value );
+		$this->set_prop( 'shipping', 'address_2', $value );
 	}
 
 	/**
 	 * Set shipping_city
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_city( $value ) {
-		return $this->set_prop( 'shipping', 'city', $value );
+		$this->set_prop( 'shipping', 'city', $value );
 	}
 
 	/**
 	 * Set shipping_state
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_state( $value ) {
-		return $this->set_prop( 'shipping', 'state', $value );
+		$this->set_prop( 'shipping', 'state', $value );
 	}
 
 	/**
 	 * Set shipping_postcode
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_postcode( $value ) {
-		return $this->set_prop( 'shipping', 'postcode', $value );
+		$this->set_prop( 'shipping', 'postcode', $value );
 	}
 
 	/**
 	 * Set shipping_country
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_country( $value ) {
-		return $this->set_prop( 'shipping', 'country', $value );
+		$this->set_prop( 'shipping', 'country', $value );
 	}
 
 	/**
 	 * Set the payment method.
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
@@ -1028,88 +1028,87 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			$this->set_prop( 'payment_method', $payment_method );
 		}
-		return true;
 	}
 
 	/**
 	 * Set payment_method_title
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method_title( $value ) {
-		return $this->set_prop( 'payment_method_title', $value );
+		$this->set_prop( 'payment_method_title', $value );
 	}
 
 	/**
 	 * Set transaction_id
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_transaction_id( $value ) {
-		return $this->set_prop( 'transaction_id', $value );
+		$this->set_prop( 'transaction_id', $value );
 	}
 
 	/**
 	 * Set customer_ip_address
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_ip_address( $value ) {
-		return $this->set_prop( 'customer_ip_address', $value );
+		$this->set_prop( 'customer_ip_address', $value );
 	}
 
 	/**
 	 * Set customer_user_agent
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_user_agent( $value ) {
-		return $this->set_prop( 'customer_user_agent', $value );
+		$this->set_prop( 'customer_user_agent', $value );
 	}
 
 	/**
 	 * Set created_via
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_created_via( $value ) {
-		return $this->set_prop( 'created_via', $value );
+		$this->set_prop( 'created_via', $value );
 	}
 
 	/**
 	 * Set customer_note
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_note( $value ) {
-		return $this->set_prop( 'customer_note', $value );
+		$this->set_prop( 'customer_note', $value );
 	}
 
 	/**
 	 * Set date_completed
 	 * @param string $timestamp
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_completed( $timestamp ) {
-		return $this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+		$this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set date_paid
 	 * @param string $timestamp
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_paid( $timestamp ) {
-		return $this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+		$this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set cart hash
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_hash( $value ) {
-		return $this->set_prop( 'cart_hash', $value );
+		$this->set_prop( 'cart_hash', $value );
 	}
 
 	/*

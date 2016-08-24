@@ -583,23 +583,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order ID.
 	 * @since 2.7.0
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_id( $value ) {
-		return $this->set_prop( 'id', absint( $value ) );
+		$this->set_prop( 'id', absint( $value ) );
 	}
 
 	/**
 	 * Set parent order ID.
 	 * @since 2.7.0
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_parent_id( $value ) {
 		if ( $value && ! get_post( $value ) ) {
-			return $this->error( 'Invalid parent ID', $value );
+			$this->throw_exception( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
-		return $this->set_prop( 'parent_id', absint( $value ) );
+		$this->set_prop( 'parent_id', absint( $value ) );
 	}
 
 	/**
@@ -633,121 +633,119 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order_version
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_version( $value ) {
-		return $this->set_prop( 'version', $value );
+		$this->set_prop( 'version', $value );
 	}
 
 	/**
 	 * Set order_currency
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_currency( $value ) {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
-			return $this->error( 'Invalid currency code', $value );
+			$this->throw_exception( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
-		return $this->set_prop( 'currency', $value );
+		$this->set_prop( 'currency', $value );
 	}
 
 	/**
 	 * Set prices_include_tax
 	 * @param bool $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_prices_include_tax( $value ) {
-		return $this->set_prop( 'prices_include_tax', (bool) $value );
+		$this->set_prop( 'prices_include_tax', (bool) $value );
 	}
 
 	/**
 	 * Set date_created
 	 * @param string $timestamp Timestamp
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_created( $timestamp ) {
-		return $this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set date_modified
 	 * @param string $timestamp
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_modified( $timestamp ) {
-		return $this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
 	 * Set discount_total
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_total( $value ) {
-		return $this->set_prop( 'discount_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set discount_tax
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_tax( $value ) {
-		return $this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_total
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_total( $value ) {
-		return $this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set shipping_tax
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
-		return true;
 	}
 
 	/**
 	 * Set cart tax
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_tax( $value ) {
 		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
-		return true;
 	}
 
 	/**
 	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	protected function set_total_tax( $value ) {
-		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set total
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
 			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
-		return $this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
+		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
 	/*

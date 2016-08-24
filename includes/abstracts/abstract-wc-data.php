@@ -380,36 +380,31 @@ abstract class WC_Data {
 	/**
 	 * Set internal data prop to specified value.
 	 * @param int ...$param Prop keys followed by value to set.
-	 * @return bool
+	 * @throws WC_Data_Exception
 	 */
 	protected function set_prop() {
-		$args = func_get_args();
-
-		if ( sizeof( $args ) < 2 ) {
-			return false;
+		if ( func_num_args() < 2 ) {
+			$this->throw_exception( 'invalid_value', 'set_prop requires at least 2 parameters' );
 		}
 
-		$value  = array_pop( $args );
-		$target = &$this->_data;
+		$args  = func_get_args();
+		$value = array_pop( $args );
+		$prop  = &$this->_data;
 
 		foreach ( $args as $arg ) {
-			if ( ! isset( $target[ $arg ] ) ) {
-				return false;
-			}
-			$target = &$target[ $arg ];
+			$prop = &$prop[ $arg ];
 		}
 
-		$target = $value;
-		return true;
+		$prop = $value;
 	}
 
 	/**
 	 * Returns an invalid data WP_Error object.
 	 * @param string $message Error Message.
 	 * @param mixed $data Data the user tried to set.
-	 * @return WP_Error
+	 * @throws WC_Data_Exception
 	 */
-	protected function error( $message = '', $data = '' ) {
-		return new WP_Error( 'invalid-data', $message, $data );
+	protected function throw_exception( $error_code, $error_message, $http_status_code = 400 ) {
+		throw new WC_Data_Exception( $error_code, $error_message, $http_status_code );
 	}
 }

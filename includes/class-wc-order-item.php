@@ -152,37 +152,37 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Set ID
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_id( $value ) {
-		return $this->set_prop( 'id', absint( $value ) );
+		$this->set_prop( 'id', absint( $value ) );
 	}
 
 	/**
 	 * Set order ID.
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_order_id( $value ) {
-		return $this->set_prop( 'order_id', absint( $value ) );
+		$this->set_prop( 'order_id', absint( $value ) );
 	}
 
 	/**
 	 * Set order item name.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
-		return $this->set_prop( 'name', wc_clean( $value ) );
+		$this->set_prop( 'name', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set order item type.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	protected function set_type( $value ) {
-		return $this->set_prop( 'type', wc_clean( $value ) );
+		$this->set_prop( 'type', wc_clean( $value ) );
 	}
 
 	/*

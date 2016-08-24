@@ -115,10 +115,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded amount.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_amount( $value ) {
-		return $this->set_prop( 'amount', wc_format_decimal( $value ) );
+		$this->set_prop( 'amount', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -141,10 +141,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refund reason.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_reason( $value ) {
-		return $this->set_prop( 'reason', $value );
+		$this->set_prop( 'reason', $value );
 	}
 
 	/**
@@ -159,10 +159,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded by.
 	 * @param int $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_refunded_by( $value ) {
-		return $this->set_prop( 'refunded_by', absint( $value ) );
+		$this->set_prop( 'refunded_by', absint( $value ) );
 	}
 
 	/**

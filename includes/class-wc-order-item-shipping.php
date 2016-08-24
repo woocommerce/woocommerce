@@ -114,7 +114,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
 		return $this->set_method_title( $value );
@@ -123,37 +123,37 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set code.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
-		return $this->set_prop( 'method_title', wc_clean( $value ) );
+		$this->set_prop( 'method_title', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set shipping method id.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_method_id( $value ) {
-		return $this->set_prop( 'method_id', wc_clean( $value ) );
+		$this->set_prop( 'method_id', wc_clean( $value ) );
 	}
 
 	/**
 	 * Set total.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
-		return $this->set_prop( 'total', wc_format_decimal( $value ) );
+		$this->set_prop( 'total', wc_format_decimal( $value ) );
 	}
 
 	/**
 	 * Set total tax.
 	 * @param string $value
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_total_tax( $value ) {
-		return $this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -161,7 +161,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 *
 	 * This is an array of tax ID keys with total amount values.
 	 * @param array $raw_tax_data
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -173,13 +173,12 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		}
 		$this->set_prop( 'taxes', $tax_data );
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
-		return true;
 	}
 
 	/**
 	 * Set properties based on passed in shipping rate object.
 	 * @param WC_Shipping_Rate $tax_rate_id
-	 * @return bool|WP_Error Returns success true or false/WP Error on failure.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
 		$this->set_method_title( $shipping_rate->label );
@@ -187,7 +186,6 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$this->set_total( $shipping_rate->cost );
 		$this->set_taxes( $shipping_rate->taxes );
 		$this->set_meta_data( $shipping_rate->get_meta_data() );
-		return true;
 	}
 
 	/*
