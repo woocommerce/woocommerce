@@ -291,7 +291,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				continue;
 			}
 
-			$images[] = array(
+			$imageData = array(
 				'id'            => (int) $attachment_id,
 				'date_created'  => wc_rest_prepare_date_response( $attachment_post->post_date_gmt ),
 				'date_modified' => wc_rest_prepare_date_response( $attachment_post->post_modified_gmt ),
@@ -299,8 +299,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'name'          => get_the_title( $attachment_id ),
 				'alt'           => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 				'position'      => (int) $position,
-				'sizes'         => $this->get_image_sizes( $attachment_id )
 			);
+
+			if($_GET['include'] == 'image-sizes')
+			{
+				$imageData['sizes'] = $this->get_image_sizes( $attachment_id );
+			}
+			$images[] = $imageData;
 		}
 
 		// Set a placeholder image if the product has no images set.
