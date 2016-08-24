@@ -118,45 +118,47 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-		if ( ! $this->get_id() ) {
-			return false;
-		}
+		try {
+			if ( ! $this->get_id() ) {
+				throw new Exception( 'Missing ID' );
+			}
+			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
-		do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
+			if ( ! empty( WC()->session ) ) {
+				WC()->session->set( 'order_awaiting_payment', false );
+			}
 
-		if ( ! empty( WC()->session ) ) {
-			WC()->session->set( 'order_awaiting_payment', false );
-		}
+			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+				$order_needs_processing = false;
 
-		if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-			$order_needs_processing = false;
+				if ( sizeof( $this->get_items() ) > 0 ) {
+					foreach ( $this->get_items() as $item ) {
+						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
+							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
-			if ( sizeof( $this->get_items() ) > 0 ) {
-				foreach ( $this->get_items() as $item ) {
-					if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
-						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-							$order_needs_processing = true;
-							break;
+							if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+								$order_needs_processing = true;
+								break;
+							}
 						}
 					}
 				}
+
+				if ( ! empty( $transaction_id ) ) {
+					$this->set_transaction_id( $transaction_id );
+				}
+
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
+				$this->set_date_paid( current_time( 'timestamp' ) );
+				$this->save();
+
+				do_action( 'woocommerce_payment_complete', $this->get_id() );
+			} else {
+				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
-
-			if ( ! empty( $transaction_id ) ) {
-				$this->set_transaction_id( $transaction_id );
-			}
-
-			$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
-			$this->set_date_paid( current_time( 'timestamp' ) );
-			$this->save();
-
-			do_action( 'woocommerce_payment_complete', $this->get_id() );
-		} else {
-			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+		} catch ( Exception $e ) {
+			return false;
 		}
-
 		return true;
 	}
 
@@ -412,13 +414,18 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
+	 * @return bool success
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
-		if ( ! $this->get_id() ) {
+		try {
+			if ( ! $this->get_id() ) {
+				throw new Exception( 'Missing ID' );
+			}
+			$this->set_status( $new_status, $note, $manual );
+			$this->save();
+		} catch ( Exception $e ) {
 			return false;
 		}
-		$this->set_status( $new_status, $note, $manual );
-		$this->save();
 		return true;
 	}
 

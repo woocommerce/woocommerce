@@ -54,7 +54,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- * @return WC_Order
+ * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -67,8 +67,8 @@ function wc_create_order( $args = array() ) {
 		'order_id'      => 0,
 	);
 
-	$args  = wp_parse_args( $args, $default_args );
 	try {
+		$args  = wp_parse_args( $args, $default_args );
 		$order = new WC_Order( $args['order_id'] );
 
 		// Update props that were set (not null)
@@ -102,9 +102,10 @@ function wc_create_order( $args = array() ) {
 		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->save();
-	} catch( WC_Data_Exception $e ) {
-
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
 	}
+
 	return $order;
 }
 

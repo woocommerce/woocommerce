@@ -24,7 +24,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		'name'         => '',
 		'product_id'   => 0,
 		'variation_id' => 0,
-		'quantity'     => 0,
+		'quantity'     => 1,
 		'tax_class'    => '',
 		'subtotal'     => 0,
 		'subtotal_tax' => 0,

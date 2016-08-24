@@ -998,6 +998,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int $qty
 	 * @param  array $args
 	 * @return int order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {

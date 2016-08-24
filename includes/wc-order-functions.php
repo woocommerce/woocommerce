@@ -819,7 +819,7 @@ function wc_create_refund( $args = array() ) {
 		$refund = new WC_Order_Refund( $args['refund_id'] );
 
 		if ( ! $order ) {
-			return new WP_Error( 'error', __( 'Invalid order ID.', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
 
 		// prevent negative refunds
@@ -871,7 +871,7 @@ function wc_create_refund( $args = array() ) {
 		$refund->save();
 
 	} catch ( Exception $e ) {
-		return new WP_Error( 'error', __( 'Invalid order ID.', 'woocommerce' ) );
+		return new WP_Error( 'error', $e->getMessage() );
 	}
 
 	return $refund;

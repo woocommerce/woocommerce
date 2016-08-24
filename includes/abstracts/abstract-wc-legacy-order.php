@@ -22,6 +22,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param int $discount tax amount.
 	 * @param int $discount_tax amount.
 	 * @return int order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
 		_deprecated_function( 'WC_Order::add_coupon', '2.7', 'Create new WC_Order_Item_Coupon object and add to order with WC_Order::add_item()' );
@@ -44,6 +45,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param int $tax_amount amount of tax.
 	 * @param int $shipping_tax_amount shipping amount.
 	 * @return int order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
 		_deprecated_function( 'WC_Order::add_tax', '2.7', 'Create new WC_Order_Item_Tax object and add to order with WC_Order::add_item()' );
@@ -65,6 +67,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * Add a shipping row to the order.
 	 * @param WC_Shipping_Rate shipping_rate
 	 * @return int order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function add_shipping( $shipping_rate ) {
 		_deprecated_function( 'WC_Order::add_shipping', '2.7', 'Create new WC_Order_Item_Shipping object and add to order with WC_Order::add_item()' );
@@ -88,6 +91,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * Order must be saved prior to adding items.
 	 * @param object $fee
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function add_fee( $fee ) {
 		_deprecated_function( 'WC_Order::add_fee', '2.7', 'Create new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
@@ -117,6 +121,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param WC_Product $product
 	 * @param array $args data to update.
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	 public function update_product( $item, $product, $args ) {
 		_deprecated_function( 'WC_Order::update_product', '2.7', 'Interact with WC_Order_Item_Product class' );
@@ -165,6 +170,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function update_coupon( $item, $args ) {
 		_deprecated_function( 'WC_Order::update_coupon', '2.7', 'Interact with WC_Order_Item_Coupon class' );
@@ -203,6 +209,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function update_shipping( $item, $args ) {
 		_deprecated_function( 'WC_Order::update_shipping', '2.7', 'Interact with WC_Order_Item_Shipping class' );
@@ -239,6 +246,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function update_fee( $item, $args ) {
 		_deprecated_function( 'WC_Order::update_fee', '2.7', 'Interact with WC_Order_Item_Fee class' );
@@ -269,6 +277,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
+	 * @throws WC_Data_Exception
 	 */
 	public function update_tax( $item, $args ) {
 		_deprecated_function( 'WC_Order::update_tax', '2.7', 'Interact with WC_Order_Item_Tax class' );

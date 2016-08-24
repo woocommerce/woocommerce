@@ -190,16 +190,28 @@ function wc_save_order_items( $order_id, $items ) {
 				continue;
 			}
 
-			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
-				$item->set_name( wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) );
-			}
+			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]                  : array();
+			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
+			$set_data          = array(
+				'name'         => isset( $items['order_item_name'][ $item_id ] ) ? $items['order_item_name'][ $item_id ]           : null,
+				'quantity'     => isset( $items['order_item_qty'][ $item_id ] ) ? $items['order_item_qty'][ $item_id ]             : null,
+				'tax_class'    => isset( $items['order_item_tax_class'][ $item_id ] ) ? $items['order_item_tax_class'][ $item_id ] : null,
+				'total'        => isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ]                     : 0,
+				'total_tax'    => array_sum( $line_tax ),
+				'subtotal'     => isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ]               : $item->get_total(),
+				'subtotal_tax' => array_sum( $line_subtotal_tax ),
+				'taxes'        => array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ),
+			);
 
-			if ( isset( $items['order_item_qty'][ $item_id ] ) && is_callable( array( $item, 'set_quantity' ) ) ) {
-				$item->set_quantity( $items['order_item_qty'][ $item_id ] );
-			}
-
-			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
-				$item->set_tax_class( wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
+			foreach ( $set_data as $prop => $value ) {
+				try {
+					$setter = "set_$prop";
+					if ( ! is_null( $value ) && is_callable( array( $item, $setter ) ) ) {
+						$item->{$setter}( wc_clean( wp_unslash( $value ) ) );
+					}
+				} catch ( WC_Data_Exception $e ) {
+					unset( $e ); // Skip prop and leave set to default
+				}
 			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
@@ -219,17 +231,6 @@ function wc_save_order_items( $order_id, $items ) {
 				}
 			}
 
-			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]: array();
-			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
-			$item->set_total( isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0 );
-			$item->set_total_tax( array_sum( $line_tax ) );
-
-			if ( is_callable( array( $item, 'set_subtotal' ) ) ) {
-				$item->set_subtotal( isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $item->get_total() );
-				$item->set_subtotal_tax( array_sum( $line_subtotal_tax ) );
-			}
-
-			$item->set_taxes( array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ) );
 			$item->save();
 		}
 	}
@@ -240,10 +241,24 @@ function wc_save_order_items( $order_id, $items ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
 			}
-			$item->set_method_id( isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '' );
-			$item->set_method_title( isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '' );
-			$item->set_total( isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ] : '' );
-			$item->set_taxes( array( 'total' => isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() ) );
+
+			$set_data = array(
+				'method_id'    => isset( $items['shipping_method'][ $item_id ] ) ? $items['shipping_method'][ $item_id ]                 : null,
+				'method_title' => isset( $items['shipping_method_title'][ $item_id ] ) ? $items['shipping_method_title'][ $item_id ]     : null,
+				'total'        => isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ]                     : 0,
+				'taxes'        => array( 'total' => isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() ),
+			);
+
+			foreach ( $set_data as $prop => $value ) {
+				try {
+					$setter = "set_$prop";
+					if ( is_callable( array( $item, $setter ) ) ) {
+						$item->{$setter}( wc_clean( wp_unslash( $value ) ) );
+					}
+				} catch ( WC_Data_Exception $e ) {
+					unset( $e ); // Skip prop and leave set to default
+				}
+			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {

@@ -1134,28 +1134,30 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
-		$order_id    = absint( $_POST['order_id'] );
+		try {
+			$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
+			$order_id    = absint( $_POST['order_id'] );
 
-		// Find the item
-		if ( ! is_numeric( $item_to_add ) ) {
-			die();
-		}
+			// Find the item
+			if ( ! is_numeric( $item_to_add ) ) {
+				die();
+			}
 
-		$post = get_post( $item_to_add );
+			$post = get_post( $item_to_add );
 
-		if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
-			die();
-		}
+			if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
+				die();
+			}
 
-		$product     = wc_get_product( $post->ID );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$class       = 'new_row';
-		$item_id     = $order->add_product( $product );
-		$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+			$product     = wc_get_product( $post->ID );
+			$order       = wc_get_order( $order_id );
+			$order_taxes = $order->get_taxes();
+			$class       = 'new_row';
+			$item_id     = $order->add_product( $product );
+			$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 
-		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+		} catch ( Exception $e ) {}
 
 		include( 'admin/meta-boxes/views/html-order-item.php' );
 		die();
@@ -1172,12 +1174,14 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$order_id    = absint( $_POST['order_id'] );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$item        = new WC_Order_Item_Fee();
-		$item->set_order_id( $order_id );
-		$item_id     = $item->save();
+		try {
+			$order_id    = absint( $_POST['order_id'] );
+			$order       = wc_get_order( $order_id );
+			$order_taxes = $order->get_taxes();
+			$item        = new WC_Order_Item_Fee();
+			$item->set_order_id( $order_id );
+			$item_id     = $item->save();
+		} catch ( Exception $e ) {}
 
 		include( 'admin/meta-boxes/views/html-order-fee.php' );
 
@@ -1196,15 +1200,17 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$order_id         = absint( $_POST['order_id'] );
-		$order            = wc_get_order( $order_id );
-		$order_taxes      = $order->get_taxes();
-		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+		try {
+			$order_id         = absint( $_POST['order_id'] );
+			$order            = wc_get_order( $order_id );
+			$order_taxes      = $order->get_taxes();
+			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
-		// Add new shipping
-		$item = new WC_Order_Item_Shipping();
-		$item->set_shipping_rate( new WC_Shipping_Rate() );
-		$order->add_item( $item );
+			// Add new shipping
+			$item = new WC_Order_Item_Shipping();
+			$item->set_shipping_rate( new WC_Shipping_Rate() );
+			$order->add_item( $item );
+		} catch ( Exception $e ) {}
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
@@ -1224,16 +1230,18 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$order_id = absint( $_POST['order_id'] );
-		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = wc_get_order( $order_id );
-		$data     = get_post_meta( $order_id );
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$rate_id  = absint( $_POST['rate_id'] );
+			$order    = wc_get_order( $order_id );
+			$data     = get_post_meta( $order_id );
 
-		// Add new tax
-		$item = new WC_Order_Item_Tax();
-		$item->set_rate( $rate_id );
-		$item->set_order_id( $order_id );
-		$item->save();
+			// Add new tax
+			$item = new WC_Order_Item_Tax();
+			$item->set_rate( $rate_id );
+			$item->set_order_id( $order_id );
+			$item->save();
+		} catch ( Exception $e ) {}
 
 		// Return HTML items
 		include( 'admin/meta-boxes/views/html-order-items.php' );
