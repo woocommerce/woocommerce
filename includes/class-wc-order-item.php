@@ -17,16 +17,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Data array, with defaults.
+	 * Default data values.
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $_default_data = array(
 		'order_id' => 0,
 		'id'       => 0, // order_item_id
 		'name'     => '',
 		'type'     => '',
 	);
+
+	/**
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * This is set the _defaults on load.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_data = array();
 
 	/**
 	 * May store an order to prevent retriving it multiple times.
@@ -53,6 +61,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $order_item ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $item = 0 ) {
+		$this->set_defaults();
 		if ( $item instanceof WC_Order_Item ) {
 			if ( $this->is_type( $item->get_type() ) ) {
 				$this->set_all( $item->get_data() );
@@ -234,6 +243,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function read( $item ) {
 		global $wpdb;
+
+		$this->set_defaults();
 
 		if ( is_numeric( $item ) && ! empty( $item ) ) {
 			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
