@@ -44,4 +44,22 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), wc_coupons_enabled() );
 	}
 
+	/**
+	 * Test wc_get_coupon_code_by_id().
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_wc_get_coupon_code_by_id() {
+		// Create coupon.
+		$code   = 'testcoupon';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		$this->assertEquals( $code, wc_get_coupon_code_by_id( $coupon->get_id() ) );
+
+		// Delete coupon.
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+
+		$this->assertEmpty( wc_get_coupon_code_by_id( 0 ) );
+	}
+
 }

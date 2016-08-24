@@ -141,10 +141,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		// Get the coupon code.
-		$code = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $post->ID ) );
+		$code = wc_get_coupon_code_by_id( $post->ID );
 
 		$coupon = new WC_Coupon( $code );
 
@@ -207,10 +205,10 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		// ID.
 		if ( isset( $request['id'] ) ) {
-			$code     = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %d AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['id'] ) );
-			$coupon   = new WC_Coupon( $code );
+			$code   = wc_get_coupon_code_by_id( $request['id'] );
+			$coupon = new WC_Coupon( $code );
 		} else {
-			$coupon   = new WC_Coupon();
+			$coupon = new WC_Coupon();
 		}
 
 		$schema = $this->get_item_schema();
