@@ -111,6 +111,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'show_if_checked' => 'option',
 			),
 
+			array(
+				'title'    => __( 'Debug Mode', 'woocommerce' ),
+				'desc'     => __( 'Enable Debug Mode', 'woocommerce' ),
+				'desc_tip' => __( 'Enable Shipping Debug Mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+				'id'       => 'woocommerce_shipping_debug_mode',
+				'default'  => 'no',
+				'type'     => 'checkbox',
+				'autoload' => false
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
 
 		) );

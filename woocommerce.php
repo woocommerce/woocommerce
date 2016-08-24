@@ -188,6 +188,7 @@ final class WooCommerce {
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
+		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
 	}
 
 	/**
