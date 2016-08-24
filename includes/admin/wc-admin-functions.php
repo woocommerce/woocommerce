@@ -203,6 +203,11 @@ function wc_save_order_items( $order_id, $items ) {
 				'taxes'        => array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ),
 			);
 
+			if ( '0' === $set_data['quantity'] ) {
+				$item->delete();
+				continue;
+			}
+
 			foreach ( $set_data as $prop => $value ) {
 				try {
 					$setter = "set_$prop";
