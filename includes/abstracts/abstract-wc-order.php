@@ -20,15 +20,14 @@ include_once( 'abstract-wc-legacy-order.php' );
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
-	 * Default data values.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
 	 * which is the tax for items only, not shipping.
-	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_default_data = array(
+	protected $_data = array(
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
@@ -45,14 +44,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'total'              => 0,
 		'total_tax'          => 0,
 	);
-
-	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * This is set the _defaults on load.
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $_data = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -105,17 +96,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
 	 * methods that will be maintained going forward.
 	 *
-	 * @param  int|object|WC_Order $order Order to init.
+	 * @param  int|object|WC_Order $read Order to init.
 	 */
-	public function __construct( $order = 0 ) {
-		$this->set_defaults();
+	public function __construct( $read = 0 ) {
+		parent::__construct( $read );
 
-		if ( is_numeric( $order ) && $order > 0 ) {
-			$this->read( $order );
-		} elseif ( $order instanceof self ) {
-			$this->read( absint( $order->get_id() ) );
-		} elseif ( ! empty( $order->ID ) ) {
-			$this->read( absint( $order->ID ) );
+		if ( is_numeric( $read ) && $read > 0 ) {
+			$this->read( $read );
+		} elseif ( $read instanceof self ) {
+			$this->read( absint( $read->get_id() ) );
+		} elseif ( ! empty( $read->ID ) ) {
+			$this->read( absint( $read->ID ) );
 		}
 		// Set default status if none were read.
 		if ( ! $this->get_status() ) {

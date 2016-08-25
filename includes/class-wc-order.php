@@ -43,10 +43,11 @@ class WC_Order extends WC_Abstract_Order {
 	protected $_status_transition = false;
 
 	/**
-	 * Default data values.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_default_data = array(
+	protected $_data = array(
 		// Abstract order props
 		'id'                   => 0,
 		'parent_id'            => 0,

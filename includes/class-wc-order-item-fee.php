@@ -14,11 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item_Fee extends WC_Order_Item {
 
 	/**
-	 * Default data values.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_default_data = array(
+	protected $_data = array(
 		'order_id'   => 0,
 		'id'         => 0,
 		'name'       => '',
@@ -30,14 +30,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			'total' => array()
 		)
 	);
-
-	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * This is set the _defaults on load.
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $_data = array();
 
 	/**
 	 * offsetGet for ArrayAccess/Backwards compatibility.

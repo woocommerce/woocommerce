@@ -17,24 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Default data values.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_default_data = array(
+	protected $_data = array(
 		'order_id' => 0,
 		'id'       => 0, // order_item_id
 		'name'     => '',
 		'type'     => '',
 	);
-
-	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * This is set the _defaults on load.
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $_data = array();
 
 	/**
 	 * May store an order to prevent retriving it multiple times.
@@ -58,18 +50,19 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Constructor.
-	 * @param int|object|array $order_item ID to load from the DB (optional) or already queried data.
+	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
-	public function __construct( $item = 0 ) {
-		$this->set_defaults();
-		if ( $item instanceof WC_Order_Item ) {
-			if ( $this->is_type( $item->get_type() ) ) {
-				$this->set_props( $item->get_data() );
+	public function __construct( $read = 0 ) {
+		parent::__construct( $read );
+
+		if ( $read instanceof WC_Order_Item ) {
+			if ( $this->is_type( $read->get_type() ) ) {
+				$this->set_props( $read->get_data() );
 			}
-		} elseif ( is_array( $item ) ) {
-			$this->set_props( $item );
+		} elseif ( is_array( $read ) ) {
+			$this->set_props( $read );
 		} else {
-			$this->read( $item );
+			$this->read( $read );
 		}
 	}
 
