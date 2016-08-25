@@ -14,9 +14,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Customers_Controller();
-	    $this->user = $this->factory->user->create( array(
-	        'role' => 'administrator',
-	    ) );
 	}
 
 	/**
@@ -38,7 +35,7 @@ class Customers extends WC_REST_Unit_Test_Case {
      * @since 2.7.0
      */
     public function test_get_customers() {
-	    wp_set_current_user( $this->user );
+	    wp_set_current_user( 1 );
 
 	    $customer_1 = WC_Helper_Customer::create_customer();
 	    WC_Helper_Customer::create_customer( 'test2', 'test2', 'test2@woo.local' );
@@ -121,7 +118,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_create_customer() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 
 		// Test just the basics first..
 		$request = new WP_REST_Request( 'POST', '/wc/v1/customers' );
@@ -267,7 +264,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_get_customer() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'get_customer_test', 'test123', 'get_customer_test@woo.local' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/customers/' . $customer->get_id() ) );
 		$data = $response->get_data();
@@ -329,7 +326,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_get_customer_invalid_id() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/customers/0' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -340,7 +337,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_update_customer() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'update_customer_test', 'test123', 'update_customer_test@woo.local' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/customers/' . $customer->get_id() ) );
@@ -378,7 +375,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_update_customer_invalid_id() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/customers/0' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -390,7 +387,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_delete_customer() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'delete_customer_test', 'test123', 'delete_customer_test@woo.local' );
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/customers/' . $customer->get_id() );
 		$request->set_param( 'force', true );
@@ -404,7 +401,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_delete_customer_invalid_id() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/customers/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -431,7 +428,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_batch_customer() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'test_batch_customer', 'test123', 'test_batch_customer@woo.local' );
 		$customer_2 = WC_Helper_Customer::create_customer( 'test_batch_customer2', 'test123', 'test_batch_customer2@woo.local' );
@@ -480,7 +477,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_schema() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( 1 );
 		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/customers' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
