@@ -226,7 +226,7 @@ function wc_save_order_items( $order_id, $items ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-					if ( $meta_key === '' && $meta_value === '' ) {
+					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
 							$item->delete_meta_data_by_mid( $meta_id );
 						}
@@ -275,7 +275,7 @@ function wc_save_order_items( $order_id, $items ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-					if ( $meta_key === '' && $meta_value === '' ) {
+					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
 							$item->delete_meta_data_by_mid( $meta_id );
 						}
