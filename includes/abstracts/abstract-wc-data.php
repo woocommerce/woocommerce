@@ -411,7 +411,7 @@ abstract class WC_Data {
 			try {
 				$setter = "set_$prop";
 				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
-					$this->{$setter}( wc_clean( wp_unslash( $value ) ) );
+					$this->{$setter}( $value );
 				}
 			} catch ( WC_Data_Exception $e ) {
 				$errors->add( $e->getErrorCode(), $e->getMessage() );

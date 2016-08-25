@@ -4,7 +4,7 @@
  * Meta
  * @package WooCommerce\Tests\CRUD
  */
-class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
+class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Create a test post we can add/test meta against.
@@ -26,6 +26,50 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 		$object->set_content( 'testing@woo.dev' );
 		$object->save();
 		return $object;
+	}
+
+	/**
+	 * Test: get_data
+	 */
+	function test_get_data() {
+		$object = new WC_Mock_WC_Data();
+		$this->assertInternalType( 'array', $object->get_data() );
+	}
+
+	/**
+	 * Test: delete_meta_data_by_mid
+	 */
+	function test_delete_meta_data_by_mid() {
+		$object = $this->create_test_post();
+		$object_id = $object->get_id();
+		$meta_id = add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
+		$object->delete_meta_data_by_mid( $meta_id );
+		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
+	}
+
+	/**
+	 * Test: set_props
+	 */
+	function test_set_props() {
+		$object = new WC_Mock_WC_Data();
+		$data_to_set = array(
+			'content'    => 'I am a fish',
+			'bool_value' => true
+		);
+		$result = $object->set_props( $data_to_set );
+		var_dump($result);
+		$this->assertFalse( is_wp_error( $result ) );
+		$this->assertEquals( 'I am a fish', $object->get_content() );
+		$this->assertEquals( true, $object->get_bool_value() );
+
+		$data_to_set = array(
+			'content'    => 'I am also a fish',
+			'bool_value' => 'thisisinvalid'
+		);
+		$result = $object->set_props( $data_to_set );
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertEquals( 'I am also a fish', $object->get_content() );
+		$this->assertNotEquals( 'thisisinvalid', $object->get_bool_value() );
 	}
 
 	/**
