@@ -181,19 +181,19 @@ function wc_save_order_items( $order_id, $items ) {
 	// Allow other plugins to check change in order items before they are saved
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	$order     = wc_get_order( $order_id );
-	$data_keys = array(
-		'line_tax'             => array(),
-		'line_subtotal_tax'    => array(),
-		'order_item_name'      => '',
-		'order_item_qty'       => 1,
-		'order_item_tax_class' => '',
-		'line_total'           => 0,
-		'line_subtotal'        => 0,
-	);
+	$order = wc_get_order( $order_id );
 
 	// Line items and fees
 	if ( isset( $items['order_item_id'] ) ) {
+		$data_keys = array(
+			'line_tax'             => array(),
+			'line_subtotal_tax'    => array(),
+			'order_item_name'      => null,
+			'order_item_qty'       => null,
+			'order_item_tax_class' => null,
+			'line_total'           => null,
+			'line_subtotal'        => null,
+		);
 		foreach ( $items['order_item_id'] as $item_id ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
@@ -244,40 +244,43 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Shipping Rows
 	if ( isset( $items['shipping_method_id'] ) ) {
+		$data_keys = array(
+			'shipping_method'       => null,
+			'shipping_method_title' => null,
+			'shipping_cost'         => 0,
+			'shipping_taxes'        => array(),
+		);
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
-			$set_data = array(
-				'method_id'    => isset( $items['shipping_method'][ $item_id ] ) ? $items['shipping_method'][ $item_id ]                 : null,
-				'method_title' => isset( $items['shipping_method_title'][ $item_id ] ) ? $items['shipping_method_title'][ $item_id ]     : null,
-				'total'        => isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ]                     : 0,
-				'taxes'        => array( 'total' => isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() ),
-			);
+			$item_data = array();
 
-			foreach ( $set_data as $prop => $value ) {
-				try {
-					$setter = "set_$prop";
-					if ( is_callable( array( $item, $setter ) ) ) {
-						$item->{$setter}( wc_clean( wp_unslash( $value ) ) );
-					}
-				} catch ( WC_Data_Exception $e ) {
-					unset( $e ); // Skip prop and leave set to default
-				}
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? $items[ $key ][ $item_id ] : $default;
 			}
+
+			$item->set_props( array(
+				'method_id'    => $item_data['shipping_method'],
+				'method_title' => $item_data['shipping_method_title'],
+				'tax_class'    => $item_data['order_item_tax_class'],
+				'total'        => $item_data['shipping_cost'],
+				'taxes'        => array(
+					'total'    => $item_data['shipping_taxes'],
+				),
+			) );
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-					if ( strstr( $meta_id, 'new-' ) ) {
-						if ( $meta_key === '' && $meta_value === '' ) {
-							continue;
+					if ( $meta_key === '' && $meta_value === '' ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
 						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
 						$item->add_meta_data( $meta_key, $meta_value, false );
-					} elseif ( $meta_key === '' && $meta_value === '' ) {
-						$item->delete_meta_data_by_mid( $meta_id );
 					} else {
 						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
 					}
