@@ -107,8 +107,8 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 * @return bool
 	 */
-	protected function filter_null_values( $value ) {
-		return ! is_null( $value );
+	protected function filter_null_meta( $meta ) {
+		return ! is_null( $meta->value );
 	}
 
 	/**
@@ -117,7 +117,7 @@ abstract class WC_Data {
 	 * @return array
 	 */
 	public function get_meta_data() {
-		return array_filter( $this->_meta_data, array( $this, 'filter_null_values' ) );
+		return array_filter( $this->_meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
@@ -191,8 +191,7 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
-			$array_keys       = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-			$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+			$this->delete_meta_data( $key );
 		}
 		$this->_meta_data[] = (object) array(
 			'key'   => $key,
