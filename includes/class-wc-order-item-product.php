@@ -297,7 +297,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$this->set_prop( 'total', wc_format_decimal( $value ) );
 
 		// Subtotal cannot be less than total
-		if ( empty( $this->get_subtotal() ) || $this->get_subtotal() < $this->get_total() ) {
+		if ( ! $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
 			$this->set_subtotal( $value );
 		}
 	}
