@@ -108,12 +108,9 @@ function wc_attribute_label( $name, $product = '' ) {
 	global $wpdb;
 
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name  = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
-		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-
-		if ( ! $label ) {
-			$label = $name;
-		}
+		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
+		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
+		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
 	} elseif ( $product && ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ]['name'] ) ) {
 		// Attempt to get label from product, as entered by the user
 		$label = $attributes[ sanitize_title( $name ) ]['name'];
