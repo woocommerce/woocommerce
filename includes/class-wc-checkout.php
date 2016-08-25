@@ -664,8 +664,9 @@ class WC_Checkout {
 				$this->check_cart_items();
 
 				// Abort if errors are present
-				if ( wc_notice_count( 'error' ) > 0 )
-					throw new Exception();
+				if ( wc_notice_count( 'error' ) > 0 ) {
+					return false;
+				}
 
 				$order_id = $this->create_order();
 

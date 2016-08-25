@@ -121,7 +121,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function payment_complete( $transaction_id = '' ) {
 		try {
 			if ( ! $this->get_id() ) {
-				throw new Exception();
+				return false;
 			}
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
@@ -420,7 +420,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		try {
 			if ( ! $this->get_id() ) {
-				throw new Exception();
+				return false;
 			}
 			$this->set_status( $new_status, $note, $manual );
 			$this->save();
