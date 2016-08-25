@@ -1647,7 +1647,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function has_shipping_method( $method_id ) {
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			if ( $shipping_method->get_method_id() === $method_id ) {
+			if ( strpos( $shipping_method->get_method_id(), $method_id ) === 0 ) {
 				return true;
 			}
 		}
