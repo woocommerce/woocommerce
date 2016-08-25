@@ -136,6 +136,9 @@ class WC_Form_Handler {
 			}
 		}
 
+		// Allow plugins to return their own errors.
+		do_action_ref_array( 'woocommerce_save_addresses_errors', array( &$error ) );
+
 		if ( wc_notice_count( 'error' ) == 0 ) {
 
 			foreach ( $address as $key => $field ) {
