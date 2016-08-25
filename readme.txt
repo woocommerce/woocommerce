@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Allow oAuth1.0a authentication using headers.
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
+* When deleting a tax rate class, remove it's tax rates.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
