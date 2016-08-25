@@ -449,9 +449,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'create' => array(
 				array(
-					'username' => 'NewUser',
+					'username' => 'newuser',
 					'password'   => 'test123',
-					'email'  => 'NewUser@woo.local',
+					'email'  => 'newuser@woo.local',
 				),
 			),
 		) );
@@ -459,7 +459,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'McTest', $data['update'][0]['last_name'] );
-		$this->assertEquals( 'NewUser', $data['create'][0]['username'] );
+		$this->assertEquals( 'newuser', $data['create'][0]['username'] );
 		$this->assertEmpty( $data['create'][0]['last_name'] );
 		$this->assertEquals( $customer_2->get_id(), $data['delete'][0]['id'] );
 		$this->assertEquals( $customer_3->get_id(), $data['delete'][1]['id'] );
