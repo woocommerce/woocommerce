@@ -64,25 +64,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$this->set_defaults();
 		if ( $item instanceof WC_Order_Item ) {
 			if ( $this->is_type( $item->get_type() ) ) {
-				$this->set_all( $item->get_data() );
+				$this->set_props( $item->get_data() );
 			}
 		} elseif ( is_array( $item ) ) {
-			$this->set_all( $item );
+			$this->set_props( $item );
 		} else {
 			$this->read( $item );
-		}
-	}
-
-	/**
-	 * Set all data based on input array.
-	 * @param array $data
-	 * @access private
-	 */
-	public function set_all( $data ) {
-		foreach ( $data as $key => $value ) {
-			if ( is_callable( array( $this, "set_$key" ) ) ) {
-				$this->{"set_$key"}( $value );
-			}
 		}
 	}
 
@@ -254,15 +241,17 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$data = false;
 		}
 
-		if ( $data ) {
-			$this->_reading = true;
-			$this->set_order_id( $data->order_id );
-			$this->set_id( $data->order_item_id );
-			$this->set_name( $data->order_item_name );
-			$this->set_type( $data->order_item_type );
-			$this->read_meta_data();
-			$this->_reading = false;
+		if ( ! $data ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'order_id' => $data->order_id,
+			'id'       => $data->order_item_id,
+			'name'     => $data->order_item_name,
+			'type'     => $data->order_item_type,
+		) );
+		$this->read_meta_data();
 	}
 
 	/**

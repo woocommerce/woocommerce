@@ -42,15 +42,18 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 */
 	public function read( $id ) {
 		parent::read( $id );
-		if ( $this->get_id() ) {
-			$this->_reading = true;
-			$this->set_rate_id( get_metadata( 'order_item', $this->get_id(), 'rate_id', true ) );
-			$this->set_label( get_metadata( 'order_item', $this->get_id(), 'label', true ) );
-			$this->set_compound( get_metadata( 'order_item', $this->get_id(), 'compound', true ) );
-			$this->set_tax_total( get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ) );
-			$this->set_shipping_tax_total( get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ) );
-			$this->_reading = false;
+
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'rate_id'            => get_metadata( 'order_item', $this->get_id(), 'rate_id', true ),
+			'label'              => get_metadata( 'order_item', $this->get_id(), 'label', true ),
+			'compound'           => get_metadata( 'order_item', $this->get_id(), 'compound', true ),
+			'tax_total'          => get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ),
+			'shipping_tax_total' => get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ),
+		) );
 	}
 
 	/**

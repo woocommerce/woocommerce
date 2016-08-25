@@ -28,12 +28,6 @@ abstract class WC_Data {
 	protected $_data = array();
 
 	/**
-	 * True when reading from the database.
-	 * @var bool
-	 */
-	protected $_reading = false;
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -398,13 +392,35 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @return WP_Error|bool
+	 */
+	public function set_props( $props ) {
+		$errors = new WP_Error();
+
+		foreach ( $props as $prop => $value ) {
+			try {
+				$setter = "set_$prop";
+				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( wc_clean( wp_unslash( $value ) ) );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				$errors->add( $e->getErrorCode(), $e->getMessage() );
+			}
+		}
+
+		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
 	 * Set internal data prop to specified value.
 	 * @param int ...$param Prop keys followed by value to set.
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_prop() {
 		if ( func_num_args() < 2 ) {
-			$this->invalid_data( 'invalid_value', 'set_prop requires at least 2 parameters' );
+			$this->error( 'invalid_value', __( 'set_prop() requires at least 2 parameters', 'woocommerce' ) );
 		}
 
 		$args  = func_get_args();
@@ -421,12 +437,10 @@ abstract class WC_Data {
 	/**
 	 * When invalid data is found, throw an exception unless reading from the DB.
 	 * @param string $error_code Error code.
-	 * @param string $data $error_message Error message.
+	 * @param string $error_message Error message.
 	 * @throws WC_Data_Exception
 	 */
-	protected function invalid_data( $error_code, $error_message ) {
-		if ( ! $this->_reading ) {
-			throw new WC_Data_Exception( $error_code, $error_message );
-		}
+	protected function error( $error_code, $error_message ) {
+		throw new WC_Data_Exception( $error_code, $error_message );
 	}
 }

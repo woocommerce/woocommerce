@@ -158,7 +158,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_props( $args );
 		$item->save();
 		do_action( 'woocommerce_order_edit_product', $this->get_id(), $item->get_id(), $args, $product );
 
@@ -193,7 +193,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_props( $args );
 		$item->save();
 
 		do_action( 'woocommerce_order_update_coupon', $this->get_id(), $item->get_id(), $args );
@@ -229,7 +229,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_props( $args );
 		$item->save();
 		$this->calculate_shipping();
 
@@ -261,7 +261,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_props( $args );
 		$item->save();
 
 		do_action( 'woocommerce_order_update_fee', $this->get_id(), $item->get_id(), $args );
@@ -292,7 +292,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_props( $args );
 		$item->save();
 
 		do_action( 'woocommerce_order_update_tax', $this->get_id(), $item->get_id(), $args );

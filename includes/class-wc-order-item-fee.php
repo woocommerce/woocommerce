@@ -90,15 +90,17 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 */
 	public function read( $id ) {
 		parent::read( $id );
-		if ( $this->get_id() ) {
-			$this->_reading = true;
-			$this->set_tax_class( get_metadata( 'order_item', $this->get_id(), '_tax_class', true ) );
-			$this->set_tax_status( get_metadata( 'order_item', $this->get_id(), '_tax_status', true ) );
-			$this->set_total( get_metadata( 'order_item', $this->get_id(), '_line_total', true ) );
-			$this->set_total_tax( get_metadata( 'order_item', $this->get_id(), '_line_tax', true ) );
-			$this->set_taxes( get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ) );
-			$this->_reading = false;
+
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'tax_class'  => get_metadata( 'order_item', $this->get_id(), '_tax_class', true ),
+			'tax_status' => get_metadata( 'order_item', $this->get_id(), '_tax_status', true ),
+			'total'      => get_metadata( 'order_item', $this->get_id(), '_line_total', true ),
+			'taxes'      => get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ),
+		) );
 	}
 
 	/**
@@ -139,7 +141,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 */
 	public function set_tax_class( $value ) {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
-			$this->invalid_data( 'order_item_fee_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
+			$this->error( 'order_item_fee_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
 	}
@@ -171,7 +173,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_total_tax( $value ) {
+	protected function set_total_tax( $value ) {
 		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
@@ -191,6 +193,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		}
 		$this->set_prop( 'taxes', $tax_data );
+		$this->set_total_tax( array_sum( $tax_data['total'] ) );
 	}
 
 	/*

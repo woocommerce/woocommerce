@@ -181,7 +181,16 @@ function wc_save_order_items( $order_id, $items ) {
 	// Allow other plugins to check change in order items before they are saved
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	$order = wc_get_order( $order_id );
+	$order     = wc_get_order( $order_id );
+	$data_keys = array(
+		'line_tax'             => array(),
+		'line_subtotal_tax'    => array(),
+		'order_item_name'      => '',
+		'order_item_qty'       => 1,
+		'order_item_tax_class' => '',
+		'line_total'           => 0,
+		'line_subtotal'        => 0,
+	);
 
 	// Line items and fees
 	if ( isset( $items['order_item_id'] ) ) {
@@ -190,46 +199,39 @@ function wc_save_order_items( $order_id, $items ) {
 				continue;
 			}
 
-			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]                  : array();
-			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
-			$set_data          = array(
-				'name'         => isset( $items['order_item_name'][ $item_id ] ) ? $items['order_item_name'][ $item_id ]           : null,
-				'quantity'     => isset( $items['order_item_qty'][ $item_id ] ) ? $items['order_item_qty'][ $item_id ]             : null,
-				'tax_class'    => isset( $items['order_item_tax_class'][ $item_id ] ) ? $items['order_item_tax_class'][ $item_id ] : null,
-				'total'        => isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ]                     : 0,
-				'total_tax'    => array_sum( $line_tax ),
-				'subtotal'     => isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ]               : $item->get_total(),
-				'subtotal_tax' => array_sum( $line_subtotal_tax ),
-				'taxes'        => array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ),
-			);
+			$item_data = array();
 
-			if ( '0' === $set_data['quantity'] ) {
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? $items[ $key ][ $item_id ] : $default;
+			}
+
+			if ( '0' === $item_data['order_item_qty'] ) {
 				$item->delete();
 				continue;
 			}
 
-			foreach ( $set_data as $prop => $value ) {
-				try {
-					$setter = "set_$prop";
-					if ( ! is_null( $value ) && is_callable( array( $item, $setter ) ) ) {
-						$item->{$setter}( wc_clean( wp_unslash( $value ) ) );
-					}
-				} catch ( WC_Data_Exception $e ) {
-					unset( $e ); // Skip prop and leave set to default
-				}
-			}
+			$item->set_props( array(
+				'name'         => $item_data['order_item_name'],
+				'quantity'     => $item_data['order_item_qty'],
+				'tax_class'    => $item_data['order_item_tax_class'],
+				'total'        => $item_data['line_total'],
+				'subtotal'     => $item_data['line_subtotal'],
+				'taxes'        => array(
+					'total'    => $item_data['line_tax'],
+					'subtotal' => $item_data['line_subtotal_tax'],
+				),
+			) );
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-					if ( strstr( $meta_id, 'new-' ) ) {
-						if ( $meta_key === '' && $meta_value === '' ) {
-							continue;
+					if ( $meta_key === '' && $meta_value === '' ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
 						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
 						$item->add_meta_data( $meta_key, $meta_value, false );
-					} elseif ( $meta_key === '' && $meta_value === '' ) {
-						$item->delete_meta_data_by_mid( $meta_id );
 					} else {
 						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
 					}
