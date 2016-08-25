@@ -869,8 +869,7 @@ class WC_Cart {
 			if ( is_array( $cart_item_data ) && ! empty( $cart_item_data ) ) {
 				$cart_item_data_key = '';
 				foreach ( $cart_item_data as $key => $value ) {
-
-					if ( is_array( $value ) ) {
+					if ( is_array( $value ) || is_object( $value ) ) {
 						$value = http_build_query( $value );
 					}
 					$cart_item_data_key .= trim( $key ) . trim( $value );
