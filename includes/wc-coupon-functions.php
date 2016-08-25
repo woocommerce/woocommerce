@@ -70,3 +70,26 @@ function wc_get_cart_coupon_types() {
 function wc_coupons_enabled() {
 	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
 }
+
+/**
+ * Get coupon code by ID.
+ *
+ * @since 2.7.0
+ *
+ * @param int $id Coupon ID.
+ *
+ * @return string
+ */
+function wc_get_coupon_code_by_id( $id ) {
+	global $wpdb;
+
+	$code = $wpdb->get_var( $wpdb->prepare( "
+		SELECT post_title
+		FROM $wpdb->posts
+		WHERE ID = %d
+		AND post_type = 'shop_coupon'
+		AND post_status = 'publish';
+	", $id ) );
+
+	return (string) $code;
+}

@@ -595,7 +595,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $object->has_shipping_method( 'flat_rate_shipping' ) );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping:1', 'Flat rate shipping', '10', array(), 'flat_rate' );
 		$item   = new WC_Order_Item_Shipping( array(
 			'method_title' => $rate->label,
 			'method_id'    => $rate->id,

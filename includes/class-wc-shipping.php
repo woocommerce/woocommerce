@@ -132,12 +132,12 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
-			$status_options         = get_option( 'woocommerce_status_options', array() );
+			$debug_mode             = 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' );
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 
 			// Debug output
-			if ( ! empty( $status_options['shipping_debug_mode'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
+			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
 				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
 			}
 		} else {
@@ -348,12 +348,11 @@ class WC_Shipping {
 			unset( $package_to_hash['contents'][ $item_id ]['data'] );
 		}
 
-		$package_hash   = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		$session_key    = 'shipping_for_package_' . $package_key;
-		$stored_rates   = WC()->session->get( $session_key );
+		$package_hash = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+		$session_key  = 'shipping_for_package_' . $package_key;
+		$stored_rates = WC()->session->get( $session_key );
 
-		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || ! empty( $status_options['shipping_debug_mode'] ) ) {
+		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			// Calculate shipping method rates
 			$package['rates'] = array();
 
