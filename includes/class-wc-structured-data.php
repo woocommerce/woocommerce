@@ -193,7 +193,7 @@ class WC_Structured_Data {
 	 * @param  bool $limit_data
 	 * @return bool $limit_data
 	 */
-	private function limit_product_data_in_loops( $limit_data ) {
+	public function limit_product_data_in_loops( $limit_data ) {
 		return $limit_data = is_product_taxonomy() || is_shop() ? true : false;
 	}
 
