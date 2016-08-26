@@ -381,25 +381,6 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Get internal data prop (raw).
-	 * @param string ...$param Prop keys to retrieve. Supports multiple keys to get nested values.
-	 * @return mixed
-	 */
-	protected function get_prop() {
-		$args = func_get_args();
-		$prop = &$this->_data;
-
-		foreach ( $args as $arg ) {
-			if ( ! isset( $prop[ $arg ] ) ) {
-				return false;
-			}
-			$prop = &$prop[ $arg ];
-		}
-
-		return $prop;
-	}
-
-	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
@@ -419,27 +400,6 @@ abstract class WC_Data {
 		}
 
 		return sizeof( $errors->get_error_codes() ) ? $errors : true;
-	}
-
-	/**
-	 * Set internal data prop to specified value.
-	 * @param int ...$param Prop keys followed by value to set.
-	 * @throws WC_Data_Exception
-	 */
-	protected function set_prop() {
-		if ( func_num_args() < 2 ) {
-			$this->error( 'invalid_value', __( 'set_prop() requires at least 2 parameters', 'woocommerce' ) );
-		}
-
-		$args  = func_get_args();
-		$value = array_pop( $args );
-		$prop  = &$this->_data;
-
-		foreach ( $args as $arg ) {
-			$prop = &$prop[ $arg ];
-		}
-
-		$prop = $value;
 	}
 
 	/**

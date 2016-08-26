@@ -118,7 +118,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_amount( $value ) {
-		$this->set_prop( 'amount', wc_format_decimal( $value ) );
+		$this->_data['amount'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->get_prop( 'amount' ), $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->_data['amount'], $this );
 	}
 
 	/**
@@ -144,7 +144,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_reason( $value ) {
-		$this->set_prop( 'reason', $value );
+		$this->_data['reason'] = $value;
 	}
 
 	/**
@@ -153,7 +153,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->get_prop( 'reason' ), $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->_data['reason'], $this );
 	}
 
 	/**
@@ -162,7 +162,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_refunded_by( $value ) {
-		$this->set_prop( 'refunded_by', absint( $value ) );
+		$this->_data['refunded_by'] = absint( $value );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->get_prop( 'refunded_by' ) );
+		return absint( $this->_data['refunded_by'] );
 	}
 
 	/**

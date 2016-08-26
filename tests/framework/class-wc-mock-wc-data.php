@@ -76,7 +76,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @return string
 	 */
 	public function get_content() {
-		return $this->get_prop( 'content' );
+		return $this->_data['content'];
 	}
 
 	/**
@@ -84,7 +84,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @param string $content
 	 */
 	public function set_content( $content ) {
-		$this->set_prop( 'content', $content );
+		$this->_data['content'] = $content;
 	}
 
 	/**
@@ -92,7 +92,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @return bool
 	 */
 	public function get_bool_value() {
-		return $this->get_prop( 'bool_value' );
+		return $this->_data['bool_value'];
 	}
 
 	/**
@@ -103,7 +103,7 @@ class WC_Mock_WC_Data extends WC_Data {
 		if ( ! is_bool( $value ) ) {
 			$this->error( 'invalid_bool_value', 'O noes' );
 		}
-		$this->set_prop( 'bool_value', $value );
+		$this->_data['bool_value'] = $value;
 	}
 
 	/**

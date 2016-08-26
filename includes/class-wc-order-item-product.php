@@ -240,7 +240,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( 0 >= $value ) {
 			$this->error( 'order_item_product_invalid_quantity', __( 'Quantity must be positive', 'woocommerce' ) );
 		}
-		$this->set_prop( 'quantity', wc_stock_amount( $value ) );
+		$this->_data['quantity'] = wc_stock_amount( $value );
 	}
 
 	/**
@@ -252,7 +252,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
 			$this->error( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
-		$this->set_prop( 'tax_class', $value );
+		$this->_data['tax_class'] = $value;
 	}
 
 	/**
@@ -264,7 +264,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
-		$this->set_prop( 'product_id', absint( $value ) );
+		$this->_data['product_id'] = absint( $value );
 	}
 
 	/**
@@ -276,7 +276,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
 			$this->error( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
 		}
-		$this->set_prop( 'variation_id', absint( $value ) );
+		$this->_data['variation_id'] = absint( $value );
 	}
 
 	/**
@@ -285,7 +285,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_subtotal( $value ) {
-		$this->set_prop( 'subtotal', wc_format_decimal( $value ) );
+		$this->_data['subtotal'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -294,7 +294,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+		$this->_data['total'] = wc_format_decimal( $value );
 
 		// Subtotal cannot be less than total
 		if ( ! $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
@@ -308,7 +308,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_subtotal_tax( $value ) {
-		$this->set_prop( 'subtotal_tax', wc_format_decimal( $value ) );
+		$this->_data['subtotal_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -317,7 +317,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		$this->_data['total_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				$tax_data['subtotal'] = $tax_data['total'];
 			}
 		}
-		$this->set_prop( 'taxes', $tax_data );
+		$this->_data['taxes'] = $tax_data;
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
 		$this->set_subtotal_tax( array_sum( $tax_data['subtotal'] ) );
 	}
@@ -390,7 +390,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return int
 	 */
 	public function get_product_id() {
-		return absint( $this->get_prop( 'product_id' ) );
+		return absint( $this->_data['product_id'] );
 	}
 
 	/**
@@ -398,7 +398,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return int
 	 */
 	public function get_variation_id() {
-		return absint( $this->get_prop( 'variation_id' ) );
+		return absint( $this->_data['variation_id'] );
 	}
 
 	/**
@@ -406,7 +406,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return int
 	 */
 	public function get_quantity() {
-		return wc_stock_amount( $this->get_prop( 'quantity' ) );
+		return wc_stock_amount( $this->_data['quantity'] );
 	}
 
 	/**
@@ -414,7 +414,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_tax_class() {
-		return $this->get_prop( 'tax_class' );
+		return $this->_data['tax_class'];
 	}
 
 	/**
@@ -422,7 +422,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_subtotal() {
-		return wc_format_decimal( $this->get_prop( 'subtotal' ) );
+		return wc_format_decimal( $this->_data['subtotal'] );
 	}
 
 	/**
@@ -430,7 +430,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_subtotal_tax() {
-		return wc_format_decimal( $this->get_prop( 'subtotal_tax' ) );
+		return wc_format_decimal( $this->_data['subtotal_tax'] );
 	}
 
 	/**
@@ -438,7 +438,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total() {
-		return wc_format_decimal( $this->get_prop( 'total' ) );
+		return wc_format_decimal( $this->_data['total'] );
 	}
 
 	/**
@@ -446,7 +446,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total_tax() {
-		return wc_format_decimal( $this->get_prop( 'total_tax' ) );
+		return wc_format_decimal( $this->_data['total_tax'] );
 	}
 
 	/**
@@ -454,6 +454,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_taxes() {
-		return $this->get_prop( 'taxes' );
+		return $this->_data['taxes'];
 	}
 }

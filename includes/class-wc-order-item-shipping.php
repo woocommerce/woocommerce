@@ -130,7 +130,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
-		$this->set_prop( 'method_title', wc_clean( $value ) );
+		$this->_data['method_title'] = wc_clean( $value );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_method_id( $value ) {
-		$this->set_prop( 'method_id', wc_clean( $value ) );
+		$this->_data['method_id'] = wc_clean( $value );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+		$this->_data['total'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -157,7 +157,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		$this->_data['total_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -175,7 +175,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		if ( ! empty( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		}
-		$this->set_prop( 'taxes', $tax_data );
+		$this->_data['taxes'] = $tax_data;
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
 	}
 
@@ -219,7 +219,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_method_title() {
-		return $this->get_prop( 'method_title' ) ? $this->get_prop( 'method_title' ) : __( 'Shipping', 'woocommerce' );
+		return $this->_data['method_title'] ? $this->_data['method_title'] : __( 'Shipping', 'woocommerce' );
 	}
 
 	/**
@@ -227,7 +227,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_method_id() {
-		return $this->get_prop( 'method_id' );
+		return $this->_data['method_id'];
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total() {
-		return wc_format_decimal( $this->get_prop( 'total' ) );
+		return wc_format_decimal( $this->_data['total'] );
 	}
 
 	/**
@@ -243,7 +243,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_total_tax() {
-		return wc_format_decimal( $this->get_prop( 'total_tax' ) );
+		return wc_format_decimal( $this->_data['total_tax'] );
 	}
 
 	/**
@@ -251,6 +251,6 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_taxes() {
-		return $this->get_prop( 'taxes' );
+		return $this->_data['taxes'];
 	}
 }
