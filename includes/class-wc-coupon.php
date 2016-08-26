@@ -769,23 +769,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  array $coupon Array of coupon properties
 	 */
 	public function read_manual_coupon( $code, $coupon ) {
-		// This will set most of our fields correctly
-		foreach ( $this->_data as $key => $value ) {
-			if ( isset( $coupon[ $key ] ) ) {
-				$this->_data[ $key ] = $coupon[ $key ];
-			}
-		}
-
 		// product_ids and exclude_product_ids could be passed in as an empty string '', or comma separated values, when it should be an empty array for the new format.
 		$convert_fields_to_array = array( 'product_ids', 'exclude_product_ids' );
 		foreach ( $convert_fields_to_array as $field ) {
 			if ( ! is_array( $coupon[ $field ] ) ) {
 				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.7' );
-				if ( empty( $coupon[ $field ] ) ) {
-					$this->_data[ $field ] = array();
-				} else {
-					$this->_data[ $field ] = explode( ',', $coupon[ $field ] );
-				}
+				$coupon[ $field ] = array_filter( explode( ',', (array) $coupon[ $field ] ) );
 			}
 		}
 
@@ -794,12 +783,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		foreach ( $yes_no_fields as $field ) {
 			if ( 'yes' === $coupon[ $field ] || 'no' === $coupon[ $field ] ) {
 				_doing_it_wrong( $field, $field . ' should be true or false instead of yes or no.', '2.7' );
-				$this->_data[ $field ] = ( 'yes' === $coupon[ $field ] );
+				$coupon[ $field ] = 'yes' === $coupon[ $field ];
 			}
 		}
 
-		// set our code
 		$this->set_code( $code );
+		$this->set_props( $coupon );
 	}
 
 	/*
