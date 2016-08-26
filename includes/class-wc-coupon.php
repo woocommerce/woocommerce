@@ -633,80 +633,43 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  int $id
 	 */
 	public function read( $id ) {
-		if ( 0 === $id ) {
-			$this->_data['id'] = 0;
-			return;
-		}
-
-
 		parent::read( $id );
 
 		if ( ! $this->get_id() ) {
 			return;
 		}
 
-
-
-		$this->set_props( array(
-			'product_id'   => get_metadata( 'order_item', $this->get_id(), '_product_id', true ),
-			'variation_id' => get_metadata( 'order_item', $this->get_id(), '_variation_id', true ),
-			'quantity'     => get_metadata( 'order_item', $this->get_id(), '_qty', true ),
-			'tax_class'    => get_metadata( 'order_item', $this->get_id(), '_tax_class', true ),
-			'subtotal'     => get_metadata( 'order_item', $this->get_id(), '_line_subtotal', true ),
-			'total'        => get_metadata( 'order_item', $this->get_id(), '_line_total', true ),
-			'taxes'        => get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ),
-		) );
-
-
-
-
-
-
-
-
 		$post_object = get_post( $id );
 
-		// Only continue reading if this coupon exists...
-		if ( empty( $post_object ) || empty( $post_object->ID ) ) {
-			$this->_data['id'] = 0;
+		if ( ! $post_object ) {
 			return;
 		}
 
-		$coupon_id   = $this->_data['id'] = absint( $post_object->ID );
+		$coupon_id = absint( $post_object->ID );
 
-		// Map standard coupon data
-		$this->set_code( $post_object->post_title );
-		$this->set_description( $post_object->post_excerpt );
-		$this->set_discount_type( get_post_meta( $coupon_id, 'discount_type', true ) );
-		$this->set_amount( get_post_meta( $coupon_id, 'coupon_amount', true ) );
-		$this->set_expiry_date( get_post_meta( $coupon_id, 'expiry_date', true ) );
-		$this->set_usage_count( get_post_meta( $coupon_id, 'usage_count', true ) );
-		// Map meta data
-		$individual_use = ( 'yes' === get_post_meta( $coupon_id, 'individual_use', true ) );
-		$this->set_individual_use( $individual_use );
-		$product_ids = explode( ',', get_post_meta( $coupon_id, 'product_ids', true ), -1 );
-		$this->set_product_ids( $product_ids );
-		$exclude_product_ids = explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ), -1 );
-		$this->set_excluded_product_ids( $exclude_product_ids );
-		$this->set_usage_limit( get_post_meta( $coupon_id, 'usage_limit', true ) );
-		$this->set_usage_limit_per_user( get_post_meta( $coupon_id, 'usage_limit_per_user', true ) );
-		$this->set_limit_usage_to_x_items( get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) );
-		$free_shipping = ( 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ) );
-		$this->set_free_shipping( $free_shipping );
-		$product_categories = get_post_meta( $coupon_id, 'product_categories', true );
-		$product_categories = ( ! empty( $product_categories ) ? $product_categories : array() );
-		$this->set_product_categories( $product_categories );
-		$exclude_product_categories = get_post_meta( $coupon_id, 'exclude_product_categories', true );
-		$exclude_product_categories = ( ! empty( $exclude_product_categories ) ? $exclude_product_categories : array() );
-		$this->set_excluded_product_categories( $exclude_product_categories );
-		$exclude_sale_items = ( 'yes' === get_post_meta( $coupon_id, 'exclude_sale_items', true ) );
-		$this->set_exclude_sale_items( $exclude_sale_items );
-		$this->set_minimum_amount( get_post_meta( $coupon_id, 'minimum_amount', true ) );
-		$this->set_maximum_amount( get_post_meta( $coupon_id, 'maximum_amount', true ) );
-		$email_restrictions =  get_post_meta( $coupon_id, 'customer_email', true ) ;
-		$this->set_email_restrictions(  ! empty( $email_restrictions ) ? $email_restrictions : array() );
-		$this->set_used_by( (array) get_post_meta( $coupon_id, '_used_by' ) );
-
+		$this->set_props( array(
+			'id'                          => $coupon_id,
+			'code'                        => $post_object->post_title,
+			'description'                 => $post_object->post_excerpt,
+			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
+			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
+			'expiry_date'                 => get_post_meta( $coupon_id, 'expiry_date', true ),
+			'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
+			'individual_use'              => 'yes' === get_post_meta( $coupon_id, 'individual_use', true ),
+			'product_ids'                 => explode( ',', get_post_meta( $coupon_id, 'product_ids', true ), -1 ),
+			'excluded_product_ids'        => explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ), -1 ),
+			'usage_limit'                 => get_post_meta( $coupon_id, 'usage_limit', true ),
+			'usage_limit_per_user'        => get_post_meta( $coupon_id, 'usage_limit_per_user', true ),
+			'limit_usage_to_x_items'      => get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ),
+			'free_shipping'               => 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ),
+			'product_categories'          => array_filter( (array) get_post_meta( $coupon_id, 'product_categories', true ) ),
+			'excluded_product_categories' => array_filter( (array) get_post_meta( $coupon_id, 'exclude_product_categories', true ) ),
+			'exclude_sale_items'          => 'yes' === get_post_meta( $coupon_id, 'exclude_sale_items', true ),
+			'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
+			'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
+			'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
+			'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
+		) );
 		$this->read_meta_data();
 
 		do_action( 'woocommerce_coupon_loaded', $this );
