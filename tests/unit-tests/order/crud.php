@@ -35,10 +35,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: get_parent_id
 	 */
 	function test_get_parent_id() {
+		$object1   = new WC_Order();
+		$parent_id = $object1->save();
 		$object = new WC_Order();
-		$set_to = 100;
-		$object->set_parent_id( $set_to );
-		$this->assertEquals( $set_to, $object->get_parent_id() );
+		$object->set_parent_id( $parent_id );
+		$this->assertEquals( $parent_id, $object->get_parent_id() );
 	}
 
 	/**
@@ -594,7 +595,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $object->has_shipping_method( 'flat_rate_shipping' ) );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping:1', 'Flat rate shipping', '10', array(), 'flat_rate' );
 		$item   = new WC_Order_Item_Shipping( array(
 			'method_title' => $rate->label,
 			'method_id'    => $rate->id,
@@ -798,8 +799,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $set_to, $object->get_billing_email() );
 
 		$set_to = 'not an email';
+		$this->setExpectedException( 'WC_Data_Exception' );
 		$object->set_billing_email( $set_to );
-		$this->assertEquals( '', $object->get_billing_email() );
+		$this->assertEquals( 'test@test.com', $object->get_billing_email() );
 	}
 
 	/**

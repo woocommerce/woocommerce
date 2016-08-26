@@ -646,7 +646,7 @@ class WC_Product_Variation extends WC_Product {
 				// Get terms for attribute taxonomy or value if its a custom attribute
 				if ( $attribute[ 'is_taxonomy' ] ) {
 
-					$post_terms = wp_get_post_terms( $this->id, $attribute[ 'name' ] );
+					$post_terms = get_the_terms( $this->id, $attribute[ 'name' ] );
 
 					foreach ( $post_terms as $term ) {
 						if ( $variation_selected_value === $term->slug ) {

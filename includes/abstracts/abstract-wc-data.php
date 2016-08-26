@@ -16,10 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Data {
 
 	/**
-	 * Core data for this object, name value pairs (name + default value).
+	 * Core data for this object. Name value pairs (name + default value).
 	 * @var array
 	 */
 	protected $_data = array();
+
+	/**
+	 * Set to _data on construct so we can track and reset data if needed.
+	 * @var array
+	 */
+	protected $_default_data = array();
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -54,6 +60,14 @@ abstract class WC_Data {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array();
+
+	/**
+	 * Default constructor.
+	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
+	 */
+	public function __construct( $read = 0 ) {
+		$this->_default_data = $this->_data;
+	}
 
 	/**
 	 * Returns the unique ID for this object.
@@ -104,12 +118,20 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Filter null meta values from array.
+	 * @return bool
+	 */
+	protected function filter_null_meta( $meta ) {
+		return ! is_null( $meta->value );
+	}
+
+	/**
 	 * Get All Meta Data.
 	 * @since 2.6.0
 	 * @return array
 	 */
 	public function get_meta_data() {
-		return $this->_meta_data;
+		return array_filter( $this->_meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
@@ -140,7 +162,7 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true ) {
-		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
 		$value    = '';
 
 		if ( ! empty( $array_keys ) ) {
@@ -183,8 +205,7 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
-			$array_keys       = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-			$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+			$this->delete_meta_data( $key );
 		}
 		$this->_meta_data[] = (object) array(
 			'key'   => $key,
@@ -221,8 +242,12 @@ abstract class WC_Data {
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				$this->_meta_data[ $array_key ]->value = null;
+			}
+		}
 	}
 
 	/**
@@ -232,7 +257,11 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
 		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'id' ), $mid );
-		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				$this->_meta_data[ $array_key ]->value = null;
+			}
+		}
 	}
 
 	/**
@@ -290,31 +319,17 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 */
 	protected function save_meta_data() {
-		global $wpdb;
-		$db_info = $this->_get_db_info();
-		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "
-			SELECT " . $db_info['meta_id_field'] . " FROM " . $db_info['table'] . "
-			WHERE " . $db_info['object_id_field'] . " = %d", $this->get_id() ) . "
-			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "')
-			AND meta_key NOT LIKE 'wp\_%%';
-		" ) );
-		$set_meta_ids = array();
-
 		foreach ( $this->_meta_data as $array_key => $meta ) {
-			if ( empty( $meta->id ) ) {
-				$new_meta_id    = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
-				$set_meta_ids[] = $new_meta_id;
+			if ( is_null( $meta->value ) ) {
+				if ( ! empty( $meta->id ) ) {
+					delete_metadata_by_mid( $this->_meta_type, $meta->id );
+				}
+			} elseif ( empty( $meta->id ) ) {
+				$new_meta_id = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
 				$this->_meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
 				update_metadata_by_mid( $this->_meta_type, $meta->id, $meta->value, $meta->key );
-				$set_meta_ids[] = absint( $meta->id );
 			}
-		}
-
-		// Delete no longer set meta data
-		$delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
-		foreach ( $delete_meta_ids as $meta_id ) {
-			delete_metadata_by_mid( $this->_meta_type, $meta_id );
 		}
 
 		if ( ! empty( $this->_cache_group ) ) {
@@ -359,9 +374,41 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Throw an exception due to invalid data.
+	 * Set all props to default values.
 	 */
-	protected function throw_exception( $id, $message = '', $code = 400 ) {
-		throw new WC_Data_Exception( $id, $message, $code );
+	protected function set_defaults() {
+		$this->_data = $this->_default_data;
+	}
+
+	/**
+	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @return WP_Error|bool
+	 */
+	public function set_props( $props ) {
+		$errors = new WP_Error();
+
+		foreach ( $props as $prop => $value ) {
+			try {
+				$setter = "set_$prop";
+				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				$errors->add( $e->getErrorCode(), $e->getMessage() );
+			}
+		}
+
+		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
+	 * When invalid data is found, throw an exception unless reading from the DB.
+	 * @param string $error_code Error code.
+	 * @param string $error_message Error message.
+	 * @throws WC_Data_Exception
+	 */
+	protected function error( $error_code, $error_message ) {
+		throw new WC_Data_Exception( $error_code, $error_message );
 	}
 }

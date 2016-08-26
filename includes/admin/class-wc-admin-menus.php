@@ -38,6 +38,9 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
+		// Rename taxonomies at Appearance > Menus > Pages
+		add_filter( 'nav_menu_meta_box_object', array( $this, 'rename_nav_menu_meta_boxes' ) );
+
 		// Add endpoints custom URLs in Appearance > Menus > Pages
 		add_action( 'admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
 
@@ -95,7 +98,6 @@ class WC_Admin_Menus {
 	 */
 	public function status_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
-		register_setting( 'woocommerce_status_settings_fields', 'woocommerce_status_options' );
 	}
 
 	/**
@@ -225,6 +227,19 @@ class WC_Admin_Menus {
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Rename taxonomies in admin menus meta boxes.
+	 */
+	public function rename_nav_menu_meta_boxes( $tax ) {
+		if ( 'product_cat' === $tax->name ) {
+			$tax->labels->name = __( 'Product Categories', 'woocommerce' );
+		} elseif ( 'product_tag' === $tax->name ) {
+			$tax->labels->name = __( 'Product Tags', 'woocommerce' );
+		}
+
+		return $tax;
 	}
 
 	/**

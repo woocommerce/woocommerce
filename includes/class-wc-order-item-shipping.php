@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item_Shipping extends WC_Order_Item {
 
 	/**
-	 * Data properties of this order item object.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -73,12 +73,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 */
 	public function read( $id ) {
 		parent::read( $id );
-		if ( $this->get_id() ) {
-			$this->set_method_id( get_metadata( 'order_item', $this->get_id(), 'method_id', true ) );
-			$this->set_total( get_metadata( 'order_item', $this->get_id(), 'cost', true ) );
-			$this->set_total_tax( get_metadata( 'order_item', $this->get_id(), 'total_tax', true ) );
-			$this->set_taxes( get_metadata( 'order_item', $this->get_id(), 'taxes', true ) );
+
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'method_id' => get_metadata( 'order_item', $this->get_id(), 'method_id', true ),
+			'total'     => get_metadata( 'order_item', $this->get_id(), 'cost', true ),
+			'taxes'     => get_metadata( 'order_item', $this->get_id(), 'taxes', true ),
+		) );
 	}
 
 	/**
@@ -114,6 +118,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
 		$this->set_method_title( $value );
@@ -122,6 +127,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set code.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
 		$this->_data['method_title'] = wc_clean( $value );
@@ -130,6 +136,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set shipping method id.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_method_id( $value ) {
 		$this->_data['method_id'] = wc_clean( $value );
@@ -138,6 +145,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set total.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
 		$this->_data['total'] = wc_format_decimal( $value );
@@ -146,8 +154,9 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set total tax.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
-	public function set_total_tax( $value ) {
+	protected function set_total_tax( $value ) {
 		$this->_data['total_tax'] = wc_format_decimal( $value );
 	}
 
@@ -156,6 +165,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 *
 	 * This is an array of tax ID keys with total amount values.
 	 * @param array $raw_tax_data
+	 * @throws WC_Data_Exception
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -172,6 +182,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in shipping rate object.
 	 * @param WC_Shipping_Rate $tax_rate_id
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
 		$this->set_method_title( $shipping_rate->label );

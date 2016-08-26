@@ -43,51 +43,66 @@ class WC_Order extends WC_Abstract_Order {
 	protected $_status_transition = false;
 
 	/**
-	 * Extend the abstract _data properties and then read the order object.
-	 *
-	 * @param  int|object|WC_Order $order Order to init.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * @since 2.7.0
+	 * @var array
 	 */
-	public function __construct( $order = 0 ) {
-		$this->_data = array_merge( $this->_data, array(
-			'customer_id'          => 0,
-			'order_key'            => '',
-			'billing'              => array(
-				'first_name'       => '',
-				'last_name'        => '',
-				'company'          => '',
-				'address_1'        => '',
-				'address_2'        => '',
-				'city'             => '',
-				'state'            => '',
-				'postcode'         => '',
-				'country'          => '',
-				'email'            => '',
-				'phone'            => '',
-			),
-			'shipping'             => array(
-				'first_name'       => '',
-				'last_name'        => '',
-				'company'          => '',
-				'address_1'        => '',
-				'address_2'        => '',
-				'city'             => '',
-				'state'            => '',
-				'postcode'         => '',
-				'country'          => '',
-			),
-			'payment_method'       => '',
-			'payment_method_title' => '',
-			'transaction_id'       => '',
-			'customer_ip_address'  => '',
-			'customer_user_agent'  => '',
-			'created_via'          => '',
-			'customer_note'        => '',
-			'date_completed'       => '',
-			'date_paid'            => '',
-			'cart_hash'            => '',
-		) );
-		parent::__construct( $order );
-	}
+	protected $_data = array(
+		// Abstract order props
+		'id'                   => 0,
+		'parent_id'            => 0,
+		'status'               => '',
+		'currency'             => '',
+		'version'              => '',
+		'prices_include_tax'   => false,
+		'date_created'         => '',
+		'date_modified'        => '',
+		'discount_total'       => 0,
+		'discount_tax'         => 0,
+		'shipping_total'       => 0,
+		'shipping_tax'         => 0,
+		'cart_tax'             => 0,
+		'total'                => 0,
+		'total_tax'            => 0,
+
+		// Order props
+		'customer_id'          => 0,
+		'order_key'            => '',
+		'billing'              => array(
+			'first_name'       => '',
+			'last_name'        => '',
+			'company'          => '',
+			'address_1'        => '',
+			'address_2'        => '',
+			'city'             => '',
+			'state'            => '',
+			'postcode'         => '',
+			'country'          => '',
+			'email'            => '',
+			'phone'            => '',
+		),
+		'shipping'             => array(
+			'first_name'       => '',
+			'last_name'        => '',
+			'company'          => '',
+			'address_1'        => '',
+			'address_2'        => '',
+			'city'             => '',
+			'state'            => '',
+			'postcode'         => '',
+			'country'          => '',
+		),
+		'payment_method'       => '',
+		'payment_method_title' => '',
+		'transaction_id'       => '',
+		'customer_ip_address'  => '',
+		'customer_user_agent'  => '',
+		'created_via'          => '',
+		'customer_note'        => '',
+		'date_completed'       => '',
+		'date_paid'            => '',
+		'cart_hash'            => '',
+	);
 
 	/**
 	 * When a payment is complete this function is called.
@@ -104,45 +119,47 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-		if ( ! $this->get_id() ) {
-			return false;
-		}
+		try {
+			if ( ! $this->get_id() ) {
+				return false;
+			}
+			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
-		do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
+			if ( ! empty( WC()->session ) ) {
+				WC()->session->set( 'order_awaiting_payment', false );
+			}
 
-		if ( ! empty( WC()->session ) ) {
-			WC()->session->set( 'order_awaiting_payment', false );
-		}
+			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+				$order_needs_processing = false;
 
-		if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-			$order_needs_processing = false;
+				if ( sizeof( $this->get_items() ) > 0 ) {
+					foreach ( $this->get_items() as $item ) {
+						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
+							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
-			if ( sizeof( $this->get_items() ) > 0 ) {
-				foreach ( $this->get_items() as $item ) {
-					if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
-						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-							$order_needs_processing = true;
-							break;
+							if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+								$order_needs_processing = true;
+								break;
+							}
 						}
 					}
 				}
+
+				if ( ! empty( $transaction_id ) ) {
+					$this->set_transaction_id( $transaction_id );
+				}
+
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
+				$this->set_date_paid( current_time( 'timestamp' ) );
+				$this->save();
+
+				do_action( 'woocommerce_payment_complete', $this->get_id() );
+			} else {
+				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
-
-			if ( ! empty( $transaction_id ) ) {
-				$this->set_transaction_id( $transaction_id );
-			}
-
-			$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
-			$this->set_date_paid( current_time( 'timestamp' ) );
-			$this->save();
-
-			do_action( 'woocommerce_payment_complete', $this->get_id() );
-		} else {
-			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+		} catch ( Exception $e ) {
+			return false;
 		}
-
 		return true;
 	}
 
@@ -251,48 +268,49 @@ class WC_Order extends WC_Abstract_Order {
 	public function read( $id ) {
 		parent::read( $id );
 
-		// Read additonal order data
-		if ( $order_id = $this->get_id() ) {
-			$post_object = get_post( $this->get_id() );
-			$this->set_order_key( get_post_meta( $this->get_id(), '_order_key', true ) );
-			$this->set_customer_id( get_post_meta( $this->get_id(), '_customer_user', true ) );
-			$this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
-			$this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
-			$this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
-			$this->set_billing_address_1( get_post_meta( $order_id, '_billing_address_1', true ) );
-			$this->set_billing_address_2( get_post_meta( $order_id, '_billing_address_2', true ) );
-			$this->set_billing_city( get_post_meta( $order_id, '_billing_city', true ) );
-			$this->set_billing_state( get_post_meta( $order_id, '_billing_state', true ) );
-			$this->set_billing_postcode( get_post_meta( $order_id, '_billing_postcode', true ) );
-			$this->set_billing_country( get_post_meta( $order_id, '_billing_country', true ) );
-			$this->set_billing_email( get_post_meta( $order_id, '_billing_email', true ) );
-			$this->set_billing_phone( get_post_meta( $order_id, '_billing_phone', true ) );
-			$this->set_shipping_first_name( get_post_meta( $order_id, '_shipping_first_name', true ) );
-			$this->set_shipping_last_name( get_post_meta( $order_id, '_shipping_last_name', true ) );
-			$this->set_shipping_company( get_post_meta( $order_id, '_shipping_company', true ) );
-			$this->set_shipping_address_1( get_post_meta( $order_id, '_shipping_address_1', true ) );
-			$this->set_shipping_address_2( get_post_meta( $order_id, '_shipping_address_2', true ) );
-			$this->set_shipping_city( get_post_meta( $order_id, '_shipping_city', true ) );
-			$this->set_shipping_state( get_post_meta( $order_id, '_shipping_state', true ) );
-			$this->set_shipping_postcode( get_post_meta( $order_id, '_shipping_postcode', true ) );
-			$this->set_shipping_country( get_post_meta( $order_id, '_shipping_country', true ) );
-			$this->set_payment_method( get_post_meta( $order_id, '_payment_method', true ) );
-			$this->set_payment_method_title( get_post_meta( $order_id, '_payment_method_title', true ) );
-			$this->set_transaction_id( get_post_meta( $order_id, '_transaction_id', true ) );
-			$this->set_customer_ip_address( get_post_meta( $order_id, '_customer_ip_address', true ) );
-			$this->set_customer_user_agent( get_post_meta( $order_id, '_customer_user_agent', true ) );
-			$this->set_created_via( get_post_meta( $order_id, '_created_via', true ) );
-			$this->set_customer_note( get_post_meta( $order_id, '_customer_note', true ) );
-			$this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
-			$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
-			$this->set_cart_hash( get_post_meta( $order_id, '_cart_hash', true ) );
-			$this->set_customer_note( $post_object->post_excerpt );
-
-			// Map user data
-			if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
-				$this->set_billing_email( $user->user_email );
-			}
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$post_object = get_post( $this->get_id() );
+
+		$this->set_props( array(
+			'order_key'            => get_post_meta( $this->get_id(), '_order_key', true ),
+			'customer_id'          => get_post_meta( $this->get_id(), '_customer_user', true ),
+			'billing_first_name'   => get_post_meta( $this->get_id(), '_billing_first_name', true ),
+			'billing_last_name'    => get_post_meta( $this->get_id(), '_billing_last_name', true ),
+			'billing_company'      => get_post_meta( $this->get_id(), '_billing_company', true ),
+			'billing_address_1'    => get_post_meta( $this->get_id(), '_billing_address_1', true ),
+			'billing_address_2'    => get_post_meta( $this->get_id(), '_billing_address_2', true ),
+			'billing_city'         => get_post_meta( $this->get_id(), '_billing_city', true ),
+			'billing_state'        => get_post_meta( $this->get_id(), '_billing_state', true ),
+			'billing_postcode'     => get_post_meta( $this->get_id(), '_billing_postcode', true ),
+			'billing_country'      => get_post_meta( $this->get_id(), '_billing_country', true ),
+			'billing_email'        => get_post_meta( $this->get_id(), '_billing_email', true ),
+			'billing_phone'        => get_post_meta( $this->get_id(), '_billing_phone', true ),
+			'shipping_first_name'  => get_post_meta( $this->get_id(), '_shipping_first_name', true ),
+			'shipping_last_name'   => get_post_meta( $this->get_id(), '_shipping_last_name', true ),
+			'shipping_company'     => get_post_meta( $this->get_id(), '_shipping_company', true ),
+			'shipping_address_1'   => get_post_meta( $this->get_id(), '_shipping_address_1', true ),
+			'shipping_address_2'   => get_post_meta( $this->get_id(), '_shipping_address_2', true ),
+			'shipping_city'        => get_post_meta( $this->get_id(), '_shipping_city', true ),
+			'shipping_state'       => get_post_meta( $this->get_id(), '_shipping_state', true ),
+			'shipping_postcode'    => get_post_meta( $this->get_id(), '_shipping_postcode', true ),
+			'shipping_country'     => get_post_meta( $this->get_id(), '_shipping_country', true ),
+			'payment_method'       => get_post_meta( $this->get_id(), '_payment_method', true ),
+			'payment_method_title' => get_post_meta( $this->get_id(), '_payment_method_title', true ),
+			'transaction_id'       => get_post_meta( $this->get_id(), '_transaction_id', true ),
+			'customer_ip_address'  => get_post_meta( $this->get_id(), '_customer_ip_address', true ),
+			'customer_user_agent'  => get_post_meta( $this->get_id(), '_customer_user_agent', true ),
+			'created_via'          => get_post_meta( $this->get_id(), '_created_via', true ),
+			'customer_note'        => get_post_meta( $this->get_id(), '_customer_note', true ),
+			'date_completed'       => get_post_meta( $this->get_id(), '_completed_date', true ),
+			'date_paid'            => get_post_meta( $this->get_id(), '_paid_date', true ),
+			'cart_hash'            => get_post_meta( $this->get_id(), '_cart_hash', true ),
+			'customer_note'        => $post_object->post_excerpt,
+		) );
+
+		$this->maybe_set_user_billing_email();
 	}
 
 	/**
@@ -397,13 +415,18 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
+	 * @return bool success
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
-		if ( ! $this->get_id() ) {
+		try {
+			if ( ! $this->get_id() ) {
+				return false;
+			}
+			$this->set_status( $new_status, $note, $manual );
+			$this->save();
+		} catch ( Exception $e ) {
 			return false;
 		}
-		$this->set_status( $new_status, $note, $manual );
-		$this->save();
 		return true;
 	}
 
@@ -815,6 +838,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order_key.
 	 * @param string $value Max length 20 chars.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
 		$this->_data['order_key'] = substr( $value, 0, 20 );
@@ -823,6 +847,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set customer_id
 	 * @param int $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_id( $value ) {
 		$this->_data['customer_id'] = absint( $value );
@@ -831,6 +856,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_first_name
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
 		$this->_data['billing']['first_name'] = $value;
@@ -839,6 +865,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_last_name
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
 		$this->_data['billing']['last_name'] = $value;
@@ -847,6 +874,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_company
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
 		$this->_data['billing']['company'] = $value;
@@ -855,6 +883,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_address_1
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_1( $value ) {
 		$this->_data['billing']['address_1'] = $value;
@@ -863,6 +892,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_address_2
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_2( $value ) {
 		$this->_data['billing']['address_2'] = $value;
@@ -871,6 +901,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_city
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_city( $value ) {
 		$this->_data['billing']['city'] = $value;
@@ -879,6 +910,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_state
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_state( $value ) {
 		$this->_data['billing']['state'] = $value;
@@ -887,6 +919,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_postcode
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_postcode( $value ) {
 		$this->_data['billing']['postcode'] = $value;
@@ -895,23 +928,41 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set billing_country
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_country( $value ) {
 		$this->_data['billing']['country'] = $value;
 	}
 
 	/**
+	 * Maybe set empty billing email to that of the user who owns the order.
+	 */
+	protected function maybe_set_user_billing_email() {
+		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
+			try {
+				$this->set_billing_email( $user->user_email );
+			} catch( WC_Data_Exception $e ){
+				unset( $e );
+			}
+		}
+	}
+
+	/**
 	 * Set billing_email
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_email( $value ) {
-		$value = sanitize_email( $value );
-		$this->_data['billing']['email'] = is_email( $value ) ? $value : '';
+		if ( $value && ! is_email( $value ) ) {
+			$this->error( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
+		}
+		$this->_data['billing']['email'] = sanitize_email( $value );
 	}
 
 	/**
 	 * Set billing_phone
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_phone( $value ) {
 		$this->_data['billing']['phone'] = $value;
@@ -920,6 +971,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_first_name
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_first_name( $value ) {
 		$this->_data['shipping']['first_name'] = $value;
@@ -928,6 +980,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_last_name
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_last_name( $value ) {
 		$this->_data['shipping']['last_name'] = $value;
@@ -936,6 +989,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_company
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_company( $value ) {
 		$this->_data['shipping']['company'] = $value;
@@ -944,6 +998,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_address_1
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_1( $value ) {
 		$this->_data['shipping']['address_1'] = $value;
@@ -952,6 +1007,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_address_2
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_2( $value ) {
 		$this->_data['shipping']['address_2'] = $value;
@@ -960,6 +1016,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_city
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_city( $value ) {
 		$this->_data['shipping']['city'] = $value;
@@ -968,6 +1025,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_state
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_state( $value ) {
 		$this->_data['shipping']['state'] = $value;
@@ -976,6 +1034,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_postcode
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_postcode( $value ) {
 		$this->_data['shipping']['postcode'] = $value;
@@ -984,6 +1043,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping_country
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_country( $value ) {
 		$this->_data['shipping']['country'] = $value;
@@ -992,22 +1052,24 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
+	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
 			$this->set_payment_method( $payment_method->id );
 			$this->set_payment_method_title( $payment_method->get_title() );
 		} elseif ( '' === $payment_method ) {
-			$this->_data['payment_method']       = '';
+			$this->_data['payment_method'] = '';
 			$this->_data['payment_method_title'] = '';
 		} else {
-			$this->_data['payment_method']       = $payment_method;
+			$this->_data['payment_method'] = $payment_method;
 		}
 	}
 
 	/**
 	 * Set payment_method_title
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method_title( $value ) {
 		$this->_data['payment_method_title'] = $value;
@@ -1016,6 +1078,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set transaction_id
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_transaction_id( $value ) {
 		$this->_data['transaction_id'] = $value;
@@ -1024,6 +1087,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set customer_ip_address
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_ip_address( $value ) {
 		$this->_data['customer_ip_address'] = $value;
@@ -1032,6 +1096,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set customer_user_agent
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_user_agent( $value ) {
 		$this->_data['customer_user_agent'] = $value;
@@ -1040,6 +1105,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set created_via
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_created_via( $value ) {
 		$this->_data['created_via'] = $value;
@@ -1048,6 +1114,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set customer_note
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_note( $value ) {
 		$this->_data['customer_note'] = $value;
@@ -1056,6 +1123,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date_completed
 	 * @param string $timestamp
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_completed( $timestamp ) {
 		$this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
@@ -1064,6 +1132,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date_paid
 	 * @param string $timestamp
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_paid( $timestamp ) {
 		$this->_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
@@ -1072,6 +1141,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set cart hash
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_hash( $value ) {
 		$this->_data['cart_hash'] = $value;

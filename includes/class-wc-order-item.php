@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Data array, with defaults.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -50,30 +50,19 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Constructor.
-	 * @param int|object|array $order_item ID to load from the DB (optional) or already queried data.
+	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
-	public function __construct( $item = 0 ) {
-		if ( $item instanceof WC_Order_Item ) {
-			if ( $this->is_type( $item->get_type() ) ) {
-				$this->set_all( $item->get_data() );
-			}
-		} elseif ( is_array( $item ) ) {
-			$this->set_all( $item );
-		} else {
-			$this->read( $item );
-		}
-	}
+	public function __construct( $read = 0 ) {
+		parent::__construct( $read );
 
-	/**
-	 * Set all data based on input array.
-	 * @param array $data
-	 * @access private
-	 */
-	public function set_all( $data ) {
-		foreach ( $data as $key => $value ) {
-			if ( is_callable( array( $this, "set_$key" ) ) ) {
-				$this->{"set_$key"}( $value );
+		if ( $read instanceof WC_Order_Item ) {
+			if ( $this->is_type( $read->get_type() ) ) {
+				$this->set_props( $read->get_data() );
 			}
+		} elseif ( is_array( $read ) ) {
+			$this->set_props( $read );
+		} else {
+			$this->read( $read );
 		}
 	}
 
@@ -152,6 +141,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Set ID
 	 * @param int $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_id( $value ) {
 		$this->_data['id'] = absint( $value );
@@ -160,6 +150,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Set order ID.
 	 * @param int $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_order_id( $value ) {
 		$this->_data['order_id'] = absint( $value );
@@ -168,6 +159,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Set order item name.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
 		$this->_data['name'] = wc_clean( $value );
@@ -176,6 +168,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Set order item type.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	protected function set_type( $value ) {
 		$this->_data['type'] = wc_clean( $value );
@@ -231,6 +224,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	public function read( $item ) {
 		global $wpdb;
 
+		$this->set_defaults();
+
 		if ( is_numeric( $item ) && ! empty( $item ) ) {
 			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
 		} elseif ( ! empty( $item->order_item_id ) ) {
@@ -239,13 +234,17 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$data = false;
 		}
 
-		if ( $data ) {
-			$this->set_order_id( $data->order_id );
-			$this->set_id( $data->order_item_id );
-			$this->set_name( $data->order_item_name );
-			$this->set_type( $data->order_item_type );
-			$this->read_meta_data();
+		if ( ! $data ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'order_id' => $data->order_id,
+			'id'       => $data->order_item_id,
+			'name'     => $data->order_item_name,
+			'type'     => $data->order_item_type,
+		) );
+		$this->read_meta_data();
 	}
 
 	/**

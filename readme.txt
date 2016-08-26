@@ -172,6 +172,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Automatically sort tax rates rather than allow clunky manual sorting.
 * Made WC_Logger pluggable via wc_get_logger function.
 * Use 'average rating' post meta for 'rating' product sorting option.
+* Show better labels in nav menus metabox.
+* Sort “Recently Viewed” products by the view order.
+* Remove checkbox options in system status tools and replace with constants.
+* Allow oAuth1.0a authentication using headers.
+* Removed internal scroll from log viewer.
+* Add reply-to to admin emails.
+* When deleting a tax rate class, remove it's tax rates.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 

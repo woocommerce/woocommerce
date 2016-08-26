@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
-	 * Data properties of this order item object.
+	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -73,10 +73,15 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 */
 	public function read( $id ) {
 		parent::read( $id );
-		if ( $this->get_id() ) {
-			$this->set_discount( get_metadata( 'order_item', $this->get_id(), 'discount_amount', true ) );
-			$this->set_discount_tax( get_metadata( 'order_item', $this->get_id(), 'discount_amount_tax', true ) );
+
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$this->set_props( array(
+			'discount'     => get_metadata( 'order_item', $this->get_id(), 'discount_amount', true ),
+			'discount_tax' => get_metadata( 'order_item', $this->get_id(), 'discount_amount_tax', true ),
+		) );
 	}
 
 	/**
@@ -110,14 +115,16 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
-		$this->set_code( $value );
+		return $this->set_code( $value );
 	}
 
 	/**
 	 * Set code.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_code( $value ) {
 		$this->_data['code'] = wc_clean( $value );
@@ -126,14 +133,16 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set discount amount.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_discount( $value ) {
-		$this->_data['discount'] =  wc_format_decimal( $value );
+		$this->_data['discount'] = wc_format_decimal( $value );
 	}
 
 	/**
 	 * Set discounted tax amount.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_tax( $value ) {
 		$this->_data['discount_tax'] = wc_format_decimal( $value );

@@ -37,6 +37,29 @@ class WC_Tax {
 	public static function init() {
 		self::$precision         = wc_get_rounding_precision();
 		self::$round_at_subtotal = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+		add_action( 'update_option_woocommerce_tax_classes', array( __CLASS__, 'maybe_remove_tax_class_rates' ), 10, 2 );
+	}
+
+	/**
+	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
+	 * @param  string $old_value
+	 * @param  string $value
+	 */
+	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
+		$old     = array_filter( array_map( 'trim', explode( "\n", $old_value ) ) );
+		$new     = array_filter( array_map( 'trim', explode( "\n", $value ) ) );
+		$removed = array_filter( array_map( 'sanitize_title', array_diff( $old, $new ) ) );
+
+		if ( $removed ) {
+			global $wpdb;
+
+			foreach ( $removed as $removed_tax_class ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", $removed_tax_class ) );
+				$wpdb->query( "DELETE locations FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations LEFT JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON rates.tax_rate_id = locations.tax_rate_id WHERE rates.tax_rate_id IS NULL;" );
+			}
+
+			WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		}
 	}
 
 	/**
