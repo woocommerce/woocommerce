@@ -137,7 +137,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return string
 	 */
 	public function get_code() {
-		return apply_filters( 'woocommerce_coupon_code', $this->_data['code'] );
+		return $this->_data['code'];
 	}
 
 	/**
