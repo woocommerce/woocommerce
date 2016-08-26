@@ -22,9 +22,11 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
-// Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
-// wp-config.php. This is to prevent data loss when deleting the plugin from the backend
-// and to ensure only the site owner can perform this action.
+/*
+ * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
+ * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
+ * and to ensure only the site owner can perform this action.
+ */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Roles + caps.
 	include_once( dirname( __FILE__ ) . '/includes/class-wc-install.php' );
