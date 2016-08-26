@@ -57,7 +57,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 			'bool_value' => true
 		);
 		$result = $object->set_props( $data_to_set );
-		var_dump($result);
 		$this->assertFalse( is_wp_error( $result ) );
 		$this->assertEquals( 'I am a fish', $object->get_content() );
 		$this->assertEquals( true, $object->get_bool_value() );
