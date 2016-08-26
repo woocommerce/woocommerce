@@ -231,12 +231,16 @@ class WC_Admin_Menus {
 
 	/**
 	 * Rename taxonomies in admin menus meta boxes.
+	 * @param  object $tax
+	 * @return object
 	 */
 	public function rename_nav_menu_meta_boxes( $tax ) {
-		if ( 'product_cat' === $tax->name ) {
-			$tax->labels->name = __( 'Product Categories', 'woocommerce' );
-		} elseif ( 'product_tag' === $tax->name ) {
-			$tax->labels->name = __( 'Product Tags', 'woocommerce' );
+		if ( isset( $tax->name ) ) {
+			if ( 'product_cat' === $tax->name ) {
+				$tax->labels->name = __( 'Product Categories', 'woocommerce' );
+			} elseif ( 'product_tag' === $tax->name ) {
+				$tax->labels->name = __( 'Product Tags', 'woocommerce' );
+			}
 		}
 
 		return $tax;
