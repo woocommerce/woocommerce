@@ -16,11 +16,29 @@
  * @category Core
  * @author WooThemes
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-if ( ! class_exists( 'WooCommerce' ) ) :
+/**
+ * Main instance of WooCommerce.
+ *
+ * Returns the main instance of WC to prevent the need to use globals.
+ *
+ * @since  2.1
+ * @return WooCommerce
+ */
+function WC() {
+	return WooCommerce::instance();
+}
+
+// Global for backwards compatibility.
+$GLOBALS['woocommerce'] = WC();
+
+if ( ! class_exists( 'WooCommerce' ) ) {
+	return;
+}
 
 /**
  * Main WooCommerce Class.
@@ -120,6 +138,7 @@ final class WooCommerce {
 
 	/**
 	 * Cloning is forbidden.
+	 *
 	 * @since 2.1
 	 */
 	public function __clone() {
@@ -128,6 +147,7 @@ final class WooCommerce {
 
 	/**
 	 * Unserializing instances of this class is forbidden.
+	 *
 	 * @since 2.1
 	 */
 	public function __wakeup() {
@@ -136,11 +156,12 @@ final class WooCommerce {
 
 	/**
 	 * Auto-load in-accessible properties on demand.
-	 * @param mixed $key
+	 *
+	 * @param mixed $key The key we're looking for.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ) ) ) {
+		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ), true ) ) {
 			return $this->$key();
 		}
 	}
@@ -158,6 +179,7 @@ final class WooCommerce {
 
 	/**
 	 * Hook into actions and filters.
+	 *
 	 * @since  2.3
 	 */
 	private function init_hooks() {
@@ -194,8 +216,8 @@ final class WooCommerce {
 	/**
 	 * Define constant if not already set.
 	 *
-	 * @param  string $name
-	 * @param  string|bool $value
+	 * @param  string      $name  The name of the constant we're defining.
+	 * @param  string|bool $value The value of the constant we're defining.
 	 */
 	private function define( $name, $value ) {
 		if ( ! defined( $name ) ) {
@@ -238,7 +260,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
 
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD.
 		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 
 		if ( $this->is_request( 'admin' ) ) {
@@ -257,26 +279,26 @@ final class WooCommerce {
 			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
 		}
 
-		include_once( WC_ABSPATH . 'includes/class-wc-query.php' ); // The main query class
-		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class
-		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class
-		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php' ); // Settings API (for gateways, shipping, and integrations)
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
-		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
-		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
-		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway
-		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php' ); // eCheck Payment Gateway
-		include_once( WC_ABSPATH . 'includes/class-wc-countries.php' ); // Defines countries and states
-		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations
-		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper
-		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper
+		include_once( WC_ABSPATH . 'includes/class-wc-query.php' ); // The main query class.
+		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class.
+		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class.
+		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' );	// WC_Data for CRUD.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php' ); // Settings API (for gateways, shipping, and integrations).
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway.
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service.
+		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory.
+		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller.
+		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway.
+		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php' ); // eCheck Payment Gateway.
+		include_once( WC_ABSPATH . 'includes/class-wc-countries.php' ); // Defines countries and states.
+		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations.
+		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper.
+		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // HTTPS Helper.
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
@@ -322,10 +344,10 @@ final class WooCommerce {
 		$this->load_plugin_textdomain();
 
 		// Load class instances.
-		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
-		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
-		$this->countries       = new WC_Countries();                            // Countries class
-		$this->integrations    = new WC_Integrations();                         // Integrations class
+		$this->product_factory = new WC_Product_Factory(); // Product Factory to create new product instances.
+		$this->order_factory   = new WC_Order_Factory();   // Order Factory to create new order instances.
+		$this->countries       = new WC_Countries();       // Countries class.
+		$this->integrations    = new WC_Integrations();    // Integrations class.
 
 		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
@@ -335,8 +357,8 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer( get_current_user_id(), true );   // Customer class, handles data such as customer location
+			$this->cart     = new WC_Cart();                                  // Cart class, stores the cart contents.
+			$this->customer = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
 		}
 
 		$this->load_webhooks();
@@ -401,6 +423,7 @@ final class WooCommerce {
 
 	/**
 	 * Get the plugin url.
+	 *
 	 * @return string
 	 */
 	public function plugin_url() {
@@ -409,6 +432,7 @@ final class WooCommerce {
 
 	/**
 	 * Get the plugin path.
+	 *
 	 * @return string
 	 */
 	public function plugin_path() {
@@ -417,6 +441,7 @@ final class WooCommerce {
 
 	/**
 	 * Get the template path.
+	 *
 	 * @return string
 	 */
 	public function template_path() {
@@ -425,6 +450,7 @@ final class WooCommerce {
 
 	/**
 	 * Get Ajax URL.
+	 *
 	 * @return string
 	 */
 	public function ajax_url() {
@@ -434,13 +460,13 @@ final class WooCommerce {
 	/**
 	 * Return the WC API URL for a given request.
 	 *
-	 * @param string $request
-	 * @param mixed $ssl (default: null)
+	 * @param string $request The request.
+	 * @param mixed  $ssl (default: null).
 	 * @return string
 	 */
 	public function api_request_url( $request, $ssl = null ) {
 		if ( is_null( $ssl ) ) {
-			$scheme = parse_url( home_url(), PHP_URL_SCHEME );
+			$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME );
 		} elseif ( $ssl ) {
 			$scheme = 'https';
 		} else {
@@ -469,7 +495,7 @@ final class WooCommerce {
 				'fields'         => 'ids',
 				'post_type'      => 'shop_webhook',
 				'post_status'    => 'publish',
-				'posts_per_page' => -1
+				'posts_per_page' => -1,
 			) );
 			set_transient( 'woocommerce_webhook_ids', $webhooks );
 		}
@@ -497,6 +523,7 @@ final class WooCommerce {
 
 	/**
 	 * Get Checkout Class.
+	 *
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
@@ -505,6 +532,7 @@ final class WooCommerce {
 
 	/**
 	 * Get gateways class.
+	 *
 	 * @return WC_Payment_Gateways
 	 */
 	public function payment_gateways() {
@@ -513,6 +541,7 @@ final class WooCommerce {
 
 	/**
 	 * Get shipping class.
+	 *
 	 * @return WC_Shipping
 	 */
 	public function shipping() {
@@ -527,20 +556,3 @@ final class WooCommerce {
 		return WC_Emails::instance();
 	}
 }
-
-endif;
-
-/**
- * Main instance of WooCommerce.
- *
- * Returns the main instance of WC to prevent the need to use globals.
- *
- * @since  2.1
- * @return WooCommerce
- */
-function WC() {
-	return WooCommerce::instance();
-}
-
-// Global for backwards compatibility.
-$GLOBALS['woocommerce'] = WC();
