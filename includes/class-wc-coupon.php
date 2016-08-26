@@ -91,6 +91,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  mixed $code code of the coupon to load
 	 */
 	public function __construct( $code = '' ) {
+		parent::__construct( $code );
+
 		if ( $code instanceof WC_Coupon ) {
 			$this->read( absint( $code->get_id() ) );
 		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
@@ -126,7 +128,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
     * @return integer
     */
 	public function get_id() {
-		return absint( $this->_data['id'] );
+		return $this->_data['id'];
 	}
 
 	/**
@@ -180,7 +182,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return integer
 	 */
 	public function get_usage_count() {
-		return absint( $this->_data['usage_count'] );
+		return $this->_data['usage_count'];
 	}
 
 	/**
@@ -189,7 +191,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function get_individual_use() {
-		return (bool) $this->_data['individual_use'];
+		return $this->_data['individual_use'];
 	}
 
 	/**
@@ -216,7 +218,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return integer
 	 */
 	public function get_usage_limit() {
-		return absint( $this->_data['usage_limit'] );
+		return $this->_data['usage_limit'];
 	}
 
 	/**
@@ -225,7 +227,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return integer
 	 */
 	public function get_usage_limit_per_user() {
-		return absint( $this->_data['usage_limit_per_user'] );
+		return $this->_data['usage_limit_per_user'];
 	}
 
 	/**
@@ -243,7 +245,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function get_free_shipping() {
-		return (bool) $this->_data['free_shipping'];
+		return $this->_data['free_shipping'];
 	}
 
 	/**
@@ -270,7 +272,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function get_exclude_sale_items() {
-		return (bool) $this->_data['exclude_sale_items'];
+		return $this->_data['exclude_sale_items'];
 	}
 
 	/**
@@ -606,6 +608,32 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->_data['id'] = 0;
 			return;
 		}
+
+
+		parent::read( $id );
+
+		if ( ! $this->get_id() ) {
+			return;
+		}
+
+
+
+		$this->set_props( array(
+			'product_id'   => get_metadata( 'order_item', $this->get_id(), '_product_id', true ),
+			'variation_id' => get_metadata( 'order_item', $this->get_id(), '_variation_id', true ),
+			'quantity'     => get_metadata( 'order_item', $this->get_id(), '_qty', true ),
+			'tax_class'    => get_metadata( 'order_item', $this->get_id(), '_tax_class', true ),
+			'subtotal'     => get_metadata( 'order_item', $this->get_id(), '_line_subtotal', true ),
+			'total'        => get_metadata( 'order_item', $this->get_id(), '_line_total', true ),
+			'taxes'        => get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ),
+		) );
+
+
+
+
+
+
+
 
 		$post_object = get_post( $id );
 
