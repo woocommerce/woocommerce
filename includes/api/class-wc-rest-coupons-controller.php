@@ -145,6 +145,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$data           = $coupon->get_data();
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
+		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -153,7 +154,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
+		}
+
+		// Format null values.
+		foreach ( $format_null as $key ) {
+			$data[ $key ] = $data[ $key ] ? $data[ $key ] : null;
 		}
 
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -192,11 +198,19 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_item_for_database( $request ) {
 		global $wpdb;
-		
+
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$coupon    = new WC_Coupon( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		// BW compat
+		if ( $request['exclude_product_ids'] ) {
+			$request['excluded_product_ids'] = $request['exclude_product_ids'];
+		}
+		if ( $request['expiry_date'] ) {
+			$request['date_expires'] = $request['expiry_date'];
+		}
 
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && 0 === $coupon->get_id() ) {
@@ -427,7 +441,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'exclude_product_ids' => array(
+				'excluded_product_ids' => array(
 					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),

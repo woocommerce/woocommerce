@@ -26,14 +26,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $_data = array(
 		'id'                          => 0,
 		'code'                        => '',
-		'description'                 => '',
-		'discount_type'               => 'fixed_cart',
 		'amount'                      => 0,
-		'date_expires'                => '',
 		'date_created'                => '',
 		'date_modified'               => '',
+		'discount_type'               => 'fixed_cart',
+		'description'                 => '',
+		'date_expires'                => '',
 		'usage_count'                 => 0,
-		'used_by'                     => '',
 		'individual_use'              => false,
 		'product_ids'                 => array(),
 		'excluded_product_ids'        => array(),
@@ -47,6 +46,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
+		'used_by'                     => '',
 	);
 
 	// Coupon message codes
@@ -715,7 +715,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			'exclude_sale_items'          => 'yes' === get_post_meta( $coupon_id, 'exclude_sale_items', true ),
 			'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 			'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
-			'email_restrictions'          => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'customer_email', true ) ) ),
+			'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
 			'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
 		) );
 		$this->read_meta_data();
@@ -811,7 +811,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		update_post_meta( $coupon_id, 'exclude_sale_items', ( true === $this->get_exclude_sale_items() ) ? 'yes' : 'no' );
 		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
 		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
-		update_post_meta( $coupon_id, 'customer_email', implode( ',', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) ) );
+		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
 	}
 
 	/**
@@ -826,7 +826,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		foreach ( $convert_fields_to_array as $field ) {
 			if ( ! is_array( $coupon[ $field ] ) ) {
 				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.7' );
-				$coupon[ $field ] = array_filter( explode( ',', (array) $coupon[ $field ] ) );
+				$coupon[ $field ] = array_filter( explode( ',', $coupon[ $field ] ) );
 			}
 		}
 
@@ -839,9 +839,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			}
 		}
 
-		// expiry_date to date_expires
-		$coupon[ 'date_expires' ] = isset( $coupon[ 'date_expires' ] ) ? $coupon[ 'date_expires' ] : '';
-		$coupon[ 'date_expires' ] = isset( $coupon[ 'expiry_date' ] ) ? $coupon[ 'expiry_date' ] : $coupon[ 'date_expires' ];
+		// BW compat
+		$coupon[ 'date_expires' ]                = isset( $coupon[ 'date_expires' ] ) ? $coupon[ 'date_expires' ]                             : '';
+		$coupon[ 'date_expires' ]                = isset( $coupon[ 'expiry_date' ] ) ? $coupon[ 'expiry_date' ]                               : $coupon[ 'date_expires' ];
+		$coupon[ 'excluded_product_ids' ]        = isset( $coupon[ 'excluded_product_ids'] ) ? $coupon[ 'excluded_product_ids']               : '';
+		$coupon[ 'excluded_product_ids' ]        = isset( $coupon[ 'exclude_product_ids'] ) ? $coupon[ 'exclude_product_ids']                 : $coupon[ 'excluded_product_ids'];
+		$coupon[ 'excluded_product_categories' ] = isset( $coupon[ 'excluded_product_categories'] ) ? $coupon[ 'excluded_product_categories'] : '';
+		$coupon[ 'excluded_product_categories' ] = isset( $coupon[ 'exclude_product_categories'] ) ? $coupon[ 'exclude_product_categories']   : $coupon[ 'excluded_product_categories'];
 
 		$this->set_code( $code );
 		$this->set_props( $coupon );
