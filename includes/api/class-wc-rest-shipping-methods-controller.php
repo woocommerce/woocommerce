@@ -93,14 +93,14 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-        $wc_shipping = WC_Shipping::instance();
-        $response    = array();
-        foreach ( $wc_shipping->get_shipping_methods() as $id => $shipping_method ) {
-            $method = $this->prepare_item_for_response( $shipping_method, $request );
+		$wc_shipping = WC_Shipping::instance();
+		$response    = array();
+		foreach ( $wc_shipping->get_shipping_methods() as $id => $shipping_method ) {
+			$method = $this->prepare_item_for_response( $shipping_method, $request );
 			$method = $this->prepare_response_for_collection( $method );
 			$response[] = $method;
-        }
-        return rest_ensure_response( $response );
+		}
+		return rest_ensure_response( $response );
 	}
 
     /**
@@ -112,7 +112,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
     public function get_item( $request ) {
         $wc_shipping = WC_Shipping::instance();
         $methods     = $wc_shipping->get_shipping_methods();
-        if ( empty ( $methods[ $request['id'] ] ) ) {
+        if ( empty( $methods[ $request['id'] ] ) ) {
             return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
         }
 

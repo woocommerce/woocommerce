@@ -140,36 +140,9 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			return $zone;
 		}
 
-		$instance_id     = 0;
-		$wc_shipping     = WC_Shipping::instance();
-		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
-		$count           = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d", $zone->get_id() ) );
-		if ( in_array( $method_id, array_keys( $allowed_classes ) ) ) {
-			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_shipping_zone_methods',
-				array(
-					'method_id'    => $method_id ,
-					'zone_id'      => $zone->get_id(),
-					'method_order' => ( $count + 1 )
-				),
-				array(
-					'%s',
-					'%d',
-					'%d'
-				)
-			);
-			$instance_id = $wpdb->insert_id;
-		}
-
-		if ( $instance_id ) {
-			do_action( 'woocommerce_shipping_zone_method_added', $instance_id, $method_id, $zone->get_id() );
-		}
-
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
-
+		$instance_id = $zone->add_shipping_method( $method_id ) ;
 		$methods     = $zone->get_shipping_methods();
 		$method      = false;
-
 		foreach ( $methods as $method_obj ) {
 			if ( $instance_id === $method_obj->instance_id ) {
 				$method = $method_obj;
@@ -178,7 +151,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( "Resource cannot be created.", 'woocommerce' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( 'Resource cannot be created.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
@@ -203,6 +176,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 
 		$instance_id = (int) $request['instance_id'];
 		$force       = $request['force'];
+
 		$methods     = $zone->get_shipping_methods();
 		$method      = false;
 
@@ -221,8 +195,9 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $method, $request );
 
+		// Actually delete
 		if ( $force ) {
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'instance_id' => $instance_id ) );
+			$zone->delete_shipping_method( $instance_id ) ;
 		} else {
 			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.' ), array( 'status' => 501 ) );
 		}
@@ -357,12 +332,12 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			$data = array(
 				'id'          => $id,
 				'label'       => $field['title'],
-				'description' => ( empty( $field['description'] ) ? '' : $field['description'] ),
+				'description' => empty( $field['description'] ) ? '' : $field['description'],
 				'type'        => $field['type'],
 				'value'       => $item->instance_settings[ $id ],
-				'default'     => ( empty( $field['default'] ) ? '' : $field['default'] ),
-				'tip'         => ( empty( $field['description'] ) ? '' : $field['description'] ),
-				'placeholder' => ( empty( $field['placeholder'] ) ? '' : $field['placeholder'] ),
+				'default'     => empty( $field['default'] ) ? '' : $field['default'],
+				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
+				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
 			);
 			if ( ! empty( $field['options'] ) ) {
 				$data['options'] = $field['options'];
