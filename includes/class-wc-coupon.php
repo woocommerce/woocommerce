@@ -86,6 +86,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'usage_limit_per_user', 'limit_usage_to_x_items', 'free_shipping',
 		'product_categories', 'exclude_product_categories', 'exclude_sale_items',
 		'minimum_amount', 'maximum_amount', 'customer_email', '_used_by',
+		'_edit_lock', '_edit_last', 
 	);
 
 	/**

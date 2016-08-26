@@ -148,7 +148,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+			$data[ $key ] = wc_format_decimal( $data[ $key ], 2 );
 		}
 
 		// Format date values.
@@ -388,7 +388,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			$coupon->set_usage_limit_per_user( $data['usage_limit_per_user'] );
 			$coupon->set_limit_usage_to_x_items( $data['limit_usage_to_x_items'] );
 			$coupon->set_usage_count( $data['usage_count'] );
-			$coupon->set_date_expires(( $data['expiry_date'] );
+			$coupon->set_date_expires( $data['expiry_date'] );
 			$coupon->set_free_shipping( $data['free_shipping'] );
 			$coupon->set_product_categories( $data['product_categories'] );
 			$coupon->set_excluded_product_categories( $data['excluded_product_categories'] );
@@ -445,11 +445,11 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( isset( $request['expiry_date'] ) ) {
-			$coupon->set_date_expires(( $request['expiry_date'] );
+			$coupon->set_date_expires( $request['expiry_date'] );
 		}
 
 		if ( isset( $request['date_expires'] ) ) {
-			$coupon->set_date_expires(( $request['date_expires'] );
+			$coupon->set_date_expires( $request['date_expires'] );
 		}
 
 		if ( isset( $request['free_shipping'] ) ) {
