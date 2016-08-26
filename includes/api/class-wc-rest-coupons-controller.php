@@ -330,79 +330,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Expiry date format.
-	 *
-	 * @param string $expiry_date
-	 * @return string
-	 */
-	protected function get_coupon_expiry_date( $expiry_date ) {
-		if ( '' != $expiry_date ) {
-			return date( 'Y-m-d', strtotime( $expiry_date ) );
-		}
-
-		return '';
-	}
-
-	/**
-	 * Add post meta fields.
-	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
-	 * @return bool|WP_Error
-	 */
-	protected function add_post_meta_fields( $post, $request ) {
-		$data = array_filter( $request->get_params() );
-
-		$defaults = array(
-			'discount_type'                => 'fixed_cart',
-			'amount'                       => 0,
-			'individual_use'               => false,
-			'product_ids'                  => array(),
-			'exclude_product_ids'          => array(),
-			'usage_limit'                  => '',
-			'usage_limit_per_user'         => '',
-			'limit_usage_to_x_items'       => '',
-			'usage_count'                  => '',
-			'expiry_date'                  => '',
-			'free_shipping'                => false,
-			'product_categories'           => array(),
-			'excluded_product_categories'  => array(),
-			'exclude_sale_items'           => false,
-			'minimum_amount'               => '',
-			'maximum_amount'               => '',
-			'email_restrictions'           => array(),
-			'description'                  => ''
-		);
-
-		$data = wp_parse_args( $data, $defaults );
-
-		if ( ! empty( $post->post_title ) ) {
-			$coupon = new WC_Coupon( $post->post_title );
-			// Set coupon meta.
-			$coupon->set_discount_type( $data['discount_type'] );
-			$coupon->set_amount( $data['amount'] );
-			$coupon->set_individual_use( $data['individual_use'] );
-			$coupon->set_product_ids( $data['product_ids'] );
-			$coupon->set_excluded_product_ids( $data['exclude_product_ids'] );
-			$coupon->set_usage_limit( $data['usage_limit'] );
-			$coupon->set_usage_limit_per_user( $data['usage_limit_per_user'] );
-			$coupon->set_limit_usage_to_x_items( $data['limit_usage_to_x_items'] );
-			$coupon->set_usage_count( $data['usage_count'] );
-			$coupon->set_date_expires( $data['expiry_date'] );
-			$coupon->set_free_shipping( $data['free_shipping'] );
-			$coupon->set_product_categories( $data['product_categories'] );
-			$coupon->set_excluded_product_categories( $data['excluded_product_categories'] );
-			$coupon->set_exclude_sale_items( $data['exclude_sale_items'] );
-			$coupon->set_minimum_amount( $data['minimum_amount'] );
-			$coupon->set_maximum_amount( $data['maximum_amount'] );
-			$coupon->set_email_restrictions( $data['email_restrictions'] );
-			$coupon->save();
-		}
-
-		return true;
-	}
-
-	/**
 	 * Update post meta fields.
 	 *
 	 * @param WP_Post $post
@@ -491,7 +418,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
@@ -624,7 +550,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				),
 			),
 		);
-
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -635,14 +560,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
-
 		$params['code'] = array(
 			'description'       => __( 'Limit result set to resources with a specific code.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-
 		return $params;
 	}
 }
