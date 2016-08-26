@@ -75,7 +75,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ) ) );
 
 				// Expiry date
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => date( 'Y-m-d', $coupon->get_expiry_date() ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => date( 'Y-m-d', $coupon->get_date_expires() ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 				do_action( 'woocommerce_coupon_options' );
 
@@ -276,7 +276,7 @@ class WC_Meta_Box_Coupon_Data {
 			'code'                        => $post->post_title,
 			'discount_type'               => wc_clean( $_POST['discount_type'] ),
 			'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
-			'expiry_date'                 => wc_clean( $_POST['expiry_date'] ),
+			'date_expires'                => wc_clean( $_POST['expiry_date'] ),
 			'individual_use'              => isset( $_POST['individual_use'] ),
 			'product_ids'                 => array_filter( array_map( 'intval', explode( ',', $_POST['product_ids'] ) ) ),
 			'excluded_product_ids'        => array_filter( array_map( 'intval', explode( ',', $_POST['exclude_product_ids'] ) ) ),

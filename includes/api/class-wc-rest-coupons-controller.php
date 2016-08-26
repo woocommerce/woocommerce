@@ -126,7 +126,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		if ( ! empty( $request['code'] ) ) {
 			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['code'] ) );
-
 			$args['post__in'] = array( $id );
 		}
 
@@ -141,44 +140,26 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		// Get the coupon code.
-		$code = wc_get_coupon_code_by_id( $post->ID );
+		$code           = wc_get_coupon_code_by_id( $post->ID );
+		$coupon         = new WC_Coupon( $code );
+		$data           = $coupon->get_data();
+		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
+		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
 
-		$coupon = new WC_Coupon( $code );
+		// Format decimal values.
+		foreach ( $format_decimal as $key ) {
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+		}
 
-		$data = array(
-			'id'                           => $coupon->get_id(),
-			'code'                         => $coupon->get_code(),
-			'date_created'                 => wc_rest_prepare_date_response( $post->post_date_gmt ),
-			'date_modified'                => wc_rest_prepare_date_response( $post->post_modified_gmt ),
-			'discount_type'                => $coupon->get_discount_type(),
-			'description'                  => $coupon->get_description(),
-			'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
-			'expiry_date'                  => $coupon->get_expiry_date() ? wc_rest_prepare_date_response( $coupon->get_expiry_date() ) : null,
-			'usage_count'                  => (int) $coupon->get_usage_count(),
-			'individual_use'               => $coupon->get_individual_use(),
-			'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
-			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
-			'usage_limit'                  => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : null,
-			'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
-			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
-			'free_shipping'                => $coupon->get_free_shipping(),
-			'product_categories'           => array_map( 'absint', (array) $coupon->get_product_categories() ),
-			'excluded_product_categories'  => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
-			'exclude_sale_items'           => $coupon->get_exclude_sale_items(),
-			'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
-			'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
-			'email_restrictions'           => $coupon->get_email_restrictions(),
-			'used_by'                      => $coupon->get_used_by(),
-		);
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+		}
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
+		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-
 		$response->add_links( $this->prepare_links( $post ) );
 
 		/**
@@ -305,33 +286,38 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$post_id = (int) $request['id'];
+		try {
+			$post_id = (int) $request['id'];
 
-		if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$coupon_id = $this->save_coupon( $request );
+			if ( is_wp_error( $coupon_id ) ) {
+				return $coupon_id;
+			}
+
+			$post = get_post( $coupon_id );
+			$this->update_additional_fields_for_object( $post, $request );
+
+			$this->update_post_meta_fields( $post, $request );
+
+			/**
+			 * Fires after a single item is created or updated via the REST API.
+			 *
+			 * @param object          $post      Inserted object (not a WP_Post object).
+			 * @param WP_REST_Request $request   Request object.
+			 * @param boolean         $creating  True when creating item, false when updating.
+			 */
+			do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
+			$request->set_param( 'context', 'edit' );
+			$response = $this->prepare_item_for_response( $post, $request );
+			return rest_ensure_response( $response );
+
+		} catch ( Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-
-		$coupon_id = $this->save_coupon( $request );
-		if ( is_wp_error( $coupon_id ) ) {
-			return $coupon_id;
-		}
-
-		$post = get_post( $coupon_id );
-		$this->update_additional_fields_for_object( $post, $request );
-
-		$this->update_post_meta_fields( $post, $request );
-
-		/**
-		 * Fires after a single item is created or updated via the REST API.
-		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
-		 */
-		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
-		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -402,7 +388,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			$coupon->set_usage_limit_per_user( $data['usage_limit_per_user'] );
 			$coupon->set_limit_usage_to_x_items( $data['limit_usage_to_x_items'] );
 			$coupon->set_usage_count( $data['usage_count'] );
-			$coupon->set_expiry_date( $data['expiry_date'] );
+			$coupon->set_date_expires(( $data['expiry_date'] );
 			$coupon->set_free_shipping( $data['free_shipping'] );
 			$coupon->set_product_categories( $data['product_categories'] );
 			$coupon->set_excluded_product_categories( $data['excluded_product_categories'] );
@@ -424,7 +410,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
-
 		$coupon = new WC_Coupon( $post->post_title );
 
 		if ( isset( $request['amount'] ) ) {
@@ -460,7 +445,11 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( isset( $request['expiry_date'] ) ) {
-			$coupon->set_expiry_date( $request['expiry_date'] );
+			$coupon->set_date_expires(( $request['expiry_date'] );
+		}
+
+		if ( isset( $request['date_expires'] ) ) {
+			$coupon->set_date_expires(( $request['date_expires'] );
 		}
 
 		if ( isset( $request['free_shipping'] ) ) {
@@ -548,7 +537,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'expiry_date' => array(
+				'date_expires' => array(
 					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
