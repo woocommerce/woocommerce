@@ -1134,30 +1134,32 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
-		$order_id    = absint( $_POST['order_id'] );
+		try {
+			$item_to_add = absint( $_POST['item_to_add'] );
+			$order_id    = absint( $_POST['order_id'] );
+			$post        = get_post( $item_to_add );
+			$order       = wc_get_order( $order_id );
 
-		// Find the item
-		if ( ! is_numeric( $item_to_add ) ) {
-			die();
+			if ( ! $post || ! $order || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
+				throw new Exception( __( 'Invalid product', 'woocommerce' ) );
+			}
+
+			$item_id     = $order->add_product( wc_get_product( $post->ID ) );
+			$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+			$order_taxes = $order->get_taxes();
+			$class       = 'new_row';
+
+			ob_start();
+			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+			include( 'admin/meta-boxes/views/html-order-item.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-
-		$post = get_post( $item_to_add );
-
-		if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
-			die();
-		}
-
-		$product     = wc_get_product( $post->ID );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$class       = 'new_row';
-		$item_id     = $order->add_product( $product );
-		$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-
-		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-
-		include( 'admin/meta-boxes/views/html-order-item.php' );
 		die();
 	}
 
@@ -1165,23 +1167,30 @@ class WC_AJAX {
 	 * Add order fee via ajax.
 	 */
 	public static function add_order_fee() {
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$order_id    = absint( $_POST['order_id'] );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$item        = new WC_Order_Item_Fee();
-		$item->set_order_id( $order_id );
-		$item_id     = $item->save();
+		try {
+			$order_id    = absint( $_POST['order_id'] );
+			$order       = wc_get_order( $order_id );
+			$order_taxes = $order->get_taxes();
+			$item        = new WC_Order_Item_Fee();
+			$item->set_order_id( $order_id );
+			$item_id     = $item->save();
 
-		include( 'admin/meta-boxes/views/html-order-fee.php' );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-fee.php' );
 
-		// Quit out
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 
@@ -1189,26 +1198,33 @@ class WC_AJAX {
 	 * Add order shipping cost via ajax.
 	 */
 	public static function add_order_shipping() {
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$order_id         = absint( $_POST['order_id'] );
-		$order            = wc_get_order( $order_id );
-		$order_taxes      = $order->get_taxes();
-		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+		try {
+			$order_id         = absint( $_POST['order_id'] );
+			$order            = wc_get_order( $order_id );
+			$order_taxes      = $order->get_taxes();
+			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
-		// Add new shipping
-		$item = new WC_Order_Item_Shipping();
-		$item->set_shipping_rate( new WC_Shipping_Rate() );
-		$order->add_item( $item );
+			// Add new shipping
+			$item = new WC_Order_Item_Shipping();
+			$item->set_shipping_rate( new WC_Shipping_Rate() );
+			$order->add_item( $item );
 
-		include( 'admin/meta-boxes/views/html-order-shipping.php' );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
-		// Quit out
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 
@@ -1224,20 +1240,28 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$order_id = absint( $_POST['order_id'] );
-		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = wc_get_order( $order_id );
-		$data     = get_post_meta( $order_id );
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$rate_id  = absint( $_POST['rate_id'] );
+			$order    = wc_get_order( $order_id );
+			$data     = get_post_meta( $order_id );
 
-		// Add new tax
-		$item = new WC_Order_Item_Tax();
-		$item->set_rate( $rate_id );
-		$item->set_order_id( $order_id );
-		$item->save();
+			// Add new tax
+			$item = new WC_Order_Item_Tax();
+			$item->set_rate( $rate_id );
+			$item->set_order_id( $order_id );
+			$item->save();
 
-		// Return HTML items
-		include( 'admin/meta-boxes/views/html-order-items.php' );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 

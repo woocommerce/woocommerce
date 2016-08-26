@@ -904,7 +904,7 @@ class WC_Cart {
 
 				// Sanity check
 				if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->post->post_status  ) {
-					throw new Exception();
+					return false;
 				}
 
 				// Load cart item data - may be added by other plugins

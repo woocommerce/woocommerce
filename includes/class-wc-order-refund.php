@@ -16,16 +16,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Extend the abstract _data properties and then read the order object.
-	 *
-	 * @param  int|object|WC_Order $order Order to init.
+	 * @param int|object|WC_Order $read Order to init.
 	 */
-	public function __construct( $order = 0 ) {
+	 public function __construct( $read = 0 ) {
+		// Extend order data
 		$this->_data = array_merge( $this->_data, array(
 			'amount'      => '',
 			'reason'      => '',
 			'refunded_by' => 0,
 		) );
-		parent::__construct( $order );
+		parent::__construct( $read );
 	}
 
 	/**
@@ -63,17 +63,17 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	public function read( $id ) {
 		parent::read( $id );
 
-		// Read additonal order data
-		if ( $this->get_id() ) {
-			$post_object = get_post( $id );
-			$this->set_amount( get_post_meta( $this->get_id(), '_refund_amount', true ) );
-
-			// post_author was used before refunded_by meta.
-			$this->set_refunded_by( metadata_exists( 'post', $this->get_id(), '_refunded_by' ) ? get_post_meta( $this->get_id(), '_refunded_by', true ) : absint( $post_object->post_author ) );
-
-			// post_excerpt was used before refund_reason meta.
-			$this->set_reason( metadata_exists( 'post', $this->get_id(), '_refund_reason' ) ? get_post_meta( $this->get_id(), '_refund_reason', true ) : absint( $post_object->post_excerpt ) );
+		if ( ! $this->get_id() ) {
+			return;
 		}
+
+		$post_object = get_post( $id );
+
+		$this->set_props( array(
+			'amount'      => get_post_meta( $this->get_id(), '_refund_amount', true ),
+			'refunded_by' => metadata_exists( 'post', $this->get_id(), '_refunded_by' ) ? get_post_meta( $this->get_id(), '_refunded_by', true ) : absint( $post_object->post_author ),
+			'reason'      => metadata_exists( 'post', $this->get_id(), '_refund_reason' ) ? get_post_meta( $this->get_id(), '_refund_reason', true ) : $post_object->post_excerpt,
+		) );
 	}
 
 	/**
@@ -115,6 +115,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded amount.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_amount( $value ) {
 		$this->_data['amount'] = wc_format_decimal( $value );
@@ -140,6 +141,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refund reason.
 	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_reason( $value ) {
 		$this->_data['reason'] = $value;
@@ -157,6 +159,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded by.
 	 * @param int $value
+	 * @throws WC_Data_Exception
 	 */
 	public function set_refunded_by( $value ) {
 		$this->_data['refunded_by'] = absint( $value );

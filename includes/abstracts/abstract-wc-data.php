@@ -16,10 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Data {
 
 	/**
-	 * Core data for this object, name value pairs (name + default value).
+	 * Core data for this object. Name value pairs (name + default value).
 	 * @var array
 	 */
 	protected $_data = array();
+
+	/**
+	 * Set to _data on construct so we can track and reset data if needed.
+	 * @var array
+	 */
+	protected $_default_data = array();
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -54,6 +60,14 @@ abstract class WC_Data {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array();
+
+	/**
+	 * Default constructor.
+	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
+	 */
+	public function __construct( $read = 0 ) {
+		$this->_default_data = $this->_data;
+	}
 
 	/**
 	 * Returns the unique ID for this object.
@@ -360,9 +374,41 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Throw an exception due to invalid data.
+	 * Set all props to default values.
 	 */
-	protected function throw_exception( $id, $message = '', $code = 400 ) {
-		throw new WC_Data_Exception( $id, $message, $code );
+	protected function set_defaults() {
+		$this->_data = $this->_default_data;
+	}
+
+	/**
+	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @return WP_Error|bool
+	 */
+	public function set_props( $props ) {
+		$errors = new WP_Error();
+
+		foreach ( $props as $prop => $value ) {
+			try {
+				$setter = "set_$prop";
+				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				$errors->add( $e->getErrorCode(), $e->getMessage() );
+			}
+		}
+
+		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
+	 * When invalid data is found, throw an exception unless reading from the DB.
+	 * @param string $error_code Error code.
+	 * @param string $error_message Error message.
+	 * @throws WC_Data_Exception
+	 */
+	protected function error( $error_code, $error_message ) {
+		throw new WC_Data_Exception( $error_code, $error_message );
 	}
 }

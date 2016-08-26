@@ -54,7 +54,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- * @return WC_Order
+ * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -67,40 +67,44 @@ function wc_create_order( $args = array() ) {
 		'order_id'      => 0,
 	);
 
-	$args  = wp_parse_args( $args, $default_args );
-	$order = new WC_Order( $args['order_id'] );
+	try {
+		$args  = wp_parse_args( $args, $default_args );
+		$order = new WC_Order( $args['order_id'] );
 
-	// Update props that were set (not null)
-	if ( ! is_null( $args['parent'] ) ) {
-		$order->set_parent_id( absint( $args['parent'] ) );
+		// Update props that were set (not null)
+		if ( ! is_null( $args['parent'] ) ) {
+			$order->set_parent_id( absint( $args['parent'] ) );
+		}
+
+		if ( ! is_null( $args['status'] ) ) {
+			$order->set_status( $args['status'] );
+		}
+
+		if ( ! is_null( $args['customer_note'] ) ) {
+			$order->set_customer_note( $args['customer_note'] );
+		}
+
+		if ( ! is_null( $args['customer_id'] ) ) {
+			$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
+		}
+
+		if ( ! is_null( $args['created_via'] ) ) {
+			$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
+		}
+
+		if ( ! is_null( $args['cart_hash'] ) ) {
+			$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
+		}
+
+		// Update other order props set automatically
+		$order->set_currency( get_woocommerce_currency() );
+		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+		$order->set_customer_user_agent( wc_get_user_agent() );
+		$order->save();
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
 	}
-
-	if ( ! is_null( $args['status'] ) ) {
-		$order->set_status( $args['status'] );
-	}
-
-	if ( ! is_null( $args['customer_note'] ) ) {
-		$order->set_customer_note( $args['customer_note'] );
-	}
-
-	if ( ! is_null( $args['customer_id'] ) ) {
-		$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
-	}
-
-	if ( ! is_null( $args['created_via'] ) ) {
-		$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
-	}
-
-	if ( ! is_null( $args['cart_hash'] ) ) {
-		$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
-	}
-
-	// Update other order props set automatically
-	$order->set_currency( get_woocommerce_currency() );
-	$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-	$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-	$order->set_customer_user_agent( wc_get_user_agent() );
-	$order->save();
 
 	return $order;
 }
