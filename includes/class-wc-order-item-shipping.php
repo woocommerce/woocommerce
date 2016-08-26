@@ -121,7 +121,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
-		return $this->set_method_title( $value );
+		$this->set_method_title( $value );
 	}
 
 	/**
