@@ -406,6 +406,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set coupon code.
 	 * @since  2.7.0
 	 * @param  string $code
+	 * @throws WC_Data_Exception
 	 */
 	public function set_code( $code ) {
 		$this->_data['code'] = apply_filters( 'woocommerce_coupon_code', $code );
@@ -415,6 +416,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set coupon description.
 	 * @since  2.7.0
 	 * @param  string $description
+	 * @throws WC_Data_Exception
 	 */
 	public function set_description( $description ) {
 		$this->_data['description'] = $description;
@@ -424,8 +426,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set discount type.
 	 * @since  2.7.0
 	 * @param  string $discount_type
+	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_type( $discount_type ) {
+		if ( ! in_array( $discount_type, wc_get_coupon_types() ) ) {
+			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
+		}
 		$this->_data['discount_type'] = $discount_type;
 	}
 
@@ -433,6 +439,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set amount.
 	 * @since  2.7.0
 	 * @param  float $amount
+	 * @throws WC_Data_Exception
 	 */
 	public function set_amount( $amount ) {
 		$this->_data['amount'] = wc_format_decimal( $amount );
@@ -442,6 +449,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set expiration date.
 	 * @since  2.7.0
 	 * @param  string $date
+	 * @throws WC_Data_Exception
 	 */
 	public function set_expiry_date( $date ) {
 		if ( ! is_numeric( $date ) ) {
@@ -455,6 +463,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set how many times this coupon has been used.
 	 * @since  2.7.0
 	 * @param  int $usage_count
+	 * @throws WC_Data_Exception
 	 */
 	public function set_usage_count( $usage_count ) {
 		$this->_data['usage_count'] = absint( $usage_count );
@@ -464,6 +473,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set if this coupon can only be used once.
 	 * @since  2.7.0
 	 * @param  bool $is_individual_use
+	 * @throws WC_Data_Exception
 	 */
 	public function set_individual_use( $is_individual_use ) {
 		$this->_data['individual_use'] = (bool) $is_individual_use;
@@ -473,24 +483,27 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the product IDs this coupon can be used with.
 	 * @since  2.7.0
 	 * @param  array $product_ids
+	 * @throws WC_Data_Exception
 	 */
 	public function set_product_ids( $product_ids ) {
-		$this->_data['product_ids'] = $product_ids;
+		$this->_data['product_ids'] = (array) $product_ids;
 	}
 
 	/**
 	 * Set the product IDs this coupon cannot be used with.
 	 * @since  2.7.0
 	 * @param  array $excluded_product_ids
+	 * @throws WC_Data_Exception
 	 */
 	public function set_excluded_product_ids( $excluded_product_ids ) {
-		$this->_data['exclude_product_ids'] = $excluded_product_ids;
+		$this->_data['exclude_product_ids'] = (array) $excluded_product_ids;
 	}
 
 	/**
 	 * Set the amount of times this coupon can be used.
 	 * @since  2.7.0
 	 * @param  int $usage_limit
+	 * @throws WC_Data_Exception
 	 */
 	public function set_usage_limit( $usage_limit ) {
 		$this->_data['usage_limit'] = absint( $usage_limit );
@@ -500,6 +513,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the amount of times this coupon can be used per user.
 	 * @since  2.7.0
 	 * @param  int $usage_limit
+	 * @throws WC_Data_Exception
 	 */
 	public function set_usage_limit_per_user( $usage_limit ) {
 		$this->_data['usage_limit_per_user'] = absint( $usage_limit );
@@ -509,6 +523,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set usage limit to x number of items.
 	 * @since  2.7.0
 	 * @param  int $limit_usage_to_x_items
+	 * @throws WC_Data_Exception
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
 		$this->_data['limit_usage_to_x_items'] = $limit_usage_to_x_items;
@@ -518,6 +533,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set if this coupon enables free shipping or not.
 	 * @since  2.7.0
 	 * @param  bool $free_shipping
+	 * @throws WC_Data_Exception
 	 */
 	public function set_free_shipping( $free_shipping ) {
 		$this->_data['free_shipping'] = (bool) $free_shipping;
@@ -527,24 +543,27 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the product category IDs this coupon can be used with.
 	 * @since  2.7.0
 	 * @param  array $product_categories
+	 * @throws WC_Data_Exception
 	 */
 	public function set_product_categories( $product_categories ) {
-		$this->_data['product_categories'] = $product_categories;
+		$this->_data['product_categories'] = (array) $product_categories;
 	}
 
 	/**
 	 * Set the product category IDs this coupon cannot be used with.
 	 * @since  2.7.0
 	 * @param  array $excluded_product_categories
+	 * @throws WC_Data_Exception
 	 */
 	public function set_excluded_product_categories( $excluded_product_categories ) {
-		$this->_data['exclude_product_categories'] = $excluded_product_categories;
+		$this->_data['exclude_product_categories'] = (array) $excluded_product_categories;
 	}
 
 	/**
 	 * Set if this coupon should excluded sale items or not.
 	 * @since  2.7.0
 	 * @param  bool $exclude_sale_items
+	 * @throws WC_Data_Exception
 	 */
 	public function set_exclude_sale_items( $exclude_sale_items ) {
 		$this->_data['exclude_sale_items'] = (bool) $exclude_sale_items;
@@ -554,6 +573,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the minimum spend amount.
 	 * @since  2.7.0
 	 * @param  float $amount
+	 * @throws WC_Data_Exception
 	 */
 	public function set_minimum_amount( $amount ) {
 		$this->_data['minimum_amount'] = wc_format_decimal( $amount );
@@ -563,6 +583,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the maximum spend amount.
 	 * @since  2.7.0
 	 * @param  float $amount
+	 * @throws WC_Data_Exception
 	 */
 	public function set_maximum_amount( $amount ) {
 		$this->_data['maximum_amount'] = wc_format_decimal( $amount );
@@ -572,15 +593,23 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set email restrictions.
 	 * @since  2.7.0
 	 * @param  array $emails
+	 * @throws WC_Data_Exception
 	 */
 	public function set_email_restrictions( $emails = array() ) {
-		$this->_data['customer_email'] = array_map( 'sanitize_email', $emails );
+		$emails = array_filter( array_map( 'sanitize_email', (array) $emails ) );
+		foreach ( $emails as $email ) {
+			if ( ! is_email( $email ) ) {
+				$this->error( 'coupon_invalid_email_address', __( 'Invalid email address restriction', 'woocommerce' ) );
+			}
+		}
+		$this->_data['customer_email'] = $emails;
 	}
 
 	/**
 	 * Set which users have used this coupon.
 	 * @since 2.7.0
 	 * @param array $used_by
+	 * @throws WC_Data_Exception
 	 */
 	public function set_used_by( $used_by ) {
 		$this->_data['used_by'] = array_filter( $used_by );
