@@ -25,19 +25,19 @@ class WC_Structured_Data {
 	 */
 	public function __construct() {
 		// Generate data...
-		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ),        30, 0 );
-		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumblist_data' ), 10, 1 );
-		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ),        10, 0 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ),        60, 0 );
-		add_action( 'woocommerce_review_meta',            array( $this, 'generate_review_data' ),         20, 1 );
-		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_order_data' ),          20, 3 );
+		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ),              30, 0 );
+		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumblist_data' ),       10, 1 );
+		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ),              10, 0 );
+		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ),              60, 0 );
+		add_action( 'woocommerce_review_meta',            array( $this, 'generate_review_data' ),               20, 1 );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_order_data' ),                20, 3 );
 		
 		// Output structured data...
-		add_action( 'woocommerce_email_order_details',    array( $this, 'output_structured_data' ),       30, 0 );
-		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),       10, 0 );
+		add_action( 'woocommerce_email_order_details',    array( $this, 'output_structured_data' ),             30, 0 );
+		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),             10, 0 );
 
 		// Filters...
-		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data' ),    10, 1 );
+		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10, 1 );
 	}
 
 	/**
@@ -95,18 +95,18 @@ class WC_Structured_Data {
 			$requested_types = array( $requested_types );
 		}
 
-		// Puts together the values of same type of structured data.
+		// Put together the values of same type of structured data.
 		foreach ( $data as $value ) {
 			$structured_data[ strtolower( $value['@type'] ) ][] = $value;
 		}
 
-		// Wraps the multiple values of each type of structured data inside a graph. Then adds context to each type of value.
+		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $structured_data as $type => $value ) {
 			$structured_data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
 			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
 		}
 
-		// If requested types, picks them up. Finally changes the associative array to an indexed one.
+		// If requested types, pick them up... Finally change the associative array to an indexed one.
 		$structured_data = $requested_types ? array_values( array_intersect_key( $structured_data, array_flip( $requested_types ) ) ) : array_values( $structured_data );
 
 		if ( ! empty( $structured_data ) ) {
@@ -187,12 +187,13 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Limit Product structured data.
+	 * Limits Product structured data on taxonomies and shop page.
 	 *
+	 * @uses   `woocommerce_structured_data_product_limit` filter hook
 	 * @param  bool $limit_data
 	 * @return bool $limit_data
 	 */
-	public function limit_product_data( $limit_data ) {
+	private function limit_product_data_in_loops( $limit_data ) {
 		return $limit_data = is_product_taxonomy() || is_shop() ? true : false;
 	}
 
@@ -240,7 +241,7 @@ class WC_Structured_Data {
 		$markup['name']        = $product->get_title();
 
 		if ( $limit_data ) {
-			return $this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+			return $this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 		}
 
 		if ( $is_variable = $product->is_type( 'variable' ) ) {
