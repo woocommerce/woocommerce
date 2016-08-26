@@ -11,7 +11,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
  *
  * @access public
- * @param bool $show_admin_bar
+ * @param bool $show_admin_bar Whether we should show the admin-bar or not.
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
@@ -120,7 +120,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 /**
  * Login a customer (set auth cookie and set global user object).
  *
- * @param int $customer_id
+ * @param int $customer_id The customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
@@ -133,7 +133,7 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 /**
  * Get past orders (by email) and update them.
  *
- * @param  int $customer_id
+ * @param  int $customer_id The customer ID.
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
@@ -172,8 +172,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 /**
  * Order Status completed - This is a paying customer.
  *
- * @access public
- * @param int $order_id
+ * @param int $order_id The order ID.
  */
 function wc_paying_customer( $order_id ) {
 	$order       = wc_get_order( $order_id );
@@ -194,9 +193,10 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
  * Checks if a user (by email or ID or both) has bought an item.
- * @param string $customer_email
- * @param int $user_id
- * @param int $product_id
+ *
+ * @param string $customer_email The customer e-mail.
+ * @param int    $user_id        The user ID.
+ * @param int    $product_id     The product ID.
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
@@ -221,7 +221,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 
 		$customer_data = array_map( 'esc_sql', array_filter( array_unique( $customer_data ) ) );
 
-		if ( sizeof( $customer_data ) == 0 ) {
+		if ( 0 == count( $customer_data ) ) {
 			return false;
 		}
 
@@ -247,9 +247,9 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
  * Checks if a user has a certain capability.
  *
  * @access public
- * @param array $allcaps
- * @param array $caps
- * @param array $args
+ * @param array $allcaps All available capabilities.
+ * @param array $caps    The capabilities.
+ * @param array $args    Arguments array.
  * @return bool
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
@@ -268,7 +268,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$order_id = isset( $args[2] ) ? $args[2] : null;
 
 				// When no order ID, we assume it's a new order
-				// and thus, customer can pay for it
+				// and thus, customer can pay for it.
 				if ( ! $order_id ) {
 					$allcaps['pay_for_order'] = true;
 					break;
@@ -311,12 +311,13 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
  * Modify the list of editable roles to prevent non-admin adding admin users.
- * @param  array $roles
+ *
+ * @param  array $roles User-Roles array.
  * @return array
  */
 function wc_modify_editable_roles( $roles ){
 	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles[ 'administrator' ] );
+		unset( $roles['administrator'] );
 	}
 	return $roles;
 }
@@ -327,10 +328,10 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  *
  * $args[0] will be the user being edited in this case.
  *
- * @param  array $caps Array of caps
- * @param  string $cap Name of the cap we are checking
- * @param  int $user_id ID of the user being checked against
- * @param  array $args
+ * @param  array  $caps    Array of caps.
+ * @param  string $cap     Name of the cap we are checking.
+ * @param  int    $user_id ID of the user being checked against.
+ * @param  array  $args    Arguments array.
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
@@ -355,7 +356,7 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
 /**
  * Get customer download permissions from the database.
  *
- * @param int $customer_id Customer/User ID
+ * @param int $customer_id Customer/User ID.
  * @return array
  */
 function wc_get_customer_download_permissions( $customer_id ) {
@@ -388,7 +389,7 @@ function wc_get_customer_download_permissions( $customer_id ) {
 /**
  * Get customer available downloads.
  *
- * @param int $customer_id Customer/User ID
+ * @param int $customer_id Customer/User ID.
  * @return array
  */
 function wc_get_customer_available_downloads( $customer_id ) {
@@ -397,18 +398,18 @@ function wc_get_customer_available_downloads( $customer_id ) {
 	$order       = null;
 	$file_number = 0;
 
-	// Get results from valid orders only
+	// Get results from valid orders only.
 	$results = wc_get_customer_download_permissions( $customer_id );
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
 			if ( ! $order || $order->get_id() != $result->order_id ) {
-				// new order
+				// New order.
 				$order    = wc_get_order( $result->order_id );
 				$_product = null;
 			}
 
-			// Make sure the order exists for this download
+			// Make sure the order exists for this download.
 			if ( ! $order ) {
 				continue;
 			}
@@ -421,19 +422,19 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			$product_id = intval( $result->product_id );
 
 			if ( ! $_product || $_product->id != $product_id ) {
-				// new product
+				// New product.
 				$file_number = 0;
 				$_product    = wc_get_product( $product_id );
 			}
 
-			// Check product exists and has the file
+			// Check product exists and has the file.
 			if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
 				continue;
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
 
-			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$_product->get_title() . ' &ndash; ' . $download_file['name'],
@@ -471,7 +472,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 /**
  * Get total spent by customer.
- * @param  int $user_id
+ *
+ * @param  int $user_id The user ID.
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
@@ -500,7 +502,8 @@ function wc_get_customer_total_spent( $user_id ) {
 
 /**
  * Get total orders by customer.
- * @param  int $user_id
+ *
+ * @param  int $user_id The user ID.
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
@@ -527,7 +530,8 @@ function wc_get_customer_order_count( $user_id ) {
 
 /**
  * Reset _customer_user on orders when a user is deleted.
- * @param int $user_id
+ *
+ * @param int $user_id The user ID.
  */
 function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
@@ -539,7 +543,8 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
 
 /**
  * Get review verification status.
- * @param  int $comment_id
+ *
+ * @param  int $comment_id The comment ID.
  * @return bool
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
@@ -597,7 +602,7 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
 	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track ) ) {
+	if ( in_array( $meta_key, $keys_to_track, true ) ) {
 		$update_time = true;
 	}
 	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
@@ -628,7 +633,7 @@ function wc_set_user_last_update_time( $user_id ) {
  * Get customer saved payment methods list.
  *
  * @since 2.6.0
- * @param int $customer_id
+ * @param int $customer_id The customer ID.
  * @return array
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {

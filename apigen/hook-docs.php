@@ -3,20 +3,80 @@
  * Generate documentation for hooks in WC
  */
 class WC_HookFinder {
-	private static $current_file           = '';
-	private static $files_to_scan          = array();
-	private static $pattern_custom_actions = '/do_action(.*?);/i';
-	private static $pattern_custom_filters = '/apply_filters(.*?);/i';
-	private static $found_files            = array();
-	private static $custom_hooks_found     = '';
 
+	/**
+	 * The current file.
+	 *
+	 * @static
+	 * @access private
+	 * @var string
+	 */
+	private static $current_file = '';
+
+	/**
+	 * An array of files to scan.
+	 *
+	 * @static
+	 * @access private
+	 * @var array
+	 */
+	private static $files_to_scan = array();
+
+	/**
+	 * Custom actions pattern.
+	 *
+	 * @static
+	 * @access private
+	 * @var string
+	 */
+	private static $pattern_custom_actions = '/do_action(.*?);/i';
+
+	/**
+	 * Custom filters pattern.
+	 *
+	 * @static
+	 * @access private
+	 * @var string
+	 */
+	private static $pattern_custom_filters = '/apply_filters(.*?);/i';
+
+	/**
+	 * An array of found files.
+	 *
+	 * @static
+	 * @access private
+	 * @var array
+	 */
+	private static $found_files = array();
+
+	/**
+	 * An array of detected custom hooks.
+	 *
+	 * @static
+	 * @access private
+	 * @var string
+	 */
+	private static $custom_hooks_found = '';
+
+	/**
+	 * Get files.
+	 *
+	 * @static
+	 * @access private
+	 * @param string $pattern The pattern we'll use to get the file.
+	 * @param int    $flags   Flags.
+	 * @param string $path    The path we're looking for.
+	 * @return array
+	 */
 	private static function get_files( $pattern, $flags = 0, $path = '' ) {
 
-	    if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
+	    if ( ! $path && '.' !== ( $dir = dirname( $pattern ) ) ) {
 
-	        if ($dir == '\\' || $dir == '/') { $dir = ''; } // End IF Statement
+	        if ( '\\' === $dir || '/' === $dir ) {
+				$dir = '';
+			}
 
-	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
+	        return self::get_files( basename( $pattern ), $flags, $dir . '/' );
 
 	    } // End IF Statement
 
@@ -28,8 +88,9 @@ class WC_HookFinder {
 			    $found_files = array();
 		   		$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
 		   		foreach ( $retrieved_files as $file ) {
-			   		if ( ! in_array( $file, self::$found_files ) )
-			   			$found_files[] = $file;
+			   		if ( ! in_array( $file, self::$found_files, true ) ) {
+						$found_files[] = $file;
+					}
 		   		}
 
 		   		self::$found_files = array_merge( self::$found_files, $found_files );
@@ -37,12 +98,20 @@ class WC_HookFinder {
 		   		if ( is_array( $files ) && is_array( $found_files ) ) {
 		   			$files = array_merge( $files, $found_files );
 		   		}
-
 		    } // End FOREACH Loop
 	    }
 	    return $files;
-    }
+	}
 
+	/**
+	 * Gets the hook link.
+	 *
+	 * @static
+	 * @access private
+	 * @param string $hook The hook we're using.
+	 * @param array  $details An array of the details.
+	 * @return string
+	 */
 	private static function get_hook_link( $hook, $details = array() ) {
 		if ( ! empty( $details['class'] ) ) {
 			$link = 'http://docs.woocommerce.com/wc-apidocs/source-class-' . $details['class'] . '.html#' . $details['line'];
@@ -55,6 +124,12 @@ class WC_HookFinder {
 		return '<a href="' . $link . '">' . $hook . '</a>';
 	}
 
+	/**
+	 * Processes all hooks.
+	 *
+	 * @static
+	 * @access public
+	 */
 	public static function process_hooks() {
 		// If we have one, get the PHP files from it.
 		$template_files 	= self::get_files( '*.php', GLOB_MARK, '../templates/' );
@@ -95,7 +170,7 @@ class WC_HookFinder {
 				$current_class      = '';
 				$current_function   = '';
 
-				if ( in_array( self::$current_file, $scanned ) ) {
+				if ( in_array( self::$current_file, $scanned, true ) ) {
 					continue;
 				}
 
@@ -103,13 +178,13 @@ class WC_HookFinder {
 
 				foreach ( $tokens as $index => $token ) {
 					if ( is_array( $token ) ) {
-						if ( $token[0] == T_CLASS ) {
+						if ( T_CLASS == $token[0] ) {
 							$token_type = 'class';
-						} elseif ( $token[0] == T_FUNCTION ) {
+						} elseif ( T_FUNCTION == $token[0] ) {
 							$token_type = 'function';
-						} elseif ( $token[1] === 'do_action' ) {
+						} elseif ( 'do_action' === $token[1] ) {
 							$token_type = 'action';
-						} elseif ( $token[1] === 'apply_filters' ) {
+						} elseif ( 'apply_filters' === $token[1] ) {
 							$token_type = 'filter';
 						} elseif ( $token_type && ! empty( trim( $token[1] ) ) ) {
 							switch ( $token_type ) {
@@ -127,12 +202,12 @@ class WC_HookFinder {
 									if ( '_' === substr( $hook, '-1', 1 ) ) {
 										$hook .= '{';
 										$open = true;
-										// Keep adding to hook until we find a comma or colon
+										// Keep adding to hook until we find a comma or colon.
 										while ( 1 ) {
 											$loop ++;
 											$next_hook  = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
 
-											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ) ) ) {
+											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ), true ) ) {
 												continue;
 											}
 
@@ -164,12 +239,12 @@ class WC_HookFinder {
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
 										self::$custom_hooks_found[ $hook ]['file'][] = self::$current_file;
 									} else {
-    									self::$custom_hooks_found[ $hook ] = array(
+										self::$custom_hooks_found[ $hook ] = array(
 											'line'     => $token[2],
 											'class'    => $current_class,
 											'function' => $current_function,
 											'file'     => array( self::$current_file ),
-											'type'     => $token_type
+											'type'     => $token_type,
 										);
 									}
 								break;
@@ -189,15 +264,15 @@ class WC_HookFinder {
 			ksort( self::$custom_hooks_found );
 
 			if ( ! empty( self::$custom_hooks_found ) ) {
-				echo '<div class="panel panel-default"><div class="panel-heading"><h2>' . $heading . '</h2></div>';
+				echo '<div class="panel panel-default"><div class="panel-heading"><h2>' . esc_html( $heading ) . '</h2></div>';
 
 				echo '<table class="summary table table-bordered table-striped"><thead><tr><th>Hook</th><th>Type</th><th>File(s)</th></tr></thead><tbody>';
 
 				foreach ( self::$custom_hooks_found as $hook => $details ) {
 					echo '<tr>
-						<td>' . self::get_hook_link( $hook, $details ) . '</td>
-						<td>' . $details['type'] . '</td>
-						<td>' . implode( ', ', array_unique( $details['file'] ) ) . '</td>
+						<td>' . wp_kses_post( self::get_hook_link( $hook, $details ) ) . '</td>
+						<td>' . wp_kses_post( $details['type'] ) . '</td>
+						<td>' . wp_kses_post( implode( ', ', array_unique( $details['file'] ) ) ) . '</td>
 					</tr>' . "\n";
 				}
 
