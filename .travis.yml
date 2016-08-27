@@ -27,7 +27,7 @@ before_script:
 
 script:
   # Search for PHP syntax errors.
-  - find . \( -name '*.php' \) -exec php -lf {} \;
+  - find . \( -name '*.php' -not -path "./vendor/*" \) -exec php -lf {} \;
   # Run PHPUnit tests.
   - phpunit -c phpunit.xml.dist
   # WordPress Coding Standards.
