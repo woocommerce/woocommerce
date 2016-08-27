@@ -62,8 +62,8 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			</p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
 				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" ' . $this->field_name( 'card-expiry' ) .,' />
-			</p>'
+				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" ' . $this->field_name( 'card-expiry' ) . ' />
+			</p>',
 		);
 
 		if ( ! $this->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
