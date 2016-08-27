@@ -59,7 +59,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.7' );
 
-		switch( $key ) {
+		switch ( $key ) {
 			case 'id' :
 				$value = $this->get_id();
 			break;

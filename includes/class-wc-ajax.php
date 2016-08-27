@@ -953,7 +953,7 @@ class WC_AJAX {
 		// Get existing variations so we don't create duplicates
 		$available_variations = array();
 
-		foreach( $_product->get_children() as $child_id ) {
+		foreach ( $_product->get_children() as $child_id ) {
 			$child = $_product->get_child( $child_id );
 
 			if ( ! empty( $child->variation_id ) ) {
@@ -1282,7 +1282,7 @@ class WC_AJAX {
 		}
 
 		if ( sizeof( $order_item_ids ) > 0 ) {
-			foreach( $order_item_ids as $id ) {
+			foreach ( $order_item_ids as $id ) {
 				wc_delete_order_item( absint( $id ) );
 			}
 		}

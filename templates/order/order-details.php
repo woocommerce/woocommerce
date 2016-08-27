@@ -35,7 +35,7 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 	</thead>
 	<tbody>
 		<?php
-			foreach( $order->get_items() as $item_id => $item ) {
+			foreach ( $order->get_items() as $item_id => $item ) {
 				$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
 
 				wc_get_template( 'order/order-details-item.php', array(

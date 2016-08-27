@@ -258,7 +258,7 @@ class WC_Webhook {
 			WC()->api->includes();
 			WC()->api->register_resources( new WC_API_Server( '/' ) );
 
-			switch( $resource ) {
+			switch ( $resource ) {
 
 				case 'coupon':
 					$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );

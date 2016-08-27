@@ -213,7 +213,7 @@ class WC_API_Resource {
 				$meta = (array) get_post_meta( $resource->id );
 			}
 
-			foreach( $meta as $meta_key => $meta_value ) {
+			foreach ( $meta as $meta_key => $meta_value ) {
 
 				// don't add hidden meta by default
 				if ( ! is_protected_meta( $meta_key ) ) {

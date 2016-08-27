@@ -169,7 +169,7 @@ class WC_Payment_Tokens {
 			$meta =  get_metadata( 'payment_token', $token_id );
 			$passed_meta = array();
 			if ( ! empty( $meta ) ) {
-				foreach( $meta as $meta_key => $meta_value ) {
+				foreach ( $meta as $meta_key => $meta_value ) {
 					$passed_meta[ $meta_key ] = $meta_value[0];
 				}
 			}

@@ -79,7 +79,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$orders = array();
 
-		foreach( $query->posts as $order_id ) {
+		foreach ( $query->posts as $order_id ) {
 
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
@@ -174,7 +174,7 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		// add line items
-		foreach( $order->get_items() as $item_id => $item ) {
+		foreach ( $order->get_items() as $item_id => $item ) {
 			$product                    = $item->get_product();
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,

@@ -158,7 +158,7 @@ class WC_Shortcode_My_Account {
 			$value = get_user_meta( get_current_user_id(), $key, true );
 
 			if ( ! $value ) {
-				switch( $key ) {
+				switch ( $key ) {
 					case 'billing_email' :
 					case 'shipping_email' :
 						$value = $current_user->user_email;

@@ -32,7 +32,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		foreach( $this->zones as $zone ) {
+		foreach ( $this->zones as $zone ) {
 			$zone->delete();
 		}
 	}

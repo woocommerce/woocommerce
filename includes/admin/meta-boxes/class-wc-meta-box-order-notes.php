@@ -43,7 +43,7 @@ class WC_Meta_Box_Order_Notes {
 
 		if ( $notes ) {
 
-			foreach( $notes as $note ) {
+			foreach ( $notes as $note ) {
 
 				$note_classes   = array( 'note' );
 				$note_classes[] = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? 'customer-note' : '';

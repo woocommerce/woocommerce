@@ -103,7 +103,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	);
 
 	if ( $post_id > 0 ) {
-		foreach( $post_transient_names as $transient ) {
+		foreach ( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
 
@@ -114,7 +114,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	}
 
 	// Delete transients
-	foreach( $transients_to_clear as $transient ) {
+	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
@@ -475,7 +475,7 @@ function wc_prepare_attachment_for_js( $response ) {
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
 		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
-			foreach( $response['sizes'] as $size => $value ) {
+			foreach ( $response['sizes'] as $size => $value ) {
 				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
 			}
 		}

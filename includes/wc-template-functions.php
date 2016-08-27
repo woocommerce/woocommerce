@@ -1896,7 +1896,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		if ( ! empty( $args['validate'] ) ) {
-			foreach( $args['validate'] as $validate ) {
+			foreach ( $args['validate'] as $validate ) {
 				$args['class'][] = 'validate-' . $validate;
 			}
 		}

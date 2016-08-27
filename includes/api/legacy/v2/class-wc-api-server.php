@@ -572,7 +572,7 @@ class WC_API_Server {
 			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 
-			if( $query->get( 'number' ) > 0 ) {
+			if ( $query->get( 'number' ) > 0 ) {
 				$page = ( $query->get( 'offset' ) / $query->get( 'number' ) ) + 1;
 				$total_pages = ceil( $total / $query->get( 'number' ) );
 			} else {

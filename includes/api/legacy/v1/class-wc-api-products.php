@@ -78,7 +78,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$products = array();
 
-		foreach( $query->posts as $product_id ) {
+		foreach ( $query->posts as $product_id ) {
 
 			if ( ! $this->is_readable( $product_id ) )
 				continue;

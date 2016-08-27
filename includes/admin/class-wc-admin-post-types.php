@@ -1575,7 +1575,7 @@ class WC_Admin_Post_Types {
 			$this->shop_order_filters();
 		} elseif ( 'product' == $typenow ) {
 			$this->product_filters();
-		} elseif( 'shop_coupon' == $typenow ) {
+		} elseif ( 'shop_coupon' == $typenow ) {
 			$this->shop_coupon_filters();
 		}
 	}

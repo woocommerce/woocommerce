@@ -187,14 +187,14 @@ class WC_Countries {
 			return $this->countries;
 		}
 
-		if( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
+		if ( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
 			$except_countries = get_option( 'woocommerce_all_except_countries', array() );
 
 			if ( ! $except_countries ) {
 				return $this->countries;
 			} else {
 				$all_except_countries = $this->countries;
-				foreach( $except_countries as $country ) {
+				foreach ( $except_countries as $country ) {
 					unset( $all_except_countries[ $country ] );
 				}
 				return apply_filters( 'woocommerce_countries_allowed_countries', $all_except_countries );

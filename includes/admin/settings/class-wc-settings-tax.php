@@ -202,7 +202,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$tax_classes   = WC_Tax::get_tax_classes();
 		$current_class = '';
 
-		foreach( $tax_classes as $class ) {
+		foreach ( $tax_classes as $class ) {
 			if ( sanitize_title( $class ) == $current_section ) {
 				$current_class = $class;
 			}

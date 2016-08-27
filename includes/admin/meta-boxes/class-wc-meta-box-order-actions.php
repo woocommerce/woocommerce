@@ -59,7 +59,7 @@ class WC_Meta_Box_Order_Actions {
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
-					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
 				</select>

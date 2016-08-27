@@ -137,7 +137,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 		$codes = array();
 
 		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
+			foreach ( explode( ',', $this->codes ) as $code ) {
 				$codes[] = strtoupper( trim( $code ) );
 			}
 		}

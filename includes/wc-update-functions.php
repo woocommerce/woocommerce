@@ -22,7 +22,7 @@ function wc_update_200_file_paths() {
 
 	if ( $existing_file_paths ) {
 
-		foreach( $existing_file_paths as $existing_file_path ) {
+		foreach ( $existing_file_paths as $existing_file_path ) {
 
 			$old_file_path = trim( $existing_file_path->meta_value );
 
@@ -275,7 +275,7 @@ function wc_update_200_line_items() {
 		$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
 
 		if ( ! empty( $order_taxes ) ) {
-			foreach( $order_taxes as $order_tax ) {
+			foreach ( $order_taxes as $order_tax ) {
 
 				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
 					continue;
@@ -399,7 +399,7 @@ function wc_update_210_file_paths() {
 
 	if ( $existing_file_paths ) {
 
-		foreach( $existing_file_paths as $existing_file_path ) {
+		foreach ( $existing_file_paths as $existing_file_path ) {
 
 			$needs_update = false;
 			$new_value    = array();

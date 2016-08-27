@@ -300,8 +300,8 @@ class WC_Product_Variation extends WC_Product {
 		$set = true;
 
 		// undefined attributes have null strings as array values
-		foreach( $this->get_variation_attributes() as $att ){
-			if( ! $att ){
+		foreach ( $this->get_variation_attributes() as $att ){
+			if ( ! $att ){
 				$set = false;
 				break;
 			}

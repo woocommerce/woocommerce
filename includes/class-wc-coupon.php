@@ -944,7 +944,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( sizeof( $this->get_product_ids() ) > 0 ) {
 			$valid_for_cart = false;
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent(), $this->get_product_ids() ) ) {
 						$valid_for_cart = true;
 					}
@@ -965,7 +965,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( sizeof( $this->get_product_categories() ) > 0 ) {
 			$valid_for_cart = false;
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
 					// If we find an item with a cat in our allowed cat list, the coupon is valid
@@ -991,7 +991,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					if ( ! empty( $cart_item['variation_id'] ) ) {
 						if ( ! in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
 							$valid_for_cart = true;
@@ -1014,7 +1014,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
-			foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
 					$valid = true;
 					break;
@@ -1048,7 +1048,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( sizeof( $this->get_excluded_product_ids() ) > 0 ) {
 			$valid_for_cart = true;
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent(), $this->get_excluded_product_ids() ) ) {
 						$valid_for_cart = false;
 					}
@@ -1069,7 +1069,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( sizeof( $this->get_excluded_product_categories() ) > 0 ) {
 			$valid_for_cart = true;
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 					if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
 						$valid_for_cart = false;
@@ -1092,7 +1092,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid_for_cart = true;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					if ( ! empty( $cart_item['variation_id'] ) ) {
 						if ( in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
 							$valid_for_cart = false;
@@ -1303,12 +1303,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				// Store excluded categories that are in cart in $categories
 				$categories = array();
 				if ( ! WC()->cart->is_empty() ) {
-					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 						$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
 						if ( sizeof( $intersect = array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
 
-							foreach( $intersect as $cat_id) {
+							foreach ( $intersect as $cat_id) {
 								$cat = get_term( $cat_id, 'product_cat' );
 								$categories[] = $cat->name;
 							}

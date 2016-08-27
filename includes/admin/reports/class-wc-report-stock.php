@@ -80,7 +80,7 @@ class WC_Report_Stock extends WP_List_Table {
 			$product = wc_get_product( $item->id );
 		}
 
-		switch( $column_name ) {
+		switch ( $column_name ) {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {

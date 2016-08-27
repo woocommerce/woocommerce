@@ -720,7 +720,7 @@ class WC_Shortcodes {
 				jQuery( document ).ready( function( $ ) {
 					var $variations_form = $( '[data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>"]' ).find( 'form.variations_form' );
 
-					<?php foreach( $attributes as $attr => $value ) { ?>
+					<?php foreach ( $attributes as $attr => $value ) { ?>
 						$variations_form.find( 'select[name="<?php echo esc_attr( $attr ); ?>"]' ).val( '<?php echo $value; ?>' );
 					<?php } ?>
 				});

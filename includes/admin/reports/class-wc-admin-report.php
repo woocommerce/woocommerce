@@ -577,7 +577,7 @@ class WC_Admin_Report {
 	 * @return string
 	 */
 	public function get_currency_tooltip() {
-		switch( get_option( 'woocommerce_currency_pos' ) ) {
+		switch ( get_option( 'woocommerce_currency_pos' ) ) {
 			case 'right':
 				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
 			case 'right_space':

@@ -73,7 +73,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupons = array();
 
-		foreach( $query->posts as $coupon_id ) {
+		foreach ( $query->posts as $coupon_id ) {
 
 			if ( ! $this->is_readable( $coupon_id ) )
 				continue;

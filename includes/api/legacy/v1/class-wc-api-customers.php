@@ -98,7 +98,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$customers = array();
 
-		foreach( $query->get_results() as $user_id ) {
+		foreach ( $query->get_results() as $user_id ) {
 
 			if ( ! $this->is_readable( $user_id ) )
 				continue;

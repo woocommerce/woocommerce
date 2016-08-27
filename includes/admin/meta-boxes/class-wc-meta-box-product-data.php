@@ -946,7 +946,7 @@ class WC_Meta_Box_Product_Data {
 					// Update post terms
 					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
 
-						foreach( $values as $key => $value ) {
+						foreach ( $values as $key => $value ) {
 							$term = get_term_by( $values_are_slugs ? 'slug' : 'name', trim( $value ), $attribute_names[ $i ] );
 
 							if ( $term ) {
