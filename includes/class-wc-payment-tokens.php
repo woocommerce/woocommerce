@@ -166,7 +166,7 @@ class WC_Payment_Tokens {
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
 
 		if ( class_exists( $token_class ) ) {
-			$meta =  get_metadata( 'payment_token', $token_id );
+			$meta = get_metadata( 'payment_token', $token_id );
 			$passed_meta = array();
 			if ( ! empty( $meta ) ) {
 				foreach ( $meta as $meta_key => $meta_value ) {

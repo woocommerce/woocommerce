@@ -380,7 +380,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	// Meta name
 	if ( taxonomy_is_product_attribute( $taxonomy ) )
-		$meta_name =  'order_' . esc_attr( $taxonomy );
+		$meta_name = 'order_' . esc_attr( $taxonomy );
 	else
 		$meta_name = 'order';
 

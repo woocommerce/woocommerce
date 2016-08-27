@@ -309,7 +309,7 @@ function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_
 	}
 
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] =  esc_html__( 'eCheck', 'woocommerce' );
+	$item['method']['brand'] = esc_html__( 'eCheck', 'woocommerce' );
 
 	return $item;
 }

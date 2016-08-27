@@ -112,7 +112,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'subcategories' => __( 'Show categories', 'woocommerce' ),
 						'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -128,7 +128,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
 						'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -147,7 +147,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
 						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
 					) ),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -190,7 +190,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'height' => '300',
 						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -204,7 +204,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'height' => '600',
 						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -218,7 +218,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'height' => '180',
 						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -349,7 +349,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'low_amount' => __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In Stock"', 'woocommerce' ),
 						'no_amount'  => __( 'Never show stock amount', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -375,7 +375,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'css'      => 'min-width:300px;',
 					'default'  => 'force',
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 					'options'  => array(
 						'force'     => __( 'Force Downloads', 'woocommerce' ),
 						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
@@ -434,7 +434,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'lbs' => __( 'lbs', 'woocommerce' ),
 						'oz'  => __( 'oz', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -452,7 +452,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'in' => __( 'in', 'woocommerce' ),
 						'yd' => __( 'yd', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(

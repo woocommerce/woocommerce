@@ -78,7 +78,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'desc_tip'      =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+				'desc_tip'      => __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
 			),
 
 			array(
@@ -86,7 +86,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'id'            => 'woocommerce_calc_discounts_sequentially',
 				'default'       => 'no',
 				'type'          => 'checkbox',
-				'desc_tip'      =>  __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
+				'desc_tip'      => __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
 				'checkboxgroup' => 'end',
 				'autoload'      => false,
 			),
@@ -94,7 +94,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			array(
 				'title'         => _x( 'Checkout Process', 'Settings group label', 'woocommerce' ),
 				'desc'          => __( 'Enable guest checkout', 'woocommerce' ),
-				'desc_tip'      =>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
+				'desc_tip'      => __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',

@@ -685,7 +685,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						$outdated_templates = true;
 					}
 				}
-				$override_files[] =  array(
+				$override_files[] = array(
 					'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
 					'version'      => $theme_version,
 					'core_version' => $core_version,

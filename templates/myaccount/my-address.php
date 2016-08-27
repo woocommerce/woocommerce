@@ -29,7 +29,7 @@ if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 	), $customer_id );
 } else {
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-		'billing' =>  __( 'Billing Address', 'woocommerce' ),
+		'billing' => __( 'Billing Address', 'woocommerce' ),
 	), $customer_id );
 }
 

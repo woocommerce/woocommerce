@@ -56,7 +56,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'min-width:350px;',
 				'default'  => 'GB',
 				'type'     => 'single_select_country',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -67,7 +67,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
 				'css'      => 'min-width: 350px;',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 				'options'  => array(
 					'all'        => __( 'Sell to All Countries', 'woocommerce' ),
 					'all_except' => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
@@ -121,7 +121,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			array(
 				'title'    => __( 'Default Customer Location', 'woocommerce' ),
 				'id'       => 'woocommerce_default_customer_address',
-				'desc_tip' =>  __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
+				'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
 				'default'  => 'geolocation',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
@@ -171,7 +171,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'default'  => 'GBP',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 				'options'  => $currency_code_options,
 			),
 
@@ -189,7 +189,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'left_space'  => __( 'Left with space', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ' 99.99)',
 					'right_space' => __( 'Right with space', 'woocommerce' ) . ' (99.99 ' . get_woocommerce_currency_symbol() . ')',
 				),
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -199,7 +199,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'width:50px;',
 				'default'  => ',',
 				'type'     => 'text',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -209,7 +209,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'width:50px;',
 				'default'  => '.',
 				'type'     => 'text',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -218,7 +218,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'       => 'woocommerce_price_num_decimals',
 				'css'      => 'width:50px;',
 				'default'  => '2',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 				'type'     => 'number',
 				'custom_attributes' => array(
 					'min'  => 0,

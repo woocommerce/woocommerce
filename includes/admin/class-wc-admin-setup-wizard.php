@@ -56,32 +56,32 @@ class WC_Admin_Setup_Wizard {
 		}
 		$this->steps = array(
 			'introduction' => array(
-				'name'    =>  __( 'Introduction', 'woocommerce' ),
+				'name'    => __( 'Introduction', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_introduction' ),
 				'handler' => '',
 			),
 			'pages' => array(
-				'name'    =>  __( 'Page Setup', 'woocommerce' ),
+				'name'    => __( 'Page Setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
 			'locale' => array(
-				'name'    =>  __( 'Store Locale', 'woocommerce' ),
+				'name'    => __( 'Store Locale', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
 				'handler' => array( $this, 'wc_setup_locale_save' ),
 			),
 			'shipping_taxes' => array(
-				'name'    =>  __( 'Shipping &amp; Tax', 'woocommerce' ),
+				'name'    => __( 'Shipping &amp; Tax', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
 			'payments' => array(
-				'name'    =>  __( 'Payments', 'woocommerce' ),
+				'name'    => __( 'Payments', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_payments' ),
 				'handler' => array( $this, 'wc_setup_payments_save' ),
 			),
 			'next_steps' => array(
-				'name'    =>  __( 'Ready!', 'woocommerce' ),
+				'name'    => __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
 				'handler' => '',
 			),

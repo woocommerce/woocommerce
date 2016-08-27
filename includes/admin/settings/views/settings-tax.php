@@ -13,7 +13,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'       => 'woocommerce_prices_include_tax',
 		'default'  => 'no',
 		'type'     => 'radio',
-		'desc_tip' =>  __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
+		'desc_tip' => __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
 		'options'  => array(
 			'yes' => __( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ),
 			'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' ),
@@ -23,7 +23,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	array(
 		'title'    => __( 'Calculate Tax Based On', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
-		'desc_tip' =>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
+		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => 'shipping',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
@@ -43,7 +43,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
 		'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
-		'desc_tip' =>  true,
+		'desc_tip' => true,
 	),
 
 	array(

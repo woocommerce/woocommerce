@@ -107,7 +107,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
 				),
 				'autoload'        => false,
-				'desc_tip'        =>  true,
+				'desc_tip'        => true,
 				'show_if_checked' => 'option',
 			),
 

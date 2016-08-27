@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td>
 					<label><?php _e( 'Customer download link', 'woocommerce' ); ?></label>
 					<?php
-						$download_link =  add_query_arg( array(
+						$download_link = add_query_arg( array(
 							'download_file' => $download->product_id,
 							'order'         => $download->order_key,
 							'email'         => urlencode( $download->user_email ),
