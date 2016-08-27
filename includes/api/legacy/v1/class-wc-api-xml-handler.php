@@ -154,7 +154,6 @@ class WC_API_XML_Handler implements WC_API_Handler {
 
 					$this->xml->endElement();
 				}
-
 			} else {
 
 				// start root element
@@ -168,7 +167,6 @@ class WC_API_XML_Handler implements WC_API_Handler {
 				// end root element
 				$this->xml->endElement();
 			}
-
 		} else {
 
 			// handle single elements
@@ -189,7 +187,6 @@ class WC_API_XML_Handler implements WC_API_Handler {
 
 					$this->xml->writeElement( $element_key, $element_value );
 				}
-
 			}
 
 			return;
@@ -308,5 +305,4 @@ class WC_API_XML_Handler implements WC_API_Handler {
 
 		return $data;
 	}
-
 }

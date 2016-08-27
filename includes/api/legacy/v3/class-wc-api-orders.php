@@ -1068,7 +1068,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $shipping_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Shipping( $shipping['id'] );
@@ -1139,7 +1138,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $fee_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Fee( $fee['id'] );
@@ -1202,7 +1200,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $coupon_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Coupon( $coupon['id'] );

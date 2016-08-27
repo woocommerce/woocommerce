@@ -995,7 +995,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $item_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$item_id = $order->update_product( $item['id'], $product, $item_args );
@@ -1092,7 +1091,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $shipping_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$shipping_args = array();
@@ -1169,7 +1167,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $fee_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$fee_args = array();
@@ -1226,7 +1223,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $coupon_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$coupon_args = array();

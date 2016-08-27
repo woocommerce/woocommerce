@@ -430,5 +430,4 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 
 		return array( 'success' => $ran, 'message' => $message );
 	}
-
 }

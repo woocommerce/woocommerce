@@ -521,5 +521,4 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'postcode', $properties['shipping']['properties'] );
 		$this->assertArrayHasKey( 'country', $properties['shipping']['properties'] );
 	}
-
 }

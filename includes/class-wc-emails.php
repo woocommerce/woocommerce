@@ -419,7 +419,6 @@ class WC_Emails {
 						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
-
 			} else {
 
 				foreach ( $fields as $field ) {

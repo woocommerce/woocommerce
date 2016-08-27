@@ -249,5 +249,4 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		_deprecated_function( 'WC_Customer::set_address_2', '2.7', 'WC_Customer::set_billing_address_2' );
 		$this->set_billing_address_2( $address );
 	}
-
 }

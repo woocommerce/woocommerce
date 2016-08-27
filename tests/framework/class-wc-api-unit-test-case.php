@@ -75,5 +75,4 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		$user->get_role_caps();
 		$user->update_user_level_from_caps();
 	}
-
 }

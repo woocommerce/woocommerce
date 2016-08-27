@@ -214,7 +214,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				while ( substr( $expr, $index, 1 ) == ' ' ) { // step the index past whitespace (pretty much turns whitespace
 					$index++;                             // into implicit multiplication if no operator is there)
 				}
-
 			}
 			while ( !is_null( $op = $stack->pop() ) ) { // pop everything off the stack and push onto output
 				if ( $op == '(' ) return self::trigger( "expecting ')'" ); // if there are (s on the stack, ()s were unbalanced

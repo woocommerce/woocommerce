@@ -317,5 +317,4 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 		$this->assertArrayHasKey( 'coupons', $response );
 		$this->check_get_coupon_response( $response['coupons'][0], new WC_Coupon( $response['coupons'][0]['code'] ) );
 	}
-
 }

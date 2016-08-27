@@ -728,7 +728,6 @@ class WC_AJAX {
 							'is_taxonomy' 	=> $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
@@ -745,7 +744,6 @@ class WC_AJAX {
 						'is_taxonomy' 	=> $is_taxonomy,
 					);
 				}
-
 			 }
 		}
 
@@ -1939,7 +1937,6 @@ class WC_AJAX {
 				$new_pos[ $post->ID ] = $menu_order;
 				$menu_order++;
 			}
-
 		}
 
 		do_action( 'woocommerce_after_product_ordering' );

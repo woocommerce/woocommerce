@@ -388,5 +388,4 @@ class WC_API_Orders extends WC_API_Resource {
 
 		return $subtotal;
 	}
-
 }

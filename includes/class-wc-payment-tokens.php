@@ -241,5 +241,4 @@ class WC_Payment_Tokens {
 		) );
 		return $type;
 	}
-
 }

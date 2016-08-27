@@ -1007,7 +1007,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'is_taxonomy'  => 1,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
@@ -1191,7 +1190,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				wc_update_product_stock_status( $product->id, $stock_status );
 			}
-
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product->id, $stock_status );
 		}

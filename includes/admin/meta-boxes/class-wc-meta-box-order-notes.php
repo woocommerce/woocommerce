@@ -62,7 +62,6 @@ class WC_Meta_Box_Order_Notes {
 				</li>
 				<?php
 			}
-
 		} else {
 			echo '<li>' . __( 'There are no notes yet.', 'woocommerce' ) . '</li>';
 		}

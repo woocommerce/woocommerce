@@ -724,7 +724,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -755,5 +754,4 @@ class WC_API_Server {
 
 		return $headers;
 	}
-
 }

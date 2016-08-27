@@ -125,7 +125,6 @@ class WC_Product_Variation extends WC_Product {
 			if ( '' === $value ) {
 				$value = $this->variation_level_meta_data[ $key ];
 			}
-
 		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
 
 			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
@@ -138,7 +137,6 @@ class WC_Product_Variation extends WC_Product {
 			if ( '' === $value ) {
 				$value = $this->variation_inherited_meta_data[ $key ];
 			}
-
 		} elseif ( 'variation_data' === $key ) {
 			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
 
@@ -653,7 +651,6 @@ class WC_Product_Variation extends WC_Product {
 							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
 						}
 					}
-
 				} else {
 
 					$options = wc_get_text_attributes( $attribute['value'] );

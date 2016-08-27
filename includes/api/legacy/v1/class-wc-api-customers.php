@@ -500,5 +500,4 @@ class WC_API_Customers extends WC_API_Resource {
 
 		return current_user_can( 'list_users' );
 	}
-
 }

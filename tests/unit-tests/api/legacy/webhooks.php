@@ -497,5 +497,4 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 
 		$this->assertEquals( $delivery, $response );
 	}
-
 }

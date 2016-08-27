@@ -290,7 +290,6 @@ class WC_API_Resource {
 					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
 				}
 			}
-
 		}
 
 		return $data;
@@ -339,7 +338,6 @@ class WC_API_Resource {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
-
 			} else {
 
 				// remove non-matching top-level fields
@@ -471,5 +469,4 @@ class WC_API_Resource {
 
 		return apply_filters( 'woocommerce_api_check_permission', $permission, $context, $post, $post_type );
 	}
-
 }

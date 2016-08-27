@@ -254,5 +254,4 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->update_meta_data( 'test_field_0', 'another field 2' );
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
-
 }

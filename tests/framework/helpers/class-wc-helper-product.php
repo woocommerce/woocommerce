@@ -261,5 +261,4 @@ class WC_Helper_Product {
 
 		return wp_insert_comment( $data );
 	}
-
 }

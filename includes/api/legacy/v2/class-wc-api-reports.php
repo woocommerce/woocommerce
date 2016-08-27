@@ -286,7 +286,6 @@ class WC_API_Reports extends WC_API_Resource {
 				// default custom range to today
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			// ensure period is valid

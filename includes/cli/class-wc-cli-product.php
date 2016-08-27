@@ -872,7 +872,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 				// Otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// Add featured image
@@ -950,7 +949,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
@@ -1195,7 +1193,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based
 					if ( is_array( $attribute['options'] ) ) {
@@ -1405,7 +1402,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
-
 		} else {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}

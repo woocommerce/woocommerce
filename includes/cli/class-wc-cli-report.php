@@ -340,7 +340,6 @@ class WC_CLI_Report extends WC_CLI_Command {
 				// default custom range to today
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			// ensure period is valid

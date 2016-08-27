@@ -828,5 +828,4 @@ class WC_Webhook {
 	public function get_post_data() {
 		return $this->post_data;
 	}
-
 }

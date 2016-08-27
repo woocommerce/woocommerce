@@ -365,7 +365,6 @@ class WC_Admin_Post_Types {
 					} else {
 						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
 					}
-
 				} elseif ( 'variable' == $the_product->product_type ) {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
@@ -718,7 +717,6 @@ class WC_Admin_Post_Types {
 					} else {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					}
-
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
@@ -1400,7 +1398,6 @@ class WC_Admin_Post_Types {
 			if ( ! empty( $_REQUEST['_backorders'] ) ) {
 				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
 			}
-
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
@@ -1719,14 +1716,12 @@ class WC_Admin_Post_Types {
 					) );
 				}
 			}
-
 		} elseif ( 'shop_coupon' === $typenow ) {
 
 			if ( ! empty( $_GET['coupon_type'] ) ) {
 				$vars['meta_key']   = 'discount_type';
 				$vars['meta_value'] = wc_clean( $_GET['coupon_type'] );
 			}
-
 		} elseif ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 
 			// Filter the orders by the posted customer.
@@ -1954,7 +1949,6 @@ class WC_Admin_Post_Types {
 				delete_transient( 'woocommerce_processing_order_count' );
 				wc_delete_shop_order_transients( $id );
 			}
-
 		}
 	}
 

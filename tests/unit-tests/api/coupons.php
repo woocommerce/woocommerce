@@ -428,5 +428,4 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'email_restrictions', $properties );
         $this->assertArrayHasKey( 'used_by', $properties );
     }
-
 }

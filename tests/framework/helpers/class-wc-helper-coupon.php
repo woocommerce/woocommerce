@@ -54,5 +54,4 @@ class WC_Helper_Coupon {
 		wp_delete_post( $coupon_id, true );
 		return true;
 	}
-
 }

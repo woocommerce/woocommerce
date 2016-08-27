@@ -122,11 +122,9 @@ class WC_Shortcode_Checkout {
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
-
 			} else {
 				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
-
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step
@@ -169,11 +167,9 @@ class WC_Shortcode_Checkout {
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
-
 			} else {
 				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
-
 		} else {
 			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}

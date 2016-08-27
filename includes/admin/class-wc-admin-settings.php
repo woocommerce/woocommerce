@@ -802,7 +802,6 @@ class WC_Admin_Settings {
 			if ( file_exists( $downloads_url . '/.htaccess' ) ) {
 				unlink( $downloads_url . '/.htaccess' );
 			}
-
 		} else {
 
 			// Force method - protect, add rules to the htaccess file

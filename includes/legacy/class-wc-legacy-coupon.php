@@ -181,5 +181,4 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 		_deprecated_function( 'exclude_sale_items', '2.7', 'get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
-
 }

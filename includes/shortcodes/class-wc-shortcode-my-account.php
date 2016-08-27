@@ -391,7 +391,5 @@ class WC_Shortcode_My_Account {
 			do_action( 'after_woocommerce_add_payment_method' );
 
 		}
-
 	}
-
 }

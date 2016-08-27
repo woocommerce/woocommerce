@@ -64,15 +64,12 @@ class WC_Shortcode_Order_Tracking {
 
 						return;
 					}
-
 				} else {
 
 					echo '<p class="woocommerce-error">' . sprintf( __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
 
 				}
-
 			}
-
 		}
 
 		wc_get_template( 'order/form-tracking.php' );

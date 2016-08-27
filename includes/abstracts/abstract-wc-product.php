@@ -895,9 +895,7 @@ class WC_Product {
 					$price = $price * $qty;
 
 				}
-
 			}
-
 		} else {
 			$price = $price * $qty;
 		}
@@ -1010,7 +1008,6 @@ class WC_Product {
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
-
 		} elseif ( $this->get_price() === '' ) {
 
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
@@ -1274,7 +1271,6 @@ class WC_Product {
 			} else {
 				$this->shipping_class = '';
 			}
-
 		}
 
 		return $this->shipping_class;
@@ -1376,7 +1372,6 @@ class WC_Product {
 
 				return $attribute['value'];
 			}
-
 		}
 
 		return '';

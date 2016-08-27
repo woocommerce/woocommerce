@@ -127,7 +127,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				$this->current_cat   = end( $product_category );
 				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 			}
-
 		}
 
 		// Show Siblings and Children Only
@@ -184,7 +183,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			if ( empty( $include ) ) {
 				return;
 			}
-
 		} elseif ( $show_children_only ) {
 			$dropdown_args['depth']        = 1;
 			$dropdown_args['child_of']     = 0;

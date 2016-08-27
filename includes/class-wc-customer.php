@@ -1183,5 +1183,4 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 		WC()->session->set( 'customer', $data );
 	}
-
 }

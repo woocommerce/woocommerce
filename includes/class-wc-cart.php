@@ -1614,7 +1614,6 @@ class WC_Cart {
 						return $return;
 
 					}
-
 				} else {
 					return __( 'Free!', 'woocommerce' );
 				}
@@ -2098,7 +2097,6 @@ class WC_Cart {
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
 						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
-
 				} else {
 
 					$cart_subtotal = wc_price( $this->subtotal );
@@ -2106,7 +2104,6 @@ class WC_Cart {
 					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
 						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
-
 				}
 			}
 
@@ -2156,7 +2153,6 @@ class WC_Cart {
 					if ( $this->prices_include_tax && $this->tax_total > 0 ) {
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
-
 				} else {
 
 					$row_price        = $_product->get_price_including_tax( $quantity );
@@ -2165,7 +2161,6 @@ class WC_Cart {
 					if ( ! $this->prices_include_tax && $this->tax_total > 0 ) {
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
-
 				}
 
 			// Non-taxable

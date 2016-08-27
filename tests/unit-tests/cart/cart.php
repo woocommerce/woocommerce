@@ -588,5 +588,4 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 	}
-
 }

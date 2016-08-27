@@ -1474,7 +1474,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
-
 		} else {
 			if ( 'incl' === $tax_display ) {
 				return '';
@@ -1521,7 +1520,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( $this->get_shipping_tax() != 0 && $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
-
 			} else {
 
 				// Show shipping including tax.
@@ -1530,7 +1528,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( $this->get_shipping_tax() != 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
-
 			}
 
 			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
@@ -1609,7 +1606,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						'value'    => $tax->formatted_amount,
 					);
 				}
-
 			} else {
 
 				$total_rows['tax'] = array(

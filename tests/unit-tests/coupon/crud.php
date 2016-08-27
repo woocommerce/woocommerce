@@ -299,5 +299,4 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 		$coupon->read( $coupon_id );
 		$this->assertEquals( $meta_value, $coupon->get_meta( 'my-custom-field' ) );
 	}
-
 }

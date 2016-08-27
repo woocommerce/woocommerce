@@ -56,7 +56,6 @@ class WC_Session_Handler extends WC_Session {
 				$this->set_session_expiration();
 				$this->update_session_timestamp( $this->_customer_id, $this->_session_expiration );
 			}
-
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();

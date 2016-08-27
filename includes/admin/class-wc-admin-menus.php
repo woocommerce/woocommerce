@@ -178,7 +178,6 @@ class WC_Admin_Menus {
 			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
-
 		}
 
 		// Return order

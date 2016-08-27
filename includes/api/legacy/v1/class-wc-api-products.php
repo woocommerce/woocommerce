@@ -417,7 +417,6 @@ class WC_API_Products extends WC_API_Resource {
 				// otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// add featured image
@@ -509,7 +508,6 @@ class WC_API_Products extends WC_API_Resource {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
@@ -551,5 +549,4 @@ class WC_API_Products extends WC_API_Resource {
 
 		return $downloads;
 	}
-
 }

@@ -61,5 +61,4 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( wc_get_coupon_code_by_id( 0 ) );
 	}
-
 }

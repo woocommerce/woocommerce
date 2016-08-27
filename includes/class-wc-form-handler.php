@@ -349,7 +349,6 @@ class WC_Form_Handler {
 							exit;
 						}
 					}
-
 				} else {
 					// No payment was required for order
 					$order->payment_complete();
@@ -360,7 +359,6 @@ class WC_Form_Handler {
 				do_action( 'woocommerce_after_pay_action', $order );
 
 			}
-
 		}
 	}
 
@@ -387,9 +385,7 @@ class WC_Form_Handler {
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
-
 			}
-
 		}
 
 	}
@@ -558,7 +554,6 @@ class WC_Form_Handler {
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
 					}
-
 				}
 			}
 
@@ -787,7 +782,6 @@ class WC_Form_Handler {
 				wc_add_to_cart_message( $added_to_cart );
 				return true;
 			}
-
 		} elseif ( $product_id ) {
 			/* Link on product archives */
 			wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
@@ -842,7 +836,6 @@ class WC_Form_Handler {
 					$variations[ $taxonomy ] = $value;
 					continue;
 				}
-
 			} else {
 				$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 			}
@@ -903,7 +896,6 @@ class WC_Form_Handler {
 					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 					}
-
 				} else {
 					$creds['user_login'] = $username;
 				}
@@ -937,7 +929,6 @@ class WC_Form_Handler {
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
-
 			} catch ( Exception $e ) {
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
 			}

@@ -558,7 +558,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['shipping_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
 				}
-
 			} else {
 
 				// Update customer location to posted location so we can correctly check available shipping methods
@@ -571,7 +570,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['billing_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 				}
-
 			}
 
 			WC()->customer->save();
@@ -696,9 +694,7 @@ class WC_Checkout {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-
 					}
-
 				} else {
 
 					if ( empty( $order ) ) {
@@ -726,11 +722,8 @@ class WC_Checkout {
 						);
 						exit;
 					}
-
 				}
-
 			}
-
 		} catch ( Exception $e ) {
 			if ( ! empty( $e ) ) {
 				wc_add_notice( $e->getMessage(), 'error' );

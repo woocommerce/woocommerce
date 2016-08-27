@@ -1428,7 +1428,6 @@ class WC_API_Products extends WC_API_Resource {
 							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
@@ -1622,7 +1621,6 @@ class WC_API_Products extends WC_API_Resource {
 
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
-
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
@@ -2209,7 +2207,6 @@ class WC_API_Products extends WC_API_Resource {
 				// Otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// Add featured image
@@ -2528,7 +2525,6 @@ class WC_API_Products extends WC_API_Resource {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {

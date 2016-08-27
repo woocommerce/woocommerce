@@ -288,7 +288,6 @@ class WC_API_Resource {
 					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
 				}
 			}
-
 		}
 
 		return $data;
@@ -337,7 +336,6 @@ class WC_API_Resource {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
-
 			} else {
 
 				// remove non-matching top-level fields
@@ -376,7 +374,6 @@ class WC_API_Resource {
 			} else {
 				return new WP_Error( 'woocommerce_api_cannot_delete_customer', __( 'The customer cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
 			}
-
 		} else {
 
 			// delete order/coupon/webhook
@@ -468,5 +465,4 @@ class WC_API_Resource {
 			return false;
 		}
 	}
-
 }

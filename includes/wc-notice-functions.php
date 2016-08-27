@@ -40,7 +40,6 @@ function wc_notice_count( $notice_type = '' ) {
 		foreach ( $all_notices as $notices ) {
 			$notice_count += absint( sizeof( $all_notices ) );
 		}
-
 	}
 
 	return $notice_count;

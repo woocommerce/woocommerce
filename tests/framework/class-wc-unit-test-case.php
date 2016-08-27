@@ -100,5 +100,4 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 			parent::assertNotFalse( $condition, $message );
 		}
 	}
-
 }

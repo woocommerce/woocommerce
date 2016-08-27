@@ -231,5 +231,4 @@ class WC_API extends WC_Legacy_API {
 			new WC_Register_WP_Admin_Settings( $page );
 		}
 	}
-
 }

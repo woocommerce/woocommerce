@@ -817,5 +817,4 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
 	}
-
 }

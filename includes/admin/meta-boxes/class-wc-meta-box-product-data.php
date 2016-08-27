@@ -685,7 +685,6 @@ class WC_Meta_Box_Product_Data {
 									foreach ( $post_terms as $term ) {
 										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 									}
-
 								} else {
 									$options = wc_get_text_attributes( $attribute['value'] );
 
@@ -693,7 +692,6 @@ class WC_Meta_Box_Product_Data {
 										$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
 										echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
 									}
-
 								}
 
 								echo '</select>';
@@ -859,7 +857,6 @@ class WC_Meta_Box_Product_Data {
 			if ( isset( $_POST['_height'] ) ) {
 				update_post_meta( $post_id, '_height', ( '' === $_POST['_height'] ) ? '' : wc_format_decimal( $_POST['_height'] ) );
 			}
-
 		} else {
 			update_post_meta( $post_id, '_weight', '' );
 			update_post_meta( $post_id, '_length', '' );
@@ -973,7 +970,6 @@ class WC_Meta_Box_Product_Data {
 							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
@@ -1126,7 +1122,6 @@ class WC_Meta_Box_Product_Data {
 					$manage_stock = 'yes';
 					$backorders   = wc_clean( $_POST['_backorders'] );
 				}
-
 			} elseif ( 'grouped' !== $product_type && ! empty( $_POST['_manage_stock'] ) ) {
 				$manage_stock = 'yes';
 				$backorders   = wc_clean( $_POST['_backorders'] );
@@ -1144,7 +1139,6 @@ class WC_Meta_Box_Product_Data {
 			} else {
 				update_post_meta( $post_id, '_stock', '' );
 			}
-
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}

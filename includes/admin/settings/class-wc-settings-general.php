@@ -255,7 +255,6 @@ class WC_Settings_General extends WC_Settings_Page {
 
 		WC_Admin_Settings::save_fields( $settings );
 	}
-
 }
 
 endif;

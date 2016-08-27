@@ -155,7 +155,6 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 					WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( $postcode ) );
 					WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( $city ) );
 				}
-
 			} else {
 				$this->import_error( __( 'The CSV is invalid.', 'woocommerce' ) );
 			}

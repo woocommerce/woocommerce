@@ -482,5 +482,4 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->read( $customer_id );
 		$this->assertEquals( $meta_value, $customer->get_meta( 'my-field' ) );
 	}
-
 }

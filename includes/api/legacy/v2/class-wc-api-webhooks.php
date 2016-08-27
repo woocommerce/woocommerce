@@ -458,5 +458,4 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
-
 }

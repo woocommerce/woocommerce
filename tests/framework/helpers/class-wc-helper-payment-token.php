@@ -54,5 +54,4 @@ class WC_Helper_Payment_Token {
 		$token->save();
 		return $token;
 	}
-
 }

@@ -37,7 +37,6 @@ class WC_HookFinder {
 		   		if ( is_array( $files ) && is_array( $found_files ) ) {
 		   			$files = array_merge( $files, $found_files );
 		   		}
-
 		    } // End FOREACH Loop
 	    }
 	    return $files;

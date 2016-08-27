@@ -40,7 +40,6 @@ extract( $variation_data );
 					foreach ( $post_terms as $term ) {
 						echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
-
 				} else {
 
 					$options = wc_get_text_attributes( $attribute['value'] );
@@ -49,7 +48,6 @@ extract( $variation_data );
 						$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
 						echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 					}
-
 				}
 
 				echo '</select>';

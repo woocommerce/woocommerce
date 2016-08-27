@@ -507,5 +507,4 @@ class WC_Shipping_Zone extends WC_Data {
 
 		return true;
 	}
-
 }

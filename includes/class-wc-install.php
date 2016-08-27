@@ -1016,7 +1016,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
 					}
-
 				} catch ( Exception $e ) {
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
