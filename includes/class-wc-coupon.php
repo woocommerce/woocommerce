@@ -660,7 +660,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_minimum_amount( get_post_meta( $coupon_id, 'minimum_amount', true ) );
 		$this->set_maximum_amount( get_post_meta( $coupon_id, 'maximum_amount', true ) );
 		$email_restrictions = get_post_meta( $coupon_id, 'customer_email', true ) ;
-		$this->set_email_restrictions(  ! empty( $email_restrictions ) ? $email_restrictions : array() );
+		$this->set_email_restrictions( ! empty( $email_restrictions ) ? $email_restrictions : array() );
 		$this->set_used_by( (array) get_post_meta( $coupon_id, '_used_by' ) );
 
 		$this->read_meta_data();

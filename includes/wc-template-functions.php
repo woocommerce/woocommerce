@@ -572,7 +572,7 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 			return ob_get_clean();
 	}
 }
-if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
+if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 
 	/**
 	 * Show the product title in the product loop. By default this is an H3.
@@ -583,7 +583,7 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 		echo '<' . $tag . ' class="woocommerce-loop-product__title">' . get_the_title() . '</' . $tag . '>';
 	}
 }
-if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
+if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 
 	/**
 	 * Show the subcategory title in the product loop.
