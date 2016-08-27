@@ -386,7 +386,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 
-	if( ! $recursive ) return $index;
+	if ( ! $recursive ) return $index;
 
 	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
 
