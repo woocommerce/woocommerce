@@ -95,7 +95,7 @@ class WC_Auth {
 	 */
 	protected function get_permissions_in_scope( $scope ) {
 		$permissions = array();
-		switch ( $scope )  {
+		switch ( $scope ) {
 			case 'read' :
 				$permissions[] = __( 'View coupons', 'woocommerce' );
 				$permissions[] = __( 'View customers', 'woocommerce' );

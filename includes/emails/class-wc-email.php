@@ -225,7 +225,7 @@ class WC_Email extends WC_Settings_API {
 	 * @param PHPMailer $mailer
 	 * @return PHPMailer
 	 */
-	public function handle_multipart( $mailer )  {
+	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
 			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
 			$this->sending   = false;
