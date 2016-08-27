@@ -227,7 +227,6 @@ class WC_Admin_Report {
 			";
 		}
 
-
 		if ( ! empty( $where_meta ) ) {
 
 			$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';

@@ -218,7 +218,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 			WHERE post_id = %d ORDER BY meta_id
 		", $object_id ) );
 
-
 		$object->delete_meta_data( 'test_meta_key' );
 		$object->update_meta_data( 'test_meta_key_2', 'updated_value', $raw_metadata[1]->meta_id );
 

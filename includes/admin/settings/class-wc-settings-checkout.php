@@ -219,7 +219,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'desc_tip' => true,
 			),
 
-
 			array(
 				'type' => 'sectionend',
 				'id' => 'checkout_endpoint_options',

@@ -90,7 +90,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 		WC_Helper_Product::delete_product( $product->id );
 
-
 		# Test case 3 #11626
 		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
 		update_post_meta( $coupon->get_id(), 'coupon_amount', '50' );
