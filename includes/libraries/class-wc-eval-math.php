@@ -75,9 +75,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
 				$stack_size = count( $stack );
-				for ( $i = 0; $i<$stack_size; $i++ ) { // freeze the state of the non-argument variables
+				for ( $i = 0; $i< $stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[ $i ];
-					if ( preg_match( '/^[a-z]\w*$/', $token ) and !in_array( $token, $args ) ) {
+					if ( preg_match( '/^[a-z]\w*$/', $token ) and ! in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
 							$stack[ $i ] = self::$v[ $token ];
 						} else {
@@ -122,7 +122,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				// find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
 				$ex = preg_match( '/^([A-Za-z]\w*\(?|\d+(?:\.\d*)?|\.\d+|\()/', substr( $expr, $index ), $match );
 				//===============
-				if ( $op == '-' and !$expecting_op ) { // is it a negation instead of a minus?
+				if ( $op == '-' and ! $expecting_op ) { // is it a negation instead of a minus?
 					$stack->push( '_' ); // put a negation on the stack
 					$index++;
 				} elseif ( $op == '_' ) { // we have to explicitly deny this, because it's legal on the stack
@@ -168,18 +168,18 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						else $output[] = $o2; // pop the argument expression stuff and push onto the output
 					}
 					// make sure there was a function
-					if ( !preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) )
+					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) )
 						return self::trigger( "unexpected ','" );
-					$stack->push( $stack->pop()+1 ); // increment the argument count
+					$stack->push( $stack->pop()+ 1 ); // increment the argument count
 					$stack->push( '(' ); // put the ( back on, we'll need to pop back to it again
 					$index++;
 					$expecting_op = false;
 					//===============
-				} elseif ( $op == '(' and !$expecting_op ) {
+				} elseif ( $op == '(' and ! $expecting_op ) {
 					$stack->push( '(' ); // that was easy
 					$index++;
 					//===============
-				} elseif ( $ex and !$expecting_op ) { // do we now have a function/variable/number?
+				} elseif ( $ex and ! $expecting_op ) { // do we now have a function/variable/number?
 					$expecting_op = true;
 					$val = $match[1];
 					if ( preg_match( "/^([A-Za-z]\w*)\($/", $val, $matches ) ) { // may be func, or variable w/ implicit multiplication against parentheses...
@@ -199,7 +199,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					//===============
 				} elseif ( $op == ')' ) { // miscellaneous error checking
 					return self::trigger( "unexpected ')'" );
-				} elseif ( in_array( $op, $ops ) and !$expecting_op ) {
+				} elseif ( in_array( $op, $ops ) and ! $expecting_op ) {
 					return self::trigger( "unexpected operator '$op'" );
 				} else { // I don't even want to know what you did to get here
 					return self::trigger( "an unexpected error occured" );
@@ -215,7 +215,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					$index++;                             // into implicit multiplication if no operator is there)
 				}
 			}
-			while ( !is_null( $op = $stack->pop() ) ) { // pop everything off the stack and push onto output
+			while ( ! is_null( $op = $stack->pop() ) ) { // pop everything off the stack and push onto output
 				if ( $op == '(' ) return self::trigger( "expecting ')'" ); // if there are (s on the stack, ()s were unbalanced
 				$output[] = $op;
 			}
@@ -240,21 +240,26 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					if ( is_null( $op2 = $stack->pop() ) ) return self::trigger( "internal error" );
 					if ( is_null( $op1 = $stack->pop() ) ) return self::trigger( "internal error" );
 					switch ( $token ) {
-					case '+':
-						$stack->push( $op1+$op2 ); break;
-					case '-':
-						$stack->push( $op1-$op2 ); break;
-					case '*':
-						$stack->push( $op1*$op2 ); break;
-					case '/':
-						if ( $op2 == 0 ) return self::trigger( "division by zero" );
-						$stack->push( $op1/$op2 ); break;
-					case '^':
-						$stack->push( pow( $op1, $op2 ) ); break;
+						case '+':
+							$stack->push( $op1 + $op2 );
+							break;
+						case '-':
+							$stack->push( $op1 - $op2 );
+							break;
+						case '*':
+							$stack->push( $op1 * $op2 );
+							break;
+						case '/':
+							if ( $op2 == 0 ) return self::trigger( "division by zero" );
+							$stack->push( $op1 / $op2 );
+							break;
+						case '^':
+							$stack->push( pow( $op1, $op2 ) );
+							break;
 					}
 					// if the token is a unary operator, pop one value off the stack, do the operation, and push it back on
 				} elseif ( $token == "_" ) {
-					$stack->push( -1*$stack->pop() );
+					$stack->push( -1 * $stack->pop() );
 					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
 				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
 					if ( is_numeric( $token ) ) {

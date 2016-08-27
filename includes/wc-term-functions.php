@@ -187,7 +187,7 @@ function wc_walk_category_dropdown_tree() {
 	}
 
 	// the user's options are the third parameter
-	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) ) {
+	if ( empty( $args[2]['walker']) || ! is_a($args[2]['walker'], 'Walker' ) ) {
 		$walker = new WC_Product_Cat_Dropdown_Walker;
 	} else {
 		$walker = $args[2]['walker'];

@@ -336,7 +336,7 @@ class Emogrifier
 	 */
 	private function parseCssRules( $css ) {
 		$cssKey = md5($css);
-		if ( !isset($this->caches[ self::CACHE_KEY_CSS ][ $cssKey ]) ) {
+		if ( ! isset($this->caches[ self::CACHE_KEY_CSS ][ $cssKey ]) ) {
 			// process the CSS file for selectors and definitions
 			preg_match_all('/(?:^|[\\s^{}]*)([^{]+){([^}]*)}/mis', $css, $matches, PREG_SET_ORDER);
 
@@ -352,7 +352,7 @@ class Emogrifier
 				foreach ( $selectors as $selector ) {
 					// don't process pseudo-elements and behavioral (dynamic) pseudo-classes;
 					// only allow structural pseudo-classes
-					if ( strpos($selector, ':') !== false && !preg_match('/:\\S+\\-(child|type\\()/i', $selector) ) {
+					if ( strpos($selector, ':') !== false && ! preg_match('/:\\S+\\-(child|type\\()/i', $selector) ) {
 						continue;
 					}
 
@@ -431,7 +431,7 @@ class Emogrifier
 			self::CACHE_KEY_CSS_DECLARATIONS_BLOCK,
 			self::CACHE_KEY_COMBINED_STYLES,
 		);
-		if ( !in_array($key, $allowedCacheKeys, true) ) {
+		if ( ! in_array($key, $allowedCacheKeys, true) ) {
 			throw new InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
 		}
 
@@ -578,7 +578,7 @@ class Emogrifier
 		// in order to not overwrite existing style attributes in the HTML, we
 		// have to save the original HTML styles
 		$nodePath = $node->getNodePath();
-		if ( !isset($this->styleAttributesForNodes[ $nodePath ]) ) {
+		if ( ! isset($this->styleAttributesForNodes[ $nodePath ]) ) {
 			$this->styleAttributesForNodes[ $nodePath ] = $this->parseCssDeclarationsBlock($normalizedOriginalStyle);
 			$this->visitedNodes[ $nodePath ] = $node;
 		}
@@ -944,7 +944,7 @@ class Emogrifier
 	 */
 	private function getCssSelectorPrecedence( $selector ) {
 		$selectorKey = md5($selector);
-		if ( !isset($this->caches[ self::CACHE_KEY_SELECTOR ][ $selectorKey ]) ) {
+		if ( ! isset($this->caches[ self::CACHE_KEY_SELECTOR ][ $selectorKey ]) ) {
 			$precedence = 0;
 			$value = 100;
 			// ids: worth 100, classes: worth 10, elements: worth 1
@@ -987,7 +987,7 @@ class Emogrifier
 		);
 		$trimmedLowercaseSelector = trim($lowercasePaddedSelector);
 		$xpathKey = md5($trimmedLowercaseSelector);
-		if ( !isset($this->caches[ self::CACHE_KEY_XPATH ][ $xpathKey ]) ) {
+		if ( ! isset($this->caches[ self::CACHE_KEY_XPATH ][ $xpathKey ]) ) {
 			$cssSelectorMatches = array(
 				'child'            => '/\\s+>\\s+/',
 				'adjacent sibling' => '/\\s+\\+\\s+/',
@@ -1197,7 +1197,7 @@ class Emogrifier
 
 		foreach ( $declarations as $declaration ) {
 			$matches = array();
-			if ( !preg_match('/^([A-Za-z\\-]+)\\s*:\\s*(.+)$/', trim($declaration), $matches) ) {
+			if ( ! preg_match('/^([A-Za-z\\-]+)\\s*:\\s*(.+)$/', trim($declaration), $matches) ) {
 				continue;
 			}
 

@@ -2101,7 +2101,7 @@ class WC_Cart {
 
 					$cart_subtotal = wc_price( $this->subtotal );
 
-					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
+					if ( $this->tax_total > 0 && ! $this->prices_include_tax ) {
 						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 				}

@@ -367,9 +367,9 @@ class WC_Admin_Assets {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 		?>
 		<style type="text/css">
-			<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
+			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>
 				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_tag' ) : ?>
+			<?php elseif ( isset( $_GET['taxonomy'] ) && 'product_tag' === $_GET['taxonomy'] ) : ?>
 				.icon32-posts-product { background-position: -301px -5px !important; }
 			<?php endif; ?>
 		</style>
