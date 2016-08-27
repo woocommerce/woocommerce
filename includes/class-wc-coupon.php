@@ -1308,7 +1308,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 						if ( sizeof( $intersect = array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
 
-							foreach ( $intersect as $cat_id) {
+							foreach ( $intersect as $cat_id ) {
 								$cat = get_term( $cat_id, 'product_cat' );
 								$categories[] = $cat->name;
 							}

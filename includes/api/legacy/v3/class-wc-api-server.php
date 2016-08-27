@@ -746,13 +746,13 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers($server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
 		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ($server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
 			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;

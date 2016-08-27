@@ -176,7 +176,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="stock_fields">
 
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
 				<label class="alignleft manage_stock">
 					<input type="checkbox" name="_manage_stock" value="1">
 					<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>

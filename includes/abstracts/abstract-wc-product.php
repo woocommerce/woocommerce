@@ -1329,7 +1329,7 @@ class WC_Product {
 			$cats_array = $this->get_related_terms( 'product_cat' );
 
 			// Don't bother if none are set
-			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
+			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array ) ) {
 				$related_posts = array();
 			} else {
 				// Sanitize

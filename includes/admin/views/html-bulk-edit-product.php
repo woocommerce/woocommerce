@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
 						);
-						foreach ($options as $key => $value) {
+						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>
@@ -77,7 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
 							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
-						foreach ($options as $key => $value) {
+						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>
@@ -205,7 +205,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'yes' => __( 'Yes', 'woocommerce' ),
 						'no'  => __( 'No', 'woocommerce' ),
 					);
-					foreach ($options as $key => $value) {
+					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
