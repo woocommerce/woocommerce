@@ -224,7 +224,7 @@ class WC_REST_Authentication {
 			'oauth_timestamp',
 			'oauth_nonce',
 			'oauth_signature',
-			'oauth_signature_method'
+			'oauth_signature_method',
 		);
 
 		$errors   = array();

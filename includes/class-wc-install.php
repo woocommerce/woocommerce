@@ -359,7 +359,7 @@ class WC_Install {
 				'simple',
 				'grouped',
 				'variable',
-				'external'
+				'external',
 			),
 		);
 
@@ -676,7 +676,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$capabilities['core'] = array(
 			'manage_woocommerce',
-			'view_woocommerce_reports'
+			'view_woocommerce_reports',
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
@@ -703,7 +703,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				"manage_{$capability_type}_terms",
 				"edit_{$capability_type}_terms",
 				"delete_{$capability_type}_terms",
-				"assign_{$capability_type}_terms"
+				"assign_{$capability_type}_terms",
 			);
 		}
 
@@ -760,7 +760,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
 				'content' 	=> '',
-			)
+			),
 		);
 
 		if ( 'redirect' !== $download_method ) {

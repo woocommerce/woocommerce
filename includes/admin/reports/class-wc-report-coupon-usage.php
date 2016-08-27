@@ -61,7 +61,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'query_type'   => 'get_var',
 			'filter_range' => true,
@@ -82,7 +82,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'query_type'   => 'get_var',
 			'filter_range' => true,
@@ -188,7 +188,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 									'key'      => 'order_item_type',
 									'value'    => 'coupon',
 									'operator' => '=',
-								)
+								),
 							),
 							'query_type'   => 'get_col',
 							'filter_range' => false,
@@ -242,7 +242,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'key'      => 'order_item_type',
 							'value'    => 'coupon',
 							'operator' => '=',
-						)
+						),
 					),
 					'order_by'     => 'coupon_count DESC',
 					'group_by'     => 'order_item_name',
@@ -289,7 +289,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'key'      => 'order_item_type',
 							'value'    => 'coupon',
 							'operator' => '=',
-						)
+						),
 					),
 					'order_by'     => 'discount_amount DESC',
 					'group_by'     => 'order_item_name',
@@ -382,7 +382,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
@@ -410,7 +410,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'     => $this->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',

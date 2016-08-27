@@ -50,7 +50,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'bank_name'      => $this->get_option( 'bank_name' ),
 					'iban'           => $this->get_option( 'iban' ),
 					'bic'            => $this->get_option( 'bic' ),
-				)
+				),
 			)
 		);
 

@@ -259,7 +259,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 			array(
 				'code' => '90210',
 				'type' => 'postcode',
-			)
+			),
 		) );
 
 		// Assert

@@ -508,7 +508,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 				'tax_rate_compound',
 				'tax_rate_shipping',
 				'tax_rate_order',
-				'tax_rate_class'
+				'tax_rate_class',
 			);
 
 			foreach ( $data as $key => $value ) {

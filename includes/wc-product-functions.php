@@ -91,7 +91,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_products_onsale',
 		'wc_featured_products',
 		'wc_outofstock_count',
-		'wc_low_stock_count'
+		'wc_low_stock_count',
 	);
 
 	// Transient names that include an ID
@@ -99,7 +99,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_product_children_',
 		'wc_product_total_stock_',
 		'wc_var_prices_',
-		'wc_related_'
+		'wc_related_',
 	);
 
 	if ( $post_id > 0 ) {
@@ -192,7 +192,7 @@ function wc_get_featured_product_ids() {
 			array(
 				'key' 	=> '_featured',
 				'value' => 'yes',
-			)
+			),
 		),
 		'fields' => 'id=>parent',
 	) );
@@ -255,7 +255,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		'%second%',
 		'%post_id%',
 		'%category%',
-		'%product_cat%'
+		'%product_cat%',
 	);
 
 	$replace = array(
@@ -267,7 +267,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		date_i18n( 's', strtotime( $post->post_date ) ),
 		$post->ID,
 		$product_cat,
-		$product_cat
+		$product_cat,
 	);
 
 	$permalink = str_replace( $find, $replace, $permalink );

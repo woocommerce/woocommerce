@@ -79,7 +79,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 					'meta_key'   => '_customer_user',
 					'meta_value' => '0',
 					'operator'   => '>',
-				)
+				),
 			),
 			'filter_range' => true,
 		) );
@@ -97,7 +97,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 					'meta_key'   => '_customer_user',
 					'meta_value' => '0',
 					'operator'   => '=',
-				)
+				),
 			),
 			'filter_range' => true,
 		) );
@@ -255,7 +255,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 					'meta_key'   => '_customer_user',
 					'meta_value' => '0',
 					'operator'   => '>',
-				)
+				),
 			),
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
@@ -281,7 +281,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 					'meta_key'   => '_customer_user',
 					'meta_value' => '0',
 					'operator'   => '=',
-				)
+				),
 			),
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',

@@ -37,7 +37,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %ssystem status%s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
 		$this->supports           = array(
 			'products',
-			'refunds'
+			'refunds',
 		);
 
 		// Load the settings.
@@ -144,7 +144,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'MX' :
 				$icon = array(
 					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_visa_mastercard_amex.png',
-					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_debit_card_275x60.gif'
+					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_debit_card_275x60.gif',
 				);
 			break;
 			case 'FR' :

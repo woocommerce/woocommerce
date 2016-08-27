@@ -725,7 +725,7 @@ class WC_API_Orders extends WC_API_Resource {
 					'key'     => '_customer_user',
 					'value'   => absint( $args['customer_id'] ),
 					'compare' => '=',
-				)
+				),
 			);
 		}
 

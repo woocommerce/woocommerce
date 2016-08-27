@@ -449,7 +449,7 @@ class WC_Tax {
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
 				WC()->countries->get_base_postcode(),
-				WC()->countries->get_base_city()
+				WC()->countries->get_base_city(),
 			);
 		}
 

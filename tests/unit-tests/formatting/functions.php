@@ -97,7 +97,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			array( 25.4, wc_get_dimension( 10, 'cm', 'in' ) ),
 			array( 914.4, wc_get_dimension( 10, 'cm', 'yd' ) ),
 			array( 393.7, wc_get_dimension( 10, 'in', 'm' ) ),
-			array( 0.010936133, wc_get_dimension( 10, 'yd', 'mm' ) )
+			array( 0.010936133, wc_get_dimension( 10, 'yd', 'mm' ) ),
 		);
 
 		// restore default

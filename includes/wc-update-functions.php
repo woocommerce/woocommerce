@@ -704,7 +704,7 @@ function wc_update_240_api_keys() {
 					'%s',
 					'%s',
 					'%s',
-					'%s'
+					'%s',
 				)
 			);
 		}

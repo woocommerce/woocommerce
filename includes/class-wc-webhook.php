@@ -557,7 +557,7 @@ class WC_Webhook {
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
-				'woocommerce_api_create_customer'
+				'woocommerce_api_create_customer',
 			),
 			'customer.updated' => array(
 				'profile_update',
@@ -576,7 +576,7 @@ class WC_Webhook {
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_api_edit_order',
 				'woocommerce_order_edit_status',
-				'woocommerce_order_status_changed'
+				'woocommerce_order_status_changed',
 			),
 			'order.deleted' => array(
 				'wp_trash_post',

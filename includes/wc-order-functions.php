@@ -447,7 +447,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 		'%s',
 		'%s',
 		'%s',
-		'%d'
+		'%d',
 	), $data);
 
 	if ( ! is_null( $expiry ) ) {
@@ -535,7 +535,7 @@ function wc_add_order_item( $order_id, $item ) {
 			'order_id'				=> $order_id,
 		),
 		array(
-			'%s', '%s', '%d'
+			'%s', '%s', '%d',
 		)
 	);
 
@@ -972,7 +972,7 @@ function wc_order_search( $term ) {
 		'_shipping_city',
 		'_shipping_postcode',
 		'_shipping_country',
-		'_shipping_state'
+		'_shipping_state',
 	) ) );
 
 	// Search orders.

@@ -441,7 +441,7 @@ class WC_Admin_Report {
 						'key'      => 'order_item_meta__product_id.meta_value',
 						'value'    => $id,
 						'operator' => '=',
-					)
+					),
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
@@ -467,7 +467,7 @@ class WC_Admin_Report {
 						'key'      => 'post_date',
 						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
 						'operator' => '>',
-					)
+					),
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',

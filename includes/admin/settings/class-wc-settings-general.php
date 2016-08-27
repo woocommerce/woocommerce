@@ -226,7 +226,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'pricing_options' )
+			array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
 		) );
 

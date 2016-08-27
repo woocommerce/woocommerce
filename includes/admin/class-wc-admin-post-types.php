@@ -1736,7 +1736,7 @@ class WC_Admin_Post_Types {
 						'key'   => '_customer_user',
 						'value' => (int) $_GET['_customer_user'],
 						'compare' => '=',
-					)
+					),
 				);
 			}
 

@@ -168,7 +168,7 @@ class WC_Auth {
 			'user_id',
 			'return_url',
 			'callback_url',
-			'scope'
+			'scope',
 		);
 
 		foreach ( $params as $param ) {
@@ -234,7 +234,7 @@ class WC_Auth {
 				'%s',
 				'%s',
 				'%s',
-				'%s'
+				'%s',
 			)
 		);
 

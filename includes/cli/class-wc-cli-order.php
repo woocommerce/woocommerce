@@ -580,7 +580,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 					'key'   => '_customer_user',
 					'value' => (int) $args['customer_id'],
 					'compare' => '=',
-				)
+				),
 			);
 		}
 

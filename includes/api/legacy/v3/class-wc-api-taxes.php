@@ -281,7 +281,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				'tax_rate_compound',
 				'tax_rate_shipping',
 				'tax_rate_order',
-				'tax_rate_class'
+				'tax_rate_class',
 			);
 
 			foreach ( $data as $key => $value ) {

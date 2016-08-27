@@ -191,7 +191,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			array(
 				'title'    => __( 'Categories', 'woocommerce' ),
 				'callback' => array( $this, 'category_widget' ),
-			)
+			),
 		);
 	}
 

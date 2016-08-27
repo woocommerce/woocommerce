@@ -1734,7 +1734,7 @@ class WC_AJAX {
 				array(
 					'key'   => '_downloadable',
 					'value' => 'yes',
-				)
+				),
 			),
 			's'              => $term,
 			'exclude'        => $exclude,
@@ -2153,7 +2153,7 @@ class WC_AJAX {
 					array(
 						'%d',
 						'%s',
-						'%s'
+						'%s',
 					),
 					array( '%d' )
 				);
@@ -2183,7 +2183,7 @@ class WC_AJAX {
 						'%s',
 						'%s',
 						'%s',
-						'%s'
+						'%s',
 					)
 				);
 

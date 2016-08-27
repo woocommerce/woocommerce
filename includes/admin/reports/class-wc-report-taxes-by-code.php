@@ -113,7 +113,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'key'      => 'order_item_name',
 				'value'    => '',
 				'operator' => '!=',
-			)
+			),
 		);
 
 		$tax_rows_orders = $this->get_order_report_data( array(

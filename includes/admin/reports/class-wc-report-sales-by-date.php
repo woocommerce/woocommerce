@@ -91,7 +91,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'key'      => 'order_items.order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'     => $this->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',
@@ -121,7 +121,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'key'      => 'order_items.order_item_type',
 					'value'    => 'line_item',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'            => $this->group_by_query,
 			'order_by'            => 'post_date ASC',
@@ -148,7 +148,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'key'      => 'order_items.order_item_type',
 					'value'    => 'line_item',
 					'operator' => '=',
-				)
+				),
 			),
 			'query_type'          => 'get_var',
 			'filter_range'        => true,

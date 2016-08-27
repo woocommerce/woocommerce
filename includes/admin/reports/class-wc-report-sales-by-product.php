@@ -275,7 +275,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'meta_key'   => '_line_subtotal',
 							'meta_value' => '0',
 							'operator'   => '=',
-						)
+						),
 					),
 					'order_by'     => 'order_item_qty DESC',
 					'group_by'     => 'product_id',

@@ -97,11 +97,11 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );

@@ -16,7 +16,7 @@ return array(
 					'rate'     => '10.0000',
 					'name'     => 'GST',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -36,7 +36,7 @@ return array(
 					'rate'     => '15.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -56,7 +56,7 @@ return array(
 					'rate'     => '20.0000',
 					'name'     => 'BTW',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -87,7 +87,7 @@ return array(
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
 					'priority' => 2,
-				)
+				),
 			),
 			'SK' => array(
 				array(
@@ -97,7 +97,7 @@ return array(
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
 					'priority' => 2,
-				)
+				),
 			),
 			'MB' => array(
 				array(
@@ -107,7 +107,7 @@ return array(
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
 					'priority' => 2,
-				)
+				),
 			),
 			'QC' => array(
 				array(
@@ -117,7 +117,7 @@ return array(
 					'name'     => _x( 'QST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
 					'priority' => 2,
-				)
+				),
 			),
 			'*' => array(
 				array(
@@ -210,7 +210,7 @@ return array(
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -230,7 +230,7 @@ return array(
 					'rate'     => '19.0000',
 					'name'     => 'Mwst.',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -250,7 +250,7 @@ return array(
 					'rate'     => '21.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -270,7 +270,7 @@ return array(
 					'rate'     => '20.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -290,7 +290,7 @@ return array(
 					'rate'	  => '20.0000',
 					'name'	  => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -310,7 +310,7 @@ return array(
 					'rate'     => '27.0000',
 					'name'     => 'ÁFA',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -330,7 +330,7 @@ return array(
 					'rate'     => '22.0000',
 					'name'     => 'IVA',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -350,7 +350,7 @@ return array(
 					'rate'     => '8.0000',
 					'name'     => __( 'Consumption tax', 'woocommerce' ),
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -370,7 +370,7 @@ return array(
 					'rate'     => '21.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -390,7 +390,7 @@ return array(
 					'rate'     => '25.0000',
 					'name'     => 'MVA',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -410,7 +410,7 @@ return array(
 					'rate'     => '13.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -430,7 +430,7 @@ return array(
 					'rate'     => '23.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -450,7 +450,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -470,7 +470,7 @@ return array(
 					'rate'     => '18.0000',
 					'name'     => 'KDV',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -490,7 +490,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'AZ' => array(
 				array(
@@ -499,7 +499,7 @@ return array(
 					'rate'     => '5.6000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'AR' => array(
 				array(
@@ -508,7 +508,7 @@ return array(
 					'rate'     => '6.5000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'CA' => array(
 				array(
@@ -517,7 +517,7 @@ return array(
 					'rate'     => '7.5000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'CO' => array(
 				array(
@@ -526,7 +526,7 @@ return array(
 					'rate'     => '2.9000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'CT' => array(
 				array(
@@ -535,7 +535,7 @@ return array(
 					'rate'     => '6.3500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'DC' => array(
 				array(
@@ -544,7 +544,7 @@ return array(
 					'rate'     => '5.7500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'FL' => array(
 				array(
@@ -553,7 +553,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'GA' => array(
 				array(
@@ -562,7 +562,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'GU' => array(
 				array(
@@ -571,7 +571,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'HI' => array(
 				array(
@@ -580,7 +580,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'ID' => array(
 				array(
@@ -589,7 +589,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'IL' => array(
 				array(
@@ -598,7 +598,7 @@ return array(
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'IN' => array(
 				array(
@@ -607,7 +607,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'IA' => array(
 				array(
@@ -616,7 +616,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'KS' => array(
 				array(
@@ -625,7 +625,7 @@ return array(
 					'rate'     => '6.1500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'KY' => array(
 				array(
@@ -634,7 +634,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'LA' => array(
 				array(
@@ -643,7 +643,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'ME' => array(
 				array(
@@ -652,7 +652,7 @@ return array(
 					'rate'     => '5.5000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'MD' => array(
 				array(
@@ -661,7 +661,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'MA' => array(
 				array(
@@ -670,7 +670,7 @@ return array(
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'MI' => array(
 				array(
@@ -679,7 +679,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'MN' => array(
 				array(
@@ -688,7 +688,7 @@ return array(
 					'rate'     => '6.8750',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'MS' => array(
 				array(
@@ -697,7 +697,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'MO' => array(
 				array(
@@ -706,7 +706,7 @@ return array(
 					'rate'     => '4.225',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'NE' => array(
 				array(
@@ -715,7 +715,7 @@ return array(
 					'rate'     => '5.5000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'NV' => array(
 				array(
@@ -724,7 +724,7 @@ return array(
 					'rate'     => '6.8500',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'NJ' => array(
 				array(
@@ -733,7 +733,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'NM' => array(
 				array(
@@ -742,7 +742,7 @@ return array(
 					'rate'     => '5.1250',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'NY' => array(
 				array(
@@ -751,7 +751,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'NC' => array(
 				array(
@@ -760,7 +760,7 @@ return array(
 					'rate'     => '4.7500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'ND' => array(
 				array(
@@ -769,7 +769,7 @@ return array(
 					'rate'     => '5.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'OH' => array(
 				array(
@@ -778,7 +778,7 @@ return array(
 					'rate'     => '5.7500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'OK' => array(
 				array(
@@ -787,7 +787,7 @@ return array(
 					'rate'     => '4.5000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'PA' => array(
 				array(
@@ -796,7 +796,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'PR' => array(
 				array(
@@ -805,7 +805,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'RI' => array(
 				array(
@@ -814,7 +814,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'SC' => array(
 				array(
@@ -823,7 +823,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'SD' => array(
 				array(
@@ -832,7 +832,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'TN' => array(
 				array(
@@ -841,7 +841,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'TX' => array(
 				array(
@@ -850,7 +850,7 @@ return array(
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'UT' => array(
 				array(
@@ -859,7 +859,7 @@ return array(
 					'rate'     => '5.9500',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'VT' => array(
 				array(
@@ -868,7 +868,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'VA' => array(
 				array(
@@ -877,7 +877,7 @@ return array(
 					'rate'     => '5.3000',
 					'name'     => 'State Tax',
 					'shipping' => false,
-				)
+				),
 			),
 			'WA' => array(
 				array(
@@ -886,7 +886,7 @@ return array(
 					'rate'     => '6.5000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'WV' => array(
 				array(
@@ -895,7 +895,7 @@ return array(
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'WI' => array(
 				array(
@@ -904,7 +904,7 @@ return array(
 					'rate'     => '5.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 			'WY' => array(
 				array(
@@ -913,7 +913,7 @@ return array(
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),
@@ -933,7 +933,7 @@ return array(
 					'rate'     => '14.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
-				)
+				),
 			),
 		),
 	),

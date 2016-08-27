@@ -228,7 +228,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	$template = locate_template(
 		array(
 			trailingslashit( $template_path ) . $template_name,
-			$template_name
+			$template_name,
 		)
 	);
 

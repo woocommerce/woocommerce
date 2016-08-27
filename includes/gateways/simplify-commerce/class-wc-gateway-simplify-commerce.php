@@ -40,7 +40,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			'default_credit_card_form',
 			'tokenization',
 			'refunds',
-			'pre-orders'
+			'pre-orders',
 		);
 		$this->view_transaction_url = 'https://www.simplify.com/commerce/app#/payment/%s';
 

@@ -233,7 +233,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'type' 	=> 'sectionend',
 					'id' 	=> 'image_options',
-				)
+				),
 
 			));
 		} elseif ( 'inventory' == $current_section ) {

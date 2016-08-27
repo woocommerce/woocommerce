@@ -202,7 +202,7 @@ class WC_Helper_Product {
 		), array(
 			'%s',
 			'%s',
-			'%d'
+			'%d',
 		) );
 		$return['term_id'] = $wpdb->insert_id;
 

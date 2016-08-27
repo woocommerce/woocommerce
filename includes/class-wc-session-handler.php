@@ -187,7 +187,7 @@ class WC_Session_Handler extends WC_Session {
 				array(
 					'%s',
 					'%s',
-					'%d'
+					'%d',
 				)
 			);
 

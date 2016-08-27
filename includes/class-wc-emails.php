@@ -80,7 +80,7 @@ class WC_Emails {
 			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
+			'woocommerce_created_customer',
 		) );
 
 		foreach ( $email_actions as $action ) {

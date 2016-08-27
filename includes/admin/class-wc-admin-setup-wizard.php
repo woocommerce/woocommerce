@@ -27,7 +27,7 @@ class WC_Admin_Setup_Wizard {
 	/** @var array Tweets user can optionally send after install */
 	private $tweets = array(
 		'Someone give me woo-t, I just set up a new store with #WordPress and @WooCommerce!',
-		'Someone give me high five, I just set up a new store with #WordPress and @WooCommerce!'
+		'Someone give me high five, I just set up a new store with #WordPress and @WooCommerce!',
 	);
 
 	/**

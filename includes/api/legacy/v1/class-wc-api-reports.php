@@ -144,7 +144,7 @@ class WC_API_Reports extends WC_API_Resource {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'query_type' => 'get_var',
 			'filter_range' => true,
@@ -228,7 +228,7 @@ class WC_API_Reports extends WC_API_Resource {
 					'key'      => 'order_item_type',
 					'value'    => 'line_item',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'     => $this->report->group_by_query,
 			'order_by'     => 'post_date ASC',
@@ -256,7 +256,7 @@ class WC_API_Reports extends WC_API_Resource {
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
 					'operator' => '=',
-				)
+				),
 			),
 			'group_by'     => $this->report->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',

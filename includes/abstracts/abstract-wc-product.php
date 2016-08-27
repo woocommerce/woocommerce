@@ -970,12 +970,12 @@ class WC_Product {
 
 			$find = array(
 				'{price_including_tax}',
-				'{price_excluding_tax}'
+				'{price_excluding_tax}',
 			);
 
 			$replace = array(
 				wc_price( $this->get_price_including_tax( $qty, $price ) ),
-				wc_price( $this->get_price_excluding_tax( $qty, $price ) )
+				wc_price( $this->get_price_excluding_tax( $qty, $price ) ),
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );

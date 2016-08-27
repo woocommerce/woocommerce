@@ -803,7 +803,7 @@ class WC_Shortcodes {
 					'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
 					'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
 					'field'    => 'slug',
-				)
+				),
 			),
 		);
 
@@ -849,7 +849,7 @@ class WC_Shortcodes {
 					'terms'    => array_map( 'sanitize_title', explode( ',', $category ) ),
 					'field'    => 'slug',
 					'operator' => $operator,
-				)
+				),
 			);
 		}
 

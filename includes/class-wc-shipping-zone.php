@@ -473,7 +473,7 @@ class WC_Shipping_Zone extends WC_Data {
 				array(
 					'%s',
 					'%d',
-					'%d'
+					'%d',
 				)
 			);
 			$instance_id = $wpdb->insert_id;
