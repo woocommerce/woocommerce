@@ -79,11 +79,24 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'discount_type', 'coupon_amount', 'expiry_date', 'usage_count',
-		'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit',
-		'usage_limit_per_user', 'limit_usage_to_x_items', 'free_shipping',
-		'product_categories', 'exclude_product_categories', 'exclude_sale_items',
-		'minimum_amount', 'maximum_amount', 'customer_email', '_used_by',
+		'discount_type',
+		'coupon_amount',
+		'expiry_date',
+		'usage_count',
+		'individual_use',
+		'product_ids',
+		'exclude_product_ids',
+		'usage_limit',
+		'usage_limit_per_user',
+		'limit_usage_to_x_items',
+		'free_shipping',
+		'product_categories',
+		'exclude_product_categories',
+		'exclude_sale_items',
+		'minimum_amount',
+		'maximum_amount',
+		'customer_email',
+		'_used_by',
 	);
 
 	/**

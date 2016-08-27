@@ -333,8 +333,15 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array( $key, array(
-			'id', 'label', 'description', 'default', 'tip',
-			'placeholder', 'type', 'options', 'value',
+			'id',
+			'label',
+			'description',
+			'default',
+			'tip',
+			'placeholder',
+			'type',
+			'options',
+			'value',
 		) );
 	}
 
@@ -347,9 +354,18 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 */
 	public function is_setting_type_valid( $type ) {
 		return in_array( $type, array(
-			'text', 'email', 'number', 'color', 'password',
-			'textarea', 'select', 'multiselect', 'radio', 'checkbox',
-			'multi_select_countries', 'image_width',
+			'text',
+			'email',
+			'number',
+			'color',
+			'password',
+			'textarea',
+			'select',
+			'multiselect',
+			'radio',
+			'checkbox',
+			'multi_select_countries',
+			'image_width',
 		) );
 	}
 

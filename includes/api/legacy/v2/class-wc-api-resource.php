@@ -41,9 +41,18 @@ class WC_API_Resource {
 			add_filter( "woocommerce_api_{$resource}_response", array( $this, 'maybe_add_meta' ), 15, 2 );
 		}
 
-		$response_names = array( 'order', 'coupon', 'customer', 'product', 'report',
-			'customer_orders', 'customer_downloads', 'order_note', 'order_refund',
-			'product_reviews', 'product_category',
+		$response_names = array(
+			'order',
+			'coupon',
+			'customer',
+			'product',
+			'report',
+			'customer_orders',
+			'customer_downloads',
+			'order_note',
+			'order_refund',
+			'product_reviews',
+			'product_category',
 		);
 
 		foreach ( $response_names as $name ) {

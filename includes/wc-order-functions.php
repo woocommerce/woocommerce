@@ -535,7 +535,9 @@ function wc_add_order_item( $order_id, $item ) {
 			'order_id'				=> $order_id,
 		),
 		array(
-			'%s', '%s', '%d',
+			'%s',
+			'%s',
+			'%d',
 		)
 	);
 

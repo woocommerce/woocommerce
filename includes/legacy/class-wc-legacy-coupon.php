@@ -24,10 +24,26 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 */
 	public function __isset( $key ) {
 		$legacy_keys = array(
-			'id', 'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
-			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
-			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
-			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
+			'id',
+			'exists',
+			'coupon_custom_fields',
+			'type',
+			'discount_type',
+			'amount',
+			'code',
+			'individual_use',
+			'product_ids',
+			'exclude_product_ids',
+			'usage_limit',
+			'usage_limit_per_user',
+			'limit_usage_to_x_items',
+			'usage_count',
+			'expiry_date',
+			'product_categories',
+			'exclude_product_categories',
+			'minimum_amount',
+			'maximum_amount',
+			'customer_email',
 		);
 		if ( in_array( $key, $legacy_keys ) ) {
 			return true;

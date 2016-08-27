@@ -51,9 +51,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'_order_currency', '_cart_discount',
-		'_cart_discount_tax', '_order_shipping', '_order_shipping_tax',
-		'_order_tax', '_order_total', '_order_version', '_prices_include_tax',
+		'_order_currency',
+		'_cart_discount',
+		'_cart_discount_tax',
+		'_order_shipping',
+		'_order_shipping_tax',
+		'_order_tax',
+		'_order_total',
+		'_order_version',
+		'_prices_include_tax',
 		'_payment_tokens',
 	);
 

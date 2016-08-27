@@ -118,10 +118,26 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
-			'id', 'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
-			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
-			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
-			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
+			'id',
+			'exists',
+			'coupon_custom_fields',
+			'type',
+			'discount_type',
+			'amount',
+			'code',
+			'individual_use',
+			'product_ids',
+			'exclude_product_ids',
+			'usage_limit',
+			'usage_limit_per_user',
+			'limit_usage_to_x_items',
+			'usage_count',
+			'expiry_date',
+			'product_categories',
+			'exclude_product_categories',
+			'minimum_amount',
+			'maximum_amount',
+			'customer_email',
 		);
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 

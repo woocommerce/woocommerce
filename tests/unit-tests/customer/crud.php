@@ -123,10 +123,23 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
-			'id', 'country', 'state', 'postcode', 'city', 'address', 'address_1', 'address_2',
-			'shipping_country', 'shipping_state', 'shipping_postcode', 'shipping_city',
-			'shipping_address', 'shipping_address_1', 'shipping_address_2',
-			'is_vat_exempt', 'calculated_shipping',
+			'id',
+			'country',
+			'state',
+			'postcode',
+			'city',
+			'address',
+			'address_1',
+			'address_2',
+			'shipping_country',
+			'shipping_state',
+			'shipping_postcode',
+			'shipping_city',
+			'shipping_address',
+			'shipping_address_1',
+			'shipping_address_2',
+			'is_vat_exempt',
+			'calculated_shipping',
 		);
 
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );

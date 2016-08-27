@@ -112,7 +112,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$product_ids   = array();
 		$products_data = array(
-			'5.17', '3.32', '1.25', '3.50', '5.01', '3.34', '5.99', '5.51',
+			'5.17',
+			'3.32',
+			'1.25',
+			'3.50',
+			'5.01',
+			'3.34',
+			'5.99',
+			'5.51',
 		);
 		foreach ( $products_data as $price ) {
 			$loop_product  = WC_Helper_Product::create_simple_product();
