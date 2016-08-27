@@ -206,23 +206,42 @@ class WC_Meta_Box_Product_Data {
 					<?php
 
 					// Download Limit
-					woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> '1',
-						'min'	=> '0',
-					) ) );
+					woocommerce_wp_text_input( array(
+						'id'                => '_download_limit',
+						'label'             => __( 'Download limit', 'woocommerce' ),
+						'placeholder'       => __( 'Unlimited', 'woocommerce' ),
+						'description'       => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ),
+						'type'              => 'number',
+						'custom_attributes' => array(
+							'step' 	=> '1',
+							'min'	=> '0',
+						),
+					) );
 
 					// Expirey
-					woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> '1',
-						'min'	=> '0',
-					) ) );
+					woocommerce_wp_text_input( array(
+						'id'                => '_download_expiry',
+						'label'             => __( 'Download expiry', 'woocommerce' ),
+						'placeholder'       => __( 'Never', 'woocommerce' ),
+						'description'       => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ),
+						'type'              => 'number',
+						'custom_attributes' => array(
+							'step' 	=> '1',
+							'min'	=> '0',
+						),
+					) );
 
 					 // Download Type
-					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' => array(
-						''            => __( 'Standard Product', 'woocommerce' ),
-						'application' => __( 'Application/Software', 'woocommerce' ),
-						'music'       => __( 'Music', 'woocommerce' ),
-					) ) );
+					woocommerce_wp_select( array(
+						'id'          => '_download_type',
+						'label'       => __( 'Download type', 'woocommerce' ),
+						'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ),
+						'options'     => array(
+							''            => __( 'Standard Product', 'woocommerce' ),
+							'application' => __( 'Application/Software', 'woocommerce' ),
+							'music'       => __( 'Music', 'woocommerce' ),
+						),
+					) );
 
 					do_action( 'woocommerce_product_options_downloads' );
 
@@ -563,9 +582,17 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group">
 					<?php
 						// menu_order
-						woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
-							'step' 	=> '1',
-						)  ) );
+						woocommerce_wp_text_input( array(
+							'id'          => 'menu_order',
+							'label'       => __( 'Menu order', 'woocommerce' ),
+							'desc_tip'    => 'true',
+							'description' => __( 'Custom ordering position.', 'woocommerce' ),
+							'value'       => intval( $post->menu_order ),
+							'type'        => 'number',
+							'custom_attributes' => array(
+								'step' 	=> '1',
+							),
+						) );
 					?>
 				</div>
 

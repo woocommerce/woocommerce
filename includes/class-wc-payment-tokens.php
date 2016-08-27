@@ -208,8 +208,10 @@ class WC_Payment_Tokens {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_payment_tokens',
 					array( 'is_default' => 1 ),
-					array( 'token_id' => $token->get_id(),
-				) );
+					array(
+						'token_id' => $token->get_id(),
+					)
+				);
 
 				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
 			} else {
@@ -217,8 +219,10 @@ class WC_Payment_Tokens {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_payment_tokens',
 					array( 'is_default' => 0 ),
-					array( 'token_id' => $token->get_id(),
-				) );
+					array(
+						'token_id' => $token->get_id(),
+					)
+				);
 			}
 		}
 	}

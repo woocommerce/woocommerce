@@ -220,7 +220,8 @@ class WC_Meta_Box_Order_Data {
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
 								if ( $order->get_user_id() ) {
-									$args = array( 'post_status' => 'all',
+									$args = array(
+										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
 										'_customer_user' => absint( $order->get_user_id() ),
 									);
