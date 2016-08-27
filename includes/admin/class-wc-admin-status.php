@@ -202,7 +202,7 @@ class WC_Admin_Status {
 			'fields'   => array(
 				'sections' => false,
 				'tags'     => false,
-			)
+			),
 		) );
 
 		$update_theme_version = 0;

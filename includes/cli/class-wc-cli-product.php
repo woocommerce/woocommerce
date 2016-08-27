@@ -712,7 +712,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $args['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
 		}
 
@@ -1192,7 +1192,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
 
@@ -1213,7 +1213,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => $is_taxonomy,
 					);
 				}
 			}
@@ -1319,7 +1319,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -1546,7 +1546,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'post_author'  => get_current_user_id(),
 					'post_parent'  => $id,
 					'post_type'    => 'product_variation',
-					'menu_order'   => $menu_order
+					'menu_order'   => $menu_order,
 				);
 
 				$variation_id = wp_insert_post( $new_variation );
@@ -1959,7 +1959,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
-				'file' => $file_url
+				'file' => $file_url,
 			);
 		}
 
@@ -2030,7 +2030,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Get the file
 		$response = wp_safe_remote_get( $image_url, array(
-			'timeout' => 10
+			'timeout' => 10,
 		) );
 
 		if ( is_wp_error( $response ) ) {
@@ -2109,7 +2109,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			'guid'           => $upload['url'],
 			'post_parent'    => $id,
 			'post_title'     => $title,
-			'post_content'   => $content
+			'post_content'   => $content,
 		);
 
 		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );

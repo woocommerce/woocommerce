@@ -313,7 +313,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			'pear'       => 'grape',
 			'vegetables' => array(
 				'cucumber' => 'asparagus',
-			)
+			),
 		);
 
 		$a2 = array(

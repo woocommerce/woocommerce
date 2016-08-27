@@ -38,7 +38,7 @@ class WC_Helper_Product {
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -71,7 +71,7 @@ class WC_Helper_Product {
 		$product_id = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Set it as variable.
@@ -102,15 +102,15 @@ class WC_Helper_Product {
 				'position'     => '1',
 				'is_visible'   => 0,
 				'is_variation' => 1,
-				'is_taxonomy'  => 1
-			)
+				'is_taxonomy'  => 1,
+			),
 		) );
 
 		// Link the product to the attribute
 		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
 			'object_id'        => $product_id,
 			'term_taxonomy_id' => $attribute_data['term_taxonomy_id'],
-			'term_order'       => 0
+			'term_order'       => 0,
 		) );
 		$return['term_taxonomy_id'] = $wpdb->insert_id;
 
@@ -119,7 +119,7 @@ class WC_Helper_Product {
 			'post_title'  => 'Variation #' . ( $product_id + 1 ) . ' of Dummy Product',
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Price related meta
@@ -141,7 +141,7 @@ class WC_Helper_Product {
 			'post_title'  => 'Variation #' . ( $product_id + 2 ) . ' of Dummy Product',
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Price related meta
@@ -198,7 +198,7 @@ class WC_Helper_Product {
 		$wpdb->insert( $wpdb->prefix . 'terms', array(
 			'name'       => 'small',
 			'slug'       => 'small',
-			'term_group' => 0
+			'term_group' => 0,
 		), array(
 			'%s',
 			'%s',
@@ -212,7 +212,7 @@ class WC_Helper_Product {
 			'taxonomy'    => 'pa_dummyattribute',
 			'description' => '',
 			'parent'      => 0,
-			'count'       => 1
+			'count'       => 1,
 		) );
 		$return['term_taxonomy_id'] = $wpdb->insert_id;
 

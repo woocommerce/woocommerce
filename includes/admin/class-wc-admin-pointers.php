@@ -54,16 +54,16 @@ class WC_Admin_Pointers {
 					'next'         => 'content',
 					'next_trigger' => array(
 						'target' => '#title',
-						'event'  => 'input'
+						'event'  => 'input',
 					),
 					'options'      => array(
 						'content'  => 	'<h3>' . esc_html__( 'Product Name', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Give your new product a name here. This is a required field and will be what your customers will see in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'top',
-							'align' => 'left'
-						)
-					)
+							'align' => 'left',
+						),
+					),
 				),
 				'content' => array(
 					'target'       => "#wp-content-editor-container",
@@ -74,16 +74,16 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'This is your products main body of content. Here you should describe your product in detail.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'product-type' => array(
 					'target'       => "#product-type",
 					'next'         => 'virtual',
 					'next_trigger' => array(
 						'target' => "#product-type",
-						'event'  => 'change blur click'
+						'event'  => 'change blur click',
 					),
 					'options'  => array(
 						'content'  => 	'<h3>' . esc_html__( 'Choose Product Type', 'woocommerce' ) . '</h3>' .
@@ -93,73 +93,73 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'Finally, external products are for linking off-site.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'virtual' => array(
 					'target'       => "#_virtual",
 					'next'         => 'downloadable',
 					'next_trigger' => array(
 						'target' => "#_virtual",
-						'event'  => 'change'
+						'event'  => 'change',
 					),
 					'options' => array(
 						'content'  => 	'<h3>' . esc_html__( 'Virtual Products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Check the "Virtual" box if this is a non-physical item, for example a service, which does not need shipping.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'downloadable' => array(
 					'target'       => "#_downloadable",
 					'next'         => 'regular_price',
 					'next_trigger' => array(
 						'target' => "#_downloadable",
-						'event'  => 'change'
+						'event'  => 'change',
 					),
 					'options' => array(
 						'content'  => 	'<h3>' . esc_html__( 'Downloadable Products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'If purchasing this product gives a customer access to a downloadable file, e.g. software, check this box.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'regular_price' => array(
 					'target'       => "#_regular_price",
 					'next'         => 'postexcerpt',
 					'next_trigger' => array(
 						'target' => "#_regular_price",
-						'event'  => 'input'
+						'event'  => 'input',
 					),
 					'options' => array(
 						'content'  => 	'<h3>' . esc_html__( 'Prices', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Next you\'ll need to give your product a price.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'postexcerpt' => array(
 					'target'       => "#postexcerpt",
 					'next'         => 'postimagediv',
 					'next_trigger' => array(
 						'target' => "#postexcerpt",
-						'event'  => 'input'
+						'event'  => 'input',
 					),
 					'options' => array(
 						'content'  => 	'<h3>' . esc_html__( 'Product Short Description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Add a quick summary for your product here. This will appear on the product page under the product name.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'postimagediv' => array(
 					'target'       => "#postimagediv",
@@ -169,9 +169,9 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'Upload or assign an image to your product here. This image will be shown in your store\'s catalog.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'product_tag' => array(
 					'target'       => "#tagsdiv-product_tag",
@@ -181,9 +181,9 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'product_catdiv' => array(
 					'target'       => "#product_catdiv",
@@ -193,9 +193,9 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'Optionally assign categories to your products to make them easier to browse through and find in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
-							'align' => 'middle'
-						)
-					)
+							'align' => 'middle',
+						),
+					),
 				),
 				'submitdiv' => array(
 					'target'       => "#submitdiv",
@@ -205,11 +205,11 @@ class WC_Admin_Pointers {
 										'<p>' . esc_html__( 'When you are finished editing your product, hit the "Publish" button to publish your product to your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
-							'align' => 'middle'
-						)
-					)
-				)
-			)
+							'align' => 'middle',
+						),
+					),
+				),
+			),
 		);
 
 		$this->enqueue_pointers( $pointers );

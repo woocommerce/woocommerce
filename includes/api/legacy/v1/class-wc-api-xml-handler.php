@@ -255,7 +255,7 @@ class WC_API_XML_Handler implements WC_API_Handler {
 			'upsell_ids'     => 'upsell_id',
 			'cross_sell_ids' => 'cross_sell_id',
 			'categories'     => 'category',
-			'tags'           => 'tag'
+			'tags'           => 'tag',
 		);
 
 		foreach ( $fields_to_fix as $parent_field_name => $child_field_name ) {

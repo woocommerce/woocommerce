@@ -212,7 +212,7 @@ extract( $variation_data );
 						'name' 				=> 'variable_shipping_class[' . $loop . ']',
 						'id'				=> '',
 						'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
-						'echo'				=> 0
+						'echo'				=> 0,
 					);
 
 					echo wp_dropdown_categories( $args );
@@ -267,7 +267,7 @@ extract( $variation_data );
 									if ( ! is_array( $file ) ) {
 										$file = array(
 											'file' => $file,
-											'name' => ''
+											'name' => '',
 										);
 									}
 									include( 'html-product-variation-download.php' );
@@ -281,7 +281,7 @@ extract( $variation_data );
 									<a href="#" class="button insert" data-row="<?php
 										$file = array(
 											'file' => '',
-											'name' => ''
+											'name' => '',
 										);
 										ob_start();
 										include( 'html-product-variation-download.php' );

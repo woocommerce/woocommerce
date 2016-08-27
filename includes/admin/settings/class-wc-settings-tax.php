@@ -53,7 +53,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function get_sections() {
 		$sections = array(
 			''         => __( 'Tax Options', 'woocommerce' ),
-			'standard' => __( 'Standard Rates', 'woocommerce' )
+			'standard' => __( 'Standard Rates', 'woocommerce' ),
 		);
 
 		// Get tax classes and display as links
@@ -225,7 +225,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'tax_rate_state',
 			'tax_rate',
 			'tax_rate_name',
-			'tax_rate_priority'
+			'tax_rate_priority',
 		);
 
 		foreach ( $tax_rate_keys as $tax_rate_key ) {

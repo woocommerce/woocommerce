@@ -176,7 +176,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 			'exclude_sale_items'         => false,
 			'minimum_amount'             => '',
 			'maximum_amount'             => 100,
-			'customer_email'             => ''
+			'customer_email'             => '',
 		) );
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertEquals( true, $coupon->get_individual_use() );
@@ -208,7 +208,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 			'exclude_sale_items'         => 'no',
 			'minimum_amount'             => '',
 			'maximum_amount'             => 100,
-			'customer_email'             => ''
+			'customer_email'             => '',
 		) );
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertEquals( true, $coupon->get_individual_use() );

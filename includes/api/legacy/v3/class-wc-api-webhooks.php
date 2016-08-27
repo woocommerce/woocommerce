@@ -293,7 +293,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// update user ID
 			$webhook_data = array(
 				'ID'          => $webhook->id,
-				'post_author' => get_current_user_id()
+				'post_author' => get_current_user_id(),
 			);
 
 			// update name

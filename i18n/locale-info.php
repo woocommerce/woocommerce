@@ -15,10 +15,10 @@ return array(
 					'state'    => '',
 					'rate'     => '10.0000',
 					'name'     => 'GST',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'BD' => array(
 		'currency_code'  => 'BDT',
@@ -35,10 +35,10 @@ return array(
 					'state'    => '',
 					'rate'     => '15.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'BE' => array(
 		'currency_code'  => 'EUR',
@@ -55,10 +55,10 @@ return array(
 					'state'    => '',
 					'rate'     => '20.0000',
 					'name'     => 'BTW',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'BR' => array(
 		'currency_code'  => 'BRL',
@@ -68,7 +68,7 @@ return array(
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
-		'tax_rates'      => array()
+		'tax_rates'      => array(),
 	),
 	'CA' => array(
 		'currency_code'  => 'CAD',
@@ -86,7 +86,7 @@ return array(
 					'rate'     => '7.0000',
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
-					'priority' => 2
+					'priority' => 2,
 				)
 			),
 			'SK' => array(
@@ -96,7 +96,7 @@ return array(
 					'rate'     => '5.0000',
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
-					'priority' => 2
+					'priority' => 2,
 				)
 			),
 			'MB' => array(
@@ -106,7 +106,7 @@ return array(
 					'rate'     => '8.0000',
 					'name'     => _x( 'PST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
-					'priority' => 2
+					'priority' => 2,
 				)
 			),
 			'QC' => array(
@@ -116,7 +116,7 @@ return array(
 					'rate'     => '9.975',
 					'name'     => _x( 'QST', 'Canadian Tax Rates', 'woocommerce' ),
 					'shipping' => false,
-					'priority' => 2
+					'priority' => 2,
 				)
 			),
 			'*' => array(
@@ -125,94 +125,94 @@ return array(
 					'state'    => 'ON',
 					'rate'     => '13.0000',
 					'name'     => _x( 'HST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'NL',
 					'rate'     => '13.0000',
 					'name'     => _x( 'HST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'NB',
 					'rate'     => '13.0000',
 					'name'     => _x( 'HST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'PE',
 					'rate'     => '14.0000',
 					'name'     => _x( 'HST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'NS',
 					'rate'     => '15.0000',
 					'name'     => _x( 'HST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'AB',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'BC',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'NT',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'NU',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'YT',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'SK',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'MB',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				),
 				array(
 					'country'  => 'CA',
 					'state'    => 'QC',
 					'rate'     => '5.0000',
 					'name'     => _x( 'GST', 'Canadian Tax Rates', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'DE' => array(
 		'currency_code'  => 'EUR',
@@ -229,10 +229,10 @@ return array(
 					'state'    => '',
 					'rate'     => '19.0000',
 					'name'     => 'Mwst.',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'ES' => array(
 		'currency_code'  => 'EUR',
@@ -249,10 +249,10 @@ return array(
 					'state'    => '',
 					'rate'     => '21.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'FR' => array(
 		'currency_code'  => 'EUR',
@@ -269,10 +269,10 @@ return array(
 					'state'    => '',
 					'rate'     => '20.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'GB' => array(
 		'currency_code'  => 'GBP',
@@ -289,10 +289,10 @@ return array(
 					'state'	 => '',
 					'rate'	  => '20.0000',
 					'name'	  => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'HU' => array(
 		'currency_code'  => 'HUF',
@@ -309,10 +309,10 @@ return array(
 					'state'    => '',
 					'rate'     => '27.0000',
 					'name'     => 'ÁFA',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'IT' => array(
 		'currency_code'  => 'EUR',
@@ -329,10 +329,10 @@ return array(
 					'state'    => '',
 					'rate'     => '22.0000',
 					'name'     => 'IVA',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'JP' => array(
 		'currency_code'  => 'JPY',
@@ -349,10 +349,10 @@ return array(
 					'state'    => '',
 					'rate'     => '8.0000',
 					'name'     => __( 'Consumption tax', 'woocommerce' ),
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'NL' => array(
 		'currency_code'  => 'EUR',
@@ -369,10 +369,10 @@ return array(
 					'state'    => '',
 					'rate'     => '21.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'NO' => array(
 		'currency_code'  => 'Kr',
@@ -389,10 +389,10 @@ return array(
 					'state'    => '',
 					'rate'     => '25.0000',
 					'name'     => 'MVA',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'NP' => array(
 		'currency_code'  => 'NPR',
@@ -409,10 +409,10 @@ return array(
 					'state'    => '',
 					'rate'     => '13.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'PL' => array(
 		'currency_code'  => 'PLN',
@@ -429,10 +429,10 @@ return array(
 					'state'    => '',
 					'rate'     => '23.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'TH' => array(
 		'currency_code'  => 'THB',
@@ -449,10 +449,10 @@ return array(
 					'state'    => '',
 					'rate'     => '7.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'TR' => array(
 		'currency_code'  => 'TRY',
@@ -469,10 +469,10 @@ return array(
 					'state'    => '',
 					'rate'     => '18.0000',
 					'name'     => 'KDV',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'US' => array(
 		'currency_code'  => 'USD',
@@ -489,7 +489,7 @@ return array(
 					'state'    => 'AL',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'AZ' => array(
@@ -498,7 +498,7 @@ return array(
 					'state'    => 'AZ',
 					'rate'     => '5.6000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'AR' => array(
@@ -507,7 +507,7 @@ return array(
 					'state'    => 'AR',
 					'rate'     => '6.5000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'CA' => array(
@@ -516,7 +516,7 @@ return array(
 					'state'    => 'CA',
 					'rate'     => '7.5000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'CO' => array(
@@ -525,7 +525,7 @@ return array(
 					'state'    => 'CO',
 					'rate'     => '2.9000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'CT' => array(
@@ -534,7 +534,7 @@ return array(
 					'state'    => 'CT',
 					'rate'     => '6.3500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'DC' => array(
@@ -543,7 +543,7 @@ return array(
 					'state'    => 'DC',
 					'rate'     => '5.7500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'FL' => array(
@@ -552,7 +552,7 @@ return array(
 					'state'    => 'FL',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'GA' => array(
@@ -561,7 +561,7 @@ return array(
 					'state'    => 'GA',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'GU' => array(
@@ -570,7 +570,7 @@ return array(
 					'state'    => 'GU',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'HI' => array(
@@ -579,7 +579,7 @@ return array(
 					'state'    => 'HI',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'ID' => array(
@@ -588,7 +588,7 @@ return array(
 					'state'    => 'ID',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'IL' => array(
@@ -597,7 +597,7 @@ return array(
 					'state'    => 'IL',
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'IN' => array(
@@ -606,7 +606,7 @@ return array(
 					'state'    => 'IN',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'IA' => array(
@@ -615,7 +615,7 @@ return array(
 					'state'    => 'IA',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'KS' => array(
@@ -624,7 +624,7 @@ return array(
 					'state'    => 'KS',
 					'rate'     => '6.1500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'KY' => array(
@@ -633,7 +633,7 @@ return array(
 					'state'    => 'KY',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'LA' => array(
@@ -642,7 +642,7 @@ return array(
 					'state'    => 'LA',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'ME' => array(
@@ -651,7 +651,7 @@ return array(
 					'state'    => 'ME',
 					'rate'     => '5.5000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'MD' => array(
@@ -660,7 +660,7 @@ return array(
 					'state'    => 'MD',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'MA' => array(
@@ -669,7 +669,7 @@ return array(
 					'state'    => 'MA',
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'MI' => array(
@@ -678,7 +678,7 @@ return array(
 					'state'    => 'MI',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'MN' => array(
@@ -687,7 +687,7 @@ return array(
 					'state'    => 'MN',
 					'rate'     => '6.8750',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'MS' => array(
@@ -696,7 +696,7 @@ return array(
 					'state'    => 'MS',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'MO' => array(
@@ -705,7 +705,7 @@ return array(
 					'state'    => 'MO',
 					'rate'     => '4.225',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'NE' => array(
@@ -714,7 +714,7 @@ return array(
 					'state'    => 'NE',
 					'rate'     => '5.5000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'NV' => array(
@@ -723,7 +723,7 @@ return array(
 					'state'    => 'NV',
 					'rate'     => '6.8500',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'NJ' => array(
@@ -732,7 +732,7 @@ return array(
 					'state'    => 'NJ',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'NM' => array(
@@ -741,7 +741,7 @@ return array(
 					'state'    => 'NM',
 					'rate'     => '5.1250',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'NY' => array(
@@ -750,7 +750,7 @@ return array(
 					'state'    => 'NY',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'NC' => array(
@@ -759,7 +759,7 @@ return array(
 					'state'    => 'NC',
 					'rate'     => '4.7500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'ND' => array(
@@ -768,7 +768,7 @@ return array(
 					'state'    => 'ND',
 					'rate'     => '5.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'OH' => array(
@@ -777,7 +777,7 @@ return array(
 					'state'    => 'OH',
 					'rate'     => '5.7500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'OK' => array(
@@ -786,7 +786,7 @@ return array(
 					'state'    => 'OK',
 					'rate'     => '4.5000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'PA' => array(
@@ -795,7 +795,7 @@ return array(
 					'state'    => 'PA',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'PR' => array(
@@ -804,7 +804,7 @@ return array(
 					'state'    => 'PR',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'RI' => array(
@@ -813,7 +813,7 @@ return array(
 					'state'    => 'RI',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'SC' => array(
@@ -822,7 +822,7 @@ return array(
 					'state'    => 'SC',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'SD' => array(
@@ -831,7 +831,7 @@ return array(
 					'state'    => 'SD',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'TN' => array(
@@ -840,7 +840,7 @@ return array(
 					'state'    => 'TN',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'TX' => array(
@@ -849,7 +849,7 @@ return array(
 					'state'    => 'TX',
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'UT' => array(
@@ -858,7 +858,7 @@ return array(
 					'state'    => 'UT',
 					'rate'     => '5.9500',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'VT' => array(
@@ -867,7 +867,7 @@ return array(
 					'state'    => 'VT',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'VA' => array(
@@ -876,7 +876,7 @@ return array(
 					'state'    => 'VA',
 					'rate'     => '5.3000',
 					'name'     => 'State Tax',
-					'shipping' => false
+					'shipping' => false,
 				)
 			),
 			'WA' => array(
@@ -885,7 +885,7 @@ return array(
 					'state'    => 'WA',
 					'rate'     => '6.5000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'WV' => array(
@@ -894,7 +894,7 @@ return array(
 					'state'    => 'WV',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'WI' => array(
@@ -903,7 +903,7 @@ return array(
 					'state'    => 'WI',
 					'rate'     => '5.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
 			),
 			'WY' => array(
@@ -912,10 +912,10 @@ return array(
 					'state'    => 'WY',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
+			),
+		),
 	),
 	'ZA' => array(
 		'currency_code'  => 'ZAR',
@@ -932,9 +932,9 @@ return array(
 					'state'    => '',
 					'rate'     => '14.0000',
 					'name'     => 'VAT',
-					'shipping' => true
+					'shipping' => true,
 				)
-			)
-		)
-	)
+			),
+		),
+	),
 );

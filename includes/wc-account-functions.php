@@ -55,7 +55,7 @@ function wc_customer_edit_account_url() {
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
 		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
-		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) )
+		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
 	) );
 
 	if ( $flip ) {

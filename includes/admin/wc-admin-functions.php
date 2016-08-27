@@ -111,7 +111,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'post_title'     => $page_title,
 			'post_content'   => $page_content,
 			'post_parent'    => $post_parent,
-			'comment_status' => 'closed'
+			'comment_status' => 'closed',
 		);
 		$page_id = wp_insert_post( $page_data );
 	}

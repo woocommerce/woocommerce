@@ -193,7 +193,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $request['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
 
 			$args['post_type'] = array( 'product', 'product_variation' );
@@ -1107,7 +1107,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -2396,7 +2396,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						'visible' => array(
 							'description' => __( 'If the variation is visible.', 'woocommerce' ),
 							'type'        => 'boolean',
-							'context'     => array( 'view', 'edit' )
+							'context'     => array( 'view', 'edit' ),
 						),
 						'virtual' => array(
 							'description' => __( 'If the variation is virtual.', 'woocommerce' ),

@@ -68,7 +68,7 @@ class WC_Tracker {
 				'blocking'    => false,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body'        => json_encode( $params ),
-				'cookies'     => array()
+				'cookies'     => array(),
 			)
 		);
 	}

@@ -29,8 +29,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Filter by price', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
@@ -39,7 +39,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
 			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
 			'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
+			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '',
 		) );
 		parent::__construct();
 	}

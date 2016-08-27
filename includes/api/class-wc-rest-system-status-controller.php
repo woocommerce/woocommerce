@@ -281,7 +281,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 						),
-					)
+					),
 				),
 				'active_plugins' => array(
 					'description' => __( 'Active Plugins', 'woocommerce' ),
@@ -355,7 +355,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-					)
+					),
 				),
 				'settings' => array(
 					'description' => __( 'Settings', 'woocommerce' ),
@@ -412,14 +412,14 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 						),
-					)
+					),
 				),
 				'pages' => array(
 					'description' => __( 'WooCommerce Pages', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-			)
+			),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
@@ -469,8 +469,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'user-agent'  => 'WooCommerce/' . WC()->version,
 			'httpversion' => '1.1',
 			'body'        => array(
-				'cmd'    => '_notify-validate'
-			)
+				'cmd'    => '_notify-validate',
+			),
 		) );
 		$post_response_successful = false;
 		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
@@ -610,7 +610,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'fields'   => array(
 						'sections' => false,
 						'tags'     => false,
-					)
+					),
 				) );
 
 				if ( is_object( $api ) && ! is_wp_error( $api ) ) {

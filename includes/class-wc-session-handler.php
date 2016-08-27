@@ -182,7 +182,7 @@ class WC_Session_Handler extends WC_Session {
 				array(
 					'session_key' => $this->_customer_id,
 					'session_value' => maybe_serialize( $this->_data ),
-					'session_expiry' => $this->_session_expiration
+					'session_expiry' => $this->_session_expiration,
 				),
 				array(
 					'%s',
@@ -285,7 +285,7 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->delete(
 			$this->_table,
 			array(
-				'session_key' => $customer_id
+				'session_key' => $customer_id,
 			)
 		);
 	}
@@ -302,10 +302,10 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->update(
 			$this->_table,
 			array(
-				'session_expiry' => $timestamp
+				'session_expiry' => $timestamp,
 			),
 			array(
-				'session_key' => $customer_id
+				'session_key' => $customer_id,
 			),
 			array(
 				'%d'

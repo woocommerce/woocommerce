@@ -91,7 +91,7 @@ class WC_Cart {
 		'coupon_discount_amounts'     => array(),
 		'coupon_discount_tax_amounts' => array(),
 		'fee_total'                   => 0,
-		'fees'                        => array()
+		'fees'                        => array(),
 	);
 
 	/**
@@ -313,7 +313,7 @@ class WC_Cart {
 		 */
 		public function persistent_cart_update() {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
-				'cart' => WC()->session->get( 'cart' )
+				'cart' => WC()->session->get( 'cart' ),
 			) );
 		}
 
@@ -579,7 +579,7 @@ class WC_Cart {
 
 					$item_data[] = array(
 						'key'   => $label,
-						'value' => $value
+						'value' => $value,
 					);
 				}
 			}
@@ -976,7 +976,7 @@ class WC_Cart {
 						'variation_id'	=> $variation_id,
 						'variation' 	=> $variation,
 						'quantity' 		=> $quantity,
-						'data'			=> $product_data
+						'data'			=> $product_data,
 					) ), $cart_item_key );
 				}
 

@@ -187,14 +187,14 @@ function wc_get_featured_product_ids() {
 			array(
 				'key' 		=> '_visibility',
 				'value' 	=> array('catalog', 'visible'),
-				'compare' 	=> 'IN'
+				'compare' 	=> 'IN',
 			),
 			array(
 				'key' 	=> '_featured',
-				'value' => 'yes'
+				'value' => 'yes',
 			)
 		),
-		'fields' => 'id=>parent'
+		'fields' => 'id=>parent',
 	) );
 
 	$product_ids          = array_keys( $featured );
@@ -525,7 +525,7 @@ function wc_get_product_types() {
 		'simple'   => __( 'Simple product', 'woocommerce' ),
 		'grouped'  => __( 'Grouped product', 'woocommerce' ),
 		'external' => __( 'External/Affiliate product', 'woocommerce' ),
-		'variable' => __( 'Variable product', 'woocommerce' )
+		'variable' => __( 'Variable product', 'woocommerce' ),
 	) );
 }
 

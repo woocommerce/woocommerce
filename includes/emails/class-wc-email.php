@@ -279,7 +279,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_headers() {
 		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
-		
+
 		if ( 'new_order' === $this->id ) {
 			$header .= "Reply-to: {$this->object->billing_first_name} {$this->object->billing_last_name} <{$this->object->billing_email}>\r\n";
 		}
@@ -486,7 +486,7 @@ class WC_Email extends WC_Settings_API {
 				'title'       => __( 'Enable/Disable', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'Enable this email notification', 'woocommerce' ),
-				'default'     => 'yes'
+				'default'     => 'yes',
 			),
 			'subject'         => array(
 				'title'       => __( 'Email Subject', 'woocommerce' ),
@@ -494,7 +494,7 @@ class WC_Email extends WC_Settings_API {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder' => '',
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email Heading', 'woocommerce' ),
@@ -502,7 +502,7 @@ class WC_Email extends WC_Settings_API {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder' => '',
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
@@ -511,8 +511,8 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'html',
 				'class'       => 'email_type wc-enhanced-select',
 				'options'     => $this->get_email_type_options(),
-				'desc_tip'    => true
-			)
+				'desc_tip'    => true,
+			),
 		);
 	}
 
@@ -740,7 +740,7 @@ class WC_Email extends WC_Settings_API {
 			<?php
 				$templates = array(
 					'template_html'  => __( 'HTML template', 'woocommerce' ),
-					'template_plain' => __( 'Plain text template', 'woocommerce' )
+					'template_plain' => __( 'Plain text template', 'woocommerce' ),
 				);
 
 				foreach ( $templates as $template_type => $title ) :

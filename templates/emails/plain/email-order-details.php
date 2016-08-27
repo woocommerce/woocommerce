@@ -29,7 +29,7 @@ echo "\n" . wc_get_email_order_items( $order, array(
 	'show_image'    => false,
 	'image_size'    => array( 32, 32 ),
 	'plain_text'    => true,
-	'sent_to_admin' => $sent_to_admin
+	'sent_to_admin' => $sent_to_admin,
 ) );
 
 echo "==========\n\n";

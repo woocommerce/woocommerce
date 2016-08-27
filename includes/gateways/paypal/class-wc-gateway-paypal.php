@@ -245,7 +245,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return array(
 			'result'   => 'success',
-			'redirect' => $paypal_request->get_request_url( $order, $this->testmode )
+			'redirect' => $paypal_request->get_request_url( $order, $this->testmode ),
 		);
 	}
 

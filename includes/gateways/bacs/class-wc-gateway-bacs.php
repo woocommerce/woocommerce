@@ -49,7 +49,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'sort_code'      => $this->get_option( 'sort_code' ),
 					'bank_name'      => $this->get_option( 'bank_name' ),
 					'iban'           => $this->get_option( 'iban' ),
-					'bic'            => $this->get_option( 'bic' )
+					'bic'            => $this->get_option( 'bic' ),
 				)
 			)
 		);
@@ -73,7 +73,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable Bank Transfer', 'woocommerce' ),
-				'default' => 'no'
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -97,7 +97,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 			),
 			'account_details' => array(
-				'type'        => 'account_details'
+				'type'        => 'account_details',
 			),
 		);
 
@@ -214,7 +214,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'bank_name'      => $bank_names[ $i ],
 					'sort_code'      => $sort_codes[ $i ],
 					'iban'           => $ibans[ $i ],
-					'bic'            => $bics[ $i ]
+					'bic'            => $bics[ $i ],
 				);
 			}
 		}
@@ -295,20 +295,20 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
 					'account_number'=> array(
 						'label' => __( 'Account Number', 'woocommerce' ),
-						'value' => $bacs_account->account_number
+						'value' => $bacs_account->account_number,
 					),
 					'sort_code'     => array(
 						'label' => $sortcode,
-						'value' => $bacs_account->sort_code
+						'value' => $bacs_account->sort_code,
 					),
 					'iban'          => array(
 						'label' => __( 'IBAN', 'woocommerce' ),
-						'value' => $bacs_account->iban
+						'value' => $bacs_account->iban,
 					),
 					'bic'           => array(
 						'label' => __( 'BIC', 'woocommerce' ),
-						'value' => $bacs_account->bic
-					)
+						'value' => $bacs_account->bic,
+					),
 				), $order_id );
 
 				foreach ( $account_fields as $field_key => $field ) {
@@ -345,7 +345,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Return thankyou redirect
 		return array(
 			'result'    => 'success',
-			'redirect'  => $this->get_return_url( $order )
+			'redirect'  => $this->get_return_url( $order ),
 		);
 
 	}

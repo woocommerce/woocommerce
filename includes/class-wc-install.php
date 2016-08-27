@@ -256,7 +256,7 @@ class WC_Install {
 	public static function cron_schedules( $schedules ) {
 		$schedules['monthly'] = array(
 			'interval' => 2635200,
-			'display'  => __( 'Monthly', 'woocommerce' )
+			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
 		return $schedules;
 	}
@@ -296,23 +296,23 @@ class WC_Install {
 			'shop' => array(
 				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
-				'content' => ''
+				'content' => '',
 			),
 			'cart' => array(
 				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 			),
 			'checkout' => array(
 				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
-			)
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+			),
 		) );
 
 		foreach ( $pages as $key => $page ) {
@@ -360,7 +360,7 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
-			)
+			),
 		);
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
@@ -609,7 +609,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 					=> true
+			'read' 					=> true,
 		) );
 
 		// Shop manager role
@@ -653,7 +653,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'upload_files'           => true,
 			'export'                 => true,
 			'import'                 => true,
-			'list_users'             => true
+			'list_users'             => true,
 		) );
 
 		$capabilities = self::get_core_capabilities();
@@ -749,17 +749,17 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
-				'content' 	=> ''
+				'content' 	=> '',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
-				'content' 	=> ''
+				'content' 	=> '',
 			)
 		);
 
@@ -767,7 +767,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$files[] = array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			);
 		}
 

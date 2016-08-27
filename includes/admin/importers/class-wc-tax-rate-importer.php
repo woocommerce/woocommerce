@@ -148,7 +148,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 						'tax_rate_compound' => $compound ? 1 : 0,
 						'tax_rate_shipping' => $shipping ? 1 : 0,
 						'tax_rate_order'    => $loop ++,
-						'tax_rate_class'    => $class
+						'tax_rate_class'    => $class,
 					);
 
 					$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );

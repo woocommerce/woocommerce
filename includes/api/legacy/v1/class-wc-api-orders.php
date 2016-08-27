@@ -315,7 +315,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$args = array(
 			'post_id' => $id,
 			'approve' => 'approve',
-			'type'    => 'order_note'
+			'type'    => 'order_note',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
@@ -352,7 +352,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_order',
-			'post_status' => array_keys( wc_get_order_statuses() )
+			'post_status' => array_keys( wc_get_order_statuses() ),
 		);
 
 		// add status argument

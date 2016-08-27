@@ -254,11 +254,11 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$zone->set_locations( array(
 			array(
 				'code' => 'US',
-				'type' => 'country'
+				'type' => 'country',
 			),
 			array(
 				'code' => '90210',
-				'type' => 'postcode'
+				'type' => 'postcode',
 			)
 		) );
 
@@ -266,12 +266,12 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$this->assertEquals( $zone->get_zone_locations(), array(
 			2 => (object) array(
 				'code' => 'US',
-				'type' => 'country'
+				'type' => 'country',
 			),
 			3 => (object) array(
 				'code' => '90210',
-				'type' => 'postcode'
-			)
+				'type' => 'postcode',
+			),
 		) );
 
 		// Clean

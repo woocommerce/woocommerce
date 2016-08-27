@@ -26,7 +26,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		'total'        => 0,
 		'total_tax'    => 0,
 		'taxes'        => array(
-			'total' => array()
+			'total' => array(),
 		),
 	);
 
@@ -170,7 +170,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
 		$tax_data     = array(
-			'total'    => array()
+			'total'    => array(),
 		);
 		if ( ! empty( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );

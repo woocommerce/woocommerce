@@ -216,7 +216,7 @@ function wc_cart_totals_shipping_html() {
 			'package_details'      => implode( ', ', $product_names ),
 			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			'index'                => $i,
-			'chosen_method'        => $chosen_method
+			'chosen_method'        => $chosen_method,
 		) );
 	}
 }

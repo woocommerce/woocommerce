@@ -168,7 +168,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'email_heading'  => $this->get_heading(),
 			'sent_to_admin'  => false,
 			'plain_text'     => false,
-			'email'			 => $this
+			'email'			 => $this,
 		) );
 	}
 
@@ -185,7 +185,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'email_heading'  => $this->get_heading(),
 			'sent_to_admin'  => false,
 			'plain_text'     => true,
-			'email'			 => $this
+			'email'			 => $this,
 		) );
 	}
 
@@ -198,7 +198,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable this email notification', 'woocommerce' ),
-				'default' => 'yes'
+				'default' => 'yes',
 			),
 			'subject_full' => array(
 				'title'       => __( 'Full Refund Subject', 'woocommerce' ),
@@ -206,7 +206,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_full ),
 				'placeholder' => '',
 				'default'     => $this->subject_full,
-				'desc_tip'      => true
+				'desc_tip'    => true,
 			),
 			'subject_partial' => array(
 				'title'       => __( 'Partial Refund Subject', 'woocommerce' ),
@@ -214,7 +214,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_partial ),
 				'placeholder' => '',
 				'default'     => $this->subject_partial,
-				'desc_tip'      => true
+				'desc_tip'    => true,
 			),
 			'heading_full' => array(
 				'title'       => __( 'Full Refund Email Heading', 'woocommerce' ),
@@ -222,7 +222,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_full ),
 				'placeholder' => '',
 				'default'     => $this->heading_full,
-				'desc_tip'      => true
+				'desc_tip'    => true,
 			),
 			'heading_partial' => array(
 				'title'       => __( 'Partial Refund Email Heading', 'woocommerce' ),
@@ -230,7 +230,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_partial ),
 				'placeholder' => '',
 				'default'     => $this->heading_partial,
-				'desc_tip'      => true
+				'desc_tip'    => true,
 			),
 			'email_type' => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
@@ -239,8 +239,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'default'     => 'html',
 				'class'       => 'email_type wc-enhanced-select',
 				'options'     => $this->get_email_type_options(),
-				'desc_tip'      => true
-			)
+				'desc_tip'    => true,
+			),
 		);
 	}
 }

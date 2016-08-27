@@ -191,7 +191,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 						'href' => rest_url( '/wc/v1/settings/general' ),
 					),
 				),
-			)
+			),
 		), $data );
 
 		// test getting a valid group with settings attached to it

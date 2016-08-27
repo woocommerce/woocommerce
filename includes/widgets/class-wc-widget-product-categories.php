@@ -41,7 +41,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Product Categories', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'orderby' => array(
 				'type'  => 'select',
@@ -49,34 +49,34 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'label' => __( 'Order by', 'woocommerce' ),
 				'options' => array(
 					'order' => __( 'Category Order', 'woocommerce' ),
-					'name'  => __( 'Name', 'woocommerce' )
-				)
+					'name'  => __( 'Name', 'woocommerce' ),
+				),
 			),
 			'dropdown' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show as dropdown', 'woocommerce' )
+				'label' => __( 'Show as dropdown', 'woocommerce' ),
 			),
 			'count' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show product counts', 'woocommerce' )
+				'label' => __( 'Show product counts', 'woocommerce' ),
 			),
 			'hierarchical' => array(
 				'type'  => 'checkbox',
 				'std'   => 1,
-				'label' => __( 'Show hierarchy', 'woocommerce' )
+				'label' => __( 'Show hierarchy', 'woocommerce' ),
 			),
 			'show_children_only' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Only show children of the current category', 'woocommerce' )
+				'label' => __( 'Only show children of the current category', 'woocommerce' ),
 			),
 			'hide_empty' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Hide empty categories', 'woocommerce' )
-			)
+				'label' => __( 'Hide empty categories', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -140,7 +140,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 					'fields'       => 'ids',
 					'parent'       => 0,
 					'hierarchical' => true,
-					'hide_empty'   => false
+					'hide_empty'   => false,
 				)
 			);
 
@@ -151,7 +151,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 					'fields'       => 'ids',
 					'parent'       => $this->current_cat->term_id,
 					'hierarchical' => true,
-					'hide_empty'   => false
+					'hide_empty'   => false,
 				)
 			);
 
@@ -165,7 +165,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 							'fields'       => 'ids',
 							'parent'       => $ancestor,
 							'hierarchical' => false,
-							'hide_empty'   => false
+							'hide_empty'   => false,
 						)
 					);
 					$siblings = array_merge( $siblings, $ancestor_siblings );
@@ -203,7 +203,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'hierarchical'       => $hierarchical,
 				'show_uncategorized' => 0,
 				'orderby'            => $orderby,
-				'selected'           => $this->current_cat ? $this->current_cat->slug : ''
+				'selected'           => $this->current_cat ? $this->current_cat->slug : '',
 			);
 			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
 

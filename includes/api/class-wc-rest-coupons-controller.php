@@ -385,7 +385,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'minimum_amount'               => '',
 			'maximum_amount'               => '',
 			'email_restrictions'           => array(),
-			'description'                  => ''
+			'description'                  => '',
 		);
 
 		$data = wp_parse_args( $data, $defaults );

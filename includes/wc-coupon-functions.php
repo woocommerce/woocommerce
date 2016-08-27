@@ -24,7 +24,7 @@ function wc_get_coupon_types() {
 		'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
 		'percent'         => __( 'Cart % Discount', 'woocommerce' ),
 		'fixed_product'   => __( 'Product Discount', 'woocommerce' ),
-		'percent_product' => __( 'Product % Discount', 'woocommerce' )
+		'percent_product' => __( 'Product % Discount', 'woocommerce' ),
 	) );
 }
 

@@ -417,35 +417,35 @@ class WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
+						'name'            => 'product_id',
 					),
 					$meta_key => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
-						'name'            => 'sparkline_value'
+						'name'            => 'sparkline_value',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'where' => array(
 					array(
 						'key'      => 'post_date',
 						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>'
+						'operator' => '>',
 					),
 					array(
 						'key'      => 'order_item_meta__product_id.meta_value',
 						'value'    => $id,
-						'operator' => '='
+						'operator' => '=',
 					)
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
-				'filter_range' => false
+				'filter_range' => false,
 			) );
 		} else {
 
@@ -454,24 +454,24 @@ class WC_Admin_Report {
 					'_order_total' => array(
 						'type'     => 'meta',
 						'function' => 'SUM',
-						'name'     => 'sparkline_value'
+						'name'     => 'sparkline_value',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'where' => array(
 					array(
 						'key'      => 'post_date',
 						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>'
+						'operator' => '>',
 					)
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
-				'filter_range' => false
+				'filter_range' => false,
 			) );
 		}
 

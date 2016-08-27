@@ -95,7 +95,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$legend[] = array(
 				'title'            => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
-				'highlight_series' => $index
+				'highlight_series' => $index,
 			);
 
 			$index++;
@@ -113,7 +113,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
 			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'7day'         => __( 'Last 7 Days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
@@ -134,23 +134,23 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
+						'name'            => 'product_id',
 					),
 					'_line_total' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
-						'name'            => 'order_item_amount'
+						'name'            => 'order_item_amount',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'group_by'     => 'ID, product_id, post_date',
 				'query_type'   => 'get_results',
-				'filter_range' => true
+				'filter_range' => true,
 			) );
 
 			$this->item_sales           = array();
@@ -190,7 +190,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		return array(
 			array(
 				'title'    => __( 'Categories', 'woocommerce' ),
-				'callback' => array( $this, 'category_widget' )
+				'callback' => array( $this, 'category_widget' ),
 			)
 		);
 	}

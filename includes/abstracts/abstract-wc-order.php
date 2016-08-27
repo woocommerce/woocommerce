@@ -243,7 +243,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'post_parent'   => $this->get_parent_id(),
 			),
 			array(
-				'ID' => $order_id
+				'ID' => $order_id,
 			)
 		);
 
@@ -625,7 +625,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		return array(
 			'from' => $old_status,
-			'to'   => $new_status
+			'to'   => $new_status,
 		);
 	 }
 
@@ -1586,7 +1586,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_currency()) )
+					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_currency()) ),
 				);
 			}
 		}

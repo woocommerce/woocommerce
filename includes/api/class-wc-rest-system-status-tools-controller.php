@@ -150,7 +150,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
 				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
-			)
+			),
 		);
 
 		return apply_filters( 'woocommerce_debug_tools', $tools );

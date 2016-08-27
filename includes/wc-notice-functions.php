@@ -133,7 +133,7 @@ function wc_print_notices() {
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
 			wc_get_template( "notices/{$notice_type}.php", array(
-				'messages' => array_filter( $all_notices[ $notice_type ] )
+				'messages' => array_filter( $all_notices[ $notice_type ] ),
 			) );
 		}
 	}
@@ -157,7 +157,7 @@ function wc_print_notice( $message, $notice_type = 'success' ) {
 	}
 
 	wc_get_template( "notices/{$notice_type}.php", array(
-		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) )
+		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) ),
 	) );
 }
 

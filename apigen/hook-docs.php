@@ -169,7 +169,7 @@ class WC_HookFinder {
 											'class'    => $current_class,
 											'function' => $current_function,
 											'file'     => array( self::$current_file ),
-											'type'     => $token_type
+											'type'     => $token_type,
 										);
 									}
 								break;

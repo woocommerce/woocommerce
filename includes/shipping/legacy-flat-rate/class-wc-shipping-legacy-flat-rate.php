@@ -129,7 +129,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function fee( $atts ) {
 		$atts = shortcode_atts( array(
 			'percent' => '',
-			'min_fee' => ''
+			'min_fee' => '',
 		), $atts );
 
 		$calculated_fee = 0;
@@ -166,7 +166,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost']
+				'cost' => $package['contents_cost'],
 			) );
 		}
 
@@ -186,7 +186,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
 			if ( $this->type === 'class' ) {

@@ -369,7 +369,7 @@ class WC_Shipping {
 			// Store in session to avoid recalculation
 			WC()->session->set( $session_key, array(
 				'package_hash' => $package_hash,
-				'rates'        => $package['rates']
+				'rates'        => $package['rates'],
 			) );
 		} else {
 			$package['rates'] = $stored_rates['rates'];

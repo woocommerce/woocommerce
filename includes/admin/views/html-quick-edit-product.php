@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'taxable'  => __( 'Taxable', 'woocommerce' ),
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' )
+							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="tax_class" name="_tax_class">
 					<?php
 						$options = array(
-							'' => __( 'Standard', 'woocommerce' )
+							'' => __( 'Standard', 'woocommerce' ),
 						);
 
 						$tax_classes = WC_Tax::get_tax_classes();
@@ -143,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
 						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' )
+						'hidden'  => __( 'Hidden', 'woocommerce' ),
 					) );
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -164,7 +164,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 					$options = array(
 						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' )
+						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) .'">'. $value .'</option>';
@@ -200,7 +200,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$options = array(
 						'no'     => __( 'Do not allow', 'woocommerce' ),
 						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'    => __( 'Allow', 'woocommerce' )
+						'yes'    => __( 'Allow', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';

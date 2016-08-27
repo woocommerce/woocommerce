@@ -86,7 +86,7 @@ class WC_Payment_Tokens {
 
 		$tokens = self::get_tokens( array(
 			'user_id'    => $customer_id,
-			'gateway_id' => $gateway_id
+			'gateway_id' => $gateway_id,
 		) );
 
 		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
@@ -136,7 +136,7 @@ class WC_Payment_Tokens {
 		}
 
 		$tokens = self::get_tokens( array(
-			'token_id' => $token_ids
+			'token_id' => $token_ids,
 		) );
 
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );

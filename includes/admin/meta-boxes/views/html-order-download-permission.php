@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'download_file' => $download->product_id,
 							'order'         => $download->order_key,
 							'email'         => urlencode( $download->user_email ),
-							'key'           => $download->download_id
+							'key'           => $download->download_id,
 						), trailingslashit( home_url() ) );
 
 						echo '<a href="' . esc_url( $download_link ) . '">' . esc_html( $file_count ) . '</a>';

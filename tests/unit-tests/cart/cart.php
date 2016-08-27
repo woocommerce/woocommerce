@@ -71,7 +71,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 		$product = wc_get_product( $product->id );
@@ -106,7 +106,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
@@ -301,7 +301,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 				'is',
 				'an',
 				'array'
-			)
+			),
 		);
 
 		// Manually generate ID

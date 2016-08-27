@@ -105,7 +105,7 @@ class WC_Checkout {
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
 				'required'      => true,
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
+				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' ),
 			);
 		}
 
@@ -114,7 +114,7 @@ class WC_Checkout {
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
 				'required'          => true,
-				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
+				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
 			);
 		}
 
@@ -123,8 +123,8 @@ class WC_Checkout {
 				'type' => 'textarea',
 				'class' => array('notes'),
 				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
-			)
+				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+			),
 		);
 
 		$this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->checkout_fields );
@@ -654,7 +654,7 @@ class WC_Checkout {
 							'ID'           => $this->customer_id,
 							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
-							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
+							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 						);
 						wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
 					}
@@ -718,7 +718,7 @@ class WC_Checkout {
 					if ( is_ajax() ) {
 						wp_send_json( array(
 							'result' 	=> 'success',
-							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order ),
 						) );
 					} else {
 						wp_safe_redirect(
@@ -751,7 +751,7 @@ class WC_Checkout {
 				'result'	=> 'failure',
 				'messages' 	=> isset( $messages ) ? $messages : '',
 				'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
+				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
 			);
 
 			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );

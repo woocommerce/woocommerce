@@ -68,7 +68,7 @@ function wc_update_200_permalinks() {
 			'product_base' 		=> untrailingslashit( $product_base ),
 			'category_base' 	=> untrailingslashit( $category_base . $category_slug ),
 			'attribute_base' 	=> untrailingslashit( $category_base ),
-			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug )
+			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug ),
 		);
 
 		update_option( 'woocommerce_permalinks', $permalinks );
@@ -124,7 +124,7 @@ function wc_update_200_taxrates() {
 							'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
 							'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
 							'tax_rate_order'    => $loop,
-							'tax_rate_class'    => $tax_rate['class']
+							'tax_rate_class'    => $tax_rate['class'],
 						)
 					);
 
@@ -154,7 +154,7 @@ function wc_update_200_taxrates() {
 					'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
 					'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
 					'tax_rate_order'    => $loop,
-					'tax_rate_class'    => $tax_rate['class']
+					'tax_rate_class'    => $tax_rate['class'],
 				)
 			);
 
@@ -214,7 +214,7 @@ function wc_update_200_line_items() {
 
 			$item_id = wc_add_order_item( $order_item_row->post_id, array(
 		 		'order_item_name' 		=> $order_item['name'],
-		 		'order_item_type' 		=> 'line_item'
+		 		'order_item_type' 		=> 'line_item',
 		 	) );
 
 		 	// Add line item meta
@@ -282,7 +282,7 @@ function wc_update_200_line_items() {
 
 				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 			 		'order_item_name' 		=> $order_tax['label'],
-			 		'order_item_type' 		=> 'tax'
+			 		'order_item_type' 		=> 'tax',
 			 	) );
 
 			 	// Add line item meta
@@ -314,7 +314,7 @@ function wc_update_200_images() {
 		$old_settings = array_filter( array(
 			'width' => get_option( 'woocommerce_' . $value . '_image_width' ),
 			'height' => get_option( 'woocommerce_' . $value . '_image_height' ),
-			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' )
+			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' ),
 		) );
 
 		if ( ! empty(  $old_settings  ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ){
@@ -338,41 +338,41 @@ function wc_update_209_brazillian_state() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => '_billing_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => '_shipping_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->usermeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => 'billing_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->usermeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => 'shipping_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 }
@@ -411,7 +411,7 @@ function wc_update_210_file_paths() {
 						$needs_update      = true;
 						$new_value[ $key ] = array(
 							'file' => $file,
-							'name' => wc_get_filename_from_url( $file )
+							'name' => wc_get_filename_from_url( $file ),
 						);
 					} else {
 						$new_value[ $key ] = $file;
@@ -564,10 +564,10 @@ function wc_update_220_attributes() {
 				$wpdb->update(
 					"{$wpdb->prefix}woocommerce_attribute_taxonomies",
 					array(
-						'attribute_name' => $sanitized_attribute_name
+						'attribute_name' => $sanitized_attribute_name,
 					),
 					array(
-						'attribute_id' => $attribute_taxonomy->attribute_id
+						'attribute_id' => $attribute_taxonomy->attribute_id,
 					)
 				);
 
@@ -617,7 +617,7 @@ function wc_update_240_shipping_methods() {
 	 */
 	$shipping_methods = array(
 		'woocommerce_flat_rates'                        => new WC_Shipping_Legacy_Flat_Rate(),
-		'woocommerce_international_delivery_flat_rates' => new WC_Shipping_Legacy_International_Delivery()
+		'woocommerce_international_delivery_flat_rates' => new WC_Shipping_Legacy_International_Delivery(),
 	);
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated
@@ -689,7 +689,7 @@ function wc_update_240_api_keys() {
 			'permissions'     => $user->woocommerce_api_key_permissions,
 			'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
 			'consumer_secret' => $user->woocommerce_api_consumer_secret,
-			'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 )
+			'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 ),
 		);
 	}
 
@@ -729,7 +729,7 @@ function wc_update_240_webhooks() {
 		'posts_per_page' => -1,
 		'post_type'      => 'shop_webhook',
 		'meta_key'       => '_topic',
-		'meta_value'     => 'order.updated'
+		'meta_value'     => 'order.updated',
 	) );
 	foreach ( $order_update_webhooks as $order_update_webhook ) {
 		$webhook = new WC_Webhook( $order_update_webhook->ID );
@@ -746,7 +746,7 @@ function wc_update_240_refunds() {
 	$refunded_orders = get_posts( array(
 		'posts_per_page' => -1,
 		'post_type'      => 'shop_order',
-		'post_status'    => array( 'wc-refunded' )
+		'post_status'    => array( 'wc-refunded' ),
 	) );
 
 	// Ensure emails are disabled during this update routine
@@ -771,7 +771,7 @@ function wc_update_240_refunds() {
 				'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 				'order_id'   => $refunded_order->ID,
 				'line_items' => array(),
-				'date'       => $refunded_order->post_modified
+				'date'       => $refunded_order->post_modified,
 			) );
 		}
 	}
@@ -827,11 +827,11 @@ function wc_update_250_currency() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'LAK'
+			'meta_value' => 'LAK',
 		),
 		array(
 			'meta_key'   => '_order_currency',
-			'meta_value' => 'KIP'
+			'meta_value' => 'KIP',
 		)
 	);
 }
@@ -901,7 +901,7 @@ function wc_update_260_zone_methods() {
 				$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
 					'zone_id'      => $old_method->zone_id,
 					'method_id'    => $old_method->shipping_method_type,
-					'method_order' => $old_method->shipping_method_order
+					'method_order' => $old_method->shipping_method_order,
 				) );
 
 				$new_instance_id = $wpdb->insert_id;
@@ -921,20 +921,20 @@ function wc_update_260_zone_methods() {
 					$wpdb->update(
 						$wpdb->prefix . 'woocommerce_shipping_table_rates',
 						array(
-							'shipping_method_id' => $new_instance_id
+							'shipping_method_id' => $new_instance_id,
 						),
 						array(
-							'shipping_method_id' => $old_method->shipping_method_id
+							'shipping_method_id' => $old_method->shipping_method_id,
 						)
 					);
 				} elseif ( 'flat_rate_boxes' === $old_method->shipping_method_type ) {
 					$wpdb->update(
 						$wpdb->prefix . 'woocommerce_shipping_flat_rate_boxes',
 						array(
-							'shipping_method_id' => $new_instance_id
+							'shipping_method_id' => $new_instance_id,
 						),
 						array(
-							'shipping_method_id' => $old_method->shipping_method_id
+							'shipping_method_id' => $old_method->shipping_method_id,
 						)
 					);
 				}
@@ -980,7 +980,7 @@ function wc_update_270_webhooks() {
 		'posts_per_page' => -1,
 		'post_type'      => 'shop_webhook',
 		'meta_key'       => '_topic',
-		'meta_value'     => 'product.updated'
+		'meta_value'     => 'product.updated',
 	) );
 	foreach ( $product_update_webhooks as $product_update_webhook ) {
 		$webhook = new WC_Webhook( $product_update_webhook->ID );

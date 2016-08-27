@@ -121,7 +121,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$sizes = array(
 			'shop_thumbnail' => array( 'width' => '180', 'height' => '180' ),
 			'shop_single'    => array( 'width' => '600', 'height' => '600' ),
-			'shop_catalog'   => array( 'width' => '300', 'height' => '300' )
+			'shop_catalog'   => array( 'width' => '300', 'height' => '300' ),
 		);
 
 		foreach ( $sizes as $size => $values ) {
@@ -143,7 +143,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'simple'   => __( 'Simple product', 'woocommerce' ),
 			'grouped'  => __( 'Grouped product', 'woocommerce' ),
 			'external' => __( 'External/Affiliate product', 'woocommerce' ),
-			'variable' => __( 'Variable product', 'woocommerce' )
+			'variable' => __( 'Variable product', 'woocommerce' ),
 		) );
 
 		$this->assertEquals( $product_types, wc_get_product_types() );

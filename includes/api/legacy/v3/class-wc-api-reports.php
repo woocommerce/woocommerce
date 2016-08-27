@@ -223,14 +223,14 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
-					'name'            => 'product_id'
+					'name'            => 'product_id',
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
+					'name'            => 'order_item_qty',
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',

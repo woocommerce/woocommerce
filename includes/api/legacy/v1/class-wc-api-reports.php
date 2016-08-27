@@ -89,28 +89,28 @@ class WC_API_Reports extends WC_API_Resource {
 				'_order_total' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'sales'
+					'name'     => 'sales',
 				),
 				'_order_tax' => array(
 					'type'            => 'meta',
 					'function'        => 'SUM',
-					'name'            => 'tax'
+					'name'            => 'tax',
 				),
 				'_order_shipping_tax' => array(
 					'type'            => 'meta',
 					'function'        => 'SUM',
-					'name'            => 'shipping_tax'
+					'name'            => 'shipping_tax',
 				),
 				'_order_shipping' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'shipping'
+					'name'     => 'shipping',
 				),
 				'ID' => array(
 					'type'     => 'post_data',
 					'function' => 'COUNT',
-					'name'     => 'order_count'
-				)
+					'name'     => 'order_count',
+				),
 			),
 			'filter_range' => true,
 		) );
@@ -122,8 +122,8 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
+					'name'            => 'order_item_qty',
+				),
 			),
 			'query_type' => 'get_var',
 			'filter_range' => true,
@@ -136,14 +136,14 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'coupon',
 					'function'        => 'SUM',
-					'name'            => 'discount_amount'
-				)
+					'name'            => 'discount_amount',
+				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
+					'operator' => '=',
 				)
 			),
 			'query_type' => 'get_var',
@@ -173,22 +173,22 @@ class WC_API_Reports extends WC_API_Resource {
 				'_order_total' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'total_sales'
+					'name'     => 'total_sales',
 				),
 				'_order_shipping' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'total_shipping'
+					'name'     => 'total_shipping',
 				),
 				'_order_tax' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'total_tax'
+					'name'     => 'total_tax',
 				),
 				'_order_shipping_tax' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'total_shipping_tax'
+					'name'     => 'total_shipping_tax',
 				),
 				'ID' => array(
 					'type'     => 'post_data',
@@ -199,7 +199,7 @@ class WC_API_Reports extends WC_API_Resource {
 				'post_date' => array(
 					'type'     => 'post_data',
 					'function' => '',
-					'name'     => 'post_date'
+					'name'     => 'post_date',
 				),
 			),
 			'group_by'     => $this->report->group_by_query,
@@ -215,19 +215,19 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_count'
+					'name'            => 'order_item_count',
 				),
 				'post_date' => array(
 					'type'     => 'post_data',
 					'function' => '',
-					'name'     => 'post_date'
+					'name'     => 'post_date',
 				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'line_item',
-					'operator' => '='
+					'operator' => '=',
 				)
 			),
 			'group_by'     => $this->report->group_by_query,
@@ -243,19 +243,19 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'coupon',
 					'function'        => 'SUM',
-					'name'            => 'discount_amount'
+					'name'            => 'discount_amount',
 				),
 				'post_date' => array(
 					'type'     => 'post_data',
 					'function' => '',
-					'name'     => 'post_date'
+					'name'     => 'post_date',
 				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
+					'operator' => '=',
 				)
 			),
 			'group_by'     => $this->report->group_by_query . ', order_item_name',
@@ -376,14 +376,14 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
-					'name'            => 'product_id'
+					'name'            => 'product_id',
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
+					'name'            => 'order_item_qty',
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',

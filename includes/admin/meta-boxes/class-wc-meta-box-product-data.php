@@ -51,15 +51,15 @@ class WC_Meta_Box_Product_Data {
 				'wrapper_class' => 'show_if_simple',
 				'label'         => __( 'Virtual', 'woocommerce' ),
 				'description'   => __( 'Virtual products are intangible and aren\'t shipped.', 'woocommerce' ),
-				'default'       => 'no'
+				'default'       => 'no',
 			),
 			'downloadable' => array(
 				'id'            => '_downloadable',
 				'wrapper_class' => 'show_if_simple',
 				'label'         => __( 'Downloadable', 'woocommerce' ),
 				'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
-				'default'       => 'no'
-			)
+				'default'       => 'no',
+			),
 		) );
 
 		foreach ( $product_type_options as $key => $option ) {
@@ -114,7 +114,7 @@ class WC_Meta_Box_Product_Data {
 							'label'  => __( 'Advanced', 'woocommerce' ),
 							'target' => 'advanced_product_data',
 							'class'  => array(),
-						)
+						),
 					) );
 
 					foreach ( $product_data_tabs as $key => $tab ) {
@@ -192,7 +192,7 @@ class WC_Meta_Box_Product_Data {
 										<a href="#" class="button insert" data-row="<?php
 											$file = array(
 												'file' => '',
-												'name' => ''
+												'name' => '',
 											);
 											ob_start();
 											include( 'views/html-product-download.php' );
@@ -208,13 +208,13 @@ class WC_Meta_Box_Product_Data {
 					// Download Limit
 					woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1',
-						'min'	=> '0'
+						'min'	=> '0',
 					) ) );
 
 					// Expirey
 					woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1',
-						'min'	=> '0'
+						'min'	=> '0',
 					) ) );
 
 					 // Download Type
@@ -239,10 +239,10 @@ class WC_Meta_Box_Product_Data {
 							'options' => array(
 								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 								'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-								'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
+								'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
 							),
 							'desc_tip'    => 'true',
-							'description' => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' )
+							'description' => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' ),
 						) );
 
 						$tax_classes         = WC_Tax::get_tax_classes();
@@ -260,7 +260,7 @@ class WC_Meta_Box_Product_Data {
 							'label'       => __( 'Tax class', 'woocommerce' ),
 							'options'     => $classes_options,
 							'desc_tip'    => 'true',
-							'description' => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' )
+							'description' => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' ),
 						) );
 
 						do_action( 'woocommerce_product_options_tax' );
@@ -305,16 +305,16 @@ class WC_Meta_Box_Product_Data {
 						'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),
 						'type'              => 'number',
 						'custom_attributes' => array(
-							'step' => 'any'
+							'step' => 'any',
 						),
-						'data_type'         => 'stock'
+						'data_type'         => 'stock',
 					) );
 
 					// Backorders?
 					woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __( 'Allow backorders?', 'woocommerce' ), 'options' => array(
 						'no'     => __( 'Do not allow', 'woocommerce' ),
 						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'    => __( 'Allow', 'woocommerce' )
+						'yes'    => __( 'Allow', 'woocommerce' ),
 					), 'desc_tip' => true, 'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ) ) );
 
 					do_action( 'woocommerce_product_options_stock_fields' );
@@ -326,7 +326,7 @@ class WC_Meta_Box_Product_Data {
 				// Stock status
 				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable hide_if_external', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
 					'instock' => __( 'In stock', 'woocommerce' ),
-					'outofstock' => __( 'Out of stock', 'woocommerce' )
+					'outofstock' => __( 'Out of stock', 'woocommerce' ),
 				), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
 
 				do_action( 'woocommerce_product_options_stock_status' );
@@ -392,7 +392,7 @@ class WC_Meta_Box_Product_Data {
 						'name'             => 'product_shipping_class',
 						'id'               => 'product_shipping_class',
 						'selected'         => $current_shipping_class,
-						'class'            => 'select short'
+						'class'            => 'select short',
 					);
 					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <?php echo wc_help_tip( __( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ) ); ?></p><?php
 
@@ -551,7 +551,7 @@ class WC_Meta_Box_Product_Data {
 					<?php
 						// menu_order
 						woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
-							'step' 	=> '1'
+							'step' 	=> '1',
 						)  ) );
 					?>
 				</div>
@@ -930,7 +930,7 @@ class WC_Meta_Box_Product_Data {
 							'position'     => $attribute_position[ $i ],
 							'is_visible'   => $is_visible,
 							'is_variation' => $is_variation,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
 
@@ -947,7 +947,7 @@ class WC_Meta_Box_Product_Data {
 						'position'     => $attribute_position[ $i ],
 						'is_visible'   => $is_visible,
 						'is_variation' => $is_variation,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => $is_taxonomy,
 					);
 				}
 			}
@@ -1044,7 +1044,7 @@ class WC_Meta_Box_Product_Data {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -1182,7 +1182,7 @@ class WC_Meta_Box_Product_Data {
 
 						$files[ $file_hash ] = array(
 							'name' => $file_name,
-							'file' => $file_url
+							'file' => $file_url,
 						);
 					}
 				}
@@ -1298,7 +1298,7 @@ class WC_Meta_Box_Product_Data {
 						'post_author'  => get_current_user_id(),
 						'post_parent'  => $post_id,
 						'post_type'    => 'product_variation',
-						'menu_order'   => $variable_menu_order[ $i ]
+						'menu_order'   => $variable_menu_order[ $i ],
 					);
 
 					$variation_id = wp_insert_post( $variation );
@@ -1314,7 +1314,7 @@ class WC_Meta_Box_Product_Data {
 							'post_title'        => $variation_post_title,
 							'menu_order'        => $variable_menu_order[ $i ],
 							'post_modified'     => $modified_date,
-							'post_modified_gmt' => get_gmt_from_date( $modified_date )
+							'post_modified_gmt' => get_gmt_from_date( $modified_date ),
 					), array( 'ID' => $variation_id ) );
 
 					clean_post_cache( $variation_id );
@@ -1472,7 +1472,7 @@ class WC_Meta_Box_Product_Data {
 
 							$files[ $file_hash ] = array(
 								'name' => $file_name,
-								'file' => $file_url
+								'file' => $file_url,
 							);
 						}
 					}

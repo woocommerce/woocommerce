@@ -54,7 +54,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = new WC_Mock_WC_Data();
 		$data_to_set = array(
 			'content'    => 'I am a fish',
-			'bool_value' => true
+			'bool_value' => true,
 		);
 		$result = $object->set_props( $data_to_set );
 		$this->assertFalse( is_wp_error( $result ) );
@@ -63,7 +63,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		$data_to_set = array(
 			'content'    => 'I am also a fish',
-			'bool_value' => 'thisisinvalid'
+			'bool_value' => 'thisisinvalid',
 		);
 		$result = $object->set_props( $data_to_set );
 		$this->assertTrue( is_wp_error( $result ) );

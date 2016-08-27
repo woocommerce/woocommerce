@@ -400,7 +400,7 @@ class WC_Product {
 				if ( ! is_array( $file ) ) {
 					$downloadable_files[ $key ] = array(
 						'file' => $file,
-						'name' => ''
+						'name' => '',
 					);
 				}
 
@@ -1524,7 +1524,7 @@ class WC_Product {
 	 */
 	public function list_attributes() {
 		wc_get_template( 'single-product/product-attributes.php', array(
-			'product'    => $this
+			'product'    => $this,
 		) );
 	}
 

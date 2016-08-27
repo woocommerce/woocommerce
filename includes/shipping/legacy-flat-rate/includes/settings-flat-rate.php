@@ -21,7 +21,7 @@ $settings = array(
 		'type' 			=> 'text',
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
-		'desc_tip'		=> true
+		'desc_tip'		=> true,
 	),
 	'availability' => array(
 		'title' 		=> __( 'Availability', 'woocommerce' ),
@@ -41,8 +41,8 @@ $settings = array(
 		'default' 		=> '',
 		'options'		=> WC()->countries->get_shipping_countries(),
 		'custom_attributes' => array(
-			'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-		)
+			'data-placeholder' => __( 'Select some countries', 'woocommerce' ),
+		),
 	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
@@ -51,8 +51,8 @@ $settings = array(
 		'default' 		=> 'taxable',
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-		)
+			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
+		),
 	),
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
@@ -60,8 +60,8 @@ $settings = array(
 		'placeholder'	=> '',
 		'description'	=> $cost_desc,
 		'default'		=> '',
-		'desc_tip'		=> true
-	)
+		'desc_tip'		=> true,
+	),
 );
 
 $shipping_classes = WC()->shipping->get_shipping_classes();
@@ -71,7 +71,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'title'			=> __( 'Shipping Class Costs', 'woocommerce' ),
 		'type'			=> 'title',
 		'default'       => '',
-		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' )
+		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
@@ -83,7 +83,7 @@ if ( ! empty( $shipping_classes ) ) {
 			'placeholder' => __( 'N/A', 'woocommerce' ),
 			'description' => $cost_desc,
 			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names
-			'desc_tip'    => true
+			'desc_tip'    => true,
 		);
 	}
 	$settings[ 'no_class_cost' ] = array(
@@ -92,7 +92,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'placeholder' => __( 'N/A', 'woocommerce' ),
 		'description' => $cost_desc,
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => true,
 	);
 	$settings[ 'type' ] = array(
 		'title' 		=> __( 'Calculation Type', 'woocommerce' ),
@@ -119,7 +119,7 @@ if ( apply_filters( 'woocommerce_enable_deprecated_additional_flat_rates', $this
 		'description'	=> __( 'One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
 		'default'		=> '',
 		'desc_tip'		=> true,
-		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
+		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' ),
 	);
 }
 

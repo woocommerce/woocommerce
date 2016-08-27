@@ -147,7 +147,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		'show_uncategorized' => 1,
 		'orderby'            => 'name',
 		'selected'           => $current_product_cat,
-		'menu_order'         => false
+		'menu_order'         => false,
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -218,7 +218,7 @@ function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new
 						array(
 							'woocommerce_term_id' => $new_term_id,
 							'meta_key'            => $meta_data->meta_key,
-							'meta_value'          => $meta_data->meta_value
+							'meta_value'          => $meta_data->meta_value,
 						)
 					);
 				}

@@ -23,7 +23,7 @@ class WC_Shipping_Zone extends WC_Data {
 		'zone_id'        => null,
 		'zone_name'      => '',
 		'zone_order'     => 0,
-		'zone_locations' => array()
+		'zone_locations' => array(),
 	);
 
 	/**
@@ -372,7 +372,7 @@ class WC_Shipping_Zone extends WC_Data {
 			}
 			$location = array(
 				'code' => wc_clean( $code ),
-				'type' => wc_clean( $type )
+				'type' => wc_clean( $type ),
 			);
 			$this->_data['zone_locations'][] = (object) $location;
 			$this->_locations_changed = true;
@@ -440,7 +440,7 @@ class WC_Shipping_Zone extends WC_Data {
 			$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
 				'zone_id'       => $this->get_id(),
 				'location_code' => $location->code,
-				'location_type' => $location->type
+				'location_type' => $location->type,
 			) );
 		}
 	}
@@ -468,7 +468,7 @@ class WC_Shipping_Zone extends WC_Data {
 				array(
 					'method_id'    => $type,
 					'zone_id'      => $this->get_id(),
-					'method_order' => ( $count + 1 )
+					'method_order' => ( $count + 1 ),
 				),
 				array(
 					'%s',

@@ -63,7 +63,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'label'       => __( 'Enable Cash on Delivery', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',
-				'default'     => 'no'
+				'default'     => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -96,15 +96,15 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'options'           => $shipping_methods,
 				'desc_tip'          => true,
 				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' )
-				)
+					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' ),
+				),
 			),
 			'enable_for_virtual' => array(
 				'title'             => __( 'Accept for virtual orders', 'woocommerce' ),
 				'label'             => __( 'Accept COD if the order is virtual', 'woocommerce' ),
 				'type'              => 'checkbox',
-				'default'           => 'yes'
-			)
+				'default'           => 'yes',
+			),
 	   );
 	}
 
@@ -211,7 +211,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		// Return thankyou redirect
 		return array(
 			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'redirect'	=> $this->get_return_url( $order ),
 		);
 	}
 

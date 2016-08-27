@@ -41,7 +41,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Checkout Options', 'woocommerce' )
+			'' => __( 'Checkout Options', 'woocommerce' ),
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
@@ -289,7 +289,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									'sort'     => '',
 									'name'     => __( 'Gateway', 'woocommerce' ),
 									'id'       => __( 'Gateway ID', 'woocommerce' ),
-									'status'   => __( 'Enabled', 'woocommerce' )
+									'status'   => __( 'Enabled', 'woocommerce' ),
 								) );
 
 								foreach ( $columns as $key => $column ) {

@@ -196,7 +196,7 @@ class WC_Admin_Webhooks {
 			'post_author'   => get_current_user_id(),
 			'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
 			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
-			'comment_status' => 'open'
+			'comment_status' => 'open',
 		) );
 
 		if ( is_wp_error( $webhook_id ) ) {
@@ -303,7 +303,7 @@ class WC_Admin_Webhooks {
 			'ignore_sticky_posts' => true,
 			'nopaging'            => true,
 			'post_status'         => 'trash',
-			'fields'              => 'ids'
+			'fields'              => 'ids',
 		) );
 
 		foreach ( $webhooks as $webhook_id ) {
@@ -428,7 +428,7 @@ class WC_Admin_Webhooks {
 			'post_id' => $webhook->id,
 			'status'  => 'approve',
 			'type'    => 'webhook_delivery',
-			'number'  => 10
+			'number'  => 10,
 		);
 
 		if ( 1 < $current ) {
@@ -471,7 +471,7 @@ class WC_Admin_Webhooks {
 		return array(
 			'topic'    => $topic,
 			'event'    => $event,
-			'resource' => $resource
+			'resource' => $resource,
 		);
 	}
 

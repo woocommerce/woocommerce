@@ -50,7 +50,7 @@ class WC_Product_Variation extends WC_Product {
 		'sale_price'            => '',
 		'stock'                 => 0,
 		'stock_status'          => 'instock',
-		'downloadable_files'    => array()
+		'downloadable_files'    => array(),
 	);
 
 	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
@@ -61,7 +61,7 @@ class WC_Product_Variation extends WC_Product {
 		'weight'     => '',
 		'length'     => '',
 		'width'      => '',
-		'height'     => ''
+		'height'     => '',
 	);
 
 	/**

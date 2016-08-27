@@ -247,7 +247,7 @@ class WC_Tax {
 			'state'     => '',
 			'city'      => '',
 			'postcode'  => '',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		extract( $args, EXTR_SKIP );
@@ -422,7 +422,7 @@ class WC_Tax {
 				'rate'     => $found_rate->tax_rate,
 				'label'    => $found_rate->tax_rate_name,
 				'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
-				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
+				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no',
 			);
 
 			$found_priority[] = $found_rate->tax_rate_priority;
@@ -474,7 +474,7 @@ class WC_Tax {
 				'state' 	=> $state,
 				'postcode' 	=> $postcode,
 				'city' 		=> $city,
-				'tax_class' => $tax_class
+				'tax_class' => $tax_class,
 			) );
 		}
 
@@ -493,7 +493,7 @@ class WC_Tax {
 			'state' 	=> WC()->countries->get_base_state(),
 			'postcode' 	=> WC()->countries->get_base_postcode(),
 			'city' 		=> WC()->countries->get_base_city(),
-			'tax_class' => $tax_class
+			'tax_class' => $tax_class,
 		) ), $tax_class );
 	}
 
@@ -533,7 +533,7 @@ class WC_Tax {
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
 					'city' 		=> $city,
-					'tax_class' => $tax_class
+					'tax_class' => $tax_class,
 				) );
 
 			} else {
@@ -553,7 +553,7 @@ class WC_Tax {
 								'state' 	=> $state,
 								'postcode' 	=> $postcode,
 								'city' 		=> $city,
-								'tax_class' => $tax_class
+								'tax_class' => $tax_class,
 							) );
 							break;
 						}
@@ -566,7 +566,7 @@ class WC_Tax {
 						'state' 	=> $state,
 						'postcode' 	=> $postcode,
 						'city' 		=> $city,
-						'tax_class' => $cart_tax_classes[0]
+						'tax_class' => $cart_tax_classes[0],
 					) );
 				}
 			}
@@ -577,7 +577,7 @@ class WC_Tax {
 					'country' 	=> $country,
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
-					'city' 		=> $city
+					'city' 		=> $city,
 				) );
 			}
 		}
@@ -841,7 +841,7 @@ class WC_Tax {
 			$wpdb->prefix . "woocommerce_tax_rates",
 			self::prepare_tax_rate( $tax_rate ),
 			array(
-				'tax_rate_id' => $tax_rate_id
+				'tax_rate_id' => $tax_rate_id,
 			)
 		);
 

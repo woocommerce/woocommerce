@@ -64,8 +64,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function' => 'SUM',
-					'name'     => 'order_item_amount'
-				)
+					'name'     => 'order_item_amount',
+				),
 			),
 			'where_meta' => array(
 				'relation' => 'OR',
@@ -73,11 +73,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'type'       => 'order_item_meta',
 					'meta_key'   => array( '_product_id', '_variation_id' ),
 					'meta_value' => $this->product_ids,
-					'operator'   => 'IN'
+					'operator'   => 'IN',
 				)
 			),
 			'query_type'   => 'get_var',
-			'filter_range' => true
+			'filter_range' => true,
 		) );
 
 		$total_items = absint( $this->get_order_report_data( array(
@@ -86,8 +86,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_count'
-				)
+					'name'            => 'order_item_count',
+				),
 			),
 			'where_meta' => array(
 				'relation' => 'OR',
@@ -95,23 +95,23 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'type'       => 'order_item_meta',
 					'meta_key'   => array( '_product_id', '_variation_id' ),
 					'meta_value' => $this->product_ids,
-					'operator'   => 'IN'
+					'operator'   => 'IN',
 				)
 			),
 			'query_type'   => 'get_var',
-			'filter_range' => true
+			'filter_range' => true,
 		) ) );
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount'],
-			'highlight_series' => 1
+			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
 			'color' => $this->chart_colours['item_count'],
-			'highlight_series' => 0
+			'highlight_series' => 0,
 		);
 
 		return $legend;
@@ -126,7 +126,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
 			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'7day'         => __( 'Last 7 Days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -156,13 +156,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		if ( ! empty( $this->product_ids ) ) {
 			$widgets[] = array(
 				'title'    => __( 'Showing reports for:', 'woocommerce' ),
-				'callback' => array( $this, 'current_filters' )
+				'callback' => array( $this, 'current_filters' ),
 			);
 		}
 
 		$widgets[] = array(
 			'title'    => '',
-			'callback' => array( $this, 'products_widget' )
+			'callback' => array( $this, 'products_widget' ),
 		);
 
 		return $widgets;
@@ -220,20 +220,20 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => '',
-							'name'            => 'product_id'
+							'name'            => 'product_id',
 						),
 						'_qty' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => 'SUM',
-							'name'            => 'order_item_qty'
-						)
+							'name'            => 'order_item_qty',
+						),
 					),
 					'order_by'     => 'order_item_qty DESC',
 					'group_by'     => 'product_id',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
 				) );
 
 				if ( $top_sellers ) {
@@ -260,28 +260,28 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => '',
-							'name'            => 'product_id'
+							'name'            => 'product_id',
 						),
 						'_qty' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => 'SUM',
-							'name'            => 'order_item_qty'
-						)
+							'name'            => 'order_item_qty',
+						),
 					),
 					'where_meta'   => array(
 						array(
 							'type'       => 'order_item_meta',
 							'meta_key'   => '_line_subtotal',
 							'meta_value' => '0',
-							'operator'   => '='
+							'operator'   => '=',
 						)
 					),
 					'order_by'     => 'order_item_qty DESC',
 					'group_by'     => 'product_id',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
 				) );
 
 				if ( $top_freebies ) {
@@ -308,20 +308,20 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => '',
-							'name'            => 'product_id'
+							'name'            => 'product_id',
 						),
 						'_line_total' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'line_item',
 							'function'        => 'SUM',
-							'name'            => 'order_item_total'
-						)
+							'name'            => 'order_item_total',
+						),
 					),
 					'order_by'     => 'order_item_total DESC',
 					'group_by'     => 'product_id',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
 				) );
 
 				if ( $top_earners ) {
@@ -402,19 +402,19 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
-						'name'            => 'order_item_count'
+						'name'            => 'order_item_count',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 					'_product_id' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
-					)
+						'name'            => 'product_id',
+					),
 				),
 				'where_meta' => array(
 					'relation' => 'OR',
@@ -422,13 +422,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'type'       => 'order_item_meta',
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
-						'operator'   => 'IN'
+						'operator'   => 'IN',
 					),
 				),
 				'group_by'     => 'product_id,' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
-				'filter_range' => true
+				'filter_range' => true,
 			) );
 
 			$order_item_amounts = $this->get_order_report_data( array(
@@ -437,18 +437,18 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function' => 'SUM',
-						'name'     => 'order_item_amount'
+						'name'     => 'order_item_amount',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 					'_product_id' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
+						'name'            => 'product_id',
 					),
 				),
 				'where_meta' => array(
@@ -457,13 +457,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'type'       => 'order_item_meta',
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
-						'operator'   => 'IN'
+						'operator'   => 'IN',
 					),
 				),
 				'group_by'     => 'product_id, ' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
-				'filter_range' => true
+				'filter_range' => true,
 			) );
 
 			// Prepare data for report
@@ -473,7 +473,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			// Encode in json format
 			$chart_data = json_encode( array(
 				'order_item_counts'  => array_values( $order_item_counts ),
-				'order_item_amounts' => array_values( $order_item_amounts )
+				'order_item_amounts' => array_values( $order_item_amounts ),
 			) );
 			?>
 			<div class="chart-container">

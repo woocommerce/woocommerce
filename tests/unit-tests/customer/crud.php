@@ -176,7 +176,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
 			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
 			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
-			'is_paying_customer' => true
+			'is_paying_customer' => true,
 		);
 
 		$customer = new WC_Customer;

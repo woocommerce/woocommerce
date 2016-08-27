@@ -411,7 +411,7 @@ function wc_price( $price, $args = array() ) {
 		'decimal_separator'  => wc_get_price_decimal_separator(),
 		'thousand_separator' => wc_get_price_thousand_separator(),
 		'decimals'           => wc_get_price_decimals(),
-		'price_format'       => get_woocommerce_price_format()
+		'price_format'       => get_woocommerce_price_format(),
 	) ) ) );
 
 	$negative        = $price < 0;

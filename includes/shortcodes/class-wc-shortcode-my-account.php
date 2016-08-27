@@ -97,7 +97,7 @@ class WC_Shortcode_My_Account {
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-			'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
+			'order_count' => 15, // @deprecated 2.6.0. Keep for backward compatibility.
 		), $atts ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
@@ -126,7 +126,7 @@ class WC_Shortcode_My_Account {
 		wc_get_template( 'myaccount/view-order.php', array(
 			'status'    => $status, // @deprecated 2.2
 			'order'     => wc_get_order( $order_id ),
-			'order_id'  => $order_id
+			'order_id'  => $order_id,
 		) );
 	}
 
@@ -179,7 +179,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
-			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
+			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address ),
 		) );
 	}
 

@@ -1305,7 +1305,7 @@ class WC_Order extends WC_Abstract_Order {
 			'cancel_order' => 'true',
 			'order'        => $this->get_order_key(),
 			'order_id'     => $this->get_id(),
-			'redirect'     => $redirect
+			'redirect'     => $redirect,
 		), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
 	}
 
@@ -1322,7 +1322,7 @@ class WC_Order extends WC_Abstract_Order {
 			'order'        => $this->get_order_key(),
 			'order_id'     => $this->get_id(),
 			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
+			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
 		), $this->get_cancel_endpoint() ) );
 	}
 
@@ -1415,7 +1415,7 @@ class WC_Order extends WC_Abstract_Order {
 		$args  = array(
 			'post_id' => $this->get_id(),
 			'approve' => 'approve',
-			'type'    => ''
+			'type'    => '',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );

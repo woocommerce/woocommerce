@@ -150,7 +150,7 @@ class WC_Admin_Post_Types {
 			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
-			11 => __( 'Order updated and email sent.', 'woocommerce' )
+			11 => __( 'Order updated and email sent.', 'woocommerce' ),
 		);
 
 		$messages['shop_coupon'] = array(
@@ -165,7 +165,7 @@ class WC_Admin_Post_Types {
 			8 => __( 'Coupon submitted.', 'woocommerce' ),
 			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-			10 => __( 'Coupon draft updated.', 'woocommerce' )
+			10 => __( 'Coupon draft updated.', 'woocommerce' ),
 		);
 
 		return $messages;
@@ -706,7 +706,7 @@ class WC_Admin_Post_Types {
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
 						'number'    => 1,
-						'status'    => $status
+						'status'    => $status,
 					) );
 
 					$latest_note = current( $latest_notes );
@@ -780,7 +780,7 @@ class WC_Admin_Post_Types {
 							$actions['processing'] = array(
 								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
 								'name'      => __( 'Processing', 'woocommerce' ),
-								'action'    => "processing"
+								'action'    => "processing",
 							);
 						}
 
@@ -788,14 +788,14 @@ class WC_Admin_Post_Types {
 							$actions['complete'] = array(
 								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
 								'name'      => __( 'Complete', 'woocommerce' ),
-								'action'    => "complete"
+								'action'    => "complete",
 							);
 						}
 
 						$actions['view'] = array(
 							'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
 							'name'      => __( 'View', 'woocommerce' ),
-							'action'    => "view"
+							'action'    => "view",
 						);
 
 						$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
@@ -823,7 +823,7 @@ class WC_Admin_Post_Types {
 			'price'    => 'price',
 			'featured' => array( 'featured', 1 ),
 			'sku'      => 'sku',
-			'name'     => 'title'
+			'name'     => 'title',
 		);
 		return wp_parse_args( $custom, $columns );
 	}
@@ -848,7 +848,7 @@ class WC_Admin_Post_Types {
 		$custom = array(
 			'order_title' => 'ID',
 			'order_total' => 'order_total',
-			'order_date'  => 'date'
+			'order_date'  => 'date',
 		);
 		unset( $columns['comments'] );
 
@@ -1703,19 +1703,19 @@ class WC_Admin_Post_Types {
 				if ( 'price' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
 						'meta_key'  => '_price',
-						'orderby'   => 'meta_value_num'
+						'orderby'   => 'meta_value_num',
 					) );
 				}
 				if ( 'featured' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
 						'meta_key'  => '_featured',
-						'orderby'   => 'meta_value'
+						'orderby'   => 'meta_value',
 					) );
 				}
 				if ( 'sku' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
 						'meta_key'  => '_sku',
-						'orderby'   => 'meta_value'
+						'orderby'   => 'meta_value',
 					) );
 				}
 			}
@@ -1735,7 +1735,7 @@ class WC_Admin_Post_Types {
 					array(
 						'key'   => '_customer_user',
 						'value' => (int) $_GET['_customer_user'],
-						'compare' => '='
+						'compare' => '=',
 					)
 				);
 			}
@@ -1745,7 +1745,7 @@ class WC_Admin_Post_Types {
 				if ( 'order_total' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
 						'meta_key'  => '_order_total',
-						'orderby'   => 'meta_value_num'
+						'orderby'   => 'meta_value_num',
 					) );
 				}
 			}
@@ -1798,7 +1798,7 @@ class WC_Admin_Post_Types {
 					'taxonomy' => 'product_cat',
 					'field'    => 'id',
 					'terms'    => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
-					'operator' => 'NOT IN'
+					'operator' => 'NOT IN',
 				);
 			}
 
@@ -1808,7 +1808,7 @@ class WC_Admin_Post_Types {
 					'taxonomy' => 'product_shipping_class',
 					'field'    => 'id',
 					'terms'    => get_terms( 'product_shipping_class', array( 'fields' => 'ids' ) ),
-					'operator' => 'NOT IN'
+					'operator' => 'NOT IN',
 				);
 			}
 		}
@@ -2101,7 +2101,7 @@ class WC_Admin_Post_Types {
 			'visible' => __( 'Catalog/search', 'woocommerce' ),
 			'catalog' => __( 'Catalog', 'woocommerce' ),
 			'search'  => __( 'Search', 'woocommerce' ),
-			'hidden'  => __( 'Hidden', 'woocommerce' )
+			'hidden'  => __( 'Hidden', 'woocommerce' ),
 		) );
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">

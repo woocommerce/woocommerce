@@ -147,7 +147,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				'compound' => (bool) $tax['tax_rate_compound'],
 				'shipping' => (bool) $tax['tax_rate_shipping'],
 				'order'    => (int) $tax['tax_rate_order'],
-				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard'
+				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard',
 			);
 
 			// Get locales from a tax rate
@@ -436,7 +436,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		return array(
 			'results' => $results,
-			'headers' => $headers
+			'headers' => $headers,
 		);
 	}
 
@@ -482,7 +482,7 @@ class WC_API_Taxes extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$taxes[] = $edit['tax'];
@@ -496,7 +496,7 @@ class WC_API_Taxes extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$taxes[] = $new['tax'];
@@ -531,7 +531,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			// Add standard class
 			$tax_classes[] = array(
 				'slug' => 'standard',
-				'name' => __( 'Standard Rate', 'woocommerce' )
+				'name' => __( 'Standard Rate', 'woocommerce' ),
 			);
 
 			$classes = WC_Tax::get_tax_classes();
@@ -539,7 +539,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			foreach ( $classes as $class ) {
 				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
 					'slug' => sanitize_title( $class ),
-					'name' => $class
+					'name' => $class,
 				), $class, $fields, $this );
 			}
 
@@ -605,8 +605,8 @@ class WC_API_Taxes extends WC_API_Resource {
 			return array(
 				'tax_class' => array(
 					'slug' => $slug,
-					'name' => $name
-				)
+					'name' => $name,
+				),
 			);
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );

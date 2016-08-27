@@ -62,7 +62,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			</p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
 				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" ' . $this->field_name( 'card-expiry' ) . ' />
+				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" ' . $this->field_name( 'card-expiry' ) . ,' />
 			</p>'
 		);
 
@@ -77,7 +77,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
 				foreach ( $fields as $field ) {
-					echo $field;
+				echo $field;
 				}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>

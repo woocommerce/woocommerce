@@ -12,7 +12,7 @@ return array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
 		'type'    => 'checkbox',
 		'label'   => __( 'Enable PayPal standard', 'woocommerce' ),
-		'default' => 'yes'
+		'default' => 'yes',
 	),
 	'title' => array(
 		'title'       => __( 'Title', 'woocommerce' ),
@@ -26,7 +26,7 @@ return array(
 		'type'        => 'text',
 		'desc_tip'    => true,
 		'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-		'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.', 'woocommerce' )
+		'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.', 'woocommerce' ),
 	),
 	'email' => array(
 		'title'       => __( 'PayPal Email', 'woocommerce' ),
@@ -34,7 +34,7 @@ return array(
 		'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ),
 		'default'     => get_option( 'admin_email' ),
 		'desc_tip'    => true,
-		'placeholder' => 'you@youremail.com'
+		'placeholder' => 'you@youremail.com',
 	),
 	'testmode' => array(
 		'title'       => __( 'PayPal Sandbox', 'woocommerce' ),
@@ -48,7 +48,7 @@ return array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging', 'woocommerce' ),
 		'default'     => 'no',
-		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) )
+		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) ),
 	),
 	'advanced' => array(
 		'title'       => __( 'Advanced options', 'woocommerce' ),
@@ -61,7 +61,7 @@ return array(
 		'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => 'you@youremail.com'
+		'placeholder' => 'you@youremail.com',
 	),
 	'identity_token' => array(
 		'title'       => __( 'PayPal Identity Token', 'woocommerce' ),
@@ -69,7 +69,7 @@ return array(
 		'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => ''
+		'placeholder' => '',
 	),
 	'invoice_prefix' => array(
 		'title'       => __( 'Invoice Prefix', 'woocommerce' ),
@@ -83,14 +83,14 @@ return array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
 		'description' => __( 'PayPal allows us to send one address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing.', 'woocommerce' ),
-		'default'     => 'no'
+		'default'     => 'no',
 	),
 	'address_override' => array(
 		'title'       => __( 'Address Override', 'woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable "address_override" to prevent address information from being changed.', 'woocommerce' ),
 		'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
-		'default'     => 'no'
+		'default'     => 'no',
 	),
 	'paymentaction' => array(
 		'title'       => __( 'Payment Action', 'woocommerce' ),
@@ -101,8 +101,8 @@ return array(
 		'desc_tip'    => true,
 		'options'     => array(
 			'sale'          => __( 'Capture', 'woocommerce' ),
-			'authorization' => __( 'Authorize', 'woocommerce' )
-		)
+			'authorization' => __( 'Authorize', 'woocommerce' ),
+		),
 	),
 	'page_style' => array(
 		'title'       => __( 'Page Style', 'woocommerce' ),
@@ -110,7 +110,7 @@ return array(
 		'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' )
+		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 	'api_details' => array(
 		'title'       => __( 'API Credentials', 'woocommerce' ),
@@ -123,7 +123,7 @@ return array(
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' )
+		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 	'api_password' => array(
 		'title'       => __( 'API Password', 'woocommerce' ),
@@ -131,7 +131,7 @@ return array(
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' )
+		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 	'api_signature' => array(
 		'title'       => __( 'API Signature', 'woocommerce' ),
@@ -139,6 +139,6 @@ return array(
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' )
+		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 );

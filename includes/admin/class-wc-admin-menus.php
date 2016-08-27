@@ -325,7 +325,7 @@ class WC_Admin_Menus {
 			'parent' => 'site-name',
 			'id'     => 'view-store',
 			'title'  => __( 'Visit Store', 'woocommerce' ),
-			'href'   => wc_get_page_permalink( 'shop' )
+			'href'   => wc_get_page_permalink( 'shop' ),
 		) );
 	}
 }

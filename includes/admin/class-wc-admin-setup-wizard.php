@@ -58,17 +58,17 @@ class WC_Admin_Setup_Wizard {
 			'introduction' => array(
 				'name'    =>  __( 'Introduction', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_introduction' ),
-				'handler' => ''
+				'handler' => '',
 			),
 			'pages' => array(
 				'name'    =>  __( 'Page Setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
-				'handler' => array( $this, 'wc_setup_pages_save' )
+				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
 			'locale' => array(
 				'name'    =>  __( 'Store Locale', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
-				'handler' => array( $this, 'wc_setup_locale_save' )
+				'handler' => array( $this, 'wc_setup_locale_save' ),
 			),
 			'shipping_taxes' => array(
 				'name'    =>  __( 'Shipping &amp; Tax', 'woocommerce' ),
@@ -83,8 +83,8 @@ class WC_Admin_Setup_Wizard {
 			'next_steps' => array(
 				'name'    =>  __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
-				'handler' => ''
-			)
+				'handler' => '',
+			),
 		);
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -107,14 +107,14 @@ class WC_Admin_Setup_Wizard {
 			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
 			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
-			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
+			'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
 		) );
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
 
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup.min.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
-			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) )
+			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) ),
 		) );
 
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
@@ -546,7 +546,7 @@ class WC_Admin_Setup_Wizard {
 						'tax_rate_compound' => 0,
 						'tax_rate_shipping' => $rate['shipping'] ? 1 : 0,
 						'tax_rate_order'    => $loop ++,
-						'tax_rate_class'    => ''
+						'tax_rate_class'    => '',
 					);
 					WC_Tax::_insert_tax_rate( $tax_rate );
 				}
@@ -615,7 +615,7 @@ class WC_Admin_Setup_Wizard {
 				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
-			)
+			),
 		);
 
 		$country = WC()->countries->get_base_country();

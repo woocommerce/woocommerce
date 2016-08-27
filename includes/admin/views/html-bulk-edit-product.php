@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'' 	=> __( '— No Change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' )
+							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
-							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' )
+							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							''         => __( '— No Change —', 'woocommerce' ),
 							'taxable'  => __( 'Taxable', 'woocommerce' ),
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' )
+							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -92,7 +92,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php
 						$options = array(
 							''         => __( '— No Change —', 'woocommerce' ),
-							'standard' => __( 'Standard', 'woocommerce' )
+							'standard' => __( 'Standard', 'woocommerce' ),
 						);
 
 						$tax_classes = WC_Tax::get_tax_classes();
@@ -120,7 +120,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$options = array(
 								'' 	=> __( '— No Change —', 'woocommerce' ),
-								'1' => __( 'Change to:', 'woocommerce' )
+								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
 								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -144,7 +144,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$options = array(
 								'' 	=> __( '— No Change —', 'woocommerce' ),
-								'1' => __( 'Change to:', 'woocommerce' )
+								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
 								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -186,7 +186,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
 						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' )
+						'hidden'  => __( 'Hidden', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -203,7 +203,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$options = array(
 						''    => __( '— No Change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
-						'no'  => __( 'No', 'woocommerce' )
+						'no'  => __( 'No', 'woocommerce' ),
 					);
 					foreach ($options as $key => $value) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -221,7 +221,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$options = array(
 						''           => __( '— No Change —', 'woocommerce' ),
 						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' )
+						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -240,7 +240,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							''    => __( '— No Change —', 'woocommerce' ),
 							'yes' => __( 'Yes', 'woocommerce' ),
-							'no'  => __( 'No', 'woocommerce' )
+							'no'  => __( 'No', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -258,7 +258,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$options = array(
 								'' 	=> __( '— No Change —', 'woocommerce' ),
-								'1' => __( 'Change to:', 'woocommerce' )
+								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
 								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -281,7 +281,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							''       => __( '— No Change —', 'woocommerce' ),
 							'no'     => __( 'Do not allow', 'woocommerce' ),
 							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-							'yes'    => __( 'Allow', 'woocommerce' )
+							'yes'    => __( 'Allow', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
@@ -301,7 +301,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$options = array(
 						''    => __( '— No Change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
-						'no'  => __( 'No', 'woocommerce' )
+						'no'  => __( 'No', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
