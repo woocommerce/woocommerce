@@ -1590,7 +1590,7 @@ class WC_Product {
 	 * @return array
 	 */
 	protected function get_related_terms( $term ) {
-		$terms_array = array(0);
+		$terms_array = array( 0 );
 
 		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
 		foreach ( $terms as $term ) {

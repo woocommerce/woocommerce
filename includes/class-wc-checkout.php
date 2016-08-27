@@ -121,7 +121,7 @@ class WC_Checkout {
 		$this->checkout_fields['order']	= array(
 			'order_comments' => array(
 				'type' => 'textarea',
-				'class' => array('notes'),
+				'class' => array( 'notes' ),
 				'label' => __( 'Order Notes', 'woocommerce' ),
 				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
 			),

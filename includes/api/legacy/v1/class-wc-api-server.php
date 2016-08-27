@@ -704,7 +704,7 @@ class WC_API_Server {
 	public function get_headers($server) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
 		foreach ($server as $key => $value) {
 			if ( strpos( $key, 'HTTP_' ) === 0) {

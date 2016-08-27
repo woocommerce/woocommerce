@@ -159,7 +159,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload' => false,
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'general_options'),
+			array( 'type' => 'sectionend', 'id' => 'general_options' ),
 
 			array( 'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
 

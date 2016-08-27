@@ -186,7 +186,7 @@ function wc_get_featured_product_ids() {
 		'meta_query'     => array(
 			array(
 				'key' 		=> '_visibility',
-				'value' 	=> array('catalog', 'visible'),
+				'value' 	=> array( 'catalog', 'visible' ),
 				'compare' 	=> 'IN',
 			),
 			array(

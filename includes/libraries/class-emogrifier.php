@@ -838,7 +838,7 @@ class Emogrifier
 		);
 		// clean CSS before output
 		$css = preg_replace($search, $replace, $css);
-		return array('css' => $css, 'media' => self::$_media);
+		return array( 'css' => $css, 'media' => self::$_media );
 	}
 
 	private function _media_concat( $matches ) {
