@@ -206,7 +206,7 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function admin_footer_text( $footer_text ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! function_exists( 'wc_get_screen_ids' ) ) {
 			return;
 		}
 		$current_screen = get_current_screen();
