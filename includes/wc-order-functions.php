@@ -113,7 +113,7 @@ function wc_get_orders( $args ) {
 		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 	}
 
-	if ( ! $args['paginate' ] ) {
+	if ( ! $args['paginate'] ) {
 		$wp_query_args['no_found_rows'] = true;
 	}
 
@@ -126,7 +126,7 @@ function wc_get_orders( $args ) {
 		$return = $orders->posts;
 	}
 
-	if ( $args['paginate' ] ) {
+	if ( $args['paginate'] ) {
 		return (object) array(
 			'orders'        => $return,
 			'total'         => $orders->found_posts,

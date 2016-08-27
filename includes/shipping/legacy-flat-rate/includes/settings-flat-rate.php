@@ -67,7 +67,7 @@ $settings = array(
 $shipping_classes = WC()->shipping->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
-	$settings[ 'class_costs' ] = array(
+	$settings['class_costs'] = array(
 		'title'			=> __( 'Shipping Class Costs', 'woocommerce' ),
 		'type'			=> 'title',
 		'default'       => '',
@@ -86,7 +86,7 @@ if ( ! empty( $shipping_classes ) ) {
 			'desc_tip'    => true,
 		);
 	}
-	$settings[ 'no_class_cost' ] = array(
+	$settings['no_class_cost'] = array(
 		'title'       => __( 'No Shipping Class Cost', 'woocommerce' ),
 		'type'        => 'text',
 		'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -94,7 +94,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'default'     => '',
 		'desc_tip'    => true,
 	);
-	$settings[ 'type' ] = array(
+	$settings['type'] = array(
 		'title' 		=> __( 'Calculation Type', 'woocommerce' ),
 		'type' 			=> 'select',
 		'class'         => 'wc-enhanced-select',
@@ -107,7 +107,7 @@ if ( ! empty( $shipping_classes ) ) {
 }
 
 if ( apply_filters( 'woocommerce_enable_deprecated_additional_flat_rates', $this->get_option( 'options', false ) ) ) {
-	$settings[ 'additional_rates' ] = array(
+	$settings['additional_rates'] = array(
 		'title'			 => __( 'Additional Rates', 'woocommerce' ),
 		'type'			 => 'title',
 		'default'        => '',

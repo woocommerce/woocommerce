@@ -211,7 +211,7 @@ class WC_Shipping_Zone extends WC_Data {
 
 		foreach ( $states as $location ) {
 			$location_codes = explode( ':', $location->code );
-			$location_parts[] = $all_states[ $location_codes[ 0 ] ][ $location_codes[ 1 ] ];
+			$location_parts[] = $all_states[ $location_codes[0] ][ $location_codes[1] ];
 		}
 
 		foreach ( $postcodes as $location ) {

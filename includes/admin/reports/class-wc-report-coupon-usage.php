@@ -112,7 +112,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
-			'color' => $this->chart_colours['coupon_count' ],
+			'color' => $this->chart_colours['coupon_count'],
 			'highlight_series' => 0,
 		);
 
@@ -458,8 +458,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						{
 							label: "<?php echo esc_js( __( 'Number of coupons used', 'woocommerce' ) ) ?>",
 							data: order_data.order_coupon_counts,
-							color: '<?php echo $this->chart_colours['coupon_count' ]; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colours['coupon_count' ]; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+							color: '<?php echo $this->chart_colours['coupon_count']; ?>',
+							bars: { fillColor: '<?php echo $this->chart_colours['coupon_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 							shadowSize: 0,
 							hoverable: false
 						},

@@ -82,7 +82,7 @@ class WC_Shortcode_Checkout {
 		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && $order_id ) {
 
 			// Pay for existing order
-			$order_key            = $_GET[ 'key' ];
+			$order_key            = $_GET['key'];
 			$order                = wc_get_order( $order_id );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {

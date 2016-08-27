@@ -154,7 +154,7 @@ class WC_REST_Authentication {
 		// From OAuth PHP library, used under MIT license.
 		$params = array();
 		if ( preg_match_all( '/(oauth_[a-z_-]*)=(:?"([^"]*)"|([^,]*))/', $header, $matches ) ) {
-			foreach ( $matches[ 1 ] as $i => $h ) {
+			foreach ( $matches[1] as $i => $h ) {
 				$params[ $h ] = urldecode( empty( $matches[3][ $i ] ) ? $matches[4][ $i ] : $matches[3][ $i ] );
 			}
 			if ( isset( $params['realm'] ) ) {

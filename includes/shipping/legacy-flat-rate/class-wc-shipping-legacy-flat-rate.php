@@ -37,7 +37,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}

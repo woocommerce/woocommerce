@@ -156,11 +156,11 @@ class WC_Form_Handler {
 	 */
 	public static function save_account_details() {
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'save_account_details' !== $_POST[ 'action' ] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+		if ( empty( $_POST['action'] ) || 'save_account_details' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
 			return;
 		}
 
@@ -174,12 +174,12 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
-		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? $_POST[ 'password_current' ] : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? sanitize_email( $_POST['account_email'] ) : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
 		$save_pass          = true;
 
 		$user->first_name   = $account_first_name;
@@ -983,7 +983,7 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $posted_fields[ 'password_1' ] !== $posted_fields[ 'password_2' ] ) {
+			if ( $posted_fields['password_1'] !== $posted_fields['password_2'] ) {
 				wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
 			}
 

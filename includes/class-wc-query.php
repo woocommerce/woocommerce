@@ -666,7 +666,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query[ 'product_cat' ] = array(
+			$tax_query['product_cat'] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array( $args['product_cat'] ),
 				'field'    => 'slug',
@@ -674,7 +674,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query[ 'product_tag' ] = array(
+			$tax_query['product_tag'] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',

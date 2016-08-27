@@ -316,7 +316,7 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  */
 function wc_modify_editable_roles( $roles ){
 	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles[ 'administrator' ] );
+		unset( $roles['administrator'] );
 	}
 	return $roles;
 }

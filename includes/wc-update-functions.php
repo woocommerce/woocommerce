@@ -634,7 +634,7 @@ function wc_update_240_shipping_methods() {
 
 			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
-				$math_cost_strings[ $rate_key ] = $math_cost_strings[ 'no_class_cost' ];
+				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
 
 			if ( $flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) ) ) {
@@ -658,7 +658,7 @@ function wc_update_240_shipping_methods() {
 				}
 			}
 
-			$math_cost_strings[ 'cost' ][] = $shipping_method->get_option( 'cost_per_order' );
+			$math_cost_strings['cost'][] = $shipping_method->get_option( 'cost_per_order' );
 
 			// Save settings
 			foreach ( $math_cost_strings as $option_id => $math_cost_string ) {

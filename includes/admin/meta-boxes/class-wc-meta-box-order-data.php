@@ -454,7 +454,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
+			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling
