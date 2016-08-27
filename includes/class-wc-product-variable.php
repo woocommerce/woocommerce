@@ -656,7 +656,7 @@ class WC_Product_Variable extends WC_Product {
 	public static function sync_stock_status( $product_id ) {
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
 			'post_status'	=> 'publish',
@@ -683,7 +683,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $children ) {
 			$children = get_posts( array(
 				'post_parent' 	=> $product_id,
-				'posts_per_page'=> -1,
+				'posts_per_page' => -1,
 				'post_type' 	=> 'product_variation',
 				'fields' 		=> 'ids',
 				'post_status'	=> 'any',
@@ -758,7 +758,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
 			'post_status'	=> 'publish',

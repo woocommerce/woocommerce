@@ -55,7 +55,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 		public static function evaluate( $expr ) {
 			self::$last_error = null;
 			$expr = trim( $expr );
-			if ( substr( $expr, -1, 1 ) == ';' ) $expr = substr( $expr, 0, strlen( $expr )-1 ); // strip semicolons at the end
+			if ( substr( $expr, -1, 1 ) == ';' ) $expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
 			//===============
 			// is it a variable assignment?
 			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', $expr, $matches ) ) {
@@ -75,7 +75,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
 				$stack_size = count( $stack );
-				for ( $i = 0; $i< $stack_size; $i++ ) { // freeze the state of the non-argument variables
+				for ( $i = 0; $i < $stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[ $i ];
 					if ( preg_match( '/^[a-z]\w*$/', $token ) and ! in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
@@ -170,7 +170,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					// make sure there was a function
 					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) )
 						return self::trigger( "unexpected ','" );
-					$stack->push( $stack->pop()+ 1 ); // increment the argument count
+					$stack->push( $stack->pop() + 1 ); // increment the argument count
 					$stack->push( '(' ); // put the ( back on, we'll need to pop back to it again
 					$index++;
 					$expecting_op = false;

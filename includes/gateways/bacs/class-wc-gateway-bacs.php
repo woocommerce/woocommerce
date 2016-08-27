@@ -293,7 +293,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 				// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
-					'account_number'=> array(
+					'account_number' => array(
 						'label' => __( 'Account Number', 'woocommerce' ),
 						'value' => $bacs_account->account_number,
 					),
