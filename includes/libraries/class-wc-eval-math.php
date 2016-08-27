@@ -85,7 +85,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						}
 					}
 				}
-				self::$f[$fnn] = array( 'args'=> $args, 'func'=> $stack );
+				self::$f[$fnn] = array( 'args' => $args, 'func' => $stack );
 				return true;
 				//===============
 			} else {
@@ -107,8 +107,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			$expr = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );
-			$ops_r = array( '+'=> 0, '-'=> 0, '*'=> 0, '/'=> 0, '^'=> 1 ); // right-associative operator?
-			$ops_p = array( '+'=> 0, '-'=> 0, '*'=> 1, '/'=> 1, '_'=> 1, '^'=> 2 ); // operator precedence
+			$ops_r = array( '+' => 0, '-' => 0, '*' => 0, '/' => 0, '^' => 1 ); // right-associative operator?
+			$ops_p = array( '+' => 0, '-' => 0, '*' => 1, '/' => 1, '_' => 1, '^' => 2 ); // operator precedence
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
