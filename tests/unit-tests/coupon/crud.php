@@ -241,13 +241,26 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 	public function test_coupon_getters_and_setters() {
 		$time = time();
 		$standard_getters_and_setters = array(
-			'code' => 'test', 'description' => 'hello world', 'discount_type' => 'percent_product',
-			'amount' => 10.50, 'expiry_date' => time(), 'usage_count' => 5, 'individual_use' => true,
-			'product_ids' => array( 5, 10 ), 'exclude_product_ids' => array( 2, 1 ), 'usage_limit' => 2,
-			'usage_limit_per_user' => 10, 'limit_usage_to_x_items' => 2, 'free_shipping' => true,
-			'product_categories' => array( 6 ), 'exclude_product_categories' => array( 8 ),
-			'exclude_sale_items' => true, 'minimum_amount' => 2, 'maximum_amount' => 1000,
-			'customer_email' => array( 'test@woo.local' ), 'used_by' => array( 1 ),
+			'code' => 'test', 
+			'description' => 'hello world',
+			'discount_type' => 'percent_product',
+			'amount' => 10.50,
+			'expiry_date' => time(),
+			'usage_count' => 5,
+			'individual_use' => true,
+			'product_ids' => array( 5, 10 ),
+			'exclude_product_ids' => array( 2, 1 ),
+			'usage_limit' => 2,
+			'usage_limit_per_user' => 10,
+			'limit_usage_to_x_items' => 2,
+			'free_shipping' => true,
+			'product_categories' => array( 6 ),
+			'exclude_product_categories' => array( 8 ),
+			'exclude_sale_items' => true,
+			'minimum_amount' => 2,
+			'maximum_amount' => 1000,
+			'customer_email' => array( 'test@woo.local' ),
+			'used_by' => array( 1 ),
 		);
 
 		$coupon = new WC_Coupon;

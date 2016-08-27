@@ -183,12 +183,28 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	public function test_customer_setters_and_getters() {
 		$time = time();
 		$standard_getters_and_setters = array(
-			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
-			'role' => 'customer', 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
-			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
-			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
-			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
-			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
+			'username' => 'test',
+			'email' => 'test@woo.local',
+			'first_name' => 'Bob',
+			'last_name' => 'tester',
+			'role' => 'customer',
+			'date_created' => $time,
+			'date_modified' => $time,
+			'billing_postcode' => 11010,
+			'billing_city' => 'New York',
+			'billing_address' => '123 Main St.',
+			'billing_address_1' => '123 Main St.',
+			'billing_address_2' => 'Apt 2',
+			'billing_state' => 'NY',
+			'billing_country' => 'US',
+			'shipping_state' => 'NY',
+			'shipping_postcode' => 11011,
+			'shipping_city' => 'New York',
+			'shipping_address' => '123 Main St.',
+			'shipping_address_1' => '123 Main St.',
+			'shipping_address_2' => 'Apt 2',
+			'is_vat_exempt' => true,
+			'calculated_shipping' => true,
 			'is_paying_customer' => true,
 		);
 

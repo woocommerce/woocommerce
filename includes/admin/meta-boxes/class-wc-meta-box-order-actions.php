@@ -139,7 +139,7 @@ class WC_Meta_Box_Order_Actions {
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
-				$wpdb->delete( 
+				$wpdb->delete(
 					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 					array( 'order_id' => $post_id ),
 					array( '%d' )

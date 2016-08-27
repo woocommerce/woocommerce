@@ -311,11 +311,17 @@ class WC_Meta_Box_Product_Data {
 					) );
 
 					// Backorders?
-					woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __( 'Allow backorders?', 'woocommerce' ), 'options' => array(
-						'no'     => __( 'Do not allow', 'woocommerce' ),
-						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'    => __( 'Allow', 'woocommerce' ),
-					), 'desc_tip' => true, 'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ) ) );
+					woocommerce_wp_select( array(
+						'id'          => '_backorders',
+						'label'       => __( 'Allow backorders?', 'woocommerce' ),
+						'options'     => array(
+							'no'      => __( 'Do not allow', 'woocommerce' ),
+							'notify'  => __( 'Allow, but notify customer', 'woocommerce' ),
+							'yes'     => __( 'Allow', 'woocommerce' ),
+						),
+						'desc_tip'    => true,
+						'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
+					) );
 
 					do_action( 'woocommerce_product_options_stock_fields' );
 
@@ -324,10 +330,17 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Stock status
-				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable hide_if_external', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
-					'instock' => __( 'In stock', 'woocommerce' ),
-					'outofstock' => __( 'Out of stock', 'woocommerce' ),
-				), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
+				woocommerce_wp_select( array(
+					'id'             => '_stock_status',
+					'wrapper_class'  => 'hide_if_variable hide_if_external',
+					'label'          => __( 'Stock status', 'woocommerce' ),
+					'options'        => array(
+						'instock'    => __( 'In stock', 'woocommerce' ),
+						'outofstock' => __( 'Out of stock', 'woocommerce' ),
+					),
+					'desc_tip'       => true,
+					'description'    => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
+				) );
 
 				do_action( 'woocommerce_product_options_stock_status' );
 
