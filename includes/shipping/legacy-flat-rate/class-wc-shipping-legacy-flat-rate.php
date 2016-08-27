@@ -356,7 +356,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			switch ( $type ) {
 				case 'class' :
 					$shipping_classes = $this->find_shipping_classes( $package );
-					foreach ( $shipping_classes as $shipping_class => $items ){
+					foreach ( $shipping_classes as $shipping_class => $items ) {
 						foreach ( $items as $item_id => $values ) {
 							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
 						}

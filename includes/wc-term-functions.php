@@ -278,7 +278,7 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * @param bool $unique (default: false)
  * @return bool
  */
-function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
 	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
 }
 
