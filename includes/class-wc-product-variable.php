@@ -616,7 +616,7 @@ class WC_Product_Variable extends WC_Product {
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'backorders_allowed'     => $variation->backorders_allowed(),
 			'is_in_stock'            => $variation->is_in_stock(),
-			'is_downloadable'        => $variation->is_downloadable() ,
+			'is_downloadable'        => $variation->is_downloadable(),
 			'is_virtual'             => $variation->is_virtual(),
 			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
 			'variation_description'  => $variation->get_variation_description(),

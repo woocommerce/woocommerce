@@ -121,7 +121,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
 			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ) ,// Partial refunds inside refunded orders should be ignored
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),// Partial refunds inside refunded orders should be ignored
 		) );
 
 		// Merge
