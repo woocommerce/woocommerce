@@ -340,7 +340,7 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 			continue; // our term to order, we skip
 		}
 		// the nextid of our term to order, lets move our term here
-		if (null !== $next_id && $term->term_id == $next_id ) {
+		if ( null !== $next_id && $term->term_id == $next_id ) {
 			$index++;
 			$index = wc_set_term_order($id, $index, $taxonomy, true);
 		}
