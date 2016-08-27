@@ -140,7 +140,7 @@ class WC_Email_New_Order extends WC_Email {
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
-				'options'       => $this->,get_email_type_options(),
+				'options'       => $this->get_email_type_options(),
 				'desc_tip'      => true,
 			),
 		);
