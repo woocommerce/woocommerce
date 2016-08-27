@@ -25,7 +25,24 @@ before_script:
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
-script: phpunit -c phpunit.xml.dist
+script:
+  # Search for PHP syntax errors.
+  - find . \( -name '*.php' \) -exec php -lf {} \;
+  # Run PHPUnit tests.
+  - phpunit -c phpunit.xml.dist
+  # WordPress Coding Standards.
+  # @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
+  # @link http://pear.php.net/package/PHP_CodeSniffer/
+  # -p flag: Show progress of the run.
+  # -s flag: Show sniff codes in all reports.
+  # -v flag: Print verbose output.
+  # -n flag: Do not print warnings. (shortcut for --warning-severity=0)
+  # --standard: Use WordPress as the standard.
+  # --extensions: Only sniff PHP files.
+  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
+  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php
+  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php
+  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php
 
 after_script:
   - bash tests/bin/travis.sh after
