@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 								wc_display_item_meta( $item );
-								
+
 								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 							?>
 						</td>

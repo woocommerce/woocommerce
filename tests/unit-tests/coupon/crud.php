@@ -241,7 +241,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 	public function test_coupon_getters_and_setters() {
 		$time = time();
 		$standard_getters_and_setters = array(
-			'code' => 'test', 
+			'code' => 'test',
 			'description' => 'hello world',
 			'discount_type' => 'percent_product',
 			'amount' => 10.50,

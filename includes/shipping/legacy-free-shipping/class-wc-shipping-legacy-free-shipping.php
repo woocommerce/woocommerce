@@ -43,7 +43,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0

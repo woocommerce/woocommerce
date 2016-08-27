@@ -344,7 +344,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		// Item counts
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
-	
+
 		// 3rd party filtering of report data
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
 	}
@@ -522,16 +522,16 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 			$data['net_order_amounts'][ $order_amount_key ]    = $order_amount_value;
 			// subtract the sum of the values from net order amounts
-			$data['net_order_amounts'][ $order_amount_key ][1] -= 
+			$data['net_order_amounts'][ $order_amount_key ][1] -=
 				$data['refund_amounts'][ $order_amount_key ][1] +
-				$data['shipping_amounts'][ $order_amount_key ][1] + 
-				$data['shipping_tax_amounts'][ $order_amount_key ][1] + 
+				$data['shipping_amounts'][ $order_amount_key ][1] +
+				$data['shipping_tax_amounts'][ $order_amount_key ][1] +
 				$data['tax_amounts'][ $order_amount_key ][1];
 		}
 
 		// 3rd party filtering of report data
 		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
-	
+
 		// Encode in json format
 		$chart_data = json_encode( array(
 			'order_counts'        => array_values( $data['order_counts'] ),
