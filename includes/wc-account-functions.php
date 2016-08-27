@@ -259,7 +259,7 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
-			$list[ $type ][$key]['actions']['default'] = array(
+			$list[ $type ][ $key ]['actions']['default'] = array(
 				'url' => $set_default_url,
 				'name' => esc_html__( 'Make Default', 'woocommerce' ),
 			);

@@ -40,7 +40,7 @@ class WC_API_Products extends WC_API_Resource {
 		);
 
 		# GET /products/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 

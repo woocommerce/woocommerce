@@ -40,7 +40,7 @@ class WC_API_Reports extends WC_API_Resource {
 		);
 
 		# GET /reports/sales
-		$routes[ $this->base . '/sales'] = array(
+		$routes[ $this->base . '/sales' ] = array(
 			array( array( $this, 'get_sales_report' ), WC_API_Server::READABLE ),
 		);
 

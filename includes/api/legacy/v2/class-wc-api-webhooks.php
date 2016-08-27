@@ -35,7 +35,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 		);
 
 		# GET /webhooks/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_webhooks_count' ), WC_API_Server::READABLE ),
 		);
 

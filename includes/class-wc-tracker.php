@@ -242,10 +242,10 @@ class WC_Tracker {
 			}
 			if ( in_array( $k, $active_plugins_keys ) ) {
 				// Remove active plugins from list so we can show active and inactive separately
-				unset( $plugins[$k] );
-				$active_plugins[$k] = $formatted;
+				unset( $plugins[ $k ] );
+				$active_plugins[ $k ] = $formatted;
 			} else {
-				$plugins[$k] = $formatted;
+				$plugins[ $k ] = $formatted;
 			}
 		}
 

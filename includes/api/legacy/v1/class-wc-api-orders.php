@@ -40,7 +40,7 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		# GET /orders/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
 		);
 

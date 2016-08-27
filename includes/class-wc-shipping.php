@@ -304,7 +304,7 @@ class WC_Shipping {
 
 					if ( ! empty( $rate->taxes ) && is_array( $rate->taxes ) ) {
 						foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
-							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[ $key ] ) ? $rate->taxes[ $key ] : 0 ) + ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 );
 						}
 					}
 				}

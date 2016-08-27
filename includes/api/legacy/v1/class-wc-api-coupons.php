@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 

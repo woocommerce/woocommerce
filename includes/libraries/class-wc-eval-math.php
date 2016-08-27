@@ -63,8 +63,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					return self::trigger( "cannot assign to constant '$matches[1]'" );
 				}
 				if ( ( $tmp = self::pfx( self::nfx( $matches[2] ) ) ) === false ) return false; // get the result and make sure it's good
-				self::$v[$matches[1]] = $tmp; // if so, stick it in the variable array
-				return self::$v[$matches[1]]; // and return the resulting value
+				self::$v[ $matches[1] ] = $tmp; // if so, stick it in the variable array
+				return self::$v[ $matches[1] ]; // and return the resulting value
 				//===============
 				// is it a function assignment?
 			} elseif ( preg_match( '/^\s*([a-z]\w*)\s*\(\s*([a-z]\w*(?:\s*,\s*[a-z]\w*)*)\s*\)\s*=\s*(.+)$/', $expr, $matches ) ) {
@@ -76,16 +76,16 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
 				$stack_size = count( $stack );
 				for ( $i = 0; $i<$stack_size; $i++ ) { // freeze the state of the non-argument variables
-					$token = $stack[$i];
+					$token = $stack[ $i ];
 					if ( preg_match( '/^[a-z]\w*$/', $token ) and !in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
-							$stack[$i] = self::$v[$token];
+							$stack[ $i ] = self::$v[ $token ];
 						} else {
 							return self::trigger( "undefined variable '$token' in function definition" );
 						}
 					}
 				}
-				self::$f[$fnn] = array( 'args' => $args, 'func' => $stack );
+				self::$f[ $fnn ] = array( 'args' => $args, 'func' => $stack );
 				return true;
 				//===============
 			} else {
@@ -133,7 +133,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						$op = '*'; $index--; // it's an implicit multiplication
 					}
 					// heart of the algorithm:
-					while ( $stack->count > 0 and ( $o2 = $stack->last() ) and in_array( $o2, $ops ) and ( $ops_r[$op] ? $ops_p[$op] < $ops_p[$o2] : $ops_p[$op] <= $ops_p[$o2] ) ) {
+					while ( $stack->count > 0 and ( $o2 = $stack->last() ) and in_array( $o2, $ops ) and ( $ops_r[ $op ] ? $ops_p[ $op ] < $ops_p[ $o2 ] : $ops_p[ $op ] <= $ops_p[ $o2 ] ) ) {
 						$output[] = $stack->pop(); // pop stuff off the stack into the output
 					}
 					// many thanks: https://en.wikipedia.org/wiki/Reverse_Polish_notation#The_algorithm_in_detail
@@ -154,8 +154,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 							if ( $arg_count > 1 )
 								return self::trigger( "too many arguments ($arg_count given, 1 expected)" );
 						} elseif ( array_key_exists( $fnn, self::$f ) ) {
-							if ( $arg_count != count( self::$f[$fnn]['args'] ) )
-								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[$fnn]['args'] ) . " expected)" );
+							if ( $arg_count != count( self::$f[ $fnn ]['args'] ) )
+								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[ $fnn ]['args'] ) . " expected)" );
 						} else { // did we somehow push a non-function on the stack? this should never happen
 							return self::trigger( "internal error" );
 						}
@@ -261,9 +261,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					if ( is_numeric( $token ) ) {
 						$stack->push( $token );
 					} elseif ( array_key_exists( $token, self::$v ) ) {
-						$stack->push( self::$v[$token] );
+						$stack->push( self::$v[ $token ] );
 					} elseif ( array_key_exists( $token, $vars ) ) {
-						$stack->push( $vars[$token] );
+						$stack->push( $vars[ $token ] );
 					} else {
 						return self::trigger( "undefined variable '$token'" );
 					}

@@ -31,9 +31,9 @@ function wc_notice_count( $notice_type = '' ) {
 	$notice_count = 0;
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
-	if ( isset( $all_notices[$notice_type] ) ) {
+	if ( isset( $all_notices[ $notice_type ] ) ) {
 
-		$notice_count = absint( sizeof( $all_notices[$notice_type] ) );
+		$notice_count = absint( sizeof( $all_notices[ $notice_type ] ) );
 
 	} elseif ( empty( $notice_type ) ) {
 
@@ -85,7 +85,7 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	$notices[$notice_type][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+	$notices[ $notice_type ][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
 	WC()->session->set( 'wc_notices', $notices );
 }

@@ -1936,7 +1936,7 @@ class WC_AJAX {
 					array( '%d' ),
 					array( '%d' )
 				);
-				$new_pos[$post->ID] = $menu_order;
+				$new_pos[ $post->ID ] = $menu_order;
 				$menu_order++;
 			}
 

@@ -344,7 +344,7 @@ class Emogrifier
 	private function parseCssRules($css)
 	{
 		$cssKey = md5($css);
-		if (!isset($this->caches[self::CACHE_KEY_CSS][$cssKey])) {
+		if (!isset($this->caches[ self::CACHE_KEY_CSS ][ $cssKey ])) {
 			// process the CSS file for selectors and definitions
 			preg_match_all('/(?:^|[\\s^{}]*)([^{]+){([^}]*)}/mis', $css, $matches, PREG_SET_ORDER);
 
@@ -375,10 +375,10 @@ class Emogrifier
 
 			usort($cssRules, array( $this, 'sortBySelectorPrecedence' ) );
 
-			$this->caches[self::CACHE_KEY_CSS][$cssKey] = $cssRules;
+			$this->caches[ self::CACHE_KEY_CSS ][ $cssKey ] = $cssRules;
 		}
 
-		return $this->caches[self::CACHE_KEY_CSS][$cssKey];
+		return $this->caches[ self::CACHE_KEY_CSS ][ $cssKey ];
 	}
 
 	/**
@@ -448,7 +448,7 @@ class Emogrifier
 			throw new InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
 		}
 
-		$this->caches[$key] = array();
+		$this->caches[ $key ] = array();
 	}
 
 	/**
@@ -490,7 +490,7 @@ class Emogrifier
 	{
 		$key = array_search($tagName, $this->unprocessableHtmlTags, true);
 		if ($key !== false) {
-			unset($this->unprocessableHtmlTags[$key]);
+			unset($this->unprocessableHtmlTags[ $key ]);
 		}
 	}
 
@@ -503,7 +503,7 @@ class Emogrifier
 	 */
 	public function addAllowedMediaType($mediaName)
 	{
-		$this->allowedMediaTypes[$mediaName] = true;
+		$this->allowedMediaTypes[ $mediaName ] = true;
 	}
 
 	/**
@@ -515,8 +515,8 @@ class Emogrifier
 	 */
 	public function removeAllowedMediaType($mediaName)
 	{
-		if (isset($this->allowedMediaTypes[$mediaName])) {
-			unset($this->allowedMediaTypes[$mediaName]);
+		if (isset($this->allowedMediaTypes[ $mediaName ])) {
+			unset($this->allowedMediaTypes[ $mediaName ]);
 		}
 	}
 
@@ -531,7 +531,7 @@ class Emogrifier
 	 */
 	public function addExcludedSelector($selector)
 	{
-		$this->excludedSelectors[$selector] = true;
+		$this->excludedSelectors[ $selector ] = true;
 	}
 
 	/**
@@ -543,8 +543,8 @@ class Emogrifier
 	 */
 	public function removeExcludedSelector($selector)
 	{
-		if (isset($this->excludedSelectors[$selector])) {
-			unset($this->excludedSelectors[$selector]);
+		if (isset($this->excludedSelectors[ $selector ])) {
+			unset($this->excludedSelectors[ $selector ]);
 		}
 	}
 
@@ -600,9 +600,9 @@ class Emogrifier
 		// in order to not overwrite existing style attributes in the HTML, we
 		// have to save the original HTML styles
 		$nodePath = $node->getNodePath();
-		if (!isset($this->styleAttributesForNodes[$nodePath])) {
-			$this->styleAttributesForNodes[$nodePath] = $this->parseCssDeclarationsBlock($normalizedOriginalStyle);
-			$this->visitedNodes[$nodePath] = $node;
+		if (!isset($this->styleAttributesForNodes[ $nodePath ])) {
+			$this->styleAttributesForNodes[ $nodePath ] = $this->parseCssDeclarationsBlock($normalizedOriginalStyle);
+			$this->visitedNodes[ $nodePath ] = $node;
 		}
 
 		$node->setAttribute('style', $normalizedOriginalStyle);
@@ -616,7 +616,7 @@ class Emogrifier
 	private function fillStyleAttributesWithMergedStyles()
 	{
 		foreach ($this->styleAttributesForNodes as $nodePath => $styleAttributesForNode) {
-			$node = $this->visitedNodes[$nodePath];
+			$node = $this->visitedNodes[ $nodePath ];
 			$currentStyleAttributes = $this->parseCssDeclarationsBlock($node->getAttribute('style'));
 			$node->setAttribute(
 				'style',
@@ -643,13 +643,13 @@ class Emogrifier
 	{
 		$combinedStyles = array_merge($oldStyles, $newStyles);
 		$cacheKey = serialize($combinedStyles);
-		if (isset($this->caches[self::CACHE_KEY_COMBINED_STYLES][$cacheKey])) {
-			return $this->caches[self::CACHE_KEY_COMBINED_STYLES][$cacheKey];
+		if (isset($this->caches[ self::CACHE_KEY_COMBINED_STYLES ][ $cacheKey ])) {
+			return $this->caches[ self::CACHE_KEY_COMBINED_STYLES ][ $cacheKey ];
 		}
 
 		foreach ($oldStyles as $attributeName => $attributeValue) {
-			if (isset($newStyles[$attributeName]) && strtolower(substr($attributeValue, -10)) === '!important') {
-				$combinedStyles[$attributeName] = $attributeValue;
+			if (isset($newStyles[ $attributeName ]) && strtolower(substr($attributeValue, -10)) === '!important') {
+				$combinedStyles[ $attributeName ] = $attributeValue;
 			}
 		}
 
@@ -659,7 +659,7 @@ class Emogrifier
 		}
 		$trimmedStyle = rtrim($style);
 
-		$this->caches[self::CACHE_KEY_COMBINED_STYLES][$cacheKey] = $trimmedStyle;
+		$this->caches[ self::CACHE_KEY_COMBINED_STYLES ][ $cacheKey ] = $trimmedStyle;
 
 		return $trimmedStyle;
 	}
@@ -706,8 +706,8 @@ class Emogrifier
 		$result = array();
 		foreach (array_keys($mediaQueries['css']) as $key) {
 			$result[] = array(
-				'css' => $mediaQueries['css'][$key],
-				'query' => $mediaQueries['query'][$key],
+				'css' => $mediaQueries['css'][ $key ],
+				'query' => $mediaQueries['query'][ $key ],
 			);
 		}
 		return $result;
@@ -981,7 +981,7 @@ class Emogrifier
 	private function getCssSelectorPrecedence($selector)
 	{
 		$selectorKey = md5($selector);
-		if (!isset($this->caches[self::CACHE_KEY_SELECTOR][$selectorKey])) {
+		if (!isset($this->caches[ self::CACHE_KEY_SELECTOR ][ $selectorKey ])) {
 			$precedence = 0;
 			$value = 100;
 			// ids: worth 100, classes: worth 10, elements: worth 1
@@ -996,10 +996,10 @@ class Emogrifier
 				$precedence += ($value * $number);
 				$value /= 10;
 			}
-			$this->caches[self::CACHE_KEY_SELECTOR][$selectorKey] = $precedence;
+			$this->caches[ self::CACHE_KEY_SELECTOR ][ $selectorKey ] = $precedence;
 		}
 
-		return $this->caches[self::CACHE_KEY_SELECTOR][$selectorKey];
+		return $this->caches[ self::CACHE_KEY_SELECTOR ][ $selectorKey ];
 	}
 
 	private function translateCssToXpath_callback( $matches ) {
@@ -1025,7 +1025,7 @@ class Emogrifier
 		);
 		$trimmedLowercaseSelector = trim($lowercasePaddedSelector);
 		$xpathKey = md5($trimmedLowercaseSelector);
-		if (!isset($this->caches[self::CACHE_KEY_XPATH][$xpathKey])) {
+		if (!isset($this->caches[ self::CACHE_KEY_XPATH ][ $xpathKey ])) {
 			$cssSelectorMatches = array(
 				'child'            => '/\\s+>\\s+/',
 				'adjacent sibling' => '/\\s+\\+\\s+/',
@@ -1073,9 +1073,9 @@ class Emogrifier
 				$xpathWithIdAttributeAndClassMatchers
 			);
 
-			$this->caches[self::CACHE_KEY_SELECTOR][$xpathKey] = $finalXpath;
+			$this->caches[ self::CACHE_KEY_SELECTOR ][ $xpathKey ] = $finalXpath;
 		}
-		return $this->caches[self::CACHE_KEY_SELECTOR][$xpathKey];
+		return $this->caches[ self::CACHE_KEY_SELECTOR ][ $xpathKey ];
 	}
 
 	/**
@@ -1111,25 +1111,25 @@ class Emogrifier
 	{
 		$parseResult = $this->parseNth($match);
 
-		if (isset($parseResult[self::MULTIPLIER])) {
-			if ($parseResult[self::MULTIPLIER] < 0) {
-				$parseResult[self::MULTIPLIER] = abs($parseResult[self::MULTIPLIER]);
+		if (isset($parseResult[ self::MULTIPLIER ])) {
+			if ($parseResult[ self::MULTIPLIER ] < 0) {
+				$parseResult[ self::MULTIPLIER ] = abs($parseResult[ self::MULTIPLIER ]);
 				$xPathExpression = sprintf(
 					'*[(last() - position()) mod %u = %u]/self::%s',
-					$parseResult[self::MULTIPLIER],
-					$parseResult[self::INDEX],
+					$parseResult[ self::MULTIPLIER ],
+					$parseResult[ self::INDEX ],
 					$match[1]
 				);
 			} else {
 				$xPathExpression = sprintf(
 					'*[position() mod %u = %u]/self::%s',
-					$parseResult[self::MULTIPLIER],
-					$parseResult[self::INDEX],
+					$parseResult[ self::MULTIPLIER ],
+					$parseResult[ self::INDEX ],
 					$match[1]
 				);
 			}
 		} else {
-			$xPathExpression = sprintf('*[%u]/self::%s', $parseResult[self::INDEX], $match[1]);
+			$xPathExpression = sprintf('*[%u]/self::%s', $parseResult[ self::INDEX ], $match[1]);
 		}
 
 		return $xPathExpression;
@@ -1144,25 +1144,25 @@ class Emogrifier
 	{
 		$parseResult = $this->parseNth($match);
 
-		if (isset($parseResult[self::MULTIPLIER])) {
-			if ($parseResult[self::MULTIPLIER] < 0) {
-				$parseResult[self::MULTIPLIER] = abs($parseResult[self::MULTIPLIER]);
+		if (isset($parseResult[ self::MULTIPLIER ])) {
+			if ($parseResult[ self::MULTIPLIER ] < 0) {
+				$parseResult[ self::MULTIPLIER ] = abs($parseResult[ self::MULTIPLIER ]);
 				$xPathExpression = sprintf(
 					'%s[(last() - position()) mod %u = %u]',
 					$match[1],
-					$parseResult[self::MULTIPLIER],
-					$parseResult[self::INDEX]
+					$parseResult[ self::MULTIPLIER ],
+					$parseResult[ self::INDEX ]
 				);
 			} else {
 				$xPathExpression = sprintf(
 					'%s[position() mod %u = %u]',
 					$match[1],
-					$parseResult[self::MULTIPLIER],
-					$parseResult[self::INDEX]
+					$parseResult[ self::MULTIPLIER ],
+					$parseResult[ self::INDEX ]
 				);
 			}
 		} else {
-			$xPathExpression = sprintf('%s[%u]', $match[1], $parseResult[self::INDEX]);
+			$xPathExpression = sprintf('%s[%u]', $match[1], $parseResult[ self::INDEX ]);
 		}
 
 		return $xPathExpression;
@@ -1232,8 +1232,8 @@ class Emogrifier
 	 */
 	private function parseCssDeclarationsBlock($cssDeclarationsBlock)
 	{
-		if (isset($this->caches[self::CACHE_KEY_CSS_DECLARATIONS_BLOCK][$cssDeclarationsBlock])) {
-			return $this->caches[self::CACHE_KEY_CSS_DECLARATIONS_BLOCK][$cssDeclarationsBlock];
+		if (isset($this->caches[ self::CACHE_KEY_CSS_DECLARATIONS_BLOCK ][ $cssDeclarationsBlock ])) {
+			return $this->caches[ self::CACHE_KEY_CSS_DECLARATIONS_BLOCK ][ $cssDeclarationsBlock ];
 		}
 
 		$properties = array();
@@ -1247,9 +1247,9 @@ class Emogrifier
 
 			$propertyName = strtolower($matches[1]);
 			$propertyValue = $matches[2];
-			$properties[$propertyName] = $propertyValue;
+			$properties[ $propertyName ] = $propertyValue;
 		}
-		$this->caches[self::CACHE_KEY_CSS_DECLARATIONS_BLOCK][$cssDeclarationsBlock] = $properties;
+		$this->caches[ self::CACHE_KEY_CSS_DECLARATIONS_BLOCK ][ $cssDeclarationsBlock ] = $properties;
 
 		return $properties;
 	}

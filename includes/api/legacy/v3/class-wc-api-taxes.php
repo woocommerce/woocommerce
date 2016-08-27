@@ -39,7 +39,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		);
 
 		# GET /taxes/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_taxes_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -57,7 +57,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		);
 
 		# GET /taxes/classes/count
-		$routes[ $this->base . '/classes/count'] = array(
+		$routes[ $this->base . '/classes/count' ] = array(
 			array( array( $this, 'get_tax_classes_count' ), WC_API_Server::READABLE ),
 		);
 

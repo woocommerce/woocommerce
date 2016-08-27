@@ -239,7 +239,7 @@ class WC_API_Authentication {
 			$filters = $params['filter'];
 			unset( $params['filter'] );
 			foreach ( $filters as $filter => $filter_value ) {
-				$params['filter[' . $filter . ']'] = $filter_value;
+				$params[ 'filter[' . $filter . ']' ] = $filter_value;
 			}
 		}
 
