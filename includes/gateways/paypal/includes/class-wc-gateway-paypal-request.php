@@ -102,7 +102,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		if ( in_array( $order->get_billing_country(), array( 'US','CA' ) ) ) {
+		if ( in_array( $order->get_billing_country(), array( 'US', 'CA' ) ) ) {
 			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(

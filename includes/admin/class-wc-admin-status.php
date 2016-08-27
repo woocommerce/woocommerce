@@ -151,7 +151,7 @@ class WC_Admin_Status {
 
 			foreach ( $files as $key => $value ) {
 
-				if ( ! in_array( $value, array( ".",".." ) ) ) {
+				if ( ! in_array( $value, array( ".", ".." ) ) ) {
 
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
 						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
