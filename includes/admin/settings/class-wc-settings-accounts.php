@@ -55,7 +55,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
+			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
 				'title'         => __( 'Enable Registration', 'woocommerce' ),
