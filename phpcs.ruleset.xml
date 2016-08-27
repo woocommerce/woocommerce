@@ -25,6 +25,7 @@
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace" />
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
+		<exclude name="Generic.PHP.DeprecatedFunctions.Deprecated" />
 		<exclude name="Generic.PHP.ForbiddenFunctions.FoundWithAlternative" />
 		<exclude name="Generic.PHP.LowerCaseKeyword.Found" />
 		<exclude name="Generic.PHP.NoSilencedErrors.Discouraged" />
