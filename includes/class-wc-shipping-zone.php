@@ -487,4 +487,25 @@ class WC_Shipping_Zone extends WC_Data {
 
 		return $instance_id;
 	}
+
+	/**
+	 * Delete a shipping method from a zone.
+	 * @param int $instance_id
+	 * @return True on success, false on failure
+	 */
+	public function delete_shipping_method( $instance_id ) {
+		global $wpdb;
+
+		if ( null === $this->get_id() ) {
+			return false;
+		}
+
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'instance_id' => $instance_id ) );
+		do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $this->get_id() );
+
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		return true;
+	}
+
 }
