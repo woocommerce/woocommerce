@@ -119,8 +119,9 @@ class WC_Structured_Data {
 	/**
 	 * Sanitizes, encodes and outputs structured data.
 	 * 
-	 * @uses   `wp_footer` action hook
-	 * @uses   `woocommerce_email_order_details` action hook
+	 * Hooked into `wp_footer` action hook.
+	 * Hooked into `woocommerce_email_order_details` action hook.
+	 *
 	 * @param  bool|array|string $requested_types (default: true)
 	 * @return bool
 	 */
@@ -189,7 +190,8 @@ class WC_Structured_Data {
 	/**
 	 * Limits Product structured data on taxonomies and shop page.
 	 *
-	 * @uses   `woocommerce_structured_data_product_limit` filter hook
+	 * Hooked into `woocommerce_structured_data_product_limit` filter hook.
+	 *
 	 * @param  bool $limit_data
 	 * @return bool $limit_data
 	 */
@@ -218,8 +220,9 @@ class WC_Structured_Data {
 	/**
 	 * Generates Product structured data.
 	 *
-	 * @uses   `woocommerce_single_product_summary` action hook
-	 * @uses   `woocommerce_shop_loop` action hook
+	 * Hooked into `woocommerce_single_product_summary` action hook.
+	 * Hooked into `woocommerce_shop_loop` action hook.
+	 *
 	 * @param  bool|object $product    (default: false)
 	 * @param  bool        $limit_data (default: false)
 	 * @return bool
@@ -235,10 +238,10 @@ class WC_Structured_Data {
 
 		$limit_data = apply_filters( 'woocommerce_structured_data_product_limit', $limit_data );
 		
-		$markup['@type']       = 'Product';
-		$markup['@id']         = get_permalink( $product->get_id() );
-		$markup['url']         = $markup['@id'];
-		$markup['name']        = $product->get_title();
+		$markup['@type'] = 'Product';
+		$markup['@id']   = get_permalink( $product->get_id() );
+		$markup['url']   = $markup['@id'];
+		$markup['name']  = $product->get_title();
 
 		if ( $limit_data ) {
 			return $this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
@@ -289,7 +292,8 @@ class WC_Structured_Data {
 	/**
 	 * Generates Review structured data.
 	 *
-	 * @uses   `woocommerce_review_meta` action hook
+	 * Hooked into `woocommerce_review_meta` action hook.
+	 *
 	 * @param  object $comment
 	 * @return bool
 	 */
@@ -321,7 +325,8 @@ class WC_Structured_Data {
 	/**
 	 * Generates BreadcrumbList structured data.
 	 *
-	 * @uses   `woocommerce_breadcrumb` action hook
+	 * Hooked into `woocommerce_breadcrumb` action hook.
+	 *
 	 * @param  object $breadcrumbs
 	 * @return bool|void
 	 */
@@ -355,7 +360,8 @@ class WC_Structured_Data {
 	/**
 	 * Generates WebSite structured data.
 	 *
-	 * @uses  `woocommerce_before_main_content` action hook
+	 * Hooked into `woocommerce_before_main_content` action hook.
+	 *
 	 * @return bool
 	 */
 	public function generate_website_data() {
@@ -374,7 +380,8 @@ class WC_Structured_Data {
 	/**
 	 * Generates Order structured data.
 	 *
-	 * @uses   `woocommerce_email_order_details` action hook
+	 * Hooked into `woocommerce_email_order_details` action hook.
+	 *
 	 * @param  object    $order
 	 * @param  bool	     $sent_to_admin (default: false)
 	 * @param  bool	     $plain_text (default: false)
