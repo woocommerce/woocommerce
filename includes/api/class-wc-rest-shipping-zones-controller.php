@@ -53,6 +53,17 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+					),
+				),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
@@ -159,6 +170,32 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 		}
 
 		return $this->get_item( $request );
+	}
+
+	/**
+	 * Delete a single Shipping Zone.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$zone = $this->get_zone( $request->get_param( 'id' ) );
+
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$force = $request['force'];
+
+		$response = $this->get_item( $request );
+
+		if ( $force ) {
+			$zone->delete();
+		} else {
+			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.' ), array( 'status' => 501 ) );
+		}
+
+		return $response;
 	}
 
 	/**

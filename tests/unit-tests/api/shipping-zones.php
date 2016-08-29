@@ -297,6 +297,47 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test Shipping Zone delete endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone() {
+		wp_set_current_user( $this->user );
+		$zone = $this->create_shipping_zone( 'Zone 1' );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test Shipping Zone delete endpoint without permissions.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone_without_permission() {
+		wp_set_current_user( 0 );
+		$zone = $this->create_shipping_zone( 'Zone 1' );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test Shipping Zone delete endpoint with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone_invalid_id() {
+		wp_set_current_user( $this->user );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/0' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
 	 * Test getting a single Shipping Zone.
 	 * @since 2.7.0
 	 */
