@@ -166,7 +166,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				$total = $total - WC()->cart->get_cart_discount_total();
 			}
 
-			if ( $total >= $this->min_amount ) {
+			$epsilon = pow( 10, - wc_get_price_decimals() );
+			if ( abs( $total - $this->min_amount ) < $epsilon || $total > $this->min_amount ) {
 				$has_met_min_amount = true;
 			}
 		}
