@@ -56,7 +56,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 				'args'                => array(
 					'force' => array(
 						'default'     => false,

@@ -386,6 +386,10 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'value'          => array(
+					'description'  => __( 'Setting value.', 'woocommerce' ),
+					'type'         => 'mixed',
+				),
 				'default'          => array(
 					'description'  => __( 'Default value for the setting.', 'woocommerce' ),
 					'type'         => 'mixed',
