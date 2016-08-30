@@ -1,9 +1,9 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, BFTrick
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, icaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 2.6.4
+Stable tag: 2.6.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.5 =
+= 2.6.5 - 31/08/16 =
 * Fix - Shipping classes URL in admin.
 * Fix - Notice in reports when using custom date ranges.
 * Fix - When checking needs_shipping, ignore anything after : in the method ID.
