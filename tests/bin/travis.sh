@@ -14,8 +14,9 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	# no Xdebug and therefore no coverage in PHP 5.2
+	# no Xdebug and therefore no coverage in PHP 5.2 or 5.3
 	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
 
 	# send coverage data to coveralls
 	php vendor/bin/coveralls --verbose --exclude-no-stmt
