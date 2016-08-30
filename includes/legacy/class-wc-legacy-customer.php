@@ -75,24 +75,6 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	}
 
 	/**
-	 * Is customer VAT exempt?
-	 * @return bool
-	 */
-	public function is_vat_exempt() {
-		_deprecated_function( 'WC_Customer::is_vat_exempt', '2.7', 'WC_Customer::get_is_vat_exempt' );
-		return $this->get_is_vat_exempt();
-	}
-
-	/**
-	 * Has calculated shipping?
-	 * @return bool
-	 */
-	public function has_calculated_shipping() {
-		_deprecated_function( 'WC_Customer::has_calculated_shipping', '2.7', 'WC_Customer::get_calculated_shipping' );
-		return $this->get_calculated_shipping();
-	}
-
-	/**
 	 * Get default country for a customer.
 	 * @return string
 	 */
