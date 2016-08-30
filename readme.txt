@@ -158,6 +158,28 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.5 =
+* Fix - Shipping classes URL in admin.
+* Fix - Notice in reports when using custom date ranges.
+* Fix - When checking needs_shipping, ignore anything after : in the method ID.
+* Fix - Allow has_shipping_method to work with instances.
+* Fix - Potential notice in wc_add_to_cart_message().
+* Fix - Prevent notice in wpdb_table_fix if termmeta table is not used.
+* Fix - Payment method box fixes e.g. maintain previously selected payment method after update.
+* Fix - Prevent multiple password validation methods at once on my account page.
+* Fix - Ship to specific counties option had no effect.
+* Fix - Broken Webhook delivery due to use of post_date_gmt which does not exist for drafts.
+* Fix - Use method title in admin shipping dropdown.
+* Fix - Fixed downloadable variable product URL.
+* Fix - Handle object when generate_cart_id is used to prevent notices.
+* Fix - Set header link color in emails.
+* Fix - Rest of the world ID 0 zone handling when using CRUD classes.
+* Fix - Cast prices as decimal when querying prices in price filter widget.
+* Fix - API - Fix coupon description field.
+* Fix - API - ID needs to be capitalized to allow correct sorting.
+* Fix - API - Fixed undefined order ID.
+* Fix - API - Allow API to save refund reason.
+
 = 2.6.4 - 26/07/16 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
 * Fix - Shipping method title display in COD settings.
