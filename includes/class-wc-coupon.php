@@ -800,32 +800,41 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  array $coupon Array of coupon properties
 	 */
 	public function read_manual_coupon( $code, $coupon ) {
-		// product_ids and exclude_product_ids could be passed in as an empty string '', or comma separated values, when it should be an empty array for the new format.
-		$convert_fields_to_array = array( 'product_ids', 'exclude_product_ids' );
-		foreach ( $convert_fields_to_array as $field ) {
-			if ( ! is_array( $coupon[ $field ] ) ) {
-				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.7' );
-				$coupon[ $field ] = array_filter( explode( ',', $coupon[ $field ] ) );
+		foreach ( $coupon as $key => $value ) {
+			switch ( $key ) {
+				case 'excluded_product_ids' :
+				case 'exclude_product_ids' :
+					if ( ! is_array( $coupon[ $key ] ) ) {
+						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						$coupon['excluded_product_ids'] = wc_string_to_array( $value );
+					}
+					break;
+				case 'exclude_product_categories' :
+				case 'excluded_product_categories' :
+					if ( ! is_array( $coupon[ $key ] ) ) {
+						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						$coupon['excluded_product_categories'] = wc_string_to_array( $value );
+					}
+					break;
+				case 'product_ids' :
+					if ( ! is_array( $coupon[ $key ] ) ) {
+						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						$coupon[ $key ] = wc_string_to_array( $value );
+					}
+					break;
+				case 'individual_use' :
+				case 'free_shipping' :
+				case 'exclude_sale_items' :
+					if ( ! is_bool( $coupon[ $key ] ) ) {
+						_doing_it_wrong( $key, $key . ' should be true or false instead of yes or no.', '2.7' );
+						$coupon[ $key ] = wc_string_to_bool( $value );
+					}
+					break;
+				case 'expiry_date' :
+					$coupon['date_expires'] = $value;
+					break;
 			}
 		}
-
-		// flip yes|no to true|false
-		$yes_no_fields = array( 'individual_use', 'free_shipping', 'exclude_sale_items' );
-		foreach ( $yes_no_fields as $field ) {
-			if ( 'yes' === $coupon[ $field ] || 'no' === $coupon[ $field ] ) {
-				_doing_it_wrong( $field, $field . ' should be true or false instead of yes or no.', '2.7' );
-				$coupon[ $field ] = 'yes' === $coupon[ $field ];
-			}
-		}
-
-		// BW compat
-		$coupon[ 'date_expires' ]                = isset( $coupon[ 'date_expires' ] ) ? $coupon[ 'date_expires' ]                             : '';
-		$coupon[ 'date_expires' ]                = isset( $coupon[ 'expiry_date' ] ) ? $coupon[ 'expiry_date' ]                               : $coupon[ 'date_expires' ];
-		$coupon[ 'excluded_product_ids' ]        = isset( $coupon[ 'excluded_product_ids'] ) ? $coupon[ 'excluded_product_ids']               : '';
-		$coupon[ 'excluded_product_ids' ]        = isset( $coupon[ 'exclude_product_ids'] ) ? $coupon[ 'exclude_product_ids']                 : $coupon[ 'excluded_product_ids'];
-		$coupon[ 'excluded_product_categories' ] = isset( $coupon[ 'excluded_product_categories'] ) ? $coupon[ 'excluded_product_categories'] : '';
-		$coupon[ 'excluded_product_categories' ] = isset( $coupon[ 'exclude_product_categories'] ) ? $coupon[ 'exclude_product_categories']   : $coupon[ 'excluded_product_categories'];
-
 		$this->set_code( $code );
 		$this->set_props( $coupon );
 	}
