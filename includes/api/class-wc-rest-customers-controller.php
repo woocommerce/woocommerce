@@ -117,7 +117,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -131,7 +130,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -147,7 +145,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -163,7 +160,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'edit', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -179,7 +175,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'delete', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -193,7 +188,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
@@ -301,49 +295,53 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
-		if ( ! empty( $request['id'] ) ) {
-			return new WP_Error( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+		try {
+			if ( ! empty( $request['id'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), 400 );
+			}
+
+			// Sets the username.
+			$request['username'] = ! empty( $request['username'] ) ? $request['username'] : '';
+
+			// Sets the password.
+			$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
+
+			// Create customer.
+			$customer = new WC_Customer;
+			$customer->set_username( $request['username'] );
+			$customer->set_password( $request['password'] );
+			$customer->set_email( $request['email'] );
+			$customer->create();
+
+			if ( ! $customer->get_id() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
+			}
+
+			$this->update_customer_meta_fields( $customer, $request );
+			$customer->save();
+
+			$user_data = get_user_by( 'id', $customer->get_id() );
+			$this->update_additional_fields_for_object( $user_data, $request );
+
+			/**
+			 * Fires after a customer is created or updated via the REST API.
+			 *
+			 * @param WP_User         $user_data Data used to create the customer.
+			 * @param WP_REST_Request $request   Request object.
+			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 */
+			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, true );
+
+			$request->set_param( 'context', 'edit' );
+			$response = $this->prepare_item_for_response( $user_data, $request );
+			$response = rest_ensure_response( $response );
+			$response->set_status( 201 );
+			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer->get_id() ) ) );
+
+			return $response;
+		} catch ( Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-
-		// Sets the username.
-		$request['username'] = ! empty( $request['username'] ) ? $request['username'] : '';
-
-		// Sets the password.
-		$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
-
-		// Create customer.
-		$customer = new WC_Customer;
-		$customer->set_username( $request['username'] );
-		$customer->set_password( $request['password'] );
-		$customer->set_email( $request['email'] );
-		$customer->create();
-
-		if ( ! $customer->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		$this->update_customer_meta_fields( $customer, $request );
-		$customer->save();
-
-		$user_data = get_user_by( 'id', $customer->get_id() );
-		$this->update_additional_fields_for_object( $user_data, $request );
-
-		/**
-		 * Fires after a customer is created or updated via the REST API.
-		 *
-		 * @param WP_User         $user_data Data used to create the customer.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating customer, false when updating customer.
-		 */
-		do_action( 'woocommerce_rest_insert_customer', $user_data, $request, true );
-
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $user_data, $request );
-		$response = rest_ensure_response( $response );
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer->get_id() ) ) );
-
-		return $response;
 	}
 
 	/**
@@ -373,50 +371,54 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$id       = (int) $request['id'];
-		$customer = new WC_Customer( $id );
+		try {
+			$id       = (int) $request['id'];
+			$customer = new WC_Customer( $id );
 
-		if ( ! $customer->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( ! $customer->get_id() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), 400 );
+			}
+
+			if ( ! empty( $request['email'] ) && email_exists( $request['email'] ) && $request['email'] !== $customer->get_email() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce' ), 400 );
+			}
+
+			if ( ! empty( $request['username'] ) && $request['username'] !== $customer->get_username() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), 400 );
+			}
+
+			// Customer email.
+			if ( isset( $request['email'] ) ) {
+				$customer->set_email( sanitize_email( $request['email'] ) );
+			}
+
+			// Customer password.
+			if ( isset( $request['password'] ) ) {
+				$customer->set_password( wc_clean( $request['password'] ) );
+			}
+
+			$this->update_customer_meta_fields( $customer, $request );
+			$customer->save();
+
+			$user_data = get_userdata( $customer->get_id() );
+			$this->update_additional_fields_for_object( $user_data, $request );
+
+			/**
+			 * Fires after a customer is created or updated via the REST API.
+			 *
+			 * @param WP_User         $customer  Data used to create the customer.
+			 * @param WP_REST_Request $request   Request object.
+			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 */
+			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, false );
+
+			$request->set_param( 'context', 'edit' );
+			$response = $this->prepare_item_for_response( $user_data, $request );
+			$response = rest_ensure_response( $response );
+			return $response;
+		} catch ( Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-
-		if ( ! empty( $request['email'] ) && email_exists( $request['email'] ) && $request['email'] !== $customer->get_email() ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		if ( ! empty( $request['username'] ) && $request['username'] !== $customer->get_username() ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		// Customer email.
-		if ( isset( $request['email'] ) ) {
-			$customer->set_email( sanitize_email( $request['email'] ) );
-		}
-
-		// Customer password.
-		if ( isset( $request['password'] ) ) {
-			$customer->set_password( wc_clean( $request['password'] ) );
-		}
-
-		$this->update_customer_meta_fields( $customer, $request );
-		$customer->save();
-
-		$user_data = get_userdata( $customer->get_id() );
-		$this->update_additional_fields_for_object( $user_data, $request );
-
-		/**
-		 * Fires after a customer is created or updated via the REST API.
-		 *
-		 * @param WP_User         $customer  Data used to create the customer.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating customer, false when updating customer.
-		 */
-		do_action( 'woocommerce_rest_insert_customer', $user_data, $request, false );
-
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $user_data, $request );
-		$response = rest_ensure_response( $response );
-		return $response;
 	}
 
 	/**
@@ -839,7 +841,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 */
 	protected function get_role_names() {
 		global $wp_roles;
-
 		return array_keys( $wp_roles->role_names );
 	}
 
