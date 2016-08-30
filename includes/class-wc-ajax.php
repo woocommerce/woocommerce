@@ -308,82 +308,38 @@ class WC_AJAX {
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
-
-		if ( isset( $_POST['country'] ) ) {
-			WC()->customer->set_billing_country( $_POST['country'] );
-		}
-
-		if ( isset( $_POST['state'] ) ) {
-			WC()->customer->set_billing_state( $_POST['state'] );
-		}
-
-		if ( isset( $_POST['postcode'] ) ) {
-			WC()->customer->set_billing_postcode( $_POST['postcode'] );
-		}
-
-		if ( isset( $_POST['city'] ) ) {
-			WC()->customer->set_billing_city( $_POST['city'] );
-		}
-
-		if ( isset( $_POST['address'] ) ) {
-			WC()->customer->set_billing_address( $_POST['address'] );
-		}
-
-		if ( isset( $_POST['address_2'] ) ) {
-			WC()->customer->set_billing_address_2( $_POST['address_2'] );
-		}
+		WC()->customer->set_props( array(
+			'billing_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
+			'billing_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
+			'billing_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
+			'billing_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
+			'billing_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
+			'billing_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+		) );
 
 		if ( wc_ship_to_billing_address_only() ) {
-
+			WC()->customer->set_props( array(
+				'shipping_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
+				'shipping_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
+				'shipping_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
+				'shipping_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
+				'shipping_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
+				'shipping_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+			) );
 			if ( ! empty( $_POST['country'] ) ) {
-				WC()->customer->set_shipping_country( $_POST['country'] );
 				WC()->customer->set_calculated_shipping( true );
-			}
-
-			if ( isset( $_POST['state'] ) ) {
-				WC()->customer->set_shipping_state( $_POST['state'] );
-			}
-
-			if ( isset( $_POST['postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $_POST['postcode'] );
-			}
-
-			if ( isset( $_POST['city'] ) ) {
-				WC()->customer->set_shipping_city( $_POST['city'] );
-			}
-
-			if ( isset( $_POST['address'] ) ) {
-				WC()->customer->set_shipping_address( $_POST['address'] );
-			}
-
-			if ( isset( $_POST['address_2'] ) ) {
-				WC()->customer->set_shipping_address_2( $_POST['address_2'] );
 			}
 		} else {
-
+			WC()->customer->set_props( array(
+				'shipping_country'   => isset( $_POST['s_country'] ) ? $_POST['s_country']     : null,
+				'shipping_state'     => isset( $_POST['s_state'] ) ? $_POST['s_state']         : null,
+				'shipping_postcode'  => isset( $_POST['s_postcode'] ) ? $_POST['s_postcode']   : null,
+				'shipping_city'      => isset( $_POST['s_city'] ) ? $_POST['s_city']           : null,
+				'shipping_address_1' => isset( $_POST['s_address'] ) ? $_POST['s_address']     : null,
+				'shipping_address_2' => isset( $_POST['s_address_2'] ) ? $_POST['s_address_2'] : null,
+			) );
 			if ( ! empty( $_POST['s_country'] ) ) {
-				WC()->customer->set_shipping_country( $_POST['s_country'] );
 				WC()->customer->set_calculated_shipping( true );
-			}
-
-			if ( isset( $_POST['s_state'] ) ) {
-				WC()->customer->set_shipping_state( $_POST['s_state'] );
-			}
-
-			if ( isset( $_POST['s_postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
-			}
-
-			if ( isset( $_POST['s_city'] ) ) {
-				WC()->customer->set_shipping_city( $_POST['s_city'] );
-			}
-
-			if ( isset( $_POST['s_address'] ) ) {
-				WC()->customer->set_shipping_address( $_POST['s_address'] );
-			}
-
-			if ( isset( $_POST['s_address_2'] ) ) {
-				WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
 			}
 		}
 

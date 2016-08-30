@@ -292,20 +292,12 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
-				// Set customer location to order location
-				if ( $order->get_billing_country() ) {
-					WC()->customer->set_country( $order->get_billing_country() );
-				}
-				if ( $order->get_billing_state() ) {
-					WC()->customer->set_state( $order->get_billing_state() );
-				}
-				if ( $order->get_billing_postcode() ) {
-					WC()->customer->set_postcode( $order->get_billing_postcode() );
-				}
-				if ( $order->get_billing_city() ) {
-					WC()->customer->set_city( $order->get_billing_city() );
-				}
-
+				WC()->customer->set_props( array(
+					'country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+					'state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+					'postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+					'city'     => $order->get_billing_city() ? $order->get_billing_city()         : null,
+				) );
 				WC()->customer->save();
 
 				// Terms

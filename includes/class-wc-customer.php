@@ -1006,24 +1006,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Set if customer has tax exemption.
-	 * @param bool $is_vat_exempt
-	 * @throws WC_Data_Exception
-	 */
-	public function set_is_vat_exempt( $is_vat_exempt ) {
-		$this->_is_vat_exempt = (bool) $is_vat_exempt;
-	}
-
-	/**
-	 * Calculated shipping?
-	 * @param boolean $calculated
-	 * @throws WC_Data_Exception
-	 */
-	public function set_calculated_shipping( $calculated = true ) {
-		$this->_calculated_shipping = (bool) $calculated;
-	}
-
-	/**
 	 * Set if the user a paying customer.
 	 * @since 2.7.0
 	 * @param boolean $is_paying_customer
@@ -1033,6 +1015,22 @@ class WC_Customer extends WC_Legacy_Customer {
 		$this->_data['is_paying_customer'] = (bool) $is_paying_customer;
 	}
 
+	/**
+	 * Set if customer has tax exemption.
+	 * @param bool $is_vat_exempt
+	 */
+	public function set_is_vat_exempt( $is_vat_exempt ) {
+		$this->_is_vat_exempt = (bool) $is_vat_exempt;
+	}
+
+	/**
+	 * Calculated shipping?
+	 * @param boolean $calculated
+	 */
+	public function set_calculated_shipping( $calculated = true ) {
+		$this->_calculated_shipping = (bool) $calculated;
+	}
+	
 	/*
 	 |--------------------------------------------------------------------------
 	 | CRUD methods
