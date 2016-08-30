@@ -228,18 +228,9 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					case 'code' :
 						$coupon_code = apply_filters( 'woocommerce_coupon_code', $value );
 						$id          = $coupon->get_id() ? $coupon->get_id() : 0;
+						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
-						// Check for duplicate coupon codes.
-						$coupon_found = $wpdb->get_var( $wpdb->prepare( "
-							SELECT $wpdb->posts.ID
-							FROM $wpdb->posts
-							WHERE $wpdb->posts.post_type = 'shop_coupon'
-							AND $wpdb->posts.post_status = 'publish'
-							AND $wpdb->posts.post_title = %s
-							AND $wpdb->posts.ID != %s
-						 ", $coupon_code, $id ) );
-
-						if ( $coupon_found ) {
+						if ( $id_from_code ) {
 							return new WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 						}
 

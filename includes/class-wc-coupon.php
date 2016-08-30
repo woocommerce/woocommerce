@@ -105,7 +105,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->read( $data );
 		} elseif ( ! empty( $data ) ) {
 			$this->set_code( $data );
-			$this->read( absint( self::get_coupon_id_from_code( $data ) ) );
+			$this->read( wc_get_coupon_id_by_code( $data ) );
 		}
 	}
 
@@ -331,27 +331,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_used_by() {
 		return $this->_data['used_by'];
-	}
-
-	/**
-	 * Get a coupon ID from it's code.
-	 * @since  2.5.0 woocommerce_coupon_code_query was removed in favour of woocommerce_get_coupon_id_from_code filter on the return. wp_cache was also implemented.
-	 * @param  string $code
-	 * @return int
-	 */
-	private function get_coupon_id_from_code( $code ) {
-		global $wpdb;
-
-		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
-
-		if ( false === $coupon_id ) {
-			$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->get_code() );
-
-			if ( $coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->get_code() ) ) {
-				wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
-			}
-		}
-		return absint( $coupon_id );
 	}
 
 	/**

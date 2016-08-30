@@ -225,18 +225,10 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), 400 );
 			}
 
-			$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$id_from_code = wc_get_coupon_id_by_code( $coupon_code );
 
-			// Check for duplicate coupon codes
-			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
-				SELECT $wpdb->posts.ID
-				FROM $wpdb->posts
-				WHERE $wpdb->posts.post_type = 'shop_coupon'
-				AND $wpdb->posts.post_status = 'publish'
-				AND $wpdb->posts.post_title = '%s'
-			 ", $coupon_code ) );
-
-			if ( $coupon_found ) {
+			if ( $id_from_code ) {
 				throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
 			}
 
@@ -340,19 +332,10 @@ class WC_API_Coupons extends WC_API_Resource {
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
-				$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
-				// Check for duplicate coupon codes
-				$coupon_found = $wpdb->get_var( $wpdb->prepare( "
-					SELECT $wpdb->posts.ID
-					FROM $wpdb->posts
-					WHERE $wpdb->posts.post_type = 'shop_coupon'
-					AND $wpdb->posts.post_status = 'publish'
-					AND $wpdb->posts.post_title = '%s'
-					AND $wpdb->posts.ID != %s
-				 ", $coupon_code, $id ) );
-
-				if ( $coupon_found ) {
+				if ( $id_from_code ) {
 					throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
 				}
 
