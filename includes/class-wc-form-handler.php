@@ -293,10 +293,10 @@ class WC_Form_Handler {
 				do_action( 'woocommerce_before_pay_action', $order );
 
 				WC()->customer->set_props( array(
-					'country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
-					'state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
-					'postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
-					'city'     => $order->get_billing_city() ? $order->get_billing_city()         : null,
+					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+					'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+					'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+					'billing_city'     => $order->get_billing_city() ? $order->get_billing_city()         : null,
 				) );
 				WC()->customer->save();
 

@@ -94,9 +94,9 @@ class WC_Shortcode_Checkout {
 
 				if ( $order->needs_payment() ) {
 					WC()->customer->set_props( array(
-						'country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
-						'state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
-						'postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+						'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+						'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+						'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
 					) );
 					WC()->customer->save();
 

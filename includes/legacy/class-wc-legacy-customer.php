@@ -69,8 +69,6 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		if ( 'shipping_address' === $key ) {
 			$key = 'shipping_address_1';
 		}
-
-
 		return $key;
 	}
 
