@@ -618,6 +618,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer ID.
 	 * @since 2.7.0
 	 * @param int $value
+	 * @throws WC_Data_Exception
 	 */
 	protected function set_id( $value ) {
 		$this->_data['id'] = absint( $value );
@@ -627,6 +628,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer's username.
 	 * @since 2.7.0
 	 * @param string $username
+	 * @throws WC_Data_Exception
 	 */
 	public function set_username( $username ) {
 		$this->_data['username'] = $username;
@@ -635,16 +637,21 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's email.
 	 * @since 2.7.0
-	 * @param string $email
+	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
-	public function set_email( $email ) {
-		$this->_data['email'] = sanitize_email( $email );
+	public function set_email( $value ) {
+		if ( $value && ! is_email( $value ) ) {
+			$this->error( 'customer_invalid_email', __( 'Invalid email address', 'woocommerce' ) );
+		}
+		$this->_data['email'] = sanitize_email( $value );
 	}
 
 	/**
 	 * Set customer's first name.
 	 * @since 2.7.0
 	 * @param string $first_name
+	 * @throws WC_Data_Exception
 	 */
 	public function set_first_name( $first_name ) {
 		$this->_data['first_name'] = $first_name;
@@ -654,6 +661,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer's last name.
 	 * @since 2.7.0
 	 * @param string $last_name
+	 * @throws WC_Data_Exception
 	 */
 	public function set_last_name( $last_name ) {
 		$this->_data['last_name'] = $last_name;
@@ -663,8 +671,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer's user role(s).
 	 * @since 2.7.0
 	 * @param mixed $role
+	 * @throws WC_Data_Exception
 	 */
 	public function set_role( $role ) {
+		global $wp_roles;
+
+		if ( $role && ! empty( $wp_roles->roles ) && ! in_array( $role, array_keys( $wp_roles->roles ) ) ) {
+			$this->error( 'customer_invalid_role', __( 'Invalid role', 'woocommerce' ) );
+		}
 		$this->_data['role'] = $role;
 	}
 
@@ -672,6 +686,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer's password.
 	 * @since 2.7.0
 	 * @param string $password
+	 * @throws WC_Data_Exception
 	 */
 	public function set_password( $password ) {
 		$this->_data['password'] = wc_clean( $password );
@@ -681,6 +696,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set the date this customer was last updated.
 	 * @since 2.7.0
 	 * @param integer $timestamp
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_modified( $timestamp ) {
 		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
@@ -690,6 +706,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set the date this customer was last updated.
 	 * @since 2.7.0
 	 * @param integer $timestamp
+	 * @throws WC_Data_Exception
 	 */
 	public function set_date_created( $timestamp ) {
 		$this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
@@ -698,6 +715,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer address to match shop base address.
 	 * @since 2.7.0
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_to_base() {
 		$base = wc_get_customer_default_location();
@@ -710,6 +728,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer shipping address to base address.
 	 * @since 2.7.0
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_to_base() {
 		$base = wc_get_customer_default_location();
@@ -725,6 +744,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $state
 	 * @param string $postcode
 	 * @param string $city
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$this->_data['shipping_country']  = $country;
@@ -739,6 +759,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $state
 	 * @param string $postcode
 	 * @param string $city
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_location( $country, $state, $postcode = '', $city = '' ) {
 		$this->_data['billing_country']  = $country;
@@ -750,6 +771,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set billing first name.
 	 * @return string
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
 		$this->_data['billing_first_name'] = $value;
@@ -758,6 +780,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set billing last name.
 	 * @return string
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
 		$this->_data['billing_last_name'] = $value;
@@ -766,6 +789,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set billing company.
 	 * @return string
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
 		$this->_data['billing_company'] = $value;
@@ -774,6 +798,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set billing phone.
 	 * @return string
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_phone( $value ) {
 		$this->_data['billing_phone'] = $value;
@@ -781,15 +806,21 @@ class WC_Customer extends WC_Legacy_Customer {
 
 	/**
 	 * Set billing email.
+	 * @param string $value
 	 * @return string
+	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_email( $email ) {
-		$this->_data['billing_email'] = sanitize_email( $email );
+	public function set_billing_email( $value ) {
+		if ( $value && ! is_email( $value ) ) {
+			$this->error( 'customer_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
+		}
+		$this->_data['billing_email'] = sanitize_email( $value );
 	}
 
 	/**
 	 * Set customer country.
 	 * @param mixed $country
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_country( $country ) {
 		$this->_data['billing_country'] = $country;
@@ -798,6 +829,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer state.
 	 * @param mixed $state
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_state( $state ) {
 		$this->_data['billing_state'] = $state;
@@ -806,6 +838,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets customer postcode.
 	 * @param mixed $postcode
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_postcode( $postcode ) {
 		$this->_data['billing_postcode'] = $postcode;
@@ -814,6 +847,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets customer city.
 	 * @param mixed $city
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_city( $city ) {
 		$this->_data['billing_city'] = $city;
@@ -822,6 +856,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer address.
 	 * @param mixed $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address( $address ) {
 		$this->_data['billing_address_1'] = $address;
@@ -830,6 +865,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer address.
 	 * @param mixed $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_1( $address ) {
 		$this->set_billing_address( $address );
@@ -838,6 +874,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's second address.
 	 * @param mixed $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_2( $address ) {
 		$this->_data['billing_address_2'] = $address;
@@ -846,6 +883,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets customer shipping first name.
 	 * @param string $first_name
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_first_name( $first_name ) {
 		$this->_data['shipping_first_name'] = $first_name;
@@ -854,6 +892,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets customer shipping last name.
 	 * @param string $last_name
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_last_name( $last_name ) {
 		$this->_data['shipping_last_name'] = $last_name;
@@ -862,6 +901,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets customer shipping company.
 	 * @param string $company.
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_company( $company ) {
 		$this->_data['shipping_company'] = $company;
@@ -870,6 +910,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set shipping country.
 	 * @param string $country
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_country( $country ) {
 		$this->_data['shipping_country'] = $country;
@@ -878,6 +919,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set shipping state.
 	 * @param string $state
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_state( $state ) {
 		$this->_data['shipping_state'] = $state;
@@ -886,6 +928,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set shipping postcode.
 	 * @param string $postcode
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_postcode( $postcode ) {
 		$this->_data['shipping_postcode'] = $postcode;
@@ -894,6 +937,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets shipping city.
 	 * @param string $city
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_city( $city ) {
 		$this->_data['shipping_city'] = $city;
@@ -902,6 +946,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set shipping address.
 	 * @param string $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address( $address ) {
 		$this->_data['shipping_address_1'] = $address;
@@ -910,6 +955,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer shipping address.
 	 * @param mixed $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_1( $address ) {
 		$this->set_shipping_address( $address );
@@ -918,6 +964,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set second shipping address.
 	 * @param string $address
+	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_2( $address ) {
 		$this->_data['shipping_address_2'] = $address;
@@ -926,23 +973,26 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set if customer has tax exemption.
 	 * @param bool $is_vat_exempt
+	 * @throws WC_Data_Exception
 	 */
 	public function set_is_vat_exempt( $is_vat_exempt ) {
-		$this->_data['is_vat_exempt'] = $is_vat_exempt;
+		$this->_data['is_vat_exempt'] = (bool) $is_vat_exempt;
 	}
 
 	/**
 	 * Calculated shipping?
 	 * @param boolean $calculated
+	 * @throws WC_Data_Exception
 	 */
 	public function set_calculated_shipping( $calculated = true ) {
-		$this->_data['calculated_shipping'] = $calculated;
+		$this->_data['calculated_shipping'] = (bool) $calculated;
 	}
 
 	/**
 	 * Set if the user a paying customer.
 	 * @since 2.7.0
 	 * @param boolean $is_paying_customer
+	 * @throws WC_Data_Exception
 	 */
 	function set_is_paying_customer( $is_paying_customer ) {
 		$this->_data['is_paying_customer'] = (bool) $is_paying_customer;
