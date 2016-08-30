@@ -22,6 +22,7 @@ elif [ $1 == 'after' ]; then
 
 	# get scrutinizer ocular and run it
 	wget https://scrutinizer-ci.com/ocular.phar
-	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
+	chmod +x ocular.phar
+	php ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
 
 fi
