@@ -1050,6 +1050,15 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Callback which flattens post meta (gets the first value).
+	 * @param  array $value
+	 * @return mixed
+	 */
+	private function flatten_post_meta( $value ) {
+		return current( $value );
+	}
+
+	/**
 	 * Read a customer from the database.
 	 * @since 2.7.0
 	 * @param integer $id
@@ -1070,20 +1079,15 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		$this->set_id( $user_object->ID );
-
-		foreach ( array_keys( $this->_data ) as $key ) {
-			$meta_value = get_user_meta( $id, $key, true );
-			if ( $meta_value && is_callable( array( $this, "set_{$key}" ) ) ) {
-				$this->{"set_{$key}"}( $meta_value );
-			}
-		}
-
-		$this->set_is_paying_customer( get_user_meta( $id, 'paying_customer', true ) );
-		$this->set_email( $user_object->user_email );
-		$this->set_username( $user_object->user_login );
-		$this->set_date_created( strtotime( $user_object->user_registered ) );
-		$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
-		$this->set_role( ( ! empty ( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer' ) );
+		$this->set_props( array_map( array( $this, 'flatten_post_meta'), get_post_meta( $id ) ) );
+		$this->set_props( array(
+			'is_paying_customer' => get_user_meta( $id, 'paying_customer', true ),
+			'email'              => $user_object->user_email,
+			'username'           => $user_object->user_login,
+			'date_created'       => strtotime( $user_object->user_registered ),
+			'date_modified'      => get_user_meta( $id, 'last_update', true ),
+			'role'               => ! empty ( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
+		) );
 		$this->read_meta_data();
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
