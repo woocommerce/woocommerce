@@ -776,7 +776,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_shipping_address_map_url() {
 		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $this->get_address( 'shipping' ), $this );
-		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
+		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
 	/**
