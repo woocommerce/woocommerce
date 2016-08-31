@@ -257,19 +257,27 @@ class WC_Product_Variable extends WC_Product {
 		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
 		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		// If the value has already been generated, we don't need to grab the values again.
-		if ( empty( $this->prices_array[ $price_hash ] ) ) {
+		/**
+		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
+		 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
+		 */
+		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
+			return $this->prices_array[ $price_hash ];
 
+		/**
+		 * No locally cached value? Get the data from the transient or generate it.
+		 */
+		} else {
 			// Get value of transient
-			$prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
+			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
-			// If the product version has changed, reset cache
-			if ( empty( $prices_array['version'] ) || $prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
-				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+			// If the product version has changed since the transient was last saved, reset the transient cache.
+			if ( empty( $transient_cached_prices_array['version'] ) || $transient_cached_prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+				$transient_cached_prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
-			// If the prices are not stored for this hash, generate them
-			if ( empty( $prices_array[ $price_hash ] ) ) {
+			// If the prices are not stored for this hash, generate them and add to the transient.
+			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
 				$prices         = array();
 				$regular_prices = array();
 				$sale_prices    = array();
@@ -314,25 +322,21 @@ class WC_Product_Variable extends WC_Product {
 				asort( $regular_prices );
 				asort( $sale_prices );
 
-				$prices_array[ $price_hash ] = array(
+				$transient_cached_prices_array[ $price_hash ] = array(
 					'price'         => $prices,
 					'regular_price' => $regular_prices,
 					'sale_price'    => $sale_prices,
 				);
 
-				set_transient( $transient_name, json_encode( $prices_array ), DAY_IN_SECONDS * 30 );
+				set_transient( $transient_name, json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
 
 			/**
-			 * Give plugins one last chance to filter the variation prices array which has been generated.
+			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
+			 * This value may differ from the transient cache. It is filtered once before storing locally.
 			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $prices_array[ $price_hash ], $this, $display );
+			return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $this, $display );
 		}
-
-		/**
-		 * Return the values.
-		 */
-		return $this->prices_array[ $price_hash ];
 	}
 
 	/**
