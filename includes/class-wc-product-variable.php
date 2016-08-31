@@ -265,7 +265,7 @@ class WC_Product_Variable extends WC_Product {
 
 			// If the product version has changed, reset cache
 			if ( empty( $prices_array['version'] ) || $prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
-				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+				$prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
 			// If the prices are not stored for this hash, generate them
