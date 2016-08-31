@@ -612,7 +612,7 @@ class WC_Cart {
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
 				if ( $values['quantity'] > 0 ) {
 					$cross_sells = array_merge( $values['data']->get_cross_sell_ids(), $cross_sells );
-					$in_cart[] = $values['product_id'];
+					$in_cart[]   = $values['product_id'];
 				}
 			}
 		}
