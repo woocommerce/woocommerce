@@ -130,7 +130,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function query_args( $args, $request ) {
 		// Set post_status.
-		$args['post_status'] = $request['status'];
+		if ( ! empty( $request['filter'] ) && ! empty( $request['filter']['post_status'] ) ) {
+			$args['post_status'] = $request['filter']['post_status'];
+		} else {
+			$args['post_status'] = $request['status'];
+		}
 
 		// Taxonomy query to filter products by type, category,
 		// tag, shipping class, and attribute.
