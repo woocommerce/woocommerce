@@ -204,6 +204,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			unset( $args['filter'] );
 		}
 
+		// Force the post_type argument, since it's not a user input variable.
+		$args['post_type'] = $this->post_type;
+
 		return $args;
 	}
 
