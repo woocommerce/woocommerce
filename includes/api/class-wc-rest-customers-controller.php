@@ -507,7 +507,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( $last_order_data = $customer->get_last_order() ) {
 			$data['last_order'] = array(
 				'id'   => $last_order_data->get_id(),
-				'date' => wc_rest_prepare_date_response( $last_order_data->get_date_created() ),
+				'date' => $last_order_data->get_date_created() ? wc_rest_prepare_date_response( $last_order_data->get_date_created() ) : null,
 			);
 		}
 
@@ -535,6 +535,15 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 */
 	protected function update_customer_meta_fields( $customer, $request ) {
 		$schema = $this->get_item_schema();
+
+		// Meta data
+		if ( isset( $request['meta_data'] ) ) {
+			if ( is_array( $request['meta_data'] ) ) {
+				foreach ( $request['meta_data'] as $meta ) {
+					$coupon->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
+				}
+			}
+		}
 
 		// Customer first name.
 		if ( isset( $request['first_name'] ) ) {
@@ -796,6 +805,35 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 						),
 						'country' => array(
 							'description' => __( 'ISO code of the country.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+					),
+				),
+				'is_paying_customer' => array(
+					'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
+					'type'        => 'bool',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'meta_data' => array(
+					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Meta ID.', 'woocommerce' ),
+							'type'        => 'int',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'key' => array(
+							'description' => __( 'Meta key.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'value' => array(
+							'description' => __( 'Meta value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),

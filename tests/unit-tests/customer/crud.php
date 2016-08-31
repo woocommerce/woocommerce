@@ -110,8 +110,6 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests backwards compat / legacy handling.
-	 * @expectedDeprecated WC_Customer::is_vat_exempt
-	 * @expectedDeprecated WC_Customer::has_calculated_shipping
 	 * @expectedDeprecated WC_Customer::get_default_country
 	 * @expectedDeprecated WC_Customer::get_default_state
 	 * @expectedDeprecated WC_Customer::is_paying_customer

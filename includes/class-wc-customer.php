@@ -79,9 +79,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		'shipping_address_2', 'shipping_state', 'shipping_country', 'paying_customer',
 		'last_update', 'first_name', 'last_name', 'show_admin_bar_front',
 		'use_ssl', 'admin_color', 'rich_editing', 'comment_shortcuts', 'dismissed_wp_pointers', 'show_welcome_panel',
-		'_woocommerce_persistent_cart', 'session_tokens',
+		'_woocommerce_persistent_cart', 'session_tokens', 'nickname', 'description',
 		'billing_first_name', 'billing_last_name', 'billing_company', 'billing_phone', 'billing_email',
-		'shipping_first_name', 'shipping_last_name', 'shipping_company',
+		'shipping_first_name', 'shipping_last_name', 'shipping_company', 'default_password_nag',
+		'primary_blog', 'source_domain',
 	);
 
 	/**
@@ -244,7 +245,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			$spent = 0;
 		}
 
-		return wc_format_decimal( $spent );
+		return wc_format_decimal( $spent, 2 );
 	}
 
 	/**
@@ -1072,7 +1073,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return mixed
 	 */
 	private function flatten_post_meta( $value ) {
-		return current( $value );
+		return is_array( $value ) ? current( $value ) : $value;
 	}
 
 	/**
@@ -1096,7 +1097,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		$this->set_id( $user_object->ID );
-		$this->set_props( array_map( array( $this, 'flatten_post_meta'), get_post_meta( $id ) ) );
+		$this->set_props( array_map( array( $this, 'flatten_post_meta'), get_user_meta( $id ) ) );
 		$this->set_props( array(
 			'is_paying_customer' => get_user_meta( $id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
@@ -1113,12 +1114,10 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @since 2.7.0
 	 */
 	public function update() {
-		$customer_ID = $this->get_id();
-
-		wp_update_user( array( 'ID' => $customer_ID, 'user_email' => $this->get_email() ) );
+		wp_update_user( array( 'ID' => $this->get_id(), 'user_email' => $this->get_email() ) );
 		// Only update password if a new one was set with set_password
 		if ( ! empty( $this->_password ) ) {
-			wp_update_user( array( 'ID' => $customer_ID, 'user_pass' => $this->_password ) );
+			wp_update_user( array( 'ID' => $this->get_id(), 'user_pass' => $this->_password ) );
 			$this->_password = '';
 		}
 
@@ -1211,4 +1210,18 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 	}
 
+	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		global $wpdb;
+		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() )
+			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
+			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
+			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
+			&& ! strstr( $meta->meta_key, $wpdb->prefix );
+	}
 }

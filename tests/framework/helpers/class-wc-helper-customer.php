@@ -60,7 +60,7 @@ class WC_Helper_Customer {
 		$customer->set_username( $username );
 		$customer->set_password( $password );
 		$customer->set_email( $email );
-		$customer->create();
+		$customer->save();
 		return $customer;
 	}
 
