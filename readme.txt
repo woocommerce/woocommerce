@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - ID needs to be capitalized to allow correct sorting.
 * Fix - API - Fixed undefined order ID.
 * Fix - API - Allow API to save refund reason.
+* Fix - Handle info notices in cart, not just error messages.
 
 = 2.6.4 - 26/07/16 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
