@@ -199,6 +199,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		}
 
+		if ( is_array( $request['filter'] ) ) {
+			$args = array_merge( $args, $request['filter'] );
+			unset( $args['filter'] );
+		}
+
 		return $args;
 	}
 
