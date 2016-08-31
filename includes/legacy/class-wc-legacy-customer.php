@@ -39,7 +39,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		if ( in_array( $key, array( 'country', 'state', 'postcode' ,'city', 'address_1', 'address', 'address_2' ) ) ) {
 			$key = 'billing_' . $key;
 		}
-		return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : '';
+		return is_callable( $this, "get_{$key}" ) ? $this->{"get_{$key}"}() : '';
 	}
 
 	/**
@@ -51,8 +51,10 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	public function __set( $key, $value ) {
 		_doing_it_wrong( $key, 'Customer properties should not be set directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
-		$this->_data[ $key ] = $value;
-		$this->_changed = true;
+
+		if ( is_callable( $this, "set_{$key}" ) ) {
+			$this->{"set_{$key}"}( $value );
+		}
 	}
 
 	/**
@@ -70,6 +72,19 @@ abstract class WC_Legacy_Customer extends WC_Data {
 			$key = 'shipping_address_1';
 		}
 		return $key;
+	}
+
+	/**
+	 * Sets session data for the location.
+	 *
+	 * @param string $country
+	 * @param string $state
+	 * @param string $postcode (default: '')
+	 * @param string $city (default: '')
+	 */
+	public function set_location( $country, $state, $postcode = '', $city = '' ) {
+		$this->set_billing_location( $country, $state, $postcode, $city );
+		$this->set_shipping_location( $country, $state, $postcode, $city );
 	}
 
 	/**

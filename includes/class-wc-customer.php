@@ -91,12 +91,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected $_meta_type = 'user';
 
 	/**
-	 * Was data changed in the database for this class?
-	 * @var boolean
-	 */
-	protected $_changed = false;
-
-	/**
 	 * If this is the customer session, this is true. When true, guest accounts will not be saved to the DB.
 	 * @var boolean
 	 */
@@ -136,17 +130,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( $is_session ) {
 			$this->_is_session = true;
 			$this->load_session();
-			add_action( 'shutdown', array( $this, 'save_session_if_changed' ), 10 );
-		}
-	}
-
-	/**
-	 * Saves customer information to the current session if any data changed.
-	 * @since 2.7.0
-	 */
-	public function save_session_if_changed() {
-		if ( $this->_changed ) {
-			$this->save_to_session();
+			add_action( 'shutdown', array( $this, 'save_to_session' ), 10 );
 		}
 	}
 
@@ -1030,7 +1014,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function set_calculated_shipping( $calculated = true ) {
 		$this->_calculated_shipping = (bool) $calculated;
 	}
-	
+
 	/*
 	 |--------------------------------------------------------------------------
 	 | CRUD methods
@@ -1201,7 +1185,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function save() {
 		if ( $this->_is_session ) {
-			$this->save_session_if_changed();
+			$this->save_to_session();
 		} elseif ( ! $this->get_id() ) {
 			$this->create();
 		} else {
@@ -1222,7 +1206,9 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 			$data[ $session_key ] = $this->{"get_$function_key"}();
 		}
-		WC()->session->set( 'customer', $data );
+		if ( $data !== WC()->session->get( 'customer' ) ) {
+			WC()->session->set( 'customer', $data );
+		}
 	}
 
 }
