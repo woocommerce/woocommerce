@@ -104,8 +104,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		} elseif ( is_numeric( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->read( $data );
 		} elseif ( ! empty( $data ) ) {
-			$this->set_code( $data );
 			$this->read( wc_get_coupon_id_by_code( $data ) );
+			$this->set_code( $data );
 		}
 	}
 
@@ -662,13 +662,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function read( $coupon_id ) {
 		$this->set_defaults();
 
-		if ( ! $coupon_id ) {
-			return;
-		}
-
-		$post_object = get_post( $coupon_id );
-
-		if ( ! $post_object ) {
+		if ( ! $coupon_id || ! ( $post_object = get_post( $coupon_id ) ) ) {
 			return;
 		}
 
