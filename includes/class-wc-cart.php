@@ -93,7 +93,7 @@ class WC_Cart {
 		'coupon_discount_amounts'     => array(),
 		'coupon_discount_tax_amounts' => array(),
 		'fee_total'                   => 0,
-		'fees'                        => array()
+		'fees'                        => array(),
 	);
 
 	/**
@@ -315,7 +315,7 @@ class WC_Cart {
 		 */
 		public function persistent_cart_update() {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
-				'cart' => WC()->session->get( 'cart' )
+				'cart' => WC()->session->get( 'cart' ),
 			) );
 		}
 
@@ -581,7 +581,7 @@ class WC_Cart {
 
 					$item_data[] = array(
 						'key'   => $label,
-						'value' => $value
+						'value' => $value,
 					);
 				}
 			}
@@ -867,8 +867,7 @@ class WC_Cart {
 			if ( is_array( $cart_item_data ) && ! empty( $cart_item_data ) ) {
 				$cart_item_data_key = '';
 				foreach ( $cart_item_data as $key => $value ) {
-
-					if ( is_array( $value ) ) {
+					if ( is_array( $value ) || is_object( $value ) ) {
 						$value = http_build_query( $value );
 					}
 					$cart_item_data_key .= trim( $key ) . trim( $value );
@@ -907,7 +906,7 @@ class WC_Cart {
 
 				// Sanity check
 				if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->post->post_status  ) {
-					throw new Exception();
+					return false;
 				}
 
 				// Load cart item data - may be added by other plugins
@@ -979,7 +978,7 @@ class WC_Cart {
 						'variation_id'	=> $variation_id,
 						'variation' 	=> $variation,
 						'quantity' 		=> $quantity,
-						'data'			=> $product_data
+						'data'			=> $product_data,
 					) ), $cart_item_key );
 				}
 
@@ -1347,7 +1346,7 @@ class WC_Cart {
 				return false;
 
 			if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-				if ( ! WC()->customer->get_calculated_shipping() ) {
+				if ( ! WC()->customer->has_calculated_shipping() ) {
 					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
 						return false;
 					}
@@ -1399,7 +1398,6 @@ class WC_Cart {
 						return $return;
 
 					}
-
 				} else {
 					return __( 'Free!', 'woocommerce' );
 				}
@@ -1883,15 +1881,13 @@ class WC_Cart {
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
 						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
-
 				} else {
 
 					$cart_subtotal = wc_price( $this->subtotal );
 
-					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
+					if ( $this->tax_total > 0 && ! $this->prices_include_tax ) {
 						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
-
 				}
 			}
 
@@ -1941,7 +1937,6 @@ class WC_Cart {
 					if ( $this->prices_include_tax && $this->tax_total > 0 ) {
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
-
 				} else {
 
 					$row_price        = $_product->get_price_including_tax( $quantity );
@@ -1950,7 +1945,6 @@ class WC_Cart {
 					if ( ! $this->prices_include_tax && $this->tax_total > 0 ) {
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
-
 				}
 
 			// Non-taxable

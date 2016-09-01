@@ -19,8 +19,8 @@ class WC_Tests_CRUD_Refunds extends WC_Unit_Test_Case {
 	 */
 	function test_get_refund_amount() {
 		$object = new WC_Order_Refund();
-		$object->set_refund_amount( 20 );
-		$this->assertEquals( '20.00', $object->get_refund_amount() );
+		$object->set_amount( 20 );
+		$this->assertEquals( '20.00', $object->get_amount() );
 	}
 
 	/**
@@ -28,8 +28,8 @@ class WC_Tests_CRUD_Refunds extends WC_Unit_Test_Case {
 	 */
 	function test_get_refund_reason() {
 		$object = new WC_Order_Refund();
-		$object->set_refund_reason( 'Customer is an idiot' );
-		$this->assertEquals( 'Customer is an idiot', $object->get_refund_reason() );
+		$object->set_reason( 'Customer is an idiot' );
+		$this->assertEquals( 'Customer is an idiot', $object->get_reason() );
 	}
 
 	/**

@@ -271,5 +271,4 @@ if ( ! function_exists( 'rest_sanitize_request_arg' ) ) {
 
 		return $value;
 	}
-
 }

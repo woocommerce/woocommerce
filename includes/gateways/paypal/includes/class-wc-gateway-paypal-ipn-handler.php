@@ -83,7 +83,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			'httpversion' => '1.1',
 			'compress'    => false,
 			'decompress'  => false,
-			'user-agent'  => 'WooCommerce/' . WC()->version
+			'user-agent'  => 'WooCommerce/' . WC()->version,
 		);
 
 		// Post back to get a response.
@@ -112,7 +112,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param string $txn_type
 	 */
 	protected function validate_transaction_type( $txn_type ) {
-		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
+		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money', 'paypal_here' );
 
 		if ( ! in_array( strtolower( $txn_type ), $accepted_types ) ) {
 			WC_Gateway_Paypal::log( 'Aborting, Invalid type:' . $txn_type );
@@ -190,7 +190,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 				// Log paypal transaction fee.
 				update_post_meta( $order->get_id(), 'PayPal Transaction Fee', wc_clean( $posted['mc_fee'] ) );
 			}
-
 		} else {
 			if ( 'authorization' === $posted['pending_reason'] ) {
 				$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );

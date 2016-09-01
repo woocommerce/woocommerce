@@ -41,9 +41,20 @@ class WC_API_Resource {
 			add_filter( "woocommerce_api_{$resource}_response", array( $this, 'maybe_add_meta' ), 15, 2 );
 		}
 
-		$response_names = array( 'order', 'coupon', 'customer', 'product', 'report',
-			'customer_orders', 'customer_downloads', 'order_note', 'order_refund',
-			'product_reviews', 'product_category', 'tax', 'tax_class'
+		$response_names = array(
+			'order',
+			'coupon',
+			'customer',
+			'product',
+			'report',
+			'customer_orders',
+			'customer_downloads',
+			'order_note',
+			'order_refund',
+			'product_reviews',
+			'product_category',
+			'tax',
+			'tax_class',
 		);
 
 		foreach ( $response_names as $name ) {
@@ -272,14 +283,13 @@ class WC_API_Resource {
 				$meta = (array) get_post_meta( $resource->id );
 			}
 
-			foreach( $meta as $meta_key => $meta_value ) {
+			foreach ( $meta as $meta_key => $meta_value ) {
 
 				// don't add hidden meta by default
 				if ( ! is_protected_meta( $meta_key ) ) {
 					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
 				}
 			}
-
 		}
 
 		return $data;
@@ -328,7 +338,6 @@ class WC_API_Resource {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
-
 			} else {
 
 				// remove non-matching top-level fields
@@ -460,5 +469,4 @@ class WC_API_Resource {
 
 		return apply_filters( 'woocommerce_api_check_permission', $permission, $context, $post, $post_type );
 	}
-
 }

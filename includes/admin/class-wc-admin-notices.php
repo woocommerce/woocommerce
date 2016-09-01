@@ -235,7 +235,7 @@ class WC_Admin_Notices {
 				$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 			} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 				$theme_file = get_template_directory() . '/' . $file;
-			} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+			} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 				$theme_file = get_template_directory() . '/woocommerce/' . $file;
 			}
 

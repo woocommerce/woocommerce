@@ -616,7 +616,6 @@ class WC_CLI_Customer extends WC_CLI_Command {
 			),
 		);
 
-
 		// Allow dot notation for nested array so that user can specifies field
 		// like 'billing_address.first_name'.
 		return $this->flatten_array( $customer );

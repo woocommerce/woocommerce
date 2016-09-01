@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     2.6.0
+ * @version     2.7.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes

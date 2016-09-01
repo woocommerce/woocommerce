@@ -27,7 +27,7 @@ foreach ( $items as $item_id => $item ) :
 		if ( $show_sku && $product->get_sku() ) {
 			echo ' (#' . $product->get_sku() . ')';
 		}
-		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item );
+		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
 		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );

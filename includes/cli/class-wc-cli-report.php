@@ -271,14 +271,14 @@ class WC_CLI_Report extends WC_CLI_Command {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
-					'name'            => 'product_id'
+					'name'            => 'product_id',
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
+					'name'            => 'order_item_qty',
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',
@@ -340,7 +340,6 @@ class WC_CLI_Report extends WC_CLI_Command {
 				// default custom range to today
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			// ensure period is valid

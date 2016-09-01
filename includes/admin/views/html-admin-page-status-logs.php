@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="clear"></div>
 	</div>
 	<div id="log-viewer">
-		<textarea cols="70" rows="40"><?php echo esc_textarea( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
+		<pre><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
 	</div>
 <?php else : ?>
 	<div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>

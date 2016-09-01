@@ -118,7 +118,7 @@ class WC_API extends WC_Legacy_API {
 		$this->rest_api_includes();
 
 		// Init REST API routes.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
 	/**
@@ -144,7 +144,6 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
-
 
 		// REST API controllers.
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );
@@ -174,6 +173,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php' );
 	}
 
 	/**
@@ -212,6 +212,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Webhooks_Controller',
 			'WC_REST_System_Status_Controller',
 			'WC_REST_System_Status_Tools_Controller',
+			'WC_REST_Shipping_Methods_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -230,5 +231,4 @@ class WC_API extends WC_Legacy_API {
 			new WC_Register_WP_Admin_Settings( $page );
 		}
 	}
-
 }

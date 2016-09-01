@@ -40,7 +40,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			'default_credit_card_form',
 			'tokenization',
 			'refunds',
-			'pre-orders'
+			'pre-orders',
 		);
 		$this->view_transaction_url = 'https://www.simplify.com/commerce/app#/payment/%s';
 
@@ -189,21 +189,21 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'label'       => __( 'Enable Simplify Commerce', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',
-				'default'     => 'no'
+				'default'     => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Credit card', 'woocommerce' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'description' => array(
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
 				'default'     => 'Pay with your credit card via Simplify Commerce by MasterCard.',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'mode' => array(
 				'title'       => __( 'Payment Mode', 'woocommerce' ),
@@ -213,50 +213,50 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'default'     => 'standard',
 				'options'     => array(
 					'standard' => __( 'Standard', 'woocommerce' ),
-					'hosted'   => __( 'Hosted Payments', 'woocommerce' )
-				)
+					'hosted'   => __( 'Hosted Payments', 'woocommerce' ),
+				),
 			),
 			'modal_color' => array(
 				'title'       => __( 'Modal Color', 'woocommerce' ),
 				'type'        => 'color',
 				'description' => __( 'Set the color of the buttons and titles on the modal dialog.', 'woocommerce' ),
 				'default'     => '#a46497',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'sandbox' => array(
 				'title'       => __( 'Sandbox', 'woocommerce' ),
 				'label'       => __( 'Enable Sandbox Mode', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Place the payment gateway in sandbox mode using sandbox API keys (real payments will not be taken).', 'woocommerce' ),
-				'default'     => 'yes'
+				'default'     => 'yes',
 			),
 			'sandbox_public_key' => array(
 				'title'       => __( 'Sandbox Public Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'sandbox_private_key' => array(
 				'title'       => __( 'Sandbox Private Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'public_key' => array(
 				'title'       => __( 'Public Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'private_key' => array(
 				'title'       => __( 'Private Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 		);
 	}
@@ -306,7 +306,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			'card.expYear'  => __( 'Expiry Year', 'woocommerce' ),
 			'is_invalid'    => __( 'is invalid', 'woocommerce' ),
 			'mode'          => $this->mode,
-			'is_ssl'        => is_ssl()
+			'is_ssl'        => is_ssl(),
 		) );
 	}
 
@@ -460,10 +460,9 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
-					'redirect' => $this->get_return_url( $order )
+					'redirect' => $this->get_return_url( $order ),
 				);
 			}
-
 		} catch ( Simplify_ApiException $e ) {
 			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
 				foreach ( $e->getFieldErrors() as $error ) {
@@ -475,7 +474,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 
 			return array(
 				'result'   => 'fail',
-				'redirect' => ''
+				'redirect' => '',
 			);
 		}
 	}
@@ -499,7 +498,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'amount'              => $amount * 100, // In cents.
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->get_id()
+				'reference'           => $order->get_id(),
 			);
 
 			$data = array_merge( $data, $token );
@@ -545,7 +544,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	protected function process_hosted_payments( $order ) {
 		return array(
 			'result'   => 'success',
-			'redirect' => $order->get_checkout_payment_url( true )
+			'redirect' => $order->get_checkout_payment_url( true ),
 		);
 	}
 
@@ -721,7 +720,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				'amount'    => $amount * 100, // In cents.
 				'payment'   => $payment_id,
 				'reason'    => $reason,
-				'reference' => $order_id
+				'reference' => $order_id,
 			) );
 
 			if ( 'APPROVED' == $refund->paymentStatus ) {
@@ -729,7 +728,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			} else {
 				throw new Simplify_ApiException( __( 'Refund was declined.', 'woocommerce' ) );
 			}
-
 		} catch ( Simplify_ApiException $e ) {
 			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
 				foreach ( $e->getFieldErrors() as $error ) {

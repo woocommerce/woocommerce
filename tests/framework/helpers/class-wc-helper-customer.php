@@ -29,7 +29,7 @@ class WC_Helper_Customer {
 			'shipping_address'		=> '123 South Street',
 			'shipping_address_2'	=> 'Apt 1',
 			'is_vat_exempt' 		=> false,
-			'calculated_shipping'	=> false
+			'calculated_shipping'	=> false,
 		);
 
 		WC_Helper_Customer::set_customer_details( $customer_data );
@@ -42,7 +42,7 @@ class WC_Helper_Customer {
 	/**
 	 * Creates a customer in the tests DB.
 	 */
-	public static function create_customer() {
+	public static function create_customer( $username = 'testcustomer', $password = 'hunter2', $email = 'test@woo.local' ) {
 		$customer = new WC_Customer();
 		$customer->set_billing_country( 'US' );
 		$customer->set_first_name( 'Justin' );
@@ -57,10 +57,10 @@ class WC_Helper_Customer {
 		$customer->set_shipping_city( 'Philadelphia' );
 		$customer->set_shipping_address( '123 South Street' );
 		$customer->set_shipping_address_2( 'Apt 1' );
-		$customer->set_username( 'testcustomer' );
-		$customer->set_password( 'hunter2' );
-		$customer->set_email( 'test@woo.local' );
-		$customer->create();
+		$customer->set_username( $username );
+		$customer->set_password( $password );
+		$customer->set_email( $email );
+		$customer->save();
 		return $customer;
 	}
 

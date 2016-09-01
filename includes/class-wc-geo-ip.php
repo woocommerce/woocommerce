@@ -364,7 +364,7 @@ class WC_Geo_IP {
 		'MF',
 		'BQ',
 		'SS',
-		'O1'
+		'O1',
 	);
 
 	/**
@@ -628,7 +628,7 @@ class WC_Geo_IP {
 		'MAF',
 		'BES',
 		'SSD',
-		'O1'
+		'O1',
 	);
 
 	/**
@@ -892,7 +892,7 @@ class WC_Geo_IP {
 		'Saint Martin',
 		'Bonaire, Saint Eustatius and Saba',
 		'South Sudan',
-		'Other'
+		'Other',
 	);
 
 	/**
@@ -1156,7 +1156,7 @@ class WC_Geo_IP {
 		'NA',
 		'NA',
 		'AF',
-		'--'
+		'--',
 	);
 
 	/** @var WC_Logger Logger instance */

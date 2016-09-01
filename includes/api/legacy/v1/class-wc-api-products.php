@@ -40,7 +40,7 @@ class WC_API_Products extends WC_API_Resource {
 		);
 
 		# GET /products/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -78,7 +78,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$products = array();
 
-		foreach( $query->posts as $product_id ) {
+		foreach ( $query->posts as $product_id ) {
 
 			if ( ! $this->is_readable( $product_id ) )
 				continue;
@@ -417,7 +417,6 @@ class WC_API_Products extends WC_API_Resource {
 				// otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// add featured image
@@ -509,7 +508,6 @@ class WC_API_Products extends WC_API_Resource {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
@@ -551,5 +549,4 @@ class WC_API_Products extends WC_API_Resource {
 
 		return $downloads;
 	}
-
 }

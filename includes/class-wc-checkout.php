@@ -88,9 +88,9 @@ class WC_Checkout {
 	 *
 	 * @access public
 	 */
-	public function __construct () {
-		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
+	public function __construct() {
+		add_action( 'woocommerce_checkout_billing', array( $this, 'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
 
 		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
 		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;
@@ -105,7 +105,7 @@ class WC_Checkout {
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
 				'required'      => true,
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
+				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' ),
 			);
 		}
 
@@ -114,17 +114,17 @@ class WC_Checkout {
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
 				'required'          => true,
-				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
+				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
 			);
 		}
 
 		$this->checkout_fields['order']	= array(
 			'order_comments' => array(
 				'type' => 'textarea',
-				'class' => array('notes'),
+				'class' => array( 'notes' ),
 				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
-			)
+				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+			),
 		);
 
 		$this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->checkout_fields );
@@ -231,7 +231,7 @@ class WC_Checkout {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = $values['data'];
 				$item    = new WC_Order_Item_Product( array(
-					'qty'          => $values['quantity'],
+					'quantity'     => $values['quantity'],
 					'name'         => $product ? $product->get_title() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
 					'product_id'   => $product ? $product->get_id() : '',
@@ -244,11 +244,7 @@ class WC_Checkout {
 					'taxes'        => $values['line_tax_data'],
 				) );
 
-				// Handle backorders @todo improve how these are handled/stored
-				if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-					$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $values['quantity'] - max( 0, $product->get_total_stock() ), true );
-				}
-
+				$item->set_backorder_meta();
 				// Set this to pass to legacy actions @todo remove in future release
 				$item->legacy_values        = $values;
 				$item->legacy_cart_item_key = $cart_item_key;
@@ -320,8 +316,6 @@ class WC_Checkout {
 
 			// Save the order
 			$order_id = $order->save();
-
-			$customer = new WC_Customer( $this->customer_id );
 
 			// Update user meta
 			$this->update_customer_data();
@@ -564,7 +558,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['shipping_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
 				}
-
 			} else {
 
 				// Update customer location to posted location so we can correctly check available shipping methods
@@ -577,7 +570,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['billing_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 				}
-
 			}
 
 			WC()->customer->save();
@@ -660,7 +652,7 @@ class WC_Checkout {
 							'ID'           => $this->customer_id,
 							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
-							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
+							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 						);
 						wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
 					}
@@ -670,8 +662,9 @@ class WC_Checkout {
 				$this->check_cart_items();
 
 				// Abort if errors are present
-				if ( wc_notice_count( 'error' ) > 0 )
-					throw new Exception();
+				if ( wc_notice_count( 'error' ) > 0 ) {
+					return false;
+				}
 
 				$order_id = $this->create_order();
 
@@ -701,9 +694,7 @@ class WC_Checkout {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-
 					}
-
 				} else {
 
 					if ( empty( $order ) ) {
@@ -723,7 +714,7 @@ class WC_Checkout {
 					if ( is_ajax() ) {
 						wp_send_json( array(
 							'result' 	=> 'success',
-							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order ),
 						) );
 					} else {
 						wp_safe_redirect(
@@ -731,11 +722,8 @@ class WC_Checkout {
 						);
 						exit;
 					}
-
 				}
-
 			}
-
 		} catch ( Exception $e ) {
 			if ( ! empty( $e ) ) {
 				wc_add_notice( $e->getMessage(), 'error' );
@@ -756,7 +744,7 @@ class WC_Checkout {
 				'result'	=> 'failure',
 				'messages' 	=> isset( $messages ) ? $messages : '',
 				'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
+				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
 			);
 
 			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
@@ -822,7 +810,6 @@ class WC_Checkout {
 						return $current_user->user_email;
 					}
 				}
-
 			}
 
 			switch ( $input ) {

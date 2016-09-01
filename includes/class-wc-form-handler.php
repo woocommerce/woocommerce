@@ -156,11 +156,11 @@ class WC_Form_Handler {
 	 */
 	public static function save_account_details() {
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'save_account_details' !== $_POST[ 'action' ] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+		if ( empty( $_POST['action'] ) || 'save_account_details' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
 			return;
 		}
 
@@ -174,12 +174,12 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
-		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? $_POST[ 'password_current' ] : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? sanitize_email( $_POST['account_email'] ) : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
 		$save_pass          = true;
 
 		$user->first_name   = $account_first_name;
@@ -292,20 +292,12 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
-				// Set customer location to order location
-				if ( $order->get_billing_country() ) {
-					WC()->customer->set_country( $order->get_billing_country() );
-				}
-				if ( $order->get_billing_state() ) {
-					WC()->customer->set_state( $order->get_billing_state() );
-				}
-				if ( $order->get_billing_postcode() ) {
-					WC()->customer->set_postcode( $order->get_billing_postcode() );
-				}
-				if ( $order->get_billing_city() ) {
-					WC()->customer->set_city( $order->get_billing_city() );
-				}
-
+				WC()->customer->set_props( array(
+					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+					'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+					'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+					'billing_city'     => $order->get_billing_city() ? $order->get_billing_city()         : null,
+				) );
 				WC()->customer->save();
 
 				// Terms
@@ -349,7 +341,6 @@ class WC_Form_Handler {
 							exit;
 						}
 					}
-
 				} else {
 					// No payment was required for order
 					$order->payment_complete();
@@ -360,7 +351,6 @@ class WC_Form_Handler {
 				do_action( 'woocommerce_after_pay_action', $order );
 
 			}
-
 		}
 	}
 
@@ -387,9 +377,7 @@ class WC_Form_Handler {
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
-
 			}
-
 		}
 
 	}
@@ -558,7 +546,6 @@ class WC_Form_Handler {
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
 					}
-
 				}
 			}
 
@@ -598,7 +585,7 @@ class WC_Form_Handler {
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
 
-		if ( empty( $order->get_id() ) ) {
+		if ( ! $order->get_id() ) {
 			return;
 		}
 
@@ -615,17 +602,17 @@ class WC_Form_Handler {
 		// Copy products from the order to the cart
 		foreach ( $order->get_items() as $item ) {
 			// Load all product info including variation data
-			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['product_id'] );
-			$quantity     = (int) $item['qty'];
-			$variation_id = (int) $item['variation_id'];
+			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
+			$quantity     = $item->get_quantity();
+			$variation_id = $item->get_variation_id();
 			$variations   = array();
 			$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
 
-			foreach ( $item['item_meta'] as $meta_name => $meta_value ) {
-				if ( taxonomy_is_product_attribute( $meta_name ) ) {
-					$variations[ $meta_name ] = $meta_value[0];
-				} elseif ( meta_is_product_attribute( $meta_name, $meta_value[0], $product_id ) ) {
-					$variations[ $meta_name ] = $meta_value[0];
+			foreach ( $item->get_meta_data() as $meta ) {
+				if ( taxonomy_is_product_attribute( $meta->meta_key ) ) {
+					$variations[ $meta->meta_key ] = $meta->meta_value;
+				} elseif ( meta_is_product_attribute( $meta->meta_key, $meta->meta_value, $product_id ) ) {
+					$variations[ $meta->meta_key ] = $meta->meta_value;
 				}
 			}
 
@@ -663,7 +650,8 @@ class WC_Form_Handler {
 			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				// Cancel the order + restore stock
-				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
+				WC()->session->set( 'order_awaiting_payment', false );
+				$order->update_status( 'cancelled', __( 'Order cancelled by customer.', 'woocommerce' ) );
 
 				// Message
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );
@@ -714,7 +702,7 @@ class WC_Form_Handler {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 
 		// Custom Handler
-		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
+		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
 
 		// Simple Products
@@ -786,7 +774,6 @@ class WC_Form_Handler {
 				wc_add_to_cart_message( $added_to_cart );
 				return true;
 			}
-
 		} elseif ( $product_id ) {
 			/* Link on product archives */
 			wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
@@ -841,7 +828,6 @@ class WC_Form_Handler {
 					$variations[ $taxonomy ] = $value;
 					continue;
 				}
-
 			} else {
 				$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 			}
@@ -902,7 +888,6 @@ class WC_Form_Handler {
 					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 					}
-
 				} else {
 					$creds['user_login'] = $username;
 				}
@@ -936,7 +921,6 @@ class WC_Form_Handler {
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
-
 			} catch ( Exception $e ) {
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
 			}
@@ -982,7 +966,7 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $posted_fields[ 'password_1' ] !== $posted_fields[ 'password_2' ] ) {
+			if ( $posted_fields['password_1'] !== $posted_fields['password_2'] ) {
 				wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
 			}
 

@@ -176,10 +176,10 @@ class WC_AJAX {
 		// Fragments and mini cart are returned
 		$data = array(
 			'fragments' => apply_filters( 'woocommerce_add_to_cart_fragments', array(
-					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
+					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
 				)
 			),
-			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5( json_encode( WC()->cart->get_cart_for_session() ) ) : '', WC()->cart->get_cart_for_session() )
+			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5( json_encode( WC()->cart->get_cart_for_session() ) ) : '', WC()->cart->get_cart_for_session() ),
 		);
 
 		wp_send_json( $data );
@@ -287,8 +287,8 @@ class WC_AJAX {
 		if ( WC()->cart->is_empty() ) {
 			$data = array(
 				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
-					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a></div>'
-				) )
+					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a></div>',
+				) ),
 			);
 
 			wp_send_json( $data );
@@ -308,82 +308,38 @@ class WC_AJAX {
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
-
-		if ( isset( $_POST['country'] ) ) {
-			WC()->customer->set_billing_country( $_POST['country'] );
-		}
-
-		if ( isset( $_POST['state'] ) ) {
-			WC()->customer->set_billing_state( $_POST['state'] );
-		}
-
-		if ( isset( $_POST['postcode'] ) ) {
-			WC()->customer->set_billing_postcode( $_POST['postcode'] );
-		}
-
-		if ( isset( $_POST['city'] ) ) {
-			WC()->customer->set_billing_city( $_POST['city'] );
-		}
-
-		if ( isset( $_POST['address'] ) ) {
-			WC()->customer->set_billing_address( $_POST['address'] );
-		}
-
-		if ( isset( $_POST['address_2'] ) ) {
-			WC()->customer->set_billing_address_2( $_POST['address_2'] );
-		}
+		WC()->customer->set_props( array(
+			'billing_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
+			'billing_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
+			'billing_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
+			'billing_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
+			'billing_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
+			'billing_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+		) );
 
 		if ( wc_ship_to_billing_address_only() ) {
-
+			WC()->customer->set_props( array(
+				'shipping_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
+				'shipping_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
+				'shipping_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
+				'shipping_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
+				'shipping_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
+				'shipping_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+			) );
 			if ( ! empty( $_POST['country'] ) ) {
-				WC()->customer->set_shipping_country( $_POST['country'] );
 				WC()->customer->set_calculated_shipping( true );
-			}
-
-			if ( isset( $_POST['state'] ) ) {
-				WC()->customer->set_shipping_state( $_POST['state'] );
-			}
-
-			if ( isset( $_POST['postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $_POST['postcode'] );
-			}
-
-			if ( isset( $_POST['city'] ) ) {
-				WC()->customer->set_shipping_city( $_POST['city'] );
-			}
-
-			if ( isset( $_POST['address'] ) ) {
-				WC()->customer->set_shipping_address( $_POST['address'] );
-			}
-
-			if ( isset( $_POST['address_2'] ) ) {
-				WC()->customer->set_shipping_address_2( $_POST['address_2'] );
 			}
 		} else {
-
+			WC()->customer->set_props( array(
+				'shipping_country'   => isset( $_POST['s_country'] ) ? $_POST['s_country']     : null,
+				'shipping_state'     => isset( $_POST['s_state'] ) ? $_POST['s_state']         : null,
+				'shipping_postcode'  => isset( $_POST['s_postcode'] ) ? $_POST['s_postcode']   : null,
+				'shipping_city'      => isset( $_POST['s_city'] ) ? $_POST['s_city']           : null,
+				'shipping_address_1' => isset( $_POST['s_address'] ) ? $_POST['s_address']     : null,
+				'shipping_address_2' => isset( $_POST['s_address_2'] ) ? $_POST['s_address_2'] : null,
+			) );
 			if ( ! empty( $_POST['s_country'] ) ) {
-				WC()->customer->set_shipping_country( $_POST['s_country'] );
 				WC()->customer->set_calculated_shipping( true );
-			}
-
-			if ( isset( $_POST['s_state'] ) ) {
-				WC()->customer->set_shipping_state( $_POST['s_state'] );
-			}
-
-			if ( isset( $_POST['s_postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
-			}
-
-			if ( isset( $_POST['s_city'] ) ) {
-				WC()->customer->set_shipping_city( $_POST['s_city'] );
-			}
-
-			if ( isset( $_POST['s_address'] ) ) {
-				WC()->customer->set_shipping_address( $_POST['s_address'] );
-			}
-
-			if ( isset( $_POST['s_address_2'] ) ) {
-				WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
 			}
 		}
 
@@ -414,8 +370,8 @@ class WC_AJAX {
 			'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
 			'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
 				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
-				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment
-			) )
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
+			) ),
 		);
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
@@ -452,7 +408,7 @@ class WC_AJAX {
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
 				'error'       => true,
-				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
+				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
 			);
 
 			wp_send_json( $data );
@@ -559,7 +515,7 @@ class WC_AJAX {
 			'value'        => '',
 			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
 			'is_variation' => apply_filters( 'woocommerce_attribute_default_is_variation', 0 ),
-			'is_taxonomy'  => $taxonomy ? 1 : 0
+			'is_taxonomy'  => $taxonomy ? 1 : 0,
 		);
 
 		if ( $taxonomy ) {
@@ -596,14 +552,14 @@ class WC_AJAX {
 
 			if ( is_wp_error( $result ) ) {
 				wp_send_json( array(
-					'error' => $result->get_error_message()
+					'error' => $result->get_error_message(),
 				) );
 			} else {
 				$term = get_term_by( 'id', $result['term_id'], $taxonomy );
 				wp_send_json( array(
 					'term_id' => $term->term_id,
 					'name'    => $term->name,
-					'slug'    => $term->slug
+					'slug'    => $term->slug,
 				) );
 			}
 		}
@@ -725,10 +681,9 @@ class WC_AJAX {
 							'position' 		=> $attribute_position[ $i ],
 							'is_visible' 	=> $is_visible,
 							'is_variation' 	=> $is_variation,
-							'is_taxonomy' 	=> $is_taxonomy
+							'is_taxonomy' 	=> $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
@@ -742,10 +697,9 @@ class WC_AJAX {
 						'position' 		=> $attribute_position[ $i ],
 						'is_visible' 	=> $is_visible,
 						'is_variation' 	=> $is_variation,
-						'is_taxonomy' 	=> $is_taxonomy
+						'is_taxonomy' 	=> $is_taxonomy,
 					);
 				}
-
 			 }
 		}
 
@@ -780,7 +734,7 @@ class WC_AJAX {
 			'post_author'  => get_current_user_id(),
 			'post_parent'  => $post_id,
 			'post_type'    => 'product_variation',
-			'menu_order'   => -1
+			'menu_order'   => -1,
 		);
 
 		$variation_id = wp_insert_post( $variation );
@@ -813,7 +767,7 @@ class WC_AJAX {
 				'_stock_status'          => '',
 				'_backorders'            => null,
 				'_tax_class'             => null,
-				'_variation_description' => ''
+				'_variation_description' => '',
 			);
 
 			foreach ( $variation_fields as $field => $value ) {
@@ -851,13 +805,13 @@ class WC_AJAX {
 			$backorder_options = array(
 				'no'     => __( 'Do not allow', 'woocommerce' ),
 				'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-				'yes'    => __( 'Allow', 'woocommerce' )
+				'yes'    => __( 'Allow', 'woocommerce' ),
 			);
 
 			// set stock status options
 			$stock_status_options = array(
 				'instock'    => __( 'In stock', 'woocommerce' ),
-				'outofstock' => __( 'Out of stock', 'woocommerce' )
+				'outofstock' => __( 'Out of stock', 'woocommerce' ),
 			);
 
 			// Get attributes
@@ -874,7 +828,7 @@ class WC_AJAX {
 				'height'               => wc_format_localized_decimal( get_post_meta( $post_id, '_height', true ) ),
 				'tax_class'            => get_post_meta( $post_id, '_tax_class', true ),
 				'backorder_options'    => $backorder_options,
-				'stock_status_options' => $stock_status_options
+				'stock_status_options' => $stock_status_options,
 			);
 
 			if ( ! $parent_data['weight'] ) {
@@ -953,7 +907,7 @@ class WC_AJAX {
 		// Get existing variations so we don't create duplicates
 		$available_variations = array();
 
-		foreach( $_product->get_children() as $child_id ) {
+		foreach ( $_product->get_children() as $child_id ) {
 			$child = $_product->get_child( $child_id );
 
 			if ( ! empty( $child->variation_id ) ) {
@@ -968,7 +922,7 @@ class WC_AJAX {
 			'post_status'  => 'publish',
 			'post_author'  => get_current_user_id(),
 			'post_parent'  => $post_id,
-			'post_type'    => 'product_variation'
+			'post_type'    => 'product_variation',
 		);
 
 		$variation_ids       = array();
@@ -1134,30 +1088,32 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
-		$order_id    = absint( $_POST['order_id'] );
+		try {
+			$item_to_add = absint( $_POST['item_to_add'] );
+			$order_id    = absint( $_POST['order_id'] );
+			$post        = get_post( $item_to_add );
+			$order       = wc_get_order( $order_id );
 
-		// Find the item
-		if ( ! is_numeric( $item_to_add ) ) {
-			die();
+			if ( ! $post || ! $order || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
+				throw new Exception( __( 'Invalid product', 'woocommerce' ) );
+			}
+
+			$item_id     = $order->add_product( wc_get_product( $post->ID ) );
+			$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+			$order_taxes = $order->get_taxes();
+			$class       = 'new_row';
+
+			ob_start();
+			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+			include( 'admin/meta-boxes/views/html-order-item.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-
-		$post = get_post( $item_to_add );
-
-		if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
-			die();
-		}
-
-		$product     = wc_get_product( $post->ID );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$class       = 'new_row';
-		$item_id     = $order->add_product( $product );
-		$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-
-		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-
-		include( 'admin/meta-boxes/views/html-order-item.php' );
 		die();
 	}
 
@@ -1165,31 +1121,30 @@ class WC_AJAX {
 	 * Add order fee via ajax.
 	 */
 	public static function add_order_fee() {
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$order_id      = absint( $_POST['order_id'] );
-		$order         = wc_get_order( $order_id );
-		$order_taxes   = $order->get_taxes();
-		$item          = array();
+		try {
+			$order_id    = absint( $_POST['order_id'] );
+			$order       = wc_get_order( $order_id );
+			$order_taxes = $order->get_taxes();
+			$item        = new WC_Order_Item_Fee();
+			$item->set_order_id( $order_id );
+			$item_id     = $item->save();
 
-		// Add new fee
-		$fee            = new stdClass();
-		$fee->name      = '';
-		$fee->tax_class = '';
-		$fee->taxable   = $fee->tax_class !== '0';
-		$fee->amount    = '';
-		$fee->tax       = '';
-		$fee->tax_data  = array();
-		$item_id        = $order->add_fee( $fee );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-fee.php' );
 
-		include( 'admin/meta-boxes/views/html-order-fee.php' );
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
 
-		// Quit out
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 
@@ -1197,26 +1152,33 @@ class WC_AJAX {
 	 * Add order shipping cost via ajax.
 	 */
 	public static function add_order_shipping() {
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$order_id         = absint( $_POST['order_id'] );
-		$order            = wc_get_order( $order_id );
-		$order_taxes      = $order->get_taxes();
-		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+		try {
+			$order_id         = absint( $_POST['order_id'] );
+			$order            = wc_get_order( $order_id );
+			$order_taxes      = $order->get_taxes();
+			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
-		// Add new shipping
-		$shipping = new WC_Shipping_Rate();
-		$item_id  = $order->add_shipping( $shipping );
-		$item     = $order->get_item( $item_id );
+			// Add new shipping
+			$item = new WC_Order_Item_Shipping();
+			$item->set_shipping_rate( new WC_Shipping_Rate() );
+			$order->add_item( $item );
 
-		include( 'admin/meta-boxes/views/html-order-shipping.php' );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
-		// Quit out
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 
@@ -1232,17 +1194,28 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$order_id = absint( $_POST['order_id'] );
-		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = wc_get_order( $order_id );
-		$data     = get_post_meta( $order_id );
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$rate_id  = absint( $_POST['rate_id'] );
+			$order    = wc_get_order( $order_id );
+			$data     = get_post_meta( $order_id );
 
-		// Add new tax
-		$order->add_tax( $rate_id, 0, 0 );
+			// Add new tax
+			$item = new WC_Order_Item_Tax();
+			$item->set_rate( $rate_id );
+			$item->set_order_id( $order_id );
+			$item->save();
 
-		// Return HTML items
-		include( 'admin/meta-boxes/views/html-order-items.php' );
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		die();
 	}
 
@@ -1263,7 +1236,7 @@ class WC_AJAX {
 		}
 
 		if ( sizeof( $order_item_ids ) > 0 ) {
-			foreach( $order_item_ids as $id ) {
+			foreach ( $order_item_ids as $id ) {
 				wc_delete_order_item( absint( $id ) );
 			}
 		}
@@ -1315,15 +1288,20 @@ class WC_AJAX {
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
+					} else {
+						$note = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
-					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
@@ -1355,13 +1333,19 @@ class WC_AJAX {
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
-					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
+
+					if ( ! empty( $_product->variation_id ) ) {
+						$note = sprintf( __( 'Item %s variation #%s stock increased from %s to %s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
+					} else {
+						$note = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					}
+
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -1376,223 +1360,33 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Add some meta to a line item.
-	 */
-	public static function add_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
-
-		if ( $meta_id ) {
-			echo '<tr data-meta_id="' . esc_attr( $meta_id ) . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
-		}
-
-		die();
-	}
-
-	/**
-	 * Remove meta from a line item.
-	 */
-	public static function remove_order_item_meta() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		global $wpdb;
-
-		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array(
-			'meta_id' => absint( $_POST['meta_id'] ),
-		) );
-
-		die();
-	}
-
-	/**
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {
-		global $wpdb;
-
 		check_ajax_referer( 'calc-totals', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
+			die( -1 );
 		}
 
-		$tax                    = new WC_Tax();
-		$tax_based_on           = get_option( 'woocommerce_tax_based_on' );
-		$order_id               = absint( $_POST['order_id'] );
-		$items                  = array();
-		$country                = strtoupper( esc_attr( $_POST['country'] ) );
-		$state                  = strtoupper( esc_attr( $_POST['state'] ) );
-		$postcode               = strtoupper( esc_attr( $_POST['postcode'] ) );
-		$city                   = wc_clean( esc_attr( $_POST['city'] ) );
-		$order                  = wc_get_order( $order_id );
-		$taxes                  = array();
-		$shipping_taxes         = array();
-		$order_item_tax_classes = array();
-
-		// Default to base
-		if ( 'base' === $tax_based_on || empty( $country ) ) {
-			$default  = wc_get_base_location();
-			$country  = $default['country'];
-			$state    = $default['state'];
-			$postcode = '';
-			$city     = '';
-		}
+		$order_id           = absint( $_POST['order_id'] );
+		$calculate_tax_args = array(
+			'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+			'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+			'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+			'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+		);
 
 		// Parse the jQuery serialized items
+		$items = array();
 		parse_str( $_POST['items'], $items );
 
-		// Prevent undefined warnings
-		if ( ! isset( $items['line_tax'] ) ) {
-			$items['line_tax'] = array();
-		}
-		if ( ! isset( $items['line_subtotal_tax'] ) ) {
-			$items['line_subtotal_tax'] = array();
-		}
-		$items['order_taxes'] = array();
-
-		// Action
-		$items = apply_filters( 'woocommerce_ajax_calc_line_taxes', $items, $order_id, $country, $_POST );
-
-		$is_vat_exempt = get_post_meta( $order_id, '_is_vat_exempt', true );
-
-		// Tax is calculated only if tax is enabled and order is not vat exempted
-		if ( wc_tax_enabled() && $is_vat_exempt !== 'yes' ) {
-
-			// Get items and fees taxes
-			if ( isset( $items['order_item_id'] ) ) {
-				$line_total = $line_subtotal = array();
-
-				foreach ( $items['order_item_id'] as $item_id ) {
-					$item_id                            = absint( $item_id );
-					$line_total[ $item_id ]             = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
-					$line_subtotal[ $item_id ]          = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
-					$order_item_tax_classes[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
-					$product_id                         = $order->get_item_meta( $item_id, '_product_id', true );
-
-					// Get product details
-					if ( get_post_type( $product_id ) == 'product' ) {
-						$_product        = wc_get_product( $product_id );
-						$item_tax_status = $_product->get_tax_status();
-					} else {
-						$item_tax_status = 'taxable';
-					}
-
-					if ( '0' !== $order_item_tax_classes[ $item_id ] && 'taxable' === $item_tax_status ) {
-						$tax_rates = WC_Tax::find_rates( array(
-							'country'   => $country,
-							'state'     => $state,
-							'postcode'  => $postcode,
-							'city'      => $city,
-							'tax_class' => $order_item_tax_classes[ $item_id ]
-						) );
-
-						$line_taxes          = WC_Tax::calc_tax( $line_total[ $item_id ], $tax_rates, false );
-						$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal[ $item_id ], $tax_rates, false );
-
-						// Set the new line_tax
-						foreach ( $line_taxes as $_tax_id => $_tax_value ) {
-							$items['line_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
-						}
-
-						// Set the new line_subtotal_tax
-						foreach ( $line_subtotal_taxes as $_tax_id => $_tax_value ) {
-							$items['line_subtotal_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
-						}
-
-						// Sum the item taxes
-						foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
-							$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-						}
-					}
-				}
-			}
-
-			// Get shipping taxes
-			if ( isset( $items['shipping_method_id'] ) ) {
-				$matched_tax_rates      = array();
-				$order_item_tax_classes = array_unique( array_values( $order_item_tax_classes ) );
-
-				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
-				if ( sizeof( $order_item_tax_classes ) > 1 && ! in_array( '', $order_item_tax_classes ) ) {
-					$tax_classes = WC_Tax::get_tax_classes();
-
-					foreach ( $tax_classes as $tax_class ) {
-						$tax_class = sanitize_title( $tax_class );
-						if ( in_array( $tax_class, $order_item_tax_classes ) ) {
-							$matched_tax_rates = WC_Tax::find_shipping_rates( array(
-								'country' 	=> $country,
-								'state' 	=> $state,
-								'postcode' 	=> $postcode,
-								'city' 		=> $city,
-								'tax_class' => $tax_class,
-							) );
-							break;
-						}
-					}
-				// If a single tax class is found, use it
-				} elseif ( sizeof( $order_item_tax_classes ) === 1 ) {
-					$matched_tax_rates = WC_Tax::find_shipping_rates( array(
-						'country' 	=> $country,
-						'state' 	=> $state,
-						'postcode' 	=> $postcode,
-						'city' 		=> $city,
-						'tax_class' => $order_item_tax_classes[0]
-					) );
-				}
-
-				// Get standard rate if no taxes were found
-				if ( ! sizeof( $matched_tax_rates ) ) {
-					$matched_tax_rates = WC_Tax::find_shipping_rates( array(
-						'country' 	=> $country,
-						'state' 	=> $state,
-						'postcode' 	=> $postcode,
-						'city' 		=> $city
-					) );
-				}
-
-				$shipping_cost = $shipping_taxes = array();
-
-				foreach ( $items['shipping_method_id'] as $item_id ) {
-					$item_id                   = absint( $item_id );
-					$shipping_cost[ $item_id ] = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : 0;
-					$_shipping_taxes           = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
-
-					// Set the new shipping_taxes
-					foreach ( $_shipping_taxes as $_tax_id => $_tax_value ) {
-						$items['shipping_taxes'][ $item_id ][ $_tax_id ] = $_tax_value;
-
-						$shipping_taxes[ $_tax_id ] = isset( $shipping_taxes[ $_tax_id ] ) ? $shipping_taxes[ $_tax_id ] + $_tax_value : $_tax_value;
-					}
-				}
-			}
-		}
-
-		// Remove old tax rows
-		$order->remove_order_items( 'tax' );
-
-		// Add tax rows
-		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
-			$order->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
-		}
-
-		// Create the new order_taxes
-		foreach ( $order->get_taxes() as $tax_id => $tax_item ) {
-			$items['order_taxes'][ $tax_id ] = absint( $tax_item['rate_id'] );
-		}
-
-		$items = apply_filters( 'woocommerce_ajax_after_calc_line_taxes', $items, $order_id, $country, $_POST );
-
-		// Save order items
+		// Save order items first
 		wc_save_order_items( $order_id, $items );
+
+		// Grab the order and recalc taxes
+		$order = wc_get_order( $order_id );
+		$order->calculate_taxes( $calculate_tax_args );
 
 		// Return HTML items
 		$order = wc_get_order( $order_id );
@@ -1843,7 +1637,7 @@ class WC_AJAX {
 					'include'          => $posts_in,
 					's'                => $term,
 					'fields'           => 'ids',
-					'exclude'          => $exclude
+					'exclude'          => $exclude,
 				);
 
 				$posts = get_posts( $args );
@@ -1893,11 +1687,11 @@ class WC_AJAX {
 			'meta_query'     => array(
 				array(
 					'key'   => '_downloadable',
-					'value' => 'yes'
-				)
+					'value' => 'yes',
+				),
 			),
 			's'              => $term,
-			'exclude'        => $exclude
+			'exclude'        => $exclude,
 		);
 
 		$posts = get_posts( $args );
@@ -1949,7 +1743,7 @@ class WC_AJAX {
 			'fields'         => 'all',
 			'orderby'        => 'display_name',
 			'search'         => '*' . $term . '*',
-			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
+			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' ),
 		) ) );
 
 		remove_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
@@ -2058,7 +1852,7 @@ class WC_AJAX {
 				$wpdb->update(
 					$wpdb->posts,
 					array(
-						'menu_order' => $menu_order
+						'menu_order' => $menu_order,
 					),
 					array( 'ID' => $post->ID ),
 					array( '%d' ),
@@ -2077,7 +1871,7 @@ class WC_AJAX {
 			$wpdb->update(
 				$wpdb->posts,
 				array(
-					'menu_order' => $menu_order
+					'menu_order' => $menu_order,
 				),
 				array( 'ID' => $sibling->ID ),
 				array( '%d' ),
@@ -2090,16 +1884,15 @@ class WC_AJAX {
 				$wpdb->update(
 					$wpdb->posts,
 					array(
-						'menu_order' => $menu_order
+						'menu_order' => $menu_order,
 					),
 					array( 'ID' => $post->ID ),
 					array( '%d' ),
 					array( '%d' )
 				);
-				$new_pos[$post->ID] = $menu_order;
+				$new_pos[ $post->ID ] = $menu_order;
 				$menu_order++;
 			}
-
 		}
 
 		do_action( 'woocommerce_after_product_ordering' );
@@ -2191,7 +1984,7 @@ class WC_AJAX {
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
 					$order_item = $order_items[ $item_id ];
-					$_product   = $order->get_product_from_item( $order_item );
+					$_product = $order_item->get_product();
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
 						$old_stock    = wc_stock_amount( $_product->stock );
@@ -2212,15 +2005,15 @@ class WC_AJAX {
 				 * @since 2.4.0
 				 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3.
 				 */
-				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->id, $refund->id );
+				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->get_id(), $refund->get_id() );
 			} else {
-				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
+				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->get_id() );
 
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->id ) );
+				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->get_id() ) );
 				$response_data['status'] = 'fully_refunded';
 			}
 
-			do_action( 'woocommerce_order_refunded', $order_id, $refund->id );
+			do_action( 'woocommerce_order_refunded', $order_id, $refund->get_id() );
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
@@ -2228,7 +2021,7 @@ class WC_AJAX {
 
 		} catch ( Exception $e ) {
 			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
-				wp_delete_post( $refund->id, true );
+				wp_delete_post( $refund->get_id(), true );
 			}
 
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
@@ -2303,7 +2096,7 @@ class WC_AJAX {
 				$data = array(
 					'user_id'     => $user_id,
 					'description' => $description,
-					'permissions' => $permissions
+					'permissions' => $permissions,
 				);
 
 				$wpdb->update(
@@ -2313,7 +2106,7 @@ class WC_AJAX {
 					array(
 						'%d',
 						'%s',
-						'%s'
+						'%s',
 					),
 					array( '%d' )
 				);
@@ -2331,7 +2124,7 @@ class WC_AJAX {
 					'permissions'     => $permissions,
 					'consumer_key'    => wc_api_hash( $consumer_key ),
 					'consumer_secret' => $consumer_secret,
-					'truncated_key'   => substr( $consumer_key, -7 )
+					'truncated_key'   => substr( $consumer_key, -7 ),
 				);
 
 				$wpdb->insert(
@@ -2343,7 +2136,7 @@ class WC_AJAX {
 						'%s',
 						'%s',
 						'%s',
-						'%s'
+						'%s',
 					)
 				);
 
@@ -2411,13 +2204,13 @@ class WC_AJAX {
 		$backorder_options = array(
 			'no'     => __( 'Do not allow', 'woocommerce' ),
 			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-			'yes'    => __( 'Allow', 'woocommerce' )
+			'yes'    => __( 'Allow', 'woocommerce' ),
 		);
 
 		// set stock status options
 		$stock_status_options = array(
 			'instock'    => __( 'In stock', 'woocommerce' ),
-			'outofstock' => __( 'Out of stock', 'woocommerce' )
+			'outofstock' => __( 'Out of stock', 'woocommerce' ),
 		);
 
 		$parent_data = array(
@@ -2431,7 +2224,7 @@ class WC_AJAX {
 			'height'               => wc_format_localized_decimal( get_post_meta( $product_id, '_height', true ) ),
 			'tax_class'            => get_post_meta( $product_id, '_tax_class', true ),
 			'backorder_options'    => $backorder_options,
-			'stock_status_options' => $stock_status_options
+			'stock_status_options' => $stock_status_options,
 		);
 
 		if ( ! $parent_data['weight'] ) {
@@ -2457,7 +2250,7 @@ class WC_AJAX {
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
 			'orderby'        => array( 'menu_order' => 'ASC', 'ID' => 'DESC' ),
-			'post_parent'    => $product_id
+			'post_parent'    => $product_id,
 		), $product_id );
 
 		$variations = get_posts( $args );
@@ -2491,7 +2284,7 @@ class WC_AJAX {
 					'_stock_status'          => '',
 					'_backorders'            => null,
 					'_tax_class'             => null,
-					'_variation_description' => ''
+					'_variation_description' => '',
 				);
 
 				foreach ( $variation_fields as $field => $value ) {
@@ -2960,7 +2753,7 @@ class WC_AJAX {
 				'posts_per_page' => -1,
 				'post_type'      => 'product_variation',
 				'fields'         => 'ids',
-				'post_status'    => array( 'publish', 'private' )
+				'post_status'    => array( 'publish', 'private' ),
 			) );
 		}
 
@@ -3085,7 +2878,7 @@ class WC_AJAX {
 				'zone_name'      => 1,
 				'zone_order'     => 1,
 				'zone_locations' => 1,
-				'zone_postcodes' => 1
+				'zone_postcodes' => 1,
 			) );
 
 			if ( isset( $zone_data['zone_id'] ) ) {
@@ -3132,7 +2925,7 @@ class WC_AJAX {
 		}
 
 		wp_send_json_success( array(
-			'zones' => WC_Shipping_Zones::get_zones()
+			'zones' => WC_Shipping_Zones::get_zones(),
 		) );
 	}
 
@@ -3163,7 +2956,7 @@ class WC_AJAX {
 		wp_send_json_success( array(
 			'instance_id' => $instance_id,
 			'zone_id'     => $zone_id,
-			'methods'     => $zone->get_shipping_methods()
+			'methods'     => $zone->get_shipping_methods(),
 		) );
 	}
 
@@ -3207,7 +3000,7 @@ class WC_AJAX {
 
 			$method_data = array_intersect_key( $data, array(
 				'method_order' => 1,
-				'enabled'      => 1
+				'enabled'      => 1,
 			) );
 
 			if ( isset( $method_data['method_order'] ) ) {
@@ -3223,7 +3016,7 @@ class WC_AJAX {
 		}
 
 		wp_send_json_success( array(
-			'methods' => $zone->get_shipping_methods()
+			'methods' => $zone->get_shipping_methods(),
 		) );
 	}
 
@@ -3322,7 +3115,7 @@ class WC_AJAX {
 		$wc_shipping = WC_Shipping::instance();
 
 		wp_send_json_success( array(
-			'shipping_classes' => $wc_shipping->get_shipping_classes()
+			'shipping_classes' => $wc_shipping->get_shipping_classes(),
 		) );
 	}
 }

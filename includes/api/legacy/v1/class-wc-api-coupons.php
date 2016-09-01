@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -73,7 +73,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupons = array();
 
-		foreach( $query->posts as $coupon_id ) {
+		foreach ( $query->posts as $coupon_id ) {
 
 			if ( ! $this->is_readable( $coupon_id ) )
 				continue;
@@ -95,18 +95,17 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @return array|WP_Error
 	 */
 	public function get_coupon( $id, $fields = null ) {
-		global $wpdb;
-
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
 
 		if ( is_wp_error( $id ) )
 			return $id;
 
 		// get the coupon code
-		$code = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $id ) );
+		$code = wc_get_coupon_code_by_id( $id );
 
-		if ( is_null( $code ) )
+		if ( empty( $code ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
 		$coupon = new WC_Coupon( $code );
 
@@ -122,11 +121,11 @@ class WC_API_Coupons extends WC_API_Resource {
 			'individual_use'               => $coupon->get_individual_use(),
 			'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
 			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
-			'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
-			'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+			'usage_limit'                  => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : null,
+			'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
 			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 			'usage_count'                  => (int) $coupon->get_usage_count(),
-			'expiry_date'                  => $this->server->format_datetime( $coupon->get_expiry_date() ),
+			'expiry_date'                  => $this->server->format_datetime( $coupon->get_date_expires() ),
 			'enable_free_shipping'         => $coupon->get_free_shipping(),
 			'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
@@ -242,5 +241,4 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		return new WP_Query( $query_args );
 	}
-
 }

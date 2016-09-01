@@ -72,8 +72,8 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 								$actions = array(
 									'download'  => array(
 										'url'  => $download['download_url'],
-										'name' => __( 'Download', 'woocommerce' )
-									)
+										'name' => __( 'Download', 'woocommerce' ),
+									),
 								);
 
 								if ( $actions = apply_filters( 'woocommerce_account_download_actions', $actions, $download ) ) {

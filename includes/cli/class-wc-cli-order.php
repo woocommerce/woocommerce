@@ -579,8 +579,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 				array(
 					'key'   => '_customer_user',
 					'value' => (int) $args['customer_id'],
-					'compare' => '='
-				)
+					'compare' => '=',
+				),
 			);
 		}
 
@@ -640,7 +640,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), $dp ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'total_shipping'            => wc_format_decimal( $order->get_shipping_total(), $dp ),
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), $dp ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
@@ -676,7 +676,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			),
 			'note'                      => $order->get_customer_note(),
 			'customer_ip'               => $order->get_customer_ip_address(),
-			'customer_user_agent'       => $order->get_user_agent(),
+			'customer_user_agent'       => $order->get_customer_user_agent(),
 			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),
@@ -718,7 +718,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'         => $item['name'],
+				'name'         => $item->get_name(),
 				'product_id'   => $product_id,
 				'sku'          => $product_sku,
 				'meta'         => $item_meta,
@@ -995,7 +995,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $item_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$item_id = $order->update_product( $item['id'], $product, $item_args );
@@ -1092,7 +1091,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $shipping_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$shipping_args = array();
@@ -1169,7 +1167,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $fee_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$fee_args = array();
@@ -1226,7 +1223,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( ! $coupon_id ) {
 				throw new WC_CLI_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$coupon_args = array();

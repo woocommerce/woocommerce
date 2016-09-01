@@ -95,7 +95,7 @@ class WC_Auth {
 	 */
 	protected function get_permissions_in_scope( $scope ) {
 		$permissions = array();
-		switch ( $scope )  {
+		switch ( $scope ) {
 			case 'read' :
 				$permissions[] = __( 'View coupons', 'woocommerce' );
 				$permissions[] = __( 'View customers', 'woocommerce' );
@@ -168,7 +168,7 @@ class WC_Auth {
 			'user_id',
 			'return_url',
 			'callback_url',
-			'scope'
+			'scope',
 		);
 
 		foreach ( $params as $param ) {
@@ -226,7 +226,7 @@ class WC_Auth {
 				'permissions'     => $permissions,
 				'consumer_key'    => wc_api_hash( $consumer_key ),
 				'consumer_secret' => $consumer_secret,
-				'truncated_key'   => substr( $consumer_key, -7 )
+				'truncated_key'   => substr( $consumer_key, -7 ),
 			),
 			array(
 				'%d',
@@ -234,7 +234,7 @@ class WC_Auth {
 				'%s',
 				'%s',
 				'%s',
-				'%s'
+				'%s',
 			)
 		);
 
@@ -243,7 +243,7 @@ class WC_Auth {
 			'user_id'         => $app_user_id,
 			'consumer_key'    => $consumer_key,
 			'consumer_secret' => $consumer_secret,
-			'key_permissions' => $permissions
+			'key_permissions' => $permissions,
 		);
 	}
 
@@ -264,7 +264,7 @@ class WC_Auth {
 			'timeout'   => 60,
 			'headers'   => array(
 				'Content-Type' => 'application/json;charset=' . get_bloginfo( 'charset' ),
-			)
+			),
 		);
 
 		$response = wp_safe_remote_post( esc_url_raw( $url ), $params );
@@ -349,7 +349,7 @@ class WC_Auth {
 					'permissions' => $this->get_permissions_in_scope( wc_clean( $_REQUEST['scope'] ) ),
 					'granted_url' => wp_nonce_url( $this->build_url( $_REQUEST, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
 					'logout_url'  => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) ),
-					'user'        => wp_get_current_user()
+					'user'        => wp_get_current_user(),
 				) );
 				exit;
 

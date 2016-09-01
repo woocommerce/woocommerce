@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -103,8 +103,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @return array|WP_Error
 	 */
 	public function get_coupon( $id, $fields = null ) {
-		global $wpdb;
-
 		try {
 
 			$id = $this->validate_request( $id, 'shop_coupon', 'read' );
@@ -114,9 +112,9 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			// get the coupon code
-			$code = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $id ) );
+			$code = wc_get_coupon_code_by_id( $id );
 
-			if ( is_null( $code ) ) {
+			if ( empty( $code ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), 404 );
 			}
 
@@ -132,11 +130,11 @@ class WC_API_Coupons extends WC_API_Resource {
 				'individual_use'               => $coupon->get_individual_use(),
 				'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
 				'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
-				'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
-				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'usage_limit'                  => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : null,
+				'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
 				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 				'usage_count'                  => (int) $coupon->get_usage_count(),
-				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->server->format_datetime( $coupon->get_expiry_date() ) : null,
+				'expiry_date'                  => $coupon->get_date_expires() ? $this->server->format_datetime( $coupon->get_date_expires() ) : null,
 				'enable_free_shipping'         => $coupon->get_free_shipping(),
 				'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
 				'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
@@ -227,18 +225,10 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), 400 );
 			}
 
-			$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$id_from_code = wc_get_coupon_id_by_code( $coupon_code );
 
-			// Check for duplicate coupon codes
-			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
-				SELECT $wpdb->posts.ID
-				FROM $wpdb->posts
-				WHERE $wpdb->posts.post_type = 'shop_coupon'
-				AND $wpdb->posts.post_status = 'publish'
-				AND $wpdb->posts.post_title = '%s'
-			 ", $coupon_code ) );
-
-			if ( $coupon_found ) {
+			if ( $id_from_code ) {
 				throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
 			}
 
@@ -260,7 +250,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'minimum_amount'               => '',
 				'maximum_amount'               => '',
 				'customer_emails'              => array(),
-				'description'                  => ''
+				'description'                  => '',
 			);
 
 			$coupon_data = wp_parse_args( $data, $defaults );
@@ -276,7 +266,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
-				'post_excerpt' => $coupon_data['description']
+				'post_excerpt' => $coupon_data['description'],
 	 		);
 
 			$id = wp_insert_post( $new_coupon, true );
@@ -342,19 +332,10 @@ class WC_API_Coupons extends WC_API_Resource {
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
-				$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
-				// Check for duplicate coupon codes
-				$coupon_found = $wpdb->get_var( $wpdb->prepare( "
-					SELECT $wpdb->posts.ID
-					FROM $wpdb->posts
-					WHERE $wpdb->posts.post_type = 'shop_coupon'
-					AND $wpdb->posts.post_status = 'publish'
-					AND $wpdb->posts.post_title = '%s'
-					AND $wpdb->posts.ID != %s
-				 ", $coupon_code, $id ) );
-
-				if ( $coupon_found ) {
+				if ( $id_from_code ) {
 					throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
 				}
 
@@ -551,7 +532,7 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$coupons[] = $edit['coupon'];
@@ -565,7 +546,7 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$coupons[] = $new['coupon'];

@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'product.updated'  => __( 'Product Updated', 'woocommerce' ),
 								'product.deleted'  => __( 'Product Deleted', 'woocommerce' ),
 								'action'           => __( 'Action', 'woocommerce' ),
-								'custom'           => __( 'Custom', 'woocommerce' )
+								'custom'           => __( 'Custom', 'woocommerce' ),
 							) );
 
 							foreach ( $topics as $topic_slug => $topic_name ) : ?>

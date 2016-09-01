@@ -30,7 +30,7 @@
 			<directory suffix=".php">./includes/updates/</directory>
 			<directory suffix=".php">./includes/widgets/</directory>
 			<directory suffix=".php">./templates/</directory>
-			<directory suffix=".php">./tests/</directory>
+			<directory>./tests/</directory>
 			<directory suffix=".php">./tmp/</directory>
 		</blacklist>
 	</filter>

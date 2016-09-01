@@ -76,7 +76,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	// Get the file.
 	$response = wp_safe_remote_get( $image_url, array(
-		'timeout' => 10
+		'timeout' => 10,
 	) );
 
 	if ( is_wp_error( $response ) ) {
@@ -306,10 +306,11 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
  */
 function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 	$objects = array(
-		'reports'       => 'view_woocommerce_reports',
-		'settings'      => 'manage_woocommerce',
-		'system_status' => 'manage_woocommerce',
-		'attributes'    => 'manage_product_terms',
+		'reports'          => 'view_woocommerce_reports',
+		'settings'         => 'manage_woocommerce',
+		'system_status'    => 'manage_woocommerce',
+		'attributes'       => 'manage_product_terms',
+		'shipping_methods' => 'manage_woocommerce',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );

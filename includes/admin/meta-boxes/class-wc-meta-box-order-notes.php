@@ -30,7 +30,7 @@ class WC_Meta_Box_Order_Notes {
 			'orderby'   => 'comment_ID',
 			'order'     => 'DESC',
 			'approve'   => 'approve',
-			'type'      => 'order_note'
+			'type'      => 'order_note',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
@@ -43,7 +43,7 @@ class WC_Meta_Box_Order_Notes {
 
 		if ( $notes ) {
 
-			foreach( $notes as $note ) {
+			foreach ( $notes as $note ) {
 
 				$note_classes   = array( 'note' );
 				$note_classes[] = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? 'customer-note' : '';
@@ -62,7 +62,6 @@ class WC_Meta_Box_Order_Notes {
 				</li>
 				<?php
 			}
-
 		} else {
 			echo '<li>' . __( 'There are no notes yet.', 'woocommerce' ) . '</li>';
 		}

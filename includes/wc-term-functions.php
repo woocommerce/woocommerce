@@ -147,7 +147,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		'show_uncategorized' => 1,
 		'orderby'            => 'name',
 		'selected'           => $current_product_cat,
-		'menu_order'         => false
+		'menu_order'         => false,
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -180,14 +180,14 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
  * @return mixed
  */
 function wc_walk_category_dropdown_tree() {
+	$args = func_get_args();
+
 	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) {
 		include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 	}
 
-	$args = func_get_args();
-
 	// the user's options are the third parameter
-	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) ) {
+	if ( empty( $args[2]['walker']) || ! is_a($args[2]['walker'], 'Walker' ) ) {
 		$walker = new WC_Product_Cat_Dropdown_Walker;
 	} else {
 		$walker = $args[2]['walker'];
@@ -218,7 +218,7 @@ function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new
 						array(
 							'woocommerce_term_id' => $new_term_id,
 							'meta_key'            => $meta_data->meta_key,
-							'meta_value'          => $meta_data->meta_value
+							'meta_value'          => $meta_data->meta_value,
 						)
 					);
 				}
@@ -278,7 +278,7 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * @param bool $unique (default: false)
  * @return bool
  */
-function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
 	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
 }
 
@@ -340,7 +340,7 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 			continue; // our term to order, we skip
 		}
 		// the nextid of our term to order, lets move our term here
-		if (null !== $next_id && $term->term_id == $next_id) {
+		if ( null !== $next_id && $term->term_id == $next_id ) {
 			$index++;
 			$index = wc_set_term_order($id, $index, $taxonomy, true);
 		}
@@ -380,13 +380,13 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	// Meta name
 	if ( taxonomy_is_product_attribute( $taxonomy ) )
-		$meta_name =  'order_' . esc_attr( $taxonomy );
+		$meta_name = 'order_' . esc_attr( $taxonomy );
 	else
 		$meta_name = 'order';
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 
-	if( ! $recursive ) return $index;
+	if ( ! $recursive ) return $index;
 
 	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
 

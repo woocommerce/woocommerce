@@ -181,5 +181,4 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		$this->assertInternalType( 'array', $notices );
 		$this->assertEmpty( $notices );
 	}
-
 }

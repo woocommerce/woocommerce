@@ -51,27 +51,32 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$item_id = $order->add_product( $product, array( 'qty' => 4 ) );
+		$order->add_product( $product, 4 );
 
 		// Set billing address
-		$billing_address = array(
-			'country'    => 'US',
-			'first_name' => 'Jeroen',
-			'last_name'  => 'Sormani',
-			'company'    => 'WooCompany',
-			'address_1'  => 'WooAddress',
-			'address_2'  => '',
-			'postcode'   => '123456',
-			'city'       => 'WooCity',
-			'state'      => 'NY',
-			'email'      => 'admin@example.org',
-			'phone'      => '555-32123',
-		);
-		$order->set_address( $billing_address, 'billing' );
+		$order->set_billing_first_name( 'Jeroen' );
+		$order->set_billing_last_name( 'Sormani' );
+		$order->set_billing_company( 'WooCompany' );
+		$order->set_billing_address_1( 'WooAddress' );
+		$order->set_billing_address_2( '' );
+		$order->set_billing_city( 'WooCity' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_postcode( '123456' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_email( 'admin@example.org' );
+		$order->set_billing_phone( '555-32123' );
 
 		// Add shipping costs
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
-		$order->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' ) );
+		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
+		$item   = new WC_Order_Item_Shipping( array(
+			'method_title' => $rate->label,
+			'method_id'    => $rate->id,
+			'total'        => wc_format_decimal( $rate->cost ),
+			'taxes'        => $rate->taxes,
+			'meta_data'    => $rate->get_meta_data(),
+		) );
+		$order->add_item( $item );
 
 		// Set payment gateway
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -84,7 +89,8 @@ class WC_Helper_Order {
 		$order->set_cart_tax( 0 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 40 ); // 4 x $10 simple helper product
+		$order->save();
 
-		return wc_get_order( $order->get_id() );
+		return $order;
 	}
 }

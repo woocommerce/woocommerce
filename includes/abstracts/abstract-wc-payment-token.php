@@ -294,5 +294,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $this->get_id() ), array( '%d' ) );
 		do_action( 'woocommerce_payment_token_deleted', $this->get_id(), $this );
 	}
-
 }

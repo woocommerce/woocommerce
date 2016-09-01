@@ -148,5 +148,4 @@ class WC_Logger {
 
 		return $removed;
 	}
-
 }

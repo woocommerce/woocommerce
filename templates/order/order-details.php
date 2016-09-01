@@ -35,8 +35,8 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 	</thead>
 	<tbody>
 		<?php
-			foreach( $order->get_items() as $item_id => $item ) {
-				$product = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			foreach ( $order->get_items() as $item_id => $item ) {
+				$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
 
 				wc_get_template( 'order/order-details-item.php', array(
 					'order'			     => $order,
@@ -67,5 +67,5 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 <?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 
 <?php if ( $show_customer_details ) : ?>
-	<?php wc_get_template( 'order/order-details-customer.php', array( 'order' =>  $order ) ); ?>
+	<?php wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) ); ?>
 <?php endif; ?>

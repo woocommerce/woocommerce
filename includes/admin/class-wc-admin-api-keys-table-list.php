@@ -25,7 +25,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		parent::__construct( array(
 			'singular' => __( 'key', 'woocommerce' ),
 			'plural'   => __( 'keys', 'woocommerce' ),
-			'ajax'     => false
+			'ajax'     => false,
 		) );
 	}
 
@@ -41,7 +41,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'truncated_key' => __( 'Consumer Key Ending In', 'woocommerce' ),
 			'user'          => __( 'User', 'woocommerce' ),
 			'permissions'   => __( 'Permissions', 'woocommerce' ),
-			'last_access'   => __( 'Last Access', 'woocommerce' )
+			'last_access'   => __( 'Last Access', 'woocommerce' ),
 		);
 	}
 
@@ -78,7 +78,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$actions = array(
 			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
 			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
-			'trash' => '<a class="submitdelete" title="' . esc_attr__( 'Revoke API Key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>'
+			'trash' => '<a class="submitdelete" title="' . esc_attr__( 'Revoke API Key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>',
 		);
 
 		$row_actions = array();
@@ -133,7 +133,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$permissions    = array(
 			'read'       => __( 'Read', 'woocommerce' ),
 			'write'      => __( 'Write', 'woocommerce' ),
-			'read_write' => __( 'Read/Write', 'woocommerce' )
+			'read_write' => __( 'Read/Write', 'woocommerce' ),
 		);
 
 		if ( isset( $permissions[ $permission_key ] ) ) {
@@ -166,7 +166,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		return array(
-			'revoke' => __( 'Revoke', 'woocommerce' )
+			'revoke' => __( 'Revoke', 'woocommerce' ),
 		);
 	}
 
@@ -211,7 +211,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $count,
 			'per_page'    => $per_page,
-			'total_pages' => ceil( $count / $per_page )
+			'total_pages' => ceil( $count / $per_page ),
 		) );
 	}
 }
