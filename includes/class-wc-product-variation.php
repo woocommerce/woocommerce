@@ -707,7 +707,7 @@ class WC_Product_Variation extends WC_Product {
 		$formatted_attributes = $this->get_formatted_variation_attributes( true );
 		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
 
-		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+		return sprintf( __( '%1$s &ndash; %2$s%3$s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}
 
 	/**

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="postbox">
 
 	<?php if ( 'custom' === $current_range && isset( $_GET['start_date'], $_GET['end_date'] ) ) : ?>
-		<h3 class="screen-reader-text"><?php echo esc_html( sprintf( _x( 'From %s to %s', 'start date and end date', 'woocommerce' ), wc_clean( $_GET['start_date'] ), wc_clean( $_GET['end_date'] ) ) ); ?></h3>
+		<h3 class="screen-reader-text"><?php echo esc_html( sprintf( _x( 'From %1$s to %2$s', 'start date and end date', 'woocommerce' ), wc_clean( $_GET['start_date'] ), wc_clean( $_GET['end_date'] ) ) ); ?></h3>
 	<?php else : ?>
 		<h3 class="screen-reader-text"><?php echo esc_html( $ranges[ $current_range ] ); ?></h3>
 	<?php endif; ?>

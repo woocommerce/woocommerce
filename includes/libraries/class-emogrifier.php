@@ -618,7 +618,7 @@ class Emogrifier
 	 */
 	private function generateStyleStringFromDeclarationsArrays( array $oldStyles, array $newStyles ) {
 		$combinedStyles = array_merge($oldStyles, $newStyles);
-		$cacheKey = serialize($combinedStyles);
+		$cacheKey = serialize( $combinedStyles );
 		if ( isset($this->caches[ self::CACHE_KEY_COMBINED_STYLES ][ $cacheKey ]) ) {
 			return $this->caches[ self::CACHE_KEY_COMBINED_STYLES ][ $cacheKey ];
 		}

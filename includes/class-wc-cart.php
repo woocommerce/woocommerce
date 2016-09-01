@@ -494,7 +494,7 @@ class WC_Cart {
 				 * Check stock based on all items in the cart.
 				 */
 				if ( ! $_product->has_enough_stock( $check_qty ) ) {
-					$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->get_stock_quantity() ) );
+					$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->get_stock_quantity() ) );
 					return $error;
 				}
 
@@ -529,7 +529,7 @@ class WC_Cart {
 						$not_enough_stock = true;
 					}
 					if ( $not_enough_stock ) {
-						$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+						$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 						return $error;
 					}
 				}
@@ -937,7 +937,7 @@ class WC_Cart {
 				}
 
 				if ( ! $product_data->has_enough_stock( $quantity ) ) {
-					throw new Exception( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ) );
+					throw new Exception( sprintf(__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ) );
 				}
 
 				// Stock check - this time accounting for whats already in-cart
@@ -958,7 +958,7 @@ class WC_Cart {
 							'<a href="%s" class="button wc-forward">%s</a> %s',
 							wc_get_cart_url(),
 							__( 'View Cart', 'woocommerce' ),
-							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $check_qty )
+							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $check_qty )
 						) );
 					}
 				}

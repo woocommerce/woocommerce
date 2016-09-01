@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <p>
 	<?php
-		echo sprintf( esc_attr__( 'Hello %s%s%s (not %2$s? %sSign out%s)', 'woocommerce' ), '<strong>', esc_html( $current_user->display_name ), '</strong>', '<a href="' . esc_url( wc_get_endpoint_url( 'customer-logout', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">', '</a>' );
+		echo sprintf( esc_attr__( 'Hello %1$s%2$s%3$s (not %2$s? %4$sSign out%5$s)', 'woocommerce' ), '<strong>', esc_html( $current_user->display_name ), '</strong>', '<a href="' . esc_url( wc_get_endpoint_url( 'customer-logout', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">', '</a>' );
 	?>
 </p>
 
@@ -56,4 +56,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @deprecated 2.6.0
 	 */
 	do_action( 'woocommerce_after_my_account' );
-?>
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

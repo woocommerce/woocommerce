@@ -11,6 +11,7 @@
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedCATCH" />
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedIF" />
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedELSE" />
+		<exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionalCall.NotAllowed" />
 		<exclude name="Generic.Commenting.DocComment.LongNotCapital" />
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 		<exclude name="Generic.Commenting.DocComment.ShortNotCapital" />
@@ -43,6 +44,7 @@
 		<exclude name="Squiz.Commenting.BlockComment.WrongEnd" />
 		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.ClosingDeclarationComment.Abstract" />
 		<exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
 		<exclude name="Squiz.Commenting.EmptyCatchComment.Missing" />
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
@@ -109,9 +111,13 @@
 		<!-- <exclude name="WordPress.Arrays.ArrayDeclaration.ValueNoNewline" /> -->
 		<!-- <exclude name="WordPress.Arrays.ArrayKeySpacingRestrictions.NoSpacesAroundArrayKeys" /> -->
 		<!-- <exclude name="WordPress.Arrays.ArrayKeySpacingRestrictions.SpacesAroundArrayKeys" /> -->
+		<exclude name="WordPress.Classes.ClassOpeningStatement.BraceOnNewLine" />
 		<exclude name="WordPress.CSRF.NonceVerification.NoNonceVerification" />
+		<exclude name="WordPress.DB.RestrictedFunctions.mysql" />
 		<exclude name="WordPress.Files.FileName.UnderscoresNotAllowed" />
+		<exclude name="WordPress.Functions.DontExtract.extract" />
 		<exclude name="WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid" />
+		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.NotSnakeCase" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar" />
@@ -132,6 +138,7 @@
 		<exclude name="WordPress.VIP.RestrictedFunctions.custom_role" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.cookies" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.curl" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.error_log" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.extract" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.file_get_contents" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.get_pages" />
@@ -139,9 +146,14 @@
 		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_by" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_link" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.parse_url" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.prevent_path_disclosure" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.runtime_configuration" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.serialize" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.urlencode" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.url_to_postid" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.user_meta" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_get_post_terms" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.wp_redirect" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get" />
 		<exclude name="WordPress.VIP.RestrictedVariables.user_meta" />
 		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints" />
@@ -153,6 +165,10 @@
 		<exclude name="WordPress.VIP.ValidatedSanitizedInput.MissingUnslash" />
 		<exclude name="WordPress.Variables.GlobalVariables.OverrideProhibited" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedScript" />
+		<exclude name="WordPress.WP.I18n.MissingSingularPlaceholder" />
+		<exclude name="WordPress.WP.I18n.MismatchedPlaceholders" />
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralPlural" />
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralText" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet" />
 		<exclude name="WordPress.WP.PreparedSQL.NotPrepared" />
 		<!-- <exclude name="WordPress.WhiteSpace.ControlStructureSpacing.BlankLineAfterEnd" /> -->

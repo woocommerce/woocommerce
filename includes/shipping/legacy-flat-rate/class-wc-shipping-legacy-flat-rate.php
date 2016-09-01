@@ -331,14 +331,16 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function get_extra_cost( $cost_string, $type, $package ) {
 		$cost         = $cost_string;
 		$cost_percent = false;
+		// @codingStandardsIgnoreStart
 		$pattern      =
-			'/' .           // start regex
-			'(\d+\.?\d*)' . // capture digits, optionally capture a `.` and more digits
-			'\s*' .         // match whitespace
-			'(\+|-)' .      // capture the operand
-			'\s*'.          // match whitespace
-			'(\d+\.?\d*)'.  // capture digits, optionally capture a `.` and more digits
-			'\%/';          // match the percent sign & end regex
+			'/' .           // Start regex.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\s*' .         // Match whitespace.
+			'(\+|-)' .      // Capture the operand.
+			'\s*' .         // Match whitespace.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\%/';          // Match the percent sign & end regex.
+		// @codingStandardsIgnoreEnd
 		if ( preg_match( $pattern, $cost_string, $this_cost_matches ) ) {
 			$cost_operator = $this_cost_matches[2];
 			$cost_percent  = $this_cost_matches[3] / 100;
