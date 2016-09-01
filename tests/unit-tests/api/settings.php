@@ -137,10 +137,11 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 8, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'value', $properties );
 		$this->assertArrayHasKey( 'default', $properties );
 		$this->assertArrayHasKey( 'tip', $properties );
 		$this->assertArrayHasKey( 'placeholder', $properties );

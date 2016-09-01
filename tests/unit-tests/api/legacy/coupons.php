@@ -38,7 +38,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 		$this->assertEquals( (int) $coupon->get_usage_limit_per_user(), $response['usage_limit_per_user'] );
 		$this->assertEquals( (int) $coupon->get_limit_usage_to_x_items(), $response['limit_usage_to_x_items'] );
 		$this->assertEquals( (int) $coupon->get_usage_count(), $response['usage_count'] );
-		$this->assertEquals( $coupon->get_expiry_date(), $response['expiry_date'] );
+		$this->assertEquals( $coupon->get_date_expires(), $response['expiry_date'] );
 		$this->assertEquals( $coupon->get_free_shipping(), $response['enable_free_shipping'] );
 		$this->assertEquals( $coupon->get_product_categories(), $response['product_category_ids'] );
 		$this->assertEquals( $coupon->get_excluded_product_categories(), $response['exclude_product_category_ids'] );
