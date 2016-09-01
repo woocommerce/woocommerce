@@ -18,8 +18,8 @@ class Customers extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test route registration.
-     *
-     * @since 2.7.0
+	 *
+	 * @since 2.7.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -29,88 +29,90 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '/wc/v1/customers/batch', $routes );
 	}
 
-    /**
-     * Test getting customers.
-     *
-     * @since 2.7.0
-     */
-    public function test_get_customers() {
-	    wp_set_current_user( 1 );
+	/**
+	 * Test getting customers.
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_get_customers() {
+		wp_set_current_user( 1 );
 
-	    $customer_1 = WC_Helper_Customer::create_customer();
-	    WC_Helper_Customer::create_customer( 'test2', 'test2', 'test2@woo.local' );
+		$customer_1 = WC_Helper_Customer::create_customer();
+		WC_Helper_Customer::create_customer( 'test2', 'test2', 'test2@woo.local' );
 
-	    $request = new WP_REST_Request( 'GET', '/wc/v1/customers' );
-	    $request->set_query_params( array(
+		$request = new WP_REST_Request( 'GET', '/wc/v1/customers' );
+		$request->set_query_params( array(
 			'orderby' => 'id',
 		) );
-	    $response  = $this->server->dispatch( $request );
-	    $customers = $response->get_data();
+		$response  = $this->server->dispatch( $request );
+		$customers = $response->get_data();
 
-	    $this->assertEquals( 200, $response->get_status() );
-	    $this->assertEquals( 2, count( $customers ) );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $customers ) );
 
-	    $this->assertContains( array(
-	        'id'            => $customer_1->get_id(),
-	        'date_created'  => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_created() ) ),
-	        'date_modified' => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_modified() ) ),
-	        'email'         => 'test@woo.local',
-	        'first_name'    => 'Justin',
-	        'last_name'     => '',
-	        'username'      => 'testcustomer',
-	        'last_order'    => null,
-	        'orders_count'  => 0,
-	        'total_spent'   => '0.00',
-	        'avatar_url'    => $customer_1->get_avatar_url(),
-	        'billing' => array(
-	            'first_name' => '',
-	            'last_name'  => '',
-	            'company'    => '',
-	            'address_1'  => '123 South Street',
-	            'address_2'  => 'Apt 1',
-	            'city'       => 'Philadelphia',
-	            'state'      => 'PA',
-	            'postcode'   => '19123',
-	            'country'    => 'US',
-	            'email'      => '',
-	            'phone'      => '',
-	        ),
-	        'shipping' => array(
-	            'first_name' => '',
-	            'last_name'  => '',
-	            'company'    => '',
-	            'address_1'  => '123 South Street',
-	            'address_2'  => 'Apt 1',
-	            'city'       => 'Philadelphia',
-	            'state'      => 'PA',
-	            'postcode'   => '19123',
-	            'country'    => 'US',
-	        ),
-	        '_links' => array(
-	            'self'       => array(
-	                array(
-	                    'href' => rest_url( '/wc/v1/customers/' . $customer_1->get_id() . '' ),
-	                ),
-	            ),
-	            'collection' => array(
-	                array(
-	                    'href' => rest_url( '/wc/v1/customers' ),
-	                ),
-	            ),
-	        ),
-	    ), $customers );
-    }
+		$this->assertContains( array(
+			'id'            => $customer_1->get_id(),
+			'date_created'  => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_created() ) ),
+			'date_modified' => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_modified() ) ),
+			'email'         => 'test@woo.local',
+			'first_name'    => 'Justin',
+			'last_name'     => '',
+			'username'      => 'testcustomer',
+			'billing' => array(
+				'first_name' => '',
+				'last_name'  => '',
+				'company'    => '',
+				'address_1'  => '123 South Street',
+				'address_2'  => 'Apt 1',
+				'city'       => 'Philadelphia',
+				'state'      => 'PA',
+				'postcode'   => '19123',
+				'country'    => 'US',
+				'email'      => '',
+				'phone'      => '',
+			),
+			'shipping' => array(
+				'first_name' => '',
+				'last_name'  => '',
+				'company'    => '',
+				'address_1'  => '123 South Street',
+				'address_2'  => 'Apt 1',
+				'city'       => 'Philadelphia',
+				'state'      => 'PA',
+				'postcode'   => '19123',
+				'country'    => 'US',
+			),
+			'is_paying_customer' => false,
+			'last_order'    => null,
+			'orders_count'  => 0,
+			'total_spent'   => '0.00',
+			'avatar_url'    => $customer_1->get_avatar_url(),
+			'meta_data' => array(),
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/customers/' . $customer_1->get_id() . '' ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/customers' ),
+					),
+				),
+			),
+		), $customers );
+	}
 
-    /**
-     * Test getting customers without valid permissions.
-     *
-     * @since 2.7.0
-     */
-    public function test_get_customers_without_permission() {
+	/**
+	 * Test getting customers without valid permissions.
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_get_customers_without_permission() {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/customers' ) );
 		$this->assertEquals( 401, $response->get_status() );
-    }
+	}
 
 	/**
 	 * Test creating a new customer.
@@ -139,10 +141,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'first_name'    => '',
 			'last_name'     => '',
 			'username'      => 'create_customer_test',
-			'last_order'    => null,
-			'orders_count'  => 0,
-			'total_spent'   => '0',
-			'avatar_url'    => $data['avatar_url'],
 			'billing' => array(
 				'first_name' => '',
 				'last_name'  => '',
@@ -167,12 +165,18 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'postcode'   => '',
 				'country'    => '',
 			),
+			'is_paying_customer' => false,
+			'meta_data' => array(),
+			'last_order'    => null,
+			'orders_count'  => 0,
+			'total_spent'   => '0.00',
+			'avatar_url'    => $data['avatar_url'],
 		), $data );
 
 		// Test extra data
 		$request = new WP_REST_Request( 'POST', '/wc/v1/customers' );
 		$request->set_body_params( array(
-		    'username' => 'create_customer_test2',
+			'username' => 'create_customer_test2',
 			'password' => 'test123',
 			'email'    => 'create_customer_test2@woo.local',
 			'first_name' => 'Test',
@@ -198,10 +202,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'first_name'    => 'Test',
 			'last_name'     => 'McTestFace',
 			'username'      => 'create_customer_test2',
-			'last_order'    => null,
-			'orders_count'  => 0,
-			'total_spent'   => '0',
-			'avatar_url'    => $data['avatar_url'],
 			'billing' => array(
 				'first_name' => '',
 				'last_name'  => '',
@@ -226,6 +226,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'postcode'   => '',
 				'country'    => 'US',
 			),
+			'is_paying_customer' => false,
+			'meta_data' => array(),
+			'last_order'    => null,
+			'orders_count'  => 0,
+			'total_spent'   => '0.00',
+			'avatar_url'    => $data['avatar_url'],
 		), $data );
 
 		// Test without required field
@@ -275,12 +281,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'date_modified' => $data['date_modified'],
 			'email'         => 'get_customer_test@woo.local',
 			'first_name'    => 'Justin',
-			'last_name'     => '',
-			'username'      => 'get_customer_test',
-			'last_order'    => null,
-			'orders_count'  => 0,
-			'total_spent'   => '0.00',
-			'avatar_url'    => $data['avatar_url'],
 			'billing' => array(
 				'first_name' => '',
 				'last_name'  => '',
@@ -305,6 +305,14 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'postcode'   => '19123',
 				'country'    => 'US',
 			),
+			'is_paying_customer' => false,
+			'meta_data' => array(),
+			'last_name'     => '',
+			'username'      => 'get_customer_test',
+			'last_order'    => null,
+			'orders_count'  => 0,
+			'total_spent'   => '0.00',
+			'avatar_url'    => $data['avatar_url'],
 		), $data );
 	}
 
@@ -483,7 +491,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 14, count( $properties ) );
+		$this->assertEquals( 16, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -521,5 +529,4 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'postcode', $properties['shipping']['properties'] );
 		$this->assertArrayHasKey( 'country', $properties['shipping']['properties'] );
 	}
-
 }

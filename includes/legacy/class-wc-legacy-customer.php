@@ -20,8 +20,23 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 */
 	public function __isset( $key ) {
 		$legacy_keys = array(
-			'country', 'state', 'postcode' ,'city', 'address_1', 'address', 'address_2', 'shipping_country', 'shipping_state',
-			'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address', 'shipping_address_2', 'is_vat_exempt', 'calculated_shipping',
+			'id',
+			'country',
+			'state',
+			'postcode' ,
+			'city',
+			'address_1',
+			'address',
+			'address_2',
+			'shipping_country',
+			'shipping_state',
+			'shipping_postcode',
+			'shipping_city',
+			'shipping_address_1',
+			'shipping_address',
+			'shipping_address_2',
+			'is_vat_exempt',
+			'calculated_shipping',
 		);
 		$key = $this->filter_legacy_key( $key );
 		return in_array( $key, $legacy_keys );
@@ -36,10 +51,10 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Customer properties should not be accessed directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
-		if ( in_array( $key, array( 'country', 'state', 'postcode' ,'city', 'address_1', 'address', 'address_2' ) ) ) {
+		if ( in_array( $key, array( 'country', 'state', 'postcode', 'city', 'address_1', 'address', 'address_2' ) ) ) {
 			$key = 'billing_' . $key;
 		}
-		return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : '';
+		return is_callable( array( $this, "get_{$key}" ) ) ? $this->{"get_{$key}"}() : '';
 	}
 
 	/**
@@ -51,8 +66,10 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	public function __set( $key, $value ) {
 		_doing_it_wrong( $key, 'Customer properties should not be set directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
-		$this->_data[ $key ] = $value;
-		$this->_changed = true;
+
+		if ( is_callable( array( $this, "set_{$key}" ) ) ) {
+			$this->{"set_{$key}"}( $value );
+		}
 	}
 
 	/**
@@ -70,26 +87,20 @@ abstract class WC_Legacy_Customer extends WC_Data {
 			$key = 'shipping_address_1';
 		}
 
-
 		return $key;
 	}
 
 	/**
-	 * Is customer VAT exempt?
-	 * @return bool
+	 * Sets session data for the location.
+	 *
+	 * @param string $country
+	 * @param string $state
+	 * @param string $postcode (default: '')
+	 * @param string $city (default: '')
 	 */
-	public function is_vat_exempt() {
-		_deprecated_function( 'WC_Customer::is_vat_exempt', '2.7', 'WC_Customer::get_is_vat_exempt' );
-		return $this->get_is_vat_exempt();
-	}
-
-	/**
-	 * Has calculated shipping?
-	 * @return bool
-	 */
-	public function has_calculated_shipping() {
-		_deprecated_function( 'WC_Customer::has_calculated_shipping', '2.7', 'WC_Customer::get_calculated_shipping' );
-		return $this->get_calculated_shipping();
+	public function set_location( $country, $state, $postcode = '', $city = '' ) {
+		$this->set_billing_location( $country, $state, $postcode, $city );
+		$this->set_shipping_location( $country, $state, $postcode, $city );
 	}
 
 	/**
@@ -236,5 +247,4 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		_deprecated_function( 'WC_Customer::set_address_2', '2.7', 'WC_Customer::set_billing_address_2' );
 		$this->set_billing_address_2( $address );
 	}
-
 }

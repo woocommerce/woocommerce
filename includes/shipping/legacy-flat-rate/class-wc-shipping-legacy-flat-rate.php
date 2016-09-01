@@ -37,7 +37,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
@@ -97,11 +97,11 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );
@@ -129,7 +129,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function fee( $atts ) {
 		$atts = shortcode_atts( array(
 			'percent' => '',
-			'min_fee' => ''
+			'min_fee' => '',
 		), $atts );
 
 		$calculated_fee = 0;
@@ -166,7 +166,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost']
+				'cost' => $package['contents_cost'],
 			) );
 		}
 
@@ -186,7 +186,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
 			if ( $this->type === 'class' ) {
@@ -356,7 +356,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			switch ( $type ) {
 				case 'class' :
 					$shipping_classes = $this->find_shipping_classes( $package );
-					foreach ( $shipping_classes as $shipping_class => $items ){
+					foreach ( $shipping_classes as $shipping_class => $items ) {
 						foreach ( $items as $item_id => $values ) {
 							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
 						}

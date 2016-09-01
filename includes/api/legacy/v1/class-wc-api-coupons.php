@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -73,7 +73,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupons = array();
 
-		foreach( $query->posts as $coupon_id ) {
+		foreach ( $query->posts as $coupon_id ) {
 
 			if ( ! $this->is_readable( $coupon_id ) )
 				continue;
@@ -125,7 +125,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
 			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 			'usage_count'                  => (int) $coupon->get_usage_count(),
-			'expiry_date'                  => $this->server->format_datetime( $coupon->get_expiry_date() ),
+			'expiry_date'                  => $this->server->format_datetime( $coupon->get_date_expires() ),
 			'enable_free_shipping'         => $coupon->get_free_shipping(),
 			'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
@@ -241,5 +241,4 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		return new WP_Query( $query_args );
 	}
-
 }

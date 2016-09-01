@@ -32,12 +32,12 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
@@ -88,7 +88,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
-				'default' => 'no'
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -103,7 +103,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'desc_tip'    => __( 'What ZIP/post codes are available for local pickup?', 'woocommerce' ),
 				'default'     => '',
 				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
-				'placeholder' => 'e.g. 12345, 56789'
+				'placeholder' => 'e.g. 12345, 56789',
 			),
 			'availability' => array(
 				'title'    => __( 'Method availability', 'woocommerce' ),
@@ -112,8 +112,8 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'class'    => 'availability wc-enhanced-select',
 				'options'  => array(
 					'all'      => __( 'All allowed countries', 'woocommerce' ),
-					'specific' => __( 'Specific Countries', 'woocommerce' )
-				)
+					'specific' => __( 'Specific Countries', 'woocommerce' ),
+				),
 			),
 			'countries' => array(
 				'title'             => __( 'Specific Countries', 'woocommerce' ),
@@ -123,9 +123,9 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'default'           => '',
 				'options'           => WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(
-					'data-placeholder'  => __( 'Select some countries', 'woocommerce' )
-				)
-			)
+					'data-placeholder'  => __( 'Select some countries', 'woocommerce' ),
+				),
+			),
 		);
 	}
 
@@ -137,7 +137,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 		$codes = array();
 
 		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
+			foreach ( explode( ',', $this->codes ) as $code ) {
 				$codes[] = strtoupper( trim( $code ) );
 			}
 		}

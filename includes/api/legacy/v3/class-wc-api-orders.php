@@ -707,7 +707,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => $this->post_type,
-			'post_status' => array_keys( wc_get_order_statuses() )
+			'post_status' => array_keys( wc_get_order_statuses() ),
 		);
 
 		// add status argument
@@ -724,8 +724,8 @@ class WC_API_Orders extends WC_API_Resource {
 				array(
 					'key'     => '_customer_user',
 					'value'   => absint( $args['customer_id'] ),
-					'compare' => '='
-				)
+					'compare' => '=',
+				),
 			);
 		}
 
@@ -1068,7 +1068,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $shipping_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Shipping( $shipping['id'] );
@@ -1139,7 +1138,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $fee_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Fee( $fee['id'] );
@@ -1202,7 +1200,6 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $coupon_id ) {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ), 500 );
 			}
-
 		} else {
 
 			$item = new WC_Order_Item_Coupon( $coupon['id'] );
@@ -1243,7 +1240,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$args = array(
 			'post_id' => $order_id,
 			'approve' => 'approve',
-			'type'    => 'order_note'
+			'type'    => 'order_note',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
@@ -1585,7 +1582,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
-				'line_items' => $line_items
+				'line_items' => $line_items,
 			);
 
 			return array( 'order_refund' => apply_filters( 'woocommerce_api_order_refund_response', $order_refund, $id, $fields, $refund, $order_id, $this ) );
@@ -1828,7 +1825,7 @@ class WC_API_Orders extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$orders[] = array(
 							'id'    => $order_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$orders[] = $edit['order'];
@@ -1842,7 +1839,7 @@ class WC_API_Orders extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$orders[] = array(
 							'id'    => $order_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$orders[] = $new['order'];

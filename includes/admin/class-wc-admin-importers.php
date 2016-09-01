@@ -94,7 +94,7 @@ class WC_Admin_Importers {
 												'attribute_name'    => $attribute_name,
 												'attribute_type'    => 'select',
 												'attribute_orderby' => 'menu_order',
-												'attribute_public'  => 0
+												'attribute_public'  => 0,
 											);
 											$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
 											delete_transient( 'wc_attribute_taxonomies' );

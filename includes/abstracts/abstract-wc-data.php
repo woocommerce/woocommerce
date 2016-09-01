@@ -265,6 +265,16 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() );
+	}
+
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * @since 2.6.0
 	 */
@@ -296,10 +306,8 @@ abstract class WC_Data {
 			", $this->get_id() ) );
 
 			if ( $raw_meta_data ) {
+				$raw_meta_data = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 				foreach ( $raw_meta_data as $meta ) {
-					if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
-						continue;
-					}
 					$this->_meta_data[] = (object) array(
 						'id'    => (int) $meta->{ $db_info['meta_id_field'] },
 						'key'   => $meta->meta_key,
@@ -390,6 +398,9 @@ abstract class WC_Data {
 
 		foreach ( $props as $prop => $value ) {
 			try {
+				if ( 'meta_data' === $prop ) {
+					continue;
+				}
 				$setter = "set_$prop";
 				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
 					$this->{$setter}( $value );

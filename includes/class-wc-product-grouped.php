@@ -99,13 +99,11 @@ class WC_Product_Grouped extends WC_Product {
 					$is_on_sale = true;
 				}
 			}
-
 		} else {
 
 			if ( $this->sale_price && $this->sale_price == $this->price ) {
 				$is_on_sale = true;
 			}
-
 		}
 
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );

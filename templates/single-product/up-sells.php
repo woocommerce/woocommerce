@@ -34,7 +34,7 @@ $args = array(
 	'orderby'             => $orderby,
 	'post__in'            => $upsells,
 	'post__not_in'        => array( $product->id ),
-	'meta_query'          => WC()->query->get_meta_query()
+	'meta_query'          => WC()->query->get_meta_query(),
 );
 
 $products                    = new WP_Query( $args );

@@ -478,7 +478,7 @@ final class WooCommerce {
 				'fields'         => 'ids',
 				'post_type'      => 'shop_webhook',
 				'post_status'    => 'publish',
-				'posts_per_page' => -1
+				'posts_per_page' => -1,
 			) );
 			set_transient( 'woocommerce_webhook_ids', $webhooks );
 		}

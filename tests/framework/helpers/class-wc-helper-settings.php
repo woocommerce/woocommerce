@@ -77,5 +77,4 @@ class WC_Helper_Settings {
 		);
 		return $settings;
 	}
-
 }

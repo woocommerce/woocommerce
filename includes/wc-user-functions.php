@@ -314,9 +314,9 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @param  array $roles
  * @return array
  */
-function wc_modify_editable_roles( $roles ){
+function wc_modify_editable_roles( $roles ) {
 	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles[ 'administrator' ] );
+		unset( $roles['administrator'] );
 	}
 	return $roles;
 }
@@ -448,7 +448,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
 						'email'         => urlencode( $result->user_email ),
-						'key'           => $result->download_id
+						'key'           => $result->download_id,
 					),
 					home_url( '/' )
 				),
@@ -459,7 +459,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'order_key'           => $order->get_order_key(),
 				'downloads_remaining' => $result->downloads_remaining,
 				'access_expires' 	  => $result->access_expires,
-				'file'                => $download_file
+				'file'                => $download_file,
 			);
 
 			$file_number++;

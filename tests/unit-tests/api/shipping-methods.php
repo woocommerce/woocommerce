@@ -132,5 +132,4 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'title', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 	}
-
 }

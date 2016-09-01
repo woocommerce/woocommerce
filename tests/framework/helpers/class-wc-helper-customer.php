@@ -29,7 +29,7 @@ class WC_Helper_Customer {
 			'shipping_address'		=> '123 South Street',
 			'shipping_address_2'	=> 'Apt 1',
 			'is_vat_exempt' 		=> false,
-			'calculated_shipping'	=> false
+			'calculated_shipping'	=> false,
 		);
 
 		WC_Helper_Customer::set_customer_details( $customer_data );
@@ -60,7 +60,7 @@ class WC_Helper_Customer {
 		$customer->set_username( $username );
 		$customer->set_password( $password );
 		$customer->set_email( $email );
-		$customer->create();
+		$customer->save();
 		return $customer;
 	}
 

@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_Request {
 				'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
 				'zip'           => $order->get_billing_postcode(),
 				'country'       => $order->get_billing_country(),
-				'email'         => $order->get_billing_email()
+				'email'         => $order->get_billing_email(),
 			),
 			$this->get_phone_number_args( $order ),
 			$this->get_shipping_args( $order ),
@@ -102,7 +102,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		if ( in_array( $order->get_billing_country(), array( 'US','CA' ) ) ) {
+		if ( in_array( $order->get_billing_country(), array( 'US', 'CA' ) ) ) {
 			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
@@ -111,12 +111,12 @@ class WC_Gateway_Paypal_Request {
 				'night_phone_c' => substr( $phone_number, 6, 4 ),
 				'day_phone_a' 	=> substr( $phone_number, 0, 3 ),
 				'day_phone_b' 	=> substr( $phone_number, 3, 3 ),
-				'day_phone_c' 	=> substr( $phone_number, 6, 4 )
+				'day_phone_c' 	=> substr( $phone_number, 6, 4 ),
 			);
 		} else {
 			$phone_args = array(
 				'night_phone_b' => $order->get_billing_phone(),
-				'day_phone_b' 	=> $order->get_billing_phone()
+				'day_phone_b' 	=> $order->get_billing_phone(),
 			);
 		}
 		return $phone_args;

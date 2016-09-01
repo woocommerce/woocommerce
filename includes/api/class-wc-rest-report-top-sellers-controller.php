@@ -64,7 +64,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
 					'name'            => 'order_item_qty',
-				)
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',

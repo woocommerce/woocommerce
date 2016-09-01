@@ -35,7 +35,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 		);
 
 		# GET /webhooks/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_webhooks_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -293,7 +293,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// update user ID
 			$webhook_data = array(
 				'ID'          => $webhook->id,
-				'post_author' => get_current_user_id()
+				'post_author' => get_current_user_id(),
 			);
 
 			// update name
@@ -458,5 +458,4 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
-
 }

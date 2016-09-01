@@ -13,24 +13,24 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'       => 'woocommerce_prices_include_tax',
 		'default'  => 'no',
 		'type'     => 'radio',
-		'desc_tip' =>  __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
+		'desc_tip' => __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
 		'options'  => array(
 			'yes' => __( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ),
-			'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' )
+			'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' ),
 		),
 	),
 
 	array(
 		'title'    => __( 'Calculate Tax Based On', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
-		'desc_tip' =>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
+		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => 'shipping',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
 		'options'  => array(
 			'shipping' => __( 'Customer shipping address', 'woocommerce' ),
 			'billing'  => __( 'Customer billing address', 'woocommerce' ),
-			'base'     => __( 'Shop base address', 'woocommerce' )
+			'base'     => __( 'Shop base address', 'woocommerce' ),
 		),
 	),
 
@@ -43,7 +43,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
 		'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
-		'desc_tip' =>  true,
+		'desc_tip' => true,
 	),
 
 	array(
@@ -60,7 +60,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'      => 'woocommerce_tax_classes',
 		'css'     => 'width:100%; height: 65px;',
 		'type'    => 'textarea',
-		'default' => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
+		'default' => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL ),
 	),
 
 	array(
@@ -72,7 +72,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'options' => array(
 			'incl'   => __( 'Including tax', 'woocommerce' ),
 			'excl'   => __( 'Excluding tax', 'woocommerce' ),
-		)
+		),
 	),
 
 	array(
@@ -85,7 +85,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 			'incl'   => __( 'Including tax', 'woocommerce' ),
 			'excl'   => __( 'Excluding tax', 'woocommerce' ),
 		),
-		'autoload'      => false
+		'autoload'      => false,
 	),
 
 	array(
@@ -107,7 +107,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 			'single'     => __( 'As a single total', 'woocommerce' ),
 			'itemized'   => __( 'Itemized', 'woocommerce' ),
 		),
-		'autoload' => false
+		'autoload' => false,
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'tax_options' ),

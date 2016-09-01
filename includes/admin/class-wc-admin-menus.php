@@ -178,7 +178,6 @@ class WC_Admin_Menus {
 			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
-
 		}
 
 		// Return order
@@ -325,7 +324,7 @@ class WC_Admin_Menus {
 			'parent' => 'site-name',
 			'id'     => 'view-store',
 			'title'  => __( 'Visit Store', 'woocommerce' ),
-			'href'   => wc_get_page_permalink( 'shop' )
+			'href'   => wc_get_page_permalink( 'shop' ),
 		) );
 	}
 }

@@ -193,7 +193,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
 			'order_item_name' => $this->get_name(),
 			'order_item_type' => $this->get_type(),
-			'order_id'        => $this->get_order_id()
+			'order_id'        => $this->get_order_id(),
 		) );
 		$this->set_id( $wpdb->insert_id );
 
@@ -210,7 +210,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
 			'order_item_name' => $this->get_name(),
 			'order_item_type' => $this->get_type(),
-			'order_id'        => $this->get_order_id()
+			'order_id'        => $this->get_order_id(),
 		), array( 'order_item_id' => $this->get_id() ) );
 
 		do_action( 'woocommerce_update_order_item', $this->get_id(), $this, $this->get_order_id() );

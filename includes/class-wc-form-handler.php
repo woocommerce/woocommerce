@@ -156,11 +156,11 @@ class WC_Form_Handler {
 	 */
 	public static function save_account_details() {
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'save_account_details' !== $_POST[ 'action' ] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+		if ( empty( $_POST['action'] ) || 'save_account_details' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
 			return;
 		}
 
@@ -174,12 +174,12 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
-		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? $_POST[ 'password_current' ] : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? sanitize_email( $_POST['account_email'] ) : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
 		$save_pass          = true;
 
 		$user->first_name   = $account_first_name;
@@ -292,20 +292,12 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
-				// Set customer location to order location
-				if ( $order->get_billing_country() ) {
-					WC()->customer->set_country( $order->get_billing_country() );
-				}
-				if ( $order->get_billing_state() ) {
-					WC()->customer->set_state( $order->get_billing_state() );
-				}
-				if ( $order->get_billing_postcode() ) {
-					WC()->customer->set_postcode( $order->get_billing_postcode() );
-				}
-				if ( $order->get_billing_city() ) {
-					WC()->customer->set_city( $order->get_billing_city() );
-				}
-
+				WC()->customer->set_props( array(
+					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+					'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+					'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+					'billing_city'     => $order->get_billing_city() ? $order->get_billing_city()         : null,
+				) );
 				WC()->customer->save();
 
 				// Terms
@@ -349,7 +341,6 @@ class WC_Form_Handler {
 							exit;
 						}
 					}
-
 				} else {
 					// No payment was required for order
 					$order->payment_complete();
@@ -360,7 +351,6 @@ class WC_Form_Handler {
 				do_action( 'woocommerce_after_pay_action', $order );
 
 			}
-
 		}
 	}
 
@@ -387,9 +377,7 @@ class WC_Form_Handler {
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
-
 			}
-
 		}
 
 	}
@@ -558,7 +546,6 @@ class WC_Form_Handler {
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
 					}
-
 				}
 			}
 
@@ -715,7 +702,7 @@ class WC_Form_Handler {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 
 		// Custom Handler
-		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
+		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
 
 		// Simple Products
@@ -787,7 +774,6 @@ class WC_Form_Handler {
 				wc_add_to_cart_message( $added_to_cart );
 				return true;
 			}
-
 		} elseif ( $product_id ) {
 			/* Link on product archives */
 			wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
@@ -842,7 +828,6 @@ class WC_Form_Handler {
 					$variations[ $taxonomy ] = $value;
 					continue;
 				}
-
 			} else {
 				$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 			}
@@ -903,7 +888,6 @@ class WC_Form_Handler {
 					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 					}
-
 				} else {
 					$creds['user_login'] = $username;
 				}
@@ -937,7 +921,6 @@ class WC_Form_Handler {
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
-
 			} catch ( Exception $e ) {
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
 			}
@@ -983,7 +966,7 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $posted_fields[ 'password_1' ] !== $posted_fields[ 'password_2' ] ) {
+			if ( $posted_fields['password_1'] !== $posted_fields['password_2'] ) {
 				wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
 			}
 

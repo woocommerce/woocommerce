@@ -40,5 +40,5 @@ $states['IR'] = array(
 	'MZN' => __( 'Mazandaran (مازندران)', 'woocommerce' ),
 	'MKZ' => __( 'Markazi (مرکزی)', 'woocommerce' ),
 	'HRZ' => __( 'Hormozgan (هرمزگان)', 'woocommerce' ),
-	'SBN' => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' )
+	'SBN' => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' ),
 );

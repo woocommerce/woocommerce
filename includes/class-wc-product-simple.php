@@ -79,7 +79,7 @@ class WC_Product_Simple extends WC_Product {
 			'meta_key'       => '_price',
 			'posts_per_page' => 1,
 			'post_type'      => 'product',
-			'fields'         => 'ids'
+			'fields'         => 'ids',
 		));
 		if ( $children_by_price ) {
 			foreach ( $children_by_price as $child ) {

@@ -105,4 +105,23 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 
 		return true;
 	}
+
+	/**
+	 * Check whether a given request has permission to delete Shipping Zones.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function delete_items_permissions_check( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
 }

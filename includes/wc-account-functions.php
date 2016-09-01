@@ -55,7 +55,7 @@ function wc_customer_edit_account_url() {
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
 		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
-		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) )
+		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
 	) );
 
 	if ( $flip ) {
@@ -259,7 +259,7 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
-			$list[ $type ][$key]['actions']['default'] = array(
+			$list[ $type ][ $key ]['actions']['default'] = array(
 				'url' => $set_default_url,
 				'name' => esc_html__( 'Make Default', 'woocommerce' ),
 			);
@@ -309,7 +309,7 @@ function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_
 	}
 
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] =  esc_html__( 'eCheck', 'woocommerce' );
+	$item['method']['brand'] = esc_html__( 'eCheck', 'woocommerce' );
 
 	return $item;
 }

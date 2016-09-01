@@ -320,5 +320,4 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'success', $properties );
         $this->assertArrayHasKey( 'message', $properties );
     }
-
 }

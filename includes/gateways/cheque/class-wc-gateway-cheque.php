@@ -54,7 +54,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable Check Payments', 'woocommerce' ),
-				'default' => 'yes'
+				'default' => 'yes',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -124,7 +124,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		// Return thankyou redirect
 		return array(
 			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'redirect'	=> $this->get_return_url( $order ),
 		);
 	}
 }

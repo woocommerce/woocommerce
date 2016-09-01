@@ -191,7 +191,7 @@ class WC_Post_Data {
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {
-				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
 		}

@@ -72,7 +72,7 @@ class WC_Admin_Attributes {
 			'attribute_name'    => isset( $_POST['attribute_name'] )    ? wc_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) ) : '',
 			'attribute_type'    => isset( $_POST['attribute_type'] )    ? wc_clean( $_POST['attribute_type'] ) : 'select',
 			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( $_POST['attribute_orderby'] ) : '',
-			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0
+			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0,
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {

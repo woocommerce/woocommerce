@@ -145,7 +145,6 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
 
-
 		// REST API controllers.
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php' );
@@ -232,5 +231,4 @@ class WC_API extends WC_Legacy_API {
 			new WC_Register_WP_Admin_Settings( $page );
 		}
 	}
-
 }

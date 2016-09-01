@@ -96,5 +96,4 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 		$token_read->read( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}
-
 }

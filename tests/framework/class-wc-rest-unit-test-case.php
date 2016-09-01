@@ -29,5 +29,4 @@
         global $wp_rest_server;
         $wp_rest_server = null;
     }
-
 }

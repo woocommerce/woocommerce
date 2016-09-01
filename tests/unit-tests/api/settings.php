@@ -137,10 +137,11 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 8, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'value', $properties );
 		$this->assertArrayHasKey( 'default', $properties );
 		$this->assertArrayHasKey( 'tip', $properties );
 		$this->assertArrayHasKey( 'placeholder', $properties );
@@ -191,7 +192,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 						'href' => rest_url( '/wc/v1/settings/general' ),
 					),
 				),
-			)
+			),
 		), $data );
 
 		// test getting a valid group with settings attached to it
@@ -537,5 +538,4 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'yd', $data['value'] );
 		$this->assertEquals( 'yd', get_option(' woocommerce_dimension_unit' ) );
 	}
-
 }

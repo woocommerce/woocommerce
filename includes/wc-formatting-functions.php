@@ -15,6 +15,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Converts a string (e.g. yes or no) to a bool.
+ * @since 2.7.0
+ * @param string $string
+ * @return bool
+ */
+function wc_string_to_bool( $string ) {
+	return is_bool( $string ) ? $string : ( $string === 'yes' || $string === 1 || $string === '1' );
+}
+
+/**
+ * Explode a string into an array by $delimiter and remove empty values.
+ * @since 2.7.0
+ * @param string $string
+ * @param string $delimiter
+ * @return array
+ */
+function wc_string_to_array( $string, $delimiter = ',' ) {
+	return is_array( $string ) ? $string : array_filter( explode( $delimiter, $string ) );
+}
+
+/**
  * Sanitize taxonomy names. Slug format (no spaces, lowercase).
  *
  * urldecode is used to reverse munging of UTF8 characters.
@@ -411,7 +432,7 @@ function wc_price( $price, $args = array() ) {
 		'decimal_separator'  => wc_get_price_decimal_separator(),
 		'thousand_separator' => wc_get_price_thousand_separator(),
 		'decimals'           => wc_get_price_decimals(),
-		'price_format'       => get_woocommerce_price_format()
+		'price_format'       => get_woocommerce_price_format(),
 	) ) ) );
 
 	$negative        = $price < 0;

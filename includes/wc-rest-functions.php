@@ -76,7 +76,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	// Get the file.
 	$response = wp_safe_remote_get( $image_url, array(
-		'timeout' => 10
+		'timeout' => 10,
 	) );
 
 	if ( is_wp_error( $response ) ) {

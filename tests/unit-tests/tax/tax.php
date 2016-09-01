@@ -25,7 +25,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -56,7 +56,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -86,7 +86,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -116,7 +116,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -126,7 +126,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'state'     => 'Cambs',
 			'postcode'  => 'PE14 1XX',
 			'city'      => 'Somewhere',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
@@ -152,7 +152,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -162,7 +162,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'state'     => 'Cambs',
 			'postcode'  => 'PE14 1XX',
 			'city'      => 'Somewhere',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
@@ -188,7 +188,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -198,7 +198,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'state'     => 'Cambs',
 			'postcode'  => 'PE14 1XX',
 			'city'      => 'Somewhere',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, true, false );
@@ -233,7 +233,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		  'tax_rate_compound' => '0',
 		  'tax_rate_shipping' => '1',
 		  'tax_rate_order'    => '1',
-		  'tax_rate_class'    => ''
+		  'tax_rate_class'    => '',
 		);
 
 		$tax_rate_2 = array(
@@ -245,7 +245,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		  'tax_rate_compound' => '1',
 		  'tax_rate_shipping' => '1',
 		  'tax_rate_order'    => '2',
-		  'tax_rate_class'    => ''
+		  'tax_rate_class'    => '',
 		);
 
 		$tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
@@ -256,7 +256,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		  'state'     => 'QC',
 		  'postcode'  => '12345',
 		  'city'      => '',
-		  'tax_class' => ''
+		  'tax_class' => '',
 		) );
 
 		// prices exclusive of tax
@@ -298,7 +298,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -308,7 +308,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'state'     => 'Cambs',
 			'postcode'  => 'PE14 1XX',
 			'city'      => 'Somewhere',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
@@ -333,7 +333,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '1',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -358,7 +358,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '1',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -383,7 +383,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '1',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -408,7 +408,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '1',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
@@ -462,7 +462,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		// Run function
@@ -501,7 +501,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		// Run function
@@ -509,7 +509,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Update a rate
 		$tax_rate = array(
-			'tax_rate_country'  => 'US'
+			'tax_rate_country'  => 'US',
 		);
 
 		// Run function
@@ -536,7 +536,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		// Run function
@@ -566,7 +566,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		// Run function
@@ -597,7 +597,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 
 		// Run function

@@ -65,16 +65,16 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 									$actions = array(
 										'pay'    => array(
 											'url'  => $order->get_checkout_payment_url(),
-											'name' => __( 'Pay', 'woocommerce' )
+											'name' => __( 'Pay', 'woocommerce' ),
 										),
 										'view'   => array(
 											'url'  => $order->get_view_order_url(),
-											'name' => __( 'View', 'woocommerce' )
+											'name' => __( 'View', 'woocommerce' ),
 										),
 										'cancel' => array(
 											'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-											'name' => __( 'Cancel', 'woocommerce' )
-										)
+											'name' => __( 'Cancel', 'woocommerce' ),
+										),
 									);
 
 									if ( ! $order->needs_payment() ) {

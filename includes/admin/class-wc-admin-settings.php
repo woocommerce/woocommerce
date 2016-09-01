@@ -139,7 +139,7 @@ class WC_Admin_Settings {
 		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'select2' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
-			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' )
+			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 		) );
 
 		// Include settings pages
@@ -501,11 +501,11 @@ class WC_Admin_Settings {
 				// Image width settings
 				case 'image_width' :
 
-					$image_size       = str_replace( '_image_size', '', $value[ 'id' ] );
+					$image_size       = str_replace( '_image_size', '', $value['id'] );
 					$size             = wc_get_image_size( $image_size );
-					$width            = isset( $size[ 'width' ] ) ? $size[ 'width' ] : $value[ 'default' ][ 'width' ];
-					$height           = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
-					$crop             = isset( $size[ 'crop' ] ) ? $size[ 'crop' ] : $value[ 'default' ][ 'crop' ];
+					$width            = isset( $size['width'] ) ? $size['width'] : $value['default']['width'];
+					$height           = isset( $size['height'] ) ? $size['height'] : $value['default']['height'];
+					$crop             = isset( $size['crop'] ) ? $size['crop'] : $value['default']['crop'];
 					$disabled_attr    = '';
 					$disabled_message = '';
 
@@ -537,7 +537,7 @@ class WC_Admin_Settings {
 						'show_option_none' => ' ',
 						'class'            => $value['class'],
 						'echo'             => false,
-						'selected'         => absint( self::get_option( $value['id'] ) )
+						'selected'         => absint( self::get_option( $value['id'] ) ),
 					);
 
 					if ( isset( $value['args'] ) ) {
@@ -652,7 +652,7 @@ class WC_Admin_Settings {
 
 		return array(
 			'description'  => $description,
-			'tooltip_html' => $tooltip_html
+			'tooltip_html' => $tooltip_html,
 		);
 	}
 
@@ -802,7 +802,6 @@ class WC_Admin_Settings {
 			if ( file_exists( $downloads_url . '/.htaccess' ) ) {
 				unlink( $downloads_url . '/.htaccess' );
 			}
-
 		} else {
 
 			// Force method - protect, add rules to the htaccess file

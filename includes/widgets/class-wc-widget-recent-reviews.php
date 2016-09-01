@@ -27,7 +27,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Recent Reviews', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -35,8 +35,8 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 10,
-				'label' => __( 'Number of reviews to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of reviews to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

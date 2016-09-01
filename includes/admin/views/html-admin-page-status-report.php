@@ -506,7 +506,7 @@ $pages          = $system_status->get_pages();
 			?></td>
 		</tr>
 		<?php
-		if( $theme['is_child_theme'] ) :
+		if ( $theme['is_child_theme'] ) :
 		?>
 		<tr>
 			<td data-export-label="Parent Theme Name"><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>

@@ -123,12 +123,12 @@ class WC_Admin_Assets {
 			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
 			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
-			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
+			'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
 		) );
 
 		// Accounting
 		wp_localize_script( 'accounting', 'accounting_params', array(
-			'mon_decimal_point' => wc_get_price_decimal_separator()
+			'mon_decimal_point' => wc_get_price_decimal_separator(),
 		) );
 
 		// WooCommerce admin pages
@@ -148,7 +148,7 @@ class WC_Admin_Assets {
 				'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
-				'mon_decimal_point'                 => wc_get_price_decimal_separator()
+				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 			);
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
@@ -202,7 +202,7 @@ class WC_Admin_Assets {
 				'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 				'i18n_variation_count_single'         => esc_js( __( '%qty% variation', 'woocommerce' ) ),
 				'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
-				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) )
+				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 			);
 
 			wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
@@ -213,7 +213,7 @@ class WC_Admin_Assets {
 
 			$params = array(
 				'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
-				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' )
+				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'wc-admin-order-meta-boxes', 'woocommerce_admin_meta_boxes_order', $params );
@@ -284,7 +284,7 @@ class WC_Admin_Assets {
 				'i18n_permission_revoke'        => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 				'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 				'i18n_product_type_alert'       => __( 'Your product has variations! Before changing the product type, it is a good idea to delete the variations to avoid errors in the stock reports.', 'woocommerce' ),
-				'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' )
+				'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -299,7 +299,7 @@ class WC_Admin_Assets {
 			$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( $_GET['taxonomy'] ) : '';
 
 			$woocommerce_term_order_params = array(
-				'taxonomy' => $taxonomy
+				'taxonomy' => $taxonomy,
 			);
 
 			wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
@@ -367,9 +367,9 @@ class WC_Admin_Assets {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 		?>
 		<style type="text/css">
-			<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
+			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>
 				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_tag' ) : ?>
+			<?php elseif ( isset( $_GET['taxonomy'] ) && 'product_tag' === $_GET['taxonomy'] ) : ?>
 				.icon32-posts-product { background-position: -301px -5px !important; }
 			<?php endif; ?>
 		</style>

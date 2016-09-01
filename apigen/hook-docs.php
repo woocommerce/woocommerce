@@ -14,7 +14,7 @@ class WC_HookFinder {
 
 	    if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
 
-	        if ($dir == '\\' || $dir == '/') { $dir = ''; } // End IF Statement
+	        if ( $dir == '\\' || $dir == '/' ) { $dir = ''; } // End IF Statement
 
 	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
 
@@ -37,7 +37,6 @@ class WC_HookFinder {
 		   		if ( is_array( $files ) && is_array( $found_files ) ) {
 		   			$files = array_merge( $files, $found_files );
 		   		}
-
 		    } // End FOREACH Loop
 	    }
 	    return $files;
@@ -169,7 +168,7 @@ class WC_HookFinder {
 											'class'    => $current_class,
 											'function' => $current_function,
 											'file'     => array( self::$current_file ),
-											'type'     => $token_type
+											'type'     => $token_type,
 										);
 									}
 								break;

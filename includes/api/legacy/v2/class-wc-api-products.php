@@ -40,7 +40,7 @@ class WC_API_Products extends WC_API_Resource {
 		);
 
 		# GET /products/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -518,7 +518,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		$filter = array_merge( $filter, array(
-			'in' => implode( ',', $order_ids )
+			'in' => implode( ',', $order_ids ),
 		) );
 
 		$orders = WC()->api->WC_API_Orders->get_orders( $fields, $filter, $status, $page );
@@ -601,7 +601,7 @@ class WC_API_Products extends WC_API_Resource {
 				'description' => $term->description,
 				'display'     => $display_type ? $display_type : 'default',
 				'image'       => $image ? esc_url( $image ) : '',
-				'count'       => intval( $term->count )
+				'count'       => intval( $term->count ),
 			);
 
 			return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
@@ -656,7 +656,7 @@ class WC_API_Products extends WC_API_Resource {
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $args['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
 
 			$query_args['post_type'] = array( 'product', 'product_variation' );
@@ -940,10 +940,9 @@ class WC_API_Products extends WC_API_Resource {
 							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based
 					if ( is_array( $attribute['options'] ) ) {
@@ -961,7 +960,7 @@ class WC_API_Products extends WC_API_Resource {
 						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => $is_taxonomy,
 					);
 				}
 			}
@@ -1044,7 +1043,7 @@ class WC_API_Products extends WC_API_Resource {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -1132,7 +1131,6 @@ class WC_API_Products extends WC_API_Resource {
 
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
-
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
@@ -1273,7 +1271,7 @@ class WC_API_Products extends WC_API_Resource {
 					'post_author'  => get_current_user_id(),
 					'post_parent'  => $id,
 					'post_type'    => 'product_variation',
-					'menu_order'   => $menu_order
+					'menu_order'   => $menu_order,
 				);
 
 				$variation_id = wp_insert_post( $new_variation );
@@ -1631,7 +1629,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
-				'file' => $file_url
+				'file' => $file_url,
 			);
 		}
 
@@ -1687,7 +1685,6 @@ class WC_API_Products extends WC_API_Resource {
 				// Otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// Add featured image
@@ -1817,7 +1814,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Get the file
 		$response = wp_safe_remote_get( $image_url, array(
-			'timeout' => 10
+			'timeout' => 10,
 		) );
 
 		if ( is_wp_error( $response ) ) {
@@ -1896,7 +1893,7 @@ class WC_API_Products extends WC_API_Resource {
 			'guid'           => $upload['url'],
 			'post_parent'    => $id,
 			'post_title'     => $title,
-			'post_content'   => $content
+			'post_content'   => $content,
 		);
 
 		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
@@ -1947,7 +1944,6 @@ class WC_API_Products extends WC_API_Resource {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
@@ -2015,7 +2011,7 @@ class WC_API_Products extends WC_API_Resource {
 					'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
 					'type'         => $attribute->attribute_type,
 					'order_by'     => $attribute->attribute_orderby,
-					'has_archives' => (bool) $attribute->attribute_public
+					'has_archives' => (bool) $attribute->attribute_public,
 				);
 			}
 
@@ -2065,7 +2061,7 @@ class WC_API_Products extends WC_API_Resource {
 				'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
 				'type'         => $attribute->attribute_type,
 				'order_by'     => $attribute->attribute_orderby,
-				'has_archives' => (bool) $attribute->attribute_public
+				'has_archives' => (bool) $attribute->attribute_public,
 			);
 
 			return array( 'product_attribute' => apply_filters( 'woocommerce_api_product_attribute_response', $product_attribute, $id, $fields, $attribute, $this ) );
@@ -2167,7 +2163,7 @@ class WC_API_Products extends WC_API_Resource {
 					'attribute_name'    => $data['slug'],
 					'attribute_type'    => $data['type'],
 					'attribute_orderby' => $data['order_by'],
-					'attribute_public'  => isset( $data['has_archives'] ) && true === $data['has_archives'] ? 1 : 0
+					'attribute_public'  => isset( $data['has_archives'] ) && true === $data['has_archives'] ? 1 : 0,
 				),
 				array( '%s', '%s', '%s', '%s', '%d' )
 			);
@@ -2250,7 +2246,7 @@ class WC_API_Products extends WC_API_Resource {
 					'attribute_name'    => $attribute_slug,
 					'attribute_type'    => $attribute_type,
 					'attribute_orderby' => $attribute_order_by,
-					'attribute_public'  => $attribute_public
+					'attribute_public'  => $attribute_public,
 				),
 				array( 'attribute_id' => $id ),
 				array( '%s', '%s', '%s', '%s', '%d' ),
@@ -2427,7 +2423,7 @@ class WC_API_Products extends WC_API_Resource {
 						$products[] = array(
 							'id'    => $product_id,
 							'sku'   => $product_sku,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$products[] = $edit['product'];
@@ -2442,7 +2438,7 @@ class WC_API_Products extends WC_API_Resource {
 						$products[] = array(
 							'id'    => $product_id,
 							'sku'   => $product_sku,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$products[] = $new['product'];

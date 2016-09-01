@@ -13,7 +13,7 @@
 					'_line_total',
 					'_line_tax',
 					'method_id',
-					'cost'
+					'cost',
 				) ) ) ) {
 					continue;
 				}
@@ -42,7 +42,7 @@
 						'_line_total',
 						'_line_tax',
 						'method_id',
-						'cost'
+						'cost',
 					) ) ) ) {
 						continue;
 					}

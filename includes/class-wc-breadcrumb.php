@@ -31,7 +31,7 @@ class WC_Breadcrumb {
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
 			strip_tags( $name ),
-			$link
+			$link,
 		);
 	}
 
@@ -71,7 +71,7 @@ class WC_Breadcrumb {
 			'is_tag',
 			'is_author',
 			'is_date',
-			'is_tax'
+			'is_tax',
 		);
 
 		if ( ( ! is_front_page() && ! ( is_post_type_archive() && intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) ) || is_paged() ) {

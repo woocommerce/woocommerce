@@ -25,7 +25,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		parent::__construct( array(
 			'singular' => __( 'webhook', 'woocommerce' ),
 			'plural'   => __( 'webhooks', 'woocommerce' ),
-			'ajax'     => false
+			'ajax'     => false,
 		) );
 	}
 
@@ -92,7 +92,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		// Get actions
 		$actions = array(
-			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id )
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id ),
 		);
 
 		if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
@@ -244,12 +244,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		if ( isset( $_GET['status'] ) && 'trash' == $_GET['status'] ) {
 			return array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete Permanently', 'woocommerce' )
+				'delete'  => __( 'Delete Permanently', 'woocommerce' ),
 			);
 		}
 
 		return array(
-			'trash' => __( 'Move to Trash', 'woocommerce' )
+			'trash' => __( 'Move to Trash', 'woocommerce' ),
 		);
 	}
 
@@ -283,7 +283,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			'post_type'           => 'shop_webhook',
 			'posts_per_page'      => $per_page,
 			'ignore_sticky_posts' => true,
-			'paged'               => $current_page
+			'paged'               => $current_page,
 		);
 
 		// Handle the status query
@@ -303,7 +303,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $webhooks->found_posts,
 			'per_page'    => $per_page,
-			'total_pages' => $webhooks->max_num_pages
+			'total_pages' => $webhooks->max_num_pages,
 		) );
 	}
 }

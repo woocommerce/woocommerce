@@ -55,7 +55,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
+			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
 				'title'         => __( 'Enable Registration', 'woocommerce' ),
@@ -64,7 +64,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -73,7 +73,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -83,7 +83,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -93,7 +93,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -102,7 +102,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'account_registration_options' ),

@@ -32,7 +32,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		'total_tax'    => 0,
 		'taxes'        => array(
 			'subtotal' => array(),
-			'total'    => array()
+			'total'    => array(),
 		),
 	);
 
@@ -171,7 +171,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			'download_file' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
 			'order'         => $order->get_order_key(),
 			'email'         => urlencode( $order->get_billing_email() ),
-			'key'           => $download_id
+			'key'           => $download_id,
 		), trailingslashit( home_url() ) ) : '';
 	}
 
@@ -329,7 +329,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
 		$tax_data     = array(
 			'total'    => array(),
-			'subtotal' => array()
+			'subtotal' => array(),
 		);
 		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
 			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $raw_tax_data['subtotal'] );

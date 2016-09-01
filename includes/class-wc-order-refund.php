@@ -34,9 +34,18 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'_order_currency', '_cart_discount', '_refund_amount', '_refunded_by', '_refund_reason',
-		'_cart_discount_tax', '_order_shipping', '_order_shipping_tax',
-		'_order_tax', '_order_total', '_order_version', '_prices_include_tax',
+		'_order_currency',
+		'_cart_discount',
+		'_refund_amount',
+		'_refunded_by',
+		'_refund_reason',
+		'_cart_discount_tax',
+		'_order_shipping',
+		'_order_shipping_tax',
+		'_order_tax',
+		'_order_total',
+		'_order_version',
+		'_prices_include_tax',
 		'_payment_tokens',
 	);
 

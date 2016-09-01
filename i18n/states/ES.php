@@ -61,5 +61,5 @@ $states['ES'] = array(
 	'VA' => __( 'Valladolid', 'woocommerce' ),
 	'BI' => __( 'Bizkaia', 'woocommerce' ),
 	'ZA' => __( 'Zamora', 'woocommerce' ),
-	'Z'  => __( 'Zaragoza', 'woocommerce' )
+	'Z'  => __( 'Zaragoza', 'woocommerce' ),
 );

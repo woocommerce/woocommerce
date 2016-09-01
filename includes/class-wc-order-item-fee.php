@@ -27,8 +27,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		'total'      => '',
 		'total_tax'  => '',
 		'taxes'      => array(
-			'total' => array()
-		)
+			'total' => array(),
+		),
 	);
 
 	/**

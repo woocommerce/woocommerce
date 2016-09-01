@@ -217,5 +217,4 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
 	}
-
 }

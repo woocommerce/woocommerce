@@ -39,116 +39,116 @@ class WC_Admin_Help {
 		$video_map = array(
 			'wc-settings' => array(
 				'title' => __( 'General Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/mz2l10u5f6?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/mz2l10u5f6?videoFoam=true',
 			),
 			'wc-settings-general' => array(
 				'title' => __( 'General Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/mz2l10u5f6?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/mz2l10u5f6?videoFoam=true',
 			),
 			'wc-settings-products' => array(
 				'title' => __( 'Product Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf?videoFoam=true',
 			),
 			'wc-settings-tax' => array(
 				'title' => __( 'Tax Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/qp1v19dwrh?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/qp1v19dwrh?videoFoam=true',
 			),
 			'wc-settings-shipping' => array(
 				'title' => __( 'Shipping Zones', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/95yiocro6p?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/95yiocro6p?videoFoam=true',
 			),
 			'wc-settings-shipping-options' => array(
 				'title' => __( 'Shipping Options', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true',
 			),
 			'wc-settings-shipping-classes' => array(
 				'title' => __( 'Shipping Classes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/tpqg17aq99?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/tpqg17aq99?videoFoam=true',
 			),
 			'wc-settings-checkout' => array(
 				'title' => __( 'Checkout Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/65yjv96z51?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/65yjv96z51?videoFoam=true',
 			),
 			'wc-settings-checkout-bacs' => array(
 				'title' => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/dh4piy3sek?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/dh4piy3sek?videoFoam=true',
 			),
 			'wc-settings-checkout-cheque' => array(
 				'title' => __( 'Check Payments', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/u2m2kcakea?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/u2m2kcakea?videoFoam=true',
 			),
 			'wc-settings-checkout-cod' => array(
 				'title' => __( 'Cash on Delivery', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/8hyli8wu5f?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/8hyli8wu5f?videoFoam=true',
 			),
 			'wc-settings-checkout-paypal' => array(
 				'title' => __( 'PayPal Standard', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/rbl7e7l4k2?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/rbl7e7l4k2?videoFoam=true',
 			),
 			'wc-settings-checkout-paypalbraintree_cards' => array(
 				'title' => __( 'PayPal by Braintree', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/oyksirgn40?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/oyksirgn40?videoFoam=true',
 			),
 			'wc-settings-checkout-stripe' => array(
 				'title' => __( 'Stripe', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/mf975hx5de?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/mf975hx5de?videoFoam=true',
 			),
 			'wc-settings-checkout-simplify_commerce' => array(
 				'title' => __( 'Simplify Commerce', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/jdfzjiiw61?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/jdfzjiiw61?videoFoam=true',
 			),
 			'wc-settings-account' => array(
 				'title' => __( 'Account Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/35mazq7il2?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/35mazq7il2?videoFoam=true',
 			),
 			'wc-settings-email' => array(
 				'title' => __( 'Email Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/svcaftq4xv?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/svcaftq4xv?videoFoam=true',
 			),
 			'wc-settings-api' => array(
 				'title' => __( 'Webhook Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq?videoFoam=true',
 			),
 			'product' => array(
 				'title' => __( 'Simple Products', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/ziyjmd4kut?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/ziyjmd4kut?videoFoam=true',
 			),
 			'edit-product_cat' => array(
 				'title' => __( 'Product Categories', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true',
 			),
 			'edit-product_tag' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true',
 			),
 			'product_attributes' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true',
 			),
 			'wc-status' => array(
 				'title' => __( 'System Status', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/xdn733nnhi?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/xdn733nnhi?videoFoam=true',
 			),
 			'wc-reports' => array(
 				'title' => __( 'Reports', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99?videoFoam=true',
 			),
 			'edit-shop_coupon' => array(
 				'title' => __( 'Coupons', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/gupd4h8sit?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/gupd4h8sit?videoFoam=true',
 			),
 			'shop_coupon' => array(
 				'title' => __( 'Coupons', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/gupd4h8sit?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/gupd4h8sit?videoFoam=true',
 			),
 			'edit-shop_order' => array(
 				'title' => __( 'Managing Orders', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/n8n0sa8hee?videoFoam=true'
+				'url'   => '//fast.wistia.net/embed/iframe/n8n0sa8hee?videoFoam=true',
 			),
 			'shop_order' => array(
 				'title' => __( 'Managing Orders', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/n8n0sa8hee?videoFoam=true'
-			)
+				'url'   => '//fast.wistia.net/embed/iframe/n8n0sa8hee?videoFoam=true',
+			),
 		);
 
 		$page      = empty( $_GET['page'] ) ? '' : sanitize_title( $_GET['page'] );
@@ -172,7 +172,7 @@ class WC_Admin_Help {
 				'title'     => __( 'WooCommerce 101', 'woocommerce' ),
 				'content'   =>
 					'<h2><a href="https://docs.woocommerce.com/document/woocommerce-101-video-series/?utm_source=helptab&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
-					'<iframe data-src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" src="" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
+					'<iframe data-src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" src="" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>',
 			) );
 		}
 
@@ -194,7 +194,7 @@ class WC_Admin_Help {
 					'</a>'
 				) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Forum', 'woocommerce' ) . '</a> <a href="' . 'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' . '" class="button">' . __( 'WooCommerce Helpdesk', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Forum', 'woocommerce' ) . '</a> <a href="' . 'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' . '" class="button">' . __( 'WooCommerce Helpdesk', 'woocommerce' ) . '</a></p>',
 		) );
 
 		$screen->add_help_tab( array(
@@ -203,7 +203,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Found a bug?', 'woocommerce' ) . '</h2>' .
 				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
-				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>',
 
 		) );
 
@@ -213,7 +213,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
 				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course offered by one of our educational partners.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'https://woocommerce.com/educational-partners/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'https://woocommerce.com/educational-partners/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>',
 		) );
 
 		$screen->add_help_tab( array(
@@ -222,7 +222,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Setup Wizard', 'woocommerce' ) . '</h2>' .
 				'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup Wizard', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup Wizard', 'woocommerce' ) . '</a></p>',
 
 		) );
 
@@ -235,7 +235,6 @@ class WC_Admin_Help {
 			'<p><a href="' . 'https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
-
 }
 
 endif;
