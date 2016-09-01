@@ -317,7 +317,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			if ( ! empty( $order_ids ) ) {
 				unset( $args['s'] );
-				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
+				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
 			}
 		}
 
@@ -458,7 +458,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request[ 'billing' ], $request[ 'shipping' ], $request[ 'line_items' ], $request[ 'shipping' ], $request[ 'fee' ], $request[ 'coupon' ] ) ) {
+			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping'], $request['fee'], $request['coupon'] ) ) {
 				$order->calculate_totals();
 			}
 

@@ -42,7 +42,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 			'show_image'    => false,
 			'image_size'    => array( 32, 32 ),
 			'plain_text'    => $plain_text,
-			'sent_to_admin' => $sent_to_admin
+			'sent_to_admin' => $sent_to_admin,
 		) ); ?>
 	</tbody>
 	<tfoot>

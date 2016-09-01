@@ -96,7 +96,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'minimum_amount'               => '',
 				'maximum_amount'               => '',
 				'customer_emails'              => array(),
-				'description'                  => ''
+				'description'                  => '',
 			);
 
 			$coupon_data = wp_parse_args( $assoc_args, $defaults );
@@ -112,7 +112,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
-				'post_excerpt' => $coupon_data['description']
+				'post_excerpt' => $coupon_data['description'],
 	 		);
 
 			$id = wp_insert_post( $new_coupon, $wp_error = false );

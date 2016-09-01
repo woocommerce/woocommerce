@@ -121,10 +121,23 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
-			'id', 'country', 'state', 'postcode', 'city', 'address', 'address_1', 'address_2',
-			'shipping_country', 'shipping_state', 'shipping_postcode', 'shipping_city',
-			'shipping_address', 'shipping_address_1', 'shipping_address_2',
-			'is_vat_exempt', 'calculated_shipping',
+			'id',
+			'country',
+			'state',
+			'postcode',
+			'city',
+			'address',
+			'address_1',
+			'address_2',
+			'shipping_country',
+			'shipping_state',
+			'shipping_postcode',
+			'shipping_city',
+			'shipping_address',
+			'shipping_address_1',
+			'shipping_address_2',
+			'is_vat_exempt',
+			'calculated_shipping',
 		);
 
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
@@ -168,13 +181,29 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	public function test_customer_setters_and_getters() {
 		$time = time();
 		$standard_getters_and_setters = array(
-			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
-			'role' => 'customer', 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
-			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
-			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
-			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
-			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
-			'is_paying_customer' => true
+			'username' => 'test',
+			'email' => 'test@woo.local',
+			'first_name' => 'Bob',
+			'last_name' => 'tester',
+			'role' => 'customer',
+			'date_created' => $time,
+			'date_modified' => $time,
+			'billing_postcode' => 11010,
+			'billing_city' => 'New York',
+			'billing_address' => '123 Main St.',
+			'billing_address_1' => '123 Main St.',
+			'billing_address_2' => 'Apt 2',
+			'billing_state' => 'NY',
+			'billing_country' => 'US',
+			'shipping_state' => 'NY',
+			'shipping_postcode' => 11011,
+			'shipping_city' => 'New York',
+			'shipping_address' => '123 Main St.',
+			'shipping_address_1' => '123 Main St.',
+			'shipping_address_2' => 'Apt 2',
+			'is_vat_exempt' => true,
+			'calculated_shipping' => true,
+			'is_paying_customer' => true,
 		);
 
 		$customer = new WC_Customer;
@@ -451,5 +480,4 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->read( $customer_id );
 		$this->assertEquals( $meta_value, $customer->get_meta( 'my-field' ) );
 	}
-
 }

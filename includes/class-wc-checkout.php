@@ -88,9 +88,9 @@ class WC_Checkout {
 	 *
 	 * @access public
 	 */
-	public function __construct () {
-		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
+	public function __construct() {
+		add_action( 'woocommerce_checkout_billing', array( $this, 'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
 
 		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
 		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;
@@ -105,7 +105,7 @@ class WC_Checkout {
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
 				'required'      => true,
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
+				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' ),
 			);
 		}
 
@@ -114,17 +114,17 @@ class WC_Checkout {
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
 				'required'          => true,
-				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
+				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
 			);
 		}
 
 		$this->checkout_fields['order']	= array(
 			'order_comments' => array(
 				'type' => 'textarea',
-				'class' => array('notes'),
+				'class' => array( 'notes' ),
 				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
-			)
+				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+			),
 		);
 
 		$this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->checkout_fields );
@@ -558,7 +558,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['shipping_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
 				}
-
 			} else {
 
 				// Update customer location to posted location so we can correctly check available shipping methods
@@ -571,7 +570,6 @@ class WC_Checkout {
 				if ( isset( $this->posted['billing_postcode'] ) ) {
 					WC()->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 				}
-
 			}
 
 			WC()->customer->save();
@@ -654,7 +652,7 @@ class WC_Checkout {
 							'ID'           => $this->customer_id,
 							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
-							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
+							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 						);
 						wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
 					}
@@ -696,9 +694,7 @@ class WC_Checkout {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-
 					}
-
 				} else {
 
 					if ( empty( $order ) ) {
@@ -718,7 +714,7 @@ class WC_Checkout {
 					if ( is_ajax() ) {
 						wp_send_json( array(
 							'result' 	=> 'success',
-							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order ),
 						) );
 					} else {
 						wp_safe_redirect(
@@ -726,11 +722,8 @@ class WC_Checkout {
 						);
 						exit;
 					}
-
 				}
-
 			}
-
 		} catch ( Exception $e ) {
 			if ( ! empty( $e ) ) {
 				wc_add_notice( $e->getMessage(), 'error' );
@@ -751,7 +744,7 @@ class WC_Checkout {
 				'result'	=> 'failure',
 				'messages' 	=> isset( $messages ) ? $messages : '',
 				'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
+				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
 			);
 
 			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );

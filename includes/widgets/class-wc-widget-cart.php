@@ -29,13 +29,13 @@ class WC_Widget_Cart extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Cart', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'hide_if_empty' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Hide if cart is empty', 'woocommerce' )
-			)
+				'label' => __( 'Hide if cart is empty', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

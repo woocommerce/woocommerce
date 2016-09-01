@@ -200,7 +200,6 @@ class WC_Admin_Dashboard {
 			echo '<p>' . __( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 		}
 	}
-
 }
 
 endif;

@@ -80,7 +80,7 @@ class WC_Emails {
 			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
+			'woocommerce_created_customer',
 		) );
 
 		foreach ( $email_actions as $action ) {
@@ -321,7 +321,7 @@ class WC_Emails {
 				'priceCurrency'    => $order->get_currency(),
 				'eligibleQuantity' => (object) array(
 					'@type' => 'QuantitativeValue',
-					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item )
+					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ),
 				),
 				'url'              => get_home_url(),
 			);
@@ -405,7 +405,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) )
+					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) ),
 				);
 			}
 		}
@@ -419,7 +419,6 @@ class WC_Emails {
 						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
-
 			} else {
 
 				foreach ( $fields as $field ) {
@@ -454,21 +453,21 @@ class WC_Emails {
 		if ( $order->get_customer_note() ) {
 			$fields['customer_note'] = array(
 				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->get_customer_note() )
+				'value' => wptexturize( $order->get_customer_note() ),
 			);
 		}
 
 		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),
-				'value' => wptexturize( $order->get_billing_email() )
+				'value' => wptexturize( $order->get_billing_email() ),
 			);
 	    }
 
 	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Tel', 'woocommerce' ),
-				'value' => wptexturize( $order->get_billing_phone() )
+				'value' => wptexturize( $order->get_billing_phone() ),
 			);
 	    }
 
@@ -545,7 +544,7 @@ class WC_Emails {
 		$args = wp_parse_args( $args, array(
 			'product'  => '',
 			'quantity' => '',
-			'order_id' => ''
+			'order_id' => '',
 		) );
 
 		extract( $args );

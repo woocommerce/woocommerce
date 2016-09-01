@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -73,7 +73,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupons = array();
 
-		foreach( $query->posts as $coupon_id ) {
+		foreach ( $query->posts as $coupon_id ) {
 
 			if ( ! $this->is_readable( $coupon_id ) )
 				continue;
@@ -241,5 +241,4 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		return new WP_Query( $query_args );
 	}
-
 }

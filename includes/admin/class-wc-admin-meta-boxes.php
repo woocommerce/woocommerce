@@ -210,7 +210,6 @@ class WC_Admin_Meta_Boxes {
 			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
 	}
-
 }
 
 new WC_Admin_Meta_Boxes();

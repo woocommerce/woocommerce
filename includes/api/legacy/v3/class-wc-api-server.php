@@ -442,32 +442,34 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array( 'store' => array(
-			'name'        => get_option( 'blogname' ),
-			'description' => get_option( 'blogdescription' ),
-			'URL'         => get_option( 'siteurl' ),
-			'wc_version'  => WC()->version,
-			'version'     => WC_API::VERSION,
-			'routes'      => array(),
-			'meta'        => array(
-				'timezone'           => wc_timezone_string(),
-				'currency'           => get_woocommerce_currency(),
-				'currency_format'    => get_woocommerce_currency_symbol(),
-				'currency_position'  => get_option( 'woocommerce_currency_pos' ),
-				'thousand_separator' => get_option( 'woocommerce_price_thousand_sep' ),
-				'decimal_separator'  => get_option( 'woocommerce_price_decimal_sep' ),
-				'price_num_decimals' => wc_get_price_decimals(),
-				'tax_included'       => wc_prices_include_tax(),
-				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || wc_site_is_https() ),
-				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-				'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
-				'links'              => array(
-					'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
+		$available = array(
+			'store' => array(
+				'name'        => get_option( 'blogname' ),
+				'description' => get_option( 'blogdescription' ),
+				'URL'         => get_option( 'siteurl' ),
+				'wc_version'  => WC()->version,
+				'version'     => WC_API::VERSION,
+				'routes'      => array(),
+				'meta'        => array(
+					'timezone'           => wc_timezone_string(),
+					'currency'           => get_woocommerce_currency(),
+					'currency_format'    => get_woocommerce_currency_symbol(),
+					'currency_position'  => get_option( 'woocommerce_currency_pos' ),
+					'thousand_separator' => get_option( 'woocommerce_price_thousand_sep' ),
+					'decimal_separator'  => get_option( 'woocommerce_price_decimal_sep' ),
+					'price_num_decimals' => wc_get_price_decimals(),
+					'tax_included'       => wc_prices_include_tax(),
+					'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || wc_site_is_https() ),
+					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+					'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
+					'links'              => array(
+						'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
+					),
 				),
 			),
-		) );
+		);
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -571,7 +573,7 @@ class WC_API_Server {
 			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 
-			if( $query->get( 'number' ) > 0 ) {
+			if ( $query->get( 'number' ) > 0 ) {
 				$page = ( $query->get( 'offset' ) / $query->get( 'number' ) ) + 1;
 				$total_pages = ceil( $total / $query->get( 'number' ) );
 			} else {
@@ -728,7 +730,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -744,13 +745,13 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ( $server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
 			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;
@@ -759,5 +760,4 @@ class WC_API_Server {
 
 		return $headers;
 	}
-
 }

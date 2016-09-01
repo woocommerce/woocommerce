@@ -103,7 +103,7 @@ class WC_Template_Loader {
 			trailingslashit( get_template_directory() ) . WC()->template_path(),
 			trailingslashit( get_stylesheet_directory() ),
 			trailingslashit( get_template_directory() ),
-			trailingslashit( WC()->plugin_path() ) . 'templates/'
+			trailingslashit( WC()->plugin_path() ) . 'templates/',
 		);
 
 		if ( WC_TEMPLATE_DEBUG_MODE ) {

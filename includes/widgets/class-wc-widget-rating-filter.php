@@ -28,8 +28,8 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Average Rating', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 		parent::__construct();
 	}
@@ -114,7 +114,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			'value'         => $rating,
 			'compare'       => '>=',
 			'type'          => 'DECIMAL',
-			'rating_filter' => true
+			'rating_filter' => true,
 		);
 
 		$meta_query = new WP_Meta_Query( $meta_query );

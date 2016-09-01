@@ -54,7 +54,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = new WC_Mock_WC_Data();
 		$data_to_set = array(
 			'content'    => 'I am a fish',
-			'bool_value' => true
+			'bool_value' => true,
 		);
 		$result = $object->set_props( $data_to_set );
 		$this->assertFalse( is_wp_error( $result ) );
@@ -63,7 +63,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		$data_to_set = array(
 			'content'    => 'I am also a fish',
-			'bool_value' => 'thisisinvalid'
+			'bool_value' => 'thisisinvalid',
 		);
 		$result = $object->set_props( $data_to_set );
 		$this->assertTrue( is_wp_error( $result ) );
@@ -218,7 +218,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 			WHERE post_id = %d ORDER BY meta_id
 		", $object_id ) );
 
-
 		$object->delete_meta_data( 'test_meta_key' );
 		$object->update_meta_data( 'test_meta_key_2', 'updated_value', $raw_metadata[1]->meta_id );
 
@@ -255,5 +254,4 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->update_meta_data( 'test_field_0', 'another field 2' );
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
-
 }

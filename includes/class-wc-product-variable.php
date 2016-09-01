@@ -117,7 +117,7 @@ class WC_Product_Variable extends WC_Product {
 				'order'       => 'ASC',
 				'fields'      => 'ids',
 				'post_status' => 'publish',
-				'numberposts' => -1
+				'numberposts' => -1,
 			);
 
 			if ( $visible_only ) {
@@ -149,7 +149,7 @@ class WC_Product_Variable extends WC_Product {
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id, array(
 			'parent_id' => $this->id,
-			'parent' 	=> $this
+			'parent' 	=> $this,
 		) );
 	}
 
@@ -484,7 +484,7 @@ class WC_Product_Variable extends WC_Product {
 			'fields'      => 'ids',
 			'post_status' => 'publish',
 			'numberposts' => 1,
-			'meta_query'  => array()
+			'meta_query'  => array(),
 		);
 
 		foreach ( $this->get_attributes() as $attribute ) {
@@ -505,11 +505,11 @@ class WC_Product_Variable extends WC_Product {
 				array(
 					'key'     => $attribute_field_name,
 					'value'   => array( '', $value ),
-					'compare' => 'IN'
+					'compare' => 'IN',
 				),
 				array(
 					'key'     => $attribute_field_name,
-					'compare' => 'NOT EXISTS'
+					'compare' => 'NOT EXISTS',
 				)
 			);
 
@@ -620,7 +620,7 @@ class WC_Product_Variable extends WC_Product {
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'backorders_allowed'     => $variation->backorders_allowed(),
 			'is_in_stock'            => $variation->is_in_stock(),
-			'is_downloadable'        => $variation->is_downloadable() ,
+			'is_downloadable'        => $variation->is_downloadable(),
 			'is_virtual'             => $variation->is_virtual(),
 			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
 			'variation_description'  => $variation->get_variation_description(),
@@ -660,10 +660,10 @@ class WC_Product_Variable extends WC_Product {
 	public static function sync_stock_status( $product_id ) {
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
+			'post_status'	=> 'publish',
 		) );
 
 		$stock_status = 'outofstock';
@@ -687,10 +687,10 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $children ) {
 			$children = get_posts( array(
 				'post_parent' 	=> $product_id,
-				'posts_per_page'=> -1,
+				'posts_per_page' => -1,
 				'post_type' 	=> 'product_variation',
 				'fields' 		=> 'ids',
-				'post_status'	=> 'any'
+				'post_status'	=> 'any',
 			) );
 		}
 
@@ -762,10 +762,10 @@ class WC_Product_Variable extends WC_Product {
 
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
+			'post_status'	=> 'publish',
 		) );
 
 		// No published variations - product won't be purchasable.

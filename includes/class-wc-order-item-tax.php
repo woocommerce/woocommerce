@@ -26,7 +26,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		'label'              => '',
 		'compound'           => false,
 		'tax_total'          => 0,
-		'shipping_tax_total' => 0
+		'shipping_tax_total' => 0,
 	);
 
 	/**

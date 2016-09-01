@@ -129,7 +129,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -145,7 +145,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -160,7 +160,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'heading' => array(
 				'title'         => __( 'Email Heading', 'woocommerce' ),
@@ -168,7 +168,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'subject_paid' => array(
 				'title'         => __( 'Email Subject (paid)', 'woocommerce' ),
@@ -176,7 +176,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'heading_paid' => array(
 				'title'         => __( 'Email Heading (paid)', 'woocommerce' ),
@@ -184,7 +184,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'email_type' => array(
 				'title'         => __( 'Email Type', 'woocommerce' ),
@@ -193,8 +193,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
 				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true
-			)
+				'desc_tip'      => true,
+			),
 		);
 	}
 }

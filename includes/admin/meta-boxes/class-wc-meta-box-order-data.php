@@ -41,43 +41,43 @@ class WC_Meta_Box_Order_Data {
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'country' => array(
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
 				'class'   => 'js_field-country select short',
 				'type'    => 'select',
-				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
+				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
-				'show'  => false
+				'show'  => false,
 			),
 			'email' => array(
 				'label' => __( 'Email', 'woocommerce' ),
@@ -90,43 +90,43 @@ class WC_Meta_Box_Order_Data {
 		self::$shipping_fields = apply_filters( 'woocommerce_admin_shipping_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'country' => array(
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
 				'type'    => 'select',
 				'class'   => 'js_field-country select short',
-				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries()
+				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
-				'show'  => false
+				'show'  => false,
 			),
 		) );
 	}
@@ -220,9 +220,10 @@ class WC_Meta_Box_Order_Data {
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
 								if ( $order->get_user_id() ) {
-									$args = array( 'post_status' => 'all',
+									$args = array(
+										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->get_user_id() )
+										'_customer_user' => absint( $order->get_user_id() ),
 									);
 									printf( '<a href="%s">%s &rarr;</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -280,7 +281,7 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
 								}
-								if ( ! isset( $field['id'] ) ){
+								if ( ! isset( $field['id'] ) ) {
 									$field['id'] = '_billing_' . $key;
 								}
 								switch ( $field['type'] ) {
@@ -372,7 +373,7 @@ class WC_Meta_Box_Order_Data {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
 									}
-									if ( ! isset( $field['id'] ) ){
+									if ( ! isset( $field['id'] ) ) {
 										$field['id'] = '_shipping_' . $key;
 									}
 
@@ -433,7 +434,7 @@ class WC_Meta_Box_Order_Data {
 
 		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
+				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
 				}
 				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
@@ -444,7 +445,7 @@ class WC_Meta_Box_Order_Data {
 
 		if ( ! empty( self::$shipping_fields ) ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
+				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
 				}
 				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
@@ -454,7 +455,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
+			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling

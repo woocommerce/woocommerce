@@ -400,7 +400,7 @@ class WC_Product {
 				if ( ! is_array( $file ) ) {
 					$downloadable_files[ $key ] = array(
 						'file' => $file,
-						'name' => ''
+						'name' => '',
 					);
 				}
 
@@ -895,9 +895,7 @@ class WC_Product {
 					$price = $price * $qty;
 
 				}
-
 			}
-
 		} else {
 			$price = $price * $qty;
 		}
@@ -970,12 +968,12 @@ class WC_Product {
 
 			$find = array(
 				'{price_including_tax}',
-				'{price_excluding_tax}'
+				'{price_excluding_tax}',
 			);
 
 			$replace = array(
 				wc_price( $this->get_price_including_tax( $qty, $price ) ),
-				wc_price( $this->get_price_excluding_tax( $qty, $price ) )
+				wc_price( $this->get_price_excluding_tax( $qty, $price ) ),
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
@@ -1010,7 +1008,6 @@ class WC_Product {
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
-
 		} elseif ( $this->get_price() === '' ) {
 
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
@@ -1274,7 +1271,6 @@ class WC_Product {
 			} else {
 				$this->shipping_class = '';
 			}
-
 		}
 
 		return $this->shipping_class;
@@ -1329,7 +1325,7 @@ class WC_Product {
 			$cats_array = $this->get_related_terms( 'product_cat' );
 
 			// Don't bother if none are set
-			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
+			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array ) ) {
 				$related_posts = array();
 			} else {
 				// Sanitize
@@ -1376,7 +1372,6 @@ class WC_Product {
 
 				return $attribute['value'];
 			}
-
 		}
 
 		return '';
@@ -1524,7 +1519,7 @@ class WC_Product {
 	 */
 	public function list_attributes() {
 		wc_get_template( 'single-product/product-attributes.php', array(
-			'product'    => $this
+			'product'    => $this,
 		) );
 	}
 
@@ -1590,7 +1585,7 @@ class WC_Product {
 	 * @return array
 	 */
 	protected function get_related_terms( $term ) {
-		$terms_array = array(0);
+		$terms_array = array( 0 );
 
 		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
 		foreach ( $terms as $term ) {

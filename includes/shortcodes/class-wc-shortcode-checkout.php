@@ -82,7 +82,7 @@ class WC_Shortcode_Checkout {
 		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && $order_id ) {
 
 			// Pay for existing order
-			$order_key            = $_GET[ 'key' ];
+			$order_key            = $_GET['key'];
 			$order                = wc_get_order( $order_id );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
@@ -109,17 +109,15 @@ class WC_Shortcode_Checkout {
 					wc_get_template( 'checkout/form-pay.php', array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
-						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) )
+						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
 					) );
 
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
-
 			} else {
 				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
-
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step
@@ -144,7 +142,7 @@ class WC_Shortcode_Checkout {
 							<?php _e( 'Total:', 'woocommerce' ); ?>
 							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 						</li>
-						<?php if ($order->get_payment_method_title()) : ?>
+						<?php if ( $order->get_payment_method_title() ) : ?>
 						<li class="method">
 							<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 							<strong><?php
@@ -162,11 +160,9 @@ class WC_Shortcode_Checkout {
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
-
 			} else {
 				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
-
 		} else {
 			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}

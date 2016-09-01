@@ -24,10 +24,26 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 */
 	public function __isset( $key ) {
 		$legacy_keys = array(
-			'id', 'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
-			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
-			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
-			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
+			'id',
+			'exists',
+			'coupon_custom_fields',
+			'type',
+			'discount_type',
+			'amount',
+			'code',
+			'individual_use',
+			'product_ids',
+			'exclude_product_ids',
+			'usage_limit',
+			'usage_limit_per_user',
+			'limit_usage_to_x_items',
+			'usage_count',
+			'expiry_date',
+			'product_categories',
+			'exclude_product_categories',
+			'minimum_amount',
+			'maximum_amount',
+			'customer_email',
 		);
 		if ( in_array( $key, $legacy_keys ) ) {
 			return true;
@@ -43,7 +59,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.7' );
 
-		switch( $key ) {
+		switch ( $key ) {
 			case 'id' :
 				$value = $this->get_id();
 			break;
@@ -165,5 +181,4 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 		_deprecated_function( 'exclude_sale_items', '2.7', 'get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
-
 }

@@ -113,7 +113,7 @@ function wc_get_orders( $args ) {
 		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 	}
 
-	if ( ! $args['paginate' ] ) {
+	if ( ! $args['paginate'] ) {
 		$wp_query_args['no_found_rows'] = true;
 	}
 
@@ -126,7 +126,7 @@ function wc_get_orders( $args ) {
 		$return = $orders->posts;
 	}
 
-	if ( $args['paginate' ] ) {
+	if ( $args['paginate'] ) {
 		return (object) array(
 			'orders'        => $return,
 			'total'         => $orders->found_posts,
@@ -156,7 +156,7 @@ function _wc_get_orders_generate_customer_meta_query( $values, $relation = 'or' 
 			'key'     => '_customer_user',
 			'value'   => array(),
 			'compare' => 'IN',
-		)
+		),
 	);
 	foreach ( $values as $value ) {
 		if ( is_array( $value ) ) {
@@ -389,7 +389,7 @@ function wc_register_order_type( $type, $args = array() ) {
 		'exclude_from_order_webhooks'      => false,
 		'exclude_from_order_reports'       => false,
 		'exclude_from_order_sales_reports' => false,
-		'class_name'                       => 'WC_Order'
+		'class_name'                       => 'WC_Order',
 	);
 
 	$args                    = array_intersect_key( $args, $order_type_args );
@@ -435,7 +435,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 		'order_key' 			=> $order->get_order_key(),
 		'downloads_remaining' 	=> $limit,
 		'access_granted'		=> current_time( 'mysql' ),
-		'download_count'		=> 0
+		'download_count'		=> 0,
 	));
 
 	$format = apply_filters( 'woocommerce_downloadable_file_permission_format', array(
@@ -447,7 +447,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 		'%s',
 		'%s',
 		'%s',
-		'%d'
+		'%d',
 	), $data);
 
 	if ( ! is_null( $expiry ) ) {
@@ -532,10 +532,12 @@ function wc_add_order_item( $order_id, $item ) {
 		array(
 			'order_item_name' 		=> $item['order_item_name'],
 			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id
+			'order_id'				=> $order_id,
 		),
 		array(
-			'%s', '%s', '%d'
+			'%s',
+			'%s',
+			'%d',
 		)
 	);
 
@@ -768,7 +770,7 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	$transients_to_clear[] = 'wc_admin_report';
 
 	// Clear transients where we have names
-	foreach( $transients_to_clear as $transient ) {
+	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
@@ -935,7 +937,7 @@ function wc_order_fully_refunded( $order_id ) {
 		'amount'     => $max_refund,
 		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 		'order_id'   => $order_id,
-		'line_items' => array()
+		'line_items' => array(),
 	) );
 
 	wc_delete_shop_order_transients( $order_id );
@@ -972,7 +974,7 @@ function wc_order_search( $term ) {
 		'_shipping_city',
 		'_shipping_postcode',
 		'_shipping_country',
-		'_shipping_state'
+		'_shipping_state',
 	) ) );
 
 	// Search orders.

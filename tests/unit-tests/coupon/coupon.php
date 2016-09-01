@@ -307,5 +307,4 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );
 	}
-
 }

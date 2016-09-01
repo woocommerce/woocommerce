@@ -228,7 +228,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	$template = locate_template(
 		array(
 			trailingslashit( $template_path ) . $template_name,
-			$template_name
+			$template_name,
 		)
 	);
 
@@ -637,7 +637,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => $width,
 			'height' => $height,
-			'crop'   => $crop
+			'crop'   => $crop,
 		);
 
 		$image_size = $width . '_' . $height;
@@ -652,7 +652,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => '300',
 			'height' => '300',
-			'crop'   => 1
+			'crop'   => 1,
 		);
 	}
 
@@ -913,7 +913,7 @@ function wc_format_country_state_string( $country_string ) {
 	}
 	return array(
 		'country' => $country,
-		'state'   => $state
+		'state'   => $state,
 	);
 }
 

@@ -74,22 +74,22 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'_order_tax' => array(
 				'type'            => 'meta',
 				'function'        => 'SUM',
-				'name'            => 'tax_amount'
+				'name'            => 'tax_amount',
 			),
 			'_order_shipping_tax' => array(
 				'type'            => 'meta',
 				'function'        => 'SUM',
-				'name'            => 'shipping_tax_amount'
+				'name'            => 'shipping_tax_amount',
 			),
 			'_order_total' => array(
 				'type'     => 'meta',
 				'function' => 'SUM',
-				'name'     => 'total_sales'
+				'name'     => 'total_sales',
 			),
 			'_order_shipping' => array(
 				'type'     => 'meta',
 				'function' => 'SUM',
-				'name'     => 'total_shipping'
+				'name'     => 'total_shipping',
 			),
 			'ID' => array(
 				'type'     => 'post_data',
@@ -100,7 +100,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'post_date' => array(
 				'type'     => 'post_data',
 				'function' => '',
-				'name'     => 'post_date'
+				'name'     => 'post_date',
 			),
 		);
 
@@ -111,7 +111,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'   => 'get_results',
 			'filter_range' => true,
 			'order_types'  => wc_get_order_types( 'sales-reports' ),
-			'order_status' => array( 'completed', 'processing', 'on-hold' )
+			'order_status' => array( 'completed', 'processing', 'on-hold' ),
 		) );
 
 		$tax_rows_partial_refunds = $this->get_order_report_data( array(
@@ -121,7 +121,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
 			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ) // Partial refunds inside refunded orders should be ignored
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),// Partial refunds inside refunded orders should be ignored
 		) );
 
 		// Merge

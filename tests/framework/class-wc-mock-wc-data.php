@@ -126,7 +126,7 @@ class WC_Mock_WC_Data extends WC_Data {
 		if ( 'user' === $this->_meta_type ) {
 			$content_id = wc_create_new_customer( $this->get_content(), 'username-' . time(), 'hunter2' );
 		} else {
-			$content_id = wp_insert_post( array ( 'post_title' => $this->get_content() ) );
+			$content_id = wp_insert_post( array( 'post_title' => $this->get_content() ) );
 		}
 		if ( $content_id ) {
 			$this->_data['id'] = $content_id;
@@ -192,5 +192,4 @@ class WC_Mock_WC_Data extends WC_Data {
 		}
 		$this->save_meta_data();
 	}
-
 }

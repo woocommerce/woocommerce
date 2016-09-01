@@ -29,7 +29,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Top Rated Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -37,8 +37,8 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of products to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

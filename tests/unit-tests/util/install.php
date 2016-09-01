@@ -115,5 +115,4 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$result = ob_get_clean();
 		$this->assertTrue( is_string( $result ) );
 	}
-
 }

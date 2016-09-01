@@ -32,7 +32,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	public $db_fields = array(
 		'parent' => 'parent',
 		'id'     => 'term_id',
-		'slug'   => 'slug'
+		'slug'   => 'slug',
 	);
 
 	/**

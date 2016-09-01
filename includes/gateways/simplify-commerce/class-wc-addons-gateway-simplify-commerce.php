@@ -105,7 +105,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'token'     => $cart_token,
 				'email'     => $order->get_billing_email(),
 				'name'      => trim( $order->get_formatted_billing_full_name() ),
-				'reference' => $order->get_id()
+				'reference' => $order->get_id(),
 			) );
 
 			if ( is_object( $customer ) && '' != $customer->id ) {
@@ -127,10 +127,9 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
-					'redirect' => $this->get_return_url( $order )
+					'redirect' => $this->get_return_url( $order ),
 				);
 			}
-
 		} catch ( Simplify_ApiException $e ) {
 			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
 				foreach ( $e->getFieldErrors() as $error ) {
@@ -142,7 +141,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			return array(
 				'result'   => 'fail',
-				'redirect' => ''
+				'redirect' => '',
 			);
 		}
 	}
@@ -160,7 +159,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		update_post_meta( $order_id, '_simplify_customer_id', $customer_id );
 
 		// Also store it on the subscriptions being purchased in the order
-		foreach( wcs_get_subscriptions_for_order( $order_id ) as $subscription ) {
+		foreach ( wcs_get_subscriptions_for_order( $order_id ) as $subscription ) {
 			update_post_meta( $subscription->id, '_simplify_customer_id', $customer_id );
 		}
 	}
@@ -199,7 +198,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 					'token'     => $cart_token,
 					'email'     => $order->get_billing_email(),
 					'name'      => trim( $order->get_formatted_billing_full_name() ),
-					'reference' => $order->get_id()
+					'reference' => $order->get_id(),
 				) );
 
 				if ( is_object( $customer ) && '' != $customer->id ) {
@@ -225,7 +224,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
-					'redirect' => $this->get_return_url( $order )
+					'redirect' => $this->get_return_url( $order ),
 				);
 
 			} catch ( Simplify_ApiException $e ) {
@@ -239,7 +238,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 				return array(
 					'result'   => 'fail',
-					'redirect' => ''
+					'redirect' => '',
 				);
 			}
 
@@ -305,7 +304,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'customer'            => $customer_id,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->get_id()
+				'reference'           => $order->get_id(),
 			) );
 
 		} catch ( Exception $e ) {
@@ -441,7 +440,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->get_id()
+				'reference'           => $order->get_id(),
 			) );
 
 			if ( 'APPROVED' == $payment->paymentStatus ) {

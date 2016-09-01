@@ -156,7 +156,7 @@ class WC_Admin_Duplicate_Product {
 				'post_modified_gmt'         => $new_post_date_gmt,
 				'post_parent'               => $post_parent,
 				'menu_order'                => $post->menu_order,
-				'post_mime_type'            => $post->post_mime_type
+				'post_mime_type'            => $post->post_mime_type,
 			)
 		);
 
@@ -171,7 +171,7 @@ class WC_Admin_Duplicate_Product {
 					'post_title' => $post_title,
 				),
 				array(
-					'ID' => $new_post_id
+					'ID' => $new_post_id,
 				)
 			);
 		}
@@ -185,7 +185,7 @@ class WC_Admin_Duplicate_Product {
 					'guid'      => get_permalink( $new_post_id ),
 				),
 				array(
-					'ID' => $new_post_id
+					'ID' => $new_post_id,
 				)
 			);
 	    }

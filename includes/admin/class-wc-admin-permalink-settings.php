@@ -106,7 +106,7 @@ class WC_Admin_Permalink_Settings {
 		$structures = array(
 			0 => '',
 			1 => '/' . trailingslashit( $base_slug ),
-			2 => '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' )
+			2 => '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' ),
 		);
 		?>
 		<table class="form-table wc-permalink-structure">

@@ -176,7 +176,7 @@ class WC_Cache_Helper {
 		if ( isset( $_GET['download_file'] ) ) {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
-			foreach( $wc_page_uris as $uri ) {
+			foreach ( $wc_page_uris as $uri ) {
 				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;

@@ -64,7 +64,7 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		# GET /customers/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
@@ -805,7 +805,7 @@ class WC_API_Customers extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$customers[] = array(
 							'id'    => $customer_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$customers[] = $edit['customer'];
@@ -819,7 +819,7 @@ class WC_API_Customers extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$customers[] = array(
 							'id'    => $customer_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$customers[] = $new['customer'];

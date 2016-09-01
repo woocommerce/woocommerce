@@ -155,7 +155,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[$key]->current = false;
+			$menu_items[ $key ]->current = false;
 
 			if ( in_array( 'current_page_parent', $classes ) ) {
 				unset( $classes[ array_search('current_page_parent', $classes) ] );

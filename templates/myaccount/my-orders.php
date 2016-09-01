@@ -22,7 +22,7 @@ $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_q
 	'meta_key'    => '_customer_user',
 	'meta_value'  => get_current_user_id(),
 	'post_type'   => wc_get_order_types( 'view-orders' ),
-	'post_status' => array_keys( wc_get_order_statuses() )
+	'post_status' => array_keys( wc_get_order_statuses() ),
 ) ) );
 
 if ( $customer_orders ) : ?>
@@ -69,16 +69,16 @@ if ( $customer_orders ) : ?>
 									$actions = array(
 										'pay'    => array(
 											'url'  => $order->get_checkout_payment_url(),
-											'name' => __( 'Pay', 'woocommerce' )
+											'name' => __( 'Pay', 'woocommerce' ),
 										),
 										'view'   => array(
 											'url'  => $order->get_view_order_url(),
-											'name' => __( 'View', 'woocommerce' )
+											'name' => __( 'View', 'woocommerce' ),
 										),
 										'cancel' => array(
 											'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-											'name' => __( 'Cancel', 'woocommerce' )
-										)
+											'name' => __( 'Cancel', 'woocommerce' ),
+										),
 									);
 
 									if ( ! $order->needs_payment() ) {

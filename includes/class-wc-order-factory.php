@@ -71,7 +71,7 @@ class WC_Order_Factory {
 		} elseif ( $item_id instanceof WC_Order_Item ) {
 			$item_data = $item_id->get_data();
 			$item_type = $item_data->get_type();
-		} elseif( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
+		} elseif ( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
 			$item_data = $item_id;
 			$item_type = $item_id->order_item_type;
 		} else {

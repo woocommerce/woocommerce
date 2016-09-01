@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -250,7 +250,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'minimum_amount'               => '',
 				'maximum_amount'               => '',
 				'customer_emails'              => array(),
-				'description'                  => ''
+				'description'                  => '',
 			);
 
 			$coupon_data = wp_parse_args( $data, $defaults );
@@ -266,7 +266,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
-				'post_excerpt' => $coupon_data['description']
+				'post_excerpt' => $coupon_data['description'],
 	 		);
 
 			$id = wp_insert_post( $new_coupon, true );
@@ -532,7 +532,7 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$coupons[] = $edit['coupon'];
@@ -546,7 +546,7 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$coupons[] = $new['coupon'];

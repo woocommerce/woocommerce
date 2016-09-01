@@ -27,7 +27,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Recently Viewed Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -35,8 +35,8 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 10,
-				'label' => __( 'Number of products to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of products to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

@@ -72,13 +72,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			'title' => array(
 				'type'  => 'text',
 				'std'   => __( 'Filter by', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'attribute' => array(
 				'type'    => 'select',
 				'std'     => '',
 				'label'   => __( 'Attribute', 'woocommerce' ),
-				'options' => $attribute_array
+				'options' => $attribute_array,
 			),
 			'display_type' => array(
 				'type'    => 'select',
@@ -86,8 +86,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				'label'   => __( 'Display type', 'woocommerce' ),
 				'options' => array(
 					'list'     => __( 'List', 'woocommerce' ),
-					'dropdown' => __( 'Dropdown', 'woocommerce' )
-				)
+					'dropdown' => __( 'Dropdown', 'woocommerce' ),
+				),
 			),
 			'query_type' => array(
 				'type'    => 'select',
@@ -95,8 +95,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				'label'   => __( 'Query type', 'woocommerce' ),
 				'options' => array(
 					'and' => __( 'AND', 'woocommerce' ),
-					'or'  => __( 'OR', 'woocommerce' )
-				)
+					'or'  => __( 'OR', 'woocommerce' ),
+				),
 			),
 		);
 	}

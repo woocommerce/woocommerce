@@ -130,7 +130,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		return self::$instance;
 	}
-
 }
 
 WC_Unit_Tests_Bootstrap::instance();

@@ -326,12 +326,12 @@ class WC_API_Server {
 				$callback = $handler[0];
 				$supported = isset( $handler[1] ) ? $handler[1] : self::METHOD_GET;
 
-				if ( !( $supported & $method ) )
+				if ( ! ( $supported & $method ) )
 					continue;
 
 				$match = preg_match( '@^' . $route . '$@i', urldecode( $this->path ), $args );
 
-				if ( !$match )
+				if ( ! $match )
 					continue;
 
 				if ( ! is_callable( $callback ) )
@@ -423,26 +423,28 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array( 'store' => array(
-			'name'        => get_option( 'blogname' ),
-			'description' => get_option( 'blogdescription' ),
-			'URL'         => get_option( 'siteurl' ),
-			'wc_version'  => WC()->version,
-			'routes'      => array(),
-			'meta'        => array(
-				'timezone'			 => wc_timezone_string(),
-				'currency'       	 => get_woocommerce_currency(),
-				'currency_format'    => get_woocommerce_currency_symbol(),
-				'tax_included'   	 => wc_prices_include_tax(),
-				'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
-				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-				'links'          	 => array(
-					'help' => 'https://woothemes.github.io/woocommerce/rest-api/',
+		$available = array(
+			'store' => array(
+				'name'        => get_option( 'blogname' ),
+				'description' => get_option( 'blogdescription' ),
+				'URL'         => get_option( 'siteurl' ),
+				'wc_version'  => WC()->version,
+				'routes'      => array(),
+				'meta'        => array(
+					'timezone'			 => wc_timezone_string(),
+					'currency'       	 => get_woocommerce_currency(),
+					'currency_format'    => get_woocommerce_currency_symbol(),
+					'tax_included'   	 => wc_prices_include_tax(),
+					'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+					'links'          	 => array(
+						'help' => 'https://woothemes.github.io/woocommerce/rest-api/',
+					),
 				),
 			),
-		) );
+		);
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -685,7 +687,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -701,13 +702,13 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ( $server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
 			}
 			elseif ( isset( $additional[ $key ] ) ) {

@@ -51,9 +51,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array(
-		'_order_currency', '_cart_discount',
-		'_cart_discount_tax', '_order_shipping', '_order_shipping_tax',
-		'_order_tax', '_order_total', '_order_version', '_prices_include_tax',
+		'_order_currency',
+		'_cart_discount',
+		'_cart_discount_tax',
+		'_order_shipping',
+		'_order_shipping_tax',
+		'_order_tax',
+		'_order_total',
+		'_order_version',
+		'_prices_include_tax',
 		'_payment_tokens',
 	);
 
@@ -243,7 +249,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'post_parent'   => $this->get_parent_id(),
 			),
 			array(
-				'ID' => $order_id
+				'ID' => $order_id,
 			)
 		);
 
@@ -625,7 +631,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		return array(
 			'from' => $old_status,
-			'to'   => $new_status
+			'to'   => $new_status,
 		);
 	 }
 
@@ -1428,7 +1434,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$subtotal = wc_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label, 'currency' => $this->get_currency() ) );
 		} else {
-			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array('currency' => $this->get_currency()) );
+			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array( 'currency' => $this->get_currency() ) );
 		}
 
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
@@ -1468,7 +1474,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
-
 		} else {
 			if ( 'incl' === $tax_display ) {
 				return '';
@@ -1510,21 +1515,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( $tax_display == 'excl' ) {
 
 				// Show shipping excluding tax.
-				$shipping = wc_price( $this->get_shipping_total(), array('currency' => $this->get_currency()) );
+				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
 
 				if ( $this->get_shipping_tax() != 0 && $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
-
 			} else {
 
 				// Show shipping including tax.
-				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array('currency' => $this->get_currency()) );
+				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
 				if ( $this->get_shipping_tax() != 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
-
 			}
 
 			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
@@ -1586,7 +1589,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_currency()) )
+					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}
@@ -1603,7 +1606,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						'value'    => $tax->formatted_amount,
 					);
 				}
-
 			} else {
 
 				$total_rows['tax'] = array(

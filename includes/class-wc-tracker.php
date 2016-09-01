@@ -68,7 +68,7 @@ class WC_Tracker {
 				'blocking'    => false,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body'        => json_encode( $params ),
-				'cookies'     => array()
+				'cookies'     => array(),
 			)
 		);
 	}
@@ -216,7 +216,7 @@ class WC_Tracker {
 	 */
 	private static function get_all_plugins() {
 		// Ensure get_plugins function is loaded
-		if( ! function_exists( 'get_plugins' ) ) {
+		if ( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
 		}
 
@@ -242,10 +242,10 @@ class WC_Tracker {
 			}
 			if ( in_array( $k, $active_plugins_keys ) ) {
 				// Remove active plugins from list so we can show active and inactive separately
-				unset( $plugins[$k] );
-				$active_plugins[$k] = $formatted;
+				unset( $plugins[ $k ] );
+				$active_plugins[ $k ] = $formatted;
 			} else {
-				$plugins[$k] = $formatted;
+				$plugins[ $k ] = $formatted;
 			}
 		}
 
@@ -382,7 +382,7 @@ class WC_Tracker {
 					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 					$theme_file = get_template_directory() . '/woocommerce/' . $file;
 				} else {
 					$theme_file = false;

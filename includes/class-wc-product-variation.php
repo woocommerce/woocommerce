@@ -50,7 +50,7 @@ class WC_Product_Variation extends WC_Product {
 		'sale_price'            => '',
 		'stock'                 => 0,
 		'stock_status'          => 'instock',
-		'downloadable_files'    => array()
+		'downloadable_files'    => array(),
 	);
 
 	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
@@ -61,7 +61,7 @@ class WC_Product_Variation extends WC_Product {
 		'weight'     => '',
 		'length'     => '',
 		'width'      => '',
-		'height'     => ''
+		'height'     => '',
 	);
 
 	/**
@@ -125,7 +125,6 @@ class WC_Product_Variation extends WC_Product {
 			if ( '' === $value ) {
 				$value = $this->variation_level_meta_data[ $key ];
 			}
-
 		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
 
 			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
@@ -138,7 +137,6 @@ class WC_Product_Variation extends WC_Product {
 			if ( '' === $value ) {
 				$value = $this->variation_inherited_meta_data[ $key ];
 			}
-
 		} elseif ( 'variation_data' === $key ) {
 			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
 
@@ -300,8 +298,8 @@ class WC_Product_Variation extends WC_Product {
 		$set = true;
 
 		// undefined attributes have null strings as array values
-		foreach( $this->get_variation_attributes() as $att ){
-			if( ! $att ){
+		foreach ( $this->get_variation_attributes() as $att ) {
+			if ( ! $att ) {
 				$set = false;
 				break;
 			}
@@ -635,28 +633,27 @@ class WC_Product_Variation extends WC_Product {
 			foreach ( $attributes as $attribute ) {
 
 				// Only deal with attributes that are variations
-				if ( ! $attribute[ 'is_variation' ] ) {
+				if ( ! $attribute['is_variation'] ) {
 					continue;
 				}
 
-				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] : '';
-				$description_name         = esc_html( wc_attribute_label( $attribute[ 'name' ] ) );
+				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
+				$description_name         = esc_html( wc_attribute_label( $attribute['name'] ) );
 				$description_value        = __( 'Any', 'woocommerce' );
 
 				// Get terms for attribute taxonomy or value if its a custom attribute
-				if ( $attribute[ 'is_taxonomy' ] ) {
+				if ( $attribute['is_taxonomy'] ) {
 
-					$post_terms = get_the_terms( $this->id, $attribute[ 'name' ] );
+					$post_terms = get_the_terms( $this->id, $attribute['name'] );
 
 					foreach ( $post_terms as $term ) {
 						if ( $variation_selected_value === $term->slug ) {
 							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
 						}
 					}
-
 				} else {
 
-					$options = wc_get_text_attributes( $attribute[ 'value' ] );
+					$options = wc_get_text_attributes( $attribute['value'] );
 
 					foreach ( $options as $option ) {
 

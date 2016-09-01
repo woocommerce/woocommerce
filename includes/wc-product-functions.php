@@ -91,7 +91,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_products_onsale',
 		'wc_featured_products',
 		'wc_outofstock_count',
-		'wc_low_stock_count'
+		'wc_low_stock_count',
 	);
 
 	// Transient names that include an ID
@@ -99,11 +99,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_product_children_',
 		'wc_product_total_stock_',
 		'wc_var_prices_',
-		'wc_related_'
+		'wc_related_',
 	);
 
 	if ( $post_id > 0 ) {
-		foreach( $post_transient_names as $transient ) {
+		foreach ( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
 
@@ -114,7 +114,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	}
 
 	// Delete transients
-	foreach( $transients_to_clear as $transient ) {
+	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
@@ -186,15 +186,15 @@ function wc_get_featured_product_ids() {
 		'meta_query'     => array(
 			array(
 				'key' 		=> '_visibility',
-				'value' 	=> array('catalog', 'visible'),
-				'compare' 	=> 'IN'
+				'value' 	=> array( 'catalog', 'visible' ),
+				'compare' 	=> 'IN',
 			),
 			array(
 				'key' 	=> '_featured',
-				'value' => 'yes'
-			)
+				'value' => 'yes',
+			),
 		),
-		'fields' => 'id=>parent'
+		'fields' => 'id=>parent',
 	) );
 
 	$product_ids          = array_keys( $featured );
@@ -255,7 +255,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		'%second%',
 		'%post_id%',
 		'%category%',
-		'%product_cat%'
+		'%product_cat%',
 	);
 
 	$replace = array(
@@ -267,7 +267,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		date_i18n( 's', strtotime( $post->post_date ) ),
 		$post->ID,
 		$product_cat,
-		$product_cat
+		$product_cat,
 	);
 
 	$permalink = str_replace( $find, $replace, $permalink );
@@ -475,7 +475,7 @@ function wc_prepare_attachment_for_js( $response ) {
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
 		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
-			foreach( $response['sizes'] as $size => $value ) {
+			foreach ( $response['sizes'] as $size => $value ) {
 				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
 			}
 		}
@@ -525,7 +525,7 @@ function wc_get_product_types() {
 		'simple'   => __( 'Simple product', 'woocommerce' ),
 		'grouped'  => __( 'Grouped product', 'woocommerce' ),
 		'external' => __( 'External/Affiliate product', 'woocommerce' ),
-		'variable' => __( 'Variable product', 'woocommerce' )
+		'variable' => __( 'Variable product', 'woocommerce' ),
 	) );
 }
 

@@ -60,7 +60,7 @@ class WC_Email_Customer_Note extends WC_Email {
 
 			$defaults = array(
 				'order_id'      => '',
-				'customer_note' => ''
+				'customer_note' => '',
 			);
 
 			$args = wp_parse_args( $args, $defaults );
@@ -101,7 +101,7 @@ class WC_Email_Customer_Note extends WC_Email {
 			'customer_note' => $this->customer_note,
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -118,7 +118,7 @@ class WC_Email_Customer_Note extends WC_Email {
 			'customer_note' => $this->customer_note,
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 }

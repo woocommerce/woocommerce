@@ -40,7 +40,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Email Options', 'woocommerce' )
+			'' => __( 'Email Options', 'woocommerce' ),
 		);
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
@@ -71,7 +71,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'      => 'min-width:300px;',
 				'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
 				'autoload' => false,
-				'desc_tip' => true
+				'desc_tip' => true,
 			),
 
 			array(
@@ -80,12 +80,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'id'                => 'woocommerce_email_from_address',
 				'type'              => 'email',
 				'custom_attributes' => array(
-					'multiple' => 'multiple'
+					'multiple' => 'multiple',
 				),
 				'css'               => 'min-width:300px;',
 				'default'           => get_option( 'admin_email' ),
 				'autoload'          => false,
-				'desc_tip'          => true
+				'desc_tip'          => true,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'email_options' ),
@@ -101,7 +101,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
 				'autoload'    => false,
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 
 			array(
@@ -113,7 +113,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'type'        => 'textarea',
 				'default'     => get_bloginfo( 'name', 'display' ) . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
 				'autoload'    => false,
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 
 			array(
@@ -124,7 +124,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'      => 'width:6em;',
 				'default'  => '#96588a',
 				'autoload' => false,
-				'desc_tip' => true
+				'desc_tip' => true,
 			),
 
 			array(
@@ -135,7 +135,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'      => 'width:6em;',
 				'default'  => '#f7f7f7',
 				'autoload' => false,
-				'desc_tip' => true
+				'desc_tip' => true,
 			),
 
 			array(
@@ -146,7 +146,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'      => 'width:6em;',
 				'default'  => '#ffffff',
 				'autoload' => false,
-				'desc_tip' => true
+				'desc_tip' => true,
 			),
 
 			array(
@@ -157,7 +157,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'      => 'width:6em;',
 				'default'  => '#3c3c3c',
 				'autoload' => false,
-				'desc_tip' => true
+				'desc_tip' => true,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'email_notification_settings' ),
@@ -233,7 +233,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									'name'       => __( 'Email', 'woocommerce' ),
 									'email_type' => __( 'Content Type', 'woocommerce' ),
 									'recipient'  => __( 'Recipient(s)', 'woocommerce' ),
-									'actions'    => ''
+									'actions'    => '',
 								) );
 								foreach ( $columns as $key => $column ) {
 									echo '<th class="wc-email-settings-table-' . esc_attr( $key ) . '">' . esc_html( $column ) . '</th>';
