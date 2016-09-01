@@ -110,8 +110,6 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests backwards compat / legacy handling.
-	 * @expectedDeprecated WC_Customer::is_vat_exempt
-	 * @expectedDeprecated WC_Customer::has_calculated_shipping
 	 * @expectedDeprecated WC_Customer::get_default_country
 	 * @expectedDeprecated WC_Customer::get_default_state
 	 * @expectedDeprecated WC_Customer::is_paying_customer
@@ -149,17 +147,17 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( $customer->get_shipping_address(), $customer->shipping_address_1 );
 		$this->assertEquals( $customer->get_shipping_address_2(), $customer->shipping_address_2 );
 		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt );
-		$this->assertEquals( $customer->get_calculated_shipping(), $customer->calculated_shipping );
+		$this->assertEquals( $customer->has_calculated_shipping(), $customer->calculated_shipping );
 
 		// Functions
 		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt() );
-		$this->assertEquals( $customer->get_calculated_shipping(), $customer->has_calculated_shipping() );
+		$this->assertEquals( $customer->has_calculated_shipping(), $customer->has_calculated_shipping() );
 		$default = wc_get_customer_default_location();
 		$this->assertEquals( $default['country'], $customer->get_default_country() );
 		$this->assertEquals( $default['state'], $customer->get_default_state() );
-		$this->assertFalse( $customer->get_calculated_shipping() );
+		$this->assertFalse( $customer->has_calculated_shipping() );
 		$customer->calculated_shipping( true );
-		$this->assertTrue( $customer->get_calculated_shipping() );
+		$this->assertTrue( $customer->has_calculated_shipping() );
 		$this->assertEquals( $customer->get_is_paying_customer(), $customer->is_paying_customer() );
 	}
 

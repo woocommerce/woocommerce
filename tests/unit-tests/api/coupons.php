@@ -406,7 +406,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 23, count( $properties ) );
+		$this->assertEquals( 24, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'code', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
