@@ -286,7 +286,9 @@ abstract class WC_Settings_API {
 		foreach ( $form_fields as $k => $v ) {
 			$type = $this->get_field_type( $v );
 
-			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
+			if( has_filter( 'wc_settings_generate_' . $type . '_html' ) ){
+				$html .= apply_filters( 'wc_settings_generate_' . $type . '_html', '', $k, $v, $this );
+			} else if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
 			} else {
 				$html .= $this->generate_text_html( $k, $v );
