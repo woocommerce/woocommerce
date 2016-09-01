@@ -101,4 +101,78 @@
 		$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 		return false;
 	});
+
+	// upload media
+	var file_frame;
+
+	$( '.wc-settings-media-upload' ).on( 'click', function( event ){
+
+		event.preventDefault();
+
+		var $el = $(this);
+
+		// If the media frame already exists, reopen it.
+		if ( file_frame ) {
+		  file_frame.open();
+			return;
+	    }
+
+	    // Create the media frame.
+	    file_frame = wp.media.frames.file_frame = wp.media({
+			title: $el.data('media_frame_title'),
+			button: {
+				text: $el.data('media_button_text'),
+			},
+			multiple: false  // Set to true to allow multiple files to be selected
+	    });
+
+
+	    // When an image is selected, run a callback.
+	    file_frame.on( 'select', function() {
+			// We set multiple to false so only get one image from the uploader
+			attachment = file_frame.state().get('selection').first().toJSON();
+
+			// Do something with attachment.id and/or attachment.url here
+			$el.next( '.wc-settings-media-id' ).val( attachment.id );
+
+            var attachment, $preview = $el.prev( '.wc-settings-media-preview-wrapper' );
+			
+			// remove any existing 
+            $preview.children().remove();
+
+            if ( attachment.id > 0) {
+                attachment = new wp.media.model.Attachment.get( attachment.id );
+
+                attachment.fetch({
+                    success: function(att) {
+                    	console.log(att);
+                        if (_.contains(['png', 'jpg', 'gif', 'jpeg'], att.get('subtype'))) {
+                            $("<img/>").attr('src', att.attributes.sizes.thumbnail.url).appendTo($preview);
+                        } else {
+                        	$("<img/>").attr('src', att.attributes.icon).appendTo($preview);
+                        }
+                        $("<p/>").addClass('description').html( att.attributes.filename ).appendTo($preview);
+                        $preview.siblings('.wc-settings-media-remove').show();
+                    }
+                });
+            }
+	    });
+
+	    // Finally, open the modal
+		file_frame.open();
+ 	});
+
+	// the remove button
+ 	$( '.wc-settings-media-remove' ).on( 'click', function( event ){
+
+		event.preventDefault();
+
+		var $el = $(this);
+
+		$el.siblings( '.wc-settings-media-preview-wrapper' ).children().remove();
+		$el.prev('.wc-settings-media-id' ).val( '' );
+		$el.hide();
+
+	});
+
 })( jQuery );
