@@ -160,7 +160,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_usage_limit_per_user(), $coupon->usage_limit_per_user );
 		$this->assertEquals( $coupon->get_limit_usage_to_x_items(), $coupon->limit_usage_to_x_items );
 		$this->assertEquals( $coupon->get_usage_count(), $coupon->usage_count );
-		$this->assertEquals( $coupon->get_expiry_date(), $coupon->expiry_date );
+		$this->assertEquals( $coupon->get_date_expires(), $coupon->expiry_date );
 		$this->assertEquals( $coupon->get_product_categories(), $coupon->product_categories );
 		$this->assertEquals( $coupon->get_excluded_product_categories(), $coupon->exclude_product_categories );
 		$this->assertEquals( $coupon->get_minimum_amount(), $coupon->minimum_amount );
@@ -245,7 +245,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 			'description' => 'hello world',
 			'discount_type' => 'percent_product',
 			'amount' => 10.50,
-			'expiry_date' => time(),
+			'date_expires' => time(),
 			'usage_count' => 5,
 			'individual_use' => true,
 			'product_ids' => array( 5, 10 ),

@@ -195,8 +195,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'value'   => $request['sku'],
 				'compare' => '=',
 			);
+		}
 
-			$args['post_type'] = array( 'product', 'product_variation' );
+		// Apply all WP_Query filters again.
+		if ( is_array( $request['filter'] ) ) {
+			$args = array_merge( $args, $request['filter'] );
+			unset( $args['filter'] );
+		}
+
+		// Force the post_type argument, since it's not a user input variable.
+		if ( ! empty( $request['sku'] ) ) {
+			$args['post_type'] = $this->get_post_types();
+		} else {
+			$args['post_type'] = $this->post_type;
 		}
 
 		return $args;
