@@ -1133,11 +1133,32 @@ function wc_transaction_query( $type = 'start' ) {
  * Gets the url to the cart page.
  *
  * @since  2.5.0
- *
  * @return string Url to cart page
  */
 function wc_get_cart_url() {
 	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to remove an item from the cart.
+ *
+ * @param string $cart_item_key contains the id of the cart item
+ * @return string url to page
+ */
+function wc_get_cart_remove_url( $cart_item_key ) {
+	$cart_page_url = wc_get_cart_url();
+	return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
+}
+
+/**
+ * Gets the url to re-add an item into the cart.
+ *
+ * @param  string $cart_item_key
+ * @return string url to page
+ */
+function wc_get_cart_undo_url( $cart_item_key ) {
+	$cart_page_url = wc_get_cart_url();
+	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'undo_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
 }
 
 /**

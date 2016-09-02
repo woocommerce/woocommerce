@@ -17,15 +17,58 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Cart_Item_Totals {
 
+	/**
+	 * An array of objects representing items.
+	 * @var array
+	 */
 	private $items          = array();
+
+	/**
+	 * An array of objects representing coupons and the discounts they grant.
+	 * @var array
+	 */
+	private $coupons        = array();
+
+	/**
+	 * Acts as a cache to prevent requerying tax rates for items.
+	 * @var array
+	 */
 	private $item_tax_rates = array();
 
 	/**
-	 * Constructor expects $items array
+	 * When calculation is needed, e.g. after adding items, this is false.
+	 *
+	 * @var boolean
 	 */
-	public function __construct( $items = array() ) {
-		$this->set_items( $items );
-		$this->get_calculated_totals();
+	private $calculated     = false;
+
+	/**
+	 * Get default blank set of props used per item.
+	 * @return array
+	 */
+	private function get_default_item_props() {
+		return (object) array(
+			'price_includes_tax'   => wc_prices_include_tax(),
+			'subtotal'             => 0,
+			'subtotal_tax'         => 0,
+			'subtotal_tax_data'    => array(),
+			'total'                => 0,
+			'tax'                  => 0,
+			'tax_data'             => array(),
+			'discounted_price'     => 0,
+		);
+	}
+
+	/**
+	 * Get default blank set of props used per coupon.
+	 * @return array
+	 */
+	private function get_default_coupon_props() {
+		return (object) array(
+			'count'     => 0,
+			'total'     => 0,
+			'total_tax' => 0,
+		);
 	}
 
 	/**
@@ -34,132 +77,47 @@ class WC_Cart_Item_Totals {
 	 */
 	public function set_items( $items ) {
 		foreach ( $items as $item_key => $maybe_item ) {
-			$item = (object) array(
-				'product'              => false,
-				'price_includes_tax'   => wc_prices_include_tax(),
-				'price'                => 0,
-				'quantity'             => 0,
-				'subtotal'             => 0,
-				'subtotal_tax'         => 0,
-				'subtotal_tax_data'    => array(),
-				'total'                => 0,
-				'tax'                  => 0,
-				'tax_data'             => array(),
-				'discount_amounts'     => array(),
-				'discount_tax_amounts' => array(),
-				'discounted_price'     => 0,
-			);
-
-			if ( is_array( $maybe_item ) && isset( $maybe_item['data'], $maybe_item['quantity'] ) ) {
-				$item->product  = $maybe_item['data'];
-				$item->quantity = $maybe_item['quantity'];
-				$item->price    = $this->add_precision( $maybe_item['data']->get_price() ); // Work with cents
+			if ( ! is_array( $maybe_item ) || ! isset( $maybe_item['data'], $maybe_item['quantity'] ) ) {
+				continue;
 			}
 
+			$item = $this->get_default_item_props();
+			$item->values   = $maybe_item;
+			$item->product  = $maybe_item['data'];
+			$item->quantity = $maybe_item['quantity'];
+			$item->price    = $maybe_item['data']->get_price();
 			$this->items[ $item_key ] = $item;
 		}
+		$this->calculated = false;
 	}
 
 	/**
-	 * Removes precision and returns items.
+	 * Set coupons.
+	 * @param array $coupons
+	 */
+	public function set_coupons( $coupons ) {
+		foreach ( $coupons as $code => $coupon_object ) {
+			$coupon                 = $this->get_default_coupon_props();
+			$coupon->coupon         = $coupon_object;
+			$this->coupons[ $code ] = $coupon;
+		}
+		$this->calculated = false;
+	}
+
+	/**
+	 * Returns items.
 	 * @return array
 	 */
 	public function get_items() {
-		$props = array( 'subtotal', 'total', 'tax', 'subtotal_tax', 'tax_data', 'discount_amounts', 'discount_tax_amounts', 'price', 'discounted_price', 'subtotal_tax_data' );
-		$items = $this->items;
-
-		foreach ( $items as $key => $item ) {
-			foreach ( $props as $prop ) {
-				$items[ $key ]->$prop = $this->remove_precision( $item->$prop );
-			}
-		}
-
 		return $this->items;
 	}
 
 	/**
-	 * Calculate and get totals.
+	 * Returns coupons.
 	 * @return array
 	 */
-	public function get_calculated_totals() {
-		$this->calculate_item_subtotals();
-		$this->calculate_item_totals();
-	}
-
-	public function get_subtotal( $inc_tax = true ) {
-		$totals = $this->remove_precision( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) );
-
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, $this->remove_precision( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
-		}
-
-		return array_sum( $totals );
-	}
-
-	public function get_total( $inc_tax = true ) {
-		$totals = $this->remove_precision( array_values( wp_list_pluck( $this->items, 'total' ) ) );
-
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, $this->remove_precision( array_values( wp_list_pluck( $this->items, 'tax' ) ) ) );
-		}
-
-		return array_sum( $totals );
-	}
-
-	public function get_tax_data() {
-		$tax_data = array();
-
-		foreach ( $this->items as $item ) {
-			foreach ( array_keys( $tax_data + $item->tax_data ) as $key ) {
-				$tax_data[ $key ] = ( isset( $item->tax_data[ $key ] ) ? $this->remove_precision( $item->tax_data[ $key ] ) : 0 ) + ( isset( $tax_data[ $key ] ) ? $tax_data[ $key ] : 0 );
-			}
-		}
-
-		return $tax_data;
-	}
-
-	/**
-	 * Multiply costs by pow precision. Lets us work with cent values.
-	 * @param  float $price
-	 * @return int
-	 */
-	private function add_precision( $price ) {
-		if ( is_array( $price ) ) {
-			foreach ( $price as $key => $value ) {
-			 	$price[ $key ] = $this->add_precision( $value );
-			}
-		} else {
-			$price = $price * ( pow( 10, wc_get_rounding_precision() ) );
-		}
-		return $price;
-	}
-
-	/**
-	 * Divide costs by pow precision. Lets us work with cent values.
-	 * @param  int $price
-	 * @return float
-	 */
-	private function remove_precision( $price ) {
-		if ( is_array( $price ) ) {
-			foreach ( $price as $key => $value ) {
-				$price[ $key ] = $this->remove_precision( $value );
-			}
-		} else {
-			$price = round( $price ) / ( pow( 10, wc_get_rounding_precision() ) );
-		}
-		return $price;
-	}
-
-	/**
-	 * Sort items by the subtotal.
-	 */
-	private function sort_items_by_subtotal( $a, $b ) {
-		$first_item_subtotal  = isset( $a->subtotal ) ? $a->subtotal : 0;
-		$second_item_subtotal = isset( $b->subtotal ) ? $b->subtotal : 0;
-		if ( $first_item_subtotal === $second_item_subtotal ) {
-			return 0;
-		}
-		return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
+	public function get_coupons() {
+		return $this->coupons;
 	}
 
 	/**
@@ -170,6 +128,172 @@ class WC_Cart_Item_Totals {
 	private function get_item_tax_rates( $item ) {
 		$tax_class = $item->product->get_tax_class();
 		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class() );
+	}
+
+	/**
+	 * Sort items by the subtotal.
+	 */
+	private function sort_items_callback( $a, $b ) {
+		$first_item_subtotal  = isset( $a->subtotal ) ? $a->subtotal : 0;
+		$second_item_subtotal = isset( $b->subtotal ) ? $b->subtotal : 0;
+		if ( $first_item_subtotal === $second_item_subtotal ) {
+			return 0;
+		}
+		return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
+	}
+
+	/**
+	 * Get the subtotal for all items.
+	 *
+	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
+	 * @return float
+	 */
+	public function get_subtotal( $inc_tax = true ) {
+		$this->maybe_calculate();
+		$totals = array_values( wp_list_pluck( $this->items, 'subtotal' ) );
+
+		if ( $inc_tax ) {
+			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) );
+		}
+
+		return array_sum( $totals );
+	}
+
+	/**
+	 * Get the total for all items.
+	 *
+	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
+	 * @return float
+	 */
+	public function get_total( $inc_tax = true ) {
+		$this->maybe_calculate();
+		$totals = array_values( wp_list_pluck( $this->items, 'total' ) );
+
+		if ( $inc_tax ) {
+			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->items, 'tax' ) ) );
+		}
+
+		return array_sum( $totals );
+	}
+
+	/**
+	 * Get all tax rows for the items.
+	 *
+	 * @return array
+	 */
+	public function get_tax_data() {
+		$this->maybe_calculate();
+		$tax_data = array();
+
+		foreach ( $this->items as $item ) {
+			foreach ( array_keys( $tax_data + $item->tax_data ) as $key ) {
+				$tax_data[ $key ] = ( isset( $item->tax_data[ $key ] ) ? $item->tax_data[ $key ] : 0 ) + ( isset( $tax_data[ $key ] ) ? $tax_data[ $key ] : 0 );
+			}
+		}
+
+		return $tax_data;
+	}
+
+	/**
+	 * Get the total discount amount.
+	 * @return float
+	 */
+	public function get_discount_total() {
+		$this->maybe_calculate();
+		return array_sum( array_values( wp_list_pluck( $this->coupons, 'total' ) ) );
+	}
+
+	/**
+	 * Get the total discount amount.
+	 * @return float
+	 */
+	public function get_discount_total_tax() {
+		$this->maybe_calculate();
+		return array_sum( array_values( wp_list_pluck( $this->coupons, 'total_tax' ) ) );
+	}
+
+	/**
+	 * Should discounts be applied sequentially?
+	 * @return bool
+	 */
+	private function calc_discounts_sequentially() {
+		return 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' );
+	}
+
+	/**
+	 * Get an items price to discount (undiscounted price).
+	 * @param  object $item
+	 * @return float
+	 */
+	private function get_undiscounted_price( $item ) {
+		if ( $item->price_includes_tax ) {
+			return ( $item->subtotal + $item->subtotal_tax ) / $item->quantity;
+		} else {
+			return $item->subtotal / $item->quantity;
+		}
+	}
+
+	/**
+	 * Get an individual items price after discounts are applied.
+	 * @param  object $item
+	 * @return float
+	 */
+	public function get_discounted_price( $item ) {
+		$price = $this->get_undiscounted_price( $item );
+
+		foreach ( $this->coupons as $code => $coupon ) {
+			if ( $coupon->coupon->is_valid_for_product( $item->product ) || $coupon->coupon->is_valid_for_cart() ) {
+				$price_to_discount = $this->calc_discounts_sequentially() ? $price : $this->get_undiscounted_price( $item );
+
+				if ( $coupon->coupon->is_type( 'fixed_product' ) ) {
+					$discount = min( $coupon->coupon->get_amount(), $price_to_discount );
+
+				} elseif ( $coupon->coupon->is_type( array( 'percent_product', 'percent' ) ) ) {
+					$discount = $coupon->coupon->get_amount() * ( $price_to_discount / 100 );
+
+				/**
+				 * This is the most complex discount - we need to divide the discount between rows based on their price in
+				 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows
+				 * with no price (free) don't get discounted. Get item discount by dividing item cost by subtotal to get a %.
+				 *
+				 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
+				 */
+				} elseif ( $coupon->coupon->is_type( 'fixed_cart' ) ) {
+					$discount_percent = ( $item->subtotal + $item->subtotal_tax ) / array_sum( array_merge( array_values( wp_list_pluck( $this->items, 'subtotal' ) ), array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+					$discount         = ( $coupon->coupon->get_amount() * $discount_percent ) / $item->quantity;
+				}
+
+				// Discount cannot be greater than the price we are discounting.
+				$discount_amount = min( $price_to_discount, $discount );
+
+				// Reduce the price so the next coupon discounts the new amount.
+				$price           = max( $price - $discount_amount, 0 );
+
+				// Store how much each coupon has discounted in total.
+				$coupon->count += $item->quantity;
+				$coupon->total += $discount_amount * $item->quantity;
+
+				// If taxes are enabled, we should also note how much tax would have been paid if it was not discounted.
+				if ( wc_tax_enabled() ) {
+					$tax_amount    = WC_Tax::get_tax_total( WC_Tax::calc_tax( $discount_amount, $this->get_item_tax_rates( $item ), $item->price_includes_tax ) );
+					$coupon->total_tax += $tax_amount * $item->quantity;
+					$coupon->total = $item->price_includes_tax ? $coupon->total - ( $tax_amount * $item->quantity ) : $coupon->total;
+				}
+			}
+
+			// If the price is 0, we can stop going through coupons because there is nothing more to discount for this product.
+			if ( 0 >= $price ) {
+				break;
+			}
+		}
+
+		/**
+		 * woocommerce_get_discounted_price filter.
+		 * @param float $price the price to return.
+		 * @param array $item->values Cart item values. Used in legacy cart class function.
+		 * @param object WC()->cart. Used in legacy cart class function.
+		 */
+		return apply_filters( 'woocommerce_get_discounted_price', $price, $item->values, WC()->cart );
 	}
 
 	/**
@@ -186,7 +310,7 @@ class WC_Cart_Item_Totals {
 
 		if ( $item_tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax
-			$taxes                         = WC_Tax::calc_tax( $item->line_price, $base_tax_rates, true, true );
+			$taxes                    = WC_Tax::calc_tax( $item->line_price, $base_tax_rates, true, true );
 
 			// Now we have a new item price (excluding TAX)
 			$item->price              = $item->price - array_sum( $taxes );
@@ -194,6 +318,36 @@ class WC_Cart_Item_Totals {
 		}
 
 		return $item;
+	}
+
+	/**
+	 * Run all calculation logic only if needed.
+	 */
+	private function maybe_calculate() {
+		if ( ! $this->calculated ) {
+			$this->calculate();
+		}
+	}
+
+	/**
+	 * Reset calculated totals back to 0.
+	 */
+	private function reset_totals() {
+		foreach ( $this->items as $key => $item ) {
+			$this->items[ $key ] = (object) array_merge( (array) $item, (array) $this->get_default_item_props() );
+		}
+		foreach ( $this->coupons as $code => $coupon ) {
+			$this->coupons[ $code ] = (object) array_merge( (array) $coupon, (array) $this->get_default_coupon_props() );
+		}
+	}
+
+	/**
+	 * Run all calculation logic based on items and coupons.
+	 */
+	private function calculate() {
+		$this->reset_totals();
+		$this->calculate_item_subtotals();
+		$this->calculate_item_totals();
 	}
 
 	/**
@@ -228,88 +382,18 @@ class WC_Cart_Item_Totals {
 				}
 			}
 		}
-
-		uasort( $this->items, array( $this, 'sort_items_by_subtotal' ) );
-	}
-
-
-	public function get_discounted_price( $item ) {
-		if ( $item->price_includes_tax ) {
-			$undiscounted_price = ( $item->subtotal + $item->subtotal_tax ) / $item->quantity;
-		} else {
-			$undiscounted_price = $item->subtotal / $item->quantity;
-		}
-
-		$price = $undiscounted_price;
-
-		if ( ! empty( WC()->cart->get_coupons() ) ) {
-			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				if ( $coupon->is_valid_for_product( $item->product ) || $coupon->is_valid_for_cart() ) {
-					$price_to_discount = 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price;
-
-					if ( $coupon->is_type( 'fixed_product' ) ) {
-						$discount = min( $this->add_precision( $coupon->get_amount() ), $price_to_discount );
-
-					} elseif ( $coupon->is_type( array( 'percent_product', 'percent' ) ) ) {
-						$discount = $coupon->get_amount() * ( $price_to_discount / 100 );
-
-					/**
-					 * This is the most complex discount - we need to divide the discount between rows based on their price in
-					 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows
-					 * with no price (free) don't get discounted. Get item discount by dividing item cost by subtotal to get a %.
-					 *
-					 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
-					 */
-					} elseif ( $coupon->is_type( 'fixed_cart' ) ) {
-						$discount_percent = ( $item->subtotal + $item->subtotal_tax ) / array_sum( array_merge( array_values( wp_list_pluck( $this->items, 'subtotal' ) ), array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
-						$discount         = ( $this->add_precision( $coupon->get_amount() ) * $discount_percent ) / $item->quantity;
-					}
-				}
-
-				$discount_amount = min( $price_to_discount, $discount );
-				$price           = max( $price - $discount_amount, 0 );
-
-				// Store how much each coupon discounts @todo
-				$total_discount = $discount_amount * $item->quantity;
-
-				if ( wc_tax_enabled() ) {
-					$tax_rates          = WC_Tax::get_rates( $item->product->get_tax_class() );
-					$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $item->price_includes_tax );
-					$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $item->quantity;
-					$total_discount     = $item->price_includes_tax ? $total_discount - $total_discount_tax : $total_discount;
-					$item->discount_tax_amounts[ $code ] = $total_discount_tax;
-				}
-
-				$item->discount_amounts[ $code ] = $total_discount;
-
-				// If the price is 0, we can stop going through coupons because there is nothing more to discount for this product.
-				if ( 0 >= $price ) {
-					break;
-				}
-			}
-		}
-
-		return $price;
-	}
-
-	/**
-	 * Apply coupon based discounts to an item.
-	 * @param  object $item
-	 * @return object
-	 */
-	private function apply_item_discount( $item ) {
-		$item->discounted_price = $this->get_discounted_price( $item );
-		return $item;
 	}
 
 	/**
 	 * Totals are costs after discounts.
 	 */
 	private function calculate_item_totals() {
+		uasort( $this->items, array( $this, 'sort_items_callback' ) );
+
 		foreach ( $this->items as $item ) {
-			$item = $this->apply_item_discount( $item );
-			$item->total = $item->discounted_price * $item->quantity;
-			$item->tax   = 0;
+			$item->discounted_price = $this->get_discounted_price( $item );
+			$item->total            = $item->discounted_price * $item->quantity;
+			$item->tax              = 0;
 
 			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
 				$item->tax_data = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );

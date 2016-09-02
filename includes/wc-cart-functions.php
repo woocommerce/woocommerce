@@ -379,3 +379,24 @@ function wc_get_chosen_shipping_method_ids() {
 	}
 	return $method_ids;
 }
+
+/**
+ * Get cart cross sells.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_cart_cross_sells() {
+	$cross_sells = array();
+	$in_cart     = array();
+	if ( ! WC()->cart->is_empty() ) {
+		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+			if ( $values['quantity'] > 0 ) {
+				$cross_sells = array_merge( $values['data']->get_cross_sells(), $cross_sells );
+				$in_cart[] = $values['product_id'];
+			}
+		}
+	}
+	$cross_sells = array_diff( $cross_sells, $in_cart );
+	return $cross_sells;
+}

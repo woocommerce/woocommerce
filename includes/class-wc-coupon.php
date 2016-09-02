@@ -1,9 +1,9 @@
 <?php
-include_once( 'legacy/class-wc-legacy-coupon.php' );
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-coupon.php' );
 
 /**
  * WooCommerce coupons.
