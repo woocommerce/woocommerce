@@ -76,12 +76,12 @@
 		<!-- <exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" /> -->
 		<exclude name="Squiz.Commenting.InlineComment.NotCapital" />
 		<!-- <exclude name="Squiz.Commenting.InlineComment.SpacingAfter" /> -->
-		<exclude name="Squiz.Commenting.InlineComment.SpacingBefore" />
+		<!-- <exclude name="Squiz.Commenting.InlineComment.SpacingBefore" /> -->
 		<exclude name="Squiz.Commenting.InlineComment.WrongStyle" />
 		<exclude name="Squiz.Commenting.VariableComment.Missing" />
 		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
 		<exclude name="Squiz.Commenting.VariableComment.WrongStyle" />
-		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace" />
+		<!-- <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace" /> -->
 		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseParenthesis" />
 		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterKeyword" />
 		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceAfterDefault" />

@@ -1256,8 +1256,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
 			if ( $_REQUEST['_sold_individually'] == 'yes' ) {
 				update_post_meta( $post_id, '_sold_individually', 'yes' );
-			}
-			else {
+			} else {
 				update_post_meta( $post_id, '_sold_individually', '' );
 			}
 		}

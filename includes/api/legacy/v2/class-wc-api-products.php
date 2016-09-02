@@ -2415,8 +2415,9 @@ class WC_API_Products extends WC_API_Resource {
 					$product_id  = wc_get_product_id_by_sku( $product_sku );
 				}
 
-				// Product exists / edit product
 				if ( $product_id ) {
+
+					// Product exists / edit product
 					$edit = $this->edit_product( $product_id, array( 'product' => $_product ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -2428,10 +2429,9 @@ class WC_API_Products extends WC_API_Resource {
 					} else {
 						$products[] = $edit['product'];
 					}
-				}
+				} else {
 
-				// Product don't exists / create product
-				else {
+					// Product don't exists / create product
 					$new = $this->create_product( array( 'product' => $_product ) );
 
 					if ( is_wp_error( $new ) ) {

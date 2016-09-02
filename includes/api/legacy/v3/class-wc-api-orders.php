@@ -1818,8 +1818,9 @@ class WC_API_Orders extends WC_API_Resource {
 					$order_id = intval( $_order['id'] );
 				}
 
-				// Order exists / edit order
 				if ( $order_id ) {
+
+					// Order exists / edit order
 					$edit = $this->edit_order( $order_id, array( 'order' => $_order ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -1830,10 +1831,9 @@ class WC_API_Orders extends WC_API_Resource {
 					} else {
 						$orders[] = $edit['order'];
 					}
-				}
+				} else {
 
-				// Order don't exists / create order
-				else {
+					// Order don't exists / create order
 					$new = $this->create_order( array( 'order' => $_order ) );
 
 					if ( is_wp_error( $new ) ) {

@@ -20,50 +20,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_template_redirect() {
 	global $wp_query, $wp;
 
-	// When default permalinks are enabled, redirect shop page to post type archive url
 	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
+
+		// When default permalinks are enabled, redirect shop page to post type archive url
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
-	}
 
-	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+
+		// When on the checkout with an empty cart, redirect to cart page
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
-	}
 
-	// Logout
-	elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
+
+		// Logout
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
-	}
 
-	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
+	} elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
+
+		// Redirect to the product page if we have a single product
 		$product = wc_get_product( $wp_query->post );
 
 		if ( $product && $product->is_visible() ) {
 			wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
-	}
+	} elseif ( is_add_payment_method_page() ) {
 
-	// Ensure payment gateways are loaded early
-	elseif ( is_add_payment_method_page() ) {
-
+		// Ensure payment gateways are loaded early
 		WC()->payment_gateways();
 
-	}
+	} elseif ( is_checkout() ) {
 
-	// Checkout pages handling
-	elseif ( is_checkout() ) {
+		// Checkout pages handling
 		// Buffer the checkout page
 		ob_start();
 
 		// Ensure gateways and shipping methods are loaded early
 		WC()->payment_gateways();
 		WC()->shipping();
+
 	}
 }
 add_action( 'template_redirect', 'wc_template_redirect' );
@@ -203,23 +202,25 @@ function wc_body_class( $classes ) {
 	$classes = (array) $classes;
 
 	if ( is_woocommerce() ) {
+
 		$classes[] = 'woocommerce';
 		$classes[] = 'woocommerce-page';
-	}
 
-	elseif ( is_checkout() ) {
+	} elseif ( is_checkout() ) {
+
 		$classes[] = 'woocommerce-checkout';
 		$classes[] = 'woocommerce-page';
-	}
 
-	elseif ( is_cart() ) {
+	} elseif ( is_cart() ) {
+
 		$classes[] = 'woocommerce-cart';
 		$classes[] = 'woocommerce-page';
-	}
 
-	elseif ( is_account_page() ) {
+	} elseif ( is_account_page() ) {
+
 		$classes[] = 'woocommerce-account';
 		$classes[] = 'woocommerce-page';
+
 	}
 
 	if ( is_store_notice_showing() ) {

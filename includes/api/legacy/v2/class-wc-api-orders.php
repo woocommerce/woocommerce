@@ -1785,10 +1785,8 @@ class WC_API_Orders extends WC_API_Resource {
 					} else {
 						$orders[] = $edit['order'];
 					}
-				}
-
-				// Order don't exists / create order
-				else {
+				} else {
+					// Order don't exists / create order
 					$new = $this->create_order( array( 'order' => $_order ) );
 
 					if ( is_wp_error( $new ) ) {

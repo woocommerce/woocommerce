@@ -194,9 +194,7 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		}
-
-		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
 			$product_type = stripslashes( $_POST['product-type'] );
 			switch ( $product_type ) {
 				case 'grouped' :

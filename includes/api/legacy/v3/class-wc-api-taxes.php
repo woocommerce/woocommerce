@@ -475,8 +475,9 @@ class WC_API_Taxes extends WC_API_Resource {
 					$tax_id = intval( $_tax['id'] );
 				}
 
-				// Tax rate exists / edit tax rate
 				if ( $tax_id ) {
+
+					// Tax rate exists / edit tax rate
 					$edit = $this->edit_tax( $tax_id, array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -487,10 +488,9 @@ class WC_API_Taxes extends WC_API_Resource {
 					} else {
 						$taxes[] = $edit['tax'];
 					}
-				}
+				} else {
 
-				// Tax rate don't exists / create tax rate
-				else {
+					// Tax rate don't exists / create tax rate
 					$new = $this->create_tax( array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $new ) ) {

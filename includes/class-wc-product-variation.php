@@ -221,14 +221,16 @@ class WC_Product_Variation extends WC_Product {
 	public function variation_is_visible() {
 		$visible = true;
 
-		// Published == enabled checkbox
 		if ( get_post_status( $this->variation_id ) != 'publish' ) {
-			$visible = false;
-		}
 
-		// Price not set
-		elseif ( $this->get_price() === "" ) {
+			// Published == enabled checkbox
 			$visible = false;
+
+		} elseif ( $this->get_price() === "" ) {
+
+			// Price not set
+			$visible = false;
+
 		}
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id, $this );

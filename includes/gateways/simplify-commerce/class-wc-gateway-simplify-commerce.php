@@ -142,19 +142,21 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			return;
 		}
 
-		// PHP Version
 		if ( version_compare( phpversion(), '5.3', '<' ) ) {
+
+			// PHP Version
 			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce Error: Simplify commerce requires PHP 5.3 and above. You are using version %s.', 'woocommerce' ), phpversion() ) . '</p></div>';
-		}
 
-		// Check required fields
-		elseif ( ! $this->public_key || ! $this->private_key ) {
+		} elseif ( ! $this->public_key || ! $this->private_key ) {
+
+			// Check required fields
 			echo '<div class="error"><p>' . __( 'Simplify Commerce Error: Please enter your public and private keys', 'woocommerce' ) . '</p></div>';
-		}
 
-		// Show message when using standard mode and no SSL on the checkout page
-		elseif ( 'standard' == $this->mode && ! wc_checkout_is_https() ) {
+		} elseif ( 'standard' == $this->mode && ! wc_checkout_is_https() ) {
+
+			// Show message when using standard mode and no SSL on the checkout page
 			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Simplify Commerce will only work in sandbox mode.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
+
 		}
 	}
 

@@ -311,13 +311,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				// Null when the order was refunded, but not the line items themselves.
 				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
 				$this->report_data->total_refunds        += $value->total_refund;
-			}
-			elseif ( 'shipping' === $value->item_type ) {
+			} elseif ( 'shipping' === $value->item_type ) {
 				$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax * -1 );
 				$this->report_data->total_shipping_refunded     += wc_format_decimal( $value->total_refund, 2 );
 				$this->report_data->total_refunds               += $value->total_refund;
-			}
-			elseif ( 'line_item' === $value->item_type ) {
+			} elseif ( 'line_item' === $value->item_type ) {
 				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
 				$this->report_data->refunded_order_items += absint( $value->order_item_count );
 				$this->report_data->total_refunds        += $value->total_refund;
