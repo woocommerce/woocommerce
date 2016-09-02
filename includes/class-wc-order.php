@@ -976,7 +976,7 @@ class WC_Order extends WC_Abstract_Order {
 		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
 			try {
 				$this->set_billing_email( $user->user_email );
-			} catch( WC_Data_Exception $e ){
+			} catch( WC_Data_Exception $e ) {
 				unset( $e );
 			}
 		}

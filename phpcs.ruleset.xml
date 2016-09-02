@@ -82,7 +82,7 @@
 		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
 		<exclude name="Squiz.Commenting.VariableComment.WrongStyle" />
 		<!-- <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace" /> -->
-		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseParenthesis" />
+		<!-- <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseParenthesis" /> -->
 		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterKeyword" />
 		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceAfterDefault" />
 		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterOpen" />
