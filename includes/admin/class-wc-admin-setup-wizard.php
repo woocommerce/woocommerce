@@ -8,7 +8,7 @@
  * @category    Admin
  * @package     WooCommerce/Admin
  * @version     2.6.0
-*/
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

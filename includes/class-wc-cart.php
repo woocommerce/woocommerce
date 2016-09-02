@@ -363,10 +363,10 @@ class WC_Cart {
 	}
 
 	/**
-	* Checks if the cart is empty.
-	*
-	* @return bool
-	*/
+	 * Checks if the cart is empty.
+	 *
+	 * @return bool
+	 */
 	public function is_empty() {
 		return 0 === sizeof( $this->get_cart() );
 	}
@@ -2287,7 +2287,7 @@ class WC_Cart {
 
 	/**
 	 * Function to apply cart discounts after tax.
-		 * @deprecated Coupons can not be applied after tax
+	 * @deprecated Coupons can not be applied after tax
 	 */
 	public function apply_cart_discounts_after_tax( $values, $price ) {
 		_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );

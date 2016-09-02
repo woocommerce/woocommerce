@@ -119,7 +119,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      * Test to make sure theme response is correct.
      *
      * @since 2.7.0
-    */
+     */
     public function test_get_system_status_info_theme() {
         wp_set_current_user( $this->user );
     	$active_theme = wp_get_theme();
@@ -173,7 +173,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      * Test system status schema.
      *
      * @since 2.7.0
-    */
+     */
     public function test_system_status_schema() {
         $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status' );
         $response = $this->server->dispatch( $request );
@@ -306,7 +306,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
      * Test system status schema.
      *
      * @since 2.7.0
-    */
+     */
     public function test_system_status_tool_schema() {
         $request = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
         $response = $this->server->dispatch( $request );

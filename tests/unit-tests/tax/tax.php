@@ -213,8 +213,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	* Test compound tax amounts
-	*/
+	 * Test compound tax amounts
+	 */
 	public function test_calc_compound_tax() {
 		global $wpdb;
 

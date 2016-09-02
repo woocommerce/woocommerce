@@ -488,10 +488,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	* Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
-	*
-	* @since  2.7.0
-	*/
+	 * Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
+	 *
+	 * @since  2.7.0
+	 */
 	public function test_classic_settings() {
 		wp_set_current_user( $this->user );
 

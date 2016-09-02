@@ -28,12 +28,12 @@ class WC_Register_WP_Admin_Settings {
 	}
 
 	/**
-	* Registers a setting group, based on admin page ID & label as parent group.
-	*
-	* @since  2.7.0
-	* @param  array $groups Array of previously registered groups.
-	* @return array
-	*/
+	 * Registers a setting group, based on admin page ID & label as parent group.
+	 *
+	 * @since  2.7.0
+	 * @param  array $groups Array of previously registered groups.
+	 * @return array
+	 */
 	public function register_group( $groups ) {
 		$groups[] = array(
 			'id'    => $this->page->get_id(),
@@ -43,12 +43,12 @@ class WC_Register_WP_Admin_Settings {
 	}
 
 	/**
-	* Registers settings to a specific group.
-	*
-	* @since  2.7.0
-	* @param  array $settings Existing registered settings
-	* @return array
-	*/
+	 * Registers settings to a specific group.
+	 *
+	 * @since  2.7.0
+	 * @param  array $settings Existing registered settings
+	 * @return array
+	 */
 	public function register_settings( $settings ) {
 		/**
 		 * wp-admin settings can be broken down into separate sections from
@@ -101,7 +101,7 @@ class WC_Register_WP_Admin_Settings {
 		if ( isset( $setting['desc_tip'] ) ) {
 			if ( true === $setting['desc_tip'] ) {
 				$new_setting['tip'] = $setting['desc'];
-			} else if ( ! empty( $setting['desc_tip'] ) ) {
+			} elseif ( ! empty( $setting['desc_tip'] ) ) {
 				$new_setting['tip'] = $setting['desc_tip'];
 			}
 		}
