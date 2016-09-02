@@ -182,16 +182,6 @@ function wc_clear_cart_after_payment() {
 add_action( 'get_header', 'wc_clear_cart_after_payment' );
 
 /**
- * Get the subtotal.
- *
- * @access public
- * @return string
- */
-function wc_cart_totals_subtotal_html() {
-	echo WC()->cart->get_cart_subtotal();
-}
-
-/**
  * Get shipping methods.
  *
  * @access public
@@ -382,7 +372,6 @@ function wc_get_chosen_shipping_method_ids() {
 
 /**
  * Get cart cross sells.
- *
  * @since 2.7.0
  * @return array
  */
@@ -399,4 +388,95 @@ function wc_get_cart_cross_sells() {
 	}
 	$cross_sells = array_diff( $cross_sells, $in_cart );
 	return $cross_sells;
+}
+
+/**
+ * See if we're displaying tax in the cart in a certain way.
+ * @since 2.7.0
+ * @return boolean
+ */
+function wc_cart_prices_include_tax() {
+	return 'incl' === get_option( 'woocommerce_tax_display_cart', 'excl' );
+}
+
+/**
+ * Determines the value that the customer spent and the subtotal
+ * displayed, used for things like coupon validation.
+ *
+ * Since the coupon lines are displayed based on the TAX DISPLAY value
+ * of cart, this is used to determine the spend.
+ *
+ * If cart totals are shown including tax, use the subtotal.
+ * If cart totals are shown excluding tax, use the subtotal ex tax
+ * (tax is shown after coupons).
+ *
+ * @since 2.7.0
+ * @return string
+ */
+function wc_cart_subtotal_to_display() {
+	return wc_format_decimal( wc_cart_prices_include_tax() ? WC()->cart->subtotal : WC()->cart->subtotal_ex_tax );
+}
+
+/**
+ * Get the subtotal.
+ * @return string
+ */
+function wc_cart_totals_subtotal_html() {
+	echo WC()->cart->get_cart_subtotal();
+}
+
+/**
+ * Gets the sub total (after calculation).
+ *
+ * @param bool $compound whether to include compound taxes
+ * @return string formatted price
+ */
+function get_cart_subtotal( $compound = false ) {
+
+	// If the cart has compound tax, we want to show the subtotal as
+	// cart + shipping + non-compound taxes (after discount)
+	if ( $compound ) {
+
+		$cart_subtotal = wc_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
+
+	// Otherwise we show cart items totals only (before discount)
+	} else {
+
+		// Display varies depending on settings
+		if ( $this->tax_display_cart == 'excl' ) {
+
+			$cart_subtotal = wc_price( $this->subtotal_ex_tax );
+
+			if ( $this->tax_total > 0 && $this->prices_include_tax ) {
+				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+			}
+		} else {
+
+			$cart_subtotal = wc_price( $this->subtotal );
+
+			if ( $this->tax_total > 0 && ! $this->prices_include_tax ) {
+				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+			}
+		}
+	}
+
+	return apply_filters( 'woocommerce_cart_subtotal', $cart_subtotal, $compound, $this );
+}
+
+/**
+ * Get the product row price per item.
+ * @since 2.7.0
+ * @param WC_Product $product
+ * @param int $quantity to show
+ * @return string formatted price
+ */
+function wc_cart_product_price_to_display( $product, $quantity = 1 ) {
+	if ( wc_is_cart_tax_display( 'incl' ) ) {
+		$price  = $product->get_price_including_tax( $quantity );
+		$suffix = wc_cart_prices_include_tax() ? '' : '<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+	} else {
+		$price = $product->get_price_excluding_tax( $quantity );
+		$suffix = wc_cart_prices_include_tax() ? '<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
+	}
+	return apply_filters( 'woocommerce_cart_product_price_to_display', wc_price( $product->is_taxable() ? $price . ' ' . $suffix : $price ), $product, $quantity );
 }

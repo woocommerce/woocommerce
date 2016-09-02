@@ -2456,7 +2456,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 
 if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
-	 * Gets and formats a list of cart item data + variations for display on the frontend.
+	 * Gets and formats a list of cart item data + variations for display on the frontend. @todo
 	 *
 	 * @since 2.7.0
 	 * @param array $cart_item
@@ -2476,11 +2476,8 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', $name ) );
 
 				// If this is a term slug, get the term's nice name
-				if ( taxonomy_exists( $taxonomy ) ) {
-					$term = get_term_by( 'slug', $value, $taxonomy );
-					if ( ! is_wp_error( $term ) && $term && $term->name ) {
-						$value = $term->name;
-					}
+				if ( taxonomy_exists( $taxonomy ) && ( $term = get_term_by( 'slug', $value, $taxonomy ) ) && ! is_wp_error( $term ) ) {
+					$value = $term->name;
 					$label = wc_attribute_label( $taxonomy );
 
 				// If this is a custom option slug, get the options name
@@ -2493,7 +2490,6 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 						$label = $name;
 					}
 				}
-
 				$item_data[] = array(
 					'key'   => $label,
 					'value' => $value,

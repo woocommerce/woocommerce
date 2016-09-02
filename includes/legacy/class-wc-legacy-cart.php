@@ -30,7 +30,11 @@ abstract class WC_Legacy_Cart {
 
 
 			/****
-
+			/**
+			 * An array of fees.
+			 * @var array
+			 *
+			public $fees = array();
 			/** @var array Contains an array of cart items. *
 			public $cart_contents = array();
 
@@ -126,11 +130,85 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
+	 * Determines the value that the customer spent and the subtotal
+	 * displayed, used for things like coupon validation.
+	 *
+	 * Since the coupon lines are displayed based on the TAX DISPLAY value
+	 * of cart, this is used to determine the spend.
+	 *
+	 * If cart totals are shown including tax, use the subtotal.
+	 * If cart totals are shown excluding tax, use the subtotal ex tax
+	 * (tax is shown after coupons).
+	 *
+	 * @since 2.6.0
+	 * @return string
+	 */
+	public function get_displayed_subtotal() {
+		_deprecated_function( 'get_displayed_subtotal', '2.7', 'wc_cart_subtotal_to_display' );
+		return wc_cart_subtotal_to_display();
+	}
+
+	/**
+	 * Get the product row price per item.
+	 *
+	 * @param WC_Product $product
+	 * @return string formatted price
+	 */
+	public function get_product_price( $product ) {
+		_deprecated_function( 'get_product_price', '2.7', 'wc_cart_product_price_to_display' );
+		return wc_cart_product_price_to_display( $product );
+	}
+
+	/**
+	 * Get the product row subtotal.
+	 *
+	 * Gets the tax etc to avoid rounding issues.
+	 *
+	 * When on the checkout (review order), this will get the subtotal based on the customer's tax rate rather than the base rate.
+	 *
+	 * @param WC_Product $product
+	 * @param int $quantity
+	 * @return string formatted price
+	 */
+	public function get_product_subtotal( $product, $quantity ) {
+		_deprecated_function( 'get_product_subtotal', '2.7', 'wc_cart_product_price_to_display' );
+		return wc_cart_product_price_to_display( $product, $quantity );
+	}
+
+	/**
+	 * Get the total of all cart discounts.
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_total() {
+		return wc_cart_round_discount( $this->discount_cart, $this->dp );
+	}
+
+	/**
+	 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_tax_total() {
+		return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
+	}
+
+	/**
 	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
 	 */
 	public function init() {
 
 	}
+
+	/**
+	 * Gets the total excluding taxes.
+	 *
+	 * @return string formatted price
+	 */
+	public function get_total_ex_tax() {
+		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( min( 0, $this->total - $this->tax_total - $this->shipping_tax_total ) ) );
+	}
+
 
 
 			/**
@@ -143,7 +221,7 @@ abstract class WC_Legacy_Cart {
 			public function get_item_data( $cart_item, $flat = false ) {
 				return wc_display_item_data( $cart_item, $flat = false  );
 			}
-			
+
 	/**
 	 * Add additional fee to the cart.
 	 *
@@ -347,10 +425,18 @@ abstract class WC_Legacy_Cart {
 			}
 
 	/**
+	 * Gets the total discount amount.
+	 * @deprecated 2.7.0 in favor to get_cart_discount_total()
+	 */
+	public function get_total_discount() {
+		_deprecated_function( 'get_total_discount', '2.7', 'get_cart_discount_total' );
+		return wc_price( $this->get_cart_discount_total() );
+	}
+
+	/**
 	 * Gets the url to the cart page.
 	 *
 	 * @deprecated 2.5.0 in favor to wc_get_cart_url()
-	 *
 	 * @return string url to page
 	 */
 	public function get_cart_url() {
@@ -362,7 +448,6 @@ abstract class WC_Legacy_Cart {
 	 * Gets the url to the checkout page.
 	 *
 	 * @deprecated 2.5.0 in favor to wc_get_checkout_url()
-	 *
 	 * @return string url to page
 	 */
 	public function get_checkout_url() {
@@ -374,7 +459,6 @@ abstract class WC_Legacy_Cart {
 	 * Coupons enabled function. Filterable.
 	 *
 	 * @deprecated 2.5.0 in favor to wc_coupons_enabled()
-	 *
 	 * @return bool
 	 */
 	public function coupons_enabled() {
@@ -386,7 +470,6 @@ abstract class WC_Legacy_Cart {
 	 * Sees if we need a shipping address.
 	 *
 	 * @deprecated 2.5.0 in favor to wc_ship_to_billing_address_only()
-	 *
 	 * @return bool
 	 */
 	public function ship_to_billing_address_only() {

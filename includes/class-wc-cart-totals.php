@@ -43,6 +43,14 @@ class WC_Cart_Item_Totals {
 	private $calculated     = false;
 
 	/**
+	 * Constructor for the cart class. Loads options and hooks in the init method.
+	 */
+	public function __construct() {
+		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate' ), 20, 0 );
+		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate' ), 20, 0 );
+	}
+
+	/**
 	 * Get default blank set of props used per item.
 	 * @return array
 	 */
@@ -200,7 +208,7 @@ class WC_Cart_Item_Totals {
 	 */
 	public function get_discount_total() {
 		$this->maybe_calculate();
-		return array_sum( array_values( wp_list_pluck( $this->coupons, 'total' ) ) );
+		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total' ) ) ), wc_get_price_decimals() );
 	}
 
 	/**
@@ -209,7 +217,7 @@ class WC_Cart_Item_Totals {
 	 */
 	public function get_discount_total_tax() {
 		$this->maybe_calculate();
-		return array_sum( array_values( wp_list_pluck( $this->coupons, 'total_tax' ) ) );
+		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total_tax' ) ) ), wc_get_price_decimals() );
 	}
 
 	/**

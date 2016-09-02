@@ -40,7 +40,25 @@ class WC_Cart_Items {
 		}
 		return '';
 	}
+	/**
+	 * Looks through cart items and checks the posts are not trashed or deleted.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function check_cart_item_validity() {
+		$return = true;
 
+		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			$_product = $values['data'];
+
+			if ( ! $_product || ! $_product->exists() || 'trash' === $_product->post->post_status ) {
+				$this->set_quantity( $cart_item_key, 0 );
+				$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
+			}
+		}
+
+		return $return;
+	}
 	/**
 	 * Generate a unique ID for the cart item being added.
 	 *
