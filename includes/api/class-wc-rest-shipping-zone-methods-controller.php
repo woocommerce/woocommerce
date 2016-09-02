@@ -140,7 +140,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			return $zone;
 		}
 
-		$instance_id = $zone->add_shipping_method( $method_id ) ;
+		$instance_id = $zone->add_shipping_method( $method_id );
 		$methods     = $zone->get_shipping_methods();
 		$method      = false;
 		foreach ( $methods as $method_obj ) {
@@ -197,7 +197,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 
 		// Actually delete
 		if ( $force ) {
-			$zone->delete_shipping_method( $instance_id ) ;
+			$zone->delete_shipping_method( $instance_id );
 		} else {
 			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.' ), array( 'status' => 501 ) );
 		}

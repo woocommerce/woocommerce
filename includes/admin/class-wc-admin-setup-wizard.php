@@ -330,19 +330,19 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ) ; ?>" />
+						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ) ; ?>" />
+						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ) ; ?>" />
+						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ); ?>" />
 					</td>
 				</tr>
 				<tr>

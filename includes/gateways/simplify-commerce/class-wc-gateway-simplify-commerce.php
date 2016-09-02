@@ -551,7 +551,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	protected function get_users_token() {
 		$customer_token  = null;
 		if ( is_user_logged_in() ) {
-			$tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id() ) ;
+			$tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id() );
 			foreach ( $tokens as $token ) {
 				if ( $token->get_gateway_id() === $this->id ) {
 					$customer_token = $token;

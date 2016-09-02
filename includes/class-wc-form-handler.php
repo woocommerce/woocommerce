@@ -243,7 +243,7 @@ class WC_Form_Handler {
 
 		if ( wc_notice_count( 'error' ) === 0 ) {
 
-			wp_update_user( $user ) ;
+			wp_update_user( $user );
 
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
