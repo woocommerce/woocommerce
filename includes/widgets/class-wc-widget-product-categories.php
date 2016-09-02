@@ -231,7 +231,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$list_args['walker']                     = new WC_Product_Cat_List_Walker;
 			$list_args['title_li']                   = '';
 			$list_args['pad_counts']                 = 1;
-			$list_args['show_option_none']           = __('No product categories exist.', 'woocommerce' );
+			$list_args['show_option_none']           = __( 'No product categories exist.', 'woocommerce' );
 			$list_args['current_category']           = ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$list_args['current_category_ancestors'] = $this->cat_ancestors;
 

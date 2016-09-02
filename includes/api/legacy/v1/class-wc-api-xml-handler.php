@@ -70,7 +70,7 @@ class WC_API_XML_Handler implements WC_API_Handler {
 
 		$this->xml->openMemory();
 
-		$this->xml->setIndent(true );
+		$this->xml->setIndent( true );
 
 		$this->xml->startDocument( '1.0', 'UTF-8' );
 

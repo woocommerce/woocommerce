@@ -134,7 +134,7 @@ class WC_Meta_Box_Product_Data {
 					woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __( 'Product URL', 'woocommerce' ), 'placeholder' => 'http://', 'description' => __( 'Enter the external URL to the product.', 'woocommerce' ) ) );
 
 					// Button text
-					woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __( 'Button text', 'woocommerce' ), 'placeholder' => _x('Buy product', 'placeholder', 'woocommerce' ), 'description' => __( 'This text will be shown on the button linking to the external product.', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __( 'Button text', 'woocommerce' ), 'placeholder' => _x( 'Buy product', 'placeholder', 'woocommerce' ), 'description' => __( 'This text will be shown on the button linking to the external product.', 'woocommerce' ) ) );
 
 				echo '</div>';
 
@@ -575,7 +575,7 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group hide_if_external">
 					<?php
 						// Purchase note
-						woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+						woocommerce_wp_textarea_input( array( 'id' => '_purchase_note', 'label' => __( 'Purchase note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
 					?>
 				</div>
 
@@ -951,7 +951,7 @@ class WC_Meta_Box_Product_Data {
 							} else {
 								$term = wp_insert_term( trim( $value ), $attribute_names[ $i ] );
 								if ( isset( $term->term_id ) ) {
-									$values[ $key ] = intval($term->term_id );
+									$values[ $key ] = intval( $term->term_id );
 								}
 							}
 						}

@@ -63,7 +63,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_payment_tokenmeta" );
 
 	// Delete options.
-	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
+	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 
 	// Delete posts + data.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );

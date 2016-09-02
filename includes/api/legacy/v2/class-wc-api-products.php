@@ -1571,7 +1571,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length

@@ -814,7 +814,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
 			$version = trim( $matches[1] );
-			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 			// Check the latest stable version and ignore trunk.
 			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {

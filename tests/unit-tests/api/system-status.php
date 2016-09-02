@@ -152,7 +152,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
         $this->assertEquals( 10, count( $settings ) );
         $this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
-        $this->assertEquals(  get_woocommerce_currency(), $settings['currency'] );
+        $this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
         $this->assertEquals( $term_response, $settings['taxonomies'] );
     }
 

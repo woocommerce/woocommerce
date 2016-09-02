@@ -922,7 +922,7 @@ class WC_Form_Handler {
 					exit;
 				}
 			} catch ( Exception $e ) {
-				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
+				wc_add_notice( apply_filters( 'login_errors', $e->getMessage() ), 'error' );
 			}
 		}
 	}

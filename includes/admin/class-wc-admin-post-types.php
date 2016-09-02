@@ -932,9 +932,9 @@ class WC_Admin_Post_Types {
 		}
 
 		$class            = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
-		$query_string     = remove_query_arg(array( 'orderby', 'order' ) );
-		$query_string     = add_query_arg( 'orderby', urlencode('menu_order title' ), $query_string );
-		$query_string     = add_query_arg( 'order', urlencode('ASC' ), $query_string );
+		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
+		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
+		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
 		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
@@ -1108,7 +1108,7 @@ class WC_Admin_Post_Types {
 			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
 		}
 
-		if ( $product->is_type('simple' ) || $product->is_type('external' ) ) {
+		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) {
 				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
@@ -1162,7 +1162,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle stock
-		if ( ! $product->is_type('grouped' ) ) {
+		if ( ! $product->is_type( 'grouped' ) ) {
 			if ( isset( $_REQUEST['_manage_stock'] ) ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
 				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );

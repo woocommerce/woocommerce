@@ -287,7 +287,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$last = get_user_meta( $customer_id, 'last_update', true );
-		sleep(1 );
+		sleep( 1 );
 		$this->assertEquals( $last, $customer->get_date_modified() );
 		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();

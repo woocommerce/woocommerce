@@ -117,7 +117,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
 		}
 
-		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
+		$output .= '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>';
 
 		return $output;
 	}

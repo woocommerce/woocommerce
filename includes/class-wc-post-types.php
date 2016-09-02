@@ -225,7 +225,7 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists('product' ) ) {
+		if ( post_type_exists( 'product' ) ) {
 			return;
 		}
 

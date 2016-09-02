@@ -614,7 +614,7 @@ class WC_Product_Variable extends WC_Product {
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'      => $availability_html,
 			'sku'                    => $variation->get_sku(),
-			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ) : '',
+			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
 			'min_qty'                => 1,
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),

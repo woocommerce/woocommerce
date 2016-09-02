@@ -16,7 +16,7 @@ class WC_HookFinder {
 
 	        if ( $dir == '\\' || $dir == '/' ) { $dir = ''; } // End IF Statement
 
-	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
+	        return self::get_files( basename( $pattern ), $flags, $dir . '/' );
 
 	    } // End IF Statement
 

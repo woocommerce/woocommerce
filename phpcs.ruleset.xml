@@ -36,7 +36,7 @@
 		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterCloseBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
+		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" /> -->
 		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" /> -->
 		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket" /> -->
 		<!-- <exclude name="Squiz.Commenting.BlockComment.NoEmptyLineBefore" /> -->

@@ -33,7 +33,7 @@ class WC_Shortcode_Order_Tracking {
 			return;
 		}
 
-		extract(shortcode_atts(array(), $atts ) );
+		extract( shortcode_atts( array(), $atts ) );
 
 		global $post;
 
@@ -66,7 +66,7 @@ class WC_Shortcode_Order_Tracking {
 					}
 				} else {
 
-					echo '<p class="woocommerce-error">' . sprintf( __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
+					echo '<p class="woocommerce-error">' . sprintf( __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ), get_permalink( $post->ID ) ) . '</p>';
 
 				}
 			}

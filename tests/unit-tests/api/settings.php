@@ -536,6 +536,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'yd', $data['value'] );
-		$this->assertEquals( 'yd', get_option(' woocommerce_dimension_unit' ) );
+		$this->assertEquals( 'yd', get_option( 'woocommerce_dimension_unit' ) );
 	}
 }

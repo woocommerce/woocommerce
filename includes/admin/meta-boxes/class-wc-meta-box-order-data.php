@@ -475,7 +475,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time('timestamp' );
+			$date = current_time( 'timestamp' );
 		} else {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}

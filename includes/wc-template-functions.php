@@ -22,7 +22,7 @@ function wc_template_redirect() {
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
 	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
-		wp_safe_redirect( get_post_type_archive_link('product' ) );
+		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 	}
 
@@ -159,7 +159,7 @@ function wc_products_rss_feed() {
 
 	} elseif ( is_tax( 'product_cat' ) ) {
 
-		$term = get_term_by( 'slug', esc_attr( get_query_var('product_cat' ) ), 'product_cat' );
+		$term = get_term_by( 'slug', esc_attr( get_query_var( 'product_cat' ) ), 'product_cat' );
 
 		if ( $term ) {
 			$feed = add_query_arg( 'product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ) );
@@ -167,11 +167,11 @@ function wc_products_rss_feed() {
 		}
 	} elseif ( is_tax( 'product_tag' ) ) {
 
-		$term = get_term_by('slug', esc_attr( get_query_var('product_tag' ) ), 'product_tag' );
+		$term = get_term_by( 'slug', esc_attr( get_query_var( 'product_tag' ) ), 'product_tag' );
 
 		if ( $term ) {
-			$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ) );
-			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
+			$feed = add_query_arg( 'product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ) );
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf( __( 'New products tagged %s', 'woocommerce' ), urlencode( $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
 		}
 	}
 }
@@ -416,7 +416,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php if ( have_posts() ) : ?>
 
-				<?php do_action('woocommerce_before_shop_loop' ); ?>
+				<?php do_action( 'woocommerce_before_shop_loop' ); ?>
 
 				<?php woocommerce_product_loop_start(); ?>
 
@@ -430,7 +430,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php woocommerce_product_loop_end(); ?>
 
-				<?php do_action('woocommerce_after_shop_loop' ); ?>
+				<?php do_action( 'woocommerce_after_shop_loop' ); ?>
 
 			<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
@@ -1913,7 +1913,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys($countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
+					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
 
 				} else {
 

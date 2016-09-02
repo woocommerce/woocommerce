@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php endforeach; ?>
 
-	<?php do_action('woocommerce_after_checkout_billing_form', $checkout ); ?>
+	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
 
 	<?php if ( ! is_user_logged_in() && $checkout->enable_signup ) : ?>
 
