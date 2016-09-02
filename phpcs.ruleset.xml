@@ -18,7 +18,7 @@
 		<exclude name="Generic.Commenting.DocComment.SpacingAfter" />
 		<exclude name="Generic.Commenting.DocComment.SpacingBeforeTags" />
 		<exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
-		<exclude name="Generic.Files.EndFileNewline.NotFound" />
+		<!-- <exclude name="Generic.Files.EndFileNewline.NotFound" /> -->
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />
 		<exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine" />
@@ -39,8 +39,8 @@
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket" />
-		<exclude name="Squiz.Commenting.BlockComment.NoEmptyLineBefore" />
-		<exclude name="Squiz.Commenting.BlockComment.NoNewLine" />
+		<!-- <exclude name="Squiz.Commenting.BlockComment.NoEmptyLineBefore" /> -->
+		<!-- <exclude name="Squiz.Commenting.BlockComment.NoNewLine" /> -->
 		<exclude name="Squiz.Commenting.BlockComment.WrongEnd" />
 		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
@@ -64,7 +64,7 @@
 		<exclude name="Squiz.Commenting.FunctionComment.ParamNameNoCaseMatch" />
 		<exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch" />
 		<exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
-		<exclude name="Squiz.Commenting.FunctionComment.SpacingAfter" />
+		<!-- <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter" /> -->
 		<exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
 		<exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
 		<exclude name="Squiz.Commenting.FunctionComment.ThrowsNotCapital" />
