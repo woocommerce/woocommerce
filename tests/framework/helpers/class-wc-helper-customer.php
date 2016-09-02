@@ -12,7 +12,6 @@ class WC_Helper_Customer {
 	 *
 	 * @return WC_Customer
 	 */
-
 	public static function create_mock_customer() {
 
 		$customer_data = array(
@@ -69,7 +68,6 @@ class WC_Helper_Customer {
 	 *
 	 * @return array
 	 */
-
 	public static function get_expected_store_location() {
 		return array( "GB", "", "", "" );
 	}
@@ -79,7 +77,6 @@ class WC_Helper_Customer {
 	 *
 	 * @return array
 	 */
-
 	public static function get_customer_details() {
 		return WC()->session->get( 'customer' );
 	}
@@ -89,7 +86,6 @@ class WC_Helper_Customer {
 	 *
 	 * @return array
 	 */
-
 	public static function get_chosen_shipping_methods() {
 		return WC()->session->get( 'chosen_shipping_methods' );
 	}
@@ -99,7 +95,6 @@ class WC_Helper_Customer {
 	 *
 	 * @return string base or billing
 	 */
-
 	public static function get_tax_based_on() {
 		return get_option( 'woocommerce_tax_based_on' );
 	}
@@ -109,7 +104,6 @@ class WC_Helper_Customer {
 	 *
 	 * @param string $default_shipping_method Shipping Method slug
 	 */
-
 	public static function set_customer_details( $customer_details ) {
 		WC()->session->set( 'customer', $customer_details );
 	}
@@ -119,7 +113,6 @@ class WC_Helper_Customer {
 	 *
 	 * @param string $chosen_shipping_method Shipping Method slug
 	 */
-
 	public static function set_chosen_shipping_methods( $chosen_shipping_methods ) {
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 	}
@@ -129,7 +122,6 @@ class WC_Helper_Customer {
 	 *
 	 * @param string $default_shipping_method Shipping Method slug
 	 */
-
 	public static function set_tax_based_on( $default_shipping_method ) {
 		update_option( 'woocommerce_tax_based_on', $default_shipping_method );
 	}
