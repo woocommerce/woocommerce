@@ -57,7 +57,8 @@ class WC_API_Resource {
 
 		foreach ( $response_names as $name ) {
 
-			/* remove fields from responses when requests specify certain fields
+			/**
+			 * Remove fields from responses when requests specify certain fields
 			 * note these are hooked at a later priority so data added via
 			 * filters (e.g. customer data to the order response) still has the
 			 * fields filtered properly
