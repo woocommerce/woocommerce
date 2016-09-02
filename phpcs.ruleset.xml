@@ -75,7 +75,7 @@
 		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
 		<!-- <exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" /> -->
 		<exclude name="Squiz.Commenting.InlineComment.NotCapital" />
-		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
+		<!-- <exclude name="Squiz.Commenting.InlineComment.SpacingAfter" /> -->
 		<exclude name="Squiz.Commenting.InlineComment.SpacingBefore" />
 		<exclude name="Squiz.Commenting.InlineComment.WrongStyle" />
 		<exclude name="Squiz.Commenting.VariableComment.Missing" />

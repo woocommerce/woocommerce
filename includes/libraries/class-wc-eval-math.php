@@ -112,7 +112,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
-
 			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", $expr, $matches ) ) { // make sure the characters are all good
 				return self::trigger( "illegal character '{$matches[0]}'" );
 			}

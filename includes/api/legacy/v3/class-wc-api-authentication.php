@@ -87,7 +87,6 @@ class WC_API_Authentication {
 		}
 
 		// if the above is not present, we will do full basic auth
-
 		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {
 			$this->exit_with_unauthorized_headers();
 		}

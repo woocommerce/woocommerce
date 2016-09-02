@@ -378,7 +378,6 @@ class WC_API_Resource {
 		} else {
 
 			// delete order/coupon/webhook
-
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
 			if ( ! $result ) {
