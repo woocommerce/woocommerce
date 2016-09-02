@@ -129,7 +129,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					// ===============
 				} elseif ( ( in_array( $op, $ops ) or $ex ) and $expecting_op ) { // are we putting an operator on the stack?
 					if ( $ex ) { // are we expecting an operator but have a number/variable/function/opening parethesis?
-						$op = '*'; $index--; // it's an implicit multiplication
+						$op = '*';
+						$index--; // it's an implicit multiplication
 					}
 					// heart of the algorithm:
 					while ( $stack->count > 0 and ( $o2 = $stack->last() ) and in_array( $o2, $ops ) and ( $ops_r[ $op ] ? $ops_p[ $op ] < $ops_p[ $o2 ] : $ops_p[ $op ] <= $ops_p[ $o2 ] ) ) {

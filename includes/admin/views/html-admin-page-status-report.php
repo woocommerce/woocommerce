@@ -67,7 +67,7 @@ $pages          = $system_status->get_pages();
 		<tr>
 			<td data-export-label="WP Multisite"><?php _e( 'WP Multisite', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( $environment['wp_multisite'] ) echo '<span class="dashicons dashicons-yes"></span>'; else echo '&ndash;'; ?></td>
+			<td><?php echo ( $environment['wp_multisite'] ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>

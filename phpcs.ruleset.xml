@@ -21,7 +21,7 @@
 		<!-- <exclude name="Generic.Files.EndFileNewline.NotFound" /> -->
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />
-		<exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine" />
+		<!-- <exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine" /> -->
 		<!-- <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" /> -->
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace" />

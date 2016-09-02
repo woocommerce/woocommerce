@@ -36,9 +36,11 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 		</div>
 	</td>
 
-	<?php if ( wc_tax_enabled() ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
-		<td class="line_tax" width="1%"></td>
-	<?php endfor; endif; ?>
+	<?php if ( wc_tax_enabled() ) : ?>
+		<?php for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
+			<td class="line_tax" width="1%"></td>
+		<?php endfor; ?>
+	<?php endif; ?>
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
