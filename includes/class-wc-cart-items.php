@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Cart Items.
  *
- * @class 		WC_Cart_Items
  * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
@@ -20,226 +19,157 @@ class WC_Cart_Items {
 	 */
 	private $items = array();
 
+	/**
+	 * An array of items removed from the cart which can be restored.
+	 * @var object[]
+	 */
+	private $removed_items = array();
+
+	/**
+	 * When data has been added, this is set to true so totals can be recalculated.
+	 * @var boolean
+	 */
+	private $dirty = false;
+
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
-		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
+		add_action( 'woocommerce_check_cart_items', array( $this, 'check_items' ), 1 );
 	}
 
 	/**
-	 * Check if product is in the cart and return cart item key.
-	 *
-	 * Cart item key will be unique based on the item and its properties, such as variations.
-	 *
-	 * @param mixed id of product to find in the cart
-	 * @return string cart item key
-	 */
-	public function find_product_in_cart( $cart_id = false ) {
-		if ( $cart_id !== false ) {
-			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
-				return $cart_id;
-			}
-		}
-		return '';
-	}
+ 	 * Get default blank set of props used per item.
+ 	 * @return array
+ 	 */
+ 	private function get_default_item_props() {
+ 		return (object) array(
+			'product'            => false,
+ 			'quantity'           => 0,
+			'price'              => 0,
+			'weight'             => 0,
+			'tax_class'          => '',
+			'price_includes_tax' => wc_prices_include_tax(),
+ 			'subtotal'           => 0,
+ 			'subtotal_tax'       => 0,
+ 			'subtotal_tax_data'  => array(),
+ 			'total'              => 0,
+ 			'tax'                => 0,
+ 			'tax_data'           => array(),
+ 			'discounted_price'   => 0,
+ 		);
+ 	}
+
 	/**
-	 * Looks through cart items and checks the posts are not trashed or deleted.
-	 *
-	 * @return bool|WP_Error
+	 * Set items array.
+	 * @param array $items
 	 */
-	public function check_cart_item_validity() {
-		$return = true;
-
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$_product = $values['data'];
-
-			if ( ! $_product || ! $_product->exists() || 'trash' === $_product->post->post_status ) {
-				$this->set_quantity( $cart_item_key, 0 );
-				$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
-			}
+	public function set_items( $items = array() ) {
+		foreach ( $items as $item_key => $maybe_item ) {
+			$this->add_item( $maybe_item, $item_key );
 		}
-
-		return $return;
+		$this->dirty = true;
 	}
+
+	/**
+	 * Add an item.
+	 */
+	public function add_item( $maybe_item, $item_key = '' ) {
+		if ( ! is_array( $maybe_item ) || ! isset( $maybe_item['data'], $maybe_item['quantity'] ) ) {
+			return;
+		}
+		if ( ! $item_key ) {
+			$item_key = $this->generate_id( $maybe_item );
+		}
+		$item = $this->get_default_item_props();
+
+		$item->values    = $maybe_item;
+		$item->product   = $maybe_item['data'];
+		$item->quantity  = $maybe_item['quantity'];
+		$item->price     = $maybe_item['data']->get_price();
+		$item->weight    = $maybe_item['data']->get_weight();
+		$item->tax_class = $maybe_item['data']->get_tax_class();
+
+		$this->items[ $item_key ] = $item;
+	}
+
+	/**
+	 * Get all items.
+	 * @return array
+	 */
+	public function get_items() {
+		return $this->items;
+	}
+
+	/**
+	 * Get an item by it's key.
+	 *
+	 * @param  string $item_key
+	 * @return array
+	 */
+	public function get_item_by_key( $item_key ) {
+		return isset( $this->items[ $item_key ] ) ? $this->items[ $item_key ] : array();
+	}
+
 	/**
 	 * Generate a unique ID for the cart item being added.
 	 *
-	 * @param int $product_id - id of the product the key is being generated for
-	 * @param int $variation_id of the product the key is being generated for
-	 * @param array $variation data for the cart item
-	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
+	 * @param array $item Cart item.
 	 * @return string cart item key
 	 */
-	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
-		return apply_filters( 'woocommerce_cart_id', md5( json_encode( array( $product_id, $variation_id, $variation, $cart_item_data ) ) ), $product_id, $variation_id, $variation, $cart_item_data );
+	public function generate_id( $item ) {
+		unset( $item['quantity'], $item['data'] );
+		return md5( json_encode( $item ) );
 	}
 
 	/**
-	 * Add a product to the cart.
-	 *
-	 * @param int $product_id contains the id of the product to add to the cart
-	 * @param int $quantity contains the quantity of the item to add
-	 * @param int $variation_id
-	 * @param array $variation attribute values
-	 * @param array $cart_item_data extra cart item data we want to pass into the item
-	 * @return string|bool $cart_item_key
+	 * Validate a product before adding to cart.
+	 * @param  WC_Product $product
+	 * @throws Exception
 	 */
-	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
-		// Wrap in try catch so plugins can throw an exception to prevent adding to cart
-		try {
-			$product_id   = absint( $product_id );
-			$variation_id = absint( $variation_id );
+	public function validate_item( $product, $adding_quantity = 0 ) {
+		$products_qty_in_cart  = $this->get_item_quantities();
+		$managing_stock        = $product->managing_stock();
+		$check_variation_stock = $product->is_type( 'variation' ) && true === $managing_stock;
 
-			// Ensure we don't add a variation to the cart directly by variation ID
-			if ( 'product_variation' == get_post_type( $product_id ) ) {
-				$variation_id = $product_id;
-				$product_id   = wp_get_post_parent_id( $variation_id );
-			}
-
-			// Get the product
-			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
-
-			// Sanity check
-			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->post->post_status  ) {
-				return false;
-			}
-
-			// Load cart item data - may be added by other plugins
-			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
-
-			// Generate a ID based on product ID, variation ID, variation data, and other cart item data
-			$cart_id        = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
-
-			// Find the cart item key in the existing cart
-			$cart_item_key  = $this->find_product_in_cart( $cart_id );
-
-			// Force quantity to 1 if sold individually and check for existing item in cart
-			if ( $product_data->is_sold_individually() ) {
-				$quantity         = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
-				$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
-
-				if ( $in_cart_quantity > 0 ) {
-					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
-				}
-			}
-
-			// Check product is_purchasable
-			if ( ! $product_data->is_purchasable() ) {
-				throw new Exception( __( 'Sorry, this product cannot be purchased.', 'woocommerce' ) );
-			}
-
-			// Stock check - only check if we're managing stock and backorders are not allowed
-			if ( ! $product_data->is_in_stock() ) {
-				throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_title() ) );
-			}
-
-			if ( ! $product_data->has_enough_stock( $quantity ) ) {
-				throw new Exception( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ) );
-			}
-
-			// Stock check - this time accounting for whats already in-cart
-			if ( $managing_stock = $product_data->managing_stock() ) {
-				$products_qty_in_cart = $this->get_cart_item_quantities();
-
-				if ( $product_data->is_type( 'variation' ) && true === $managing_stock ) {
-					$check_qty = isset( $products_qty_in_cart[ $variation_id ] ) ? $products_qty_in_cart[ $variation_id ] : 0;
-				} else {
-					$check_qty = isset( $products_qty_in_cart[ $product_id ] ) ? $products_qty_in_cart[ $product_id ] : 0;
-				}
-
-				/**
-				 * Check stock based on all items in the cart.
-				 */
-				if ( ! $product_data->has_enough_stock( $check_qty + $quantity ) ) {
-					throw new Exception( sprintf(
-						'<a href="%s" class="button wc-forward">%s</a> %s',
-						wc_get_cart_url(),
-						__( 'View Cart', 'woocommerce' ),
-						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $check_qty )
-					) );
-				}
-			}
-
-			// If cart_item_key is set, the item is already in the cart
-			if ( $cart_item_key ) {
-				$new_quantity = $quantity + $this->cart_contents[ $cart_item_key ]['quantity'];
-				$this->set_quantity( $cart_item_key, $new_quantity, false );
-			} else {
-				$cart_item_key = $cart_id;
-
-				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item
-				$this->cart_contents[ $cart_item_key ] = apply_filters( 'woocommerce_add_cart_item', array_merge( $cart_item_data, array(
-					'product_id'	=> $product_id,
-					'variation_id'	=> $variation_id,
-					'variation' 	=> $variation,
-					'quantity' 		=> $quantity,
-					'data'			=> $product_data,
-				) ), $cart_item_key );
-			}
-
-			if ( did_action( 'wp' ) ) {
-				$this->set_cart_cookies( ! $this->is_empty() );
-			}
-
-			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
-
-			return $cart_item_key;
-
-		} catch ( Exception $e ) {
-			if ( $e->getMessage() ) {
-				wc_add_notice( $e->getMessage(), 'error' );
-			}
-			return false;
-		}
-	}
-
-	/**
-	 * Remove a cart item.
-	 *
-	 * @since  2.3.0
-	 * @param  string $cart_item_key
-	 * @return bool
-	 */
-	public function remove_cart_item( $cart_item_key ) {
-		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
-			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
-			unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
-
-			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
-
-			unset( $this->cart_contents[ $cart_item_key ] );
-
-			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
-
-			$this->calculate_totals();
-
-			return true;
+		if ( empty( $product ) || ! $product->exists() || ! $product->is_purchasable() || 'trash' === $product->post->post_status ) {
+			throw new Exception( __( 'Sorry, this product cannot be purchased.', 'woocommerce' ) );
 		}
 
-		return false;
-	}
-
-	/**
-	 * Restore a cart item.
-	 *
-	 * @param  string $cart_item_key
-	 * @return bool
-	 */
-	public function restore_cart_item( $cart_item_key ) {
-		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-			$this->cart_contents[ $cart_item_key ] = $this->removed_cart_contents[ $cart_item_key ];
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $this->cart_contents[ $cart_item_key ]['variation_id'] ? $this->cart_contents[ $cart_item_key ]['variation_id'] : $this->cart_contents[ $cart_item_key ]['product_id'] );
-
-			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
-
-			unset( $this->removed_cart_contents[ $cart_item_key ] );
-
-			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this );
-
-			$this->calculate_totals();
-
-			return true;
+		if ( ! $product->is_in_stock() ) {
+			throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product->get_title() ) );
 		}
 
-		return false;
+		// Force quantity to 1 if sold individually and check for existing item in cart
+		if ( $product->is_sold_individually() ) {
+			$in_cart_quantity = $product->variation_id ? $products_qty_in_cart[ $product->variation_id ] : $products_qty_in_cart[ $product->id ];
+
+			if ( $in_cart_quantity > 0 ) {
+				throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product->get_title() ) ) );
+			}
+		}
+
+		if ( ! $product->has_enough_stock( $adding_quantity ) ) {
+			throw new Exception( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product->get_title(), $product->get_stock_quantity() ) );
+		}
+
+		// Stock check - this time accounting for whats already in-cart
+		$check_id  = $check_variation_stock ? $product->variation_id : $product->id;
+		$check_qty = isset( $products_qty_in_cart[ $check_id ] ) ? $products_qty_in_cart[ $check_id ] : 0;
+
+		/**
+		 * Check stock based on all items in the cart.
+		 */
+		if ( ! $product->has_enough_stock( $check_qty + $adding_quantity ) ) {
+			throw new Exception( '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a> ' . sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product->get_stock_quantity(), $check_qty ) );
+		}
+
+		/**
+		 * Finally consider any held stock, from pending orders.
+		 */
+		if ( ! $product->has_enough_stock( $check_qty + $adding_quantity + wc_get_held_stock_count( $product ) ) ) {
+			throw new Exception( '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a> ' . sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+		}
 	}
 
 	/**
@@ -247,130 +177,109 @@ class WC_Cart_Items {
 	 *
 	 * @param string	$cart_item_key	contains the id of the cart item
 	 * @param int		$quantity		contains the quantity of the item
-	 * @param bool      $refresh_totals	whether or not to calculate totals after setting the new qty
-	 *
-	 * @return bool
 	 */
-	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
-		if ( $quantity == 0 || $quantity < 0 ) {
-			do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
-			unset( $this->cart_contents[ $cart_item_key ] );
+	public function set_quantity( $cart_item_key, $quantity = 1 ) {
+		if ( $quantity <= 0 ) {
+			$this->remove_item( $cart_item_key );
 		} else {
-			$old_quantity = $this->cart_contents[ $cart_item_key ]['quantity'];
-			$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
+			$old_quantity = $this->items[ $cart_item_key ]['quantity'];
+			$this->items[ $cart_item_key ]['quantity'] = $quantity;
+			$this->dirty = true;
 			do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity );
 		}
+	}
 
-		if ( $refresh_totals ) {
-			$this->calculate_totals();
+	/**
+	 * Remove a cart item.
+	 * @param  string $cart_item_key
+	 * @return bool
+	 */
+	public function remove_item( $cart_item_key ) {
+		if ( isset( $this->items[ $cart_item_key ] ) ) {
+			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
+
+			$this->removed_items[ $cart_item_key ] = $this->items[ $cart_item_key ];
+			$this->dirty = true;
+			unset( $this->removed_items[ $cart_item_key ]['data'] );
+			unset( $this->items[ $cart_item_key ] );
+
+			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
+			return true;
 		}
+		return false;
+	}
 
-		return true;
+	/**
+	 * Restore a cart item.
+	 * @param  string $cart_item_key
+	 * @return bool
+	 */
+	public function restore_item( $cart_item_key ) {
+		if ( isset( $this->removed_items[ $cart_item_key ] ) ) {
+			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
+
+			$this->items[ $cart_item_key ] = $this->removed_items[ $cart_item_key ];
+			$this->items[ $cart_item_key ]['data'] = wc_get_product( $this->items[ $cart_item_key ]['variation_id'] ? $this->items[ $cart_item_key ]['variation_id'] : $this->items[ $cart_item_key ]['product_id'] );
+			$this->dirty = true;
+			unset( $this->removed_items[ $cart_item_key ] );
+
+			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this );
+			return true;
+		}
+		return false;
 	}
 
 	/**
 	 * Check all cart items for errors.
 	 */
-	public function check_cart_items() {
-
-		// Result
-		$return = true;
-
-		// Check cart item validity
-		$result = $this->check_cart_item_validity();
-
-		if ( is_wp_error( $result ) ) {
-			wc_add_notice( $result->get_error_message(), 'error' );
-			$return = false;
+	public function check_items() {
+		try {
+			foreach ( $this->get_items() as $item ) {
+				$this->validate_item( $item['data'] );
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
 		}
-
-		// Check item stock
-		$result = $this->check_cart_item_stock();
-
-		if ( is_wp_error( $result ) ) {
-			wc_add_notice( $result->get_error_message(), 'error' );
-			$return = false;
-		}
-
-		return $return;
 
 	}
 
 	/**
-	 * Looks through the cart to check each item is in stock. If not, add an error.
-	 *
-	 * @return bool|WP_Error
+	 * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
+	 * @return array
 	 */
-	public function check_cart_item_stock() {
-		global $wpdb;
+	public function get_item_quantities() {
+		$quantities = array();
 
-		$error               = new WP_Error();
-		$product_qty_in_cart = $this->get_cart_item_quantities();
-
-		// First stock check loop
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$_product = $values['data'];
-
-			/**
-			 * Check stock based on stock-status.
-			 */
-			if ( ! $_product->is_in_stock() ) {
-				$error->add( 'out-of-stock', sprintf(__( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title() ) );
-				return $error;
-			}
-
-			if ( ! $_product->managing_stock() ) {
-				continue;
-			}
-
-			$check_qty = $_product->is_type( 'variation' ) && true === $_product->managing_stock() ? $product_qty_in_cart[ $values['variation_id'] ] : $product_qty_in_cart[ $values['product_id'] ];
-
-			/**
-			 * Check stock based on all items in the cart.
-			 */
-			if ( ! $_product->has_enough_stock( $check_qty ) ) {
-				$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->get_stock_quantity() ) );
-				return $error;
-			}
-
-			/**
-			 * Finally consider any held stock, from pending orders.
-			 */
-			if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $_product->backorders_allowed() ) {
-				$order_id   = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
-				$held_stock = $wpdb->get_var(
-					$wpdb->prepare( "
-						SELECT SUM( order_item_meta.meta_value ) AS held_qty
-						FROM {$wpdb->posts} AS posts
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
-						WHERE 	order_item_meta.meta_key   = '_qty'
-						AND 	order_item_meta2.meta_key  = %s AND order_item_meta2.meta_value  = %d
-						AND 	posts.post_type            IN ( '" . implode( "','", wc_get_order_types() ) . "' )
-						AND 	posts.post_status          = 'wc-pending'
-						AND		posts.ID                   != %d;",
-						$_product->is_type( 'variation' ) && true === $_product->managing_stock() ? '_variation_id' : '_product_id',
-						$_product->is_type( 'variation' ) && true === $_product->managing_stock() ? $values['variation_id'] : $values['product_id'],
-						$order_id
-					)
-				);
-
-				$not_enough_stock = false;
-
-				if ( $_product->is_type( 'variation' ) && 'parent' === $_product->managing_stock() && $_product->parent->get_stock_quantity() < ( $held_stock + $check_qty ) ) {
-					$not_enough_stock = true;
-				} elseif ( $_product->get_stock_quantity() < ( $held_stock + $check_qty ) ) {
-					$not_enough_stock = true;
-				}
-				if ( $not_enough_stock ) {
-					$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
-					return $error;
-				}
-			}
+		foreach ( $this->get_items() as $cart_item_key => $values ) {
+			$product           = $values['data'];
+			$id                = $values[ $product->is_type( 'variation' ) && true === $product->managing_stock() ? 'variation_id' : 'product_id' ];
+			$quantities[ $id ] = isset( $quantities[ $id ] ) ? $quantities[ $id ] + $values['quantity'] : $values['quantity'];
 		}
 
-		return true;
+		return $quantities;
 	}
 
+	/**
+	 * Get number of items in the cart.
+	 * @return int
+	 */
+	public function get_item_count() {
+		return apply_filters( 'woocommerce_cart_contents_count', array_sum( wp_list_pluck( $this->items, 'quantity' ) ) );
+	}
+
+	/**
+	 * Get all tax classes for items in the cart.
+	 * @return array
+	 */
+	public function get_item_tax_classes() {
+		return array_unique( wp_list_pluck( $this->items, 'tax_class' ) );
+	}
+
+	/**
+	 * Get weight of items in the cart.
+	 * @return int
+	 */
+	public function get_item_weight() {
+		return apply_filters( 'woocommerce_cart_contents_weight', array_sum( wp_list_pluck( $this->items, 'weight' ) ) );
+	}
 }

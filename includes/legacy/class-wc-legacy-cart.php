@@ -16,6 +16,64 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooThemes
  */
 abstract class WC_Legacy_Cart {
+
+	/**
+	* Add a product to the cart.
+	*
+	* @param int $product_id contains the id of the product to add to the cart
+	* @param int $quantity contains the quantity of the item to add
+	* @param int $variation_id
+	* @param array $variation attribute values
+	* @param array $cart_item_data extra cart item data we want to pass into the item
+	* @return string|bool $cart_item_key
+	*/
+   public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+	   return $this->items->add( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+   }
+
+
+   /**
+	* Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
+	* @return array
+	*/
+   public function get_cart_item_quantities() {
+	   return $this->items->get_item_quantities();
+   }
+
+   /**
+	* Get all tax classes for items in the cart.
+	* @return array
+	*/
+   public function get_cart_item_tax_classes() {
+	   return $this->items->get_item_tax_classes();
+   }
+
+   /**
+	* Get weight of items in the cart.
+	* @return int
+	*/
+   public function get_cart_contents_weight() {
+	   return $this->items->get_item_weight();
+   }
+
+   /**
+	* Get number of items in the cart.
+	* @return int
+	*/
+   public function get_cart_contents_count() {
+	   return $this->items->get_item_count();
+   }
+
+   /**
+	* Returns a specific item in the cart.
+	*
+	* @param string $item_key Cart item key.
+	* @return array Item data
+	*/
+   public function get_cart_item( $item_key ) {
+	    return $this->items->get_item_by_key( $item_key );
+   }
+
 	/**
 	 * Auto-load in-accessible properties on demand.
 	 *
@@ -128,7 +186,65 @@ abstract class WC_Legacy_Cart {
 			return 0;
 		}
 	}
+	public function find_product_in_cart( $cart_id = false ) {
+		if ( $cart_id !== false ) {
+			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
+				return $cart_id;
+			}
+		}
+		return '';
+	}
+	/**
+	 * Generate a unique ID for the cart item being added.
+	 *
+	 * @param int $product_id - id of the product the key is being generated for
+	 * @param int $variation_id of the product the key is being generated for
+	 * @param array $variation data for the cart item
+	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
+	 * @return string cart item key
+	 */
+	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+		return apply_filters( 'woocommerce_cart_id', md5( json_encode( array( $product_id, $variation_id, $variation, $cart_item_data ) ) ), $product_id, $variation_id, $variation, $cart_item_data );
+	}
 
+	/**
+	 * Looks through cart items and checks the posts are not trashed or deleted.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function check_cart_item_validity() {
+		$return = true;
+
+		foreach ( $this->get_items() as $cart_item_key => $values ) {
+			$_product = $values['data'];
+
+			if ( ! $_product || ! $_product->exists() || 'trash' === $_product->post->post_status ) {
+				$this->set_quantity( $cart_item_key, 0 );
+				$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Looks through the cart to check each item is in stock. If not, add an error.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function check_cart_item_stock() {
+	}
+	/**
+	 * Save the persistent cart when the cart is updated.
+	 */
+	public function persistent_cart_update() {
+	}
+
+	/**
+	 * Delete the persistent cart permanently.
+	 */
+	public function persistent_cart_destroy() {
+	}
 	/**
 	 * Determines the value that the customer spent and the subtotal
 	 * displayed, used for things like coupon validation.
@@ -155,8 +271,19 @@ abstract class WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
-		_deprecated_function( 'get_product_price', '2.7', 'wc_cart_product_price_to_display' );
+		_deprecated_function( 'get_product_price', '2.7', 'wc_cart_product_price_html' );
 		return wc_cart_product_price_to_display( $product );
+	}
+
+	/**
+	 * Gets the sub total (after calculation).
+	 *
+	 * @param bool $compound whether to include compound taxes
+	 * @return string formatted price
+	 */
+	public function get_cart_subtotal( $compound = false ) {
+		_deprecated_function( 'get_cart_subtotal', '2.7', 'wc_cart_subtotal_html' );
+		return wc_cart_subtotal_html();
 	}
 
 	/**
@@ -171,7 +298,7 @@ abstract class WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
-		_deprecated_function( 'get_product_subtotal', '2.7', 'wc_cart_product_price_to_display' );
+		_deprecated_function( 'get_product_subtotal', '2.7', 'wc_cart_product_price_html' );
 		return wc_cart_product_price_to_display( $product, $quantity );
 	}
 

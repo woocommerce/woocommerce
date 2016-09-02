@@ -738,3 +738,12 @@ function woocommerce_calc_shipping_backwards_compatibility( $value ) {
 }
 
 add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_backwards_compatibility' );
+
+/**
+ * Get the subtotal.
+ * @return string
+ */
+function wc_cart_totals_subtotal_html() {
+	_deprecated_function( 'wc_cart_totals_subtotal_html', '2.7', 'wc_cart_subtotal_html' );
+	echo wc_cart_subtotal_html();
+}

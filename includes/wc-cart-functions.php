@@ -37,7 +37,7 @@ function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart( false );
+	WC()->cart->empty_cart();
 }
 
 /**
@@ -418,49 +418,30 @@ function wc_cart_subtotal_to_display() {
 }
 
 /**
- * Get the subtotal.
- * @return string
- */
-function wc_cart_totals_subtotal_html() {
-	echo WC()->cart->get_cart_subtotal();
-}
-
-/**
  * Gets the sub total (after calculation).
  *
  * @param bool $compound whether to include compound taxes
  * @return string formatted price
  */
-function get_cart_subtotal( $compound = false ) {
-
+function wc_cart_subtotal_html( $compound = false ) {
 	// If the cart has compound tax, we want to show the subtotal as
 	// cart + shipping + non-compound taxes (after discount)
 	if ( $compound ) {
-
-		$cart_subtotal = wc_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
+		$cart_subtotal = WC()->cart->cart_contents_total + WC()->cart->shipping_total + WC()->cart->get_taxes_total( false, false );
+		$suffix = '';
 
 	// Otherwise we show cart items totals only (before discount)
 	} else {
+		$cart_subtotal = wc_cart_subtotal_to_display();
 
-		// Display varies depending on settings
-		if ( $this->tax_display_cart == 'excl' ) {
-
-			$cart_subtotal = wc_price( $this->subtotal_ex_tax );
-
-			if ( $this->tax_total > 0 && $this->prices_include_tax ) {
-				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-			}
+		if ( wc_cart_prices_include_tax() ) {
+			$suffix = wc_cart_prices_include_tax() ? '' : '<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 		} else {
-
-			$cart_subtotal = wc_price( $this->subtotal );
-
-			if ( $this->tax_total > 0 && ! $this->prices_include_tax ) {
-				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
-			}
+			$suffix = wc_cart_prices_include_tax() ? '<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
 		}
 	}
 
-	return apply_filters( 'woocommerce_cart_subtotal', $cart_subtotal, $compound, $this );
+	return apply_filters( 'woocommerce_cart_subtotal', wc_price( $cart_subtotal ) . ' ' . $suffix, $compound, WC()->cart );
 }
 
 /**
@@ -470,13 +451,13 @@ function get_cart_subtotal( $compound = false ) {
  * @param int $quantity to show
  * @return string formatted price
  */
-function wc_cart_product_price_to_display( $product, $quantity = 1 ) {
-	if ( wc_is_cart_tax_display( 'incl' ) ) {
+function wc_cart_product_price_html( $product, $quantity = 1 ) {
+	if ( wc_cart_prices_include_tax() ) {
 		$price  = $product->get_price_including_tax( $quantity );
 		$suffix = wc_cart_prices_include_tax() ? '' : '<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	} else {
 		$price = $product->get_price_excluding_tax( $quantity );
 		$suffix = wc_cart_prices_include_tax() ? '<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
 	}
-	return apply_filters( 'woocommerce_cart_product_price_to_display', wc_price( $product->is_taxable() ? $price . ' ' . $suffix : $price ), $product, $quantity );
+	return apply_filters( 'woocommerce_cart_product_price_html', wc_price( $product->is_taxable() ? $price . ' ' . $suffix : $price ), $product, $quantity );
 }

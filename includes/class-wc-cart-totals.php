@@ -5,49 +5,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Cart Item Totals
+ * Handles cart totals calculations.
  *
- * Handles total/subtotal calculation for a group of items.
- *
- * @class 		WC_Cart_Item_Totals
+ * @class 		WC_Cart_Totals
  * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Cart_Item_Totals {
+class WC_Cart_Totals {
 
-	/**
-	 * An array of objects representing items.
-	 * @var array
-	 */
-	private $items          = array();
+	protected $data = array(
+		'items' => 0,
+		'fees'    => 0,
+		'discount' => '',
+	);
 
-	/**
-	 * An array of objects representing coupons and the discounts they grant.
-	 * @var array
-	 */
-	private $coupons        = array();
-
-	/**
-	 * Acts as a cache to prevent requerying tax rates for items.
-	 * @var array
-	 */
-	private $item_tax_rates = array();
-
-	/**
-	 * When calculation is needed, e.g. after adding items, this is false.
-	 *
-	 * @var boolean
-	 */
-	private $calculated     = false;
+	protected $totals = array(
+		'subtotal' => 0,
+		'total'    => 0,
+		'taxes'    => array(),
+	);
 
 	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
-	public function __construct() {
-		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate' ), 20, 0 );
-		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate' ), 20, 0 );
+	public function __construct( $calculate = array() ) {
+		$calculate['items'];
+		$calculate['fees'];
+		$calculate['shipping'];
+		$calculate['discount'];
 	}
 
 	/**

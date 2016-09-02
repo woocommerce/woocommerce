@@ -181,7 +181,7 @@ class WC_Checkout {
 
 			// Insert or update the post data
 			$order_id  = absint( WC()->session->order_awaiting_payment );
-			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash = md5( json_encode( wc_clean( WC()->cart->session->get_cart_for_session() ) ) . WC()->cart->total );
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
