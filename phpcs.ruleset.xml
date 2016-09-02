@@ -22,7 +22,7 @@
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />
 		<exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine" />
-		<exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
+		<!-- <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" /> -->
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace" />
 		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
@@ -45,7 +45,7 @@
 		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
 		<exclude name="Squiz.Commenting.ClosingDeclarationComment.Abstract" />
-		<exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
+		<!-- <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" /> -->
 		<exclude name="Squiz.Commenting.EmptyCatchComment.Missing" />
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
@@ -73,7 +73,7 @@
 		<exclude name="Squiz.Commenting.FunctionComment.WrongStyle" />
 		<exclude name="Squiz.Commenting.InlineComment.Empty" />
 		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
-		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
+		<!-- <exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" /> -->
 		<exclude name="Squiz.Commenting.InlineComment.NotCapital" />
 		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
 		<exclude name="Squiz.Commenting.InlineComment.SpacingBefore" />

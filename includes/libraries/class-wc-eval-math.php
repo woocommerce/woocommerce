@@ -56,7 +56,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			self::$last_error = null;
 			$expr = trim( $expr );
 			if ( substr( $expr, -1, 1 ) == ';' ) $expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
-			//===============
+			// ===============
 			// is it a variable assignment?
 			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', $expr, $matches ) ) {
 				if ( in_array( $matches[1], self::$vb ) ) { // make sure we're not assigning to a constant
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				if ( ( $tmp = self::pfx( self::nfx( $matches[2] ) ) ) === false ) return false; // get the result and make sure it's good
 				self::$v[ $matches[1] ] = $tmp; // if so, stick it in the variable array
 				return self::$v[ $matches[1] ]; // and return the resulting value
-				//===============
+				// ===============
 				// is it a function assignment?
 			} elseif ( preg_match( '/^\s*([a-z]\w*)\s*\(\s*([a-z]\w*(?:\s*,\s*[a-z]\w*)*)\s*\)\s*=\s*(.+)$/', $expr, $matches ) ) {
 				$fnn = $matches[1]; // get the function name
@@ -87,7 +87,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 				self::$f[ $fnn ] = array( 'args' => $args, 'func' => $stack );
 				return true;
-				//===============
+				// ===============
 			} else {
 				return self::pfx( self::nfx( $expr ) ); // straight up evaluation, woo
 			}
@@ -121,13 +121,13 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				$op = substr( $expr, $index, 1 ); // get the first character at the current index
 				// find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
 				$ex = preg_match( '/^([A-Za-z]\w*\(?|\d+(?:\.\d*)?|\.\d+|\()/', substr( $expr, $index ), $match );
-				//===============
+				// ===============
 				if ( $op == '-' and ! $expecting_op ) { // is it a negation instead of a minus?
 					$stack->push( '_' ); // put a negation on the stack
 					$index++;
 				} elseif ( $op == '_' ) { // we have to explicitly deny this, because it's legal on the stack
 					return self::trigger( "illegal character '_'" ); // but not in the input expression
-					//===============
+					// ===============
 				} elseif ( ( in_array( $op, $ops ) or $ex ) and $expecting_op ) { // are we putting an operator on the stack?
 					if ( $ex ) { // are we expecting an operator but have a number/variable/function/opening parethesis?
 						$op = '*'; $index--; // it's an implicit multiplication
@@ -140,7 +140,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					$stack->push( $op ); // finally put OUR operator onto the stack
 					$index++;
 					$expecting_op = false;
-					//===============
+					// ===============
 				} elseif ( $op == ')' and $expecting_op ) { // ready to close a parenthesis?
 					while ( ( $o2 = $stack->pop() ) != '(' ) { // pop off the stack back to the last (
 						if ( is_null( $o2 ) ) return self::trigger( "unexpected ')'" );
@@ -161,7 +161,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						}
 					}
 					$index++;
-					//===============
+					// ===============
 				} elseif ( $op == ',' and $expecting_op ) { // did we just finish a function argument?
 					while ( ( $o2 = $stack->pop() ) != '(' ) {
 						if ( is_null( $o2 ) ) return self::trigger( "unexpected ','" ); // oops, never had a (
@@ -174,11 +174,11 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					$stack->push( '(' ); // put the ( back on, we'll need to pop back to it again
 					$index++;
 					$expecting_op = false;
-					//===============
+					// ===============
 				} elseif ( $op == '(' and ! $expecting_op ) {
 					$stack->push( '(' ); // that was easy
 					$index++;
-					//===============
+					// ===============
 				} elseif ( $ex and ! $expecting_op ) { // do we now have a function/variable/number?
 					$expecting_op = true;
 					$val = $match[1];
@@ -196,7 +196,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						$output[] = $val;
 					}
 					$index += strlen( $val );
-					//===============
+					// ===============
 				} elseif ( $op == ')' ) { // miscellaneous error checking
 					return self::trigger( "unexpected ')'" );
 				} elseif ( in_array( $op, $ops ) and ! $expecting_op ) {

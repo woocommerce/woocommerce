@@ -49,7 +49,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		WC_Helper_Customer::set_tax_based_on( 'base' );
 		$this->assertEquals( $customer->get_taxable_address(), $base_store_address );
 
-		//Now reset the settings back to the way they were before this test
+		// Now reset the settings back to the way they were before this test
 
 		WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen_shipping_methods );
 		WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
@@ -103,7 +103,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		WC_Helper_Customer::set_tax_based_on( 'base' );
 		$this->assertEquals( $customer->is_customer_outside_base(), false );
 
-		//Now reset the settings back to the way they were before this test
+		// Now reset the settings back to the way they were before this test
 
 		WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen_shipping_methods );
 		WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
