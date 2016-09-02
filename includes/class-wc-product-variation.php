@@ -366,7 +366,7 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size , $attr);
+			$image = get_the_post_thumbnail( $parent_id, $size , $attr );
 		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
 		} else {

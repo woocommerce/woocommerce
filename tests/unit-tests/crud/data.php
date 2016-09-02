@@ -78,8 +78,8 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		$meta_data = $object->get_meta_data();
@@ -99,8 +99,8 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		// test single meta key

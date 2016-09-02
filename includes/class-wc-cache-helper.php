@@ -210,7 +210,7 @@ class WC_Cache_Helper {
 			return;
 		}
 
-		$config   = w3_instance('W3_Config');
+		$config   = w3_instance('W3_Config' );
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
 		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 

@@ -134,7 +134,7 @@ class WC_Meta_Box_Product_Data {
 					woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __( 'Product URL', 'woocommerce' ), 'placeholder' => 'http://', 'description' => __( 'Enter the external URL to the product.', 'woocommerce' ) ) );
 
 					// Button text
-					woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __( 'Button text', 'woocommerce' ), 'placeholder' => _x('Buy product', 'placeholder', 'woocommerce'), 'description' => __( 'This text will be shown on the button linking to the external product.', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __( 'Button text', 'woocommerce' ), 'placeholder' => _x('Buy product', 'placeholder', 'woocommerce' ), 'description' => __( 'This text will be shown on the button linking to the external product.', 'woocommerce' ) ) );
 
 				echo '</div>';
 
@@ -866,7 +866,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Save shipping class
 		$product_shipping_class = $_POST['product_shipping_class'] > 0 && $product_type != 'external' ? absint( $_POST['product_shipping_class'] ) : '';
-		wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class');
+		wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class' );
 
 		// Unique SKU
 		$sku     = get_post_meta( $post_id, '_sku', true );
@@ -951,7 +951,7 @@ class WC_Meta_Box_Product_Data {
 							} else {
 								$term = wp_insert_term( trim( $value ), $attribute_names[ $i ] );
 								if ( isset( $term->term_id ) ) {
-									$values[ $key ] = intval($term->term_id);
+									$values[ $key ] = intval($term->term_id );
 								}
 							}
 						}
@@ -1525,7 +1525,7 @@ class WC_Meta_Box_Product_Data {
 
 				// Save shipping class
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
-				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
+				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class' );
 
 				// Update Attributes
 				$updated_attribute_keys = array();

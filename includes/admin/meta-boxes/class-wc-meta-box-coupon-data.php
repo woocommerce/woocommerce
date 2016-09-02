@@ -196,7 +196,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array(
 					'id'                => 'usage_limit',
 					'label'             => __( 'Usage limit per coupon', 'woocommerce' ),
-					'placeholder'       => _x('Unlimited usage', 'placeholder', 'woocommerce'),
+					'placeholder'       => _x('Unlimited usage', 'placeholder', 'woocommerce' ),
 					'description'       => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ),
 					'type'              => 'number',
 					'desc_tip'          => true,

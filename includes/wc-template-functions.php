@@ -22,7 +22,7 @@ function wc_template_redirect() {
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
 	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
-		wp_safe_redirect( get_post_type_archive_link('product') );
+		wp_safe_redirect( get_post_type_archive_link('product' ) );
 		exit;
 	}
 
@@ -159,7 +159,7 @@ function wc_products_rss_feed() {
 
 	} elseif ( is_tax( 'product_cat' ) ) {
 
-		$term = get_term_by( 'slug', esc_attr( get_query_var('product_cat') ), 'product_cat' );
+		$term = get_term_by( 'slug', esc_attr( get_query_var('product_cat' ) ), 'product_cat' );
 
 		if ( $term ) {
 			$feed = add_query_arg( 'product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ) );
@@ -167,11 +167,11 @@ function wc_products_rss_feed() {
 		}
 	} elseif ( is_tax( 'product_tag' ) ) {
 
-		$term = get_term_by('slug', esc_attr( get_query_var('product_tag') ), 'product_tag');
+		$term = get_term_by('slug', esc_attr( get_query_var('product_tag' ) ), 'product_tag' );
 
 		if ( $term ) {
-			$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
-			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_url( $feed ) . '" />';
+			$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ) );
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
 		}
 	}
 }
@@ -416,7 +416,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php if ( have_posts() ) : ?>
 
-				<?php do_action('woocommerce_before_shop_loop'); ?>
+				<?php do_action('woocommerce_before_shop_loop' ); ?>
 
 				<?php woocommerce_product_loop_start(); ?>
 
@@ -430,7 +430,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php woocommerce_product_loop_end(); ?>
 
-				<?php do_action('woocommerce_after_shop_loop'); ?>
+				<?php do_action('woocommerce_after_shop_loop' ); ?>
 
 			<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
@@ -1474,7 +1474,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 			'hidden'   => false,
 		);
 
-		$args = wp_parse_args( $args, $defaults  );
+		$args = wp_parse_args( $args, $defaults );
 
 		wc_get_template( 'global/form-login.php', $args );
 	}
@@ -1766,10 +1766,10 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	function woocommerce_subcategory_thumbnail( $category ) {
 		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'shop_catalog' );
 		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
-		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
+		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
+			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
 			$image        = $image[0];
 			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
 			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
@@ -1868,7 +1868,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( $args['required'] ) {
 			$args['class'][] = 'validate-required';
-			$required = ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce'  ) . '">*</abbr>';
+			$required = ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
 			$required = '';
 		}
@@ -1963,7 +1963,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			case 'textarea' :
 
-				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $value  ) . '</textarea>';
+				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $value ) . '</textarea>';
 
 				break;
 			case 'checkbox' :
@@ -2073,7 +2073,7 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 			$product_search_form_index = 0;
 		}
 
-		do_action( 'pre_get_product_search_form'  );
+		do_action( 'pre_get_product_search_form' );
 
 		wc_get_template( 'product-searchform.php', array(
 			'index' => $product_search_form_index++,

@@ -523,7 +523,7 @@ class WC_Admin_Report {
 			break;
 
 			case 'year' :
-				$this->start_date    = strtotime( date( 'Y-01-01', current_time('timestamp') ) );
+				$this->start_date    = strtotime( date( 'Y-01-01', current_time('timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'month';
 			break;
@@ -536,7 +536,7 @@ class WC_Admin_Report {
 			break;
 
 			case 'month' :
-				$this->start_date    = strtotime( date( 'Y-m-01', current_time('timestamp') ) );
+				$this->start_date    = strtotime( date( 'Y-m-01', current_time('timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'day';
 			break;

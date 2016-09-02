@@ -49,7 +49,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( 'list' != $args['style'] )
 			return;
 
-		$indent = str_repeat("\t", $depth);
+		$indent = str_repeat("\t", $depth );
 		$output .= "$indent<ul class='children'>\n";
 	}
 
@@ -67,7 +67,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( 'list' != $args['style'] )
 			return;
 
-		$indent = str_repeat("\t", $depth);
+		$indent = str_repeat("\t", $depth );
 		$output .= "$indent</ul>\n";
 	}
 

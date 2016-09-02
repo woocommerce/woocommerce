@@ -1378,7 +1378,7 @@ class WC_Cart {
 		}
 
 		// Only calculate the grand total + shipping if on the cart/checkout
-		if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
+		if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT' ) || defined('WOOCOMMERCE_CART' ) ) {
 
 			// Calculate the Shipping
 			$this->calculate_shipping();

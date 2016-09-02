@@ -31,7 +31,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="table"
 		>
@@ -61,7 +61,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$hide_sidebar = true;
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**

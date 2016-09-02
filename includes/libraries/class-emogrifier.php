@@ -11,6 +11,7 @@
  * @author Oliver Klee <typo3-coding@oliverklee.de>
  * @author Roman Ožana <ozana@omdesign.cz>
  */
+// @codingStandardsIgnoreFile
 class Emogrifier
 {
 	/**

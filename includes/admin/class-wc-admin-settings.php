@@ -479,7 +479,7 @@ class WC_Admin_Settings {
 								type="checkbox"
 								class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 								value="1"
-								<?php checked( $option_value, 'yes'); ?>
+								<?php checked( $option_value, 'yes' ); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
 							/> <?php echo $description ?>
 						</label> <?php echo $tooltip_html; ?>

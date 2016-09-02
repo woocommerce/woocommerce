@@ -178,7 +178,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_page_permalink( 'checkout' ) );
 		}
 
-		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
+		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout' ) == 'yes' ) {
 			$return_url = str_replace( 'http:', 'https:', $return_url );
 		}
 

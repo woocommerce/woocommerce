@@ -163,7 +163,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			// Set order currency.
 			if ( isset( $data['currency'] ) ) {
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce') );
+					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ) );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -855,7 +855,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		foreach ( $order_meta as $meta_key => $meta_value ) {
 
-			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+			if ( is_string( $meta_key ) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
 				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
