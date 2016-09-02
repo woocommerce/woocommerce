@@ -198,7 +198,7 @@ class WC_Admin_Meta_Boxes {
 		}
 
 		// We need this save event to run once to avoid potential endless loops. This would have been perfect:
-		//	remove_action( current_filter(), __METHOD__ );
+		// remove_action( current_filter(), __METHOD__ );
 		// But cannot be used due to https://github.com/woothemes/woocommerce/issues/6485
 		// When that is patched in core we can use the above. For now:
 		self::$saved_meta_boxes = true;
