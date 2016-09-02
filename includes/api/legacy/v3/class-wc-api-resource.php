@@ -102,7 +102,7 @@ class WC_API_Resource {
 			$post = get_post( $id );
 
 			if ( null === $post ) {
-				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %s found with the ID equal to %s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
+				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %1$s found with the ID equal to %2$s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
 			}
 
 			// For checking permissions, product variations are the same as the product post type

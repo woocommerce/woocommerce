@@ -35,7 +35,9 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		if ( ! empty( $_POST ) && $this->validate_ipn() ) {
 			$posted = wp_unslash( $_POST );
 
+			// @codingStandardsIgnoreStart
 			do_action( 'valid-paypal-standard-ipn-request', $posted );
+			// @codingStandardsIgnoreEnd
 			exit;
 		}
 
@@ -258,7 +260,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 			$this->send_ipn_email_notification(
 				sprintf( __( 'Payment for order %s refunded', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
-				sprintf( __( 'Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
+				sprintf( __( 'Order #%1$s has been marked as refunded - PayPal reason code: %2$s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 			);
 		}
 	}
@@ -273,7 +275,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		$this->send_ipn_email_notification(
 			sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
-			sprintf( __( 'Order #%s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), wc_clean( $posted['reason_code'] ) )
+			sprintf( __( 'Order #%1$s has been marked on-hold due to a reversal - PayPal reason code: %2$s', 'woocommerce' ), $order->get_order_number(), wc_clean( $posted['reason_code'] ) )
 		);
 	}
 
@@ -285,7 +287,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	protected function payment_status_canceled_reversal( $order, $posted ) {
 		$this->send_ipn_email_notification(
 			sprintf( __( 'Reversal cancelled for order #%s', 'woocommerce' ), $order->get_order_number() ),
-			sprintf( __( 'Order #%s has had a reversal cancelled. Please check the status of payment and update the order status accordingly here: %s', 'woocommerce' ), $order->get_order_number(), esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) )
+			sprintf( __( 'Order #%1$s has had a reversal cancelled. Please check the status of payment and update the order status accordingly here: %2$s', 'woocommerce' ), $order->get_order_number(), esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) )
 		);
 	}
 

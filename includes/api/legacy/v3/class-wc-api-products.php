@@ -1753,7 +1753,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Generate a useful post title
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post
 			if ( ! $variation_id ) {

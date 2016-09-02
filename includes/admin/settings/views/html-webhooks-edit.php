@@ -13,7 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_name"><?php _e( 'Name', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) ); ?>
+					<?php
+					// @codingStandardsIgnoreStart
+					echo wc_help_tip( sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) );
+					// @codingStandardsIgnoreEnd
+					?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_name" id="webhook_name" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_name() ); ?>" />
