@@ -1060,7 +1060,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$token_ids = get_post_meta( $this->get_id(), '_payment_tokens', true );
 
-		if ( empty ( $token_ids ) ) {
+		if ( empty( $token_ids ) ) {
 			$token_ids = array();
 		}
 

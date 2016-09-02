@@ -38,7 +38,7 @@
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterCloseBracket" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket" />
+		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket" /> -->
 		<!-- <exclude name="Squiz.Commenting.BlockComment.NoEmptyLineBefore" /> -->
 		<!-- <exclude name="Squiz.Commenting.BlockComment.NoNewLine" /> -->
 		<exclude name="Squiz.Commenting.BlockComment.WrongEnd" />

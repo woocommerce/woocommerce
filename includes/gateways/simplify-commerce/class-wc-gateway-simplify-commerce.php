@@ -311,7 +311,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	}
 
 	public function add_payment_method() {
-		if ( empty ( $_POST['simplify_token'] ) ) {
+		if ( empty( $_POST['simplify_token'] ) ) {
 			wc_add_notice( __( 'There was a problem adding this card.', 'woocommerce' ), 'error' );
 			return;
 		}
@@ -428,11 +428,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			// or the customer token (just saved method, previously saved method)
 			$pass_tokens = array();
 
-			if ( ! empty ( $cart_token ) ) {
+			if ( ! empty( $cart_token ) ) {
 				$pass_tokens['token'] = $cart_token;
 			}
 
-			if ( ! empty ( $customer_token ) ) {
+			if ( ! empty( $customer_token ) ) {
 				$pass_tokens['customer'] = $customer_token;
 				// Use the customer token only, since we already saved the (one time use) card token to the customer
 				if ( isset( $_POST['wc-simplify_commerce-new-payment-method'] ) && true === (bool) $_POST['wc-simplify_commerce-new-payment-method'] ) {
@@ -441,7 +441,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			}
 
 			// Did we create an account and save a payment method? We might need to use the customer token instead of the card token
-			if ( isset( $_POST['createaccount'] ) && true === (bool) $_POST['createaccount'] && empty ( $customer_token ) ) {
+			if ( isset( $_POST['createaccount'] ) && true === (bool) $_POST['createaccount'] && empty( $customer_token ) ) {
 				$user_token = $this->get_users_token();
 				if ( ! is_null( $user_token ) ) {
 					$pass_tokens['customer'] = $user_token->get_token();

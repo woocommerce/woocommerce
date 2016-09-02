@@ -1152,7 +1152,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			'username'           => $user_object->user_login,
 			'date_created'       => strtotime( $user_object->user_registered ),
 			'date_modified'      => get_user_meta( $id, 'last_update', true ),
-			'role'               => ! empty ( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
+			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
 		) );
 		$this->read_meta_data();
 	}
