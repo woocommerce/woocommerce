@@ -212,7 +212,7 @@ class WC_Frontend_Scripts {
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
 			$flexslider_options = apply_filters( 'woocommerce_single_product_carousel_options', $options = array(
-				'rtl'            => is_rtl() ? 'true' : 'false',
+				'rtl'            => is_rtl(),
 				'animation'      => 'slide',
 				'smoothHeight'   => true,
 				'directionNav'   => false,
