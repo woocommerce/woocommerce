@@ -181,7 +181,7 @@ class WC_Checkout {
 
 			// Insert or update the post data
 			$order_id  = absint( WC()->session->order_awaiting_payment );
-			$cart_hash = md5( json_encode( wc_clean( WC()->cart->session->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -226,6 +226,37 @@ class WC_Checkout {
 					}
 				}
 			}
+
+
+
+
+
+
+			/**
+			 * @todo
+			 */
+			 /*foreach ( $this->totals->get_item_totals() as $cart_item_key => $item ) {
+ 				/**
+ 				 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
+ 				 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
+ 				 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
+ 				 *
+ 				 * Tax exclusive prices are not affected.
+ 				if ( ! $item->product->is_taxable() || wc_prices_include_tax() ) {
+ 					$this->cart_contents[ $cart_item_key ]['line_total']        = round( $item->total + $item->tax - wc_round_tax_total( $item->tax ), $this->dp );
+ 					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = round( $item->subtotal + $item->subtotal_tax - wc_round_tax_total( $item->subtotal_tax ), $this->dp );
+ 					$this->cart_contents[ $cart_item_key ]['line_tax']          = wc_round_tax_total( $item->tax );
+ 					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = wc_round_tax_total( $item->subtotal_tax );
+ 					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array_map( 'wc_round_tax_total', $item->tax_data ), 'subtotal' => array_map( 'wc_round_tax_total', $item->subtotal_tax_data ) );
+ 				} else {
+ 					$this->cart_contents[ $cart_item_key ]['line_total']        = $item->total;
+ 					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $item->subtotal;
+ 					$this->cart_contents[ $cart_item_key ]['line_tax']          = $item->tax;
+ 					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $item->subtotal_tax;
+ 					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $item->tax_data, 'subtotal' => $item->subtotal_tax_data );
+ 				}
+
+ 			}*/
 
 			// Add line items.
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {

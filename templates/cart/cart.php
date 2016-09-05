@@ -85,7 +85,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							}
 
 							// Meta data
-							echo WC()->cart->get_item_data( $cart_item );
+							echo wc_display_item_data( $cart_item );
 
 							// Backorder notification
 							if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {

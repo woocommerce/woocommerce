@@ -16,29 +16,79 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooThemes
  */
 abstract class WC_Legacy_Cart {
+	/**
+	 * Looks through the cart to see if shipping is actually required.
+	 *
+	 * @return bool whether or not the cart needs shipping
+	 */
+	public function needs_shipping() {
+		// If shipping is disabled or not yet configured, we can skip this.
+		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+
+		$needs_shipping = false;
+
+		if ( ! empty( $this->cart_contents ) ) {
+			foreach ( $this->cart_contents as $cart_item_key => $values ) {
+				$_product = $values['data'];
+				if ( $_product->needs_shipping() ) {
+					$needs_shipping = true;
+				}
+			}
+		}
+
+		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+	}
+
 
 	/**
-	* Add a product to the cart.
-	*
-	* @param int $product_id contains the id of the product to add to the cart
-	* @param int $quantity contains the quantity of the item to add
-	* @param int $variation_id
-	* @param array $variation attribute values
-	* @param array $cart_item_data extra cart item data we want to pass into the item
-	* @return string|bool $cart_item_key
-	*/
-   public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
-	   return $this->items->add( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
-   }
+	 * Gets the cart contents total (after calculation).
+	 *
+	 * @return string formatted price @todo use subtotal functions
+	 */
+	public function get_cart_total() {
+		if ( ! $this->prices_include_tax ) {
+			$cart_contents_total = wc_price( $this->cart_contents_total );
+		} else {
+			$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
+		}
+		return apply_filters( 'woocommerce_cart_contents_total', $cart_contents_total );
+	}
 
 
-   /**
-	* Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
-	* @return array
-	*/
-   public function get_cart_item_quantities() {
-	   return $this->items->get_item_quantities();
-   }
+	/**
+	 * Add a product to the cart.
+	 * @deprecated 2.7.0
+	 * @param int $product_id contains the id of the product to add to the cart
+	 * @param int $quantity contains the quantity of the item to add
+	 * @param int $variation_id
+	 * @param array $variation attribute values
+	 * @param array $cart_item_data extra cart item data we want to pass into the item
+	 * @return string|bool $cart_item_key
+	 */
+	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+		_deprecated_function( 'WC_Cart::add_to_cart', '2.7', 'wc_add_to_cart' );
+
+		// Map legacy args to new.
+		if ( $variation_id ) {
+			$product_id = $variation_id;
+		}
+
+		if ( $variation ) {
+			$cart_item_data['variation'] = $variation;
+		}
+
+		return wc_add_to_cart( $product_id, $quantity, $cart_item_data );
+	}
+
+	/**
+	 * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
+	 * @return array
+	 */
+	public function get_cart_item_quantities() {
+		return wc_cart_item_quantities();
+	}
 
    /**
 	* Get all tax classes for items in the cart.
@@ -64,27 +114,52 @@ abstract class WC_Legacy_Cart {
 	   return $this->items->get_item_count();
    }
 
-   /**
-	* Returns a specific item in the cart.
-	*
-	* @param string $item_key Cart item key.
-	* @return array Item data
-	*/
-   public function get_cart_item( $item_key ) {
-	    return $this->items->get_item_by_key( $item_key );
-   }
+
+//check_cart_items
 
 	/**
-	 * Auto-load in-accessible properties on demand.
-	 *
-	 * @param mixed $key
+	 * Handle props.
+	 * @param string $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
 		switch ( $key ) {
+			case 'subtotal' :
+				return $this->totals->get_items_subtotal( true );
+			case 'subtotal_ex_tax' :
+				return $this->totals->get_items_subtotal( false );
+			case 'taxes' :
+				return $this->totals->get_tax_data();
+			case 'cart_contents_total' :
+				return $this->totals->get_items_total( false );
+			case 'discount_cart' :
+				return $this->totals->get_discount_total();
+			case 'discount_cart_tax' :
+				return $this->totals->get_discount_total_tax();
 			case 'cart_contents' :
 				return $this->get_cart();
-			break;
+
+
+			case 'tax_total' :
+				return $this->totals->get_tax_total();
+			case 'shipping_tax_total':
+				return $this->totals->get_shipping_tax_total();
+			case 'taxes' :
+				return $this->totals->get_taxes();
+			case 'shipping_taxes' :
+				return $this->totals->get_shipping_taxes();
+			case 'total' :
+				return $this->totals->get_total();
+
+			case 'coupon_discount_amounts' :
+				//wp_list_pluck( $totals->get_coupons(), 'total' );
+				break;
+			case 'coupon_discount_tax_amounts' :
+				//wp_list_pluck( $totals->get_coupons(), 'total_tax' );
+				break;
+
+
+
 
 
 			/****
@@ -186,6 +261,30 @@ abstract class WC_Legacy_Cart {
 			return 0;
 		}
 	}
+
+
+	/**
+	 * Remove taxes.
+	 */
+	public function remove_taxes() {
+		$this->shipping_tax_total = $this->tax_total = 0;
+		$this->subtotal           = $this->subtotal_ex_tax;
+
+		foreach ( $this->cart_contents as $cart_item_key => $item ) {
+			$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
+			$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array(), 'subtotal' => array() );
+		}
+
+		// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
+		if ( apply_filters( 'woocommerce_cart_remove_taxes_apply_zero_rate', true ) ) {
+			$this->taxes = $this->shipping_taxes = array( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) => 0 );
+		} else {
+			$this->taxes = $this->shipping_taxes = array();
+		}
+	}
+
+
+
 	public function find_product_in_cart( $cart_id = false ) {
 		if ( $cart_id !== false ) {
 			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
@@ -204,6 +303,7 @@ abstract class WC_Legacy_Cart {
 	 * @return string cart item key
 	 */
 	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+		//generate_key
 		return apply_filters( 'woocommerce_cart_id', md5( json_encode( array( $product_id, $variation_id, $variation, $cart_item_data ) ) ), $product_id, $variation_id, $variation, $cart_item_data );
 	}
 
@@ -272,7 +372,7 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function get_product_price( $product ) {
 		_deprecated_function( 'get_product_price', '2.7', 'wc_cart_product_price_html' );
-		return wc_cart_product_price_to_display( $product );
+		return wc_cart_product_price_html( $product );
 	}
 
 	/**
@@ -283,7 +383,7 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function get_cart_subtotal( $compound = false ) {
 		_deprecated_function( 'get_cart_subtotal', '2.7', 'wc_cart_subtotal_html' );
-		return wc_cart_subtotal_html();
+		return wc_cart_subtotal_html( false, false );
 	}
 
 	/**
@@ -299,7 +399,7 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
 		_deprecated_function( 'get_product_subtotal', '2.7', 'wc_cart_product_price_html' );
-		return wc_cart_product_price_to_display( $product, $quantity );
+		return wc_cart_product_price_html( $product, $quantity );
 	}
 
 	/**
@@ -447,13 +547,6 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function has_discount( $coupon_code = '' ) {
 		return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
-	}
-
-	/**
-	 * Get array of applied coupon objects and codes.
-	 * @return array of applied coupons
-	 */
-	public function get_coupons( $deprecated = null ) {
 	}
 
 	/**

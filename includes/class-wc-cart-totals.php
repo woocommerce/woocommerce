@@ -15,27 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Cart_Totals {
 
-	protected $data = array(
-		'items' => 0,
-		'fees'    => 0,
-		'discount' => '',
-	);
-
-	protected $totals = array(
-		'subtotal' => 0,
-		'total'    => 0,
-		'taxes'    => array(),
-	);
-
-	/**
-	 * Constructor for the cart class. Loads options and hooks in the init method.
-	 */
-	public function __construct( $calculate = array() ) {
-		$calculate['items'];
-		$calculate['fees'];
-		$calculate['shipping'];
-		$calculate['discount'];
-	}
+	protected $calculate_tax = true;
+	protected $totals        = null;
+	protected $coupons       = array();
+	protected $items         = array();
+	protected $fees          = array();
 
 	/**
 	 * Get default blank set of props used per item.
@@ -67,23 +51,33 @@ class WC_Cart_Totals {
 	}
 
 	/**
+	 * Get default blank set of props used per fee.
+	 * @return array
+	 */
+	private function get_default_fee_props() {
+		return (object) array(
+			'tax'      => 0,
+			'tax_data' => array(),
+		);
+	}
+
+	/**
 	 * Sets items and adds precision which lets us work with integers.
 	 * @param array $items
 	 */
 	public function set_items( $items ) {
 		foreach ( $items as $item_key => $maybe_item ) {
-			if ( ! is_array( $maybe_item ) || ! isset( $maybe_item['data'], $maybe_item['quantity'] ) ) {
+			if ( ! is_a( $maybe_item, 'WC_Cart_Item' ) ) {
 				continue;
 			}
-
-			$item = $this->get_default_item_props();
-			$item->values   = $maybe_item;
-			$item->product  = $maybe_item['data'];
-			$item->quantity = $maybe_item['quantity'];
-			$item->price    = $maybe_item['data']->get_price();
+			$item                     = $this->get_default_item_props();
+			$item->product            = $maybe_item->get_product();
+			$item->values             = $maybe_item;
+			$item->quantity           = $maybe_item->get_quantity();
+			$item->price              = $item->product->get_price();
 			$this->items[ $item_key ] = $item;
 		}
-		$this->calculated = false;
+		$this->totals = null;
 	}
 
 	/**
@@ -96,23 +90,47 @@ class WC_Cart_Totals {
 			$coupon->coupon         = $coupon_object;
 			$this->coupons[ $code ] = $coupon;
 		}
-		$this->calculated = false;
+		$this->totals = null;
 	}
 
 	/**
-	 * Returns items.
+	 * Set fees.
+	 * @param array $fees
+	 */
+	public function set_fees( $fees ) {
+		foreach ( $fees as $fee_key => $fee_object ) {
+			$fee                    = $this->get_default_fee_props();
+			$fee->amount            = $fee_object->amount;
+			$fee->taxable           = $fee_object->taxable;
+			$fee->tax_class         = $fee_object->tax_class;
+			$this->fees[ $fee_key ] = $fee;
+		}
+		$this->totals = null;
+	}
+
+	/**
+	 * Should we calc tax?
+	 * @param bool
+	 */
+	public function set_calculate_tax( $value ) {
+		$this->calculate_tax = (bool) $value;
+	}
+
+	/**
+	 * Should we calc tax?
+	 * @param bool
+	 */
+	public function get_calculate_tax() {
+		return wc_tax_enabled() && $this->calculate_tax;
+	}
+
+	/**
+	 * Returns items and their totals.
 	 * @return array
 	 */
-	public function get_items() {
+	public function get_item_totals() {
+		$this->maybe_calculate();
 		return $this->items;
-	}
-
-	/**
-	 * Returns coupons.
-	 * @return array
-	 */
-	public function get_coupons() {
-		return $this->coupons;
 	}
 
 	/**
@@ -143,7 +161,7 @@ class WC_Cart_Totals {
 	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
 	 * @return float
 	 */
-	public function get_subtotal( $inc_tax = true ) {
+	public function get_items_subtotal( $inc_tax = true ) {
 		$this->maybe_calculate();
 		$totals = array_values( wp_list_pluck( $this->items, 'subtotal' ) );
 
@@ -160,7 +178,7 @@ class WC_Cart_Totals {
 	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
 	 * @return float
 	 */
-	public function get_total( $inc_tax = true ) {
+	public function get_items_total( $inc_tax = true ) {
 		$this->maybe_calculate();
 		$totals = array_values( wp_list_pluck( $this->items, 'total' ) );
 
@@ -269,7 +287,7 @@ class WC_Cart_Totals {
 				$coupon->total += $discount_amount * $item->quantity;
 
 				// If taxes are enabled, we should also note how much tax would have been paid if it was not discounted.
-				if ( wc_tax_enabled() ) {
+				if ( $this->get_calculate_tax() ) {
 					$tax_amount    = WC_Tax::get_tax_total( WC_Tax::calc_tax( $discount_amount, $this->get_item_tax_rates( $item ), $item->price_includes_tax ) );
 					$coupon->total_tax += $tax_amount * $item->quantity;
 					$coupon->total = $item->price_includes_tax ? $coupon->total - ( $tax_amount * $item->quantity ) : $coupon->total;
@@ -305,7 +323,7 @@ class WC_Cart_Totals {
 
 		if ( $item_tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax
-			$taxes                    = WC_Tax::calc_tax( $item->line_price, $base_tax_rates, true, true );
+			$taxes                    = WC_Tax::calc_tax( $item->price, $base_tax_rates, true, true );
 
 			// Now we have a new item price (excluding TAX)
 			$item->price              = $item->price - array_sum( $taxes );
@@ -319,30 +337,19 @@ class WC_Cart_Totals {
 	 * Run all calculation logic only if needed.
 	 */
 	private function maybe_calculate() {
-		if ( ! $this->calculated ) {
+		if ( is_null( $this->totals ) ) {
 			$this->calculate();
 		}
 	}
 
 	/**
-	 * Reset calculated totals back to 0.
+	 * Run all calculation logic only if needed.
 	 */
-	private function reset_totals() {
-		foreach ( $this->items as $key => $item ) {
-			$this->items[ $key ] = (object) array_merge( (array) $item, (array) $this->get_default_item_props() );
-		}
-		foreach ( $this->coupons as $code => $coupon ) {
-			$this->coupons[ $code ] = (object) array_merge( (array) $coupon, (array) $this->get_default_coupon_props() );
-		}
-	}
-
-	/**
-	 * Run all calculation logic based on items and coupons.
-	 */
-	private function calculate() {
-		$this->reset_totals();
+	public function calculate() {
 		$this->calculate_item_subtotals();
 		$this->calculate_item_totals();
+		$this->calculate_fee_totals();
+		$this->calculate_totals();
 	}
 
 	/**
@@ -363,12 +370,12 @@ class WC_Cart_Totals {
 			$item->subtotal     = $item->price * $item->quantity;
 			$item->subtotal_tax = 0;
 
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
-			 	if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', false ) ) {
-					$item           = $this->adjust_non_base_location_price( $item );
-					$item->subtotal = $item->price * $item->quantity;
-				}
+			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', false ) ) {
+				$item           = $this->adjust_non_base_location_price( $item );
+				$item->subtotal = $item->price * $item->quantity;
+			}
 
+			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
 				$item->subtotal_tax_data = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
 				$item->subtotal_tax      = array_sum( $item->subtotal_tax_data );
 
@@ -390,7 +397,7 @@ class WC_Cart_Totals {
 			$item->total            = $item->discounted_price * $item->quantity;
 			$item->tax              = 0;
 
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
+			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
 				$item->tax_data = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
 				$item->tax      = array_sum( $item->tax_data );
 
@@ -401,5 +408,107 @@ class WC_Cart_Totals {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Calculate any fees taxes.
+	 */
+	private function calculate_fee_totals() {
+		if ( ! empty( $this->fees ) ) {
+			foreach ( $this->fees as $fee_key => $fee ) {
+				if ( $this->get_calculate_tax() && $fee->taxable ) {
+					$fee->tax_data = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
+					$fee->tax      = array_sum( $fee->tax_data );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the total for all items.
+	 *
+	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
+	 * @return float
+	 */
+	public function get_fees_total( $inc_tax = true ) {
+		$this->maybe_calculate();
+		$totals = array_values( wp_list_pluck( $this->fees, 'amount' ) );
+
+		if ( $inc_tax ) {
+			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->fees, 'tax' ) ) );
+		}
+
+		return array_sum( $totals );
+	}
+
+	/**
+	 * Main cart totals.
+	 */
+	private function calculate_totals() {
+		$this->totals                 = new stdClass();
+		$this->totals->shipping_taxes = array();
+		$this->totals->taxes          = $this->get_tax_data();
+
+		// Total up/round taxes and shipping taxes
+		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->totals->tax_total          = WC_Tax::get_tax_total( $this->totals->taxes );
+			$this->totals->shipping_tax_total = WC_Tax::get_tax_total( $this->totals->shipping_taxes );
+			$this->totals->taxes              = array_map( array( 'WC_Tax', 'round' ), $this->totals->taxes );
+			$this->totals->shipping_taxes     = array_map( array( 'WC_Tax', 'round' ), $this->totals->shipping_taxes );
+		} else {
+			$this->totals->tax_total          = array_sum( $this->totals->taxes );
+			$this->totals->shipping_tax_total = array_sum( $this->totals->shipping_taxes );
+		}
+
+		// Allow plugins to hook and alter totals before final total is calculated
+		do_action( 'woocommerce_calculate_totals', WC()->cart );
+
+		// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
+		$this->totals->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->get_items_total( false ) + $this->get_fees_total( false ) + $this->totals->tax_total + $this->totals->shipping_tax_total, wc_get_price_decimals() ), WC()->cart ) );
+	}
+
+	/**
+	 * Get shipping taxes.
+	 * @return array
+	 */
+	public function get_shipping_taxes() {
+		$this->maybe_calculate();
+		return $this->totals->shipping_taxes;
+	}
+
+	/**
+	 * Get shipping tax total.
+	 * @return float
+	 */
+	public function get_shipping_tax_total() {
+		$this->maybe_calculate();
+		return $this->totals->shipping_tax_total;
+	}
+
+	/**
+	 * Get taxes.
+	 * @return array
+	 */
+	public function get_taxes() {
+		$this->maybe_calculate();
+		return $this->totals->taxes;
+	}
+
+	/**
+	 * Get tax total.
+	 * @return float
+	 */
+	public function get_tax_total() {
+		$this->maybe_calculate();
+		return $this->totals->tax_total;
+	}
+
+	/**
+	 * Get grand total.
+	 * @return float
+	 */
+	public function get_total() {
+		$this->maybe_calculate();
+		return $this->totals->total;
 	}
 }

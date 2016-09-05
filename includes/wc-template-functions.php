@@ -2454,7 +2454,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wc_display_item_downloads' ) ) {
+if ( ! function_exists( 'wc_display_item_data' ) ) {
 	/**
 	 * Gets and formats a list of cart item data + variations for display on the frontend. @todo
 	 *

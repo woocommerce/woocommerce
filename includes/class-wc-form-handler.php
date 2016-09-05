@@ -621,7 +621,9 @@ class WC_Form_Handler {
 				continue;
 			}
 
-			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
+			$cart_item_data['variation'] = $variations;
+
+			wc_add_to_cart( $item, $quantity, $cart_item_data );
 		}
 
 		do_action( 'woocommerce_ordered_again', $order->get_id() );
@@ -733,7 +735,7 @@ class WC_Form_Handler {
 		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
+		if ( $passed_validation && wc_add_to_cart( $product_id, $quantity ) !== false ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
@@ -762,7 +764,7 @@ class WC_Form_Handler {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
-				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
+				if ( $passed_validation && wc_add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
 					$added_to_cart[ $item ] = $quantity;
 				}
@@ -841,7 +843,7 @@ class WC_Form_Handler {
 			// Add to cart validation
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
+			if ( $passed_validation && wc_add_to_cart( $variation, $quantity, array( 'variation' => $variations ) ) !== false ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 				return true;
 			}

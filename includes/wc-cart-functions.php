@@ -31,6 +31,110 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
+ * Add a product to the cart.
+ *
+ * Validates the product can be added, then adds it if valid.
+ *
+ * @since 2.7.0
+ * @param int $product_or_variation_id contains the id of the product to add to the cart.
+ * @param int $quantity contains the quantity of the item to add
+ * @param array $data extra cart item data we want to pass into the item, including any data about the variation if applicable.
+ * @return string|bool $cart_item_key that was added or false if validation failed.
+ */
+function wc_add_to_cart( $product_or_variation_id = 0, $quantity = 1, $data = array() ) {
+	try {
+		$product = wc_get_product( $product_or_variation_id );
+
+		if ( empty( $product ) || ! $product->is_purchasable() ) {
+			throw new Exception( __( 'Sorry, this product cannot be purchased.', 'woocommerce' ) );
+		}
+
+		$quantity = max( 0, apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product, $data ) );
+		$data     = (array) apply_filters( 'woocommerce_add_to_cart_data', $data, $product );
+
+		wc_add_to_cart_validate_stock( $product, $quantity );
+
+		$cart_item_key = WC()->cart->add_item( array(
+			'product'  => $product,
+			'quantity' => $quantity,
+			'data'     => $data,
+		) );
+
+		do_action(
+			'woocommerce_add_to_cart',
+			$cart_item_key,
+			$product->get_id(),
+			$quantity,
+			is_callable( array( $product, 'get_variation_id' ) ) ? $product->get_variation_id() : 0,
+			! empty( $data['variation'] ) ? $data['variation'] : array(),
+			$data
+		);
+
+		return $cart_item_key;
+	} catch ( Exception $e ) {
+		wc_add_notice( $e->getMessage(), 'error' );
+		return false;
+	}
+}
+
+/**
+ * Check product has enough stock to be added to cart.
+ * @since 2.7.0
+ * @param WC_Product $product
+ * @param int $adding_quantity
+ * @throws Exception
+ */
+function wc_add_to_cart_validate_stock( $product, $adding_quantity = 0 ) {
+	$products_qty_in_cart  = wc_cart_item_quantities();
+	$managing_stock        = $product->managing_stock();
+	$check_variation_stock = $product->is_type( 'variation' ) && true === $managing_stock;
+	$check_id              = $check_variation_stock ? $product->variation_id : $product->id;
+	$in_cart_qty           = isset( $products_qty_in_cart[ $check_id ] ) ? $products_qty_in_cart[ $check_id ] : 0;
+
+	if ( ! $product->is_in_stock() ) {
+		throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product->get_title() ) );
+	}
+
+	if ( $product->is_sold_individually() && $in_cart_qty ) {
+		throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product->get_title() ) ) );
+	}
+
+	if ( ! $product->has_enough_stock( $adding_quantity ) ) {
+		throw new Exception( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product->get_title(), $product->get_stock_quantity() ) );
+	}
+
+	/**
+	 * Check stock based on all items in the cart.
+	 */
+	if ( ! $product->has_enough_stock( $in_cart_qty + $adding_quantity ) ) {
+		throw new Exception( '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a> ' . sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product->get_stock_quantity(), $check_qty ) );
+	}
+
+	/**
+	 * Finally consider any held stock, from pending orders.
+	 */
+	if ( ! $product->has_enough_stock( $in_cart_qty + $adding_quantity + wc_get_held_stock_count( $product ) ) ) {
+		throw new Exception( '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a> ' . sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+	}
+}
+
+/**
+ * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
+ * @since 2.7.0
+ * @return array
+ */
+function wc_cart_item_quantities() {
+	$quantities = array();
+
+	foreach ( WC()->cart->get_cart() as $cart_item_key => $item ) {
+		$id                = $item->get_product_id();
+		$quantities[ $id ] = isset( $quantities[ $id ] ) ? $quantities[ $id ] + $item->get_quantity() : $item->get_quantity();
+	}
+
+	return $quantities;
+}
+
+/**
  * Clears the cart session when called.
  */
 function wc_empty_cart() {
@@ -275,8 +379,6 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 /**
  * Get order total html including inc tax if needed.
- *
- * @access public
  */
 function wc_cart_totals_order_total_html() {
 	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
@@ -423,7 +525,7 @@ function wc_cart_subtotal_to_display() {
  * @param bool $compound whether to include compound taxes
  * @return string formatted price
  */
-function wc_cart_subtotal_html( $compound = false ) {
+function wc_cart_subtotal_html( $compound = false, $echo = true ) {
 	// If the cart has compound tax, we want to show the subtotal as
 	// cart + shipping + non-compound taxes (after discount)
 	if ( $compound ) {
@@ -441,7 +543,13 @@ function wc_cart_subtotal_html( $compound = false ) {
 		}
 	}
 
-	return apply_filters( 'woocommerce_cart_subtotal', wc_price( $cart_subtotal ) . ' ' . $suffix, $compound, WC()->cart );
+	$html = apply_filters( 'woocommerce_cart_subtotal', wc_price( $cart_subtotal ) . ' ' . $suffix, $compound, WC()->cart );
+
+	if ( $echo ) {
+		echo $html;
+	} else {
+		return $html;
+	}
 }
 
 /**

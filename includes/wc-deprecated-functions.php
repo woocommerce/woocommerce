@@ -14,6 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+// Stop errors breaking ajax calls.
+if ( is_ajax() ) {
+	add_filter( 'deprecated_function_trigger_error', '__return_false' );
+}
+
 /**
  * @deprecated
  */
@@ -745,5 +750,29 @@ add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_b
  */
 function wc_cart_totals_subtotal_html() {
 	_deprecated_function( 'wc_cart_totals_subtotal_html', '2.7', 'wc_cart_subtotal_html' );
-	echo wc_cart_subtotal_html();
+	wc_cart_subtotal_html();
 }
+
+/**
+ * Handle deprecated woocommerce_add_to_cart_sold_individually_quantity filter.
+ */
+function woocommerce_add_to_cart_sold_individually_quantity_deprecated_filter( $quantity, $product, $data ) {
+	if ( has_filter( 'woocommerce_add_to_cart_sold_individually_quantity' ) ) {
+		_deprecated_function( 'The woocommerce_add_to_cart_sold_individually_quantity filter', '2.7.0', 'woocommerce_add_to_cart_quantity' );
+		return apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product->get_id(), is_callable( array( $product, 'get_variation_id' ) ) ? $product->get_variation_id() : 0, $data );
+	}
+	return $quantity;
+}
+add_filter( 'woocommerce_add_to_cart_quantity', 'woocommerce_add_to_cart_sold_individually_quantity_deprecated_filter', 10, 3 );
+
+/**
+ * Handle deprecated woocommerce_add_cart_item_data filter.
+ */
+function woocommerce_add_to_cart_data_deprecated_filter( $data, $product ) {
+	if ( has_filter( 'woocommerce_add_cart_item_data' ) ) {
+		_deprecated_function( 'The woocommerce_add_cart_item_data filter', '2.7.0', 'woocommerce_add_to_cart_data' );
+		return apply_filters( 'woocommerce_add_cart_item_data', $data, $product->get_id(), is_callable( array( $product, 'get_variation_id' ) ) ? $product->get_variation_id() : 0 );
+	}
+	return $data;
+}
+add_filter( 'woocommerce_add_to_cart_data', 'woocommerce_add_to_cart_data_deprecated_filter', 10, 2 );
