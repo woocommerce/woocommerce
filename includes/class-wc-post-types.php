@@ -35,6 +35,11 @@ class WC_Post_types {
 	 * Register core taxonomies.
 	 */
 	public static function register_taxonomies() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( taxonomy_exists( 'product_type' ) ) {
 			return;
 		}
@@ -225,6 +230,11 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( post_type_exists('product') ) {
 			return;
 		}

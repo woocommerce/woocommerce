@@ -168,6 +168,11 @@ class WC_Cache_Helper {
 	 * @access public
 	 */
 	public static function prevent_caching() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );

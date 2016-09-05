@@ -464,6 +464,11 @@ final class WooCommerce {
 	 * @since 2.2
 	 */
 	private function load_webhooks() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) {
 			$webhooks = get_posts( array(
 				'fields'         => 'ids',
