@@ -145,23 +145,6 @@ function wc_empty_cart() {
 }
 
 /**
- * Load the persistent cart.
- *
- * @param string $user_login
- * @param WP_User $user
- * @deprecated 2.3
- */
-function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true ) ) ) {
-		return;
-	}
-
-	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || 0 === sizeof( WC()->session->cart ) ) {
-		WC()->session->cart = $saved_cart['cart'];
-	}
-}
-
-/**
  * Retrieves unvalidated referer from '_wp_http_referer' or HTTP referer.
  *
  * Do not use for redirects, use {@see wp_get_referer()} instead.
@@ -569,3 +552,36 @@ function wc_cart_product_price_html( $product, $quantity = 1 ) {
 	}
 	return apply_filters( 'woocommerce_cart_product_price_html', wc_price( $product->is_taxable() ? $price . ' ' . $suffix : $price ), $product, $quantity );
 }
+
+/**
+ * Load the persistent cart.
+ */
+function wc_load_persistent_cart() {
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+	$cart = WC()->session->get( 'cart', null );
+
+	if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) ) ) {
+		$cart          = array();
+		$cart['items'] = $saved_cart;
+		WC()->session->set( 'cart', $cart );
+	}
+}
+add_action( 'wp_loaded', 'wc_load_persistent_cart', 5 );
+
+/**
+ * Update the persistent cart.
+ */
+function wc_update_persistent_cart() {
+	update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', WC()->cart->get_cart_for_session() );
+}
+add_action( 'woocommerce_cart_updated', 'wc_update_persistent_cart' );
+
+/**
+ * Delete the persistent cart.
+ */
+function wc_delete_persistent_cart() {
+	delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
+}
+add_action( 'woocommerce_cart_emptied', 'wc_delete_persistent_cart' );

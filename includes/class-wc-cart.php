@@ -388,10 +388,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function destroy_cart_session( $clear_persistent_cart = true ) {
 		WC()->session->set( 'cart', null );
-
-		if ( $clear_persistent_cart && get_current_user_id() ) {
-			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
-		}
 	}
 
 	/**
@@ -445,15 +441,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	//	$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
 
-		/**
-		 * Load the cart object. This defaults to the persistent cart if null.
-		 */
-		$cart = WC()->session->get( 'cart', null );
-
-		if ( is_null( $cart ) ) {
-			$cart = is_user_logged_in() ? get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) : false;
-			$cart = ! empty( $cart ) && isset( $cart['items'] ) ? $cart : array( 'items' => array(), 'removed_items' => array() );
-		}
+		$cart = wp_parse_args( (array) WC()->session->get( 'cart', array() ), array(
+			'items'         => array(),
+			'removed_items' => array()
+		) );
 
 		foreach ( $cart['items'] as $key => $values ) {
 			if ( ! isset( $values['product_id'], $values['quantity'] ) || ! ( $product = wc_get_product( $values['product_id'] ) ) ) {
@@ -479,11 +470,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			'items'         => $this->get_cart_for_session(),
 			'removed_items' => wc_list_pluck( $this->items->get_removed_items(), 'get_data' ),
 		);
-
 		if ( WC()->session->set( 'cart', $session_data ) ) {
-			if ( is_user_logged_in() ) {
-				update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', $session_data );
-			}
 			do_action( 'woocommerce_cart_updated' );
 		}
 	}
