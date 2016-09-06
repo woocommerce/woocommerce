@@ -25,6 +25,9 @@ $order = wc_get_order( $order_id );
 $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 ?>
+
+<?php do_action( 'woocommerce_order_details_before_order_table' ); ?>
+
 <h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
 <table class="shop_table order_details">
 	<thead>

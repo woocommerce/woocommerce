@@ -20,6 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
+
+<?php do_action( 'woocommerce_order_details_before_customer_table' ); ?>
+
 <header><h2><?php _e( 'Customer Details', 'woocommerce' ); ?></h2></header>
 
 <table class="shop_table customer_details">
@@ -75,3 +78,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div><!-- /.col2-set -->
 
 <?php endif; ?>
+
+<?php do_action( 'woocommerce_order_details_after_customer_table' ); ?>
