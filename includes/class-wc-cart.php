@@ -5,7 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-items.php' );
-include_once( WC_ABSPATH . 'includes/class-wc-cart-shipping.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-fees.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
@@ -62,6 +61,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		// Item validation
 		add_action( 'woocommerce_check_cart_items', array( $this->items, 'check_items' ), 1 );
 
+		// Trigger the fees API where developers can add fees to the cart
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_fees' ) );
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_shipping' ) );
+
 		// Sessions
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
@@ -71,14 +74,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'set_session' ), 20, 0 );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
-	}
-
-	/**
-	 * Get array of applied coupon objects and codes.
-	 * @return array of applied coupons
-	 */
-	public function get_coupons() {
-		return array();
+		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 	}
 
 	/**
@@ -102,6 +98,98 @@ class WC_Cart extends WC_Legacy_Cart {
 	*/
 	public function is_empty() {
 		return ! sizeof( $this->get_cart() );
+	}
+
+	/**
+ 	* Get all tax classes for items in the cart.
+ 	* @return array
+ 	*/
+    public function get_cart_item_tax_classes() {
+ 	   return $this->items->get_item_tax_classes();
+    }
+
+    /**
+ 	* Get weight of items in the cart.
+ 	* @return int
+ 	*/
+    public function get_cart_contents_weight() {
+ 	   return $this->items->get_item_weight();
+    }
+
+    /**
+ 	* Get number of items in the cart.
+ 	* @return int
+ 	*/
+    public function get_cart_contents_count() {
+ 	   return $this->items->get_item_count();
+    }
+	
+	/**
+	 * Looks through the cart to see if shipping is actually required.
+	 * @return bool whether or not the cart needs shipping
+	 */
+	public function needs_shipping() {
+		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+		$needs_shipping = false;
+
+		foreach ( $this->get_cart() as $cart_item_key => $item ) {
+			$product = $item->get_product();
+			if ( $product && $product->needs_shipping() ) {
+				$needs_shipping = true;
+				break;
+			}
+		}
+		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+	}
+
+	/**
+	 * Should the shipping address form be shown.
+	 * @return bool
+	 */
+	public function needs_shipping_address() {
+		return apply_filters( 'woocommerce_cart_needs_shipping_address', $this->needs_shipping() && ! wc_ship_to_billing_address_only() );
+	}
+
+	/**
+	 * Get packages to calculate shipping for.
+	 *
+	 * This lets us calculate costs for carts that are shipped to multiple locations.
+	 *
+	 * Shipping methods are responsible for looping through these packages.
+	 *
+	 * By default we pass the cart itself as a package - plugins can change this.
+	 * through the filter and break it up.
+	 *
+	 * @since 1.5.4
+	 * @return array of cart items
+	 */
+	public function get_shipping_packages() {
+		return apply_filters( 'woocommerce_cart_shipping_packages',
+			array(
+				array(
+					'contents'        => $this->items->get_items_needing_shipping(),
+					'contents_cost'   => array_sum( wc_list_pluck( $this->items->get_items_needing_shipping(), 'get_price' ) ),
+					'applied_coupons' => $this->get_coupons(),
+					'user'            => array(
+						'ID' => get_current_user_id(),
+					),
+					'destination' => WC()->customer->get_shipping(),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
+	 */
+	public function calculate_shipping() {
+		if ( $this->needs_shipping() ) {
+			WC()->shipping->calculate_shipping( $this->get_shipping_packages() );
+		} else {
+			WC()->shipping->reset_shipping();
+		}
 	}
 
 	/**
@@ -240,12 +328,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function calculate_totals() {
 		do_action( 'woocommerce_before_calculate_totals', $this );
 
-		// Calculate the Shipping
-	//	$this->calculate_shipping();
-
-		// Trigger the fees API where developers can add fees to the cart
-		$this->calculate_fees();
-
+		$this->totals->set_coupons( $this->get_coupons() );
 		$this->totals->set_fees( $this->get_fees() );
 		$this->totals->set_items( $this->get_cart() );
 		$this->totals->set_calculate_tax( ! WC()->customer->get_is_vat_exempt() );
@@ -379,8 +462,32 @@ class WC_Cart extends WC_Legacy_Cart {
 
 
 
+	/**
+	 * Applies a coupon code passed to the method.
+	 *
+	 * @param string $coupon_code - The code to apply
+	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
+	 */
+	public function add_discount( $coupon_code ) {
+		$this->coupons->add( $coupon_code );
+	}
 
+	/**
+	 * Remove a single coupon by code.
+	 * @param  string $coupon_code Code of the coupon to remove
+	 * @return bool
+	 */
+	public function remove_coupon( $coupon_code ) {
+		return $this->coupons->remove_coupon( $coupon_code );
+	}
 
+	/**
+	 * Get array of applied coupon objects and codes.
+	 * @return array of applied coupons
+	 */
+	public function get_coupons() {
+		return $this->coupons->get_coupons();
+	}
 
 	/**
 	 * Destroy cart session data.
@@ -434,16 +541,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get the cart data from the PHP session and store it in class variables.
 	 */
 	public function get_cart_from_session() {
-		// Load cart session data from session
-		//foreach ( $this->session_data as $key => $default ) {
-		//	$this->$key = WC()->session->get( $key, $default );
-	//	}
-
-	//	$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
-
 		$cart = wp_parse_args( (array) WC()->session->get( 'cart', array() ), array(
 			'items'         => array(),
-			'removed_items' => array()
+			'removed_items' => array(),
+			'coupons'       => array(),
 		) );
 
 		foreach ( $cart['items'] as $key => $values ) {
@@ -451,13 +552,13 @@ class WC_Cart extends WC_Legacy_Cart {
 				unset( $cart['items'][ $key ] );
 				continue;
 			}
-
 			// Put session data into array. Run through filter so other plugins can load their own session data.
 			$cart['items'][ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $values, $values, $key );
 		}
 
 		$this->items->set_items( $cart['items'] );
 		$this->items->set_removed_items( $cart['removed_items'] );
+		$this->coupons->set_coupons( $cart['coupons'] );
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this );
 	}
@@ -469,6 +570,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$session_data = array(
 			'items'         => $this->get_cart_for_session(),
 			'removed_items' => wc_list_pluck( $this->items->get_removed_items(), 'get_data' ),
+			'coupons'       => $this->get_coupons(),
 		);
 		if ( WC()->session->set( 'cart', $session_data ) ) {
 			do_action( 'woocommerce_cart_updated' );

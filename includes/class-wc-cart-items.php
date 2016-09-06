@@ -131,6 +131,23 @@ class WC_Cart_Items {
 	}
 
 	/**
+	 * Filter items needing shipping callback.
+	 * @return bool
+	 */
+	protected function filter_items_needing_shipping( $item ) {
+		$product = $item->get_product();
+		return $product && $product->needs_shipping();
+	}
+
+	/**
+	 * Get only items that need shipping.
+	 * @return array
+	 */
+	public function get_items_needing_shipping() {
+		return array_filter( $this->get_items(), array( $this, 'filter_items_needing_shipping' ) );
+	}
+
+	/**
 	 * Check all cart items for errors.
 	 */
 	public function check_items() {
@@ -164,7 +181,7 @@ class WC_Cart_Items {
 	 * @return array
 	 */
 	public function get_item_tax_classes() {
-		return array_unique( wp_list_pluck( $this->items, 'tax_class' ) );
+		return array_unique( array_values( wc_list_pluck( $this->items, 'get_tax_class' ) ) );
 	}
 
 	/**

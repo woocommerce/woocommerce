@@ -34,7 +34,11 @@ class WC_Cart_Coupons {
 	 * @return array
 	 */
 	public function get_coupons() {
-		return array_filter( (array) $this->coupons );
+		return $this->coupons;
+	}
+
+	public function set_coupons( $set ) {
+		$this->coupons = array_filter( (array) $set );
 	}
 
 	/**
@@ -92,7 +96,7 @@ class WC_Cart_Coupons {
 		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
 	}
 
-	public function add_discount( $coupon_code ) {
+	public function add( $coupon_code ) {
 		if ( ! wc_coupons_enabled() ) {
 			return false;
 		}

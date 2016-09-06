@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WooCommerce Shipping Class
  *
@@ -10,14 +14,6 @@
  * @category	Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-/**
- * WC_Shipping
- */
 class WC_Shipping {
 
 	/** @var bool True if shipping is enabled. */
@@ -25,6 +21,9 @@ class WC_Shipping {
 
 	/** @var array|null Stores methods loaded into woocommerce. */
 	public $shipping_methods         = null;
+
+	/** @var object|null Stores matching shipping zone. */
+	protected $shipping_zone         = null;
 
 	/** @var float Stores the cost of shipping */
 	public $shipping_total 			 = 0;
@@ -122,6 +121,14 @@ class WC_Shipping {
 	}
 
 	/**
+	 * Get matching shipping zone.
+	 * @return object|null
+	 */
+	public function get_shipping_zone() {
+		return $this->shipping_zone;
+	}
+
+	/**
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
 	 *
 	 * Loads all shipping methods which are hooked in.
@@ -132,15 +139,10 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
-			$debug_mode             = 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' );
-			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
-			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
-
-			// Debug output
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
-				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
-			}
+			$this->shipping_zone    = WC_Shipping_Zones::get_zone_matching_package( $package );
+			$this->shipping_methods = $this->shipping_zone->get_shipping_methods( true );
 		} else {
+			$this->shipping_zone    = null;
 			$this->shipping_methods = array();
 		}
 
@@ -396,13 +398,5 @@ class WC_Shipping {
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
 		$this->packages = array();
-	}
-
-	/**
-	 * @deprecated 2.6.0 Was previously used to determine sort order of methods, but this is now controlled by zones and thus unused.
-	 */
-	public function sort_shipping_methods() {
-		_deprecated_function( 'sort_shipping_methods', '2.6', '' );
-		return $this->shipping_methods;
 	}
 }

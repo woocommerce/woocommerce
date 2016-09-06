@@ -279,6 +279,7 @@ function wc_cart_totals_shipping_html() {
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 		$product_names = array();
+		$package_name  = apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package );
 
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
@@ -286,12 +287,16 @@ function wc_cart_totals_shipping_html() {
 			}
 		}
 
+		if ( 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) && WC()->shipping->get_shipping_zone() ) {
+			$package_name .= ' - ' . WC()->shipping->get_shipping_zone()->get_zone_name();
+		}
+
 		wc_get_template( 'cart/cart-shipping.php', array(
 			'package'              => $package,
 			'available_methods'    => $package['rates'],
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'         => $package_name,
 			'index'                => $i,
 			'chosen_method'        => $chosen_method,
 		) );
@@ -551,6 +556,23 @@ function wc_cart_product_price_html( $product, $quantity = 1 ) {
 		$suffix = wc_cart_prices_include_tax() ? '<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
 	}
 	return apply_filters( 'woocommerce_cart_product_price_html', wc_price( $product->is_taxable() ? $price . ' ' . $suffix : $price ), $product, $quantity );
+}
+
+/**
+ * Should we show shipping in the cart?
+ * @since 2.7.0
+ * @return bool
+ */
+function wc_cart_show_shipping() {
+	if ( ! wc_shipping_enabled() || WC()->cart->is_empty() ) {
+		return false;
+	}
+
+	if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) && ! WC()->customer->has_calculated_shipping() && ! WC()->customer->has_shipping_address() ) {
+		return false;
+	}
+
+	return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 }
 
 /**

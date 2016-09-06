@@ -330,6 +330,32 @@ class WC_Customer extends WC_Legacy_Customer {
 		return $this->get_calculated_shipping();
 	}
 
+	/**
+	 * WC assumes you have an address if you have a shipping country and/or a
+	 * postcode or state.
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function has_shipping_address() {
+		return $this->get_shipping_country() && ( $this->get_shipping_state() || $this->get_shipping_postcode() );
+	}
+
+	/**
+	 * Gets full billing address array.
+	 * @return array
+	 */
+	public function get_billing() {
+		return $this->_data['billing'];
+	}
+
+	/**
+	 * Gets full shipping address array.
+	 * @return array
+	 */
+	public function get_shipping() {
+		return $this->_data['shipping'];
+	}
+
 	/*
 	 |--------------------------------------------------------------------------
 	 | Getters

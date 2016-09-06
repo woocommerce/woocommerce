@@ -41,6 +41,52 @@ abstract class WC_Legacy_Cart {
 		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
 	}
 
+	/**
+	 * Gets the shipping total (after calculation).
+	 *
+	 * @return string price or string for the shipping total
+	 */
+	public function get_cart_shipping_total() {
+		if ( isset( $this->shipping_total ) ) {
+			if ( $this->shipping_total > 0 ) {
+
+				// Display varies depending on settings
+				if ( $this->tax_display_cart == 'excl' ) {
+
+					$return = wc_price( $this->shipping_total );
+
+					if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
+						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+					}
+
+					return $return;
+
+				} else {
+
+					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
+
+					if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
+						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+					}
+
+					return $return;
+
+				}
+			} else {
+				return __( 'Free!', 'woocommerce' );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Sees if the customer has entered enough data to calc the shipping yet.
+	 * @return bool
+	 */
+	public function show_shipping() {
+		_deprecated_function( 'WC_Cart::show_shipping', '2.7', 'wc_cart_show_shipping' );
+		return wc_cart_show_shipping();
+	}
 
 	/**
 	 * Gets the cart contents total (after calculation).
@@ -90,30 +136,9 @@ abstract class WC_Legacy_Cart {
 		return wc_cart_item_quantities();
 	}
 
-   /**
-	* Get all tax classes for items in the cart.
-	* @return array
-	*/
-   public function get_cart_item_tax_classes() {
-	   return $this->items->get_item_tax_classes();
-   }
 
-   /**
-	* Get weight of items in the cart.
-	* @return int
-	*/
-   public function get_cart_contents_weight() {
-	   return $this->items->get_item_weight();
-   }
 
-   /**
-	* Get number of items in the cart.
-	* @return int
-	*/
-   public function get_cart_contents_count() {
-	   return $this->items->get_item_count();
-   }
-
+//public function calculate_shipping() {
 
 //check_cart_items
 
@@ -150,18 +175,14 @@ abstract class WC_Legacy_Cart {
 				return $this->totals->get_shipping_taxes();
 			case 'total' :
 				return $this->totals->get_total();
-
 			case 'coupon_discount_amounts' :
-				//wp_list_pluck( $totals->get_coupons(), 'total' );
-				break;
+				return wp_list_pluck( $this->totals->get_coupons(), 'total' );
 			case 'coupon_discount_tax_amounts' :
-				//wp_list_pluck( $totals->get_coupons(), 'total_tax' );
-				break;
-
-
-
-
-
+				return wp_list_pluck( $this->totals->get_coupons(), 'total_tax' );
+			case 'shipping_total' :
+				return WC()->shipping->shipping_total;
+			case 'shipping_taxes' :
+				return WC()->shipping->shipping_taxes;
 			/****
 			/**
 			 * An array of fees.
@@ -594,14 +615,6 @@ abstract class WC_Legacy_Cart {
 		WC()->session->set( 'coupon_discount_tax_amounts', array() );
 	}
 
-	/**
-	 * Remove a single coupon by code.
-	 * @param  string $coupon_code Code of the coupon to remove
-	 * @return bool
-	 */
-	public function remove_coupon( $coupon_code ) {
-
-	}
 
 			/**
 			 * Function to apply discounts to a product and get the discounted price (before tax is applied).

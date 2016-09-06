@@ -95,6 +95,30 @@ class WC_Cart_Item implements ArrayAccess {
 	}
 
 	/**
+	 * Gets price of the product.
+	 * @return float
+	 */
+	public function get_price() {
+		return $this->get_product() ? $this->get_product()->get_price() : 0;
+	}
+
+	/**
+	 * Gets price of the product.
+	 * @return float
+	 */
+	public function get_weight() {
+		return $this->get_product() ? $this->get_product()->get_weight() : 0;
+	}
+
+	/**
+	 * Gets price of the product.
+	 * @return float
+	 */
+	public function get_tax_class() {
+		return $this->get_product() ? $this->get_product()->get_tax_class() : '';
+	}
+
+	/**
 	 * Set product.
 	 * @param int $value
 	 */
