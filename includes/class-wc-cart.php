@@ -3,11 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php' );
-include_once( WC_ABSPATH . 'includes/class-wc-cart-items.php' );
-include_once( WC_ABSPATH . 'includes/class-wc-cart-fees.php' );
-include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
-include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
+include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-totals.php' );
+include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-session.php' );
 
 /**
  * Main cart class.
@@ -17,19 +14,7 @@ include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Cart extends WC_Legacy_Cart {
-
-	/**
-	 * Cart items class.
-	 * @var WC_Cart_Items
-	 */
-	protected $items;
-
-	/**
-	 * Cart coupons class.
-	 * @var WC_Cart_Coupons
-	 */
-	protected $coupons;
+class WC_Cart extends WC_Cart_Session {
 
 	/**
 	 * Cart totals class.
@@ -38,19 +23,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $totals;
 
 	/**
-	 * Cart fees class.
-	 * @var WC_Cart_Fees
-	 */
-	public $fees;
-
-	/**
 	 * Constructor for the cart class.
 	 */
 	public function __construct() {
-		$this->coupons = new WC_Cart_Coupons;
-		$this->fees    = new WC_Cart_Fees;
+		parent::__construct();
+
 		$this->totals  = new WC_Cart_Totals;
-		$this->items   = new WC_Cart_Items;
 
 		// Recalculation
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
@@ -64,17 +42,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		// Trigger the fees API where developers can add fees to the cart
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_fees' ) );
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_shipping' ) );
-
-		// Sessions
-		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
-		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
-		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
-		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
-		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
-		add_action( 'woocommerce_add_to_cart', array( $this, 'set_session' ), 20, 0 );
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
-		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 	}
 
 	/**
@@ -87,7 +54,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
-			$this->session->get_cart_from_session();
+			$this->get_cart_from_session();
 		}
 		return $this->items->get_items();
 	}
@@ -123,7 +90,7 @@ class WC_Cart extends WC_Legacy_Cart {
     public function get_cart_contents_count() {
  	   return $this->items->get_item_count();
     }
-	
+
 	/**
 	 * Looks through the cart to see if shipping is actually required.
 	 * @return bool whether or not the cart needs shipping
@@ -489,91 +456,5 @@ class WC_Cart extends WC_Legacy_Cart {
 		return $this->coupons->get_coupons();
 	}
 
-	/**
-	 * Destroy cart session data.
-	 * @param  boolean $clear_persistent_cart
-	 */
-	public function destroy_cart_session( $clear_persistent_cart = true ) {
-		WC()->session->set( 'cart', null );
-	}
 
-	/**
-	 * Will set cart cookies if needed, once, during WP hook.
-	 */
-	public function maybe_set_cart_cookies() {
-		if ( headers_sent() || ! did_action( 'wp_loaded' ) ) {
-			return;
-		}
-		if ( ! $this->is_empty() ) {
-			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-			$this->set_cart_cookies( false );
-		}
-	}
-
-	/**
-	 * Set cart hash cookie and items in cart.
-	 *
-	 * @access private
-	 * @param bool $set (default: true)
-	 */
-	private function set_cart_cookies( $set = true ) {
-		if ( $set ) {
-			wc_setcookie( 'woocommerce_items_in_cart', 1 );
-			wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart_for_session() ) ) );
-		} else {
-			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
-			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
-		}
-		do_action( 'woocommerce_set_cart_cookies', $set );
-	}
-
-	/**
-	 * Returns the contents of the cart in an array without the 'data' element.
-	 *
-	 * @return array contents of the cart
-	 */
-	public function get_cart_for_session() {
-		return wc_list_pluck( $this->get_cart(), 'get_data' );
-	}
-
-	/**
-	 * Get the cart data from the PHP session and store it in class variables.
-	 */
-	public function get_cart_from_session() {
-		$cart = wp_parse_args( (array) WC()->session->get( 'cart', array() ), array(
-			'items'         => array(),
-			'removed_items' => array(),
-			'coupons'       => array(),
-		) );
-
-		foreach ( $cart['items'] as $key => $values ) {
-			if ( ! isset( $values['product_id'], $values['quantity'] ) || ! ( $product = wc_get_product( $values['product_id'] ) ) ) {
-				unset( $cart['items'][ $key ] );
-				continue;
-			}
-			// Put session data into array. Run through filter so other plugins can load their own session data.
-			$cart['items'][ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $values, $values, $key );
-		}
-
-		$this->items->set_items( $cart['items'] );
-		$this->items->set_removed_items( $cart['removed_items'] );
-		$this->coupons->set_coupons( $cart['coupons'] );
-
-		do_action( 'woocommerce_cart_loaded_from_session', $this );
-	}
-
-	/**
-	 * Sets the php session data for the cart and coupons.
-	 */
-	public function set_session() {
-		$session_data = array(
-			'items'         => $this->get_cart_for_session(),
-			'removed_items' => wc_list_pluck( $this->items->get_removed_items(), 'get_data' ),
-			'coupons'       => $this->get_coupons(),
-		);
-		if ( WC()->session->set( 'cart', $session_data ) ) {
-			do_action( 'woocommerce_cart_updated' );
-		}
-	}
 }
