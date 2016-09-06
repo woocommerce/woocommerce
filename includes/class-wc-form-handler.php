@@ -589,7 +589,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( ! $order->has_status( 'completed' ) ) {
+		if ( ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) ) {
 			return;
 		}
 
