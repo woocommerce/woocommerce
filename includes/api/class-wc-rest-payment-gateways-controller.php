@@ -192,7 +192,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Get a gateway based on the current request object.
 	 *
-	 * @param  WC_Payment_Gateway $gateway Payment gateway object.
+	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|null
 	 */
 	public function get_gateway( $request ) {
@@ -230,9 +230,9 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $item, $context );
+		$data    = $this->filter_response_by_context( $data, $context );
 
-		$response = rest_ensure_response( $item );
+		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $gateway, $request ) );
 
 		/**
