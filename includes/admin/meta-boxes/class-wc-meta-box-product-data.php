@@ -1386,38 +1386,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Price handling
-				$regular_price = wc_format_decimal( $variable_regular_price[ $i ] );
-				$sale_price    = $variable_sale_price[ $i ] === '' ? '' : wc_format_decimal( $variable_sale_price[ $i ] );
-				$date_from     = wc_clean( $variable_sale_price_dates_from[ $i ] );
-				$date_to       = wc_clean( $variable_sale_price_dates_to[ $i ] );
-
-				update_post_meta( $variation_id, '_regular_price', $regular_price );
-				update_post_meta( $variation_id, '_sale_price', $sale_price );
-
-				// Save Dates
-				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
-				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
-
-				if ( $date_to && ! $date_from ) {
-					update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
-				}
-
-				// Update price if on sale
-				if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
-					update_post_meta( $variation_id, '_price', $sale_price );
-				} else {
-					update_post_meta( $variation_id, '_price', $regular_price );
-				}
-
-				if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-					update_post_meta( $variation_id, '_price', $sale_price );
-				}
-
-				if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-					update_post_meta( $variation_id, '_price', $regular_price );
-					update_post_meta( $variation_id, '_sale_price_dates_from', '' );
-					update_post_meta( $variation_id, '_sale_price_dates_to', '' );
-				}
+				_wc_save_product_price( $variation_id, $variable_regular_price[ $i ], $variable_sale_price[ $i ], $variable_sale_price_dates_from[ $i ], $variable_sale_price_dates_to[ $i ] );
 
 				if ( isset( $variable_tax_class[ $i ] ) && $variable_tax_class[ $i ] !== 'parent' ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variable_tax_class[ $i ] ) );
