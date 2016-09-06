@@ -115,7 +115,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the product review schema.
+	 * Test the shipping method schema.
 	 *
 	 * @since 2.7.0
 	 */
