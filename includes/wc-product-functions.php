@@ -594,7 +594,7 @@ function wc_get_product_id_by_sku( $sku ) {
  * @param string $date_to
  */
 function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
-	$product_id  = absint( $product_id );
+	$product_id    = absint( $product_id );
 	$regular_price = wc_format_decimal( $regular_price );
 	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
 	$date_from     = wc_clean( $date_from );
@@ -608,7 +608,8 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 	update_post_meta( $product_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
 
 	if ( $date_to && ! $date_from ) {
-		update_post_meta( $product_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+		$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+		update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 	}
 
 	// Update price if on sale
