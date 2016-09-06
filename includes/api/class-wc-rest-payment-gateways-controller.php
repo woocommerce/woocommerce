@@ -133,7 +133,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -150,7 +150,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Update settings if present
