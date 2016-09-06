@@ -135,7 +135,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -153,7 +153,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Update settings if present
@@ -223,8 +223,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			'description'        => $gateway->description,
 			'order'              => isset( $order[ $gateway->id ] ) ? $order[ $gateway->id ] : '',
 			'enabled'            => ( 'yes' === $gateway->enabled ),
-			'method_title'       => empty( $gateway->method_title ) ? ucfirst( $gateway->id ) : $gateway->method_title,
-			'method_description' => $gateway->method_description,
+			'method_title'       => $gateway->get_method_title(),
+			'method_description' => $gateway->get_method_description(),
 			'settings'           => $this->get_settings( $gateway ),
 		);
 
