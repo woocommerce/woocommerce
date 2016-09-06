@@ -119,7 +119,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		// Attempt to get label from product, as entered by the user
 		$label = $attributes[ sanitize_title( $name ) ]['name'];
 	} else {
-		$label = str_replace( '-', ' ', $name );
+		$label = $name;
 	}
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
