@@ -31,7 +31,7 @@ function wc_rest_prepare_date_response( $date ) {
 	}
 
 	// Return null if $date is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date ) {
+	if ( '0000-00-00 00:00:00' === $date || empty( $date ) ) {
 		return null;
 	}
 
