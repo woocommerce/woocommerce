@@ -1197,8 +1197,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				// Don't manage stock.
 				update_post_meta( $product->id, '_manage_stock', 'no' );
 				update_post_meta( $product->id, '_backorders', $backorders );
-				update_post_meta( $product->id, '_stock', '' );
 
+				wc_update_product_stock( $product->id, '' );
 				wc_update_product_stock_status( $product->id, $stock_status );
 			}
 		} elseif ( 'variable' !== $product_type ) {
@@ -1459,7 +1459,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 			} else {
 				delete_post_meta( $variation_id, '_backorders' );
-				delete_post_meta( $variation_id, '_stock' );
+				wc_update_product_stock( $variation_id, '' );
 			}
 
 			// Regular Price.

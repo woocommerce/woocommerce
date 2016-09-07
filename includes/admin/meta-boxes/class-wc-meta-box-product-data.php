@@ -1137,7 +1137,7 @@ class WC_Meta_Box_Product_Data {
 			if ( ! empty( $_POST['_manage_stock'] ) ) {
 				wc_update_product_stock( $post_id, wc_stock_amount( $_POST['_stock'] ) );
 			} else {
-				update_post_meta( $post_id, '_stock', '' );
+				wc_update_product_stock( $post_id, '' );
 			}
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
@@ -1411,7 +1411,7 @@ class WC_Meta_Box_Product_Data {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
-					delete_post_meta( $variation_id, '_stock' );
+					wc_update_product_stock( $variation_id, '' );
 				}
 
 				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
