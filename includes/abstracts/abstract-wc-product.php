@@ -961,7 +961,7 @@ class WC_Product {
 		}
 
 		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
-		$woocommerce_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no');
+		$woocommerce_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 
 		if ( $price_display_suffix && 'yes' === $woocommerce_calc_taxes ) {
 
