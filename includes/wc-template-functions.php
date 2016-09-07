@@ -2427,3 +2427,14 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
+
+	/**
+	 * Get the shop sidebar template.
+	 *
+	 */
+	function woocommerce_photoswipe() {
+		wc_get_template( 'single-product/photoswipe.php' );
+	}
+}

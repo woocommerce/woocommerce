@@ -201,13 +201,18 @@ class WC_Frontend_Scripts {
 
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			self::enqueue_script( 'flexslider', $assets_path . 'js/flexslider/jquery.flexslider' . $suffix . '.js', array( 'jquery' ), '2.7.0', true );
+			self::enqueue_script( 'photoswipe', $assets_path . 'js/photoswipe/photoswipe' . $suffix . '.js', '4.1.1', true );
+			self::enqueue_script( 'photoswipe-ui-default', $assets_path . 'js/photoswipe/photoswipe-ui-default' . $suffix . '.js', array( 'photoswipe' ), '4.1.1', true );
+			self::enqueue_style( 'photoswipe', $assets_path . 'css/photoswipe/photoswipe.css' );
+			self::enqueue_style( 'photoswipe-default-skin', $assets_path . 'css/photoswipe/default-skin/default-skin.css' );
+
 			self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
 		}
 
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
 			$flexslider_options = apply_filters( 'woocommerce_single_product_carousel_options', $options = array(
-				'rtl'            => is_rtl() ? 'true' : 'false',
+				'rtl'            => is_rtl(),
 				'animation'      => 'slide',
 				'smoothHeight'   => true,
 				'directionNav'   => false,

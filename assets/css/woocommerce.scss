@@ -164,8 +164,20 @@ p.demo_store {
 				padding-top: 1em;
 			}
 
+			&.woocommerce-product-gallery {
+				position: relative;
+			}
+
 			.woocommerce-product-gallery__wrapper {
-					transition: all cubic-bezier(0.795, -0.035, 0.000, 1.000) .5s;
+				transition: all cubic-bezier(0.795, -0.035, 0.000, 1.000) .5s;
+			}
+
+			.woocommerce-product-gallery__trigger {
+				position: absolute;
+				top: .5em;
+				right: .5em;
+				font-size: 2em;
+				z-index: 999;
 			}
 
 			.flex-control-thumbs {
@@ -1516,6 +1528,48 @@ p.demo_store {
 				}
 			}
 		}
+	}
+}
+
+/**
+ * Photoswipe
+ * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
+ * 2. For zooming on mobile.
+ */
+.pswp {
+	z-index: 999999;
+}
+
+.woocommerce img.pswp__img,
+.woocommerce-page img.pswp__img {
+	max-width: none; /* 2 */
+}
+
+button.pswp__button {
+	box-shadow: none !important;
+}
+
+button.pswp__button,
+button.pswp__button:hover,
+button.pswp__button--arrow--left:before,
+button.pswp__button--arrow--right:before {
+	background-color: transparent !important; /* 1 */
+	background-image: url('photoswipe/default-skin/default-skin.png') !important; /* 1 */
+}
+
+button.pswp__button--arrow--left,
+button.pswp__button--arrow--right,
+button.pswp__button--arrow--left:hover,
+button.pswp__button--arrow--right:hover {
+	background-image: none !important; /* 1 */
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.1), (-webkit-min-device-pixel-ratio: 1.09375), (min-resolution: 105dpi), (min-resolution: 1.1dppx) {
+	button.pswp__button,
+	button.pswp__button:hover,
+	button.pswp__button--arrow--left:before,
+	button.pswp__button--arrow--right:before {
+		background-image: url('photoswipe/default-skin/default-skin.svg') !important; /* 1 */
 	}
 }
 
