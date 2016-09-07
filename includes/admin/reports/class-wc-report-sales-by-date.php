@@ -285,7 +285,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
-					'function'        => 'SUM',
+					'function'        => '',
 					'name'            => 'order_item_count',
 					'join_type'       => 'LEFT'
 				)
