@@ -45,12 +45,12 @@ add_filter( 'the_title', 'wc_page_endpoint_title' );
  */
 function wc_get_page_id( $page ) {
 
-	if ( $page == 'pay' || $page == 'thanks' ) {
+	if ( 'pay' == $page || 'thanks' == $page ) {
 		_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 		$page = 'checkout';
 	}
-	if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
+	if ( 'change_password' === $page || 'edit_address' === $page || 'lost_password' === $page ) {
 		_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
 
 		$page = 'myaccount';

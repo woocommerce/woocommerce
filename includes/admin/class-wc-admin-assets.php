@@ -306,7 +306,7 @@ class WC_Admin_Assets {
 		}
 
 		// Product sorting - only when sorting by menu order on the products page
-		if ( current_user_can( 'edit_others_pages' ) && $screen_id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
+		if ( current_user_can( 'edit_others_pages' ) && 'edit-product' === $screen_id && isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) {
 			wp_register_script( 'woocommerce_product_ordering', WC()->plugin_url() . '/assets/js/admin/product-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), WC_VERSION, true );
 			wp_enqueue_script( 'woocommerce_product_ordering' );
 		}

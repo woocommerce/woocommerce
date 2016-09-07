@@ -372,7 +372,7 @@ class WC_Form_Handler {
 			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
 				// Redirect to success/confirmation/payment page
-				if ( $result['result'] == 'success' ) {
+				if ( 'success' === $result['result'] ) {
 					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
 					wp_redirect( $result['redirect'] );
 					exit();

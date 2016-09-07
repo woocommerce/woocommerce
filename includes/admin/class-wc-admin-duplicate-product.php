@@ -39,7 +39,7 @@ class WC_Admin_Duplicate_Product {
 			return $actions;
 		}
 
-		if ( $post->post_type != 'product' ) {
+		if ( 'product' !== $post->post_type ) {
 			return $actions;
 		}
 
@@ -63,7 +63,7 @@ class WC_Admin_Duplicate_Product {
 			return;
 		}
 
-		if ( $post->post_type != 'product' ) {
+		if ( 'product' !== $post->post_type ) {
 			return;
 		}
 

@@ -1513,7 +1513,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $this->get_shipping_total() != 0 ) {
 
-			if ( $tax_display == 'excl' ) {
+			if ( 'excl' === $tax_display ) {
 
 				// Show shipping excluding tax.
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
