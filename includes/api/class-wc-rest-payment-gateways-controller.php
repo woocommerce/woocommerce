@@ -112,7 +112,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$this->maybe_define_wp_admin();
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$response         = array();
 		foreach ( $payment_gateways as $payment_gateway_id => $payment_gateway ) {
@@ -131,7 +130,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$this->maybe_define_wp_admin();
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
@@ -149,7 +147,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$this->maybe_define_wp_admin();
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
@@ -276,19 +273,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			$settings[ $id ] = $data;
 		}
 		return $settings;
-	}
-
-	/**
-	 * Some form fields (like COD) have a setting to limit to specific shipping
-	 * methods. Some of the code for loading these into settings is behind an
-	 * is_admin check. To work correctly with methods that do this, we can
-	 * define the constant here and act as wp-admin (since these settings are
-	 * shown to managers and admins only anyway).
-	 */
-	protected function maybe_define_wp_admin() {
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 	}
 
 	/**

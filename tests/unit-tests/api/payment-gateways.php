@@ -250,9 +250,6 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.
 	 */
 	private function get_settings( $gateway_class ) {
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 		$gateway = new $gateway_class;
 		$settings = array();
 		$gateway->init_form_fields();
