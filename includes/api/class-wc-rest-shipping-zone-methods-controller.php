@@ -32,6 +32,12 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
@@ -40,6 +46,23 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+					),
+				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -103,6 +126,170 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	}
 
 	/**
+	 * Create a new shipping zone method instance.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function create_item( $request ) {
+		global $wpdb;
+
+		$method_id = $request['method_id'];
+		$zone      = $this->get_zone( $request['zone_id'] );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$instance_id = $zone->add_shipping_method( $method_id );
+		$methods     = $zone->get_shipping_methods();
+		$method      = false;
+		foreach ( $methods as $method_obj ) {
+			if ( $instance_id === $method_obj->instance_id ) {
+				$method = $method_obj;
+				break;
+			}
+		}
+
+		if ( false === $method ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( 'Resource cannot be created.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$method = $this->update_fields( $instance_id, $method, $request );
+
+		$data = $this->prepare_item_for_response( $method, $request );
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Delete a shipping method instance.
+	 *
+	 * @param WP_REST_Request $request Full details about the request
+	 * @return WP_Error|boolean
+	 */
+	public function delete_item( $request ) {
+		global $wpdb;
+
+		$zone = $this->get_zone( $request['zone_id'] );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$instance_id = (int) $request['instance_id'];
+		$force       = $request['force'];
+
+		$methods     = $zone->get_shipping_methods();
+		$method      = false;
+
+		foreach ( $methods as $method_obj ) {
+			if ( $instance_id === $method_obj->instance_id ) {
+				$method = $method_obj;
+				break;
+			}
+		}
+
+		if ( false === $method ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$method = $this->update_fields( $instance_id, $method, $request );
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $method, $request );
+
+		// Actually delete
+		if ( $force ) {
+			$zone->delete_shipping_method( $instance_id );
+		} else {
+			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.' ), array( 'status' => 501 ) );
+		}
+
+		/**
+		 * Fires after a product review is deleted via the REST API.
+		 *
+		 * @param object           $method
+		 * @param WP_REST_Response $response        The response data.
+		 * @param WP_REST_Request  $request         The request sent to the API.
+		 */
+		do_action( 'rest_delete_product_review', $method, $response, $request );
+
+		return $response;
+	}
+
+	/**
+	 * Update A Single Shipping Zone Method.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_item( $request ) {
+		global $wpdb;
+
+		$zone = $this->get_zone( $request['zone_id'] );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$instance_id = (int) $request['instance_id'];
+		$methods     = $zone->get_shipping_methods();
+		$method      = false;
+
+		foreach ( $methods as $method_obj ) {
+			if ( $instance_id === $method_obj->instance_id ) {
+				$method = $method_obj;
+				break;
+			}
+		}
+
+		if ( false === $method ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$method = $this->update_fields( $instance_id, $method, $request );
+
+		$data = $this->prepare_item_for_response( $method, $request );
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Updates settings, order, and enabled status on create.
+	 *
+	 * @param $instance_id integer
+	 * @param $method
+	 * @param WP_REST_Request $request
+	 * @return $method
+	 */
+	public function update_fields( $instance_id, $method, $request ) {
+		global $wpdb;
+
+		// Update settings if present
+		if ( isset( $request['settings'] ) ) {
+			$method->init_instance_settings();
+			$instance_settings = $method->instance_settings;
+			foreach ( $method->get_instance_form_fields() as $key => $field ) {
+				if ( isset( $request['settings'][ $key ] ) ) {
+					$instance_settings[ $key ] = $request['settings'][ $key ];
+				}
+			}
+			update_option( $method->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method ) );
+		}
+
+		// Update order
+		if ( isset( $request['order'] ) ) {
+			$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $request['order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+			$method->method_order = absint( $request['order'] );
+		}
+
+		// Update if this method is enabled or not.
+		if ( isset( $request['enabled'] ) ) {
+			if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $request['enabled'] ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+				do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method->id, $request['zone_id'], $request['enabled'] );
+				$method->enabled = ( true === $request['enabled'] ? 'yes' : 'no' );
+			}
+		}
+
+		return $method;
+	}
+
+	/**
 	 * Prepare the Shipping Zone Method for the REST response.
 	 *
 	 * @param array $item Shipping Zone Method.
@@ -118,6 +305,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			'method_id'          => $item->id,
 			'method_title'       => $item->method_title,
 			'method_description' => $item->method_description,
+			'settings'           => $this->get_settings( $item ),
 		);
 
 		$context = empty( $request['context'] ) ? 'view' : $request['context'];
@@ -132,6 +320,31 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		$response = $this->prepare_response_for_collection( $response );
 
 		return $response;
+	}
+
+	/**
+	 * Return settings associated with this shipping zone method instance.
+	 */
+	public function get_settings( $item ) {
+		$item->init_instance_settings();
+		$settings = array();
+		foreach ( $item->get_instance_form_fields() as $id => $field ) {
+			$data = array(
+				'id'          => $id,
+				'label'       => $field['title'],
+				'description' => empty( $field['description'] ) ? '' : $field['description'],
+				'type'        => $field['type'],
+				'value'       => $item->instance_settings[ $id ],
+				'default'     => empty( $field['default'] ) ? '' : $field['default'],
+				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
+				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
+			);
+			if ( ! empty( $field['options'] ) ) {
+				$data['options'] = $field['options'];
+			}
+			$settings[ $id ] = $data;
+		}
+		return $settings;
 	}
 
 	/**
@@ -172,12 +385,14 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'instance_id' => array(
 					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Shipping method customer facing title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'order' => array(
 					'description' => __( 'Shipping method sort order.', 'woocommerce' ),
@@ -195,19 +410,26 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'required'    => false,
 				),
 				'method_id' => array(
-					'description' => __( 'Shipping method ID.', 'woocommerce' ),
+					'description' => __( 'Shipping method ID. Write on create only.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'method_title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_description' => array(
 					'description' => __( 'Shipping method description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'settings' => array(
+					'description' => __( 'Shipping method settings.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 		);

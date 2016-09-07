@@ -35,7 +35,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 		);
 
 		# GET /webhooks/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_webhooks_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -194,7 +194,9 @@ class WC_API_Webhooks extends WC_API_Resource {
 				'ping_status'   => 'closed',
 				'post_author'   => get_current_user_id(),
 				'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+				// @codingStandardsIgnoreStart
 				'post_title'    => ! empty( $data['name'] ) ? $data['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
+				// @codingStandardsIgnoreEnd
 			), $data, $this );
 
 			$webhook_id = wp_insert_post( $webhook_data );
@@ -293,7 +295,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// update user ID
 			$webhook_data = array(
 				'ID'          => $webhook->id,
-				'post_author' => get_current_user_id()
+				'post_author' => get_current_user_id(),
 			);
 
 			// update name
@@ -458,5 +460,4 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
-
 }

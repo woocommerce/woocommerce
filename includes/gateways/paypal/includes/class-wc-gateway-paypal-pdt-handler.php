@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			),
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
-			'user-agent'	=> 'WooCommerce/' . WC_VERSION
+			'user-agent'	=> 'WooCommerce/' . WC_VERSION,
 		);
 
 		// Post back to get a response.
@@ -90,8 +90,8 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . print_r( $transaction_result, true ) );
 
-		update_post_meta( $order->id, '_paypal_status', $status );
-		update_post_meta( $order->id, '_transaction_id', $transaction );
+		update_post_meta( $order->get_id(), '_paypal_status', $status );
+		update_post_meta( $order->get_id(), '_transaction_id', $transaction );
 
 		if ( $transaction_result ) {
 	 		if ( 'completed' === $status ) {
@@ -103,19 +103,19 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 					// Log paypal transaction fee and other meta data.
 					if ( ! empty( $transaction_result['mc_fee'] ) ) {
-						update_post_meta( $order->id, 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
+						update_post_meta( $order->get_id(), 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
 					}
 					if ( ! empty( $transaction_result['payer_email'] ) ) {
-						update_post_meta( $order->id, 'Payer PayPal address', $transaction_result['payer_email'] );
+						update_post_meta( $order->get_id(), 'Payer PayPal address', $transaction_result['payer_email'] );
 					}
 					if ( ! empty( $transaction_result['first_name'] ) ) {
-						update_post_meta( $order->id, 'Payer first name', $transaction_result['first_name'] );
+						update_post_meta( $order->get_id(), 'Payer first name', $transaction_result['first_name'] );
 					}
 					if ( ! empty( $transaction_result['last_name'] ) ) {
-						update_post_meta( $order->id, 'Payer last name', $transaction_result['last_name'] );
+						update_post_meta( $order->get_id(), 'Payer last name', $transaction_result['last_name'] );
 					}
 					if ( ! empty( $transaction_result['payment_type'] ) ) {
-						update_post_meta( $order->id, 'Payment type', $transaction_result['payment_type'] );
+						update_post_meta( $order->get_id(), 'Payment type', $transaction_result['payment_type'] );
 					}
 				}
 			} else {

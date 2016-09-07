@@ -58,5 +58,4 @@ class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_
 
 		return $id;
 	}
-
 }

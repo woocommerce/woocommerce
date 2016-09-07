@@ -156,7 +156,7 @@ class WC_Email extends WC_Settings_API {
 		'/&(euro|#8364);/i',                             // Euro sign
 		'/&#36;/',                                       // Dollar sign
 		'/&[^&\s;]+;/i',                                 // Unknown/unhandled entities
-		'/[ ]{2,}/'                                      // Runs of spaces, post-handling
+		'/[ ]{2,}/',                                      // Runs of spaces, post-handling
 	);
 
 	/**
@@ -184,7 +184,7 @@ class WC_Email extends WC_Settings_API {
 		'EUR',                                          // Euro sign. € ?
 		'$',                                            // Dollar sign
 		'',                                             // Unknown/unhandled entities
-		' '                                             // Runs of spaces, post-handling
+		' ',                                             // Runs of spaces, post-handling
 	);
 
 	/**
@@ -225,7 +225,7 @@ class WC_Email extends WC_Settings_API {
 	 * @param PHPMailer $mailer
 	 * @return PHPMailer
 	 */
-	public function handle_multipart( $mailer )  {
+	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
 			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
 			$this->sending   = false;
@@ -240,7 +240,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), __( $string ) );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
 	/**
@@ -278,7 +278,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_headers() {
-		return apply_filters( 'woocommerce_email_headers', "Content-Type: " . $this->get_content_type() . "\r\n", $this->id, $this->object );
+		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
+
+		if ( 'new_order' === $this->id ) {
+			$header .= "Reply-to: {$this->object->billing_first_name} {$this->object->billing_last_name} <{$this->object->billing_email}>\r\n";
+		}
+		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
 	}
 
 	/**
@@ -481,7 +486,7 @@ class WC_Email extends WC_Settings_API {
 				'title'       => __( 'Enable/Disable', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'Enable this email notification', 'woocommerce' ),
-				'default'     => 'yes'
+				'default'     => 'yes',
 			),
 			'subject'         => array(
 				'title'       => __( 'Email Subject', 'woocommerce' ),
@@ -489,7 +494,7 @@ class WC_Email extends WC_Settings_API {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder' => '',
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email Heading', 'woocommerce' ),
@@ -497,7 +502,7 @@ class WC_Email extends WC_Settings_API {
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder' => '',
 				'default'     => '',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
@@ -506,8 +511,8 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'html',
 				'class'       => 'email_type wc-enhanced-select',
 				'options'     => $this->get_email_type_options(),
-				'desc_tip'    => true
-			)
+				'desc_tip'    => true,
+			),
 		);
 	}
 
@@ -735,7 +740,7 @@ class WC_Email extends WC_Settings_API {
 			<?php
 				$templates = array(
 					'template_html'  => __( 'HTML template', 'woocommerce' ),
-					'template_plain' => __( 'Plain text template', 'woocommerce' )
+					'template_plain' => __( 'Plain text template', 'woocommerce' ),
 				);
 
 				foreach ( $templates as $template_type => $title ) :
@@ -779,7 +784,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
 							</p>
 
 							<div class="editor" style="display:none">

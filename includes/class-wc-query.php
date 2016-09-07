@@ -36,8 +36,8 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
-			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -211,9 +211,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
@@ -468,8 +466,11 @@ class WC_Query {
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 			break;
 			case 'rating' :
-				// Sorting handled later though a hook
-				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+				$args['meta_key'] = '_wc_average_rating';
+				$args['orderby']  = array(
+					'meta_value_num' => 'DESC',
+					'ID'             => 'ASC',
+				);
 			break;
 			case 'title' :
 				$args['orderby']  = 'title';
@@ -498,12 +499,14 @@ class WC_Query {
 	/**
 	 * Order by rating post clauses.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0
 	 * @param array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
+
+		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -661,7 +664,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query[ 'product_cat' ] = array(
+			$tax_query['product_cat'] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array( $args['product_cat'] ),
 				'field'    => 'slug',
@@ -669,7 +672,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query[ 'product_tag' ] = array(
+			$tax_query['product_tag'] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',

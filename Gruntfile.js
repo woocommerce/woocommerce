@@ -28,6 +28,17 @@ module.exports = function( grunt ) {
 			]
 		},
 
+		// Sass linting with Stylelint.
+		stylelint: {
+			options: {
+				stylelintrc: '.stylelintrc'
+			},
+			all: [
+				'<%= dirs.css %>/*.scss',
+				'!<%= dirs.css %>/select2.scss'
+			]
+		},
+
 		// Minify .js files.
 		uglify: {
 			options: {
@@ -228,6 +239,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -243,6 +255,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'css', [
+		'stylelint',
 		'sass',
 		'cssmin'
 	]);

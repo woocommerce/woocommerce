@@ -193,10 +193,21 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $request['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
+		}
 
-			$args['post_type'] = array( 'product', 'product_variation' );
+		// Apply all WP_Query filters again.
+		if ( is_array( $request['filter'] ) ) {
+			$args = array_merge( $args, $request['filter'] );
+			unset( $args['filter'] );
+		}
+
+		// Force the post_type argument, since it's not a user input variable.
+		if ( ! empty( $request['sku'] ) ) {
+			$args['post_type'] = $this->get_post_types();
+		} else {
+			$args['post_type'] = $this->post_type;
 		}
 
 		return $args;
@@ -1007,7 +1018,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'is_taxonomy'  => 1,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
@@ -1107,7 +1117,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -1191,7 +1201,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				wc_update_product_stock_status( $product->id, $stock_status );
 			}
-
 		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product->id, $stock_status );
 		}
@@ -1306,7 +1315,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
 			// Generate a useful post title.
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $product->id ) ) );
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $product->id ) ) );
 
 			// Update or Add post.
 			if ( ! $variation_id ) {
@@ -1442,7 +1451,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				}  elseif ( isset( $request['inventory_delta'] ) ) {
+				} elseif ( isset( $request['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 
@@ -2396,7 +2405,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						'visible' => array(
 							'description' => __( 'If the variation is visible.', 'woocommerce' ),
 							'type'        => 'boolean',
-							'context'     => array( 'view', 'edit' )
+							'context'     => array( 'view', 'edit' ),
 						),
 						'virtual' => array(
 							'description' => __( 'If the variation is virtual.', 'woocommerce' ),
@@ -2626,7 +2635,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params = parent::get_collection_params();
 
 		$params['slug'] = array(
-			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

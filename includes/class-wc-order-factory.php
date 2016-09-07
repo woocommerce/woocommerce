@@ -30,7 +30,7 @@ class WC_Order_Factory {
 			$the_order = $post;
 		} elseif ( is_numeric( $the_order ) ) {
 			$the_order = get_post( $the_order );
-		} elseif ( $the_order instanceof WC_Order ) {
+		} elseif ( $the_order instanceof WC_Abstract_Order ) {
 			$the_order = get_post( $the_order->get_id() );
 		}
 
@@ -60,7 +60,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 * @param int
-	 * @return WC_Order_Item
+	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
 		global $wpdb;
@@ -71,7 +71,7 @@ class WC_Order_Factory {
 		} elseif ( $item_id instanceof WC_Order_Item ) {
 			$item_data = $item_id->get_data();
 			$item_type = $item_data->get_type();
-		} elseif( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
+		} elseif ( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
 			$item_data = $item_id;
 			$item_type = $item_id->order_item_type;
 		} else {
@@ -99,6 +99,6 @@ class WC_Order_Factory {
 				break;
 			}
 		}
-		return new WC_Order_Item();
+		return false;
 	}
 }

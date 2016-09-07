@@ -838,7 +838,7 @@ abstract class WC_Settings_API {
 		return wp_kses( trim( stripslashes( $value ) ),
 			array_merge(
 				array(
-					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true ),
 				),
 				wp_kses_allowed_html( 'post' )
 			)

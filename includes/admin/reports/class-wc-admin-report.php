@@ -152,10 +152,10 @@ class WC_Admin_Report {
 
 			switch ( $type ) {
 				case 'meta' :
-					$joins["meta_{$key}"] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$key}' )";
+					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$key}' )";
 					break;
 				case 'parent_meta' :
-					$joins["parent_meta_{$key}"] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$key}')";
+					$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$key}')";
 					break;
 				case 'order_item_meta' :
 					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
@@ -164,7 +164,7 @@ class WC_Admin_Report {
 						$joins["order_items"] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
 					}
 
-					$joins["order_item_meta_{$key}"]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
+					$joins[ "order_item_meta_{$key}" ]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
 														"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
 														" AND (order_item_meta_{$key}.meta_key = '{$key}')";
 					break;
@@ -186,11 +186,11 @@ class WC_Admin_Report {
 				if ( 'order_item_meta' === $type ) {
 
 					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
-					$joins["order_item_meta_{$key}"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
+					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
 					// If we have a where clause for meta, join the postmeta table
-					$joins["meta_{$key}"] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
+					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
 				}
 			}
 		}
@@ -222,11 +222,10 @@ class WC_Admin_Report {
 		if ( $filter_range ) {
 
 			$query['where'] .= "
-				AND 	posts.post_date >= '" . date('Y-m-d', $this->start_date ) . "'
-				AND 	posts.post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				AND 	posts.post_date >= '" . date( 'Y-m-d', $this->start_date ) . "'
+				AND 	posts.post_date < '" . date( 'Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
-
 
 		if ( ! empty( $where_meta ) ) {
 
@@ -417,35 +416,35 @@ class WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
+						'name'            => 'product_id',
 					),
 					$meta_key => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
-						'name'            => 'sparkline_value'
+						'name'            => 'sparkline_value',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'where' => array(
 					array(
 						'key'      => 'post_date',
 						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>'
+						'operator' => '>',
 					),
 					array(
 						'key'      => 'order_item_meta__product_id.meta_value',
 						'value'    => $id,
-						'operator' => '='
-					)
+						'operator' => '=',
+					),
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
-				'filter_range' => false
+				'filter_range' => false,
 			) );
 		} else {
 
@@ -454,24 +453,24 @@ class WC_Admin_Report {
 					'_order_total' => array(
 						'type'     => 'meta',
 						'function' => 'SUM',
-						'name'     => 'sparkline_value'
+						'name'     => 'sparkline_value',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'where' => array(
 					array(
 						'key'      => 'post_date',
 						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>'
-					)
+						'operator' => '>',
+					),
 				),
 				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
-				'filter_range' => false
+				'filter_range' => false,
 			) );
 		}
 
@@ -481,14 +480,14 @@ class WC_Admin_Report {
 		}
 
 		if ( $type == 'sales' ) {
-			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
+			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
-			$tooltip = sprintf( _n( 'Sold 1 item in the last %d days', 'Sold %d items in the last %d days', $total, 'woocommerce' ), $total, $days );
+			$tooltip = sprintf( _n( 'Sold 1 item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
 		}
 
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
-		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
+		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
 	}
 
 	/**
@@ -524,7 +523,7 @@ class WC_Admin_Report {
 			break;
 
 			case 'year' :
-				$this->start_date    = strtotime( date( 'Y-01-01', current_time('timestamp') ) );
+				$this->start_date    = strtotime( date( 'Y-01-01', current_time( 'timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'month';
 			break;
@@ -537,7 +536,7 @@ class WC_Admin_Report {
 			break;
 
 			case 'month' :
-				$this->start_date    = strtotime( date( 'Y-m-01', current_time('timestamp') ) );
+				$this->start_date    = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'day';
 			break;
@@ -578,16 +577,20 @@ class WC_Admin_Report {
 	 * @return string
 	 */
 	public function get_currency_tooltip() {
-		switch( get_option( 'woocommerce_currency_pos' ) ) {
+		switch ( get_option( 'woocommerce_currency_pos' ) ) {
 			case 'right':
-				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
+				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"';
+				break;
 			case 'right_space':
-				$currency_tooltip = 'append_tooltip: "&nbsp;' . get_woocommerce_currency_symbol() . '"'; break;
+				$currency_tooltip = 'append_tooltip: "&nbsp;' . get_woocommerce_currency_symbol() . '"';
+				break;
 			case 'left':
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"';
+				break;
 			case 'left_space':
 			default:
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '&nbsp;"'; break;
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '&nbsp;"';
+				break;
 		}
 
 		return $currency_tooltip;

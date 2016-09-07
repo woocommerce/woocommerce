@@ -65,7 +65,7 @@ class WC_Admin_Permalink_Settings {
 	public function product_category_slug_input() {
 		$permalinks = get_option( 'woocommerce_permalinks' );
 		?>
-		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php if ( isset( $permalinks['category_base'] ) ) echo esc_attr( $permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr_x('product-category', 'slug', 'woocommerce') ?>" />
+		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php if ( isset( $permalinks['category_base'] ) ) echo esc_attr( $permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-category', 'slug', 'woocommerce' ) ?>" />
 		<?php
 	}
 
@@ -75,7 +75,7 @@ class WC_Admin_Permalink_Settings {
 	public function product_tag_slug_input() {
 		$permalinks = get_option( 'woocommerce_permalinks' );
 		?>
-		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php if ( isset( $permalinks['tag_base'] ) ) echo esc_attr( $permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr_x('product-tag', 'slug', 'woocommerce') ?>" />
+		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php if ( isset( $permalinks['tag_base'] ) ) echo esc_attr( $permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-tag', 'slug', 'woocommerce' ) ?>" />
 		<?php
 	}
 
@@ -106,7 +106,7 @@ class WC_Admin_Permalink_Settings {
 		$structures = array(
 			0 => '',
 			1 => '/' . trailingslashit( $base_slug ),
-			2 => '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' )
+			2 => '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' ),
 		);
 		?>
 		<table class="form-table wc-permalink-structure">

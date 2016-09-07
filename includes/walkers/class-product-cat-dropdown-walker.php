@@ -32,7 +32,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	public $db_fields = array(
 		'parent' => 'parent',
 		'id'     => 'term_id',
-		'slug'   => 'slug'
+		'slug'   => 'slug',
 	);
 
 	/**
@@ -48,7 +48,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
 		if ( ! empty( $args['hierarchical'] ) ) {
-			$pad = str_repeat('&nbsp;', $depth * 3);
+			$pad = str_repeat( '&nbsp;', $depth * 3 );
 		} else {
 			$pad = '';
 		}

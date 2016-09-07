@@ -139,7 +139,7 @@ class WC_Admin_Settings {
 		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'select2' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
-			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' )
+			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 		) );
 
 		// Include settings pages
@@ -270,7 +270,7 @@ class WC_Admin_Settings {
 					if ( ! empty( $value['desc'] ) ) {
 						echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
 					}
-					echo '<table class="form-table">'. "\n\n";
+					echo '<table class="form-table">' . "\n\n";
 					if ( ! empty( $value['id'] ) ) {
 						do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
 					}
@@ -479,7 +479,7 @@ class WC_Admin_Settings {
 								type="checkbox"
 								class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 								value="1"
-								<?php checked( $option_value, 'yes'); ?>
+								<?php checked( $option_value, 'yes' ); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
 							/> <?php echo $description ?>
 						</label> <?php echo $tooltip_html; ?>
@@ -501,11 +501,11 @@ class WC_Admin_Settings {
 				// Image width settings
 				case 'image_width' :
 
-					$image_size       = str_replace( '_image_size', '', $value[ 'id' ] );
+					$image_size       = str_replace( '_image_size', '', $value['id'] );
 					$size             = wc_get_image_size( $image_size );
-					$width            = isset( $size[ 'width' ] ) ? $size[ 'width' ] : $value[ 'default' ][ 'width' ];
-					$height           = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
-					$crop             = isset( $size[ 'crop' ] ) ? $size[ 'crop' ] : $value[ 'default' ][ 'crop' ];
+					$width            = isset( $size['width'] ) ? $size['width'] : $value['default']['width'];
+					$height           = isset( $size['height'] ) ? $size['height'] : $value['default']['height'];
+					$crop             = isset( $size['crop'] ) ? $size['crop'] : $value['default']['crop'];
 					$disabled_attr    = '';
 					$disabled_message = '';
 
@@ -515,7 +515,7 @@ class WC_Admin_Settings {
 					}
 
 					?><tr valign="top">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; echo $disabled_message; ?></th>
+						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html . $disabled_message; ?></th>
 						<td class="forminp image_width_settings">
 
 							<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
@@ -537,7 +537,7 @@ class WC_Admin_Settings {
 						'show_option_none' => ' ',
 						'class'            => $value['class'],
 						'echo'             => false,
-						'selected'         => absint( self::get_option( $value['id'] ) )
+						'selected'         => absint( self::get_option( $value['id'] ) ),
 					);
 
 					if ( isset( $value['args'] ) ) {
@@ -547,7 +547,7 @@ class WC_Admin_Settings {
 					?><tr valign="top" class="single_select_page">
 						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
 						<td class="forminp">
-							<?php echo str_replace(' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) .  "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
+							<?php echo str_replace( ' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -598,7 +598,7 @@ class WC_Admin_Settings {
 								<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
-											echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
+											echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections ), true, false ) . '>' . $val . '</option>';
 										}
 									}
 								?>
@@ -652,7 +652,7 @@ class WC_Admin_Settings {
 
 		return array(
 			'description'  => $description,
-			'tooltip_html' => $tooltip_html
+			'tooltip_html' => $tooltip_html,
 		);
 	}
 
@@ -802,7 +802,6 @@ class WC_Admin_Settings {
 			if ( file_exists( $downloads_url . '/.htaccess' ) ) {
 				unlink( $downloads_url . '/.htaccess' );
 			}
-
 		} else {
 
 			// Force method - protect, add rules to the htaccess file

@@ -28,7 +28,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon  = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		// Create dummy product - price will be 10
 		$product = WC_Helper_Product::create_simple_product();
@@ -58,8 +58,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		# Test case 2 #10573
 		update_post_meta( $product->id, '_regular_price', '29.95' );
 		update_post_meta( $product->id, '_price', '29.95' );
-		update_post_meta( $coupon->id, 'discount_type', 'percent' );
-		update_post_meta( $coupon->id, 'coupon_amount', '10' );
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '10' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -71,13 +71,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 		$product = wc_get_product( $product->id );
 
 		WC()->cart->add_to_cart( $product->id, 1 );
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
@@ -90,10 +90,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 		WC_Helper_Product::delete_product( $product->id );
 
-
 		# Test case 3 #11626
-		update_post_meta( $coupon->id, 'discount_type', 'percent' );
-		update_post_meta( $coupon->id, 'coupon_amount', '50' );
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '50' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -106,13 +105,20 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => ''
+			'tax_rate_class'    => '',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$product_ids   = array();
 		$products_data = array(
-			'5.17', '3.32', '1.25', '3.50', '5.01', '3.34', '5.99', '5.51'
+			'5.17',
+			'3.32',
+			'1.25',
+			'3.50',
+			'5.01',
+			'3.34',
+			'5.99',
+			'5.51',
 		);
 		foreach ( $products_data as $price ) {
 			$loop_product  = WC_Helper_Product::create_simple_product();
@@ -122,7 +128,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC()->cart->add_to_cart( $loop_product->id, 1 );
 		}
 
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
 		$this->assertEquals( '16.55', WC()->cart->total );
@@ -140,7 +146,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 
-		WC_Helper_Coupon::delete_coupon( $coupon->id );
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**
@@ -299,8 +306,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 				'this',
 				'is',
 				'an',
-				'array'
-			)
+				'array',
+			),
 		);
 
 		// Manually generate ID
@@ -567,7 +574,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
 
@@ -578,8 +585,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->id );
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 	}
-
 }

@@ -137,10 +137,11 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 8, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'value', $properties );
 		$this->assertArrayHasKey( 'default', $properties );
 		$this->assertArrayHasKey( 'tip', $properties );
 		$this->assertArrayHasKey( 'placeholder', $properties );
@@ -191,7 +192,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 						'href' => rest_url( '/wc/v1/settings/general' ),
 					),
 				),
-			)
+			),
 		), $data );
 
 		// test getting a valid group with settings attached to it
@@ -487,10 +488,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	* Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
-	*
-	* @since  2.7.0
-	*/
+	 * Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
+	 *
+	 * @since  2.7.0
+	 */
 	public function test_classic_settings() {
 		wp_set_current_user( $this->user );
 
@@ -535,7 +536,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'yd', $data['value'] );
-		$this->assertEquals( 'yd', get_option(' woocommerce_dimension_unit' ) );
+		$this->assertEquals( 'yd', get_option( 'woocommerce_dimension_unit' ) );
 	}
-
 }

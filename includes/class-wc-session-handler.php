@@ -56,7 +56,6 @@ class WC_Session_Handler extends WC_Session {
 				$this->set_session_expiration();
 				$this->update_session_timestamp( $this->_customer_id, $this->_session_expiration );
 			}
-
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
@@ -122,7 +121,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} else {
-			require_once( ABSPATH . 'wp-includes/class-phpass.php');
+			require_once( ABSPATH . 'wp-includes/class-phpass.php' );
 			$hasher = new PasswordHash( 8, false );
 			return md5( $hasher->get_random_bytes( 32 ) );
 		}
@@ -182,12 +181,12 @@ class WC_Session_Handler extends WC_Session {
 				array(
 					'session_key' => $this->_customer_id,
 					'session_value' => maybe_serialize( $this->_data ),
-					'session_expiry' => $this->_session_expiration
+					'session_expiry' => $this->_session_expiration,
 				),
 				array(
 					'%s',
 					'%s',
-					'%d'
+					'%d',
 				)
 			);
 
@@ -285,7 +284,7 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->delete(
 			$this->_table,
 			array(
-				'session_key' => $customer_id
+				'session_key' => $customer_id,
 			)
 		);
 	}
@@ -302,10 +301,10 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->update(
 			$this->_table,
 			array(
-				'session_expiry' => $timestamp
+				'session_expiry' => $timestamp,
 			),
 			array(
-				'session_key' => $customer_id
+				'session_key' => $customer_id,
 			),
 			array(
 				'%d'

@@ -264,7 +264,6 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				// Default custom range to today.
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			$filter['period'] = empty( $filter['period'] ) ? 'week' : $filter['period'];

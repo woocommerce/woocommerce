@@ -347,7 +347,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
+			// @codingStandardsIgnoreStart
 			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+			// @codingStandardsIgnoreEnd
 
 			// Post author.
 			$data->post_author = get_current_user_id();

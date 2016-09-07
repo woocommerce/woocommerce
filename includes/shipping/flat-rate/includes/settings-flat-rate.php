@@ -15,7 +15,7 @@ $settings = array(
 		'type' 			=> 'text',
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
-		'desc_tip'		=> true
+		'desc_tip'		=> true,
 	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
@@ -24,8 +24,8 @@ $settings = array(
 		'default' 		=> 'taxable',
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-		)
+			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
+		),
 	),
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
@@ -33,18 +33,18 @@ $settings = array(
 		'placeholder'	=> '',
 		'description'	=> $cost_desc,
 		'default'		=> '0',
-		'desc_tip'		=> true
-	)
+		'desc_tip'		=> true,
+	),
 );
 
 $shipping_classes = WC()->shipping->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
-	$settings[ 'class_costs' ] = array(
+	$settings['class_costs'] = array(
 		'title'			 => __( 'Shipping Class Costs', 'woocommerce' ),
 		'type'			 => 'title',
 		'default'        => '',
-		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' )
+		'description'    => sprintf( __( 'These costs can optionally be added based on the %1$sproduct shipping class%2$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
@@ -56,18 +56,18 @@ if ( ! empty( $shipping_classes ) ) {
 			'placeholder' => __( 'N/A', 'woocommerce' ),
 			'description' => $cost_desc,
 			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names
-			'desc_tip'    => true
+			'desc_tip'    => true,
 		);
 	}
-	$settings[ 'no_class_cost' ] = array(
+	$settings['no_class_cost'] = array(
 		'title'       => __( 'No Shipping Class Cost', 'woocommerce' ),
 		'type'        => 'text',
 		'placeholder' => __( 'N/A', 'woocommerce' ),
 		'description' => $cost_desc,
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => true,
 	);
-	$settings[ 'type' ] = array(
+	$settings['type'] = array(
 		'title' 		=> __( 'Calculation Type', 'woocommerce' ),
 		'type' 			=> 'select',
 		'class'         => 'wc-enhanced-select',

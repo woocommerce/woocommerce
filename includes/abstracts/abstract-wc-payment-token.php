@@ -37,21 +37,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	protected $_meta_type = 'payment_token';
 
 	 /**
-	 * Initialize a payment token.
-	 *
-	 * These fields are accepted by all payment tokens:
-	 * is_default   - boolean Optional - Indicates this is the default payment token for a user
-	 * token        - string  Required - The actual token to store
-	 * gateway_id   - string  Required - Identifier for the gateway this token is associated with
-	 * user_id      - int     Optional - ID for the user this token is associated with. 0 if this token is not associated with a user
-	 *
-	 * @since 2.6.0
-	 * @param mixed $token
-	 */
+	  * Initialize a payment token.
+	  *
+	  * These fields are accepted by all payment tokens:
+	  * is_default   - boolean Optional - Indicates this is the default payment token for a user
+	  * token        - string  Required - The actual token to store
+	  * gateway_id   - string  Required - Identifier for the gateway this token is associated with
+	  * user_id      - int     Optional - ID for the user this token is associated with. 0 if this token is not associated with a user
+	  *
+	  * @since 2.6.0
+	  * @param mixed $token
+	  */
 	public function __construct( $token = '' ) {
 		if ( is_numeric( $token ) ) {
 			$this->read( $token );
-		} else if ( is_object( $token ) ) {
+		} elseif ( is_object( $token ) ) {
 			$token_id = $token->get_id();
 			if ( ! empty( $token_id ) ) {
 				$this->read( $token->get_id() );
@@ -294,5 +294,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $this->get_id() ), array( '%d' ) );
 		do_action( 'woocommerce_payment_token_deleted', $this->get_id(), $this );
 	}
-
 }

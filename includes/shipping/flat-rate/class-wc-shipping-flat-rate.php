@@ -66,11 +66,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );
@@ -160,7 +160,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
 			if ( $this->type === 'class' ) {

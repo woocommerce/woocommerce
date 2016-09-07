@@ -145,7 +145,7 @@ class WC_Admin_Notices {
 		$notices = self::get_notices();
 
 		if ( ! empty( $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			foreach ( $notices as $notice ) {
 				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 					add_action( 'admin_notices', array( __CLASS__, self::$core_notices[ $notice ] ) );
@@ -235,7 +235,7 @@ class WC_Admin_Notices {
 				$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 			} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 				$theme_file = get_template_directory() . '/' . $file;
-			} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+			} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 				$theme_file = get_template_directory() . '/woocommerce/' . $file;
 			}
 

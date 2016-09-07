@@ -485,5 +485,4 @@ abstract class WP_REST_Controller {
 
 		return $endpoint_args;
 	}
-
 }

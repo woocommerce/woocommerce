@@ -34,10 +34,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->has_fields         = false;
 		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->method_title       = __( 'PayPal', 'woocommerce' );
-		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %ssystem status%s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
+		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %1$ssystem status%2$s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
 		$this->supports           = array(
 			'products',
-			'refunds'
+			'refunds',
 		);
 
 		// Load the settings.
@@ -109,12 +109,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	protected function get_icon_url( $country ) {
 		$url           = 'https://www.paypal.com/' . strtolower( $country );
-		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR');
+		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR' );
 		$countries     = array( 'DZ', 'AU', 'BH', 'BQ', 'BW', 'CA', 'CN', 'CW', 'FI', 'FR', 'DE', 'GR', 'HK', 'IN', 'ID', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'TW', 'TH', 'AE', 'GB', 'US', 'VN' );
 
 		if ( in_array( $country, $home_counties ) ) {
 			return  $url . '/webapps/mpp/home';
-		} else if ( in_array( $country, $countries ) ) {
+		} elseif ( in_array( $country, $countries ) ) {
 			return $url . '/webapps/mpp/paypal-popup';
 		} else {
 			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
@@ -144,7 +144,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'MX' :
 				$icon = array(
 					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_visa_mastercard_amex.png',
-					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_debit_card_275x60.gif'
+					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_debit_card_275x60.gif',
 				);
 			break;
 			case 'FR' :
@@ -245,7 +245,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return array(
 			'result'   => 'success',
-			'redirect' => $paypal_request->get_request_url( $order, $this->testmode )
+			'redirect' => $paypal_request->get_request_url( $order, $this->testmode ),
 		);
 	}
 
@@ -299,7 +299,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
 			case 'successwithwarning':
-				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
+				$order->add_order_note( sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
 				return true;
 			break;
 		}
@@ -315,7 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( 'paypal' === $order->payment_method && 'pending' === get_post_meta( $order->id, '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'paypal' === $order->get_payment_method() && 'pending' === get_post_meta( $order->get_id(), '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -330,12 +330,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {
 					case 'Completed' :
-						$order->add_order_note( sprintf( __( 'Payment of %s was captured - Auth ID: %s, Transaction ID: %s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						update_post_meta( $order->id, '_paypal_status', $result->PAYMENTSTATUS );
-						update_post_meta( $order->id, '_transaction_id', $result->TRANSACTIONID );
+						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
+						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
+						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
 					break;
 					default :
-						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %s, Status: %s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
+						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
 					break;
 				}
 			}

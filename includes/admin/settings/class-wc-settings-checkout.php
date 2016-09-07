@@ -41,11 +41,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Checkout Options', 'woocommerce' )
+			'' => __( 'Checkout Options', 'woocommerce' ),
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
-			// Load shipping methods so we can show any global options they may have.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 			foreach ( $payment_gateways as $gateway ) {
@@ -78,7 +77,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'desc_tip'      =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+				'desc_tip'      => __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
 			),
 
 			array(
@@ -86,7 +85,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'id'            => 'woocommerce_calc_discounts_sequentially',
 				'default'       => 'no',
 				'type'          => 'checkbox',
-				'desc_tip'      =>  __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
+				'desc_tip'      => __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
 				'checkboxgroup' => 'end',
 				'autoload'      => false,
 			),
@@ -94,7 +93,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			array(
 				'title'         => _x( 'Checkout Process', 'Settings group label', 'woocommerce' ),
 				'desc'          => __( 'Enable guest checkout', 'woocommerce' ),
-				'desc_tip'      =>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
+				'desc_tip'      => __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -219,7 +218,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'desc_tip' => true,
 			),
 
-
 			array(
 				'type' => 'sectionend',
 				'id' => 'checkout_endpoint_options',
@@ -289,7 +287,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									'sort'     => '',
 									'name'     => __( 'Gateway', 'woocommerce' ),
 									'id'       => __( 'Gateway ID', 'woocommerce' ),
-									'status'   => __( 'Enabled', 'woocommerce' )
+									'status'   => __( 'Enabled', 'woocommerce' ),
 								) );
 
 								foreach ( $columns as $key => $column ) {
@@ -329,7 +327,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										echo '<td class="status">';
 
 										if ( $gateway->enabled == 'yes' )
-											echo '<span class="status-enabled tips" data-tip="' . __ ( 'Yes', 'woocommerce' ) . '">' . __ ( 'Yes', 'woocommerce' ) . '</span>';
+											echo '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 										else
 											echo '-';
 

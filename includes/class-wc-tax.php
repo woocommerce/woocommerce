@@ -37,6 +37,29 @@ class WC_Tax {
 	public static function init() {
 		self::$precision         = wc_get_rounding_precision();
 		self::$round_at_subtotal = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+		add_action( 'update_option_woocommerce_tax_classes', array( __CLASS__, 'maybe_remove_tax_class_rates' ), 10, 2 );
+	}
+
+	/**
+	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
+	 * @param  string $old_value
+	 * @param  string $value
+	 */
+	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
+		$old     = array_filter( array_map( 'trim', explode( "\n", $old_value ) ) );
+		$new     = array_filter( array_map( 'trim', explode( "\n", $value ) ) );
+		$removed = array_filter( array_map( 'sanitize_title', array_diff( $old, $new ) ) );
+
+		if ( $removed ) {
+			global $wpdb;
+
+			foreach ( $removed as $removed_tax_class ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", $removed_tax_class ) );
+				$wpdb->query( "DELETE locations FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations LEFT JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON rates.tax_rate_id = locations.tax_rate_id WHERE rates.tax_rate_id IS NULL;" );
+			}
+
+			WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		}
 	}
 
 	/**
@@ -224,7 +247,7 @@ class WC_Tax {
 			'state'     => '',
 			'city'      => '',
 			'postcode'  => '',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		extract( $args, EXTR_SKIP );
@@ -399,7 +422,7 @@ class WC_Tax {
 				'rate'     => $found_rate->tax_rate,
 				'label'    => $found_rate->tax_rate_name,
 				'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
-				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
+				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no',
 			);
 
 			$found_priority[] = $found_rate->tax_rate_priority;
@@ -426,7 +449,7 @@ class WC_Tax {
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
 				WC()->countries->get_base_postcode(),
-				WC()->countries->get_base_city()
+				WC()->countries->get_base_city(),
 			);
 		}
 
@@ -451,7 +474,7 @@ class WC_Tax {
 				'state' 	=> $state,
 				'postcode' 	=> $postcode,
 				'city' 		=> $city,
-				'tax_class' => $tax_class
+				'tax_class' => $tax_class,
 			) );
 		}
 
@@ -470,7 +493,7 @@ class WC_Tax {
 			'state' 	=> WC()->countries->get_base_state(),
 			'postcode' 	=> WC()->countries->get_base_postcode(),
 			'city' 		=> WC()->countries->get_base_city(),
-			'tax_class' => $tax_class
+			'tax_class' => $tax_class,
 		) ), $tax_class );
 	}
 
@@ -510,7 +533,7 @@ class WC_Tax {
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
 					'city' 		=> $city,
-					'tax_class' => $tax_class
+					'tax_class' => $tax_class,
 				) );
 
 			} else {
@@ -530,7 +553,7 @@ class WC_Tax {
 								'state' 	=> $state,
 								'postcode' 	=> $postcode,
 								'city' 		=> $city,
-								'tax_class' => $tax_class
+								'tax_class' => $tax_class,
 							) );
 							break;
 						}
@@ -543,7 +566,7 @@ class WC_Tax {
 						'state' 	=> $state,
 						'postcode' 	=> $postcode,
 						'city' 		=> $city,
-						'tax_class' => $cart_tax_classes[0]
+						'tax_class' => $cart_tax_classes[0],
 					) );
 				}
 			}
@@ -554,7 +577,7 @@ class WC_Tax {
 					'country' 	=> $country,
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
-					'city' 		=> $city
+					'city' 		=> $city,
 				) );
 			}
 		}
@@ -818,7 +841,7 @@ class WC_Tax {
 			$wpdb->prefix . "woocommerce_tax_rates",
 			self::prepare_tax_rate( $tax_rate ),
 			array(
-				'tax_rate_id' => $tax_rate_id
+				'tax_rate_id' => $tax_rate_id,
 			)
 		);
 

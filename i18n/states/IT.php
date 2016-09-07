@@ -119,5 +119,5 @@ $states['IT'] = array(
 	'VR' => __( 'Verona', 'woocommerce' ),
 	'VV' => __( 'Vibo Valentia', 'woocommerce' ),
 	'VI' => __( 'Vicenza', 'woocommerce' ),
-	'VT' => __( 'Viterbo', 'woocommerce' )
+	'VT' => __( 'Viterbo', 'woocommerce' ),
 );

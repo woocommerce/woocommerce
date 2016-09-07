@@ -14,14 +14,16 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	# no Xdebug and therefore no coverage in PHP 5.2
+	# no Xdebug and therefore no coverage in PHP 5.2 or 5.3
 	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
 
 	# send coverage data to coveralls
 	php vendor/bin/coveralls --verbose --exclude-no-stmt
 
 	# get scrutinizer ocular and run it
 	wget https://scrutinizer-ci.com/ocular.phar
-	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
+	chmod +x ocular.phar
+	php ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
 
 fi

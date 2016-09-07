@@ -31,16 +31,15 @@ function wc_notice_count( $notice_type = '' ) {
 	$notice_count = 0;
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
-	if ( isset( $all_notices[$notice_type] ) ) {
+	if ( isset( $all_notices[ $notice_type ] ) ) {
 
-		$notice_count = absint( sizeof( $all_notices[$notice_type] ) );
+		$notice_count = absint( sizeof( $all_notices[ $notice_type ] ) );
 
 	} elseif ( empty( $notice_type ) ) {
 
 		foreach ( $all_notices as $notices ) {
 			$notice_count += absint( sizeof( $all_notices ) );
 		}
-
 	}
 
 	return $notice_count;
@@ -85,7 +84,7 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	$notices[$notice_type][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+	$notices[ $notice_type ][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
 	WC()->session->set( 'wc_notices', $notices );
 }
@@ -133,7 +132,7 @@ function wc_print_notices() {
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
 			wc_get_template( "notices/{$notice_type}.php", array(
-				'messages' => array_filter( $all_notices[ $notice_type ] )
+				'messages' => array_filter( $all_notices[ $notice_type ] ),
 			) );
 		}
 	}
@@ -157,7 +156,7 @@ function wc_print_notice( $message, $notice_type = 'success' ) {
 	}
 
 	wc_get_template( "notices/{$notice_type}.php", array(
-		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) )
+		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) ),
 	) );
 }
 
@@ -194,7 +193,7 @@ function wc_get_notices( $notice_type = '' ) {
 function wc_add_wp_error_notices( $errors ) {
 	if ( is_wp_error( $errors ) && $errors->get_error_messages() ) {
 		foreach ( $errors->get_error_messages() as $error ) {
-			wc_add_notice( $error, 'error');
+			wc_add_notice( $error, 'error' );
 		}
 	}
 }

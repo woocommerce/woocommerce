@@ -256,7 +256,7 @@ class WC_Install {
 	public static function cron_schedules( $schedules ) {
 		$schedules['monthly'] = array(
 			'interval' => 2635200,
-			'display'  => __( 'Monthly', 'woocommerce' )
+			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
 		return $schedules;
 	}
@@ -296,23 +296,23 @@ class WC_Install {
 			'shop' => array(
 				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
-				'content' => ''
+				'content' => '',
 			),
 			'cart' => array(
 				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 			),
 			'checkout' => array(
 				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
-			)
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+			),
 		) );
 
 		foreach ( $pages as $key => $page ) {
@@ -359,8 +359,8 @@ class WC_Install {
 				'simple',
 				'grouped',
 				'variable',
-				'external'
-			)
+				'external',
+			),
 		);
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
@@ -403,6 +403,14 @@ class WC_Install {
 		}
 
 		dbDelta( self::get_schema() );
+
+		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE Column_name = 'comment_type' and Key_name = 'comment_type'" );
+
+		if ( is_null( $index_exists ) ) {
+			// Add an index to the field comment_type to improve the response time of the query
+			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		}
 	}
 
 	/**
@@ -601,7 +609,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 					=> true
+			'read' 					=> true,
 		) );
 
 		// Shop manager role
@@ -645,7 +653,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'upload_files'           => true,
 			'export'                 => true,
 			'import'                 => true,
-			'list_users'             => true
+			'list_users'             => true,
 		) );
 
 		$capabilities = self::get_core_capabilities();
@@ -668,7 +676,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$capabilities['core'] = array(
 			'manage_woocommerce',
-			'view_woocommerce_reports'
+			'view_woocommerce_reports',
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
@@ -695,7 +703,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				"manage_{$capability_type}_terms",
 				"edit_{$capability_type}_terms",
 				"delete_{$capability_type}_terms",
-				"assign_{$capability_type}_terms"
+				"assign_{$capability_type}_terms",
 			);
 		}
 
@@ -741,25 +749,25 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
-				'content' 	=> ''
+				'content' 	=> '',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
-				'content' 	=> ''
-			)
+				'content' 	=> '',
+			),
 		);
 
 		if ( 'redirect' !== $download_method ) {
 			$files[] = array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			);
 		}
 
@@ -806,7 +814,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
 			$version = trim( $matches[1] );
-			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 			// Check the latest stable version and ignore trunk.
 			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
@@ -876,6 +884,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$tables[] = $wpdb->prefix . 'woocommerce_payment_tokens';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zones';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_locations';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_methods';
 
 		return $tables;
 	}
@@ -1008,7 +1020,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
 					}
-
 				} catch ( Exception $e ) {
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',

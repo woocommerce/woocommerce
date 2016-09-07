@@ -60,5 +60,4 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 			<div class="clear"></div>
 		</fieldset><?php
 	}
-
 }

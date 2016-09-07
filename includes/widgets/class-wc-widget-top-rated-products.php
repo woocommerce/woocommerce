@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  2.7.0
  * @extends  WC_Widget
  */
 class WC_Widget_Top_Rated_Products extends WC_Widget {
@@ -29,7 +29,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Top Rated Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -37,8 +37,8 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of products to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -62,9 +62,15 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		add_filter( 'posts_clauses',  array( WC()->query, 'order_by_rating_post_clauses' ) );
-
-		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
+		$query_args = array(
+			'posts_per_page' => $number,
+			'no_found_rows'  => 1,
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'meta_key'       => '_wc_average_rating',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'DESC',
+		);
 
 		$query_args['meta_query'] = WC()->query->get_meta_query();
 
@@ -85,8 +91,6 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			$this->widget_end( $args );
 		}
-
-		remove_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
 
 		wp_reset_postdata();
 

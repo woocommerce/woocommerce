@@ -4,22 +4,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
-* Abstract WC Data Class
-*
-* Implemented by classes using the same CRUD(s) pattern.
-*
-* @version  2.6.0
-* @package  WooCommerce/Abstracts
-* @category Abstract Class
-* @author   WooThemes
-*/
+ * Abstract WC Data Class
+ *
+ * Implemented by classes using the same CRUD(s) pattern.
+ *
+ * @version  2.6.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
+ */
 abstract class WC_Data {
 
 	/**
-	 * Core data for this object, name value pairs (name + default value).
+	 * Core data for this object. Name value pairs (name + default value).
 	 * @var array
 	 */
 	protected $_data = array();
+
+	/**
+	 * Set to _data on construct so we can track and reset data if needed.
+	 * @var array
+	 */
+	protected $_default_data = array();
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -54,6 +60,14 @@ abstract class WC_Data {
 	 * @var array
 	 */
 	protected $_internal_meta_keys = array();
+
+	/**
+	 * Default constructor.
+	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
+	 */
+	public function __construct( $read = 0 ) {
+		$this->_default_data = $this->_data;
+	}
 
 	/**
 	 * Returns the unique ID for this object.
@@ -104,12 +118,20 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Get All Meta Data
+	 * Filter null meta values from array.
+	 * @return bool
+	 */
+	protected function filter_null_meta( $meta ) {
+		return ! is_null( $meta->value );
+	}
+
+	/**
+	 * Get All Meta Data.
 	 * @since 2.6.0
 	 * @return array
 	 */
 	public function get_meta_data() {
-		return $this->_meta_data;
+		return array_filter( $this->_meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
@@ -140,7 +162,7 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true ) {
-		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
 		$value    = '';
 
 		if ( ! empty( $array_keys ) ) {
@@ -163,11 +185,11 @@ abstract class WC_Data {
 		if ( ! empty( $data ) && is_array( $data ) ) {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
-				if ( isset( $meta['key'], $meta['value'], $meta['meta_id'] ) ) {
+				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
 					$this->_meta_data[] = (object) array(
-						'key'     => $meta['key'],
-						'value'   => $meta['value'],
-						'meta_id' => $meta['meta_id'],
+						'id'    => $meta['id'],
+						'key'   => $meta['key'],
+						'value' => $meta['value'],
 					);
 				}
 			}
@@ -183,8 +205,7 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
-			$array_keys       = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-			$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+			$this->delete_meta_data( $key );
 		}
 		$this->_meta_data[] = (object) array(
 			'key'   => $key,
@@ -202,13 +223,13 @@ abstract class WC_Data {
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$array_key = '';
 		if ( $meta_id ) {
-			$array_key = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $meta_id );
+			$array_key = array_keys( wp_list_pluck( $this->_meta_data, 'id' ), $meta_id );
 		}
 		if ( $array_key ) {
 			$this->_meta_data[ current( $array_key ) ] = (object) array(
-				'key'     => $key,
-				'value'   => $value,
-				'meta_id' => $meta_id,
+				'id'    => $meta_id,
+				'key'   => $key,
+				'value' => $value,
 			);
 		} else {
 			$this->add_meta_data( $key, $value, true );
@@ -221,8 +242,36 @@ abstract class WC_Data {
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
+		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				$this->_meta_data[ $array_key ]->value = null;
+			}
+		}
+	}
+
+	/**
+	 * Delete meta data.
+	 * @since 2.6.0
+	 * @param int $mid Meta ID
+	 */
+	public function delete_meta_data_by_mid( $mid ) {
+		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'id' ), $mid );
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				$this->_meta_data[ $array_key ]->value = null;
+			}
+		}
+	}
+
+	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() );
 	}
 
 	/**
@@ -237,7 +286,7 @@ abstract class WC_Data {
 			return;
 		}
 
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			$cache_key   = WC_Cache_Helper::get_cache_prefix( $this->_cache_group ) . $this->get_id();
 			$cached_meta = wp_cache_get( $cache_key, $this->_cache_group );
 
@@ -253,21 +302,21 @@ abstract class WC_Data {
 			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
 				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
 				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
+				WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
 			", $this->get_id() ) );
 
-			foreach ( $raw_meta_data as $meta ) {
-				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
-					continue;
+			if ( $raw_meta_data ) {
+				$raw_meta_data = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
+				foreach ( $raw_meta_data as $meta ) {
+					$this->_meta_data[] = (object) array(
+						'id'    => (int) $meta->{ $db_info['meta_id_field'] },
+						'key'   => $meta->meta_key,
+						'value' => maybe_unserialize( $meta->meta_value ),
+					);
 				}
-				$this->_meta_data[] = (object) array(
-					'key'     => $meta->meta_key,
-					'value'   => $meta->meta_value,
-					'meta_id' => $meta->{ $db_info['meta_id_field'] },
-				);
 			}
 
-			if ( ! empty ( $this->_cache_group ) ) {
+			if ( ! empty( $this->_cache_group ) ) {
 				wp_cache_set( $cache_key, $this->_meta_data, $this->_cache_group );
 			}
 		}
@@ -278,34 +327,20 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 */
 	protected function save_meta_data() {
-		global $wpdb;
-		$db_info = $this->_get_db_info();
-		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "
-			SELECT " . $db_info['meta_id_field'] . " FROM " . $db_info['table'] . "
-			WHERE " . $db_info['object_id_field'] . " = %d", $this->get_id() ) . "
-			AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');
-		" ) );
-		$set_meta_ids = array();
-
 		foreach ( $this->_meta_data as $array_key => $meta ) {
-			if ( empty( $meta->meta_id ) ) {
-				$new_meta_id    = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
-				$set_meta_ids[] = $new_meta_id;
-				$this->_meta_data[ $array_key ]->meta_id = $new_meta_id;
+			if ( is_null( $meta->value ) ) {
+				if ( ! empty( $meta->id ) ) {
+					delete_metadata_by_mid( $this->_meta_type, $meta->id );
+				}
+			} elseif ( empty( $meta->id ) ) {
+				$new_meta_id = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
+				$this->_meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
-				update_metadata_by_mid( $this->_meta_type, $meta->meta_id, $meta->value, $meta->key );
-				$set_meta_ids[] = absint( $meta->meta_id );
+				update_metadata_by_mid( $this->_meta_type, $meta->id, $meta->value, $meta->key );
 			}
 		}
 
-		// Delete no longer set meta data
-		$delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
-
-		foreach ( $delete_meta_ids as $meta_id ) {
-			delete_metadata_by_mid( $this->_meta_type, $meta_id );
-		}
-
-		if ( ! empty ( $this->_cache_group ) ) {
+		if ( ! empty( $this->_cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->_cache_group );
 		}
 		$this->read_meta_data();
@@ -346,4 +381,45 @@ abstract class WC_Data {
 		);
 	}
 
+	/**
+	 * Set all props to default values.
+	 */
+	protected function set_defaults() {
+		$this->_data = $this->_default_data;
+	}
+
+	/**
+	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @return WP_Error|bool
+	 */
+	public function set_props( $props ) {
+		$errors = new WP_Error();
+
+		foreach ( $props as $prop => $value ) {
+			try {
+				if ( 'meta_data' === $prop ) {
+					continue;
+				}
+				$setter = "set_$prop";
+				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				$errors->add( $e->getErrorCode(), $e->getMessage() );
+			}
+		}
+
+		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
+	 * When invalid data is found, throw an exception unless reading from the DB.
+	 * @param string $error_code Error code.
+	 * @param string $error_message Error message.
+	 * @throws WC_Data_Exception
+	 */
+	protected function error( $error_code, $error_message ) {
+		throw new WC_Data_Exception( $error_code, $error_message );
+	}
 }

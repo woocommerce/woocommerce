@@ -8,8 +8,9 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Data array
 	 */
 	protected $_data = array(
-		'id'      => 0,
-		'content' => '',
+		'id'         => 0,
+		'content'    => '',
+		'bool_value' => false,
 	);
 
 	// see WC_Data
@@ -56,6 +57,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple read.
 	 */
 	public function __construct( $id = '' ) {
+		parent::__construct();
 		if ( ! empty( $id ) ) {
 			$this->read( $id );
 		}
@@ -78,11 +80,30 @@ class WC_Mock_WC_Data extends WC_Data {
 	}
 
 	/**
-	 * SImple set content.
+	 * Simple set content.
 	 * @param string $content
 	 */
 	public function set_content( $content ) {
 		$this->_data['content'] = $content;
+	}
+
+	/**
+	 * Simple get bool value.
+	 * @return bool
+	 */
+	public function get_bool_value() {
+		return $this->_data['bool_value'];
+	}
+
+	/**
+	 * Simple set bool value.
+	 * @return bool
+	 */
+	public function set_bool_value( $value ) {
+		if ( ! is_bool( $value ) ) {
+			$this->error( 'invalid_bool_value', 'O noes' );
+		}
+		$this->_data['bool_value'] = $value;
 	}
 
 	/**
@@ -105,7 +126,7 @@ class WC_Mock_WC_Data extends WC_Data {
 		if ( 'user' === $this->_meta_type ) {
 			$content_id = wc_create_new_customer( $this->get_content(), 'username-' . time(), 'hunter2' );
 		} else {
-			$content_id = wp_insert_post( array ( 'post_title' => $this->get_content() ) );
+			$content_id = wp_insert_post( array( 'post_title' => $this->get_content() ) );
 		}
 		if ( $content_id ) {
 			$this->_data['id'] = $content_id;
@@ -116,6 +137,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple read.
 	 */
 	public function read( $id ) {
+		$this->set_defaults();
 
 		if ( 'user' === $this->_meta_type ) {
 			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
@@ -170,5 +192,4 @@ class WC_Mock_WC_Data extends WC_Data {
 		}
 		$this->save_meta_data();
 	}
-
 }

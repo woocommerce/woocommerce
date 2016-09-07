@@ -56,7 +56,7 @@ function wc_get_page_id( $page ) {
 		$page = 'myaccount';
 	}
 
-	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
+	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
 	return $page ? absint( $page ) : -1;
 }
@@ -146,7 +146,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page 		= (int) wc_get_page_id('shop');
+	$shop_page 		= (int) wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) {
@@ -155,14 +155,14 @@ function wc_nav_menu_item_classes( $menu_items ) {
 
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[$key]->current = false;
+			$menu_items[ $key ]->current = false;
 
 			if ( in_array( 'current_page_parent', $classes ) ) {
-				unset( $classes[ array_search('current_page_parent', $classes) ] );
+				unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
 			}
 
 			if ( in_array( 'current-menu-item', $classes ) ) {
-				unset( $classes[ array_search('current-menu-item', $classes) ] );
+				unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
 			}
 
 		// Set active state if this is the shop page link

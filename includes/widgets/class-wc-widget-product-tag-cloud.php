@@ -27,8 +27,8 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Product Tags', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

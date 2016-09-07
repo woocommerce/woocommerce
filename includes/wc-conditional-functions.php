@@ -160,9 +160,9 @@ if ( ! function_exists( 'is_account_page' ) ) {
 if ( ! function_exists( 'is_view_order_page' ) ) {
 
 	/**
-	* is_view_order_page - Returns true when on the view order page.
-	* @return bool
-	*/
+	 * is_view_order_page - Returns true when on the view order page.
+	 * @return bool
+	 */
 	function is_view_order_page() {
 		global $wp;
 
@@ -173,12 +173,12 @@ if ( ! function_exists( 'is_view_order_page' ) ) {
 if ( ! function_exists( 'is_edit_account_page' ) ) {
 
 	/**
-	* Check for edit account page.
-	* Returns true when viewing the edit account page.
-	*
-	* @since 2.5.1
-	* @return bool
-	*/
+	 * Check for edit account page.
+	 * Returns true when viewing the edit account page.
+	 *
+	 * @since 2.5.1
+	 * @return bool
+	 */
 	function is_edit_account_page() {
 		global $wp;
 
@@ -189,9 +189,9 @@ if ( ! function_exists( 'is_edit_account_page' ) ) {
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
 	/**
-	* is_order_received_page - Returns true when viewing the order received page.
-	* @return bool
-	*/
+	 * is_order_received_page - Returns true when viewing the order received page.
+	 * @return bool
+	 */
 	function is_order_received_page() {
 		global $wp;
 
@@ -202,9 +202,9 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
 	/**
-	* is_add_payment_method_page - Returns true when viewing the add payment method page.
-	* @return bool
-	*/
+	 * is_add_payment_method_page - Returns true when viewing the add payment method page.
+	 * @return bool
+	 */
 	function is_add_payment_method_page() {
 		global $wp;
 
@@ -215,9 +215,9 @@ if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 if ( ! function_exists( 'is_lost_password_page' ) ) {
 
 	/**
-	* is_lost_password_page - Returns true when viewing the lost password page.
-	* @return bool
-	*/
+	 * is_lost_password_page - Returns true when viewing the lost password page.
+	 * @return bool
+	 */
 	function is_lost_password_page() {
 		global $wp;
 

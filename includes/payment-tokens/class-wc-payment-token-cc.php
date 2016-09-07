@@ -145,5 +145,4 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	public function set_last4( $last4 ) {
 		$this->add_meta_data( 'last4', $last4, true );
 	}
-
 }

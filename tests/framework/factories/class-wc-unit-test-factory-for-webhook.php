@@ -67,5 +67,4 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 
 		return new WC_Webhook( $id );
 	}
-
 }

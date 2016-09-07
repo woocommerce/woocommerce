@@ -27,8 +27,8 @@ class WC_Widget_Product_Search extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => '',
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
