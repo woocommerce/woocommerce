@@ -211,9 +211,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}

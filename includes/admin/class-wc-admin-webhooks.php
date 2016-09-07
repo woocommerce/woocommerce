@@ -46,7 +46,9 @@ class WC_Admin_Webhooks {
 	private function update_name( $webhook_id ) {
 		global $wpdb;
 
+		// @codingStandardsIgnoreStart
 		$name = ! empty( $_POST['webhook_name'] ) ? $_POST['webhook_name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
 		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $webhook_id ) );
 	}
 
@@ -195,7 +197,9 @@ class WC_Admin_Webhooks {
 			'ping_status'   => 'closed',
 			'post_author'   => get_current_user_id(),
 			'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+			// @codingStandardsIgnoreStart
 			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
+			// @codingStandardsIgnoreEnd
 			'comment_status' => 'open',
 		) );
 
@@ -463,7 +467,7 @@ class WC_Admin_Webhooks {
 
 			if ( 'action' === $resource ) {
 				$topic = 'action';
-			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
+			} elseif ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
 				$topic = 'custom';
 			}
 		}

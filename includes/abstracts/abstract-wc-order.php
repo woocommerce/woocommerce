@@ -146,7 +146,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get a title for the new post type.
 	 */
 	protected function get_post_title() {
+		// @codingStandardsIgnoreStart
 		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -833,7 +835,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_items_from_db( $type ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $this->get_id(), $type ) ;
+		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $this->get_id(), $type );
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {
@@ -1057,7 +1059,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$token_ids = get_post_meta( $this->get_id(), '_payment_tokens', true );
 
-		if ( empty ( $token_ids ) ) {
+		if ( empty( $token_ids ) ) {
 			$token_ids = array();
 		}
 

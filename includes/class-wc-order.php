@@ -470,7 +470,7 @@ class WC_Order extends WC_Abstract_Order {
 	protected function status_transition() {
 		if ( $this->_status_transition ) {
 			if ( ! empty( $this->_status_transition['from'] ) ) {
-				$transition_note = sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $this->_status_transition['from'] ), wc_get_order_status_name( $this->_status_transition['to'] ) );
+				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $this->_status_transition['from'] ), wc_get_order_status_name( $this->_status_transition['to'] ) );
 
 				do_action( 'woocommerce_order_status_' . $this->_status_transition['from'] . '_to_' . $this->_status_transition['to'], $this->get_id() );
 				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->_status_transition['from'], $this->_status_transition['to'] );
@@ -975,7 +975,7 @@ class WC_Order extends WC_Abstract_Order {
 		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
 			try {
 				$this->set_billing_email( $user->user_email );
-			} catch( WC_Data_Exception $e ){
+			} catch( WC_Data_Exception $e ) {
 				unset( $e );
 			}
 		}

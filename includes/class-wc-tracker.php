@@ -168,7 +168,7 @@ class WC_Tracker {
 		}
 
 		$wp_data['memory_limit'] = size_format( $memory );
-		$wp_data['debug_mode']   = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
+		$wp_data['debug_mode']   = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'Yes' : 'No';
 		$wp_data['locale']       = get_locale();
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
@@ -350,7 +350,7 @@ class WC_Tracker {
 			'download_require_login'                => get_option( 'woocommerce_downloads_require_login' ),
 			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
 			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
-			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout'),
+			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout' ),
 			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
 			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),

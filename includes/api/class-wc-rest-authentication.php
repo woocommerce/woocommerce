@@ -248,11 +248,7 @@ class WC_REST_Authentication {
 		// then it's a failed authentication.
 		if ( ! empty( $errors ) ) {
 			$message = sprintf(
-				_n(
-					__( 'Missing OAuth parameter %s', 'woocommerce' ),
-					__( 'Missing OAuth parameters %s', 'woocommerce' ),
-					count( $errors )
-				),
+				_n( 'Missing OAuth parameter %s', 'Missing OAuth parameters %s', count( $errors ), 'woocommerce' ),
 				implode( ', ', $errors )
 			);
 

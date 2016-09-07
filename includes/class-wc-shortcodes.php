@@ -730,7 +730,10 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		while ( $single_product->have_posts() ) : $single_product->the_post(); wp_enqueue_script( 'wc-single-product' ); ?>
+		while ( $single_product->have_posts() ) :
+			$single_product->the_post();
+			wp_enqueue_script( 'wc-single-product' );
+			?>
 
 			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
 

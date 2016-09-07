@@ -327,7 +327,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										echo '<td class="status">';
 
 										if ( $gateway->enabled == 'yes' )
-											echo '<span class="status-enabled tips" data-tip="' . __ ( 'Yes', 'woocommerce' ) . '">' . __ ( 'Yes', 'woocommerce' ) . '</span>';
+											echo '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 										else
 											echo '-';
 

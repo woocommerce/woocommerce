@@ -1753,7 +1753,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Generate a useful post title
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post
 			if ( ! $variation_id ) {
@@ -1893,7 +1893,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				}  else if ( isset( $data['inventory_delta'] ) ) {
+				} else if ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 
@@ -2093,7 +2093,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length
@@ -2419,7 +2419,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		unset( $response );
 
-		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for  );
+		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for );
 
 		return $upload;
 	}
@@ -3243,8 +3243,9 @@ class WC_API_Products extends WC_API_Resource {
 					$product_id  = wc_get_product_id_by_sku( $product_sku );
 				}
 
-				// Product exists / edit product
 				if ( $product_id ) {
+
+					// Product exists / edit product
 					$edit = $this->edit_product( $product_id, array( 'product' => $_product ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -3256,10 +3257,9 @@ class WC_API_Products extends WC_API_Resource {
 					} else {
 						$products[] = $edit['product'];
 					}
-				}
+				} else {
 
-				// Product don't exists / create product
-				else {
+					// Product don't exists / create product
 					$new = $this->create_product( array( 'product' => $_product ) );
 
 					if ( is_wp_error( $new ) ) {

@@ -486,7 +486,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( isset( $data['currency'] ) ) {
 
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce'), 400 );
+					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ), 400 );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -828,7 +828,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach ( $order_meta as $meta_key => $meta_value ) {
 
-			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+			if ( is_string( $meta_key ) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
 				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
@@ -1818,8 +1818,9 @@ class WC_API_Orders extends WC_API_Resource {
 					$order_id = intval( $_order['id'] );
 				}
 
-				// Order exists / edit order
 				if ( $order_id ) {
+
+					// Order exists / edit order
 					$edit = $this->edit_order( $order_id, array( 'order' => $_order ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -1830,10 +1831,9 @@ class WC_API_Orders extends WC_API_Resource {
 					} else {
 						$orders[] = $edit['order'];
 					}
-				}
+				} else {
 
-				// Order don't exists / create order
-				else {
+					// Order don't exists / create order
 					$new = $this->create_order( array( 'order' => $_order ) );
 
 					if ( is_wp_error( $new ) ) {

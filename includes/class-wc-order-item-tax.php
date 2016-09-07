@@ -197,7 +197,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_label() {
-		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce');
+		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce' );
 	}
 
 	/**

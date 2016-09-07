@@ -65,7 +65,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							</label>
 						</td>
 
-						<?php do_action ( 'woocommerce_grouped_product_list_before_price', $product ); ?>
+						<?php do_action( 'woocommerce_grouped_product_list_before_price', $product ); ?>
 
 						<td class="price">
 							<?php

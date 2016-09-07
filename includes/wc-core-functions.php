@@ -247,7 +247,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @return string
  */
 function get_woocommerce_currency() {
-	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
 /**

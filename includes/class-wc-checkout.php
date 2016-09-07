@@ -123,7 +123,7 @@ class WC_Checkout {
 				'type' => 'textarea',
 				'class' => array( 'notes' ),
 				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+				'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
 			),
 		);
 
@@ -137,7 +137,7 @@ class WC_Checkout {
 	 */
 	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
-		do_action('woocommerce_check_cart_items');
+		do_action( 'woocommerce_check_cart_items' );
 	}
 
 	/**
@@ -381,7 +381,7 @@ class WC_Checkout {
 			}
 
 			// Prevent timeout
-			@set_time_limit(0);
+			@set_time_limit( 0 );
 
 			do_action( 'woocommerce_before_checkout_process' );
 

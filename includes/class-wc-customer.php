@@ -1145,14 +1145,14 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		$this->set_id( $user_object->ID );
-		$this->set_props( array_map( array( $this, 'flatten_post_meta'), get_user_meta( $id ) ) );
+		$this->set_props( array_map( array( $this, 'flatten_post_meta' ), get_user_meta( $id ) ) );
 		$this->set_props( array(
 			'is_paying_customer' => get_user_meta( $id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
 			'username'           => $user_object->user_login,
 			'date_created'       => strtotime( $user_object->user_registered ),
 			'date_modified'      => get_user_meta( $id, 'last_update', true ),
-			'role'               => ! empty ( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
+			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
 		) );
 		$this->read_meta_data();
 	}

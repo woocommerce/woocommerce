@@ -312,13 +312,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				// Null when the order was refunded, but not the line items themselves.
 				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
 				$this->report_data->total_refunds        += $value->total_refund;
-			}
-			elseif ( 'shipping' === $value->item_type ) {
+			} elseif ( 'shipping' === $value->item_type ) {
 				$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax * -1 );
 				$this->report_data->total_shipping_refunded     += wc_format_decimal( $value->total_refund, 2 );
 				$this->report_data->total_refunds               += $value->total_refund;
-			}
-			elseif ( 'line_item' === $value->item_type ) {
+			} elseif ( 'line_item' === $value->item_type ) {
 				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
 				$this->report_data->refunded_order_items += absint( $value->order_item_count );
 				$this->report_data->total_refunds        += $value->total_refund;
@@ -410,7 +408,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 0,
 		);
 		$legend[] = array(
-			'title' => sprintf( _nx( '%s refunded %d order', '%s refunded %d orders', $this->report_data->total_refunded_orders, '%s = amount of the refunds, %d = number of refunded orders.', 'woocommerce' ), '<strong>' . wc_price( $data->total_refunds ) . '</strong>', $this->report_data->total_refunded_orders ) . ' (' . sprintf( _n( '%d item', '%d items', $this->report_data->refunded_order_items, 'woocommerce' ), $this->report_data->refunded_order_items ) . ')',
+			'title' => sprintf( _nx( '%1$s refunded %2$d order', '%1$s refunded %2$d orders', $this->report_data->total_refunded_orders, '%s = amount of the refunds, %d = number of refunded orders.', 'woocommerce' ), '<strong>' . wc_price( $data->total_refunds ) . '</strong>', $this->report_data->total_refunded_orders ) . ' (' . sprintf( _n( '%d item', '%d items', $this->report_data->refunded_order_items, 'woocommerce' ), $this->report_data->refunded_order_items ) . ')',
 			'color' => $this->chart_colours['refund_amount'],
 			'highlight_series' => 8,
 		);
@@ -459,7 +457,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		$this->calculate_current_range( $current_range );
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
@@ -470,7 +468,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -676,7 +674,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 								position: "bottom",
 								tickColor: 'transparent',
 								mode: "time",
-								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+								timeformat: "<?php echo ( $this->chart_groupby == 'day' ) ? '%d %b' : '%b'; ?>",
 								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 								tickLength: 1,
 								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],

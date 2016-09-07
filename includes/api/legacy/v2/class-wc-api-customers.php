@@ -821,10 +821,8 @@ class WC_API_Customers extends WC_API_Resource {
 					} else {
 						$customers[] = $edit['customer'];
 					}
-				}
-
-				// Customer don't exists / create customer
-				else {
+				} else {
+					// Customer don't exists / create customer
 					$new = $this->create_customer( array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $new ) ) {

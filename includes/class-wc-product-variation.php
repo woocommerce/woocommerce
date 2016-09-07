@@ -221,14 +221,16 @@ class WC_Product_Variation extends WC_Product {
 	public function variation_is_visible() {
 		$visible = true;
 
-		// Published == enabled checkbox
 		if ( get_post_status( $this->variation_id ) != 'publish' ) {
-			$visible = false;
-		}
 
-		// Price not set
-		elseif ( $this->get_price() === "" ) {
+			// Published == enabled checkbox
 			$visible = false;
+
+		} elseif ( $this->get_price() === "" ) {
+
+			// Price not set
+			$visible = false;
+
 		}
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id, $this );
@@ -366,7 +368,7 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size , $attr);
+			$image = get_the_post_thumbnail( $parent_id, $size , $attr );
 		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
 		} else {
@@ -707,7 +709,7 @@ class WC_Product_Variation extends WC_Product {
 		$formatted_attributes = $this->get_formatted_variation_attributes( true );
 		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
 
-		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+		return sprintf( __( '%1$s &ndash; %2$s%3$s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}
 
 	/**

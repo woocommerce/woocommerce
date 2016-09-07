@@ -133,7 +133,7 @@ class WC_Admin_Dashboard {
 				<li class="best-seller-this-month">
 					<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ); ?>">
 						<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, date( 'd', current_time( 'timestamp' ) ) ), 'count' ); ?>
-						<?php printf( __( "%s top seller this month (sold %d)", 'woocommerce' ), "<strong>" . get_the_title( $top_seller->product_id ) . "</strong>", $top_seller->qty ); ?>
+						<?php printf( __( '%1$s top seller this month (sold %2$d)', 'woocommerce' ), '<strong>' . get_the_title( $top_seller->product_id ) . '</strong>', $top_seller->qty ); ?>
 					</a>
 				</li>
 			<?php endif; ?>
@@ -191,7 +191,7 @@ class WC_Admin_Dashboard {
 				echo '<div class="star-rating" title="' . esc_attr( $rating ) . '">
 					<span style="width:' . ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
 
-				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . __( 'reviewed by', 'woocommerce' ) . ' ' . esc_html( $comment->comment_author ) .'</h4>';
+				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . __( 'reviewed by', 'woocommerce' ) . ' ' . esc_html( $comment->comment_author ) . '</h4>';
 				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
 
 			}

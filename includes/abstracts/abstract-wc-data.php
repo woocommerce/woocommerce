@@ -4,15 +4,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
-* Abstract WC Data Class
-*
-* Implemented by classes using the same CRUD(s) pattern.
-*
-* @version  2.6.0
-* @package  WooCommerce/Abstracts
-* @category Abstract Class
-* @author   WooThemes
-*/
+ * Abstract WC Data Class
+ *
+ * Implemented by classes using the same CRUD(s) pattern.
+ *
+ * @version  2.6.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
+ */
 abstract class WC_Data {
 
 	/**

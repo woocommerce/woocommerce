@@ -164,7 +164,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	}
 
 	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
-	$output .= '<option value="" ' .  selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
 	if ( $args['show_uncategorized'] ) {
 		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
@@ -187,7 +187,7 @@ function wc_walk_category_dropdown_tree() {
 	}
 
 	// the user's options are the third parameter
-	if ( empty( $args[2]['walker']) || ! is_a($args[2]['walker'], 'Walker' ) ) {
+	if ( empty( $args[2]['walker'] ) || ! is_a( $args[2]['walker'], 'Walker' ) ) {
 		$walker = new WC_Product_Cat_Dropdown_Walker;
 	} else {
 		$walker = $args[2]['walker'];
@@ -342,15 +342,15 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		// the nextid of our term to order, lets move our term here
 		if ( null !== $next_id && $term->term_id == $next_id ) {
 			$index++;
-			$index = wc_set_term_order($id, $index, $taxonomy, true);
+			$index = wc_set_term_order( $id, $index, $taxonomy, true );
 		}
 
 		// set order
 		$index++;
-		$index = wc_set_term_order($term->term_id, $index, $taxonomy);
+		$index = wc_set_term_order( $term->term_id, $index, $taxonomy );
 
 		// if that term has children we walk through them
-		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
+		$children = get_terms( $taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0" );
 		if ( ! empty( $children ) ) {
 			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
 		}
@@ -388,11 +388,11 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	if ( ! $recursive ) return $index;
 
-	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
+	$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
 
 	foreach ( $children as $term ) {
 		$index++;
-		$index = wc_set_term_order($term->term_id, $index, $taxonomy, true);
+		$index = wc_set_term_order( $term->term_id, $index, $taxonomy, true );
 	}
 
 	clean_term_cache( $term_id, $taxonomy );

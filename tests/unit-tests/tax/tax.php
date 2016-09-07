@@ -213,8 +213,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	* Test compound tax amounts
-	*/
+	 * Test compound tax amounts
+	 */
 	public function test_calc_compound_tax() {
 		global $wpdb;
 
@@ -338,7 +338,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
+		$this->assertEquals( WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -363,7 +363,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
+		$this->assertEquals( WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -388,7 +388,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals(WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
+		$this->assertEquals( WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -413,7 +413,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertTrue(WC_Tax::is_compound( $tax_rate_id ) );
+		$this->assertTrue( WC_Tax::is_compound( $tax_rate_id ) );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -422,7 +422,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 * Test the rounding method.
 	 */
 	public function test_round() {
-		$this->assertEquals(WC_Tax::round( '2.1234567' ), '2.1235' );
+		$this->assertEquals( WC_Tax::round( '2.1234567' ), '2.1235' );
 	}
 
 	/**
@@ -434,7 +434,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'2' => '2',
 		);
 
-		$this->assertEquals(WC_Tax::get_tax_total( $to_total ), '3.665' );
+		$this->assertEquals( WC_Tax::get_tax_total( $to_total ), '3.665' );
 	}
 
 	/**

@@ -269,7 +269,7 @@ class WC_Admin_Assets {
 				'revoke_access_nonce'           => wp_create_nonce( 'revoke-access' ),
 				'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 				'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
-				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
+				'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),

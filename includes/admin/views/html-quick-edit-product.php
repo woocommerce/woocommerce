@@ -126,7 +126,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
-						echo '<option value="' . esc_attr( $value->slug ) . '">'. $value->name .'</option>';
+						echo '<option value="' . esc_attr( $value->slug ) . '">' . $value->name . '</option>';
 					}
 				?>
 				</select>
@@ -146,7 +146,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'hidden'  => __( 'Hidden', 'woocommerce' ),
 					) );
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -167,7 +167,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) .'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -203,7 +203,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'yes'    => __( 'Allow', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>

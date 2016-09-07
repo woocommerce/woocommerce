@@ -8,7 +8,7 @@
  * @category    Admin
  * @package     WooCommerce/Admin
  * @version     2.6.0
-*/
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -219,7 +219,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'Your store needs a few essential %spages%s. The following will be created automatically (if they do not already exist):', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Your store needs a few essential %1$spages%2$s. The following will be created automatically (if they do not already exist):', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
 			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
@@ -251,7 +251,7 @@ class WC_Admin_Setup_Wizard {
 				</tbody>
 			</table>
 
-			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %sPages screen%s. You can control which pages are shown on your website via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %1$sPages screen%2$s. You can control which pages are shown on your website via %3$sAppearance > Menus%4$s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -313,7 +313,7 @@ class WC_Admin_Setup_Wizard {
 							}
 							?>
 						</select>
-						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
+						<span class="description"><?php printf( __( 'If your currency is not listed you can %1$sadd it later%2$s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -330,19 +330,19 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ) ; ?>" />
+						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ) ; ?>" />
+						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ) ; ?>" />
+						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ); ?>" />
 					</td>
 				</tr>
 				<tr>
@@ -566,21 +566,21 @@ class WC_Admin_Setup_Wizard {
 			'paypal-braintree' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">', '</a>' ),
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %1$sLearn more about PayPal%2$s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
 			'paypal-ec' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">', '</a>' ),
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %1$sLearn more about PayPal%2$s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-stripe/" target="_blank">', '</a>' ),
+				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %1$sLearn more about Stripe%2$s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-stripe/" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-first',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
@@ -752,7 +752,7 @@ class WC_Admin_Setup_Wizard {
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="https://woocommerce.com/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %1$sFind out more%2$s.', 'woocommerce' ), '<a href="https://woocommerce.com/usage-tracking/" target="_blank">', '</a>' ); ?></p>
 				<p class="submit">
 					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
 					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'No thanks', 'woocommerce' ); ?></a>

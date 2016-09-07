@@ -93,7 +93,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 
 			$legend[] = array(
-				'title'            => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
+				'title'            => sprintf( __( '%1$s sales in %2$s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
 				'highlight_series' => $index,
 			);
@@ -257,7 +257,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -396,7 +396,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									position: "bottom",
 									tickColor: 'transparent',
 									mode: "time",
-									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+									timeformat: "<?php echo ( $this->chart_groupby == 'day' ) ? '%d %b' : '%b'; ?>",
 									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],

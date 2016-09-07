@@ -1258,7 +1258,7 @@ class WC_API_Products extends WC_API_Resource {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
 			// Generate a useful post title
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post
 			if ( ! $variation_id ) {
@@ -1571,7 +1571,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length
@@ -2089,9 +2089,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( strlen( $slug ) >= 28 ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), 400 );
 		}
 
@@ -2415,8 +2415,9 @@ class WC_API_Products extends WC_API_Resource {
 					$product_id  = wc_get_product_id_by_sku( $product_sku );
 				}
 
-				// Product exists / edit product
 				if ( $product_id ) {
+
+					// Product exists / edit product
 					$edit = $this->edit_product( $product_id, array( 'product' => $_product ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -2428,10 +2429,9 @@ class WC_API_Products extends WC_API_Resource {
 					} else {
 						$products[] = $edit['product'];
 					}
-				}
+				} else {
 
-				// Product don't exists / create product
-				else {
+					// Product don't exists / create product
 					$new = $this->create_product( array( 'product' => $_product ) );
 
 					if ( is_wp_error( $new ) ) {

@@ -798,8 +798,9 @@ class WC_API_Customers extends WC_API_Resource {
 					$customer_id = intval( $_customer['id'] );
 				}
 
-				// Customer exists / edit customer
 				if ( $customer_id ) {
+
+					// Customer exists / edit customer
 					$edit = $this->edit_customer( $customer_id, array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -810,10 +811,9 @@ class WC_API_Customers extends WC_API_Resource {
 					} else {
 						$customers[] = $edit['customer'];
 					}
-				}
+				} else {
 
-				// Customer don't exists / create customer
-				else {
+					// Customer don't exists / create customer
 					$new = $this->create_customer( array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $new ) ) {

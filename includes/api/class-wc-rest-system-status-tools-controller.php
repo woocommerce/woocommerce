@@ -165,7 +165,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$tools = array();
 		foreach ( $this->get_tools() as $id => $tool ) {
-			$tools[] = $this->prepare_response_for_collection( $this->prepare_item_for_response ( array(
+			$tools[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( array(
 				'id'          => $id,
 				'name'        => $tool['name'],
 				'action'      => $tool['button'],
@@ -189,7 +189,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		$tool = $tools[ $request['id'] ];
-		return rest_ensure_response( $this->prepare_item_for_response ( array(
+		return rest_ensure_response( $this->prepare_item_for_response( array(
 		   'id'          => $request['id'],
 		   'name'        => $tool['name'],
 		   'action'      => $tool['button'],

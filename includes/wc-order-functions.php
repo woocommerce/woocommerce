@@ -1138,9 +1138,9 @@ function wc_reduce_stock_levels( $order_id ) {
 				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
 
 				if ( ! empty( $item['variation_id'] ) ) {
-					$order->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
+					$order->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
 				} else {
-					$order->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
+					$order->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
 				}
 
 				if ( $new_stock < 0 ) {

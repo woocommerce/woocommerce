@@ -777,10 +777,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	* Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
-	* @since 2.7.0
-	* @param int $coupon_id
-	*/
+	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
+	 * @since 2.7.0
+	 * @param int $coupon_id
+	 */
 	private function update_post_meta( $coupon_id ) {
 		update_post_meta( $coupon_id, 'discount_type', $this->get_discount_type() );
 		update_post_meta( $coupon_id, 'coupon_amount', $this->get_amount() );
@@ -1231,7 +1231,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		// Specific product ID's excluded from the discount
-		if ( sizeof( $this->get_excluded_product_ids()) && sizeof( array_intersect( $product_ids, $this->get_excluded_product_ids() ) ) ) {
+		if ( sizeof( $this->get_excluded_product_ids() ) && sizeof( array_intersect( $product_ids, $this->get_excluded_product_ids() ) ) ) {
 			$valid = false;
 		}
 
