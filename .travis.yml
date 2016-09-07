@@ -54,6 +54,7 @@ script:
   - /tmp/phpcs/scripts/phpcs -p -s -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/*.php
   - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/*.php
   - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
 
 after_script:
   - bash tests/bin/travis.sh after
