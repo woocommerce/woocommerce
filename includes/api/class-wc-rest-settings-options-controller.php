@@ -139,7 +139,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			// Get the option value
 			if ( is_array( $option_key ) ) {
 				$option           = get_option( $option_key[0] );
-				$setting['value'] = $option[ $option_key[1] ];
+				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : '';
 			} else {
 				$setting['value'] = WC_Admin_Settings::get_option( $option_key );
 			}

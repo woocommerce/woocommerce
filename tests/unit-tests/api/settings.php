@@ -603,6 +603,29 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
 			'value'       => 'This is my subject',
 		), $setting );
+
+		// test updating another subject and making sure it works with a "similar" id
+		$request = new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'email_customer_new_account', 'subject' ) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEmpty( $setting['value'] );
+
+		// test update
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_customer_new_account', 'subject' ) );
+		$request->set_body_params( array(
+			'value' => 'This is my new subject',
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( 'This is my new subject', $setting['value'] );
+
+		// make sure the other is what we left it
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order/subject' ) );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( 'This is my subject', $setting['value'] );
 	}
 
 }
