@@ -264,7 +264,6 @@ function wc_save_order_items( $order_id, $items ) {
 			$item->set_props( array(
 				'method_id'    => $item_data['shipping_method'],
 				'method_title' => $item_data['shipping_method_title'],
-				'tax_class'    => $item_data['order_item_tax_class'],
 				'total'        => $item_data['shipping_cost'],
 				'taxes'        => array(
 					'total'    => $item_data['shipping_taxes'],

@@ -285,7 +285,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
-					'function'        => 'SUM',
+					'function'        => '',
 					'name'            => 'order_item_count',
 					'join_type'       => 'LEFT',
 				),
@@ -305,6 +305,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_shipping_refunded     = 0;
 		$this->report_data->total_shipping_tax_refunded = 0;
 		$this->report_data->total_refunds               = 0;
+		$this->report_data->refunded_order_items        = 0;
 
 		foreach ( $this->report_data->partial_refunds as $key => $value ) {
 			if ( is_null( $value->item_type ) ) {

@@ -201,20 +201,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_props( array(
-			'id'                 => $post_object->ID,
+			'id'                 => $id,
 			'parent_id'          => $post_object->post_parent,
 			'date_created'       => $post_object->post_date,
 			'date_modified'      => $post_object->post_modified,
 			'status'             => $post_object->post_status,
-			'currency'           => get_post_meta( $this->get_id(), '_order_currency', true ),
-			'discount_total'     => get_post_meta( $this->get_id(), '_cart_discount', true ),
-			'discount_tax'       => get_post_meta( $this->get_id(), '_cart_discount_tax', true ),
-			'shipping_total'     => get_post_meta( $this->get_id(), '_order_shipping', true ),
-			'shipping_tax'       => get_post_meta( $this->get_id(), '_order_shipping_tax', true ),
-			'cart_tax'           => get_post_meta( $this->get_id(), '_order_tax', true ),
-			'total'              => get_post_meta( $this->get_id(), '_order_total', true ),
-			'version'            => get_post_meta( $this->get_id(), '_order_version', true ),
-			'prices_include_tax' => metadata_exists( 'post', $this->get_id(), '_prices_include_tax' ) ? 'yes' === get_post_meta( $this->get_id(), '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+			'currency'           => get_post_meta( $id, '_order_currency', true ),
+			'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
+			'discount_tax'       => get_post_meta( $id, '_cart_discount_tax', true ),
+			'shipping_total'     => get_post_meta( $id, '_order_shipping', true ),
+			'shipping_tax'       => get_post_meta( $id, '_order_shipping_tax', true ),
+			'cart_tax'           => get_post_meta( $id, '_order_tax', true ),
+			'total'              => get_post_meta( $id, '_order_total', true ),
+			'version'            => get_post_meta( $id, '_order_version', true ),
+			'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 		) );
 
 		$this->read_meta_data();
@@ -495,8 +495,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['total'], wc_get_price_decimals() );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total', $value, $this );
+		return $raw ? $this->_data['total'] : apply_filters( 'woocommerce_order_amount_total', $this->_data['total'], $this );
 	}
 
 	/**
@@ -655,7 +654,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
 			$this->error( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
-		$this->_data['currency'] = $value;
+		$this->_data['currency'] = $value ? $value : get_woocommerce_currency();
 	}
 
 	/**

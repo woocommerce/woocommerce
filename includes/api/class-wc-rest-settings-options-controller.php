@@ -387,6 +387,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'label'            => array(
 					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
@@ -394,6 +396,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'description'      => array(
 					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
@@ -401,14 +405,19 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'value'          => array(
 					'description'  => __( 'Setting value.', 'woocommerce' ),
 					'type'         => 'mixed',
+					'context'      => array( 'view', 'edit' ),
 				),
 				'default'          => array(
 					'description'  => __( 'Default value for the setting.', 'woocommerce' ),
 					'type'         => 'mixed',
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'tip'              => array(
 					'description'  => __( 'Extra help text explaining the setting.', 'woocommerce' ),
@@ -416,6 +425,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'placeholder'      => array(
 					'description'  => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
@@ -423,6 +434,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'type'             => array(
 					'description'  => __( 'Type of setting. Allowed values: text, email, number, color, password, textarea, select, multiselect, radio, image_width, checkbox.', 'woocommerce' ),
@@ -430,10 +443,14 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'options'          => array(
 					'description'  => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce' ),
 					'type'         => 'array',
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 			),
 		);

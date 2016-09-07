@@ -385,12 +385,14 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'instance_id' => array(
 					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Shipping method customer facing title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'order' => array(
 					'description' => __( 'Shipping method sort order.', 'woocommerce' ),
@@ -410,17 +412,19 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'method_id' => array(
 					'description' => __( 'Shipping method ID. Write on create only.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit.' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'method_title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_description' => array(
 					'description' => __( 'Shipping method description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'settings' => array(
 					'description' => __( 'Shipping method settings.', 'woocommerce' ),

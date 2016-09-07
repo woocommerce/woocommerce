@@ -45,7 +45,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
-			// Load shipping methods so we can show any global options they may have.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 			foreach ( $payment_gateways as $gateway ) {
