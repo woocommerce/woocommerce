@@ -99,6 +99,14 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Delete data from the database.
+	 * @since 2.7.0
+	 */
+	public function delete() {
+		wp_delete_post( $this->get_id(), true );
+	}
+
+	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */
