@@ -884,6 +884,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$tables[] = $wpdb->prefix . 'woocommerce_payment_tokens';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zones';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_locations';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_methods';
 
 		return $tables;
 	}
