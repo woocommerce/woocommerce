@@ -16,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooThemes
  */
 abstract class WC_Legacy_Cart {
+
+	public function add_discount( $coupon_code ) {
+		return $this->add_coupon( $coupon_code );
+	}
+
 	/**
 	 * Looks through the cart to see if shipping is actually required.
 	 *
@@ -39,6 +44,11 @@ abstract class WC_Legacy_Cart {
 		}
 
 		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+	}
+
+
+	public function calculate_fees() {
+		$this->fees->calculate_fees();
 	}
 
 	/**
@@ -509,43 +519,6 @@ abstract class WC_Legacy_Cart {
 		return array_filter( (array) $this->fees );
 	}
 
-	/**
-	 * Calculate fees.
-	 */
-	public function calculate_fees() {
-		// Reset fees before calculation
-		$this->fee_total = 0;
-		$this->fees      = array();
-
-		// Fire an action where developers can add their fees
-		do_action( 'woocommerce_cart_calculate_fees', $this );
-
-		// If fees were added, total them and calculate tax
-		if ( ! empty( $this->fees ) ) {
-			foreach ( $this->fees as $fee_key => $fee ) {
-				$this->fee_total += $fee->amount;
-
-				if ( $fee->taxable ) {
-					// Get tax rates
-					$tax_rates = WC_Tax::get_rates( $fee->tax_class );
-					$fee_taxes = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
-
-					if ( ! empty( $fee_taxes ) ) {
-						// Set the tax total for this fee
-						$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
-
-						// Set tax data - Since 2.2
-						$this->fees[ $fee_key ]->tax_data = $fee_taxes;
-
-						// Tax rows - merge the totals we just got
-						foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
-							$this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
-						}
-					}
-				}
-			}
-		}
-	}
 
 
 	//public function check_customer_coupons( $posted ) {

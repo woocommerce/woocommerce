@@ -71,6 +71,20 @@ class WC_Cart_Fees implements Iterator {
 	}
 
 	/**
+	 * Allow 3rd parties to calculate and register fees.
+	 */
+	public function calculate_fees() {
+		// Remove any existing fees.
+		$this->set_fees( false );
+
+		// Fire an action where developers can add their fees
+		do_action( 'woocommerce_cart_calculate_fees', WC()->cart );
+
+		// Return fees
+		return $this->get_fees();
+	}
+
+	/**
 	 * Generate a unique ID for the fee being added.
 	 *
 	 * @param string $fee Fee name.

@@ -15,11 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Cart_Totals {
 
-	protected $calculate_tax = true;
-	protected $totals        = null;
-	protected $coupons       = array();
-	protected $items         = array();
-	protected $fees          = array();
+	protected $calculate_tax  = true;
+	protected $totals         = null;
+	protected $coupons        = array();
+	protected $items          = array();
+	protected $fees           = array();
+	protected $shipping_lines = array();
 
 	/**
 	 * Get default blank set of props used per item.
@@ -58,6 +59,18 @@ class WC_Cart_Totals {
 		return (object) array(
 			'tax'      => 0,
 			'tax_data' => array(),
+		);
+	}
+
+	/**
+	 * Get default blank set of props used per shipping row.
+	 * @return array
+	 */
+	private function get_default_shipping_props() {
+		return (object) array(
+			'total'     => 0,
+			'total_tax' => 0,
+			'taxes'     => array(),
 		);
 	}
 
@@ -101,7 +114,7 @@ class WC_Cart_Totals {
 		public function get_coupons() {
 			return $this->coupons;
 		}
-		
+
 	/**
 	 * Set fees.
 	 * @param array $fees
@@ -134,11 +147,110 @@ class WC_Cart_Totals {
 	}
 
 	/**
+	 * Subtotals are costs before discounts.
+	  * Prices include tax. @todo
+	  *
+	  * To prevent rounding issues we need to work with the inclusive price where possible.
+	  * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+	  * be 8.325 leading to totals being 1p off.
+	  *
+	  * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
+	  * afterwards.
+	  *
+	  * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
+	  */
+	private function calculate_item_subtotals() {
+		foreach ( $this->items as $item ) {
+			$item->subtotal     = $item->price * $item->quantity;
+			$item->subtotal_tax = 0;
+
+			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', false ) ) {
+				$item           = $this->adjust_non_base_location_price( $item );
+				$item->subtotal = $item->price * $item->quantity;
+			}
+
+			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
+				$item->subtotal_tax_data = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+				$item->subtotal_tax      = array_sum( $item->subtotal_tax_data );
+
+				if ( $item->price_includes_tax ) {
+					$item->subtotal = $item->subtotal - $item->subtotal_tax;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Totals are costs after discounts.
+	 */
+	public function calculate_item_totals() {
+		$this->calculate_item_subtotals();
+		uasort( $this->items, array( $this, 'sort_items_callback' ) );
+
+		foreach ( $this->items as $item ) {
+			$item->discounted_price = $this->get_discounted_price( $item );
+			$item->total            = $item->discounted_price * $item->quantity;
+			$item->tax              = 0;
+
+			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
+				$item->tax_data = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+				$item->tax      = array_sum( $item->tax_data );
+
+				if ( $item->price_includes_tax ) {
+					$item->total = $item->total - $item->tax;
+				} else {
+					$item->total = $item->total;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Calculate any fees taxes.
+	 */
+	private function calculate_fee_totals() {
+		if ( ! empty( $this->fees ) ) {
+			foreach ( $this->fees as $fee_key => $fee ) {
+				if ( $this->get_calculate_tax() && $fee->taxable ) {
+					$fee->tax_data = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
+					$fee->tax      = array_sum( $fee->tax_data );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Main cart totals.
+	 */
+	public function calculate_totals() {
+		$this->calculate_fee_totals();
+		$this->totals                 = new stdClass();
+		$this->totals->shipping_taxes = array();
+		$this->totals->taxes          = $this->get_tax_data();
+
+		// Total up/round taxes and shipping taxes
+		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->totals->tax_total          = WC_Tax::get_tax_total( $this->totals->taxes );
+			$this->totals->shipping_tax_total = WC_Tax::get_tax_total( $this->totals->shipping_taxes );
+			$this->totals->taxes              = array_map( array( 'WC_Tax', 'round' ), $this->totals->taxes );
+			$this->totals->shipping_taxes     = array_map( array( 'WC_Tax', 'round' ), $this->totals->shipping_taxes );
+		} else {
+			$this->totals->tax_total          = array_sum( $this->totals->taxes );
+			$this->totals->shipping_tax_total = array_sum( $this->totals->shipping_taxes );
+		}
+
+		// Allow plugins to hook and alter totals before final total is calculated
+		do_action( 'woocommerce_calculate_totals', WC()->cart );
+
+		// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
+		$this->totals->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->get_items_total( false ) + $this->get_fees_total( false ) + $this->get_shipping_total( false ) + $this->totals->tax_total + $this->totals->shipping_tax_total, wc_get_price_decimals() ), WC()->cart ) );
+	}
+
+	/**
 	 * Returns items and their totals.
 	 * @return array
 	 */
 	public function get_item_totals() {
-		$this->maybe_calculate();
 		return $this->items;
 	}
 
@@ -171,7 +283,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_items_subtotal( $inc_tax = true ) {
-		$this->maybe_calculate();
 		$totals = array_values( wp_list_pluck( $this->items, 'subtotal' ) );
 
 		if ( $inc_tax ) {
@@ -188,7 +299,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_items_total( $inc_tax = true ) {
-		$this->maybe_calculate();
 		$totals = array_values( wp_list_pluck( $this->items, 'total' ) );
 
 		if ( $inc_tax ) {
@@ -204,7 +314,6 @@ class WC_Cart_Totals {
 	 * @return array
 	 */
 	public function get_tax_data() {
-		$this->maybe_calculate();
 		$tax_data = array();
 
 		foreach ( $this->items as $item ) {
@@ -221,7 +330,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_discount_total() {
-		$this->maybe_calculate();
 		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total' ) ) ), wc_get_price_decimals() );
 	}
 
@@ -230,7 +338,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_discount_total_tax() {
-		$this->maybe_calculate();
 		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total_tax' ) ) ), wc_get_price_decimals() );
 	}
 
@@ -343,104 +450,12 @@ class WC_Cart_Totals {
 	}
 
 	/**
-	 * Run all calculation logic only if needed.
-	 */
-	private function maybe_calculate() {
-		if ( is_null( $this->totals ) ) {
-			$this->calculate();
-		}
-	}
-
-	/**
-	 * Run all calculation logic only if needed.
-	 */
-	public function calculate() {
-		$this->calculate_item_subtotals();
-		$this->calculate_item_totals();
-		$this->calculate_fee_totals();
-		$this->calculate_totals();
-	}
-
-	/**
-	 * Subtotals are costs before discounts.
-	  * Prices include tax. @todo
-	  *
-	  * To prevent rounding issues we need to work with the inclusive price where possible.
-	  * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
-	  * be 8.325 leading to totals being 1p off.
-	  *
-	  * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
-	  * afterwards.
-	  *
-	  * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
-	  */
-	private function calculate_item_subtotals() {
-		foreach ( $this->items as $item ) {
-			$item->subtotal     = $item->price * $item->quantity;
-			$item->subtotal_tax = 0;
-
-			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', false ) ) {
-				$item           = $this->adjust_non_base_location_price( $item );
-				$item->subtotal = $item->price * $item->quantity;
-			}
-
-			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
-				$item->subtotal_tax_data = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
-				$item->subtotal_tax      = array_sum( $item->subtotal_tax_data );
-
-				if ( $item->price_includes_tax ) {
-					$item->subtotal = $item->subtotal - $item->subtotal_tax;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Totals are costs after discounts.
-	 */
-	private function calculate_item_totals() {
-		uasort( $this->items, array( $this, 'sort_items_callback' ) );
-
-		foreach ( $this->items as $item ) {
-			$item->discounted_price = $this->get_discounted_price( $item );
-			$item->total            = $item->discounted_price * $item->quantity;
-			$item->tax              = 0;
-
-			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
-				$item->tax_data = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
-				$item->tax      = array_sum( $item->tax_data );
-
-				if ( $item->price_includes_tax ) {
-					$item->total = $item->total - $item->tax;
-				} else {
-					$item->total = $item->total;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Calculate any fees taxes.
-	 */
-	private function calculate_fee_totals() {
-		if ( ! empty( $this->fees ) ) {
-			foreach ( $this->fees as $fee_key => $fee ) {
-				if ( $this->get_calculate_tax() && $fee->taxable ) {
-					$fee->tax_data = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
-					$fee->tax      = array_sum( $fee->tax_data );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Get the total for all items.
 	 *
 	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
 	 * @return float
 	 */
 	public function get_fees_total( $inc_tax = true ) {
-		$this->maybe_calculate();
 		$totals = array_values( wp_list_pluck( $this->fees, 'amount' ) );
 
 		if ( $inc_tax ) {
@@ -451,37 +466,10 @@ class WC_Cart_Totals {
 	}
 
 	/**
-	 * Main cart totals.
-	 */
-	private function calculate_totals() {
-		$this->totals                 = new stdClass();
-		$this->totals->shipping_taxes = array();
-		$this->totals->taxes          = $this->get_tax_data();
-
-		// Total up/round taxes and shipping taxes
-		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->totals->tax_total          = WC_Tax::get_tax_total( $this->totals->taxes );
-			$this->totals->shipping_tax_total = WC_Tax::get_tax_total( $this->totals->shipping_taxes );
-			$this->totals->taxes              = array_map( array( 'WC_Tax', 'round' ), $this->totals->taxes );
-			$this->totals->shipping_taxes     = array_map( array( 'WC_Tax', 'round' ), $this->totals->shipping_taxes );
-		} else {
-			$this->totals->tax_total          = array_sum( $this->totals->taxes );
-			$this->totals->shipping_tax_total = array_sum( $this->totals->shipping_taxes );
-		}
-
-		// Allow plugins to hook and alter totals before final total is calculated
-		do_action( 'woocommerce_calculate_totals', WC()->cart );
-
-		// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
-		$this->totals->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->get_items_total( false ) + $this->get_fees_total( false ) + $this->totals->tax_total + $this->totals->shipping_tax_total, wc_get_price_decimals() ), WC()->cart ) );
-	}
-
-	/**
 	 * Get shipping taxes.
 	 * @return array
 	 */
 	public function get_shipping_taxes() {
-		$this->maybe_calculate();
 		return $this->totals->shipping_taxes;
 	}
 
@@ -490,7 +478,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_shipping_tax_total() {
-		$this->maybe_calculate();
 		return $this->totals->shipping_tax_total;
 	}
 
@@ -499,7 +486,6 @@ class WC_Cart_Totals {
 	 * @return array
 	 */
 	public function get_taxes() {
-		$this->maybe_calculate();
 		return $this->totals->taxes;
 	}
 
@@ -508,7 +494,6 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_tax_total() {
-		$this->maybe_calculate();
 		return $this->totals->tax_total;
 	}
 
@@ -517,7 +502,42 @@ class WC_Cart_Totals {
 	 * @return float
 	 */
 	public function get_total() {
-		$this->maybe_calculate();
 		return $this->totals->total;
+	}
+
+
+
+
+
+	/**
+	 * Get the total for all items.
+	 *
+	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
+	 * @return float
+	 */
+	public function get_shipping_total( $inc_tax = true ) {
+		$totals = array_values( wp_list_pluck( $this->shipping_lines, 'total' ) );
+
+		if ( $inc_tax ) {
+			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->shipping_lines, 'total_tax' ) ) );
+		}
+
+		return array_sum( $totals );
+	}
+
+	public function set_shipping( $shipping_objects ) {
+		$this->shipping_lines = array();
+
+		if ( is_array( $shipping_objects ) ) {
+			foreach ( $shipping_objects as $key => $shipping_object ) {
+				$shipping                     = $this->get_default_shipping_props();
+				$shipping->total              = $shipping_object->cost;
+				$shipping->taxes              = $shipping_object->taxes;
+				$shipping->total_tax          = array_sum( $shipping_object->taxes );
+				$this->shipping_lines[ $key ] = $shipping;
+			}
+		}
+
+		$this->totals = null;
 	}
 }

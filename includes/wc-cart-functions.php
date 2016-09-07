@@ -607,3 +607,38 @@ function wc_delete_persistent_cart() {
 	delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
 }
 add_action( 'woocommerce_cart_emptied', 'wc_delete_persistent_cart' );
+
+/**
+ * Get chosen method for package from session.
+ * @param  int $key
+ * @return string|bool
+ */
+function wc_get_chosen_shipping_method_for_package( $key ) {
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	return isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
+}
+
+/**
+ * See if the methods have changed since the last request.
+ * @param  int $key
+ * @param  array $rates
+ * @return bool
+ */
+function wc_shipping_methods_have_changed( $key, $new_rates ) {
+	// Lookup previous methods from session.
+	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+
+	// Get new and old rates.
+	$new_rates  = array_keys( $new_rates );
+	$prev_rates = isset( $previous_shipping_methods[ $key ] ) ? $previous_shipping_methods[ $key ] : false;
+
+	// Update session.
+	$previous_shipping_methods[ $key ] = $new_rates;
+	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
+
+	return $new_rates != $prev_rates;
+}
+
+function wc_get_tax_totals {
+
+}

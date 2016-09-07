@@ -172,7 +172,7 @@ class WC_Cart_Items {
 	 * Get number of items in the cart.
 	 * @return int
 	 */
-	public function get_item_count() {
+	public function get_quantity() {
 		return apply_filters( 'woocommerce_cart_contents_count', array_sum( wc_list_pluck( $this->items, 'get_quantity' ) ) );
 	}
 
@@ -180,7 +180,7 @@ class WC_Cart_Items {
 	 * Get all tax classes for items in the cart.
 	 * @return array
 	 */
-	public function get_item_tax_classes() {
+	public function get_tax_classes() {
 		return array_unique( array_values( wc_list_pluck( $this->items, 'get_tax_class' ) ) );
 	}
 
@@ -188,7 +188,7 @@ class WC_Cart_Items {
 	 * Get weight of items in the cart.
 	 * @return int
 	 */
-	public function get_item_weight() {
+	public function get_weight() {
 		return apply_filters( 'woocommerce_cart_contents_weight', array_sum( wc_list_pluck( $this->items, 'get_weight' ) ) );
 	}
 }

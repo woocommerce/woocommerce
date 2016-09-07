@@ -23,30 +23,87 @@ class WC_Cart extends WC_Cart_Session {
 	protected $totals;
 
 	/**
+	 * This stores the chosen shipping methods for the cart item packages.
+	 * @var array
+	 */
+	protected $shipping_methods;
+
+	/**
 	 * Constructor for the cart class.
 	 */
 	public function __construct() {
 		parent::__construct();
 
-		$this->totals  = new WC_Cart_Totals;
+		$this->totals = new WC_Cart_Totals;
 
-		// Recalculation
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_restored', array( $this, 'calculate_totals' ), 20, 0 );
-
-		// Item validation
 		add_action( 'woocommerce_check_cart_items', array( $this->items, 'check_items' ), 1 );
+	}
 
-		// Trigger the fees API where developers can add fees to the cart
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_fees' ) );
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_shipping' ) );
+	/**
+	 * Add an item to the cart.
+	 */
+	public function add_item( $args ) {
+		$item_key   = $this->items->generate_key( $args );
+		$cart_items = $this->items->get_items();
+
+		if ( $item = $this->items->get_item_by_key( $item_key ) ) {
+			$item->set_quantity( $item->get_quantity() + $args['quantity']  );
+		} else {
+			$item                    = new WC_Cart_Item( $args );
+			$cart_items[ $item_key ] = apply_filters( 'woocommerce_add_cart_item', $item, $item_key );
+		}
+
+		$this->items->set_items( $cart_items );
+
+		return $item_key;
+	}
+
+	/**
+	 * Add additional fee to the cart.
+	 *
+	 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
+	 * @param float $amount Fee amount.
+	 * @param bool $taxable (default: false) Is the fee taxable?
+	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
+	 */
+	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
+		$fee_key = $this->fees->generate_key( $name );
+		$fees    = $this->fees->get_fees();
+
+		// Only add each fee once
+		if ( isset( $fees[ $fee_key ] ) ) {
+			return;
+		}
+
+		$fees[ $fee_key ] = (object) array(
+			'id'        => $fee_key,
+			'name'      => wc_clean( $name ),
+			'amount'    => (float) $amount,
+			'tax_class' => $tax_class,
+			'taxable'   => (bool) $taxable,
+		);
+
+		$this->fees->set_fees( $fees );
+
+		return $fee_key;
+	}
+
+	/**
+	 * Applies a coupon code.
+	 * @since 2.7.0
+	 * @param string $coupon_code - The code to apply
+	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
+	 */
+	public function add_coupon( $coupon_code ) {
+		return $this->coupons->add( $coupon_code );
 	}
 
 	/**
 	 * Returns the contents of the cart in an array.
-	 *
 	 * @return array contents of the cart
 	 */
 	public function get_cart() {
@@ -60,6 +117,22 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
+	 * Get array of fees.
+	 * @return array of fees
+	 */
+	public function get_fees() {
+		return $this->fees->get_fees();
+	}
+
+	/**
+	 * Get array of applied coupon objects and codes.
+	 * @return array of applied coupons
+	 */
+	public function get_coupons() {
+		return $this->coupons->get_coupons();
+	}
+
+	/**
 	* Checks if the cart is empty.
 	* @return bool
 	*/
@@ -68,28 +141,95 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
- 	* Get all tax classes for items in the cart.
- 	* @return array
- 	*/
-    public function get_cart_item_tax_classes() {
- 	   return $this->items->get_item_tax_classes();
-    }
+	 * Empties the cart and optionally the persistent cart too.
+	 */
+	public function empty_cart() {
+		$this->items->set_items( false );
+		$this->fees->set_fees( false );
+		$this->shipping_methods = null;
+		$this->totals = new WC_Cart_Totals;
+		do_action( 'woocommerce_cart_emptied' );
+	}
 
-    /**
- 	* Get weight of items in the cart.
- 	* @return int
- 	*/
-    public function get_cart_contents_weight() {
- 	   return $this->items->get_item_weight();
-    }
+	/**
+	 * Set the quantity for an item in the cart.
+	 * @param string	$cart_item_key	contains the id of the cart item
+	 * @param int		$quantity		contains the quantity of the item
+	 */
+	public function set_quantity( $item_key, $quantity = 1, $deprecated = true ) {
+		if ( $quantity <= 0 ) {
+			$this->items->remove_item( $item_key );
+		} elseif ( $item = $this->items->get_item_by_key( $item_key ) ) {
+			$old_quantity = $item->get_quantity();
+			$item->set_quantity( $quantity );
+			do_action( 'woocommerce_after_cart_item_quantity_update', $item_key, $quantity, $old_quantity );
+		}
+	}
 
-    /**
- 	* Get number of items in the cart.
- 	* @return int
- 	*/
-    public function get_cart_contents_count() {
- 	   return $this->items->get_item_count();
-    }
+	/**
+	 * Remove item from cart.
+	 * @param string $item_key Cart item key.
+	 */
+	public function remove_cart_item( $item_key ) {
+		$this->items->remove_item( $item_key );
+	}
+
+	/**
+	 * Remove a single coupon by code.
+	 * @param  string $coupon_code Code of the coupon to remove
+	 * @return bool
+	 */
+	public function remove_coupon( $coupon_code ) {
+		return $this->coupons->remove_coupon( $coupon_code );
+	}
+
+	/**
+	 * Returns a specific item in the cart.
+	 *
+	 * @param string $item_key Cart item key.
+	 * @return array Item data
+	 */
+	public function get_cart_item( $item_key ) {
+		 return $this->items->get_item_by_key( $item_key );
+	}
+
+	/**
+	 * Restore item from cart.
+	 * @param string $item_key Cart item key.
+	 */
+	public function restore_cart_item( $item_key ) {
+		$this->items->restore_item( $item_key );
+	}
+
+	/**
+	 * Get all tax classes for items in the cart.
+	 * @return array
+	 */
+	public function get_cart_item_tax_classes() {
+		return $this->items->get_tax_classes();
+	}
+
+	/**
+	 * Get weight of items in the cart.
+	 * @return int
+	 */
+	public function get_cart_contents_weight() {
+		return $this->items->get_weight();
+	}
+
+	/**
+	 * Get number of items in the cart.
+	 * @return int
+	 */
+	public function get_cart_contents_count() {
+		return $this->items->get_quantity();
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Cart shipping calculation.
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Looks through the cart to see if shipping is actually required.
@@ -149,145 +289,43 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
-	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
+	 * Uses the shipping class to calculate shipping then gets the totals when its finished. @todo where should this be called? After item calc? How to get totals to totals class?
 	 */
 	public function calculate_shipping() {
-		if ( $this->needs_shipping() ) {
-			WC()->shipping->calculate_shipping( $this->get_shipping_packages() );
-		} else {
-			WC()->shipping->reset_shipping();
-		}
+		return $this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 	}
 
 	/**
-	 * Empties the cart and optionally the persistent cart too.
+	 * Given a set of packages with rates, get the chosen ones only.
+	 * @since 2.7.0
+	 * @param array $calculated_shipping_packages
+	 * @return array
 	 */
-	public function empty_cart() {
-		$this->items->set_items( false );
-		$this->fees->set_fees( false );
-		do_action( 'woocommerce_cart_emptied' );
-	}
+	protected function get_chosen_shipping_methods( $calculated_shipping_packages ) {
+		$chosen_methods = array();
 
-	/**
-	 * Returns a specific item in the cart.
-	 *
-	 * @param string $item_key Cart item key.
-	 * @return array Item data
-	 */
-	public function get_cart_item( $item_key ) {
-		 return $this->items->get_item_by_key( $item_key );
-	}
+		// Get chosen methods for each package to get our totals.
+		foreach ( $calculated_shipping_packages as $key => $package ) {
+			$chosen_method = wc_get_chosen_shipping_method_for_package( $key );
+			$changed       = wc_shipping_methods_have_changed( $key, $package['rates'] );
 
-	/**
-	 * Remove item from cart.
-	 * @param string $item_key Cart item key.
-	 */
-	public function remove_cart_item( $item_key ) {
-		$this->items->remove_item( $item_key );
-	}
+			// If not set, not available, or available methods have changed, set to the DEFAULT option
+			if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
+				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', current( $package['rates'] ), $package['rates'], $chosen_method );
+				do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
+			}
 
-	/**
-	 * Restore item from cart.
-	 * @param string $item_key Cart item key.
-	 */
-	public function restore_cart_item( $item_key ) {
-		$this->items->restore_item( $item_key );
-	}
-
-	/**
-	 * Add an item to the cart.
-	 */
-	public function add_item( $args ) {
-		$item_key   = $this->items->generate_key( $args );
-		$cart_items = $this->items->get_items();
-
-		if ( $item = $this->items->get_item_by_key( $item_key ) ) {
-			$item->set_quantity( $item->get_quantity() + $args['quantity']  );
-		} else {
-			$item                    = new WC_Cart_Item( $args );
-			$cart_items[ $item_key ] = apply_filters( 'woocommerce_add_cart_item', $item, $item_key );
+			$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
 		}
 
-		$this->items->set_items( $cart_items );
-
-		return $item_key;
+		return $chosen_methods;
 	}
 
-	/**
-	 * Set the quantity for an item in the cart.
-	 *
-	 * @param string	$cart_item_key	contains the id of the cart item
-	 * @param int		$quantity		contains the quantity of the item
-	 */
-	public function set_quantity( $item_key, $quantity = 1, $deprecated = true ) {
-		if ( $quantity <= 0 ) {
-			$this->items->remove_item( $item_key );
-		} elseif ( $item = $this->items->get_item_by_key( $item_key ) ) {
-			$old_quantity = $item->get_quantity();
-			$item->set_quantity( $quantity );
-			do_action( 'woocommerce_after_cart_item_quantity_update', $item_key, $quantity, $old_quantity );
-		}
-	}
-
-	/**
-	 * Get array of fees.
-	 * @return array of fees
-	 */
-	public function get_fees() {
-		return $this->fees->get_fees();
-	}
-
-	/**
-	 * Allow 3rd parties to calculate and register fees.
-	 */
-	public function calculate_fees() {
-		// Remove any existing fees.
-		$this->fees->set_fees( false );
-
-		// Fire an action where developers can add their fees
-		do_action( 'woocommerce_cart_calculate_fees', $this );
-	}
-
-	/**
-	 * Add additional fee to the cart.
-	 *
-	 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
-	 * @param float $amount Fee amount.
-	 * @param bool $taxable (default: false) Is the fee taxable?
-	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
-	 */
-	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-		$fee_key = $this->fees->generate_key( $name );
-		$fees    = $this->fees->get_fees();
-
-		// Only add each fee once
-		if ( isset( $fees[ $fee_key ] ) ) {
-			return;
-		}
-
-		$fees[ $fee_key ] = (object) array(
-			'id'        => $fee_key,
-			'name'      => wc_clean( $name ),
-			'amount'    => (float) $amount,
-			'tax_class' => $tax_class,
-			'taxable'   => (bool) $taxable,
-		);
-
-		$this->fees->set_fees( $fees );
-
-		return $fee_key;
-	}
-
-
-
-
-
-
-
-
-
-
-
+	/*
+	|--------------------------------------------------------------------------
+	| Cart Totals.
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Calculate totals for the items in the cart.
@@ -295,11 +333,20 @@ class WC_Cart extends WC_Cart_Session {
 	public function calculate_totals() {
 		do_action( 'woocommerce_before_calculate_totals', $this );
 
+		// Calculate line item totals
 		$this->totals->set_coupons( $this->get_coupons() );
-		$this->totals->set_fees( $this->get_fees() );
 		$this->totals->set_items( $this->get_cart() );
 		$this->totals->set_calculate_tax( ! WC()->customer->get_is_vat_exempt() );
-		$this->totals->calculate();
+		$this->totals->calculate_item_totals();
+
+		// Calculate fees
+		$this->totals->set_fees( $this->fees->calculate_fees() );
+
+		// Calculate shipping costs
+		$this->totals->set_shipping( $this->calculate_shipping() );
+
+		// Calc grand totals
+		$this->totals->calculate_totals();
 
 		do_action( 'woocommerce_after_calculate_totals', $this );
 	}
@@ -328,10 +375,6 @@ class WC_Cart extends WC_Cart_Session {
 	public function get_taxes() {
 		return apply_filters( 'woocommerce_cart_get_taxes', $this->totals->get_taxes() );
 	}
-
-
-
-
 
 	/**
 	 * Get taxes, merged by code, formatted ready for output.
@@ -365,15 +408,6 @@ class WC_Cart extends WC_Cart_Session {
 
 		return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 	}
-
-
-
-
-
-
-
-
-
 
 	/**
 	 * Gets the cart tax (after calculation).
@@ -429,32 +463,11 @@ class WC_Cart extends WC_Cart_Session {
 
 
 
-	/**
-	 * Applies a coupon code passed to the method.
-	 *
-	 * @param string $coupon_code - The code to apply
-	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
-	 */
-	public function add_discount( $coupon_code ) {
-		$this->coupons->add( $coupon_code );
-	}
 
-	/**
-	 * Remove a single coupon by code.
-	 * @param  string $coupon_code Code of the coupon to remove
-	 * @return bool
-	 */
-	public function remove_coupon( $coupon_code ) {
-		return $this->coupons->remove_coupon( $coupon_code );
-	}
 
-	/**
-	 * Get array of applied coupon objects and codes.
-	 * @return array of applied coupons
-	 */
-	public function get_coupons() {
-		return $this->coupons->get_coupons();
-	}
+
+
+
 
 
 }

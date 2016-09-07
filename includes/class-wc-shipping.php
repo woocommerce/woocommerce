@@ -17,25 +17,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping {
 
 	/** @var bool True if shipping is enabled. */
-	public $enabled					 = false;
+	public $enabled	         = false;
 
 	/** @var array|null Stores methods loaded into woocommerce. */
-	public $shipping_methods         = null;
+	public $shipping_methods = null;
 
 	/** @var object|null Stores matching shipping zone. */
-	protected $shipping_zone         = null;
+	protected $shipping_zone = null;
 
 	/** @var float Stores the cost of shipping */
-	public $shipping_total 			 = 0;
+	public $shipping_total   = 0;
 
 	/** @var array Stores an array of shipping taxes. */
-	public $shipping_taxes			 = array();
+	public $shipping_taxes   = array();
 
 	/** @var array Stores the shipping classes. */
-	public $shipping_classes		 = array();
+	public $shipping_classes = array();
 
 	/** @var array Stores packages to ship and to get quotes for. */
-	public $packages				 = array();
+	public $packages         = array();
 
 	/**
 	 * @var WC_Shipping The single instance of the class
@@ -211,41 +211,16 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Get the default method.
-	 * @param  array  $available_methods
-	 * @param  boolean $current_chosen_method
-	 * @return string
-	 */
-	private function get_default_method( $available_methods, $current_chosen_method = false ) {
-		if ( ! empty( $available_methods ) ) {
-			if ( ! empty( $current_chosen_method ) ) {
-				if ( isset( $available_methods[ $current_chosen_method ] ) ) {
-					return $available_methods[ $current_chosen_method ]->id;
-				} else {
-					foreach ( $available_methods as $method_key => $method ) {
-						if ( strpos( $method->id, $current_chosen_method ) === 0 ) {
-							return $method->id;
-						}
-					}
-				}
-			}
-			return current( $available_methods )->id;
-		}
-		return '';
-	}
-
-	/**
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
-	 * @param array $packages multi-dimensional array of cart items to calc shipping for
+	 * @param array $packages multi-dimensional array of cart items to calc shipping for.
+	 * @return array Array of calculated packages.
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		$this->shipping_total = null;
-		$this->shipping_taxes = array();
 		$this->packages       = array();
 
 		if ( ! $this->enabled || empty( $packages ) ) {
-			return;
+			return array();
 		}
 
 		// Calculate costs for passed packages
@@ -264,58 +239,9 @@ class WC_Shipping {
 		 *
 		 * @param array $packages The array of packages after shipping costs are calculated.
 		 */
-		$this->packages = apply_filters( 'woocommerce_shipping_packages', $this->packages );
+		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $this->packages ) );
 
-		if ( ! is_array( $this->packages ) || empty( $this->packages ) ) {
-			return;
-		}
-
-		// Get all chosen methods
-		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
-		$method_counts  = WC()->session->get( 'shipping_method_counts' );
-
-		// Get chosen methods for each package
-		foreach ( $this->packages as $i => $package ) {
-			$chosen_method    = false;
-			$method_count     = false;
-
-			if ( ! empty( $chosen_methods[ $i ] ) ) {
-				$chosen_method = $chosen_methods[ $i ];
-			}
-
-			if ( ! empty( $method_counts[ $i ] ) ) {
-				$method_count = absint( $method_counts[ $i ] );
-			}
-
-			if ( sizeof( $package['rates'] ) > 0 ) {
-
-				// If not set, not available, or available methods have changed, set to the DEFAULT option
-				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], false ), $package['rates'], $chosen_method );
-					$chosen_methods[ $i ] = $chosen_method;
-					$method_counts[ $i ]  = sizeof( $package['rates'] );
-					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
-				}
-
-				// Store total costs
-				if ( $chosen_method ) {
-					$rate = $package['rates'][ $chosen_method ];
-
-					// Merge cost and taxes - label and ID will be the same
-					$this->shipping_total += $rate->cost;
-
-					if ( ! empty( $rate->taxes ) && is_array( $rate->taxes ) ) {
-						foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
-							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[ $key ] ) ? $rate->taxes[ $key ] : 0 ) + ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 );
-						}
-					}
-				}
-			}
-		}
-
-		// Save all chosen methods (array)
-		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
-		WC()->session->set( 'shipping_method_counts', $method_counts );
+		return $this->packages;
 	}
 
 	/**
