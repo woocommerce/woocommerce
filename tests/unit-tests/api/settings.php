@@ -8,14 +8,12 @@
 
 class Settings extends WC_REST_Unit_Test_Case {
 
-	protected $server;
-
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_Rest_Settings_Options_Controller();
+		$this->endpoint = new WC_REST_Settings_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
@@ -519,7 +517,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-		), $data );
+	), $data );
 
 		// test get single
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/products/woocommerce_dimension_unit' ) );
@@ -538,4 +536,73 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'yd', $data['value'] );
 		$this->assertEquals( 'yd', get_option( 'woocommerce_dimension_unit' ) );
 	}
+
+	/**
+	 * Tests our email etting registration to make sure settings added for WP-Admin are available over the API.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_email_settings() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order' ) );
+		$settings = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertContains( array(
+			'id'          => 'recipient',
+			'label'       => 'Recipient(s)',
+			'description' => 'Enter recipients (comma separated) for this email. Defaults to <code>admin@example.org</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'Enter recipients (comma separated) for this email. Defaults to <code>admin@example.org</code>.',
+			'value'       => '',
+			'_links'      => array(
+				'self' => array(
+					array(
+						'href' => rest_url( '/wc/v1/settings/email_new_order/recipient' ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/settings/email_new_order' ),
+					),
+				),
+			),
+		), $settings );
+
+		// test get single
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order/subject' ) );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( array(
+			'id'          => 'subject',
+			'label'       => 'Subject',
+			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'value'       => '',
+		), $setting );
+
+		// test update
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_new_order', 'subject' ) );
+		$request->set_body_params( array(
+			'value' => 'This is my subject',
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( array(
+			'id'          => 'subject',
+			'label'       => 'Subject',
+			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'value'       => 'This is my subject',
+		), $setting );
+	}
+
 }

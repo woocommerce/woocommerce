@@ -106,7 +106,9 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		foreach ( $settings as $setting_obj ) {
 			$setting = $this->prepare_item_for_response( $setting_obj, $request );
 			$setting = $this->prepare_response_for_collection( $setting );
-			$data[]  = $setting;
+			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
+				$data[]  = $setting;
+			}
 		}
 
 		return rest_ensure_response( $data );
@@ -131,13 +133,17 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		}
 
 		$filtered_settings = array();
-
 		foreach ( $settings as $setting ) {
-			$setting = $this->filter_setting( $setting );
-			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
-				$setting['value']    = WC_Admin_Settings::get_option( $setting['id'] );
-				$filtered_settings[] = $setting;
+			$option_key = $setting['option_key'];
+			$setting    = $this->filter_setting( $setting );
+			// Get the option value
+			if ( is_array( $option_key ) ) {
+				$option           = get_option( $option_key[0] );
+				$setting['value'] = $option[ $option_key[1] ];
+			} else {
+				$setting['value'] = WC_Admin_Settings::get_option( $option_key );
 			}
+			$filtered_settings[] = $setting;
 		}
 
 		return $filtered_settings;
@@ -218,10 +224,18 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			return $setting;
 		}
 
-		$update_data = array();
-		$update_data[ $setting['id'] ] = $request['value'];
-
-		WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+		if ( is_array( $setting['option_key'] ) ) {
+			$setting['value']       = $request['value'];
+			$option_key             = $setting['option_key'];
+			$prev                   = get_option( $option_key[0] );
+			$prev[ $option_key[1] ] = $request['value'];
+			update_option( $option_key[0], $prev );
+		} else {
+			$update_data = array();
+			$update_data[ $setting['option_key'] ] = $request['value'];
+			$setting['value']              = $request['value'];
+			WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+		}
 
 		$response = $this->prepare_item_for_response( $setting, $request );
 
@@ -237,17 +251,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data          = $this->filter_setting( $item );
-		$data['value'] = WC_Admin_Settings::get_option( $data['id'] );
-
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
+		unset( $item['option_key'] );
+		$data     = $this->filter_setting( $item );
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
 		$response = rest_ensure_response( $data );
-
 		$response->add_links( $this->prepare_links( $data['id'], $request['group'] ) );
-
 		return $response;
 	}
 
@@ -342,6 +351,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			'type',
 			'options',
 			'value',
+			'option_key',
 		) );
 	}
 
@@ -378,7 +388,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'settings',
+			'title'                => 'setting',
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'               => array(
