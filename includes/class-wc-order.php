@@ -56,7 +56,6 @@ class WC_Order extends WC_Abstract_Order {
 		'_order_shipping_tax',
 		'_order_tax',
 		'_order_total',
-		'_order_total',
 		'_payment_method',
 		'_payment_method_title',
 		'_transaction_id',
