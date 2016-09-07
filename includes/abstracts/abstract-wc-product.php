@@ -962,7 +962,7 @@ class WC_Product {
 
 		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
 
-		if ( $price_display_suffix ) {
+		if ( $price_display_suffix AND $woocommerce_calc_taxes) {
 
 			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
 
@@ -977,6 +977,10 @@ class WC_Product {
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
+		}
+
+		else {
+			$price_display_suffix = '';
 		}
 
 		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
