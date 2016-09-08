@@ -628,4 +628,151 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'This is my subject', $setting['value'] );
 	}
 
+	/**
+	 * Test validation of checkbox settings.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_checkbox() {
+		wp_set_current_user( $this->user );
+
+		// test bogus value
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'not_yes_or_no',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// test yes
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'yes',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		// test no
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'no',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test validation of radio settings.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_radio() {
+		wp_set_current_user( $this->user );
+
+		// not a valid option
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'shipping', 'woocommerce_ship_to_destination' ) );
+		$request->set_body_params( array(
+			'value' => 'billing2',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// valid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'shipping', 'woocommerce_ship_to_destination' ) );
+		$request->set_body_params( array(
+			'value' => 'billing',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test validation of multiselect.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_multiselect() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'general', 'woocommerce_specific_allowed_countries' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEmpty( $setting['value'] );
+
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'general', 'woocommerce_specific_allowed_countries' ) );
+		$request->set_body_params( array(
+			'value' => array( 'AX', 'DZ', 'MMM' ),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'AX', 'DZ' ), $setting['value'] );
+	}
+
+	/**
+	 * Test validation of select.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_select() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'kg', $setting['value'] );
+
+		// invalid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) );
+		$request->set_body_params( array(
+			'value' => 'pounds', // invalid, should be lbs
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// valid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) );
+		$request->set_body_params( array(
+			'value' => 'lbs', // invalid, should be lbs
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'lbs', $setting['value'] );
+	}
+
+	/**
+	 * Test validation of image_width.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_image_width() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 180, 'height' => 180, 'crop' => true ), $setting['value'] );
+
+		// test bogus
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
+		$request->set_body_params( array(
+			'value' => array(
+				'width'  => 400,
+				'height' => 200,
+				'crop'   => 'asdasdasd',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 400, 'height' => 200, 'crop' => true ), $setting['value'] );
+
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
+		$request->set_body_params( array(
+			'value' => array(
+				'width'  => 200,
+				'height' => 100,
+				'crop'   => false,
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 200, 'height' => 100, 'crop' => false ), $setting['value'] );
+	}
+
 }

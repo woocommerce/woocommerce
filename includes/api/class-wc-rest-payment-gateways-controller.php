@@ -156,12 +156,27 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		// Update settings if present
 		if ( isset( $request['settings'] ) ) {
 			$gateway->init_form_fields();
-			$settings = $gateway->settings;
+			$settings     = $gateway->settings;
+			$errors_found = false;
 			foreach ( $gateway->form_fields as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
-					$settings[ $key ] = $request['settings'][ $key ];
+					if ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
+						$value = $this->{'validate_setting_' . $field['type'] . '_field'}( $request['settings'][ $key ], $field );
+					} else {
+						$value = $this->validate_setting_text_field( $request['settings'][ $key ], $field );
+					}
+					if ( is_wp_error( $value ) ) {
+						$errors_found = true;
+						break;
+					}
+					$settings[ $key ] = $value;
 				}
 			}
+
+			if ( $errors_found ) {
+				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
 			$gateway->settings = $settings;
 			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}

@@ -109,6 +109,9 @@ class WC_Register_WP_Admin_Settings {
 		foreach ( $sections as $section => $section_label ) {
 			$settings_from_section = $this->object->get_settings( $section );
 			foreach ( $settings_from_section as $setting ) {
+				if ( ! isset( $setting['id'] ) ) {
+					continue;
+				}
 				$setting['option_key'] = $setting['id'];
 				$new_setting           = $this->register_setting( $setting );
 				if ( $new_setting ) {
@@ -120,12 +123,11 @@ class WC_Register_WP_Admin_Settings {
 	}
 
 	/**
-	 * Register's a specific setting (from WC_Settings_Page::get_settings() )
-	 * into the format expected for the REST API Settings Controller.
+	 * Register a setting into the format expected for the Settings REST API.
 	 *
 	 * @since 2.7.0
-	 * @param  array $setting Settings array, as produced by a subclass of WC_Settings_Page.
-	 * @return array|bool boolean False if setting has no ID or converted array.
+	 * @param  array $setting
+	 * @return array|bool
 	 */
 	public function register_setting( $setting ) {
 		if ( ! isset( $setting['id'] ) ) {

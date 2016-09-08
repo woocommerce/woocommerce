@@ -136,13 +136,21 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		foreach ( $settings as $setting ) {
 			$option_key = $setting['option_key'];
 			$setting    = $this->filter_setting( $setting );
+			$default    = isset( $setting['default'] ) ? $setting['default'] : '';
 			// Get the option value
 			if ( is_array( $option_key ) ) {
 				$option           = get_option( $option_key[0] );
-				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : '';
+				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$setting['value'] = WC_Admin_Settings::get_option( $option_key );
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
+				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
 			}
+
+			if ( 'multi_select_countries' === $setting['type'] ) {
+				$setting['options'] = WC()->countries->get_countries();
+				$setting['type']    = 'multiselect';
+			}
+
 			$filtered_settings[] = $setting;
 		}
 
@@ -224,16 +232,26 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			return $setting;
 		}
 
+		if ( is_callable( array( $this, 'validate_setting_' . $setting['type'] . '_field' ) ) ) {
+			$value = $this->{'validate_setting_' . $setting['type'] . '_field'}( $request['value'], $setting );
+		} else {
+			$value = $this->validate_setting_text_field( $request['value'], $setting );
+		}
+
+		if ( is_wp_error( $value ) ) {
+			return $value;
+		}
+
 		if ( is_array( $setting['option_key'] ) ) {
-			$setting['value']       = $request['value'];
+			$setting['value']       = $value;
 			$option_key             = $setting['option_key'];
 			$prev                   = get_option( $option_key[0] );
 			$prev[ $option_key[1] ] = $request['value'];
 			update_option( $option_key[0], $prev );
 		} else {
 			$update_data = array();
-			$update_data[ $setting['option_key'] ] = $request['value'];
-			$setting['value']              = $request['value'];
+			$update_data[ $setting['option_key'] ] = $value;
+			$setting['value']                      = $value;
 			WC_Admin_Settings::save_fields( array( $setting ), $update_data );
 		}
 
@@ -330,6 +348,29 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			unset( $setting['options'] );
 		}
 
+		if ( 'image_width' === $setting['type'] ) {
+			$setting = $this->cast_image_width( $setting );
+		}
+
+		return $setting;
+	}
+
+	/**
+	 * For image_width, Crop can return "0" instead of false -- so we want
+	 * to make sure we return these consistently the same we accept them.
+	 *
+	 * @since 2.7.0
+	 * @param  array $setting
+	 * @return array
+	 */
+	public function cast_image_width( $setting ) {
+		foreach ( array( 'default', 'value' ) as $key ) {
+			if ( isset( $setting[ $key ] ) ) {
+				$setting[ $key ]['width']  = intval( $setting[ $key ]['width'] );
+				$setting[ $key ]['height'] = intval( $setting[ $key ]['height'] );
+				$setting[ $key ]['crop']   = (bool)  $setting[ $key ]['crop'];
+			}
+		}
 		return $setting;
 	}
 
@@ -364,18 +405,17 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 */
 	public function is_setting_type_valid( $type ) {
 		return in_array( $type, array(
-			'text',
-			'email',
-			'number',
-			'color',
-			'password',
-			'textarea',
-			'select',
-			'multiselect',
-			'radio',
-			'checkbox',
-			'multi_select_countries',
-			'image_width',
+			'text',         // validates with validate_setting_text_field
+			'email',        // validates with validate_setting_text_field
+			'number',       // validates with validate_setting_text_field
+			'color',        // validates with validate_setting_text_field
+			'password',     // validates with validate_setting_text_field
+			'textarea',     // validates with validate_setting_textarea_field
+			'select',       // validates with validate_setting_select_field
+			'multiselect',  // validates with validate_setting_multiselect_field
+			'radio',        // validates with validate_setting_radio_field (-> validate_setting_select_field)
+			'checkbox',     // validates with validate_setting_checkbox_field
+			'image_width',  // validates with validate_setting_image_width_field
 		) );
 	}
 
