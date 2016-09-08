@@ -925,6 +925,7 @@ class WC_Form_Handler {
 				}
 			} catch ( Exception $e ) {
 				wc_add_notice( apply_filters( 'login_errors', $e->getMessage() ), 'error' );
+				do_action( 'woocommerce_login_failed' );
 			}
 		}
 	}
