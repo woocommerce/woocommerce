@@ -108,6 +108,18 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = array();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+
+		return $params;
+	}
+
+	/**
 	 * Check if a given request has access to read the attributes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -151,6 +163,26 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get attribute name.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return string
+	 */
+	protected function get_taxonomy( $request ) {
+		if ( '' !== $this->attribute ) {
+			return $this->attribute;
+		}
+
+		if ( $request['id'] ) {
+			$name = wc_attribute_taxonomy_name_by_id( (int) $request['id'] );
+
+			$this->attribute = $name;
+		}
+
+		return $this->attribute;
 	}
 
 	/**
@@ -222,6 +254,63 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Prepare a single product attribute output for response.
+	 *
+	 * @param obj $item Term object.
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response $response
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$data = array(
+			'id'           => (int) $item->attribute_id,
+			'name'         => $item->attribute_label,
+			'slug'         => wc_attribute_taxonomy_name( $item->attribute_name ),
+			'type'         => $item->attribute_type,
+			'order_by'     => $item->attribute_orderby,
+			'has_archives' => (bool) $item->attribute_public,
+		);
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $item ) );
+
+		/**
+		 * Filter a attribute item returned from the API.
+		 *
+		 * Allows modification of the product attribute data right before it is returned.
+		 *
+		 * @param WP_REST_Response  $response  The response object.
+		 * @param object            $item      The original attribute object.
+		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param object $attribute Attribute object.
+	 * @return array Links for the given attribute.
+	 */
+	protected function prepare_links( $attribute ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base;
+		$links = array(
+			'self' => array(
+				'href' => rest_url( trailingslashit( $base ) . $attribute->attribute_id ),
+			),
+			'collection' => array(
+				'href' => rest_url( $base ),
+			),
+		);
+
+		return $links;
+	}
+
+	/**
 	 * Create a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -232,7 +321,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 
 		$args = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
 			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
 			'attribute_public'  => true === $request['has_archives'],
@@ -292,6 +381,47 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Validate attribute slug.
+	 *
+	 * @param string $slug
+	 * @param bool $new_data
+	 * @return bool|WP_Error
+	 */
+	protected function validate_attribute_slug( $slug, $new_data = true ) {
+		if ( strlen( $slug ) >= 28 ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get attribute data.
+	 *
+	 * @param int $id Attribute ID.
+	 * @return stdClass|WP_Error
+	 */
+	protected function get_attribute( $id ) {
+		global $wpdb;
+
+		$attribute = $wpdb->get_row( $wpdb->prepare( "
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+			WHERE attribute_id = %d
+		 ", $id ) );
+
+		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
+			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		return $attribute;
+	}
+
+	/**
 	 * Get a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -324,7 +454,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$format = array( '%s', '%s', '%s', '%s', '%d' );
 		$args   = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => $request['type'],
 			'attribute_orderby' => $request['order_by'],
 			'attribute_public'  => $request['has_archives'],
@@ -454,63 +584,6 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Prepare a single product attribute output for response.
-	 *
-	 * @param obj $item Term object.
-	 * @param WP_REST_Request $request
-	 * @return WP_REST_Response $response
-	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
-			'id'           => (int) $item->attribute_id,
-			'name'         => $item->attribute_label,
-			'slug'         => wc_attribute_taxonomy_name( $item->attribute_name ),
-			'type'         => $item->attribute_type,
-			'order_by'     => $item->attribute_orderby,
-			'has_archives' => (bool) $item->attribute_public,
-		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item ) );
-
-		/**
-		 * Filter a attribute item returned from the API.
-		 *
-		 * Allows modification of the product attribute data right before it is returned.
-		 *
-		 * @param WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original attribute object.
-		 * @param WP_REST_Request   $request   Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
-	}
-
-	/**
-	 * Prepare links for the request.
-	 *
-	 * @param object $attribute Attribute object.
-	 * @return array Links for the given attribute.
-	 */
-	protected function prepare_links( $attribute ) {
-		$base  = '/' . $this->namespace . '/' . $this->rest_base;
-		$links = array(
-			'self' => array(
-				'href' => rest_url( trailingslashit( $base ) . $attribute->attribute_id ),
-			),
-			'collection' => array(
-				'href' => rest_url( $base ),
-			),
-		);
-
-		return $links;
-	}
-
-	/**
 	 * Get the Attribute's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -567,78 +640,5 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the query params for collections
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$params = array();
-		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
-
-		return $params;
-	}
-
-	/**
-	 * Get attribute name.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return string
-	 */
-	protected function get_taxonomy( $request ) {
-		if ( '' !== $this->attribute ) {
-			return $this->attribute;
-		}
-
-		if ( $request['id'] ) {
-			$name = wc_attribute_taxonomy_name_by_id( (int) $request['id'] );
-
-			$this->attribute = $name;
-		}
-
-		return $this->attribute;
-	}
-
-	/**
-	 * Get attribute data.
-	 *
-	 * @param int $id Attribute ID.
-	 * @return stdClass|WP_Error
-	 */
-	protected function get_attribute( $id ) {
-		global $wpdb;
-
-		$attribute = $wpdb->get_row( $wpdb->prepare( "
-			SELECT *
-			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-			WHERE attribute_id = %d
-		 ", $id ) );
-
-		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
-			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		return $attribute;
-	}
-
-	/**
-	 * Validate attribute slug.
-	 *
-	 * @param string $slug
-	 * @param bool $new_data
-	 * @return bool|WP_Error
-	 */
-	protected function validate_attribute_slug( $slug, $new_data = true ) {
-		if ( strlen( $slug ) >= 28 ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-		}
-
-		return true;
 	}
 }
