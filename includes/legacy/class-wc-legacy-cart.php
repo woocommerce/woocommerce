@@ -22,6 +22,34 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
+	 * Gets the cart tax (after calculation).
+	 *
+	 * @return string formatted price
+	 */
+	public function get_cart_tax() {
+		$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
+		return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
+	}
+
+	/**
+	 * Get a tax amount.
+	 * @param  string $tax_rate_id
+	 * @return float amount
+	 */
+	public function get_tax_amount( $tax_rate_id ) {
+		return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
+	}
+
+	/**
+	 * Get a tax amount.
+	 * @param  string $tax_rate_id
+	 * @return float amount
+	 */
+	public function get_shipping_tax_amount( $tax_rate_id ) {
+		return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
+	}
+	
+	/**
 	 * Looks through the cart to see if shipping is actually required.
 	 *
 	 * @return bool whether or not the cart needs shipping

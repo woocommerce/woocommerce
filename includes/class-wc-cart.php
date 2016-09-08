@@ -292,7 +292,7 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
-	 * Uses the shipping class to calculate shipping then gets the totals when its finished. @todo where should this be called? After item calc? How to get totals to totals class?
+	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
 		return $this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
@@ -372,7 +372,7 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
-	 * Gets the order taxes (after calculation).
+	 * Gets all taxes.
 	 * @return array of taxes
 	 */
 	public function get_taxes() {
@@ -380,8 +380,7 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
-	 * Get taxes, merged by code, formatted ready for output.
-	 *
+	 * Gets all taxes which will be output.
 	 * @return array
 	 */
 	public function get_tax_totals() {
@@ -396,64 +395,19 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
-	 * Gets the cart tax (after calculation).
-	 *
-	 * @return string formatted price
-	 */
-	public function get_cart_tax() {
-		$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
-		return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
-	}
-
-	/**
-	 * Get a tax amount.
-	 * @param  string $tax_rate_id
-	 * @return float amount
-	 */
-	public function get_tax_amount( $tax_rate_id ) {
-		return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
-	}
-
-	/**
-	 * Get a tax amount.
-	 * @param  string $tax_rate_id
-	 * @return float amount
-	 */
-	public function get_shipping_tax_amount( $tax_rate_id ) {
-		return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
-	}
-
-	/**
 	 * Get tax row amounts with or without compound taxes includes.
 	 *
 	 * @param  bool $compound True if getting compound taxes
-	 * @param  bool $display  True if getting total to display
+	 * @param  bool $round  True if getting total to display
 	 * @return float price
 	 */
-	public function get_taxes_total( $compound = true, $display = true ) {
+	public function get_taxes_total( $compound = true, $round = true ) {
 		$total = 0;
-		foreach ( $this->taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
-			$total += $tax;
+		foreach ( $this->get_taxes() as $key => $tax ) {
+			if ( $compound === $tax->get_compound() ) {
+				$total += $tax;
+			}
 		}
-		foreach ( $this->shipping_taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
-			$total += $tax;
-		}
-		if ( $display ) {
-			$total = wc_round_tax_total( $total );
-		}
-		return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
+		return apply_filters( 'woocommerce_cart_taxes_total', $round ? wc_round_tax_total( $total ) : $total, $compound, $display, $this );
 	}
-
-
-
-
-
-
-
-
-
-
-
 }
