@@ -406,7 +406,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				} else {
 					$attributes[] = array(
 						'id'     => 0,
-						'name'   => str_replace( 'pa_', '', $name ),
+						'name'   => $name,
 						'option' => $attribute,
 					);
 				}
@@ -425,7 +425,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				} else {
 					$attributes[] = array(
 						'id'        => 0,
-						'name'      => str_replace( 'pa_', '', $attribute['name'] ),
+						'name'      => $attribute['name'],
 						'position'  => (int) $attribute['position'],
 						'visible'   => (bool) $attribute['is_visible'],
 						'variation' => (bool) $attribute['is_variation'],
