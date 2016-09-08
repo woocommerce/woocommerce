@@ -555,7 +555,7 @@ class WC_Cart {
 
 				if ( '' === $value )
 					continue;
-				
+
 				$key = str_replace( array( 'attribute_pa_', 'attribute_' ), '', urldecode( $name ) );
 
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
@@ -582,7 +582,7 @@ class WC_Cart {
 				$item_data[] = array(
 					'key'   => $key,
 					'name'  => $label,
-					'value' => $value
+					'value' => $value,
 				);
 			}
 		}
