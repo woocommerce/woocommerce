@@ -456,4 +456,47 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_taxes() {
 		return $this->_data['taxes'];
 	}
+
+
+
+
+
+
+	/**
+	 * Expands things like term slugs before return. @todo find correct place for this
+	 * @param string $hideprefix (default: _)
+	 * @return array
+	 */
+	public function get_formatted_meta_data( $hideprefix = '_' ) {
+	    $formatted_meta = array();
+	    $meta_data      = $this->get_meta_data();
+
+	    foreach ( $meta_data as $meta ) {
+	        if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
+	            continue;
+	        }
+
+	        $meta->key     = rawurldecode( $meta->key );
+	        $meta->value   = rawurldecode( $meta->value );
+	        $attribute_key = str_replace( 'attribute_', '', $meta->key );
+	        $display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
+	        $display_value = $meta->value;
+
+	        if ( taxonomy_exists( $attribute_key ) ) {
+	            $term = get_term_by( 'slug', $meta->value, $attribute_key );
+	            if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
+	                $display_value = $term->name;
+	            }
+	        }
+
+	        $formatted_meta[ $meta->id ] = (object) array(
+	            'key'           => $meta->key,
+	            'value'         => $meta->value,
+	            'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
+	            'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
+	        );
+	    }
+
+	    return $formatted_meta;
+	}
 }

@@ -4,10 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php' );
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-items.php' );
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-fees.php' );
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-item.php' );
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-coupons.php' );
 
 /**
  * Cart session class.

@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
+
 /**
 * Abstract WC Data Class
 *
@@ -14,6 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 * @author   WooThemes
 */
 abstract class WC_Data {
+
+	/**
+	 * ID for this object.
+	 * @var int
+	 */
+	protected $id = 0;
 
 	/**
 	 * Core data for this object. Name value pairs (name + default value).
@@ -73,33 +81,35 @@ abstract class WC_Data {
 	 * Returns the unique ID for this object.
 	 * @return int
 	 */
-	abstract public function get_id();
+	public function get_id() {
+		return $this->id;
+	}
 
 	/**
 	 * Creates new object in the database.
 	 */
-	abstract public function create();
+	public function create() {}
 
 	/**
 	 * Read object from the database.
 	 * @param int ID of the object to load.
 	 */
-	abstract public function read( $id );
+	public function read( $id ) {}
 
 	/**
 	 * Updates object data in the database.
 	 */
-	abstract public function update();
+	public function update() {}
 
 	/**
 	 * Updates object data in the database.
 	 */
-	abstract public function delete();
+	public function delete() {}
 
 	/**
 	 * Save should create or update based on object existance.
 	 */
-	abstract public function save();
+	public function save() {}
 
 	/**
 	 * Change data to JSON format.
@@ -114,7 +124,7 @@ abstract class WC_Data {
 	 * @return array
 	 */
 	public function get_data() {
-		return array_merge( $this->_data, array( 'meta_data' => $this->get_meta_data() ) );
+		return array_merge( array( 'id' => $this->get_id() ), $this->_data, array( 'meta_data' => $this->get_meta_data() ) );
 	}
 
 	/**
@@ -379,6 +389,14 @@ abstract class WC_Data {
 			'object_id_field' => $object_id_field,
 			'meta_id_field'   => $meta_id_field,
 		);
+	}
+
+	/**
+	 * Set ID.
+	 * @param int $id
+	 */
+	public function set_id( $id ) {
+		$this->id = absint( $id );
 	}
 
 	/**

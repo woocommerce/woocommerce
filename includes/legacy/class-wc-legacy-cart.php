@@ -525,16 +525,6 @@ abstract class WC_Legacy_Cart {
 
 
 	/**
-	 * Applies a coupon code passed to the method.
-	 *
-	 * @param string $coupon_code - The code to apply
-	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
-	 */
-	public function add_discount( $coupon_code ) {
-		// Coupons are globally disabled
-	}
-
-	/**
 	 * Returns whether or not a discount has been applied.
 	 * @param string $coupon_code
 	 * @return bool

@@ -15,12 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Zone extends WC_Data {
 
+	protected $id = null;
+
 	/**
 	 * Zone Data
 	 * @var array
 	 */
 	protected $_data = array(
-		'zone_id'        => null,
 		'zone_name'      => '',
 		'zone_order'     => 0,
 		'zone_locations' => array(),
@@ -133,11 +134,19 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
+	 * Set ID.
+	 * @param int|null $id
+	 */
+	public function set_id( $id ) {
+		$this->id = $id;
+	}
+
+	/**
 	 * Get ID
 	 * @return int|null Null if the zone does not exist. 0 is the default zone.
 	 */
 	public function get_id() {
-		return $this->get_zone_id();
+		return is_null( $this->id ) ? null : absint( $this->id );
 	}
 
 	/**
@@ -145,7 +154,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return int|null Null if the zone does not exist. 0 is the default zone.
 	 */
 	public function get_zone_id() {
-		return is_null( $this->_data['zone_id'] ) ? null : absint( $this->_data['zone_id'] );
+		return $this->get_id();
 	}
 
 	/**
@@ -315,24 +324,6 @@ class WC_Shipping_Zone extends WC_Data {
 	 */
 	private function location_is_postcode( $location ) {
 		return 'postcode' === $location->type;
-	}
-
-	/**
-	 * Set zone ID
-	 * @access private
-	 * @param int $set
-	 */
-	private function set_id( $set ) {
-		$this->set_zone_id( $set );
-	}
-
-	/**
-	 * Set zone ID
-	 * @access private
-	 * @param int $set
-	 */
-	private function set_zone_id( $set ) {
-		$this->_data['zone_id'] = is_null( $set ) ? null : absint( $set );
 	}
 
 	/**

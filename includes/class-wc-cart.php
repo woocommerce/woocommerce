@@ -3,8 +3,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-totals.php' );
-include_once( WC_ABSPATH . 'includes/cart/class-wc-cart-session.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-coupons.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-fees.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-items.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-session.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
 
 /**
  * Main cart class.
@@ -40,7 +44,6 @@ class WC_Cart extends WC_Cart_Session {
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_restored', array( $this, 'calculate_totals' ), 20, 0 );
-		add_action( 'woocommerce_check_cart_items', array( $this->items, 'check_items' ), 1 );
 	}
 
 	/**
@@ -382,31 +385,14 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$taxes      = $this->get_taxes();
-		$tax_totals = array();
-
-		foreach ( $taxes as $key => $tax ) {
-			$code = WC_Tax::get_rate_code( $key );
-
-			if ( $code || $key === apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) ) {
-				if ( ! isset( $tax_totals[ $code ] ) ) {
-					$tax_totals[ $code ] = new stdClass();
-					$tax_totals[ $code ]->amount = 0;
-				}
-				$tax_totals[ $code ]->tax_rate_id       = $key;
-				$tax_totals[ $code ]->is_compound       = WC_Tax::is_compound( $key );
-				$tax_totals[ $code ]->label             = WC_Tax::get_rate_label( $key );
-				$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
-			}
-		}
+		$taxes = $this->get_taxes();
 
 		if ( apply_filters( 'woocommerce_cart_hide_zero_taxes', true ) ) {
-			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
-			$tax_totals = array_intersect_key( $tax_totals, $amounts );
+			$zero_amounts = array_filter( wp_list_pluck( $taxes, 'amount' ) );
+			$taxes        = array_intersect_key( $taxes, $zero_amounts );
 		}
 
-		return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
+		return apply_filters( 'woocommerce_cart_formatted_tax_totals', $taxes );
 	}
 
 	/**

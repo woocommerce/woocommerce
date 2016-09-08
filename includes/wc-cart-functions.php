@@ -95,7 +95,7 @@ function wc_add_to_cart_validate_stock( $product, $adding_quantity = 0 ) {
 		throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product->get_title() ) );
 	}
 
-	if ( $product->is_sold_individually() && $in_cart_qty ) {
+	if ( $product->is_sold_individually() && $in_cart_qty && $adding_quantity ) {
 		throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product->get_title() ) ) );
 	}
 
@@ -304,9 +304,7 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
- * Get taxes total.
- *
- * @access public
+ * Get taxes total. Used when not showing itemized taxes.
  */
 function wc_cart_totals_taxes_total_html() {
 	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) );
@@ -637,8 +635,4 @@ function wc_shipping_methods_have_changed( $key, $new_rates ) {
 	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
 
 	return $new_rates != $prev_rates;
-}
-
-function wc_get_tax_totals {
-
 }

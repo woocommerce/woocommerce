@@ -21,7 +21,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @var array
 	 */
 	protected $_data = array(
-		'id'                 => 0,
 		'date_created'       => '',
 		'date_modified'      => '',
 		'email'              => '',
@@ -364,15 +363,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 
 	/**
-	 * Return a customer's user ID. Logged out users have ID 0.
-	 * @since 2.7.0
-	 * @return int
-	 */
-	public function get_id() {
-		return $this->_data['id'];
-	}
-
-	/**
 	 * Return the customer's username.
 	 * @since 2.7.0
 	 * @return string
@@ -707,16 +697,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	| database itself and should only change what is stored in the class
 	| object.
 	*/
-
-	/**
-	 * Set customer ID.
-	 * @since 2.7.0
-	 * @param int $value
-	 * @throws WC_Data_Exception
-	 */
-	protected function set_id( $value ) {
-		$this->_data['id'] = absint( $value );
-	}
 
 	/**
 	 * Set customer's username.

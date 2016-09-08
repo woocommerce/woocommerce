@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php echo WC()->cart->get_item_data( $cart_item ); ?>
 						</td>
 						<td class="product-total">
-							<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); ?>
+							<?php echo apply_filters( 'woocommerce_cart_item_subtotal', wc_cart_product_price_html( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); ?>
 						</td>
 					</tr>
 					<?php
@@ -57,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<tr class="cart-subtotal">
 			<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
-			<td><?php wc_cart_totals_subtotal_html(); ?></td>
+			<td><?php wc_cart_subtotal_html(); ?></td>
 		</tr>
 
 		<?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>

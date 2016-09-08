@@ -26,6 +26,13 @@ class WC_Cart_Items {
 	private $removed_items = array();
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_action( 'woocommerce_check_cart_items', array( $this, 'check_items' ), 1 );
+	}
+
+	/**
 	 * Generate a unique ID for the cart item being added.
 	 *
 	 * @param array $item Cart item.

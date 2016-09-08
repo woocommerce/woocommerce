@@ -546,30 +546,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$tax_totals = array();
-
-		foreach ( $this->get_items( 'tax' ) as $key => $tax ) {
-			$code = $tax->get_rate_code();
-
-			if ( ! isset( $tax_totals[ $code ] ) ) {
-				$tax_totals[ $code ] = new stdClass();
-				$tax_totals[ $code ]->amount = 0;
-			}
-
-			$tax_totals[ $code ]->id                = $key;
-			$tax_totals[ $code ]->rate_id           = $tax->get_rate_id();
-			$tax_totals[ $code ]->is_compound       = $tax->is_compound();
-			$tax_totals[ $code ]->label             = $tax->get_label();
-			$tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
-		}
+		$taxes = $this->get_items( 'tax' );
 
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
-			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
-			$tax_totals = array_intersect_key( $tax_totals, $amounts );
+			$zero_amounts = array_filter( wp_list_pluck( $taxes, 'amount' ) );
+			$taxes        = array_intersect_key( $taxes, $zero_amounts );
 		}
 
-		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
+		return apply_filters( 'woocommerce_order_formatted_tax_totals', $taxes );
 	}
 
 	/*
