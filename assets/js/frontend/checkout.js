@@ -332,7 +332,7 @@ jQuery( function( $ ) {
 					wc_checkout_form.init_payment_methods( selectedPaymentMethod );
 
 					// Fire updated_checkout e
-					$( document.body ).trigger( 'updated_checkout' );
+					$( document.body ).trigger( 'updated_checkout', [ data ] );
 				}
 
 			});
