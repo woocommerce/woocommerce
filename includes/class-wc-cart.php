@@ -555,6 +555,8 @@ class WC_Cart {
 
 				if ( '' === $value )
 					continue;
+				
+				$key = str_replace( array( 'attribute_pa_', 'attribute_' ), '', urldecode( $name ) );
 
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
@@ -578,8 +580,9 @@ class WC_Cart {
 				}
 
 				$item_data[] = array(
-					'key'   => $label,
-					'value' => $value,
+					'key'   => $key,
+					'name'  => $label,
+					'value' => $value
 				);
 			}
 		}
@@ -594,7 +597,8 @@ class WC_Cart {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $key;
+			$item_data[ $key ]['name']    = ! empty( $data['name'] ) ? $data['name'] : $data['key'];
 			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 		}
 
@@ -604,7 +608,7 @@ class WC_Cart {
 
 			if ( $flat ) {
 				foreach ( $item_data as $data ) {
-					echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+					echo wp_kses_post( $data['name'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
 				}
 			} else {
 				wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
