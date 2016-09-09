@@ -166,6 +166,22 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
+	 * @deprecated 2.7.0
+	 */
+	public function check_cart_coupons() {
+		_deprecated_function( 'WC_Cart::check_cart_coupons', '2.7', 'WC_Cart_Coupons::check_coupons' );
+		$this->coupons->check_coupons();
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function check_customer_coupons( $posted ) {
+		_deprecated_function( 'WC_Cart::check_customer_coupons', '2.7', 'WC_Cart_Coupons::check_customer_restriction/check_customer_limits' );
+	}
+
+
+	/**
 	 * Get the discount amount for a used coupon.
 	 * @param  string $code coupon code
 	 * @param  bool $ex_tax inc or ex tax
@@ -554,11 +570,6 @@ abstract class WC_Legacy_Cart {
 		$new_fee->tax_data  = array();
 		$this->fees[]       = $new_fee;
 	}
-
-
-
-	//public function check_customer_coupons( $posted ) {
-
 
 
 	/**

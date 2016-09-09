@@ -25,8 +25,9 @@ class WC_Cart_Coupons {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
-		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
+		add_action( 'woocommerce_check_cart_items', array( $this, 'check_coupons' ), 1 );
+		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_restriction' ), 1 );
+		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_limits' ), 1 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 2 );
 	}
 
@@ -68,16 +69,11 @@ class WC_Cart_Coupons {
 	/**
 	 * Check cart coupons for errors.
 	 */
-	public function check_cart_coupons() {
+	public function check_coupons() {
 		foreach ( $this->coupons as $code => $coupon ) {
 			if ( ! $coupon->is_valid() ) {
-				// Error message
 				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
-
-				// Remove the coupon
 				$this->remove_coupon( $code );
-
-				// Flag totals for refresh
 				WC()->session->set( 'refresh_totals', true );
 			}
 		}
@@ -85,72 +81,62 @@ class WC_Cart_Coupons {
 
 	/**
 	 * Check for user coupons (now that we have billing email). If a coupon is invalid, add an error.
-	 *
-	 * Checks two types of coupons:
-	 *  1. Where a list of customer emails are set (limits coupon usage to those defined).
-	 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email).
-	 *
 	 * @param array $posted
 	 */
-	public function check_customer_coupons( $posted ) {
-		if ( ! empty( $this->coupons ) ) {
-			foreach ( $this->coupons as $code => $coupon ) {
-				if ( $coupon->is_valid() ) {
+	public function check_customer_restriction( $posted ) {
+		foreach ( $this->coupons as $code => $coupon ) {
+			if ( sizeof( $coupon->get_email_restrictions() ) > 0 ) {
+				$check_emails = array(
+					$posted['billing_email']
+				);
+				if ( is_user_logged_in() ) {
+					$current_user   = wp_get_current_user();
+					$check_emails[] = $current_user->user_email;
+				}
+				$check_emails = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
-					// Limit to defined email addresses
-					if ( is_array( $coupon->get_email_restrictions() ) && sizeof( $coupon->get_email_restrictions() ) > 0 ) {
-						$check_emails           = array();
-						if ( is_user_logged_in() ) {
-							$current_user   = wp_get_current_user();
-							$check_emails[] = $current_user->user_email;
-						}
-						$check_emails[] = $posted['billing_email'];
-						$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
+				if ( 0 == sizeof( array_intersect( $check_emails, $coupon->get_email_restrictions() ) ) ) {
+					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
+					$this->remove_coupon( $code );
+					WC()->session->set( 'refresh_totals', true );
+				}
+			}
+		}
+	}
 
-						if ( 0 == sizeof( array_intersect( $check_emails, $coupon->get_email_restrictions() ) ) ) {
-							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
+	/**
+	 * Check for user coupons (now that we have billing email). If a coupon is invalid, add an error.
+	 * @param array $posted
+	 */
+	public function check_customer_limits( $posted ) {
+		foreach ( $this->coupons as $code => $coupon ) {
+			// Usage limits per user - check against billing and user email and user ID
+			if ( $coupon->get_usage_limit_per_user() > 0 ) {
+				$check_emails = array();
+				$used_by      = $coupon->get_used_by();
 
-							// Remove the coupon
-							$this->remove_coupon( $code );
-
-							// Flag totals for refresh
-							WC()->session->set( 'refresh_totals', true );
-						}
+				if ( is_user_logged_in() ) {
+					$current_user   = wp_get_current_user();
+					$check_emails[] = sanitize_email( $current_user->user_email );
+					$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
+				} else {
+					$check_emails[] = sanitize_email( $posted['billing_email'] );
+					$user           = get_user_by( 'email', $posted['billing_email'] );
+					if ( $user ) {
+						$usage_count = sizeof( array_keys( $used_by, $user->ID ) );
+					} else {
+						$usage_count = 0;
 					}
+				}
 
-					// Usage limits per user - check against billing and user email and user ID
-					if ( $coupon->get_usage_limit_per_user() > 0 ) {
-						$check_emails = array();
-						$used_by      = $coupon->get_used_by();
+				foreach ( $check_emails as $check_email ) {
+					$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
+				}
 
-						if ( is_user_logged_in() ) {
-							$current_user   = wp_get_current_user();
-							$check_emails[] = sanitize_email( $current_user->user_email );
-							$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
-						} else {
-							$check_emails[] = sanitize_email( $posted['billing_email'] );
-							$user           = get_user_by( 'email', $posted['billing_email'] );
-							if ( $user ) {
-								$usage_count = sizeof( array_keys( $used_by, $user->ID ) );
-							} else {
-								$usage_count = 0;
-							}
-						}
-
-						foreach ( $check_emails as $check_email ) {
-							$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
-						}
-
-						if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
-							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
-
-							// Remove the coupon
-							$this->remove_coupon( $code );
-
-							// Flag totals for refresh
-							WC()->session->set( 'refresh_totals', true );
-						}
-					}
+				if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
+					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+					$this->remove_coupon( $code );
+					WC()->session->set( 'refresh_totals', true );
 				}
 			}
 		}
