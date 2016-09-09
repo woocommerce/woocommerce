@@ -104,7 +104,7 @@ class WC_HookFinder {
 
 				foreach ( $tokens as $index => $token ) {
 					if ( is_array( $token ) ) {
-						$trimmed_token_1 = trim( $token[1] )
+						$trimmed_token_1 = trim( $token[1] );
 						if ( T_CLASS == $token[0] ) {
 							$token_type = 'class';
 						} elseif ( T_FUNCTION == $token[0] ) {
