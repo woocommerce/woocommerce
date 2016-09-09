@@ -470,7 +470,7 @@ abstract class WC_Legacy_Cart {
 
 					$return = wc_price( $this->shipping_total );
 
-					if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
+					if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
 						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
 
@@ -480,7 +480,7 @@ abstract class WC_Legacy_Cart {
 
 					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
-					if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
+					if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
 						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 
@@ -517,7 +517,7 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function get_cart_total() {
 		_deprecated_function( 'WC_Cart::get_cart_total', '2.7' );
-		if ( ! $this->prices_include_tax ) {
+		if ( ! wc_prices_include_tax() ) {
 			$cart_contents_total = wc_price( $this->cart_contents_total );
 		} else {
 			$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );

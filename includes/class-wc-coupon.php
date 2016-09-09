@@ -347,66 +347,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		return $this->_data['used_by'];
 	}
 
-	/**
-	 * Get discount amount for a cart item.
-	 *
-	 * @param  float $discounting_amount Amount the coupon is being applied to
-	 * @param  array|null $cart_item Cart item being discounted if applicable
-	 * @param  boolean $single True if discounting a single qty item, false if its the line
-	 * @return float Amount this coupon has discounted
-	 */
-	public function get_discount_amount( $discounting_amount, $cart_item = null, $single = false ) {
-		$discount      = 0;
-		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
-
-		if ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
-			$discount = $this->get_amount() * ( $discounting_amount / 100 );
-		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
-			/**
-			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
-			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
-			 * with no price (free) don't get discounted.
-			 *
-			 * Get item discount by dividing item cost by subtotal to get a %.
-			 *
-			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
-			 */
-			if ( wc_prices_include_tax() ) {
-				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
-			} else {
-				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
-			}
-			$discount = ( $this->get_amount() * $discount_percent ) / $cart_item_qty;
-
-		} elseif ( $this->is_type( 'fixed_product' ) ) {
-			$discount = min( $this->get_amount(), $discounting_amount );
-			$discount = $single ? $discount : $discount * $cart_item_qty;
-		}
-
-		$discount = min( $discount, $discounting_amount );
-
-		// Handle the limit_usage_to_x_items option
-		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
-			if ( $discounting_amount ) {
-				if ( '' === $this->get_limit_usage_to_x_items() ) {
-					$limit_usage_qty = $cart_item_qty;
-				} else {
-					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
-					$this->set_limit_usage_to_x_items( max( 0, $this->get_limit_usage_to_x_items() - $limit_usage_qty ) );
-				}
-				if ( $single ) {
-					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-				} else {
-					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
-				}
-			}
-		}
-
-		$discount = round( $discount, wc_get_rounding_precision() );
-
-		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

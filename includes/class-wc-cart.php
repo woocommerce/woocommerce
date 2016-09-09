@@ -412,6 +412,15 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
+	 * Gets the order subtotal with or without tax.
+	 * @param bool $including_tax
+	 * @return string formatted price
+	 */
+	public function get_subtotal( $including_tax = false ) {
+		return apply_filters( 'woocommerce_cart_subtotal', $this->totals->get_items_subtotal( $including_tax ), $including_tax );
+	}
+
+	/**
 	 * Gets the order total (after calculation).
 	 * @return string formatted price
 	 */

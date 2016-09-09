@@ -414,12 +414,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 	if ( $method->cost > 0 ) {
 		if ( ! wc_cart_prices_include_tax() ) {
 			$label .= ': ' . wc_price( $method->cost );
-			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
+			if ( $method->get_shipping_tax() > 0 && wc_prices_include_tax() ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
-			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
+			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
@@ -502,7 +502,7 @@ function wc_cart_prices_include_tax() {
  * @return string
  */
 function wc_cart_subtotal_to_display() {
-	return wc_format_decimal( wc_cart_prices_include_tax() ? WC()->cart->subtotal : WC()->cart->subtotal_ex_tax );
+	return wc_format_decimal( WC()->cart->get_subtotal( wc_cart_prices_include_tax() ) );
 }
 
 /**

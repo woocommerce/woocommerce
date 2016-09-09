@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product, $woocommerce_loop;
 
-if ( ! $crosssells = WC()->cart->get_cross_sells() ) {
+if ( ! $crosssells = wc_get_cart_cross_sells() ) {
 	return;
 }
 
