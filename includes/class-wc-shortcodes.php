@@ -100,7 +100,7 @@ class WC_Shortcodes {
 		if ( $products->have_posts() ) {
 			?>
 
-			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop" ); ?>
+			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>
 
 			<?php woocommerce_product_loop_start(); ?>
 
@@ -112,11 +112,11 @@ class WC_Shortcodes {
 
 			<?php woocommerce_product_loop_end(); ?>
 
-			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop" ); ?>
+			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop", $atts ); ?>
 
 			<?php
 		} else {
-			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results" );
+			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results", $atts );
 		}
 
 		woocommerce_reset_loop();

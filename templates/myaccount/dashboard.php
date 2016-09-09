@@ -4,7 +4,7 @@
  *
  * Shows the first intro screen on the account dashboard.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/my-account-dashboard.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/dashboard.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
