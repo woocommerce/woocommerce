@@ -55,6 +55,14 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
+	 * Get data.
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge( array( 'zone_id' => $this->get_id() ), $this->_data );
+	}
+
+	/**
 	 * Insert zone into the database
 	 */
 	public function create() {
