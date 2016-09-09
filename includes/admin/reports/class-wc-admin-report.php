@@ -259,7 +259,7 @@ class WC_Admin_Report {
 						$query['where'] .= ' ' . $relation;
 					}
 
-					if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
+					if ( isset( $value['type'] ) && 'order_item_meta' === $value['type'] ) {
 
 						if ( is_array( $value['meta_key'] ) ) {
 							$query['where'] .= " ( order_item_meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
@@ -408,7 +408,7 @@ class WC_Admin_Report {
 	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
 
 		if ( $id ) {
-			$meta_key = $type == 'sales' ? '_line_total' : '_qty';
+			$meta_key = ( 'sales' === $type ) ? '_line_total' : '_qty';
 
 			$data = $this->get_order_report_data( array(
 				'data' => array(
@@ -479,7 +479,7 @@ class WC_Admin_Report {
 			$total += $d->sparkline_value;
 		}
 
-		if ( $type == 'sales' ) {
+		if ( 'sales' === $type ) {
 			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
 			$tooltip = sprintf( _n( 'Sold 1 item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
@@ -487,7 +487,7 @@ class WC_Admin_Report {
 
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
-		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
+		return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
 	}
 
 	/**

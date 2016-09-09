@@ -1506,7 +1506,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
 		$_product = wc_get_product( $product_id );
-		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
+		if ( $_product->post->post_parent > 0 || 'grouped' === $product_type ) {
 
 			$clear_parent_ids = array();
 
@@ -1514,7 +1514,7 @@ class WC_API_Products extends WC_API_Resource {
 				$clear_parent_ids[] = $_product->post->post_parent;
 			}
 
-			if ( $product_type == 'grouped' ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $product_id;
 			}
 
@@ -1706,7 +1706,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Product url.
-		if ( $product_type == 'external' ) {
+		if ( 'external' === $product_type ) {
 			if ( isset( $data['product_url'] ) ) {
 				update_post_meta( $product_id, '_product_url', wc_clean( $data['product_url'] ) );
 			}
@@ -1814,7 +1814,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+					if ( isset( $image['position'] ) && 0 == $image['position'] ) {
 						if ( isset( $image['src'] ) ) {
 							$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
@@ -1936,7 +1936,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Tax class
 			if ( isset( $variation['tax_class'] ) ) {
-				if ( $variation['tax_class'] !== 'parent' ) {
+				if ( 'parent' !== $variation['tax_class'] ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variation['tax_class'] ) );
 				} else {
 					delete_post_meta( $variation_id, '_tax_class' );
@@ -2274,7 +2274,7 @@ class WC_API_Products extends WC_API_Resource {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
-				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+				if ( isset( $image['position'] ) && 0 == $image['position'] ) {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {

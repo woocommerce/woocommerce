@@ -582,7 +582,7 @@ class WC_Email extends WC_Settings_API {
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );
 
-				if ( $f !== false ) {
+				if ( false !== $f ) {
 					fwrite( $f, $code );
 					fclose( $f );
 					$saved = true;

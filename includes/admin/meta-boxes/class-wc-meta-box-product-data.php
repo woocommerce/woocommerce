@@ -865,7 +865,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save shipping class
-		$product_shipping_class = $_POST['product_shipping_class'] > 0 && $product_type != 'external' ? absint( $_POST['product_shipping_class'] ) : '';
+		$product_shipping_class = ( $_POST['product_shipping_class'] > 0 && 'external' !== $product_type ) ? absint( $_POST['product_shipping_class'] ) : '';
 		wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class' );
 
 		// Unique SKU
@@ -1422,7 +1422,7 @@ class WC_Meta_Box_Product_Data {
 				// Price handling
 				_wc_save_product_price( $variation_id, $variable_regular_price[ $i ], $variable_sale_price[ $i ], $variable_sale_price_dates_from[ $i ], $variable_sale_price_dates_to[ $i ] );
 
-				if ( isset( $variable_tax_class[ $i ] ) && $variable_tax_class[ $i ] !== 'parent' ) {
+				if ( isset( $variable_tax_class[ $i ] ) && 'parent' !== $variable_tax_class[ $i ] ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variable_tax_class[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_tax_class' );

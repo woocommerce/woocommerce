@@ -352,7 +352,7 @@ $pages          = $system_status->get_pages();
 						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $plugin['version_latest'] ) ) . '</strong>';
 					}
 
-					if ( $plugin['network_activated'] != false ) {
+					if ( false != $plugin['network_activated'] ) {
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
@@ -570,7 +570,7 @@ $pages          = $system_status->get_pages();
 								} else {
 									echo esc_html( $override['file'] );
 								}
-								if ( $i !== ( count( $theme['overrides'] ) - 1 ) ) {
+								if ( ( count( $theme['overrides'] ) - 1 ) !== $i ) {
 									echo ', ';
 								}
 								echo '<br />';

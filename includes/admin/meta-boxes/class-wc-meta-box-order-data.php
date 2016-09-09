@@ -302,7 +302,7 @@ class WC_Meta_Box_Order_Data {
 										$found_method 	= false;
 
 										foreach ( $payment_gateways as $gateway ) {
-											if ( $gateway->enabled == "yes" ) {
+											if ( 'yes' === $gateway->enabled ) {
 												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
 												if ( $payment_method == $gateway->id ) {
 													$found_method = true;

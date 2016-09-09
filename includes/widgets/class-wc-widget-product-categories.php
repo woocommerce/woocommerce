@@ -104,7 +104,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		// Menu Order
 		$list_args['menu_order'] = false;
-		if ( $orderby == 'order' ) {
+		if ( 'order' === $orderby ) {
 			$list_args['menu_order'] = 'asc';
 		} else {
 			$list_args['orderby']    = 'title';
