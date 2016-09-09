@@ -243,6 +243,8 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 
 			$coupon_post = get_post( $coupon->get_id() );
 			$coupon_usage_limit = $coupon->get_usage_limit();
+			$coupon_usage_limit_per_user = $coupon->get_usage_limit_per_user();
+			$coupon_date_expires = $coupon->get_date_expires();
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
@@ -254,10 +256,10 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'product_ids'                  => implode( ', ', $coupon->get_product_ids() ),
 				'exclude_product_ids'          => implode( ', ', $coupon->get_excluded_product_ids() ),
 				'usage_limit'                  => ( ! empty( $coupon_usage_limit ) ) ? $coupon_usage_limit : null,
-				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'usage_limit_per_user'         => ( ! empty( $coupon_usage_limit_per_user ) ) ? $coupon_usage_limit_per_user : null,
 				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 				'usage_count'                  => (int) $coupon->get_usage_count(),
-				'expiry_date'                  => ( ! empty( $coupon->get_date_expires() ) ) ? $this->format_datetime( $coupon->get_date_expires() ) : null,
+				'expiry_date'                  => ( ! empty( $coupon_date_expires ) ) ? $this->format_datetime( $coupon_date_expires ) : null,
 				'enable_free_shipping'         => $coupon->get_free_shipping(),
 				'product_category_ids'         => implode( ', ', $coupon->get_product_categories() ),
 				'exclude_product_category_ids' => implode( ', ', $coupon->get_excluded_product_categories() ),
