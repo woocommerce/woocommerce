@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -22,8 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * Token Data (stored in the payment_tokens table).
 	 * @var array
 	 */
-	protected $_data = array(
-		 'id'         => 0,
+	protected $data = array(
 		 'gateway_id' => '',
 		 'token'      => '',
 		 'is_default' => 0,
@@ -34,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * Meta type. Payment tokens are a new object type.
 	 * @var string
 	 */
-	protected $_meta_type = 'payment_token';
+	protected $meta_type = 'payment_token';
 
 	 /**
 	  * Initialize a payment token.
@@ -59,17 +57,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 		// Set token type (cc, echeck)
 		if ( ! empty( $this->type ) ) {
-			$this->_data['type'] = $this->type;
+			$this->data['type'] = $this->type;
 		}
-	}
-
-	/**
-	 * Returns the payment token ID.
-	 * @since 2.6.0
-	 * @return integer Token ID
-	 */
-	public function get_id() {
-		return absint( $this->_data['id'] );
 	}
 
 	/**
@@ -78,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return string Raw token
 	 */
 	public function get_token() {
-		return $this->_data['token'];
+		return $this->data['token'];
 	}
 
 	/**
@@ -87,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string $token
 	 */
 	public function set_token( $token ) {
-		$this->_data['token'] = $token;
+		$this->data['token'] = $token;
 	}
 
 	/**
@@ -96,7 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
 	public function get_type() {
-		return isset( $this->_data['type'] ) ? $this->_data['type'] : '';
+		return isset( $this->data['type'] ) ? $this->data['type'] : '';
 	}
 
 	/**
@@ -113,7 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
 	public function get_user_id() {
-		return ( isset( $this->_data['user_id'] ) && $this->_data['user_id'] > 0 ) ? absint( $this->_data['user_id'] ) : 0;
+		return ( isset( $this->data['user_id'] ) && $this->data['user_id'] > 0 ) ? absint( $this->data['user_id'] ) : 0;
 	}
 
 	/**
@@ -122,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param int $user_id
 	 */
 	public function set_user_id( $user_id ) {
-		$this->_data['user_id'] = absint( $user_id );
+		$this->data['user_id'] = absint( $user_id );
 	}
 
 	/**
@@ -131,7 +120,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return string Gateway ID
 	 */
 	public function get_gateway_id() {
-		return $this->_data['gateway_id'];
+		return $this->data['gateway_id'];
 	}
 
 	/**
@@ -140,7 +129,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string $gateway_id
 	 */
 	public function set_gateway_id( $gateway_id ) {
-		$this->_data['gateway_id'] = $gateway_id;
+		$this->data['gateway_id'] = $gateway_id;
 	}
 
 	/**
@@ -149,7 +138,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return boolean True if the token is default
 	 */
 	public function is_default() {
-		return ! empty( $this->_data['is_default'] );
+		return ! empty( $this->data['is_default'] );
 	}
 
 	/**
@@ -158,7 +147,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param boolean $is_default True or false
 	 */
 	public function set_default( $is_default ) {
-		$this->_data['is_default'] = (bool) $is_default;
+		$this->data['is_default'] = (bool) $is_default;
 	}
 
 	/**
@@ -167,11 +156,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		if ( empty( $this->_data['token'] ) ) {
+		if ( empty( $this->data['token'] ) ) {
 			return false;
 		}
 
-		if ( empty( $this->_data['type'] ) ) {
+		if ( empty( $this->data['type'] ) ) {
 			return false;
 		}
 
@@ -189,8 +178,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$token_id = $token->token_id;
 			$token = (array) $token;
 			unset( $token['token_id'] );
-			$this->_data = $token;
-			$this->_data['id'] = $token_id;
+			$this->data = $token;
+			$this->set_id( $token_id );
 			$this->read_meta_data();
 		}
 	}
@@ -258,7 +247,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		);
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $payment_token_data );
-		$this->_data['id'] = $token_id = $wpdb->insert_id;
+		$token_id = $wpdb->insert_id;
+		$this->set_id( $token_id );
 		$this->save_meta_data();
 
 		// Make sure all other tokens are not set to default

@@ -15,12 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Zone extends WC_Data {
 
+	protected $id = null;
+
 	/**
 	 * Zone Data
 	 * @var array
 	 */
-	protected $_data = array(
-		'zone_id'        => null,
+	protected $data = array(
 		'zone_name'      => '',
 		'zone_order'     => 0,
 		'zone_locations' => array(),
@@ -30,7 +31,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * True when location data needs to be re-saved
 	 * @var bool
 	 */
-	private $_locations_changed = false;
+	private $locations_changed = false;
 
 	/**
 	 * Constructor for zones
@@ -133,11 +134,19 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
+	 * Set ID.
+	 * @param int|null $id
+	 */
+	public function set_id( $id ) {
+		$this->id = $id;
+	}
+
+	/**
 	 * Get ID
 	 * @return int|null Null if the zone does not exist. 0 is the default zone.
 	 */
 	public function get_id() {
-		return $this->get_zone_id();
+		return is_null( $this->id ) ? null : absint( $this->id );
 	}
 
 	/**
@@ -145,7 +154,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return int|null Null if the zone does not exist. 0 is the default zone.
 	 */
 	public function get_zone_id() {
-		return is_null( $this->_data['zone_id'] ) ? null : absint( $this->_data['zone_id'] );
+		return $this->get_id();
 	}
 
 	/**
@@ -153,7 +162,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return string
 	 */
 	public function get_zone_name() {
-		return $this->_data['zone_name'];
+		return $this->data['zone_name'];
 	}
 
 	/**
@@ -161,7 +170,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return int
 	 */
 	public function get_zone_order() {
-		return absint( $this->_data['zone_order'] );
+		return absint( $this->data['zone_order'] );
 	}
 
 	/**
@@ -169,7 +178,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return array of zone objects
 	 */
 	public function get_zone_locations() {
-		return $this->_data['zone_locations'];
+		return $this->data['zone_locations'];
 	}
 
 	/**
@@ -320,29 +329,11 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
-	 * Set zone ID
-	 * @access private
-	 * @param int $set
-	 */
-	private function set_id( $set ) {
-		$this->set_zone_id( $set );
-	}
-
-	/**
-	 * Set zone ID
-	 * @access private
-	 * @param int $set
-	 */
-	private function set_zone_id( $set ) {
-		$this->_data['zone_id'] = is_null( $set ) ? null : absint( $set );
-	}
-
-	/**
 	 * Set zone name
 	 * @param string $set
 	 */
 	public function set_zone_name( $set ) {
-		$this->_data['zone_name'] = wc_clean( $set );
+		$this->data['zone_name'] = wc_clean( $set );
 	}
 
 	/**
@@ -350,7 +341,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @param int $set
 	 */
 	public function set_zone_order( $set ) {
-		$this->_data['zone_order'] = absint( $set );
+		$this->data['zone_order'] = absint( $set );
 	}
 
 	/**
@@ -376,8 +367,8 @@ class WC_Shipping_Zone extends WC_Data {
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type ),
 			);
-			$this->_data['zone_locations'][] = (object) $location;
-			$this->_locations_changed = true;
+			$this->data['zone_locations'][] = (object) $location;
+			$this->locations_changed = true;
 		}
 	}
 
@@ -389,10 +380,10 @@ class WC_Shipping_Zone extends WC_Data {
 		if ( ! is_array( $types ) ) {
 			$types = array( $types );
 		}
-		foreach ( $this->_data['zone_locations'] as $key => $values ) {
+		foreach ( $this->data['zone_locations'] as $key => $values ) {
 			if ( in_array( $values->type, $types ) ) {
-				unset( $this->_data['zone_locations'][ $key ] );
-				$this->_locations_changed = true;
+				unset( $this->data['zone_locations'][ $key ] );
+				$this->locations_changed = true;
 			}
 		}
 	}
@@ -408,7 +399,7 @@ class WC_Shipping_Zone extends WC_Data {
 			$this->add_location( $location['code'], $location['type'] );
 		}
 
-		$this->_locations_changed = true;
+		$this->locations_changed = true;
 	}
 
 	/**
@@ -423,7 +414,7 @@ class WC_Shipping_Zone extends WC_Data {
 				$this->add_location( $location->location_code, $location->location_type );
 			}
 		}
-		$this->_locations_changed = false;
+		$this->locations_changed = false;
 	}
 
 	/**
@@ -432,7 +423,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 */
 	private function save_locations() {
-		if ( ! $this->_locations_changed || null === $this->get_id() ) {
+		if ( ! $this->locations_changed || null === $this->get_id() ) {
 			return false;
 		}
 		global $wpdb;
