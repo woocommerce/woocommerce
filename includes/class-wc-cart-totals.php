@@ -194,7 +194,7 @@ class WC_Cart_Totals {
 
 			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
 				$item->taxes = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
-				$item->tax      = array_sum( $item->taxes );
+				$item->tax   = array_sum( $item->taxes );
 
 				if ( $item->price_includes_tax ) {
 					$item->total = $item->total - $item->tax;
@@ -213,7 +213,7 @@ class WC_Cart_Totals {
 			foreach ( $this->fees as $fee_key => $fee ) {
 				if ( $this->get_calculate_tax() && $fee->taxable ) {
 					$fee->taxes = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
-					$fee->tax      = array_sum( $fee->taxes );
+					$fee->tax   = array_sum( $fee->taxes );
 				}
 			}
 		}

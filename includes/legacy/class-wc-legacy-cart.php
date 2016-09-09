@@ -1,4 +1,4 @@
-<?php
+'<?php
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,13 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooThemes
  */
 abstract class WC_Legacy_Cart {
-
 	/**
-	 * Handle props.
+	 * Handle unset props.
 	 * @param string $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+		_doing_it_wrong( $key, 'Cart properties should not be accessed directly.', '2.7' );
+
 		switch ( $key ) {
 			case 'subtotal' :
 				return $this->totals->get_items_subtotal( true );
@@ -38,92 +39,56 @@ abstract class WC_Legacy_Cart {
 				return $this->totals->get_discount_total_tax();
 			case 'cart_contents' :
 				return $this->get_cart();
+			case 'removed_cart_contents' :
+				return $this->items->get_removed_items();
 			case 'tax_total' :
 				return $this->totals->get_tax_total();
 			case 'shipping_tax_total':
 				return $this->totals->get_shipping_tax_total();
 			case 'taxes' :
-				return $this->totals->get_taxes();
+				return wc_list_pluck( $this->totals->get_taxes(), 'get_tax_total' );
 			case 'shipping_taxes' :
-				return $this->totals->get_shipping_taxes();
+				return wc_list_pluck( $this->totals->get_taxes(), 'get_shipping_tax_total' );
 			case 'total' :
 				return $this->totals->get_total();
 			case 'coupon_discount_amounts' :
 				return wp_list_pluck( $this->totals->get_coupons(), 'total' );
 			case 'coupon_discount_tax_amounts' :
 				return wp_list_pluck( $this->totals->get_coupons(), 'total_tax' );
-
-
-
+			case 'applied_coupons' :
+				return array_keys( $this->get_coupons() );
+			case 'coupons' :
+				return $this->get_coupons();
 			case 'shipping_total' :
 				return WC()->shipping->shipping_total;
 			case 'shipping_taxes' :
 				return WC()->shipping->shipping_taxes;
-
-
-
-			/** @var array Contains an array of cart items. *
-			public $cart_contents = array();
-
-			/** @var array Contains an array of removed cart items. *
-			public $removed_cart_contents = array();
-
-			/** @var array Contains an array of coupon codes applied to the cart. *
-			public $applied_coupons = array();
-
-			/** @var array Contains an array of coupon code discounts after they have been applied. *
-			public $coupon_discount_amounts = array();
-
-			/** @var array Contains an array of coupon code discount taxes. Used for tax incl pricing. *
-			public $coupon_discount_tax_amounts = array();
-
-			/** @var array Contains an array of coupon usage counts after they have been applied. *
-			public $coupon_applied_count = array();
-
-			/** @var array Array of coupons *
-			public $coupons = array();
-
-			/** @var float The total cost of the cart items. *
-			public $cart_contents_total;
-
-			/** @var float Cart grand total. *
-			public $total;
-
-			/** @var float Cart subtotal. *
-			public $subtotal;
-
-			/** @var float Cart subtotal without tax. *
-			public $subtotal_ex_tax;
-
-			/** @var float Total cart tax. *
-			public $tax_total;
-
-			/** @var array An array of taxes/tax rates for the cart. *
-			public $taxes;
-
-			/** @var array An array of taxes/tax rates for the shipping. *
-			public $shipping_taxes;
-
-			/** @var float Discount amount before tax *
-			public $discount_cart;
-
-			/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly *
-			public $discount_cart_tax;
-
-			/** @var float Total for additional fees. *
-			public $fee_total;
-
-			/** @var float Shipping cost. *
-			public $shipping_total;
-
-			/** @var float Shipping tax. *
-			public $shipping_tax_total;
-
-			/** @var array cart_session_data. Array of data the cart calculates and stores in the session with defaults *
-			public $cart_session_data = array(
-			 */
-
-
+			case 'cart_session_data' :
+				return array(
+					'cart_contents_total'         => $this->cart_contents_total,
+					'total'                       => $this->total,
+					'subtotal'                    => $this->subtotal,
+					'subtotal_ex_tax'             => $this->subtotal_ex_tax,
+					'tax_total'                   => $this->tax_total,
+					'taxes'                       => $this->taxes,
+					'shipping_taxes'              => $this->shipping_taxes,
+					'discount_cart'               => $this->discount_cart,
+					'discount_cart_tax'           => $this->discount_cart_tax,
+					'shipping_total'              => $this->shipping_total,
+					'shipping_tax_total'          => $this->shipping_tax_total,
+					'coupon_discount_amounts'     => $this->coupon_discount_amounts,
+					'coupon_discount_tax_amounts' => $this->coupon_discount_tax_amounts,
+					'fee_total'                   => $this->fee_total,
+					'fees'                        => $this->fees,
+				);
+			case 'coupon_applied_count' :
+				return wp_list_pluck( $this->totals->get_coupons(), 'count' );
+			case 'fee_total' :
+				return $this->totals->get_fees_total( false );
+			case 'shipping_total' :
+				return $this->totals->get_shipping_total( false );
+			case 'shipping_tax_total' :
+				return $this->totals->get_shipping_tax_total();
 			case 'prices_include_tax' :
 				return wc_prices_include_tax();
 			break;
@@ -168,6 +133,14 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * @deprecated 2.7.0
 	 */
+	public function get_applied_coupons() {
+		_deprecated_function( 'WC_Cart::get_applied_coupons', '2.7', 'WC_Cart::get_coupons' );
+		return array_keys( $this->get_coupons() );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
 	public function check_cart_coupons() {
 		_deprecated_function( 'WC_Cart::check_cart_coupons', '2.7', 'WC_Cart_Coupons::check_coupons' );
 		$this->coupons->check_coupons();
@@ -178,120 +151,12 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function check_customer_coupons( $posted ) {
 		_deprecated_function( 'WC_Cart::check_customer_coupons', '2.7', 'WC_Cart_Coupons::check_customer_restriction/check_customer_limits' );
-	}
-
-
-	/**
-	 * Get the discount amount for a used coupon.
-	 * @param  string $code coupon code
-	 * @param  bool $ex_tax inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
-		$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
-
-		if ( ! $ex_tax ) {
-			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
-		}
-
-		return wc_cart_round_discount( $discount_amount, $this->dp );
+		$this->coupons->check_customer_restriction( $posted );
+		$this->coupons->check_customer_limits( $posted );
 	}
 
 	/**
-	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
-	 * @param  string $code coupon code
-	 * @param  bool inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_tax_amount( $code ) {
-		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/**
-	 * Gets the cart tax (after calculation).
-	 *
-	 * @return string formatted price
-	 */
-	public function get_cart_tax() {
-		$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
-		return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
-	}
-
-	/**
-	 * Get a tax amount.
-	 * @param  string $tax_rate_id
-	 * @return float amount
-	 */
-	public function get_tax_amount( $tax_rate_id ) {
-		return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
-	}
-
-	/**
-	 * Get a tax amount.
-	 * @param  string $tax_rate_id
-	 * @return float amount
-	 */
-	public function get_shipping_tax_amount( $tax_rate_id ) {
-		return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
-	}
-
-	public function calculate_fees() {
-		$this->fees->calculate_fees();
-	}
-
-	/**
-	 * Gets the shipping total (after calculation).
-	 *
-	 * @return string price or string for the shipping total
-	 */
-	public function get_cart_shipping_total() {
-		if ( isset( $this->shipping_total ) ) {
-			if ( $this->shipping_total > 0 ) {
-
-				// Display varies depending on settings
-				if ( $this->tax_display_cart == 'excl' ) {
-
-					$return = wc_price( $this->shipping_total );
-
-					if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
-						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-					}
-
-					return $return;
-
-				} else {
-
-					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
-
-					if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
-						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
-					}
-
-					return $return;
-
-				}
-			} else {
-				return __( 'Free!', 'woocommerce' );
-			}
-		}
-		return '';
-	}
-
-	/**
-	 * Sees if the customer has entered enough data to calc the shipping yet.
-	 * @return bool
+	 * @deprecated 2.7.0
 	 */
 	public function show_shipping() {
 		_deprecated_function( 'WC_Cart::show_shipping', '2.7', 'wc_cart_show_shipping' );
@@ -299,19 +164,12 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
-	 * Gets the cart contents total (after calculation).
-	 *
-	 * @return string formatted price @todo use subtotal functions
+	 * @deprecated 2.7.0
 	 */
-	public function get_cart_total() {
-		if ( ! $this->prices_include_tax ) {
-			$cart_contents_total = wc_price( $this->cart_contents_total );
-		} else {
-			$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
-		}
-		return apply_filters( 'woocommerce_cart_contents_total', $cart_contents_total );
+	public function calculate_fees() {
+		_deprecated_function( 'WC_Cart::calculate_fees', '2.7', 'WC_Cart_Fees::calculate_fees' );
+		$this->fees->calculate_fees();
 	}
-
 
 	/**
 	 * Add a product to the cart.
@@ -343,100 +201,39 @@ abstract class WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_cart_item_quantities() {
+		_deprecated_function( 'WC_Cart::get_cart_item_quantities', '2.7', 'wc_cart_item_quantities' );
 		return wc_cart_item_quantities();
 	}
 
-
-
-//public function calculate_shipping() {
-
-//check_cart_items
-
-
-
-
 	/**
-	 * Remove taxes.
+	 * @deprecated 2.7.0
 	 */
-	public function remove_taxes() {
-		$this->shipping_tax_total = $this->tax_total = 0;
-		$this->subtotal           = $this->subtotal_ex_tax;
-
-		foreach ( $this->cart_contents as $cart_item_key => $item ) {
-			$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
-			$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array(), 'subtotal' => array() );
-		}
-
-		// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
-		if ( apply_filters( 'woocommerce_cart_remove_taxes_apply_zero_rate', true ) ) {
-			$this->taxes = $this->shipping_taxes = array( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) => 0 );
-		} else {
-			$this->taxes = $this->shipping_taxes = array();
-		}
-	}
-
-
-
-	public function find_product_in_cart( $cart_id = false ) {
-		if ( $cart_id !== false ) {
-			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
-				return $cart_id;
-			}
-		}
-		return '';
-	}
-	/**
-	 * Generate a unique ID for the cart item being added.
-	 *
-	 * @param int $product_id - id of the product the key is being generated for
-	 * @param int $variation_id of the product the key is being generated for
-	 * @param array $variation data for the cart item
-	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
-	 * @return string cart item key
-	 */
-	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
-		//generate_key
-		return apply_filters( 'woocommerce_cart_id', md5( json_encode( array( $product_id, $variation_id, $variation, $cart_item_data ) ) ), $product_id, $variation_id, $variation, $cart_item_data );
+	public function check_cart_items() {
+		_deprecated_function( 'WC_Cart::check_cart_items', '2.7', 'WC_Cart_Items::check_items' );
+		$this->items->check_items();
 	}
 
 	/**
-	 * Looks through cart items and checks the posts are not trashed or deleted.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function check_cart_item_validity() {
-		$return = true;
-
-		foreach ( $this->get_items() as $cart_item_key => $values ) {
-			$_product = $values['data'];
-
-			if ( ! $_product || ! $_product->exists() || 'trash' === $_product->post->post_status ) {
-				$this->set_quantity( $cart_item_key, 0 );
-				$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
-			}
-		}
-
-		return $return;
-	}
-
-	/**
-	 * Looks through the cart to check each item is in stock. If not, add an error.
-	 *
-	 * @return bool|WP_Error
+	 * @deprecated 2.7.0
 	 */
 	public function check_cart_item_stock() {
-	}
-	/**
-	 * Save the persistent cart when the cart is updated.
-	 */
-	public function persistent_cart_update() {
+		_doing_it_wrong( 'check_cart_item_stock', 'Should not be called directly.', '2.7' );
 	}
 
 	/**
-	 * Delete the persistent cart permanently.
+	 * @deprecated 2.7.0
+	 */
+	public function persistent_cart_update() {
+		_doing_it_wrong( 'persistent_cart_destroy', 'Should not be called directly.', '2.7' );
+	}
+
+	/**
+	 * @deprecated 2.7.0
 	 */
 	public function persistent_cart_destroy() {
+		_doing_it_wrong( 'persistent_cart_destroy', 'Should not be called directly.', '2.7' );
 	}
+
 	/**
 	 * Determines the value that the customer spent and the subtotal
 	 * displayed, used for things like coupon validation.
@@ -447,7 +244,7 @@ abstract class WC_Legacy_Cart {
 	 * If cart totals are shown including tax, use the subtotal.
 	 * If cart totals are shown excluding tax, use the subtotal ex tax
 	 * (tax is shown after coupons).
-	 *
+	 * @deprecated 2.7.0
 	 * @since 2.6.0
 	 * @return string
 	 */
@@ -469,7 +266,7 @@ abstract class WC_Legacy_Cart {
 
 	/**
 	 * Gets the sub total (after calculation).
-	 *
+	 * @deprecated 2.7.0
 	 * @param bool $compound whether to include compound taxes
 	 * @return string formatted price
 	 */
@@ -493,137 +290,6 @@ abstract class WC_Legacy_Cart {
 		_deprecated_function( 'get_product_subtotal', '2.7', 'wc_cart_product_price_html' );
 		return wc_cart_product_price_html( $product, $quantity );
 	}
-
-	/**
-	 * Get the total of all cart discounts.
-	 *
-	 * @return float
-	 */
-	public function get_cart_discount_total() {
-		return wc_cart_round_discount( $this->discount_cart, $this->dp );
-	}
-
-	/**
-	 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
-	 *
-	 * @return float
-	 */
-	public function get_cart_discount_tax_total() {
-		return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
-	}
-
-	/**
-	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
-	 */
-	public function init() {
-
-	}
-
-	/**
-	 * Gets the total excluding taxes.
-	 *
-	 * @return string formatted price
-	 */
-	public function get_total_ex_tax() {
-		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( min( 0, $this->total - $this->tax_total - $this->shipping_tax_total ) ) );
-	}
-
-
-
-			/**
-			 * Gets and formats a list of cart item data + variations for display on the frontend.
-			 *
-			 * @param array $cart_item
-			 * @param bool $flat (default: false)
-			 * @return string
-			 */
-			public function get_item_data( $cart_item, $flat = false ) {
-				return wc_display_item_data( $cart_item, $flat = false  );
-			}
-
-	/**
-	 * Add additional fee to the cart.
-	 *
-	 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
-	 * @param float $amount Fee amount.
-	 * @param bool $taxable (default: false) Is the fee taxable?
-	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
-	 */
-	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-
-		$new_fee_id = sanitize_title( $name );
-
-		// Only add each fee once
-		foreach ( $this->fees as $fee ) {
-			if ( $fee->id == $new_fee_id ) {
-				return;
-			}
-		}
-
-		$new_fee            = new stdClass();
-		$new_fee->id        = $new_fee_id;
-		$new_fee->name      = esc_attr( $name );
-		$new_fee->amount    = (float) esc_attr( $amount );
-		$new_fee->tax_class = $tax_class;
-		$new_fee->taxable   = $taxable ? true : false;
-		$new_fee->tax       = 0;
-		$new_fee->tax_data  = array();
-		$this->fees[]       = $new_fee;
-	}
-
-
-	/**
-	 * Gets the array of applied coupon codes.
-	 *
-	 * @return array of applied coupons
-	 */
-	public function get_applied_coupons() {
-		return $this->applied_coupons;
-	}
-
-
-
-
-			/**
-			 * Function to apply discounts to a product and get the discounted price (before tax is applied).
-			 *
-			 * @param mixed $values
-			 * @param mixed $price
-			 * @param bool $add_totals (default: false)
-			 * @return float price
-			 */
-			public function get_discounted_price( $values, $price, $add_totals = false ) {
-				//return apply_filters( 'woocommerce_get_discounted_price', $price, $values, $this );
-			}
-
-			/**
-			 * Gets cross sells based on the items in the cart.
-			 *
-			 * @return array cross_sells (item ids)
-			 */
-			public function get_cross_sells() {
-				wc_get_cart_cross_sells();
-			}
-
-			/**
-			 * Gets the url to remove an item from the cart.
-			 *
-			 * @param string $cart_item_key contains the id of the cart item
-			 * @return string url to page
-			 */
-			public function get_remove_url( $cart_item_key ) {
-				return wc_get_cart_remove_url( $cart_item_key );
-			}
-
-			/**
-			 * Gets the url to re-add an item into the cart.
-			 *
-			 * @param  string $cart_item_key
-			 * @return string url to page
-			 */
-			public function get_undo_url( $cart_item_key ) {
-				return wc_get_cart_undo_url( $cart_item_key );
-			}
 
 	/**
 	 * Gets the total discount amount.
@@ -676,5 +342,195 @@ abstract class WC_Legacy_Cart {
 	public function ship_to_billing_address_only() {
 		_deprecated_function( 'ship_to_billing_address_only', '2.5', 'wc_ship_to_billing_address_only' );
 		return wc_ship_to_billing_address_only();
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_cross_sells() {
+		_deprecated_function( 'WC_Cart::get_cross_sells', '2.7', 'wc_get_cart_cross_sells' );
+		wc_get_cart_cross_sells();
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_remove_url( $cart_item_key ) {
+		_deprecated_function( 'WC_Cart::get_remove_url', '2.7', 'wc_get_cart_remove_url' );
+		return wc_get_cart_remove_url( $cart_item_key );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_undo_url( $cart_item_key ) {
+		_deprecated_function( 'WC_Cart::get_undo_url', '2.7', 'wc_get_cart_undo_url' );
+		return wc_get_cart_undo_url( $cart_item_key );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_discounted_price( $values, $price, $add_totals = false ) {
+		_deprecated_function( 'WC_Cart::get_undo_url', '2.7' );
+		return $price;
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_item_data( $cart_item, $flat = false ) {
+		_deprecated_function( 'WC_Cart::get_item_data', '2.7', 'wc_display_item_data' );
+		return wc_display_item_data( $cart_item, $flat = false  );
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused method.
+	 */
+	public function get_total_ex_tax() {
+		_deprecated_function( 'WC_Cart::get_total_ex_tax', '2.7' );
+		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( min( 0, $this->total - $this->tax_total - $this->shipping_tax_total ) ) );
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused method.
+	 */
+	public function init() {
+		_deprecated_function( 'WC_Cart::init', '2.7' );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_cart_discount_total() {
+		_deprecated_function( 'WC_Cart::get_cart_discount_total', '2.7', 'WC_Cart_Totals::get_discount_total' );
+		return $this->totals->get_discount_total();
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function get_cart_discount_tax_total() {
+		_deprecated_function( 'WC_Cart::get_cart_discount_tax_total', '2.7', 'WC_Cart_Totals::get_discount_total_tax' );
+		return $this->totals->get_discount_total_tax();
+	}
+
+	/**
+	 * @deprecated 2.7.0 Taxes are just not calculated when not needed, so no need to remove them.
+	 */
+	public function remove_taxes() {
+		_deprecated_function( 'WC_Cart::remove_taxes', '2.7' );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function find_product_in_cart( $cart_id = false ) {
+		_deprecated_function( 'WC_Cart::find_product_in_cart', '2.7', 'WC_Cart::get_item_by_key' );
+		if ( $cart_id !== false ) {
+			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
+				return $cart_id;
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Generate a unique ID for the cart item being added.
+	 * @deprecated 2.7.0
+	 * @param int $product_id - id of the product the key is being generated for
+	 * @param int $variation_id of the product the key is being generated for
+	 * @param array $variation data for the cart item
+	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
+	 * @return string cart item key
+	 */
+	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+		_deprecated_function( 'WC_Cart::generate_cart_id', '2.7', 'WC_Cart_Items::generate_key' );
+		return apply_filters( 'woocommerce_cart_id', md5( json_encode( array( $product_id, $variation_id, $variation, $cart_item_data ) ) ), $product_id, $variation_id, $variation, $cart_item_data );
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function check_cart_item_validity() {
+		_deprecated_function( 'WC_Cart::check_cart_item_validity', '2.7', 'WC_Cart_Items::check_items' );
+		$this->items->check_items();
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused
+	 */
+	public function get_cart_shipping_total() {
+		_deprecated_function( 'WC_Cart::get_cart_shipping_total', '2.7' );
+		if ( isset( $this->shipping_total ) ) {
+			if ( $this->shipping_total > 0 ) {
+
+				// Display varies depending on settings
+				if ( $this->tax_display_cart == 'excl' ) {
+
+					$return = wc_price( $this->shipping_total );
+
+					if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
+						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+					}
+
+					return $return;
+
+				} else {
+
+					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
+
+					if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
+						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+					}
+
+					return $return;
+
+				}
+			} else {
+				return __( 'Free!', 'woocommerce' );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused
+	 */
+	public function get_tax_amount( $tax_rate_id ) {
+		_deprecated_function( 'WC_Cart::get_tax_amount', '2.7', 'Obtain from WC_Cart::get_taxes' );
+		$taxes = $this->totals->get_taxes();
+		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ]->get_tax_total() : 0;
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused
+	 */
+	public function get_shipping_tax_amount( $tax_rate_id ) {
+		_deprecated_function( 'WC_Cart::get_shipping_tax_amount', '2.7', 'Obtain from WC_Cart::get_taxes' );
+		$taxes = $this->totals->get_taxes();
+		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ]->get_shipping_tax_total() : 0;
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused
+	 */
+	public function get_cart_total() {
+		_deprecated_function( 'WC_Cart::get_cart_total', '2.7' );
+		if ( ! $this->prices_include_tax ) {
+			$cart_contents_total = wc_price( $this->cart_contents_total );
+		} else {
+			$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
+		}
+		return apply_filters( 'woocommerce_cart_contents_total', $cart_contents_total );
+	}
+
+	/**
+	 * @deprecated 2.7.0 Unused
+	 */
+	public function get_cart_tax() {
+		_deprecated_function( 'WC_Cart::get_cart_tax', '2.7' );
+		$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
+		return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
 	}
 }

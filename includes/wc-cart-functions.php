@@ -370,7 +370,7 @@ function wc_cart_totals_order_total_html() {
 	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
-	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
+	if ( wc_tax_enabled() && wc_cart_prices_include_tax() ) {
 		$tax_string_array = array();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
@@ -398,7 +398,7 @@ function wc_cart_totals_order_total_html() {
  * @param object $fee
  */
 function wc_cart_totals_fee_html( $fee ) {
-	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+	$cart_totals_fee_html = ! wc_cart_prices_include_tax() ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
 
 	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee );
 }
@@ -412,7 +412,7 @@ function wc_cart_totals_shipping_method_label( $method ) {
 	$label = $method->get_label();
 
 	if ( $method->cost > 0 ) {
-		if ( WC()->cart->tax_display_cart == 'excl' ) {
+		if ( ! wc_cart_prices_include_tax() ) {
 			$label .= ': ' . wc_price( $method->cost );
 			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';

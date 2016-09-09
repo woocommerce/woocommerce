@@ -3,6 +3,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * @todo
+ *
+ * - Handle checkout
+ * - Item types
+ * - Coupon totals
+ * - Orers same system
+ * - Apply backend coupons
+ * - Unit tests
+ */
 include_once( WC_ABSPATH . 'includes/class-wc-cart-coupons.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-fees.php' );
 include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
@@ -447,5 +457,36 @@ class WC_Cart extends WC_Cart_Session {
 			}
 		}
 		return apply_filters( 'woocommerce_cart_taxes_total', $round ? wc_round_tax_total( $total ) : $total, $compound, $display, $this );
+	}
+
+	/**
+	 * Get the total discount amount for a specific coupon code.
+	 * @param string $code
+	 * @param bool $ex_tax
+	 * @return float
+	 */
+	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
+		$coupon_totals = $this->totals->get_coupons();
+		$coupon_total  = isset( $coupon_totals[ $code ] ) ? $coupon_totals[ $code ] : array( 'total' => 0, 'total_tax' => 0 );
+		$amount        = $coupon_total['total'];
+
+		if ( ! $ex_tax ) {
+			$amount += $coupon_total['total_tax'];
+		}
+
+		return wc_cart_round_discount( $amount, wc_get_price_decimals() );
+	}
+
+	/**
+	 * Get the total discount tax amount for a specific coupon code.
+	 * @param string $code
+	 * @return float
+	 */
+	public function get_coupon_discount_tax_amount( $code ) {
+		$coupon_totals = $this->totals->get_coupons();
+		$coupon_total  = isset( $coupon_totals[ $code ] ) ? $coupon_totals[ $code ] : array( 'total' => 0, 'total_tax' => 0 );
+		$amount        = $coupon_total['total_tax'];
+
+		return wc_cart_round_discount( $amount, wc_get_price_decimals() );
 	}
 }
