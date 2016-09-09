@@ -27,18 +27,32 @@ class WC_Cart_Coupons {
 	public function __construct() {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
+		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 2 );
 	}
 
 	/**
-	 * Get fees.
+	 * Get coupons.
 	 * @return array
 	 */
 	public function get_coupons() {
 		return $this->coupons;
 	}
 
+	/**
+	 * Set coupons.
+	 * @param array $set
+	 */
 	public function set_coupons( $set ) {
-		$this->coupons = array_filter( (array) $set );
+		$set           = array_filter( (array) $set );
+		$this->coupons = array();
+
+		foreach ( $set as $code => $coupon ) {
+			if ( is_object( $coupon ) ) {
+				$this->coupons[ $code ] = $coupon;
+			} else {
+				$this->coupons[ $coupon ] = new WC_Coupon( $coupon );
+			}
+		}
 	}
 
 	/**
@@ -46,117 +60,16 @@ class WC_Cart_Coupons {
 	 * @param  string $coupon_code Code of the coupon to remove
 	 */
 	public function remove_coupon( $coupon_code ) {
-		$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
-		$position    = array_search( $coupon_code, $this->coupons );
-
-		if ( $position !== false ) {
-			unset( $this->coupons[ $position ] );
-		}
-
+		$coupon_code = wc_format_coupon_code( $coupon_code );
+		unset( $this->coupons[ $coupon_code ] );
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
-	}
-	/**
-	 * Remove coupons from the cart of a defined type.
-	 */
-	public function remove_coupons() {
-		$this->coupons = array();
-	}
-
-	/**
-	 * Returns whether or not a discount has been applied.
-	 * @param string $coupon_code
-	 * @return bool
-	 */
-	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->coupons ) : sizeof( $this->coupons ) > 0;
-	}
-	/**
-	 * Get the discount amount for a used coupon.
-	 * @param  string $code coupon code
-	 * @param  bool $ex_tax inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
-		$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
-
-		if ( ! $ex_tax ) {
-			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
-		}
-
-		return wc_cart_round_discount( $discount_amount, $this->dp );
-	}
-
-	/**
-	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
-	 * @param  string $code coupon code
-	 * @param  bool inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_tax_amount( $code ) {
-		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
-	}
-
-	public function add( $coupon_code ) {
-		if ( ! wc_coupons_enabled() ) {
-			return false;
-		}
-
-		$the_coupon = new WC_Coupon( $coupon_code );
-
-		// Check it can be used with cart
-		if ( ! $the_coupon->is_valid() ) {
-			wc_add_notice( $the_coupon->get_error_message(), 'error' );
-			return false;
-		}
-
-		// Check if applied
-		if ( $this->has_discount( $coupon_code ) ) {
-			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
-			return false;
-		}
-
-		// If its individual use then remove other coupons
-		if ( $the_coupon->get_individual_use() ) {
-			$this->coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->coupons );
-		}
-
-		foreach ( $this->get_coupons() as $code ) {
-			$coupon = new WC_Coupon( $code );
-
-			if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->coupons ) ) {
-				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
-				return false;
-			}
-		}
-
-		$this->coupons[] = $coupon_code;
-
-		// Choose free shipping
-		if ( $the_coupon->get_free_shipping() ) {
-			$packages = WC()->shipping->get_packages();
-			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-			foreach ( $packages as $i => $package ) {
-				$chosen_shipping_methods[ $i ] = 'free_shipping';
-			}
-
-			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-		}
-
-		$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
-
-		do_action( 'woocommerce_applied_coupon', $coupon_code );
-
-		return true;
 	}
 
 	/**
 	 * Check cart coupons for errors.
 	 */
 	public function check_cart_coupons() {
-		foreach ( $this->coupons as $code ) {
-			$coupon = new WC_Coupon( $code );
-
+		foreach ( $this->coupons as $code => $coupon ) {
 			if ( ! $coupon->is_valid() ) {
 				// Error message
 				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
@@ -181,9 +94,7 @@ class WC_Cart_Coupons {
 	 */
 	public function check_customer_coupons( $posted ) {
 		if ( ! empty( $this->coupons ) ) {
-			foreach ( $this->coupons as $code ) {
-				$coupon = new WC_Coupon( $code );
-
+			foreach ( $this->coupons as $code => $coupon ) {
 				if ( $coupon->is_valid() ) {
 
 					// Limit to defined email addresses
@@ -245,4 +156,15 @@ class WC_Cart_Coupons {
 		}
 	}
 
+	/**
+	 * Add a message for the applied coupon.
+	 * @param  string $code
+	 * @param  WC_Coupon $coupon
+	 */
+	public function applied_coupon( $code, $coupon ) {
+		$coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
+		if ( $coupon->get_free_shipping() ) {
+			WC()->session->set( 'chosen_shipping_methods', null );
+		}
+	}
 }

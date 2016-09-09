@@ -276,10 +276,10 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
 function wc_cart_totals_shipping_html() {
 	$packages = WC()->shipping->get_packages();
 
-	foreach ( $packages as $i => $package ) {
-		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+	foreach ( $packages as $key => $package ) {
+		$chosen_method = wc_get_chosen_shipping_method_for_package( $key, $package );
 		$product_names = array();
-		$package_name  = apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package );
+		$package_name  = apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $key + 1 ), 'woocommerce' ), ( $key + 1 ) ), $key, $package );
 
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
@@ -297,7 +297,7 @@ function wc_cart_totals_shipping_html() {
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
 			'package_name'         => $package_name,
-			'index'                => $i,
+			'index'                => $key,
 			'chosen_method'        => $chosen_method,
 		) );
 	}
@@ -609,25 +609,63 @@ add_action( 'woocommerce_cart_emptied', 'wc_delete_persistent_cart' );
 /**
  * Get chosen method for package from session.
  * @param  int $key
+ * @param  array $package
  * @return string|bool
  */
-function wc_get_chosen_shipping_method_for_package( $key ) {
+function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
-	return isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
+	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
+	$changed        = wc_shipping_methods_have_changed( $key, $package );
+
+	// If not set, not available, or available methods have changed, set to the DEFAULT option
+	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
+		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
+		$chosen_methods[ $key ] = $chosen_method;
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
+	}
+
+	return $chosen_method;
+}
+
+/**
+ * Choose the default method for a package.
+ * @param  string $key
+ * @param  array $package
+ * @return string
+ */
+function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
+	$rate_keys = array_keys( $package['rates'] );
+	$default   = current( $rate_keys );
+	$coupons   = WC()->cart->get_coupons();
+
+	foreach ( $coupons as $coupon ) {
+		if ( $coupon->get_free_shipping() ) {
+			foreach ( $rate_keys as $rate_key ) {
+				if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
+					$default = $rate_key;
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
 
 /**
  * See if the methods have changed since the last request.
  * @param  int $key
- * @param  array $rates
+ * @param  array $package
  * @return bool
  */
-function wc_shipping_methods_have_changed( $key, $new_rates ) {
+function wc_shipping_methods_have_changed( $key, $package ) {
 	// Lookup previous methods from session.
 	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 
 	// Get new and old rates.
-	$new_rates  = array_keys( $new_rates );
+	$new_rates  = array_keys( $package['rates'] );
 	$prev_rates = isset( $previous_shipping_methods[ $key ] ) ? $previous_shipping_methods[ $key ] : false;
 
 	// Update session.

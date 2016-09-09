@@ -225,7 +225,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), 400 );
 			}
 
-			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$coupon_code  = wc_format_coupon_code( $data['code'] );
 			$id_from_code = wc_get_coupon_id_by_code( $coupon_code );
 
 			if ( $id_from_code ) {
@@ -332,7 +332,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
-				$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$coupon_code  = wc_format_coupon_code( $data['code'] );
 				$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 				if ( $id_from_code ) {

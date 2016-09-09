@@ -98,9 +98,9 @@ class WC_Cart_Totals {
 	 * @param array $coupons
 	 */
 	public function set_coupons( $coupons ) {
-		foreach ( $coupons as $code ) {
+		foreach ( $coupons as $code => $coupon_object ) {
 			$coupon                 = $this->get_default_coupon_props();
-			$coupon->coupon         = new WC_Coupon( $code );
+			$coupon->coupon         = $coupon_object;
 			$this->coupons[ $code ] = $coupon;
 		}
 		$this->totals = null;

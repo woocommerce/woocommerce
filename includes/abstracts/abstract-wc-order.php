@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'abstract-wc-legacy-order.php' );
+include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php' );
 
 /**
  * Abstract Order

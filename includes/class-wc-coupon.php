@@ -434,7 +434,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_code( $code ) {
-		$this->_data['code'] = apply_filters( 'woocommerce_coupon_code', $code );
+		$this->_data['code'] = wc_format_coupon_code( $code );
 	}
 
 	/**

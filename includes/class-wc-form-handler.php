@@ -465,7 +465,7 @@ class WC_Form_Handler {
 
 		// Add Discount
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+			WC()->cart->add_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
 		}
 
 		// Remove Coupon Codes

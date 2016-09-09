@@ -102,7 +102,35 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
 	 */
 	public function add_coupon( $coupon_code ) {
-		return $this->coupons->add( $coupon_code );
+		if ( ! wc_coupons_enabled() ) {
+			return false;
+		}
+		try {
+			$coupon  = new WC_Coupon( $coupon_code );
+			$coupons = array_keys( $this->get_coupons() );
+
+			if ( ! $coupon->is_valid() ) {
+				throw new Exception( $coupon->get_error_message() );
+			}
+
+			if ( $this->has_coupon( $coupon_code ) ) {
+				throw new Exception( '', WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
+			}
+
+			if ( $coupon->get_individual_use() ) {
+				$coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $coupon, $coupons );
+			}
+
+			$coupons[] = $coupon_code;
+
+			$this->coupons->set_coupons( $coupons );
+
+			do_action( 'woocommerce_applied_coupon', $coupon_code, $coupon );
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getCode() ? WC_Coupon::get_coupon_error( $e->getCode() ) : $e->getMessage(), 'error' );
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -149,6 +177,7 @@ class WC_Cart extends WC_Cart_Session {
 	public function empty_cart() {
 		$this->items->set_items( false );
 		$this->fees->set_fees( false );
+		$this->coupons->set_coupons( false );
 		$this->shipping_methods = null;
 		$this->totals = new WC_Cart_Totals;
 		do_action( 'woocommerce_cart_emptied' );
@@ -184,6 +213,13 @@ class WC_Cart extends WC_Cart_Session {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		return $this->coupons->remove_coupon( $coupon_code );
+	}
+
+	/**
+	 * Remove all coupons.
+	 */
+	public function remove_coupons() {
+		return $this->coupons->set_coupons( false );
 	}
 
 	/**
@@ -226,6 +262,16 @@ class WC_Cart extends WC_Cart_Session {
 	 */
 	public function get_cart_contents_count() {
 		return $this->items->get_quantity();
+	}
+
+	/**
+	 * Returns whether or not a coupon has been applied.
+	 * @param string $coupon_code
+	 * @return bool
+	 */
+	public function has_coupon( $coupon_code = '' ) {
+		$coupons = array_keys( $this->get_coupons() );
+		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), $coupons ) : sizeof( $coupons );
 	}
 
 	/*
@@ -281,7 +327,7 @@ class WC_Cart extends WC_Cart_Session {
 				array(
 					'contents'        => $this->items->get_items_needing_shipping(),
 					'contents_cost'   => array_sum( wc_list_pluck( $this->items->get_items_needing_shipping(), 'get_price' ) ),
-					'applied_coupons' => $this->get_coupons(),
+					'applied_coupons' => array_keys( $this->get_coupons() ),
 					'user'            => array(
 						'ID' => get_current_user_id(),
 					),
@@ -309,15 +355,7 @@ class WC_Cart extends WC_Cart_Session {
 
 		// Get chosen methods for each package to get our totals.
 		foreach ( $calculated_shipping_packages as $key => $package ) {
-			$chosen_method = wc_get_chosen_shipping_method_for_package( $key );
-			$changed       = wc_shipping_methods_have_changed( $key, $package['rates'] );
-
-			// If not set, not available, or available methods have changed, set to the DEFAULT option
-			if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
-				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', current( $package['rates'] ), $package['rates'], $chosen_method );
-				do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
-			}
-
+			$chosen_method          = wc_get_chosen_shipping_method_for_package( $key, $package );
 			$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
 		}
 

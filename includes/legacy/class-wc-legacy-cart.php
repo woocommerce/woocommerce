@@ -17,9 +17,191 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WC_Legacy_Cart {
 
+	/**
+	 * Handle props.
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		switch ( $key ) {
+			case 'subtotal' :
+				return $this->totals->get_items_subtotal( true );
+			case 'subtotal_ex_tax' :
+				return $this->totals->get_items_subtotal( false );
+			case 'taxes' :
+				return $this->totals->get_tax_data();
+			case 'cart_contents_total' :
+				return $this->totals->get_items_total( false );
+			case 'discount_cart' :
+				return $this->totals->get_discount_total();
+			case 'discount_cart_tax' :
+				return $this->totals->get_discount_total_tax();
+			case 'cart_contents' :
+				return $this->get_cart();
+			case 'tax_total' :
+				return $this->totals->get_tax_total();
+			case 'shipping_tax_total':
+				return $this->totals->get_shipping_tax_total();
+			case 'taxes' :
+				return $this->totals->get_taxes();
+			case 'shipping_taxes' :
+				return $this->totals->get_shipping_taxes();
+			case 'total' :
+				return $this->totals->get_total();
+			case 'coupon_discount_amounts' :
+				return wp_list_pluck( $this->totals->get_coupons(), 'total' );
+			case 'coupon_discount_tax_amounts' :
+				return wp_list_pluck( $this->totals->get_coupons(), 'total_tax' );
+
+
+
+			case 'shipping_total' :
+				return WC()->shipping->shipping_total;
+			case 'shipping_taxes' :
+				return WC()->shipping->shipping_taxes;
+
+
+
+			/** @var array Contains an array of cart items. *
+			public $cart_contents = array();
+
+			/** @var array Contains an array of removed cart items. *
+			public $removed_cart_contents = array();
+
+			/** @var array Contains an array of coupon codes applied to the cart. *
+			public $applied_coupons = array();
+
+			/** @var array Contains an array of coupon code discounts after they have been applied. *
+			public $coupon_discount_amounts = array();
+
+			/** @var array Contains an array of coupon code discount taxes. Used for tax incl pricing. *
+			public $coupon_discount_tax_amounts = array();
+
+			/** @var array Contains an array of coupon usage counts after they have been applied. *
+			public $coupon_applied_count = array();
+
+			/** @var array Array of coupons *
+			public $coupons = array();
+
+			/** @var float The total cost of the cart items. *
+			public $cart_contents_total;
+
+			/** @var float Cart grand total. *
+			public $total;
+
+			/** @var float Cart subtotal. *
+			public $subtotal;
+
+			/** @var float Cart subtotal without tax. *
+			public $subtotal_ex_tax;
+
+			/** @var float Total cart tax. *
+			public $tax_total;
+
+			/** @var array An array of taxes/tax rates for the cart. *
+			public $taxes;
+
+			/** @var array An array of taxes/tax rates for the shipping. *
+			public $shipping_taxes;
+
+			/** @var float Discount amount before tax *
+			public $discount_cart;
+
+			/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly *
+			public $discount_cart_tax;
+
+			/** @var float Total for additional fees. *
+			public $fee_total;
+
+			/** @var float Shipping cost. *
+			public $shipping_total;
+
+			/** @var float Shipping tax. *
+			public $shipping_tax_total;
+
+			/** @var array cart_session_data. Array of data the cart calculates and stores in the session with defaults *
+			public $cart_session_data = array(
+			 */
+
+
+			case 'prices_include_tax' :
+				return wc_prices_include_tax();
+			break;
+			case 'round_at_subtotal' :
+				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+			break;
+			case 'tax_display_cart' :
+				return get_option( 'woocommerce_tax_display_cart' );
+			break;
+			case 'dp' :
+				return wc_get_price_decimals();
+			break;
+			case 'display_totals_ex_tax' :
+			case 'display_cart_ex_tax' :
+				return $this->tax_display_cart === 'excl';
+			break;
+			case 'cart_contents_weight' :
+				return $this->get_cart_contents_weight();
+			break;
+			case 'cart_contents_count' :
+				return $this->get_cart_contents_count();
+			break;
+		}
+	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
 	public function add_discount( $coupon_code ) {
+		_deprecated_function( 'WC_Cart::add_discount', '2.7', 'WC_Cart::add_coupon' );
 		return $this->add_coupon( $coupon_code );
 	}
+
+	/**
+	 * @deprecated 2.7.0
+	 */
+	public function has_discount( $coupon_code = '' ) {
+		_deprecated_function( 'WC_Cart::has_discount', '2.7', 'WC_Cart::has_coupon' );
+		return $this->has_coupon( $coupon_code );
+	}
+
+	/**
+	 * Get the discount amount for a used coupon.
+	 * @param  string $code coupon code
+	 * @param  bool $ex_tax inc or ex tax
+	 * @return float discount amount
+	 */
+	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
+		$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+
+		if ( ! $ex_tax ) {
+			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
+		}
+
+		return wc_cart_round_discount( $discount_amount, $this->dp );
+	}
+
+	/**
+	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
+	 * @param  string $code coupon code
+	 * @param  bool inc or ex tax
+	 * @return float discount amount
+	 */
+	public function get_coupon_discount_tax_amount( $code ) {
+		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Gets the cart tax (after calculation).
@@ -48,32 +230,6 @@ abstract class WC_Legacy_Cart {
 	public function get_shipping_tax_amount( $tax_rate_id ) {
 		return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
 	}
-	
-	/**
-	 * Looks through the cart to see if shipping is actually required.
-	 *
-	 * @return bool whether or not the cart needs shipping
-	 */
-	public function needs_shipping() {
-		// If shipping is disabled or not yet configured, we can skip this.
-		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
-			return false;
-		}
-
-		$needs_shipping = false;
-
-		if ( ! empty( $this->cart_contents ) ) {
-			foreach ( $this->cart_contents as $cart_item_key => $values ) {
-				$_product = $values['data'];
-				if ( $_product->needs_shipping() ) {
-					$needs_shipping = true;
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
-	}
-
 
 	public function calculate_fees() {
 		$this->fees->calculate_fees();
@@ -180,146 +336,7 @@ abstract class WC_Legacy_Cart {
 
 //check_cart_items
 
-	/**
-	 * Handle props.
-	 * @param string $key
-	 * @return mixed
-	 */
-	public function __get( $key ) {
-		switch ( $key ) {
-			case 'subtotal' :
-				return $this->totals->get_items_subtotal( true );
-			case 'subtotal_ex_tax' :
-				return $this->totals->get_items_subtotal( false );
-			case 'taxes' :
-				return $this->totals->get_tax_data();
-			case 'cart_contents_total' :
-				return $this->totals->get_items_total( false );
-			case 'discount_cart' :
-				return $this->totals->get_discount_total();
-			case 'discount_cart_tax' :
-				return $this->totals->get_discount_total_tax();
-			case 'cart_contents' :
-				return $this->get_cart();
 
-
-			case 'tax_total' :
-				return $this->totals->get_tax_total();
-			case 'shipping_tax_total':
-				return $this->totals->get_shipping_tax_total();
-			case 'taxes' :
-				return $this->totals->get_taxes();
-			case 'shipping_taxes' :
-				return $this->totals->get_shipping_taxes();
-			case 'total' :
-				return $this->totals->get_total();
-			case 'coupon_discount_amounts' :
-				return wp_list_pluck( $this->totals->get_coupons(), 'total' );
-			case 'coupon_discount_tax_amounts' :
-				return wp_list_pluck( $this->totals->get_coupons(), 'total_tax' );
-			case 'shipping_total' :
-				return WC()->shipping->shipping_total;
-			case 'shipping_taxes' :
-				return WC()->shipping->shipping_taxes;
-			/****
-			/**
-			 * An array of fees.
-			 * @var array
-			 *
-			public $fees = array();
-			/** @var array Contains an array of cart items. *
-			public $cart_contents = array();
-
-			/** @var array Contains an array of removed cart items. *
-			public $removed_cart_contents = array();
-
-			/** @var array Contains an array of coupon codes applied to the cart. *
-			public $applied_coupons = array();
-
-			/** @var array Contains an array of coupon code discounts after they have been applied. *
-			public $coupon_discount_amounts = array();
-
-			/** @var array Contains an array of coupon code discount taxes. Used for tax incl pricing. *
-			public $coupon_discount_tax_amounts = array();
-
-			/** @var array Contains an array of coupon usage counts after they have been applied. *
-			public $coupon_applied_count = array();
-
-			/** @var array Array of coupons *
-			public $coupons = array();
-
-			/** @var float The total cost of the cart items. *
-			public $cart_contents_total;
-
-			/** @var float Cart grand total. *
-			public $total;
-
-			/** @var float Cart subtotal. *
-			public $subtotal;
-
-			/** @var float Cart subtotal without tax. *
-			public $subtotal_ex_tax;
-
-			/** @var float Total cart tax. *
-			public $tax_total;
-
-			/** @var array An array of taxes/tax rates for the cart. *
-			public $taxes;
-
-			/** @var array An array of taxes/tax rates for the shipping. *
-			public $shipping_taxes;
-
-			/** @var float Discount amount before tax *
-			public $discount_cart;
-
-			/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly *
-			public $discount_cart_tax;
-
-			/** @var float Total for additional fees. *
-			public $fee_total;
-
-			/** @var float Shipping cost. *
-			public $shipping_total;
-
-			/** @var float Shipping tax. *
-			public $shipping_tax_total;
-
-			/** @var array cart_session_data. Array of data the cart calculates and stores in the session with defaults *
-			public $cart_session_data = array(
-			 */
-
-
-			case 'prices_include_tax' :
-				return wc_prices_include_tax();
-			break;
-			case 'round_at_subtotal' :
-				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
-			break;
-			case 'tax_display_cart' :
-				return get_option( 'woocommerce_tax_display_cart' );
-			break;
-			case 'dp' :
-				return wc_get_price_decimals();
-			break;
-			case 'display_totals_ex_tax' :
-			case 'display_cart_ex_tax' :
-				return $this->tax_display_cart === 'excl';
-			break;
-			case 'cart_contents_weight' :
-				return $this->get_cart_contents_weight();
-			break;
-			case 'cart_contents_count' :
-				return $this->get_cart_contents_count();
-			break;
-			case 'tax' :
-				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
-				$this->tax = new WC_Tax();
-			return $this->tax;
-			case 'discount_total':
-				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
-			return 0;
-		}
-	}
 
 
 	/**
@@ -538,28 +555,11 @@ abstract class WC_Legacy_Cart {
 		$this->fees[]       = $new_fee;
 	}
 
-	/**
-	 * Get fees.
-	 *
-	 * @return array
-	 */
-	public function get_fees() {
-		return array_filter( (array) $this->fees );
-	}
-
 
 
 	//public function check_customer_coupons( $posted ) {
 
 
-	/**
-	 * Returns whether or not a discount has been applied.
-	 * @param string $coupon_code
-	 * @return bool
-	 */
-	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
-	}
 
 	/**
 	 * Gets the array of applied coupon codes.
@@ -570,41 +570,7 @@ abstract class WC_Legacy_Cart {
 		return $this->applied_coupons;
 	}
 
-	/**
-	 * Get the discount amount for a used coupon.
-	 * @param  string $code coupon code
-	 * @param  bool $ex_tax inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
-		$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
 
-		if ( ! $ex_tax ) {
-			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
-		}
-
-		return wc_cart_round_discount( $discount_amount, $this->dp );
-	}
-
-	/**
-	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
-	 * @param  string $code coupon code
-	 * @param  bool inc or ex tax
-	 * @return float discount amount
-	 */
-	public function get_coupon_discount_tax_amount( $code ) {
-		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
-	}
-
-	/**
-	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
-	 */
-	public function remove_coupons( $deprecated = null ) {
-		$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
-		WC()->session->set( 'applied_coupons', array() );
-		WC()->session->set( 'coupon_discount_amounts', array() );
-		WC()->session->set( 'coupon_discount_tax_amounts', array() );
-	}
 
 
 			/**
