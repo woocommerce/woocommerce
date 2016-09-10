@@ -756,6 +756,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					if ( is_wp_error( $upload ) ) {
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product_id, $images ) ) {
 							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+						} else {
+							continue;
 						}
 					}
 
