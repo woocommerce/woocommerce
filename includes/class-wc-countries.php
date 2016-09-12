@@ -548,6 +548,7 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
+				'autofocus'    => true,
 			),
 			'last_name' => array(
 				'label'        => __( 'Last Name', 'woocommerce' ),

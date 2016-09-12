@@ -1862,6 +1862,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'custom_attributes' => array(),
 			'validate'          => array(),
 			'default'           => '',
+			'autofocus'         => '',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -1877,6 +1878,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
 
 		$args['autocomplete'] = ( $args['autocomplete'] ) ? 'autocomplete="' . esc_attr( $args['autocomplete'] ) . '"' : '';
+		
+		$args['autofocus'] = ( true == esc_attr( $args['autofocus'] ) ) ? apply_filters( 'woocommerce_form_field_autofocus', ' autofocus' ) : '' ;
 
 		if ( is_string( $args['label_class'] ) ) {
 			$args['label_class'] = array( $args['label_class'] );
@@ -1964,7 +1967,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			case 'textarea' :
 
-				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $value ) . '</textarea>';
+				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . $args['autofocus'] . '>' . esc_textarea( $value ) . '</textarea>';
 
 				break;
 			case 'checkbox' :
@@ -1980,7 +1983,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'tel' :
 			case 'number' :
 
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . $args['autofocus'] . ' />';
 
 				break;
 			case 'select' :
