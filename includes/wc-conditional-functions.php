@@ -126,7 +126,7 @@ if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 
 		$wc_endpoints = WC()->query->get_query_vars();
 
-		if ( $endpoint !== false ) {
+		if ( false !== $endpoint ) {
 			if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
 				return false;
 			} else {

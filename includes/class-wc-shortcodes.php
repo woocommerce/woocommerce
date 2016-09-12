@@ -232,7 +232,7 @@ class WC_Shortcodes {
 		), $atts, 'product_categories' );
 
 		$ids        = array_filter( array_map( 'trim', explode( ',', $atts['ids'] ) ) );
-		$hide_empty = ( $atts['hide_empty'] == true || $atts['hide_empty'] == 1 ) ? 1 : 0;
+		$hide_empty = ( true === $atts['hide_empty'] || 'true' === $atts['hide_empty'] || 1 === $atts['hide_empty'] || '1' === $atts['hide_empty'] ) ? 1 : 0;
 
 		// get terms and workaround WP bug with parents/pad counts
 		$args = array(
@@ -252,7 +252,7 @@ class WC_Shortcodes {
 
 		if ( $hide_empty ) {
 			foreach ( $product_categories as $key => $category ) {
-				if ( $category->count == 0 ) {
+				if ( 0 == $category->count ) {
 					unset( $product_categories[ $key ] );
 				}
 			}
@@ -690,7 +690,7 @@ class WC_Shortcodes {
 		$preselected_id = '0';
 
 		// check if sku is a variation
-		if ( isset( $atts['sku'] ) && $single_product->have_posts() && $single_product->post->post_type === 'product_variation' ) {
+		if ( isset( $atts['sku'] ) && $single_product->have_posts() && 'product_variation' === $single_product->post->post_type ) {
 
 			$variation = new WC_Product_Variation( $single_product->post->ID );
 			$attributes = $variation->get_variation_attributes();

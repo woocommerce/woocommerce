@@ -368,7 +368,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			if ( isset( $setting[ $key ] ) ) {
 				$setting[ $key ]['width']  = intval( $setting[ $key ]['width'] );
 				$setting[ $key ]['height'] = intval( $setting[ $key ]['height'] );
-				$setting[ $key ]['crop']   = (bool)  $setting[ $key ]['crop'];
+				$setting[ $key ]['crop']   = (bool) $setting[ $key ]['crop'];
 			}
 		}
 		return $setting;

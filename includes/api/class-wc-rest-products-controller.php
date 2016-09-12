@@ -1495,7 +1495,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Tax class.
 			if ( isset( $variation['tax_class'] ) ) {
-				if ( $variation['tax_class'] !== 'parent' ) {
+				if ( 'parent' !== $variation['tax_class'] ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variation['tax_class'] ) );
 				} else {
 					delete_post_meta( $variation_id, '_tax_class' );

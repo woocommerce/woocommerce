@@ -441,7 +441,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$link = add_query_arg( $filter_name, implode( ',', $current_filter ), $link );
 
 				// Add Query type Arg to URL
-				if ( $query_type === 'or' && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
+				if ( 'or' === $query_type && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
 					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
 				}
 			}

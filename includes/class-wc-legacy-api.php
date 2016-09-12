@@ -97,7 +97,7 @@ class WC_Legacy_API {
 			// Legacy v1 API request.
 			if ( 1 === WC_API_REQUEST_VERSION ) {
 				$this->handle_v1_rest_api_request();
-			} else if ( 2 === WC_API_REQUEST_VERSION ) {
+			} elseif ( 2 === WC_API_REQUEST_VERSION ) {
 				$this->handle_v2_rest_api_request();
 			} else {
 				$this->includes();

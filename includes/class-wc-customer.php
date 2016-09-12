@@ -1233,7 +1233,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 			$data[ $session_key ] = $this->{"get_$function_key"}();
 		}
-		if ( $data !== WC()->session->get( 'customer' ) ) {
+		if ( WC()->session->get( 'customer' ) !== $data ) {
 			WC()->session->set( 'customer', $data );
 		}
 	}

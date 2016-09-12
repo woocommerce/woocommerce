@@ -65,7 +65,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				$terms = wp_list_pluck( $terms, 'slug' );
 				break;
 		}
-	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
+	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
 		// wp_get_post_terms doesn't let us use custom sort order
 		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 
@@ -81,7 +81,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
 			// Ensure slugs is valid for get_terms - slugs isn't supported
-			$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
+			$args['fields']     = ( 'slugs' === $args['fields'] ) ? 'id=>slug' : $args['fields'];
 			$terms              = get_terms( $taxonomy, $args );
 		}
 	} else {
@@ -152,7 +152,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 
 	$args = wp_parse_args( $args, $defaults );
 
-	if ( $args['orderby'] == 'order' ) {
+	if ( 'order' === $args['orderby'] ) {
 		$args['menu_order'] = 'asc';
 		$args['orderby']    = 'name';
 	}
@@ -417,12 +417,12 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
 	// No sorting when menu_order is false.
-	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
+	if ( isset( $args['menu_order'] ) && false == $args['menu_order'] ) {
 		return $clauses;
 	}
 
 	// No sorting when orderby is non default.
-	if ( isset( $args['orderby'] ) && $args['orderby'] != 'name' ) {
+	if ( isset( $args['orderby'] ) && 'name' !== $args['orderby'] ) {
 		return $clauses;
 	}
 
@@ -638,7 +638,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		if ( is_object( $term ) ) {
 			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
-			if ( $term_counts[ $term->term_id ] !== '' ) {
+			if ( '' !== $term_counts[ $term->term_id ] ) {
 				$term->count = absint( $term_counts[ $term->term_id ] );
 			}
 		}

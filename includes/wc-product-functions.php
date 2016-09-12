@@ -215,7 +215,7 @@ function wc_get_featured_product_ids() {
  */
 function wc_product_post_type_link( $permalink, $post ) {
 	// Abort if post is not a product.
-	if ( $post->post_type !== 'product' ) {
+	if ( 'product' !== $post->post_type ) {
 		return $permalink;
 	}
 
@@ -596,7 +596,7 @@ function wc_get_product_id_by_sku( $sku ) {
 function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
 	$product_id    = absint( $product_id );
 	$regular_price = wc_format_decimal( $regular_price );
-	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
+	$sale_price    = '' === $sale_price ? '' : wc_format_decimal( $sale_price );
 	$date_from     = wc_clean( $date_from );
 	$date_to       = wc_clean( $date_to );
 
@@ -668,7 +668,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
 		 */
 		if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $parent_id, '_product_version', true ), '2.4.0', '<' ) ) {
 			foreach ( $parent_attributes as $attribute ) {
-				if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+				if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
 					continue;
 				}
 				$text_attributes = wc_get_text_attributes( $attribute['value'] );

@@ -107,7 +107,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				<a class="woocommerce-Button woocommerce-Button--previous button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 
-			<?php if ( $current_page !== intval( $customer_orders->max_num_pages ) ) : ?>
+			<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
 				<a class="woocommerce-Button woocommerce-Button--next button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</div>

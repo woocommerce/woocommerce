@@ -28,7 +28,7 @@ class WC_Register_WP_Admin_Settings {
 		if ( 'page' === $type ) {
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_page_group' ) );
 			add_filter( 'woocommerce_settings-' . $this->object->get_id(),  array( $this, 'register_page_settings' ) );
-		} else if ( 'email' === $type ) {
+		} elseif ( 'email' === $type ) {
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_email_group' ) );
 			add_filter( 'woocommerce_settings-email_' . $this->object->id,  array( $this, 'register_email_settings' ) );
 		}
@@ -135,9 +135,9 @@ class WC_Register_WP_Admin_Settings {
 		}
 
 		$description = '';
-		if ( ! empty ( $setting['desc'] ) ) {
+		if ( ! empty( $setting['desc'] ) ) {
 			$description = $setting['desc'];
-		} else if ( ! empty( $setting['description'] ) ) {
+		} elseif ( ! empty( $setting['description'] ) ) {
 			$description = $setting['description'];
 		}
 
@@ -158,7 +158,7 @@ class WC_Register_WP_Admin_Settings {
 		if ( isset( $setting['desc_tip'] ) ) {
 			if ( true === $setting['desc_tip'] ) {
 				$new_setting['tip'] = $description;
-			} else if ( ! empty( $setting['desc_tip'] ) ) {
+			} elseif ( ! empty( $setting['desc_tip'] ) ) {
 				$new_setting['tip'] = $setting['desc_tip'];
 			}
 		}

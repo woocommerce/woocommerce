@@ -582,7 +582,7 @@ class WC_API_Server {
 				$page = 1;
 				$total_pages = 1;
 			}
-		} else if ( is_a( $query, 'stdClass' ) ) {
+		} elseif ( is_a( $query, 'stdClass' ) ) {
 			$page        = $query->page;
 			$single      = $query->is_single;
 			$total       = $query->total;

@@ -388,7 +388,7 @@ class WC_Countries {
 				echo '</optgroup>';
 			else :
 				echo '<option';
-				if ( $selected_country == $key && $selected_state == '*' ) {
+				if ( $selected_country == $key && '*' == $selected_state ) {
 					echo ' selected="selected"';
 				}
 				echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
@@ -1010,7 +1010,7 @@ class WC_Countries {
 			$address_fields[ $type . $key ] = $value;
 
 			// Add email and phone after company or last
-			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
+			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && end( $keys ) === $key ) ) ) {
 				$address_fields['billing_email'] = array(
 					'label'        => __( 'Email Address', 'woocommerce' ),
 					'required'     => true,

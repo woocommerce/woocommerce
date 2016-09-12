@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( $string === 'yes' || $string === 1 || $string === '1' );
+	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || '1' === $string );
 }
 
 /**
@@ -245,8 +245,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	if ( $dp !== false ) {
-		$dp     = intval( $dp == "" ? wc_get_price_decimals() : $dp );
+	if ( false !== $dp ) {
+		$dp     = intval( '' == $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 
 	// DP is false - don't use number format, just return a string in our format

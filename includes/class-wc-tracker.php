@@ -309,7 +309,7 @@ class WC_Tracker {
 		$active_gateways = array();
 		$gateways        = WC()->payment_gateways->payment_gateways();
 		foreach ( $gateways as $id => $gateway ) {
-			if ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) {
+			if ( isset( $gateway->enabled ) && 'yes' === $gateway->enabled ) {
 				$active_gateways[ $id ] = array( 'title' => $gateway->title, 'supports' => $gateway->supports );
 			}
 		}
@@ -325,7 +325,7 @@ class WC_Tracker {
 		$active_methods   = array();
 		$shipping_methods = WC()->shipping->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
-			if ( isset( $shipping_method->enabled ) && $shipping_method->enabled == 'yes' ) {
+			if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
 				$active_methods[ $id ] = array( 'title' => $shipping_method->title, 'tax_status' => $shipping_method->tax_status );
 			}
 		}
@@ -388,7 +388,7 @@ class WC_Tracker {
 					$theme_file = false;
 				}
 
-				if ( $theme_file !== false ) {
+				if ( false !== $theme_file ) {
 					$override_data[] = basename( $theme_file );
 				}
 			}

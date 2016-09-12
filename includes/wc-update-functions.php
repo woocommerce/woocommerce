@@ -110,8 +110,9 @@ function wc_update_200_taxrates() {
 
 				foreach ( $states as $state ) {
 
-					if ( $state == '*' )
+					if ( '*' == $state ) {
 						$state = '';
+					}
 
 					$wpdb->insert(
 						$wpdb->prefix . "woocommerce_tax_rates",
@@ -121,8 +122,8 @@ function wc_update_200_taxrates() {
 							'tax_rate'          => $tax_rate['rate'],
 							'tax_rate_name'     => $tax_rate['label'],
 							'tax_rate_priority' => 1,
-							'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-							'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+							'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+							'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 							'tax_rate_order'    => $loop,
 							'tax_rate_class'    => $tax_rate['class'],
 						)
@@ -138,10 +139,11 @@ function wc_update_200_taxrates() {
 	if ( $local_tax_rates )
 		foreach ( $local_tax_rates as $tax_rate ) {
 
-			$location_type = $tax_rate['location_type'] == 'postcode' ? 'postcode' : 'city';
+			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
 
-			if ( $tax_rate['state'] == '*' )
+			if ( '*' == $tax_rate['state'] ) {
 				$tax_rate['state'] = '';
+			}
 
 			$wpdb->insert(
 				$wpdb->prefix . "woocommerce_tax_rates",
@@ -151,8 +153,8 @@ function wc_update_200_taxrates() {
 					'tax_rate'          => $tax_rate['rate'],
 					'tax_rate_name'     => $tax_rate['label'],
 					'tax_rate_priority' => 2,
-					'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-					'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+					'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+					'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 					'tax_rate_order'    => $loop,
 					'tax_rate_class'    => $tax_rate['class'],
 				)

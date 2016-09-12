@@ -220,7 +220,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// Add line items.
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$product    = $item->get_product();
-			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
 			$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
 			foreach ( $item_meta as $key => $values ) {
@@ -337,7 +337,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			if ( ! empty( $status ) ) {
 
-				if ( $status == 'any' ) {
+				if ( 'any' === $status ) {
 
 					$order_statuses = array();
 
@@ -1551,7 +1551,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// Add line items
 			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
 				$product    = $item->get_product();
-				$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+				$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
 				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
 				foreach ( $item_meta as $key => $values ) {

@@ -257,7 +257,7 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
+		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
 			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
 		}
 

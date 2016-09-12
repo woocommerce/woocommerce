@@ -1459,7 +1459,7 @@ class WC_AJAX {
 		$note      = wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
 		$note_type = $_POST['note_type'];
 
-		$is_customer_note = $note_type == 'customer' ? 1 : 0;
+		$is_customer_note = ( 'customer' === $note_type ) ? 1 : 0;
 
 		if ( $post_id > 0 ) {
 			$order      = wc_get_order( $post_id );
@@ -1918,8 +1918,8 @@ class WC_AJAX {
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
 		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
-		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
-		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
+		$api_refund             = ( 'true' === $_POST['api_refund'] ) ? true : false;
+		$restock_refunded_items = ( 'true' === $_POST['restock_refunded_items'] ) ? true : false;
 		$refund                 = false;
 		$response_data          = array();
 
@@ -2338,7 +2338,7 @@ class WC_AJAX {
 		$product_type_terms = wp_get_object_terms( $product_id, 'product_type' );
 
 		// If the product type hasn't been set or it has changed, update it before saving variations
-		if ( empty( $product_type_terms ) || $product_type !== sanitize_title( current( $product_type_terms )->name ) ) {
+		if ( empty( $product_type_terms ) || sanitize_title( current( $product_type_terms )->name ) !== $product_type ) {
 			wp_set_object_terms( $product_id, $product_type, 'product_type' );
 		}
 

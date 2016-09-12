@@ -190,7 +190,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$request->set_body_params( array(
 			'settings' => array(
 				'paymentaction' => 'afasfasf',
-			)
+			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
@@ -199,7 +199,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$request->set_body_params( array(
 			'settings' => array(
 				'paymentaction' => 'authorization',
-			)
+			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$paypal   = $response->get_data();

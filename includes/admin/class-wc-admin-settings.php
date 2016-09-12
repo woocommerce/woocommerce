@@ -206,7 +206,7 @@ class WC_Admin_Settings {
 			$option_value = stripslashes( $option_value );
 		}
 
-		return $option_value === null ? $default : $option_value;
+		return ( null === $option_value ) ? $default : $option_value;
 	}
 
 	/**
@@ -297,7 +297,7 @@ class WC_Admin_Settings {
 					$type         = $value['type'];
 					$option_value = self::get_option( $value['id'], $value['default'] );
 
-					if ( $value['type'] == 'color' ) {
+					if ( 'color' === $value['type'] ) {
 						$type = 'text';
 						$value['class'] .= 'colorpick';
 						$description .= '<div id="colorPickerDiv_' . esc_attr( $value['id'] ) . '" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>';
@@ -366,7 +366,7 @@ class WC_Admin_Settings {
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
 							<select
-								name="<?php echo esc_attr( $value['id'] ); ?><?php if ( $value['type'] == 'multiselect' ) echo '[]'; ?>"
+								name="<?php echo esc_attr( $value['id'] ); ?><?php echo ( 'multiselect' === $value['type'] ) ? '[]' : ''; ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
