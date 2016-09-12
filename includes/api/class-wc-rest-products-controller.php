@@ -1556,15 +1556,20 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
 						$_attribute_key           = 'attribute_' . sanitize_title( $_attribute['name'] );
 						$updated_attribute_keys[] = $_attribute_key;
+						$attribute_value          = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 
-						if ( isset( $_attribute['is_taxonomy'] ) && $_attribute['is_taxonomy'] ) {
-							// Don't use wc_clean as it destroys sanitized characters
-							$_attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-						} else {
-							$_attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
+							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+
+							if ( $term && ! is_wp_error( $term ) ) {
+								$attribute_value = $term->slug;
+							} else {
+								$attribute_value = sanitize_title( $attribute_value );
+							}
 						}
 
-						update_post_meta( $variation_id, $_attribute_key, $_attribute_value );
+						update_post_meta( $variation_id, $_attribute_key, $attribute_value );
 					}
 				}
 
@@ -1610,14 +1615,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
-						$value = '';
+						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 
-						if ( isset( $attribute['option'] ) ) {
-							if ( $_attribute['is_taxonomy'] ) {
-								// Don't use wc_clean as it destroys sanitized characters.
-								$value = sanitize_title( trim( stripslashes( $attribute['option'] ) ) );
+						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
+							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+
+							if ( $term && ! is_wp_error( $term ) ) {
+								$value = $term->slug;
 							} else {
-								$value = wc_clean( trim( stripslashes( $attribute['option'] ) ) );
+								$value = sanitize_title( $attribute_value );
 							}
 						}
 
