@@ -49,7 +49,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_group
+	 * @covers WC_Register_WP_Admin_Settings::register_page_group
 	 */
 	public function test_register_group() {
 		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
