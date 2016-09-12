@@ -54,6 +54,7 @@ class WC_Logger {
 		}
 
 		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
+			@chmod( wc_get_log_file_path( $handle ), FS_CHMOD_FILE );
 			return true;
 		}
 
