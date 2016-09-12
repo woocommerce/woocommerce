@@ -398,10 +398,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
 				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
+					$option_term = get_term_by( 'slug', $attribute, $name );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_label( $name ),
-						'option' => $attribute,
+						'option' => $option_term->name,
 					);
 				} else {
 					$attributes[] = array(

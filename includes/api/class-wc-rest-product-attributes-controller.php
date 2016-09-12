@@ -232,7 +232,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 
 		$args = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
 			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
 			'attribute_public'  => true === $request['has_archives'],
@@ -324,7 +324,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$format = array( '%s', '%s', '%s', '%s', '%d' );
 		$args   = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => $request['type'],
 			'attribute_orderby' => $request['order_by'],
 			'attribute_public'  => $request['has_archives'],
