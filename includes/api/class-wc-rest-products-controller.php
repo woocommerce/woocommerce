@@ -385,12 +385,17 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				$name = str_replace( 'attribute_', '', $attribute_name );
 
+				if ( ! $attribute ) {
+					continue;
+				}
+
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
 				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
+					$option_term  = get_term_by( 'slug', $attribute, $name );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_label( $name ),
-						'option' => $attribute,
+						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
 					);
 				} else {
 					$attributes[] = array(

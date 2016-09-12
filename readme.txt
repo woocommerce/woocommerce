@@ -179,6 +179,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - ID needs to be capitalized to allow correct sorting.
 * Fix - API - Fixed undefined order ID.
 * Fix - API - Allow API to save refund reason.
+* Fix - API - Resolved encoding issues with attribute and variation slugs.
+* Fix - API - get_attributes should return term name, not slug.
 * Fix - Handle info notices in cart, not just error messages.
 * Fix - Don't remove hyphens in attribute labels.
 * Fix - Start sales on variations after they are saved, if applicable.
