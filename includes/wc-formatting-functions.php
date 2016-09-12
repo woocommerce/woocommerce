@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( $taxonomy ) ), $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', sanitize_title( urldecode( $taxonomy ) ), $taxonomy );
 }
 
 /**
