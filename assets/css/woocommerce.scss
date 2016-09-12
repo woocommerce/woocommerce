@@ -1013,6 +1013,27 @@ p.demo_store {
 		}
 	}
 
+	table.woocommerce-MyAccount-downloads {
+		td,
+		th {
+			vertical-align: top;
+			text-align: center;
+
+			&:first-child {
+				text-align: left;
+			}
+			&:last-child {
+				text-align: left;
+			}
+			.woocommerce-MyAccount-downloads-file {
+				&:before {
+					content: '\2193';
+					display: inline-block;
+				}
+			}
+		}
+	}
+
 	td.product-name {
 		dl.variation {
 			margin: 0.25em 0;
