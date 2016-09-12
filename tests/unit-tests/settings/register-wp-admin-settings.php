@@ -176,7 +176,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings_one_section() {
 		$this->page
@@ -200,7 +200,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings() {
 		$this->page
