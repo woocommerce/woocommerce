@@ -56,7 +56,10 @@ class WC_Logger {
 		if ( ! file_exists( wc_get_log_file_path( $handle ) ) ) {
 			$temphandle = @fopen( wc_get_log_file_path( $handle ), 'w+' );
 			@fclose( $temphandle );
-			@chmod( wc_get_log_file_path( $handle ), FS_CHMOD_FILE );
+
+			if ( defined( 'FS_CHMOD_FILE' ) ) {
+				@chmod( wc_get_log_file_path( $handle ), FS_CHMOD_FILE );
+			}
 		}
 
 		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
