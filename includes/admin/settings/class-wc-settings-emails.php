@@ -160,7 +160,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'desc_tip' => true,
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'email_notification_settings' ),
+			array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
 
 		) );
 
