@@ -181,7 +181,7 @@ class WC_Checkout {
 
 			// Insert or update the post data
 			$order_id  = absint( WC()->session->order_awaiting_payment );
-			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->get_total() );
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -211,12 +211,12 @@ class WC_Checkout {
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '' );
 			$order->set_payment_method( $this->payment_method );
-			$order->set_shipping_total( WC()->cart->shipping_total );
+			$order->set_shipping_total( WC()->cart->get_shipping_total() );
 			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
 			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
-			$order->set_cart_tax( WC()->cart->tax_total );
-			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
-			$order->set_total( WC()->cart->total );
+			$order->set_cart_tax( WC()->cart->get_tax_total() );
+			$order->set_shipping_tax( WC()->cart->get_shipping_tax_total() );
+			$order->set_total( WC()->cart->get_total() );
 
 			// Billing and shipping addresses
 			if ( $address_keys = array_merge( array_keys( $this->checkout_fields['billing'] ), array_keys( $this->checkout_fields['shipping'] ) ) ) {
@@ -227,63 +227,34 @@ class WC_Checkout {
 				}
 			}
 
-
-
-
-
-
 			/**
-			 * @todo
+			 * Store items and costs. For tax inclusive prices, we do some extra rounding logic so the stored
+			 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
+			 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
 			 */
-			 /*foreach ( $this->totals->get_item_totals() as $cart_item_key => $item ) {
- 				/**
- 				 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
- 				 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
- 				 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
- 				 *
- 				 * Tax exclusive prices are not affected.
- 				if ( ! $item->product->is_taxable() || wc_prices_include_tax() ) {
- 					$this->cart_contents[ $cart_item_key ]['line_total']        = round( $item->total + $item->tax - wc_round_tax_total( $item->tax ), $this->dp );
- 					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = round( $item->subtotal + $item->subtotal_tax - wc_round_tax_total( $item->subtotal_tax ), $this->dp );
- 					$this->cart_contents[ $cart_item_key ]['line_tax']          = wc_round_tax_total( $item->tax );
- 					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = wc_round_tax_total( $item->subtotal_tax );
- 					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array_map( 'wc_round_tax_total', $item->tax_data ), 'subtotal' => array_map( 'wc_round_tax_total', $item->subtotal_tax_data ) );
- 				} else {
- 					$this->cart_contents[ $cart_item_key ]['line_total']        = $item->total;
- 					$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $item->subtotal;
- 					$this->cart_contents[ $cart_item_key ]['line_tax']          = $item->tax;
- 					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $item->subtotal_tax;
- 					$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $item->tax_data, 'subtotal' => $item->subtotal_tax_data );
- 				}
+			$item_totals = WC()->cart->get_item_totals();
 
- 			}*/
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				$item                       = new WC_Order_Item_Product( $cart_item );
+				$item->legacy_values        = $cart_item;
+				$item->legacy_cart_item_key = $cart_item_key;
+				$item_total                 = $item_totals[ $cart_item_key ];
 
-			// Add line items.
-			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-				$product = $values['data'];
-				$item    = new WC_Order_Item_Product( array(
-					'quantity'     => $values['quantity'],
-					'name'         => $product ? $product->get_title() : '',
-					'tax_class'    => $product ? $product->get_tax_class() : '',
-					'product_id'   => $product ? $product->get_id() : '',
-					'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
-					'variation'    => $values['variation'],
-					'subtotal'     => $values['line_subtotal'],
-					'total'        => $values['line_total'],
-					'subtotal_tax' => $values['line_subtotal_tax'],
-					'total_tax'    => $values['line_tax'],
-					'taxes'        => $values['line_tax_data'],
-				) );
+				if ( 'taxable' === $item->get_tax_status() || wc_prices_include_tax() ) {
+					$item->set_subtotal( round( $item_total->subtotal + $item_total->subtotal_tax - wc_round_tax_total( $item_total->subtotal_tax ), wc_get_price_decimals() ) );
+					$item->set_total( round( $item_total->total + $item_total->tax - wc_round_tax_total( $item_total->tax ), wc_get_price_decimals() ) );
+					$item->set_taxes( array( 'total' => array_map( 'wc_round_tax_total', $item_total->taxes ), 'subtotal' => array_map( 'wc_round_tax_total', $item_total->subtotal_taxes ) ) );
+				} else {
+					$item->set_subtotal( $item_total->subtotal );
+					$item->set_total( $item_total->total );
+					$item->set_taxes( array( 'total' => $item_total->taxes, 'subtotal' => $item_total->subtotal_taxes ) );
+				}
 
 				$item->set_backorder_meta();
-				// Set this to pass to legacy actions @todo remove in future release
-				$item->legacy_values        = $values;
-				$item->legacy_cart_item_key = $cart_item_key;
-
 				$order->add_item( $item );
 			}
 
-			// Add fees
+			/*// Add fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
 				$item = new WC_Order_Item_Fee( array(
 					'name'      => $fee->name,
@@ -343,7 +314,7 @@ class WC_Checkout {
 					'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
 				) );
 				$order->add_item( $item );
-			}
+			}*/
 
 			// Save the order
 			$order_id = $order->save();
@@ -540,7 +511,7 @@ class WC_Checkout {
 									break;
 									case 'state' :
 										// Get valid states
-										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
+										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_billing_country() : WC()->customer->get_shipping_country() ) );
 
 										if ( ! empty( $valid_states ) && is_array( $valid_states ) ) {
 											$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );

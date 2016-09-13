@@ -84,7 +84,6 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected $_data = array(
 		// Abstract order props
-		'id'                   => 0,
 		'parent_id'            => 0,
 		'status'               => '',
 		'currency'             => '',

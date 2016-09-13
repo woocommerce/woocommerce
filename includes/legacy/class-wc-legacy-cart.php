@@ -400,22 +400,6 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
-	 * @deprecated 2.7.0
-	 */
-	public function get_cart_discount_total() {
-		_deprecated_function( 'WC_Cart::get_cart_discount_total', '2.7', 'WC_Cart_Totals::get_discount_total' );
-		return $this->totals->get_discount_total();
-	}
-
-	/**
-	 * @deprecated 2.7.0
-	 */
-	public function get_cart_discount_tax_total() {
-		_deprecated_function( 'WC_Cart::get_cart_discount_tax_total', '2.7', 'WC_Cart_Totals::get_discount_total_tax' );
-		return $this->totals->get_discount_total_tax();
-	}
-
-	/**
 	 * @deprecated 2.7.0 Taxes are just not calculated when not needed, so no need to remove them.
 	 */
 	public function remove_taxes() {

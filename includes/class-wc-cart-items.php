@@ -15,13 +15,13 @@ class WC_Cart_Items {
 
 	/**
 	 * An array of items in the cart.
-	 * @var WC_Cart_Item[]
+	 * @var WC_Item_Product[]
 	 */
 	private $items = array();
 
 	/**
 	 * An array of items removed from the cart which can be restored.
-	 * @var WC_Cart_Item[]
+	 * @var WC_Item_Product[]
 	 */
 	private $removed_items = array();
 
@@ -47,7 +47,7 @@ class WC_Cart_Items {
 	 * Get an item by it's key.
 	 *
 	 * @param  string $item_key
-	 * @return WC_Cart_Item|bool
+	 * @return WC_Item_Product|bool
 	 */
 	public function get_item_by_key( $item_key ) {
 		return isset( $this->items[ $item_key ] ) ? $this->items[ $item_key ] : false;
@@ -78,8 +78,8 @@ class WC_Cart_Items {
 		$items       = array_filter( (array) $items );
 
 		foreach ( $items as $key => $item ) {
-			if ( ! is_a( $item, 'WC_Cart_Item' ) ) {
-				$item = new WC_Cart_Item( $item );
+			if ( ! is_a( $item, 'WC_Item_Product' ) ) {
+				$item = new WC_Item_Product( $item );
 			}
 			$this->items[ $key ] = $item;
 		}
@@ -94,8 +94,8 @@ class WC_Cart_Items {
 		$items               = array_filter( (array) $items );
 
 		foreach ( $items as $key => $item ) {
-			if ( ! is_a( $item, 'WC_Cart_Item' ) ) {
-				$item = new WC_Cart_Item( $item );
+			if ( ! is_a( $item, 'WC_Item_Product' ) ) {
+				$item = new WC_Item_Product( $item );
 			}
 			$this->removed_items[ $key ] = $item;
 		}
@@ -128,7 +128,7 @@ class WC_Cart_Items {
 		if ( isset( $this->removed_items[ $cart_item_key ] ) ) {
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, WC()->cart );
 
-			$this->items[ $cart_item_key ] = new WC_Cart_Item( $this->removed_items[ $cart_item_key ] );
+			$this->items[ $cart_item_key ] = new WC_Item_Product( $this->removed_items[ $cart_item_key ] );
 			unset( $this->removed_items[ $cart_item_key ] );
 
 			do_action( 'woocommerce_cart_item_restored', $cart_item_key, WC()->cart );

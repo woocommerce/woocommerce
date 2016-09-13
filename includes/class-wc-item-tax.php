@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Order Line Item (tax).
+ * Line Item (tax).
  *
  * @version     2.7.0
  * @since       2.7.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Item_Tax extends WC_Item {
 
 	/**
-	 * Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * Data array.
 	 * @since 2.7.0
 	 * @var array
 	 */

@@ -66,7 +66,7 @@ class WC_Cart extends WC_Cart_Session {
 		if ( $item = $this->items->get_item_by_key( $item_key ) ) {
 			$item->set_quantity( $item->get_quantity() + $args['quantity']  );
 		} else {
-			$item                    = new WC_Cart_Item( $args );
+			$item                    = new WC_Item_Product( $args );
 			$cart_items[ $item_key ] = apply_filters( 'woocommerce_add_cart_item', $item, $item_key );
 		}
 
@@ -366,7 +366,9 @@ class WC_Cart extends WC_Cart_Session {
 		// Get chosen methods for each package to get our totals.
 		foreach ( $calculated_shipping_packages as $key => $package ) {
 			$chosen_method          = wc_get_chosen_shipping_method_for_package( $key, $package );
-			$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
+			if ( $chosen_method ) {
+				$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
+			}
 		}
 
 		return $chosen_methods;
@@ -412,6 +414,14 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
+	 * Get item totals from totals class.
+	 * @return array
+	 */
+	public function get_item_totals() {
+		return $this->totals->get_item_totals();
+	}
+
+	/**
 	 * Gets the order subtotal with or without tax.
 	 * @param bool $including_tax
 	 * @return string formatted price
@@ -425,7 +435,7 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return string formatted price
 	 */
 	public function get_total() {
-		return apply_filters( 'woocommerce_cart_total', wc_price( $this->totals->get_total() ) );
+		return apply_filters( 'woocommerce_cart_total', $this->totals->get_total() );
 	}
 
 	/**
@@ -461,11 +471,53 @@ class WC_Cart extends WC_Cart_Session {
 	public function get_taxes_total( $compound = true, $round = true ) {
 		$total = 0;
 		foreach ( $this->get_taxes() as $key => $tax ) {
-			if ( $compound === $tax->get_compound() ) {
-				$total += $tax;
+			if ( ! $compound && $tax->get_compound() ) {
+				continue;
 			}
+			$total += $tax;
 		}
 		return apply_filters( 'woocommerce_cart_taxes_total', $round ? wc_round_tax_total( $total ) : $total, $compound, $display, $this );
+	}
+
+	/**
+	 * Get the total tax on the cart.
+	 * @return float
+	 */
+	public function get_tax_total() {
+		return $this->totals->get_tax_total();
+	}
+
+	/**
+	 * Get the total tax on shipping.
+	 * @return float
+	 */
+	public function get_shipping_tax_total() {
+		return $this->totals->get_shipping_tax_total();
+	}
+
+	/**
+	 * Get the total cost of shipping, with or without taxes included.
+	 * @param  bool $including_tax
+	 * @return float
+	 */
+	public function get_shipping_total( $including_tax = false ) {
+		return $this->totals->get_shipping_total( $including_tax );
+	}
+
+	/**
+	 * Return the total amount of discount granted by coupons.
+	 * @return float
+	 */
+	public function get_cart_discount_total() {
+		return $this->totals->get_discount_total();
+	}
+
+	/**
+	 * Return the tax on the total amount of discount granted by coupons.
+	 * @return float
+	 */
+	public function get_cart_discount_tax_total() {
+		return $this->totals->get_discount_total_tax();
 	}
 
 	/**

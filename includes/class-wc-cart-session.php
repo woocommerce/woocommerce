@@ -44,7 +44,6 @@ abstract class WC_Cart_Session extends WC_Legacy_Cart {
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
-		add_action( 'woocommerce_add_to_cart', array( $this, 'set_session' ), 20, 0 );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );

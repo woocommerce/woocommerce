@@ -28,7 +28,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $_data = array(
-		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
 		'currency'           => '',
@@ -198,8 +197,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return;
 		}
 
+		$this->set_id( $post_object->ID );
 		$this->set_props( array(
-			'id'                 => $post_object->ID,
 			'parent_id'          => $post_object->post_parent,
 			'date_created'       => $post_object->post_date,
 			'date_modified'      => $post_object->post_modified,
@@ -371,15 +370,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get order ID.
-	 * @since 2.7.0
-	 * @return integer
-	 */
-	public function get_id() {
-		return $this->_data['id'];
-	}
-
-	/**
 	 * Get parent order ID.
 	 * @since 2.7.0
 	 * @return integer
@@ -443,8 +433,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['discount_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_total', $value, $this );
+		return $raw ? $this->_data['discount_total'] : apply_filters( 'woocommerce_order_amount_discount_total', $this->_data['discount_total'], $this );
 	}
 
 	/**
@@ -453,8 +442,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['discount_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_tax', $value, $this );
+		return $raw ? $this->_data['discount_tax'] : apply_filters( 'woocommerce_order_amount_discount_tax', $this->_data['discount_tax'], $this );
 	}
 
 	/**
@@ -463,8 +451,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['shipping_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_total', $value, $this );
+		return $raw ? $this->_data['shipping_total'] : apply_filters( 'woocommerce_order_amount_shipping_total', $this->_data['shipping_total'], $this );
 	}
 
 	/**
@@ -473,8 +460,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['shipping_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_tax', $value, $this );
+		return $raw ? $this->_data['shipping_tax'] : apply_filters( 'woocommerce_order_amount_shipping_tax', $this->_data['shipping_tax'], $this );
 	}
 
 	/**
@@ -483,8 +469,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_cart_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['cart_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_cart_tax', $value, $this );
+		return $raw ? $this->_data['cart_tax'] : apply_filters( 'woocommerce_order_amount_cart_tax', $this->_data['cart_tax'], $this );
 	}
 
 	/**
@@ -493,8 +478,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['total'], wc_get_price_decimals() );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total', $value, $this );
+		return $raw ? $this->_data['total'] : apply_filters( 'woocommerce_order_amount_total', $this->_data['total'], $this );
 	}
 
 	/**
@@ -508,8 +492,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->_data['total_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total_tax', $value, $this );
+		return $raw ? $this->_data['total_tax'] : apply_filters( 'woocommerce_order_amount_total_tax', $this->_data['total_tax'], $this );
 	}
 
 	/**
@@ -567,16 +550,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	| setters may handle both.
 	|
 	*/
-
-	/**
-	 * Set order ID.
-	 * @since 2.7.0
-	 * @param int $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_id( $value ) {
-		$this->_data['id'] = absint( $value );
-	}
 
 	/**
 	 * Set parent order ID.

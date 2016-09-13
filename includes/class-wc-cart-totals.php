@@ -80,7 +80,7 @@ class WC_Cart_Totals {
 	 */
 	public function set_items( $items ) {
 		foreach ( $items as $item_key => $maybe_item ) {
-			if ( ! is_a( $maybe_item, 'WC_Cart_Item' ) ) {
+			if ( ! is_a( $maybe_item, 'WC_Item_Product' ) ) {
 				continue;
 			}
 			$item                     = $this->get_default_item_props();
@@ -106,14 +106,13 @@ class WC_Cart_Totals {
 		$this->totals = null;
 	}
 
-
-		/**
-		 * Get fees.
-		 * @return array
-		 */
-		public function get_coupons() {
-			return $this->coupons;
-		}
+	/**
+	 * Get fees.
+	 * @return array
+	 */
+	public function get_coupons() {
+		return $this->coupons;
+	}
 
 	/**
 	 * Set fees.
@@ -148,17 +147,16 @@ class WC_Cart_Totals {
 
 	/**
 	 * Subtotals are costs before discounts.
-	  * Prices include tax. @todo
-	  *
-	  * To prevent rounding issues we need to work with the inclusive price where possible.
-	  * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
-	  * be 8.325 leading to totals being 1p off.
-	  *
-	  * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
-	  * afterwards.
-	  *
-	  * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
-	  */
+	 *
+	 * To prevent rounding issues we need to work with the inclusive price where possible.
+	 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+	 * be 8.325 leading to totals being 1p off.
+	 *
+	 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
+	 * afterwards.
+	 *
+	 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
+	 */
 	private function calculate_item_subtotals() {
 		foreach ( $this->items as $item ) {
 			$item->subtotal     = $item->price * $item->quantity;
@@ -523,6 +521,10 @@ class WC_Cart_Totals {
 		return array_sum( $totals );
 	}
 
+	/**
+	 * Set shipping lines.
+	 * @param array
+	 */
 	public function set_shipping( $shipping_objects ) {
 		$this->shipping_lines = array();
 
@@ -530,12 +532,11 @@ class WC_Cart_Totals {
 			foreach ( $shipping_objects as $key => $shipping_object ) {
 				$shipping                     = $this->get_default_shipping_props();
 				$shipping->total              = $shipping_object->cost;
-				$shipping->taxes           = $shipping_object->taxes;
+				$shipping->taxes              = $shipping_object->taxes;
 				$shipping->total_tax          = array_sum( $shipping_object->taxes );
 				$this->shipping_lines[ $key ] = $shipping;
 			}
 		}
-
 		$this->totals = null;
 	}
 }
