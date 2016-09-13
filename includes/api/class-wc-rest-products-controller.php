@@ -560,6 +560,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'date_created'       => wc_rest_prepare_date_response( $post_data->post_date_gmt ),
 				'date_modified'      => wc_rest_prepare_date_response( $post_data->post_modified_gmt ),
 				'permalink'          => $variation->get_permalink(),
+				'description'        => $variation->get_variation_description(),
 				'sku'                => $variation->get_sku(),
 				'price'              => $variation->get_price(),
 				'regular_price'      => $variation->get_regular_price(),
@@ -2374,6 +2375,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'Product description.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
 						),
 						'sku' => array(
 							'description' => __( 'Unique identifier.', 'woocommerce' ),
