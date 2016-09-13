@@ -15,12 +15,78 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Cart_Totals {
 
-	protected $calculate_tax  = true;
-	protected $totals         = null;
-	protected $coupons        = array();
-	protected $items          = array();
-	protected $fees           = array();
-	protected $shipping_lines = array();
+	/**
+	 * Should tax be calculated?
+	 * @var boolean
+	 */
+	private $calculate_tax  = true;
+
+	/**
+	 * Stores totals.
+	 * @var array
+	 */
+	private $totals         = null;
+
+	/**
+	 * Coupons to calculate.
+	 * @var array
+	 */
+	private $coupons        = array();
+
+	/**
+	 * Line items to calculate.
+	 * @var array
+	 */
+	private $items          = array();
+
+	/**
+	 * Fees to calculate.
+	 * @var array
+	 */
+	private $fees           = array();
+
+	/**
+	 * Shipping to calculate.
+	 * @var array
+	 */
+	private $shipping_lines = array();
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->set_totals( $this->get_default_totals() );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Default item props.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get default totals.
+	 * @return array
+	 */
+	private function get_default_totals() {
+		return array(
+			'fees_total'         => 0,
+			'fees_total_tax'     => 0,
+			'items_subtotal'     => 0,
+			'items_subtotal_tax' => 0,
+			'items_total'        => 0,
+			'items_total_tax'    => 0,
+			'item_totals'        => array(),
+			'coupon_counts'      => array(),
+			'coupon_totals'      => array(),
+			'coupon_tax_totals'  => array(),
+			'total'              => 0,
+			'taxes'              => array(),
+			'tax_total'          => 0,
+			'shipping_total'     => 0,
+			'shipping_tax_total' => 0,
+		);
+	}
 
 	/**
 	 * Get default blank set of props used per item.
@@ -33,7 +99,7 @@ class WC_Cart_Totals {
 			'subtotal_tax'       => 0,
 			'subtotal_taxes'     => array(),
 			'total'              => 0,
-			'tax'                => 0,
+			'total_tax'          => 0,
 			'taxes'              => array(),
 			'discounted_price'   => 0,
 		);
@@ -57,8 +123,8 @@ class WC_Cart_Totals {
 	 */
 	private function get_default_fee_props() {
 		return (object) array(
-			'tax'   => 0,
-			'taxes' => array(),
+			'total_tax' => 0,
+			'taxes'     => array(),
 		);
 	}
 
@@ -74,75 +140,52 @@ class WC_Cart_Totals {
 		);
 	}
 
-	/**
-	 * Sets items and adds precision which lets us work with integers.
-	 * @param array $items
-	 */
-	public function set_items( $items ) {
-		foreach ( $items as $item_key => $maybe_item ) {
-			if ( ! is_a( $maybe_item, 'WC_Item_Product' ) ) {
-				continue;
-			}
-			$item                     = $this->get_default_item_props();
-			$item->product            = $maybe_item->get_product();
-			$item->values             = $maybe_item;
-			$item->quantity           = $maybe_item->get_quantity();
-			$item->price              = $item->product->get_price();
-			$this->items[ $item_key ] = $item;
-		}
-		$this->totals = null;
-	}
+	/*
+	|--------------------------------------------------------------------------
+	| Calculation methods.
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
-	 * Set coupons.
-	 * @param array $coupons
-	 */
-	public function set_coupons( $coupons ) {
-		foreach ( $coupons as $code => $coupon_object ) {
-			$coupon                 = $this->get_default_coupon_props();
-			$coupon->coupon         = $coupon_object;
-			$this->coupons[ $code ] = $coupon;
-		}
-		$this->totals = null;
-	}
-
-	/**
-	 * Get fees.
+	 * Removes data we don't want to expose in the item totals.
+	 * @param object $item
 	 * @return array
 	 */
-	public function get_coupons() {
-		return $this->coupons;
+	private function format_item_totals( $item ) {
+		unset( $item->product );
+		unset( $item->values );
+		return $item;
 	}
 
 	/**
-	 * Set fees.
-	 * @param array $fees
+	 * Totals are costs after discounts.
 	 */
-	public function set_fees( $fees ) {
-		foreach ( $fees as $fee_key => $fee_object ) {
-			$fee                    = $this->get_default_fee_props();
-			$fee->amount            = $fee_object->amount;
-			$fee->taxable           = $fee_object->taxable;
-			$fee->tax_class         = $fee_object->tax_class;
-			$this->fees[ $fee_key ] = $fee;
+	public function calculate_item_totals() {
+		$this->calculate_item_subtotals();
+		uasort( $this->items, array( $this, 'sort_items_callback' ) );
+
+		foreach ( $this->items as $item ) {
+			$item->discounted_price = $this->get_discounted_price( $item );
+			$item->total            = $item->discounted_price * $item->quantity;
+			$item->total_tax        = 0;
+
+			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
+				$item->taxes     = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+				$item->total_tax = array_sum( $item->taxes );
+
+				if ( $item->price_includes_tax ) {
+					$item->total = $item->total - $item->total_tax;
+				} else {
+					$item->total = $item->total;
+				}
+			}
 		}
-		$this->totals = null;
-	}
-
-	/**
-	 * Should we calc tax?
-	 * @param bool
-	 */
-	public function set_calculate_tax( $value ) {
-		$this->calculate_tax = (bool) $value;
-	}
-
-	/**
-	 * Should we calc tax?
-	 * @param bool
-	 */
-	public function get_calculate_tax() {
-		return wc_tax_enabled() && $this->calculate_tax;
+		$this->set_items_total( array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
+		$this->set_items_total_tax( array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
+		$this->set_coupon_totals( wp_list_pluck( $this->coupons, 'total' ) );
+		$this->set_coupon_tax_totals( wp_list_pluck( $this->coupons, 'total_tax' ) );
+		$this->set_coupon_counts( wp_list_pluck( $this->coupons, 'count' ) );
+		$this->set_item_totals( array_map( array( $this, 'format_item_totals' ), $this->items ) );
 	}
 
 	/**
@@ -176,31 +219,8 @@ class WC_Cart_Totals {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Totals are costs after discounts.
-	 */
-	public function calculate_item_totals() {
-		$this->calculate_item_subtotals();
-		uasort( $this->items, array( $this, 'sort_items_callback' ) );
-
-		foreach ( $this->items as $item ) {
-			$item->discounted_price = $this->get_discounted_price( $item );
-			$item->total            = $item->discounted_price * $item->quantity;
-			$item->tax              = 0;
-
-			if ( $this->get_calculate_tax() && $item->product->is_taxable() ) {
-				$item->taxes = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
-				$item->tax   = array_sum( $item->taxes );
-
-				if ( $item->price_includes_tax ) {
-					$item->total = $item->total - $item->tax;
-				} else {
-					$item->total = $item->total;
-				}
-			}
-		}
+		$this->set_items_subtotal( array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
+		$this->set_items_subtotal_tax( array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
 	}
 
 	/**
@@ -210,11 +230,13 @@ class WC_Cart_Totals {
 		if ( ! empty( $this->fees ) ) {
 			foreach ( $this->fees as $fee_key => $fee ) {
 				if ( $this->get_calculate_tax() && $fee->taxable ) {
-					$fee->taxes = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
-					$fee->tax   = array_sum( $fee->taxes );
+					$fee->taxes     = WC_Tax::calc_tax( $fee->total, $tax_rates, false );
+					$fee->total_tax = array_sum( $fee->taxes );
 				}
 			}
 		}
+		$this->set_fees_total( array_sum( array_values( wp_list_pluck( $this->fees, 'total' ) ) ) );
+		$this->set_fees_total_tax( array_sum( array_values( wp_list_pluck( $this->fees, 'total_tax' ) ) ) );
 	}
 
 	/**
@@ -222,41 +244,23 @@ class WC_Cart_Totals {
 	 */
 	public function calculate_totals() {
 		$this->calculate_fee_totals();
-		$this->totals        = new stdClass();
-		$this->totals->taxes = $this->get_merged_taxes();
+		$this->set_shipping_total( array_sum( array_values( wp_list_pluck( $this->shipping_lines, 'total' ) ) ) );
+		$this->set_taxes( $this->get_merged_taxes() );
 
 		// Total up/round taxes and shipping taxes
 		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->totals->tax_total          = WC_Tax::get_tax_total( wc_list_pluck( $this->totals->taxes, 'get_tax_total' ) );
-			$this->totals->shipping_tax_total = WC_Tax::get_tax_total( wc_list_pluck( $this->totals->taxes, 'get_shipping_tax_total' ) );
+			$this->set_tax_total( WC_Tax::get_tax_total( wc_list_pluck( $this->get_taxes(), 'get_tax_total' ) ) );
+			$this->set_shipping_tax_total( WC_Tax::get_tax_total( wc_list_pluck( $this->get_taxes(), 'get_shipping_tax_total' ) ) );
 		} else {
-			$this->totals->tax_total          = array_sum( wc_list_pluck( $this->totals->taxes, 'get_tax_total' ) );
-			$this->totals->shipping_tax_total = array_sum( wc_list_pluck( $this->totals->taxes, 'get_shipping_tax_total' ) );
+			$this->set_tax_total( array_sum( wc_list_pluck( $this->get_taxes(), 'get_tax_total' ) ) );
+			$this->set_shipping_tax_total( array_sum( wc_list_pluck( $this->get_taxes(), 'get_shipping_tax_total' ) ) );
 		}
 
 		// Allow plugins to hook and alter totals before final total is calculated
 		do_action( 'woocommerce_calculate_totals', WC()->cart );
 
 		// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
-		$this->totals->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->get_items_total( false ) + $this->get_fees_total( false ) + $this->get_shipping_total( false ) + $this->totals->tax_total + $this->totals->shipping_tax_total, wc_get_price_decimals() ), WC()->cart ) );
-	}
-
-	/**
-	 * Returns items and their totals.
-	 * @return array
-	 */
-	public function get_item_totals() {
-		return $this->items;
-	}
-
-	/**
-	 * Get tax rates for an item. Caches rates in class to avoid multiple look ups.
-	 * @param  object $item
-	 * @return array of taxes
-	 */
-	private function get_item_tax_rates( $item ) {
-		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class() );
+		$this->set_total( apply_filters( 'woocommerce_calculated_total', round( $this->get_items_total() + $this->get_fees_total() + $this->get_shipping_total() + $this->get_tax_total() + $this->get_shipping_tax_total(), wc_get_price_decimals() ), WC()->cart ) );
 	}
 
 	/**
@@ -269,54 +273,6 @@ class WC_Cart_Totals {
 			return 0;
 		}
 		return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
-	}
-
-	/**
-	 * Get the subtotal for all items.
-	 *
-	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
-	 * @return float
-	 */
-	public function get_items_subtotal( $inc_tax = true ) {
-		$totals = array_values( wp_list_pluck( $this->items, 'subtotal' ) );
-
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) );
-		}
-
-		return array_sum( $totals );
-	}
-
-	/**
-	 * Get the total for all items.
-	 *
-	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
-	 * @return float
-	 */
-	public function get_items_total( $inc_tax = true ) {
-		$totals = array_values( wp_list_pluck( $this->items, 'total' ) );
-
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->items, 'tax' ) ) );
-		}
-
-		return array_sum( $totals );
-	}
-
-	/**
-	 * Get the total discount amount.
-	 * @return float
-	 */
-	public function get_discount_total() {
-		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total' ) ) ), wc_get_price_decimals() );
-	}
-
-	/**
-	 * Get the total discount amount.
-	 * @return float
-	 */
-	public function get_discount_total_tax() {
-		return wc_cart_round_discount( array_sum( array_values( wp_list_pluck( $this->coupons, 'total_tax' ) ) ), wc_get_price_decimals() );
 	}
 
 	/**
@@ -345,7 +301,7 @@ class WC_Cart_Totals {
 	 * @param  object $item
 	 * @return float
 	 */
-	public function get_discounted_price( $item ) {
+	private function get_discounted_price( $item ) {
 		$price = $this->get_undiscounted_price( $item );
 
 		foreach ( $this->coupons as $code => $coupon ) {
@@ -427,27 +383,368 @@ class WC_Cart_Totals {
 		return $item;
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Setters.
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
-	 * Get the total for all items.
-	 *
-	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
+	 * Should we calc tax?
+	 * @param bool
+	 */
+	public function set_calculate_tax( $value ) {
+		$this->calculate_tax = (bool) $value;
+	}
+
+	/**
+	 * Set all totals.
+	 * @param array $value
+	 */
+	public function set_totals( $value ) {
+		$value = wp_parse_args( $value, $this->get_default_totals() );
+		$this->totals = $value;
+	}
+
+	/**
+	 * Sets items and adds precision which lets us work with integers.
+	 * @param array $items
+	 */
+	public function set_items( $items ) {
+		foreach ( $items as $item_key => $maybe_item ) {
+			if ( ! is_a( $maybe_item, 'WC_Item_Product' ) ) {
+				continue;
+			}
+			$item                     = $this->get_default_item_props();
+			$item->product            = $maybe_item->get_product();
+			$item->values             = $maybe_item;
+			$item->quantity           = $maybe_item->get_quantity();
+			$item->price              = $item->product->get_price();
+			$this->items[ $item_key ] = $item;
+		}
+	}
+
+	/**
+	 * Set coupons.
+	 * @param array $coupons
+	 */
+	public function set_coupons( $coupons ) {
+		foreach ( $coupons as $code => $coupon_object ) {
+			$coupon                 = $this->get_default_coupon_props();
+			$coupon->coupon         = $coupon_object;
+			$this->coupons[ $code ] = $coupon;
+		}
+	}
+
+	/**
+	 * Set fees.
+	 * @param array $fees
+	 */
+	public function set_fees( $fees ) {
+		foreach ( $fees as $fee_key => $fee_object ) {
+			$fee                    = $this->get_default_fee_props();
+			$fee->total             = $fee_object->amount;
+			$fee->taxable           = $fee_object->taxable;
+			$fee->tax_class         = $fee_object->tax_class;
+			$this->fees[ $fee_key ] = $fee;
+		}
+	}
+
+	/**
+	 * Set shipping lines.
+	 * @param array
+	 */
+	public function set_shipping( $shipping_objects ) {
+		$this->shipping_lines = array();
+
+		if ( is_array( $shipping_objects ) ) {
+			foreach ( $shipping_objects as $key => $shipping_object ) {
+				$shipping                     = $this->get_default_shipping_props();
+				$shipping->total              = $shipping_object->cost;
+				$shipping->taxes              = $shipping_object->taxes;
+				$shipping->total_tax          = array_sum( $shipping_object->taxes );
+				$this->shipping_lines[ $key ] = $shipping;
+			}
+		}
+	}
+
+	/**
+	 * Set taxes.
+	 * @param array $value
+	 */
+	private function set_taxes( $value ) {
+		$this->totals['taxes'] = $value;
+	}
+
+	/**
+	 * Set tax total.
+	 * @param float $value
+	 */
+	private function set_tax_total( $value ) {
+		$this->totals['tax_total'] = $value;
+	}
+
+	/**
+	 * Set shipping total.
+	 * @param float $value
+	 */
+	private function set_shipping_total( $value ) {
+		$this->totals['shipping_total'] = $value;
+	}
+
+	/**
+	 * Set shipping tax total.
+	 * @param float $value
+	 */
+	private function set_shipping_tax_total( $value ) {
+		$this->totals['shipping_tax_total'] = $value;
+	}
+
+	/**
+	 * Set item totals.
+	 * @param array $value
+	 */
+	private function set_item_totals( $value ) {
+		$this->totals['item_totals'] = $value;
+	}
+
+	/**
+	 * Set items subtotal.
+	 * @param float $value
+	 */
+	private function set_items_subtotal( $value ) {
+		$this->totals['items_subtotal'] = $value;
+	}
+
+	/**
+	 * Set items subtotal tax.
+	 * @param float $value
+	 */
+	private function set_items_subtotal_tax( $value ) {
+		$this->totals['items_subtotal_tax'] = $value;
+	}
+
+	/**
+	 * Set items total.
+	 * @param float $value
+	 */
+	private function set_items_total( $value ) {
+		$this->totals['items_total'] = $value;
+	}
+
+	/**
+	 * Set items total tax.
+	 * @param float $value
+	 */
+	private function set_items_total_tax( $value ) {
+		$this->totals['items_total_tax'] = $value;
+	}
+
+	/**
+	 * Set discount total.
+	 * @param array $value
+	 */
+	private function set_coupon_totals( $value ) {
+		$this->totals['coupon_totals'] = (array) $value;
+	}
+
+	/**
+	 * Set discount total tax.
+	 * @param array $value
+	 */
+	private function set_coupon_tax_totals( $value ) {
+		$this->totals['coupon_tax_totals'] = (array) $value;
+	}
+
+	/**
+	 * Set counts.
+	 * @param array $value
+	 */
+	private function set_coupon_counts( $value ) {
+		$this->totals['coupon_tax_totals'] = (array) $value;
+	}
+
+	/**
+	 * Set fees total.
+	 * @param float $value
+	 */
+	private function set_fees_total( $value ) {
+		$this->totals['fees_total'] = $value;
+	}
+
+	/**
+	 * Set fees total tax.
+	 * @param float $value
+	 */
+	private function set_fees_total_tax( $value ) {
+		$this->totals['fees_total_tax'] = $value;
+	}
+
+	/**
+	 * Set total.
+	 * @param float $value
+	 */
+	private function set_total( $value ) {
+		$this->totals['total'] = max( 0, $value );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get all totals.
+	 * @return array.
+	 */
+	public function get_totals() {
+		return $this->totals;
+	}
+
+	/**
+	 * Get shipping and item taxes.
+	 * @return array
+	 */
+	public function get_taxes() {
+		return $this->totals['taxes'];
+	}
+
+	/**
+	 * Get tax total.
 	 * @return float
 	 */
-	public function get_fees_total( $inc_tax = true ) {
-		$totals = array_values( wp_list_pluck( $this->fees, 'amount' ) );
+	public function get_tax_total() {
+		return $this->totals['tax_total'];
+	}
 
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->fees, 'tax' ) ) );
-		}
+	/**
+	 * Get shipping total.
+	 * @return float
+	 */
+	public function get_shipping_total() {
+		return $this->totals['shipping_total'];
+	}
 
-		return array_sum( $totals );
+	/**
+	 * Get shipping tax total.
+	 * @return float
+	 */
+	public function get_shipping_tax_total() {
+		return $this->totals['shipping_tax_total'];
+	}
+
+	/**
+	 * Get the items subtotal.
+	 * @return float
+	 */
+	public function get_items_subtotal() {
+		return $this->totals['items_subtotal'];
+	}
+
+	/**
+	 * Get the items subtotal tax.
+	 * @return float
+	 */
+	public function get_items_subtotal_tax() {
+		return $this->totals['items_subtotal_tax'];
+	}
+
+	/**
+	 * Get the items total.
+	 * @return float
+	 */
+	public function get_items_total() {
+		return $this->totals['items_total'];
+	}
+
+	/**
+	 * Get the items total tax.
+	 * @return float
+	 */
+	public function get_items_total_tax() {
+		return $this->totals['items_total_tax'];
+	}
+
+	/**
+	 * Get the total discount amount.
+	 * @return array
+	 */
+	public function get_coupon_totals() {
+		return $this->totals['coupon_totals'];
+	}
+
+	/**
+	 * Get the total discount amount.
+	 * @return array
+	 */
+	public function get_coupon_tax_totals() {
+		return $this->totals['coupon_tax_totals'];
+	}
+
+	/**
+	 * Get couppon counts.
+	 * @return array
+	 */
+	public function get_coupon_counts() {
+		return $this->totals['coupon_counts'];
+	}
+
+	/**
+	 * Get the total fees amount.
+	 * @return float
+	 */
+	public function get_fees_total() {
+		return $this->totals['fees_total'];
+	}
+
+	/**
+	 * Get the total fee tax amount.
+	 * @return float
+	 */
+	public function get_fees_total_tax() {
+		return $this->totals['fees_total_tax'];
+	}
+
+	/**
+	 * Get the total.
+	 * @return float
+	 */
+	public function get_total() {
+		return $this->totals['total'];
+	}
+
+	/**
+	 * Returns an array of item totals.
+	 * @return array
+	 */
+	public function get_item_totals() {
+		return $this->totals['item_totals'];
+	}
+
+	/**
+	 * Should we calc tax?
+	 * @param bool
+	 */
+	private function get_calculate_tax() {
+		return wc_tax_enabled() && $this->calculate_tax;
+	}
+
+	/**
+	 * Get tax rates for an item. Caches rates in class to avoid multiple look ups.
+	 * @param  object $item
+	 * @return array of taxes
+	 */
+	private function get_item_tax_rates( $item ) {
+		$tax_class = $item->product->get_tax_class();
+		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class() );
 	}
 
 	/**
 	 * Get all tax rows for a set of items and shipping methods.
 	 * @return array
 	 */
-	public function get_merged_taxes() {
+	private function get_merged_taxes() {
 		$taxes = array();
 
 		foreach ( $this->items as $item ) {
@@ -471,72 +768,5 @@ class WC_Cart_Totals {
 		}
 
 		return $taxes;
-	}
-
-	/**
-	 * Get taxes.
-	 * @return array
-	 */
-	public function get_taxes() {
-		return $this->totals->taxes;
-	}
-
-	/**
-	 * Get tax total.
-	 * @return float
-	 */
-	public function get_tax_total() {
-		return $this->totals->tax_total;
-	}
-
-	/**
-	 * Get shipping tax total.
-	 * @return float
-	 */
-	public function get_shipping_tax_total() {
-		return $this->totals->shipping_tax_total;
-	}
-
-	/**
-	 * Get grand total.
-	 * @return float
-	 */
-	public function get_total() {
-		return $this->totals->total;
-	}
-
-	/**
-	 * Get the total for all items.
-	 *
-	 * @param  boolean $inc_tax Should tax also be included in the subtotal?
-	 * @return float
-	 */
-	public function get_shipping_total( $inc_tax = true ) {
-		$totals = array_values( wp_list_pluck( $this->shipping_lines, 'total' ) );
-
-		if ( $inc_tax ) {
-			$totals = array_merge( $totals, array_values( wp_list_pluck( $this->shipping_lines, 'total_tax' ) ) );
-		}
-
-		return array_sum( $totals );
-	}
-
-	/**
-	 * Set shipping lines.
-	 * @param array
-	 */
-	public function set_shipping( $shipping_objects ) {
-		$this->shipping_lines = array();
-
-		if ( is_array( $shipping_objects ) ) {
-			foreach ( $shipping_objects as $key => $shipping_object ) {
-				$shipping                     = $this->get_default_shipping_props();
-				$shipping->total              = $shipping_object->cost;
-				$shipping->taxes              = $shipping_object->taxes;
-				$shipping->total_tax          = array_sum( $shipping_object->taxes );
-				$this->shipping_lines[ $key ] = $shipping;
-			}
-		}
-		$this->totals = null;
 	}
 }

@@ -33,12 +33,19 @@ abstract class WC_Cart_Session extends WC_Legacy_Cart {
 	public $fees;
 
 	/**
+	 * Cart totals class.
+	 * @var WC_Cart_Totals
+	 */
+	protected $totals;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->items   = new WC_Cart_Items;
 		$this->coupons = new WC_Cart_Coupons;
 		$this->fees    = new WC_Cart_Fees;
+		$this->totals  = new WC_Cart_Totals;
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
@@ -104,6 +111,7 @@ abstract class WC_Cart_Session extends WC_Legacy_Cart {
 			'items'         => array(),
 			'removed_items' => array(),
 			'coupons'       => array(),
+			'totals'        => null,
 		) );
 
 		foreach ( $cart['items'] as $key => $values ) {
@@ -118,6 +126,7 @@ abstract class WC_Cart_Session extends WC_Legacy_Cart {
 		$this->items->set_items( $cart['items'] );
 		$this->items->set_removed_items( $cart['removed_items'] );
 		$this->coupons->set_coupons( $cart['coupons'] );
+		$this->totals->set_totals( (array) $cart['totals'] );
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this );
 	}
@@ -130,6 +139,7 @@ abstract class WC_Cart_Session extends WC_Legacy_Cart {
 			'items'         => $this->get_cart_for_session(),
 			'removed_items' => wc_list_pluck( $this->items->get_removed_items(), 'get_data' ),
 			'coupons'       => $this->coupons->get_coupons(),
+			'totals'        => $this->totals->get_totals(),
 		);
 		if ( WC()->session->set( 'cart', $session_data ) ) {
 			do_action( 'woocommerce_cart_updated' );

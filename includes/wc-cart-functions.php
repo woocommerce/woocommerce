@@ -346,7 +346,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
+	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), ! wc_cart_prices_include_tax() ) ) {
 		$discount_html = '-' . wc_price( $amount );
 	} else {
 		$discount_html = '';
@@ -437,7 +437,10 @@ function wc_cart_totals_shipping_method_label( $method ) {
  * @param  int $precision
  * @return float
  */
-function wc_cart_round_discount( $value, $precision ) {
+function wc_cart_round_discount( $value, $precision = false ) {
+	if ( ! $precision ) {
+		$precision = wc_get_price_decimals();
+	}
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {

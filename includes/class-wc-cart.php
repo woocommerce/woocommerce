@@ -31,12 +31,6 @@ include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
 class WC_Cart extends WC_Cart_Session {
 
 	/**
-	 * Cart totals class.
-	 * @var WC_Cart_Totals
-	 */
-	protected $totals;
-
-	/**
 	 * This stores the chosen shipping methods for the cart item packages.
 	 * @var array
 	 */
@@ -47,8 +41,6 @@ class WC_Cart extends WC_Cart_Session {
 	 */
 	public function __construct() {
 		parent::__construct();
-
-		$this->totals = new WC_Cart_Totals;
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
@@ -410,15 +402,7 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return bool
 	 */
 	public function needs_payment() {
-		return apply_filters( 'woocommerce_cart_needs_payment', $this->totals->get_total() > 0, $this );
-	}
-
-	/**
-	 * Get item totals from totals class.
-	 * @return array
-	 */
-	public function get_item_totals() {
-		return $this->totals->get_item_totals();
+		return apply_filters( 'woocommerce_cart_needs_payment', $this->get_total() > 0, $this );
 	}
 
 	/**
@@ -427,7 +411,11 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return string formatted price
 	 */
 	public function get_subtotal( $including_tax = false ) {
-		return apply_filters( 'woocommerce_cart_subtotal', $this->totals->get_items_subtotal( $including_tax ), $including_tax );
+		$subtotal = $this->totals->get_items_subtotal();
+		if ( $including_tax ) {
+			$subtotal += $this->totals->get_items_subtotal_tax();
+		}
+		return apply_filters( 'woocommerce_cart_subtotal', $subtotal, $including_tax );
 	}
 
 	/**
@@ -501,7 +489,11 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return float
 	 */
 	public function get_shipping_total( $including_tax = false ) {
-		return $this->totals->get_shipping_total( $including_tax );
+		$shipping_total = $this->totals->get_shipping_total();
+		if ( $including_tax ) {
+			$shipping_total += $this->totals->get_shipping_tax_total();
+		}
+		return $shipping_total;
 	}
 
 	/**
@@ -521,18 +513,26 @@ class WC_Cart extends WC_Cart_Session {
 	}
 
 	/**
+	 * Get item totals from totals class.
+	 * @return array
+	 */
+	public function get_item_totals() {
+		return $this->totals->get_item_totals();
+	}
+
+	/**
 	 * Get the total discount amount for a specific coupon code.
 	 * @param string $code
 	 * @param bool $ex_tax
 	 * @return float
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
-		$coupon_totals = $this->totals->get_coupons();
-		$coupon_total  = isset( $coupon_totals[ $code ] ) ? $coupon_totals[ $code ] : array( 'total' => 0, 'total_tax' => 0 );
-		$amount        = $coupon_total['total'];
+		$totals     = $this->totals->get_coupon_totals();
+		$tax_totals = $this->totals->get_coupon_tax_totals();
+		$amount     = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
 
 		if ( ! $ex_tax ) {
-			$amount += $coupon_total['total_tax'];
+			$amount += isset( $tax_totals[ $code ] ) ? $tax_totals[ $code ] : 0;
 		}
 
 		return wc_cart_round_discount( $amount, wc_get_price_decimals() );
@@ -544,10 +544,8 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return float
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		$coupon_totals = $this->totals->get_coupons();
-		$coupon_total  = isset( $coupon_totals[ $code ] ) ? $coupon_totals[ $code ] : array( 'total' => 0, 'total_tax' => 0 );
-		$amount        = $coupon_total['total_tax'];
-
+		$tax_totals = $this->totals->get_coupon_tax_totals();
+		$amount     = isset( $tax_totals[ $code ] ) ? $tax_totals[ $code ] : 0;
 		return wc_cart_round_discount( $amount, wc_get_price_decimals() );
 	}
 }

@@ -25,44 +25,6 @@ abstract class WC_Legacy_Cart {
 		_doing_it_wrong( $key, 'Cart properties should not be accessed directly.', '2.7' );
 
 		switch ( $key ) {
-			case 'subtotal' :
-				return $this->totals->get_items_subtotal( true );
-			case 'subtotal_ex_tax' :
-				return $this->totals->get_items_subtotal( false );
-			case 'taxes' :
-				return $this->totals->get_tax_data();
-			case 'cart_contents_total' :
-				return $this->totals->get_items_total( false );
-			case 'discount_cart' :
-				return $this->totals->get_discount_total();
-			case 'discount_cart_tax' :
-				return $this->totals->get_discount_total_tax();
-			case 'cart_contents' :
-				return $this->get_cart();
-			case 'removed_cart_contents' :
-				return $this->items->get_removed_items();
-			case 'tax_total' :
-				return $this->totals->get_tax_total();
-			case 'shipping_tax_total':
-				return $this->totals->get_shipping_tax_total();
-			case 'taxes' :
-				return wc_list_pluck( $this->totals->get_taxes(), 'get_tax_total' );
-			case 'shipping_taxes' :
-				return wc_list_pluck( $this->totals->get_taxes(), 'get_shipping_tax_total' );
-			case 'total' :
-				return $this->totals->get_total();
-			case 'coupon_discount_amounts' :
-				return wp_list_pluck( $this->totals->get_coupons(), 'total' );
-			case 'coupon_discount_tax_amounts' :
-				return wp_list_pluck( $this->totals->get_coupons(), 'total_tax' );
-			case 'applied_coupons' :
-				return array_keys( $this->get_coupons() );
-			case 'coupons' :
-				return $this->get_coupons();
-			case 'shipping_total' :
-				return WC()->shipping->shipping_total;
-			case 'shipping_taxes' :
-				return WC()->shipping->shipping_taxes;
 			case 'cart_session_data' :
 				return array(
 					'cart_contents_total'         => $this->cart_contents_total,
@@ -81,36 +43,61 @@ abstract class WC_Legacy_Cart {
 					'fee_total'                   => $this->fee_total,
 					'fees'                        => $this->fees,
 				);
-			case 'coupon_applied_count' :
-				return wp_list_pluck( $this->totals->get_coupons(), 'count' );
-			case 'fee_total' :
-				return $this->totals->get_fees_total( false );
-			case 'shipping_total' :
-				return $this->totals->get_shipping_total( false );
-			case 'shipping_tax_total' :
-				return $this->totals->get_shipping_tax_total();
+			case 'subtotal' :
+				return $this->get_subtotal( true );
+			case 'subtotal_ex_tax' :
+				return $this->get_subtotal( false );
+			case 'taxes' :
+				return $this->get_taxes();
+			case 'discount_cart' :
+				return $this->get_cart_discount_total();
+			case 'discount_cart_tax' :
+				return $this->get_cart_discount_tax_total();
+			case 'cart_contents' :
+				return $this->get_cart();
+			case 'removed_cart_contents' :
+				return $this->items->get_removed_items();
+			case 'tax_total' :
+				return $this->get_tax_total();
+			case 'shipping_tax_total':
+				return $this->get_shipping_tax_total();
 			case 'prices_include_tax' :
 				return wc_prices_include_tax();
-			break;
 			case 'round_at_subtotal' :
 				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
-			break;
 			case 'tax_display_cart' :
 				return get_option( 'woocommerce_tax_display_cart' );
-			break;
 			case 'dp' :
 				return wc_get_price_decimals();
-			break;
 			case 'display_totals_ex_tax' :
 			case 'display_cart_ex_tax' :
 				return $this->tax_display_cart === 'excl';
-			break;
 			case 'cart_contents_weight' :
 				return $this->get_cart_contents_weight();
-			break;
 			case 'cart_contents_count' :
 				return $this->get_cart_contents_count();
-			break;
+			case 'fee_total' :
+				return $this->totals->get_fees_total();
+			case 'shipping_total' :
+				return $this->get_shipping_total( false );
+			case 'applied_coupons' :
+				return array_keys( $this->get_coupons() );
+			case 'coupons' :
+				return $this->get_coupons();
+			case 'total' :
+				return $this->get_total();
+			case 'cart_contents_total' :
+				return $this->totals->get_items_total();
+			case 'taxes' :
+				return wc_list_pluck( $this->get_taxes(), 'get_tax_total' );
+			case 'shipping_taxes' :
+				return wc_list_pluck( $this->get_taxes(), 'get_shipping_tax_total' );
+			case 'coupon_discount_amounts' :
+				return $this->totals->get_coupon_totals();
+			case 'coupon_discount_tax_amounts' :
+				return $this->totals->get_coupon_tax_totals();
+			case 'coupon_applied_count' :
+				return $this->totals->get_coupon_counts();
 		}
 	}
 
