@@ -37,8 +37,6 @@ before_script:
   - phpenv rehash
 
 script:
-  # Search for PHP syntax errors.
-  - find . \( -name '*.php' -not -path "./vendor/*" \) -exec php -lf {} \;
   # Run PHPUnit tests.
   - phpunit -c phpunit.xml.dist
   # WordPress Coding Standards.
