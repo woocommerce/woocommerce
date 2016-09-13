@@ -86,11 +86,11 @@ class WC_Form_Handler {
 			// Get Value.
 			switch ( $field['type'] ) {
 				case 'checkbox' :
-					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
-				break;
+					$_POST[ $key ] = (int) isset( $_POST[ $key ] );
+					break;
 				default :
 					$_POST[ $key ] = isset( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : '';
-				break;
+					break;
 			}
 
 			// Hook to allow modification of value.
@@ -103,7 +103,7 @@ class WC_Form_Handler {
 
 			if ( ! empty( $_POST[ $key ] ) ) {
 
-				// Validation rules
+				// Validation rules.
 				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
@@ -115,28 +115,30 @@ class WC_Form_Handler {
 								} else {
 									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
 								}
-							break;
+								break;
 							case 'phone' :
 								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
 								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
 									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
 								}
-							break;
+								break;
 							case 'email' :
 								$_POST[ $key ] = strtolower( $_POST[ $key ] );
 
 								if ( ! is_email( $_POST[ $key ] ) ) {
 									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
 								}
-							break;
+								break;
 						}
 					}
 				}
 			}
 		}
 
-		if ( wc_notice_count( 'error' ) == 0 ) {
+		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address );
+
+		if ( 0 === wc_notice_count( 'error' ) ) {
 
 			foreach ( $address as $key => $field ) {
 				update_user_meta( $user_id, $key, $_POST[ $key ] );
