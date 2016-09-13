@@ -446,18 +446,18 @@ class WC_Checkout {
 
 					// Get Value
 					switch ( $field['type'] ) {
-						case "checkbox" :
-							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
-						break;
-						case "multiselect" :
+						case 'checkbox' :
+							$this->posted[ $key ] = (int) isset( $_POST[ $key ] );
+							break;
+						case 'multiselect' :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'wc_clean', $_POST[ $key ] ) ) : '';
-						break;
-						case "textarea" :
+							break;
+						case 'textarea' :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? wp_strip_all_tags( wp_check_invalid_utf8( stripslashes( $_POST[ $key ] ) ) ) : '';
-						break;
+							break;
 						default :
 							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? ( is_array( $_POST[ $key ] ) ? array_map( 'wc_clean', $_POST[ $key ] ) : wc_clean( $_POST[ $key ] ) ) : '';
-						break;
+							break;
 					}
 
 					// Hooks to allow modification of value
@@ -489,24 +489,26 @@ class WC_Checkout {
 									case 'postcode' :
 										$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
-										if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] ) ) :
+										if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] ) ) {
 											wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
-										else :
+										} else {
 											$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] );
-										endif;
-									break;
+										}
+										break;
 									case 'phone' :
 										$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
-										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
+										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) ) {
 											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
-									break;
+										}
+										break;
 									case 'email' :
 										$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
-										if ( ! is_email( $this->posted[ $key ] ) )
+										if ( ! is_email( $this->posted[ $key ] ) ) {
 											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
-									break;
+										}
+										break;
 									case 'state' :
 										// Get valid states
 										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
@@ -516,7 +518,7 @@ class WC_Checkout {
 
 											// Convert value to key if set
 											if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) ) {
-												 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
+												$this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
 											}
 										}
 
@@ -526,7 +528,7 @@ class WC_Checkout {
 												wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ), 'error' );
 											}
 										}
-									break;
+										break;
 								}
 							}
 						}
