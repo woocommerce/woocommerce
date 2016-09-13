@@ -501,7 +501,7 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return float
 	 */
 	public function get_cart_discount_total() {
-		return $this->totals->get_discount_total();
+		return wc_cart_round_discount( array_sum( $this->totals->get_coupon_totals() ) );
 	}
 
 	/**
@@ -509,7 +509,7 @@ class WC_Cart extends WC_Cart_Session {
 	 * @return float
 	 */
 	public function get_cart_discount_tax_total() {
-		return $this->totals->get_discount_total_tax();
+		return wc_cart_round_discount( array_sum( $this->totals->get_coupon_tax_totals() ) );
 	}
 
 	/**

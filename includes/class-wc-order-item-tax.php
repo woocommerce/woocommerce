@@ -89,7 +89,7 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 		global $wpdb;
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $this->get_name(),
+			'order_item_name' => $this->get_rate_code(),
 			'order_item_type' => $this->get_type(),
 			'order_id'        => $this->get_order_id(),
 		) );
@@ -106,7 +106,7 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 		global $wpdb;
 
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $this->get_name(),
+			'order_item_name' => $this->get_rate_code(),
 			'order_item_type' => $this->get_type(),
 			'order_id'        => $this->get_order_id(),
 		), array( 'order_item_id' => $this->get_id() ) );

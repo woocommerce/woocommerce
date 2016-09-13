@@ -242,7 +242,7 @@ class WC_Checkout {
 
 				if ( 'taxable' === $item->get_tax_status() || wc_prices_include_tax() ) {
 					$item->set_subtotal( round( $item_total->subtotal + $item_total->subtotal_tax - wc_round_tax_total( $item_total->subtotal_tax ), wc_get_price_decimals() ) );
-					$item->set_total( round( $item_total->total + $item_total->tax - wc_round_tax_total( $item_total->tax ), wc_get_price_decimals() ) );
+					$item->set_total( round( $item_total->total + $item_total->total_tax - wc_round_tax_total( $item_total->total_tax ), wc_get_price_decimals() ) );
 					$item->set_taxes( array( 'total' => array_map( 'wc_round_tax_total', $item_total->taxes ), 'subtotal' => array_map( 'wc_round_tax_total', $item_total->subtotal_taxes ) ) );
 				} else {
 					$item->set_subtotal( $item_total->subtotal );
@@ -252,6 +252,13 @@ class WC_Checkout {
 
 				$item->set_backorder_meta();
 				$order->add_item( $item );
+			}
+
+			// Store tax rows
+			foreach ( WC()->cart->get_taxes() as $tax_rate_id => $tax_item ) {
+				if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
+					$order->add_item( new WC_Order_Item_Tax( $tax_item ) );
+				}
 			}
 
 			/*// Add fees
@@ -289,20 +296,6 @@ class WC_Checkout {
 					$item->legacy_package_key = $package_key;
 
 					$order->add_item( $item );
-				}
-			}
-
-			// Store tax rows
-			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-				if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					$order->add_item( new WC_Order_Item_Tax( array(
-						'rate_id'            => $tax_rate_id,
-						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
-						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-					) ) );
 				}
 			}
 
