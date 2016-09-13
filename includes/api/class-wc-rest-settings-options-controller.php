@@ -106,7 +106,9 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		foreach ( $settings as $setting_obj ) {
 			$setting = $this->prepare_item_for_response( $setting_obj, $request );
 			$setting = $this->prepare_response_for_collection( $setting );
-			$data[]  = $setting;
+			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
+				$data[]  = $setting;
+			}
 		}
 
 		return rest_ensure_response( $data );
@@ -131,13 +133,25 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		}
 
 		$filtered_settings = array();
-
 		foreach ( $settings as $setting ) {
-			$setting = $this->filter_setting( $setting );
-			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
-				$setting['value']    = WC_Admin_Settings::get_option( $setting['id'] );
-				$filtered_settings[] = $setting;
+			$option_key = $setting['option_key'];
+			$setting    = $this->filter_setting( $setting );
+			$default    = isset( $setting['default'] ) ? $setting['default'] : '';
+			// Get the option value
+			if ( is_array( $option_key ) ) {
+				$option           = get_option( $option_key[0] );
+				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
+			} else {
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
+				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
 			}
+
+			if ( 'multi_select_countries' === $setting['type'] ) {
+				$setting['options'] = WC()->countries->get_countries();
+				$setting['type']    = 'multiselect';
+			}
+
+			$filtered_settings[] = $setting;
 		}
 
 		return $filtered_settings;
@@ -218,10 +232,28 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			return $setting;
 		}
 
-		$update_data = array();
-		$update_data[ $setting['id'] ] = $request['value'];
+		if ( is_callable( array( $this, 'validate_setting_' . $setting['type'] . '_field' ) ) ) {
+			$value = $this->{'validate_setting_' . $setting['type'] . '_field'}( $request['value'], $setting );
+		} else {
+			$value = $this->validate_setting_text_field( $request['value'], $setting );
+		}
 
-		WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+		if ( is_wp_error( $value ) ) {
+			return $value;
+		}
+
+		if ( is_array( $setting['option_key'] ) ) {
+			$setting['value']       = $value;
+			$option_key             = $setting['option_key'];
+			$prev                   = get_option( $option_key[0] );
+			$prev[ $option_key[1] ] = $request['value'];
+			update_option( $option_key[0], $prev );
+		} else {
+			$update_data = array();
+			$update_data[ $setting['option_key'] ] = $value;
+			$setting['value']                      = $value;
+			WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+		}
 
 		$response = $this->prepare_item_for_response( $setting, $request );
 
@@ -237,17 +269,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data          = $this->filter_setting( $item );
-		$data['value'] = WC_Admin_Settings::get_option( $data['id'] );
-
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
+		unset( $item['option_key'] );
+		$data     = $this->filter_setting( $item );
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
 		$response = rest_ensure_response( $data );
-
 		$response->add_links( $this->prepare_links( $data['id'], $request['group'] ) );
-
 		return $response;
 	}
 
@@ -321,6 +348,29 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			unset( $setting['options'] );
 		}
 
+		if ( 'image_width' === $setting['type'] ) {
+			$setting = $this->cast_image_width( $setting );
+		}
+
+		return $setting;
+	}
+
+	/**
+	 * For image_width, Crop can return "0" instead of false -- so we want
+	 * to make sure we return these consistently the same we accept them.
+	 *
+	 * @since 2.7.0
+	 * @param  array $setting
+	 * @return array
+	 */
+	public function cast_image_width( $setting ) {
+		foreach ( array( 'default', 'value' ) as $key ) {
+			if ( isset( $setting[ $key ] ) ) {
+				$setting[ $key ]['width']  = intval( $setting[ $key ]['width'] );
+				$setting[ $key ]['height'] = intval( $setting[ $key ]['height'] );
+				$setting[ $key ]['crop']   = (bool) $setting[ $key ]['crop'];
+			}
+		}
 		return $setting;
 	}
 
@@ -342,6 +392,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			'type',
 			'options',
 			'value',
+			'option_key',
 		) );
 	}
 
@@ -354,18 +405,17 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 */
 	public function is_setting_type_valid( $type ) {
 		return in_array( $type, array(
-			'text',
-			'email',
-			'number',
-			'color',
-			'password',
-			'textarea',
-			'select',
-			'multiselect',
-			'radio',
-			'checkbox',
-			'multi_select_countries',
-			'image_width',
+			'text',         // validates with validate_setting_text_field
+			'email',        // validates with validate_setting_text_field
+			'number',       // validates with validate_setting_text_field
+			'color',        // validates with validate_setting_text_field
+			'password',     // validates with validate_setting_text_field
+			'textarea',     // validates with validate_setting_textarea_field
+			'select',       // validates with validate_setting_select_field
+			'multiselect',  // validates with validate_setting_multiselect_field
+			'radio',        // validates with validate_setting_radio_field (-> validate_setting_select_field)
+			'checkbox',     // validates with validate_setting_checkbox_field
+			'image_width',  // validates with validate_setting_image_width_field
 		) );
 	}
 
@@ -378,7 +428,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'settings',
+			'title'                => 'setting',
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'               => array(
@@ -387,6 +437,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'label'            => array(
 					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
@@ -394,6 +446,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'description'      => array(
 					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
@@ -401,14 +455,19 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'value'          => array(
 					'description'  => __( 'Setting value.', 'woocommerce' ),
 					'type'         => 'mixed',
+					'context'      => array( 'view', 'edit' ),
 				),
 				'default'          => array(
 					'description'  => __( 'Default value for the setting.', 'woocommerce' ),
 					'type'         => 'mixed',
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'tip'              => array(
 					'description'  => __( 'Extra help text explaining the setting.', 'woocommerce' ),
@@ -416,6 +475,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'placeholder'      => array(
 					'description'  => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
@@ -423,6 +484,8 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'type'             => array(
 					'description'  => __( 'Type of setting. Allowed values: text, email, number, color, password, textarea, select, multiselect, radio, image_width, checkbox.', 'woocommerce' ),
@@ -430,10 +493,14 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 				'options'          => array(
 					'description'  => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce' ),
 					'type'         => 'array',
+					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
 				),
 			),
 		);

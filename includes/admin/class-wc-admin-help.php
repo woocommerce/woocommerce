@@ -23,7 +23,7 @@ class WC_Admin_Help {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		add_action( "current_screen", array( $this, 'add_tabs' ), 50 );
+		add_action( 'current_screen', array( $this, 'add_tabs' ), 50 );
 	}
 
 	/**
@@ -182,12 +182,12 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Help &amp; Support', 'woocommerce' ) . '</h2>' .
 				'<p>' . sprintf(
-					__( 'Should you need help understanding, using, or extending WooCommerce, %splease read our documentation%s. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
+					__( 'Should you need help understanding, using, or extending WooCommerce, %1$splease read our documentation%2$s. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
 					'<a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin">',
 					'</a>'
 				) . '</p>' .
 				'<p>' . sprintf(
-					__( 'For further assistance with WooCommerce core you can use the %scommunity forum%s. If you need help with premium add-ons sold by WooCommerce, please %suse our helpdesk%s.', 'woocommerce' ),
+					__( 'For further assistance with WooCommerce core you can use the %1$scommunity forum%2$s. If you need help with premium add-ons sold by WooCommerce, please %3$suse our helpdesk%4$s.', 'woocommerce' ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce">',
 					'</a>',
 					'<a href="https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin">',
@@ -202,7 +202,7 @@ class WC_Admin_Help {
 			'title'     => __( 'Found a bug?', 'woocommerce' ),
 			'content'   =>
 				'<h2>' . __( 'Found a bug?', 'woocommerce' ) . '</h2>' .
-				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
+				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%1$s">Github issues</a>. Ensure you read the <a href="%2$s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%3$s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>',
 
 		) );

@@ -69,8 +69,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			$this->description    = __( 'Order partially refunded emails are sent to customers when their orders are partially refunded.', 'woocommerce' );
 			$this->heading        = $this->heading_partial;
 			$this->subject        = $this->subject_partial;
-		}
-		else {
+		} else {
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
 			$this->description    = __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );

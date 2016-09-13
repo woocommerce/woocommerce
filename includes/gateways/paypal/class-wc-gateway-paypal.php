@@ -34,7 +34,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->has_fields         = false;
 		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->method_title       = __( 'PayPal', 'woocommerce' );
-		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %ssystem status%s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
+		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %1$ssystem status%2$s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
 		$this->supports           = array(
 			'products',
 			'refunds',
@@ -114,7 +114,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( in_array( $country, $home_counties ) ) {
 			return  $url . '/webapps/mpp/home';
-		} else if ( in_array( $country, $countries ) ) {
+		} elseif ( in_array( $country, $countries ) ) {
 			return $url . '/webapps/mpp/paypal-popup';
 		} else {
 			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
@@ -299,7 +299,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
 			case 'successwithwarning':
-				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
+				$order->add_order_note( sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
 				return true;
 			break;
 		}
@@ -330,12 +330,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {
 					case 'Completed' :
-						$order->add_order_note( sprintf( __( 'Payment of %s was captured - Auth ID: %s, Transaction ID: %s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
+						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
 						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
 						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
 					break;
 					default :
-						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %s, Status: %s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
+						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
 					break;
 				}
 			}

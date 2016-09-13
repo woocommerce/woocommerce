@@ -45,7 +45,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
-			// Load shipping methods so we can show any global options they may have.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 			foreach ( $payment_gateways as $gateway ) {
@@ -326,12 +325,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 									case 'status' :
 										echo '<td class="status">';
-
-										if ( $gateway->enabled == 'yes' )
-											echo '<span class="status-enabled tips" data-tip="' . __ ( 'Yes', 'woocommerce' ) . '">' . __ ( 'Yes', 'woocommerce' ) . '</span>';
-										else
-											echo '-';
-
+										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>' : '-';
 										echo '</td>';
 										break;
 

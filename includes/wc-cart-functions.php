@@ -223,9 +223,9 @@ function wc_format_list_of_items( $items ) {
 	foreach ( $items as $key => $item ) {
 		$item_string .= $item;
 
-		if ( $key + 2 === sizeof( $items ) ) {
+		if ( sizeof( $items ) === $key + 2 ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
-		} elseif ( $key + 1 !== sizeof( $items ) ) {
+		} elseif ( sizeof( $items ) !== $key + 1 ) {
 			$item_string .= ', ';
 		}
 	}
@@ -279,8 +279,10 @@ function wc_cart_totals_shipping_html() {
 	foreach ( $packages as $key => $package ) {
 		$chosen_method = wc_get_chosen_shipping_method_for_package( $key, $package );
 		$product_names = array();
+		// @codingStandardsIgnoreStart
 		$package_name  = apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $key + 1 ), 'woocommerce' ), ( $key + 1 ) ), $key, $package );
-
+		// @codingStandardsIgnoreEnd
+		//
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
 				$product_names[] = $values['data']->get_title() . ' &times;' . $values['quantity'];

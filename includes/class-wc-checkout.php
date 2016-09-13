@@ -123,7 +123,7 @@ class WC_Checkout {
 				'type' => 'textarea',
 				'class' => array( 'notes' ),
 				'label' => __( 'Order Notes', 'woocommerce' ),
-				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+				'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
 			),
 		);
 
@@ -137,7 +137,7 @@ class WC_Checkout {
 	 */
 	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
-		do_action('woocommerce_check_cart_items');
+		do_action( 'woocommerce_check_cart_items' );
 	}
 
 	/**
@@ -294,7 +294,7 @@ class WC_Checkout {
 
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-				if ( $tax_rate_id && $tax_rate_id !== apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) ) {
+				if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
 					$order->add_item( new WC_Order_Item_Tax( array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
@@ -383,7 +383,7 @@ class WC_Checkout {
 			}
 
 			// Prevent timeout
-			@set_time_limit(0);
+			@set_time_limit( 0 );
 
 			do_action( 'woocommerce_before_checkout_process' );
 
@@ -430,7 +430,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
 
 				// Skip shipping if not needed
-				if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! WC()->cart->needs_shipping_address() ) ) {
+				if ( 'shipping' === $fieldset_key && ( false == $this->posted['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
 					$skipped_shipping = true;
 					continue;
 				}
@@ -792,7 +792,7 @@ class WC_Checkout {
 
 			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-			if ( $value !== null ) {
+			if ( null !== $value ) {
 				return $value;
 			}
 
@@ -808,7 +808,7 @@ class WC_Checkout {
 						return $meta;
 					}
 
-					if ( $input == 'billing_email' ) {
+					if ( 'billing_email' === $input ) {
 						return $current_user->user_email;
 					}
 				}

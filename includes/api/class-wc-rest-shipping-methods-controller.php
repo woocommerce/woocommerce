@@ -61,7 +61,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 	}
 
     /**
-	 * Check whether a given request has permission to view system status.
+	 * Check whether a given request has permission to view shipping methods.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -113,7 +113,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
         $wc_shipping = WC_Shipping::instance();
         $methods     = $wc_shipping->get_shipping_methods();
         if ( empty( $methods[ $request['id'] ] ) ) {
-            return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+            return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
         }
 
         $method   = $methods[ $request['id'] ];
@@ -125,9 +125,9 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
     /**
      * Prepare a shipping method for response.
      *
-     * @param WP_Comment $method Shipping method object.
-     * @param WP_REST_Request $request Request object.
-     * @return WP_REST_Response $response Response data.
+     * @param  WC_Shipping_Method $method   Shipping method object.
+     * @param  WP_REST_Request    $request  Request object.
+     * @return WP_REST_Response   $response Response data.
      */
     public function prepare_item_for_response( $method, $request ) {
         $data = array(
@@ -146,11 +146,11 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
         $response->add_links( $this->prepare_links( $method, $request ) );
 
         /**
-         * Filter product reviews object returned from the REST API.
+         * Filter shipping methods object returned from the REST API.
          *
-         * @param WP_REST_Response $response The response object.
-         * @param Object           $method   Product review object used to create response.
-         * @param WP_REST_Request  $request  Request object.
+         * @param WP_REST_Response   $response The response object.
+         * @param WC_Shipping_Method $method   Shipping method object used to create response.
+         * @param WP_REST_Request    $request  Request object.
          */
         return apply_filters( 'woocommerce_rest_prepare_shipping_method', $response, $method, $request );
     }
@@ -158,9 +158,9 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
     /**
 	 * Prepare links for the request.
 	 *
-	 * @param Object $method Shipping method object.
-	 * @param WP_REST_Request $request Request object.
-	 * @return array Links for the given product review.
+	 * @param WC_Shipping_Method $method Shipping method object.
+	 * @param WP_REST_Request   $request Request object.
+	 * @return array
 	 */
 	protected function prepare_links( $method, $request ) {
 		$links      = array(

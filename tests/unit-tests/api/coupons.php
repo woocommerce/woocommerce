@@ -75,7 +75,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 			'_links' => array(
 				'self'       => array(
 					array(
-						'href' => rest_url( '/wc/v1/coupons/'. $coupon_1->get_id() ),
+						'href' => rest_url( '/wc/v1/coupons/' . $coupon_1->get_id() ),
 					),
 				),
 				'collection' => array(

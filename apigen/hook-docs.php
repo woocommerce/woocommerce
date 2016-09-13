@@ -12,11 +12,13 @@ class WC_HookFinder {
 
 	private static function get_files( $pattern, $flags = 0, $path = '' ) {
 
-	    if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
+		if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
 
-	        if ( $dir == '\\' || $dir == '/' ) { $dir = ''; } // End IF Statement
+			if ( '\\' == $dir || '/' == $dir ) {
+				$dir = '';
+			}
 
-	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
+	        return self::get_files( basename( $pattern ), $flags, $dir . '/' );
 
 	    } // End IF Statement
 
@@ -102,15 +104,16 @@ class WC_HookFinder {
 
 				foreach ( $tokens as $index => $token ) {
 					if ( is_array( $token ) ) {
-						if ( $token[0] == T_CLASS ) {
+						$trimmed_token_1 = trim( $token[1] );
+						if ( T_CLASS == $token[0] ) {
 							$token_type = 'class';
-						} elseif ( $token[0] == T_FUNCTION ) {
+						} elseif ( T_FUNCTION == $token[0] ) {
 							$token_type = 'function';
-						} elseif ( $token[1] === 'do_action' ) {
+						} elseif ( 'do_action' === $token[1] ) {
 							$token_type = 'action';
-						} elseif ( $token[1] === 'apply_filters' ) {
+						} elseif ( 'apply_filters' === $token[1] ) {
 							$token_type = 'filter';
-						} elseif ( $token_type && ! empty( trim( $token[1] ) ) ) {
+						} elseif ( $token_type && ! empty( $trimmed_token_1 ) ) {
 							switch ( $token_type ) {
 								case 'class' :
 									$current_class = $token[1];

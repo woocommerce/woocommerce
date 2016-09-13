@@ -108,7 +108,7 @@ class WC_Post_types {
 						'add_new_item'               => __( 'Add New Tag', 'woocommerce' ),
 						'new_item_name'              => __( 'New Tag Name', 'woocommerce' ),
 						'popular_items'              => __( 'Popular Tags', 'woocommerce' ),
-						'separate_items_with_commas' => __( 'Separate Tags with commas', 'woocommerce'  ),
+						'separate_items_with_commas' => __( 'Separate Tags with commas', 'woocommerce' ),
 						'add_or_remove_items'        => __( 'Add or remove Tags', 'woocommerce' ),
 						'choose_from_most_used'      => __( 'Choose from the most used tags', 'woocommerce' ),
 						'not_found'                  => __( 'No tags found', 'woocommerce' ),
@@ -225,7 +225,7 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists('product') ) {
+		if ( post_type_exists( 'product' ) ) {
 			return;
 		}
 

@@ -537,10 +537,9 @@ class WC_API_Coupons extends WC_API_Resource {
 					} else {
 						$coupons[] = $edit['coupon'];
 					}
-				}
+				} else {
 
-				// Coupon don't exists / create coupon
-				else {
+					// Coupon don't exists / create coupon
 					$new = $this->create_coupon( array( 'coupon' => $_coupon ) );
 
 					if ( is_wp_error( $new ) ) {

@@ -28,4 +28,6 @@ if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' )
 
 <?php if ( $rating_html = $product->get_rating_html() ) : ?>
 	<?php echo $rating_html; ?>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

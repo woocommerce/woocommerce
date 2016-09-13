@@ -40,11 +40,11 @@ abstract class WC_Session {
 	}
 
 	 /**
-	 * __isset function.
-	 *
-	 * @param mixed $key
-	 * @return bool
-	 */
+	  * __isset function.
+	  *
+	  * @param mixed $key
+	  * @return bool
+	  */
 	public function __isset( $key ) {
 		return isset( $this->_data[ sanitize_title( $key ) ] );
 	}

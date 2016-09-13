@@ -243,7 +243,7 @@ class WC_Form_Handler {
 
 		if ( wc_notice_count( 'error' ) === 0 ) {
 
-			wp_update_user( $user ) ;
+			wp_update_user( $user );
 
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
@@ -372,7 +372,7 @@ class WC_Form_Handler {
 			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
 				// Redirect to success/confirmation/payment page
-				if ( $result['result'] == 'success' ) {
+				if ( 'success' === $result['result'] ) {
 					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
 					wp_redirect( $result['redirect'] );
 					exit();
@@ -463,18 +463,17 @@ class WC_Form_Handler {
 	 */
 	public static function update_cart_action() {
 
-		// Add Discount
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
 			WC()->cart->add_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
-		}
 
-		// Remove Coupon Codes
-		elseif ( isset( $_GET['remove_coupon'] ) ) {
+		} elseif ( isset( $_GET['remove_coupon'] ) ) {
+
+			// Remove Coupon Codes
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
-		}
 
-		// Remove from cart
-		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+		} elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+
+			// Remove from cart
 			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
 
 			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
@@ -498,10 +497,10 @@ class WC_Form_Handler {
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
-		}
 
-		// Undo Cart Item
-		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+
+			// Undo Cart Item
 			$cart_item_key = sanitize_text_field( $_GET['undo_item'] );
 
 			WC()->cart->restore_cart_item( $cart_item_key );
@@ -509,6 +508,7 @@ class WC_Form_Handler {
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : wc_get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
+
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form
@@ -589,7 +589,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( ! $order->has_status( 'completed' ) ) {
+		if ( ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) ) {
 			return;
 		}
 
@@ -924,7 +924,8 @@ class WC_Form_Handler {
 					exit;
 				}
 			} catch ( Exception $e ) {
-				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
+				wc_add_notice( apply_filters( 'login_errors', $e->getMessage() ), 'error' );
+				do_action( 'woocommerce_login_failed' );
 			}
 		}
 	}

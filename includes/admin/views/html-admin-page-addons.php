@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
 			<?php foreach ( $sections as $section_id => $section ) : ?>
-				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php if ( $section_id !== end( $section_keys ) ) echo ' |'; ?></li>
+				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php if ( end( $section_keys ) !== $section_id ) echo ' |'; ?></li>
 			<?php endforeach; ?>
 		</ul>
 		<br class="clear" />
@@ -49,8 +49,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="storefront">
 			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
 			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
-			<p><?php printf( __( 'We recommend Storefront, the %sofficial%s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
-			<p><?php printf( __( 'Storefront is an intuitive, flexible and %sfree%s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+			<p><?php printf( __( 'We recommend Storefront, the %1$sofficial%2$s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
+			<p><?php printf( __( 'Storefront is an intuitive, flexible and %1$sfree%2$s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
 			<p>
 				<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank" class="button"><?php _e( 'Read all about it', 'woocommerce' ) ?></a>
 				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>

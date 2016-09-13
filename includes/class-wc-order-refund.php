@@ -20,7 +20,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	 public function __construct( $read = 0 ) {
 		// Extend order data
-		$this->_data = array_merge( $this->_data, array(
+		$this->data = array_merge( $this->data, array(
 			'amount'      => '',
 			'reason'      => '',
 			'refunded_by' => 0,
@@ -33,7 +33,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_internal_meta_keys = array(
+	protected $internal_meta_keys = array(
 		'_order_currency',
 		'_cart_discount',
 		'_refund_amount',
@@ -99,6 +99,14 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Delete data from the database.
+	 * @since 2.7.0
+	 */
+	public function delete() {
+		wp_delete_post( $this->get_id(), true );
+	}
+
+	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */
@@ -118,7 +126,9 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Get a title for the new post type.
 	 */
 	protected function get_post_title() {
+		// @codingStandardsIgnoreStart
 		return sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -127,7 +137,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_amount( $value ) {
-		$this->_data['amount'] = wc_format_decimal( $value );
+		$this->data['amount'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -135,7 +145,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->_data['amount'], $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->data['amount'], $this );
 	}
 
 	/**
@@ -153,7 +163,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_reason( $value ) {
-		$this->_data['reason'] = $value;
+		$this->data['reason'] = $value;
 	}
 
 	/**
@@ -162,7 +172,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->_data['reason'], $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->data['reason'], $this );
 	}
 
 	/**
@@ -171,7 +181,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_refunded_by( $value ) {
-		$this->_data['refunded_by'] = absint( $value );
+		$this->data['refunded_by'] = absint( $value );
 	}
 
 	/**
@@ -180,7 +190,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->_data['refunded_by'] );
+		return absint( $this->data['refunded_by'] );
 	}
 
 	/**

@@ -388,7 +388,7 @@ class WC_Countries {
 				echo '</optgroup>';
 			else :
 				echo '<option';
-				if ( $selected_country == $key && $selected_state == '*' ) {
+				if ( $selected_country == $key && '*' == $selected_state ) {
 					echo ' selected="selected"';
 				}
 				echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
@@ -969,7 +969,7 @@ class WC_Countries {
 
 			// Default Locale Can be filtered to override fields in get_address_fields().
 			// Countries with no specific locale will use default.
-			$this->locale['default'] = apply_filters('woocommerce_get_country_locale_default', $this->get_default_address_fields() );
+			$this->locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
 
 			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout
 			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) {
@@ -1009,7 +1009,7 @@ class WC_Countries {
 			$address_fields[ $type . $key ] = $value;
 
 			// Add email and phone after company or last
-			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
+			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && end( $keys ) === $key ) ) ) {
 				$address_fields['billing_email'] = array(
 					'label'        => __( 'Email Address', 'woocommerce' ),
 					'required'     => true,

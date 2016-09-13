@@ -18,7 +18,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $data = array(
 		'product_id' => 0,
 		'quantity'   => 0,
 		'variation'  => array(),
@@ -28,7 +28,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * Product this item represents.
 	 * @var WC_Product
 	 */
-	protected $_product = null;
+	protected $product = null;
 
 	/**
 	 * Constructor.
@@ -51,7 +51,7 @@ class WC_Cart_Item implements ArrayAccess {
 			case 'variation_id' :
 				return is_callable( array( $this, 'get_variation_id' ) ) ? $this->get_product()->get_variation_id() : 0;
 		}
-		return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : '';
+		return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : '';
 	}
 
 	/**
@@ -69,7 +69,7 @@ class WC_Cart_Item implements ArrayAccess {
 				$this->set_product( wc_get_product( $value ) );
 				break;
 			default :
-				$this->_data[ $offset ] = $value;
+				$this->data[ $offset ] = $value;
 				break;
 		}
 	}
@@ -80,7 +80,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'data' ) ) || isset( $this->_data[ $offset ] ) ) {
+		if ( in_array( $offset, array( 'data' ) ) || isset( $this->data[ $offset ] ) ) {
 			return true;
 		}
 		return false;
@@ -91,7 +91,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @param string $offset
 	 */
 	public function offsetUnset( $offset ) {
-		unset( $this->_data[ $offset ] );
+		unset( $this->data[ $offset ] );
 	}
 
 	/**
@@ -123,8 +123,8 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @param int $value
 	 */
 	public function set_product( $value ) {
-		$this->_product = $value;
-		$this->_data['product_id'] = is_callable( array( $this->_product, 'get_variation_id' ) ) ? $this->_product->get_variation_id() : $this->_product->get_id();
+		$this->product = $value;
+		$this->data['product_id'] = is_callable( array( $this->product, 'get_variation_id' ) ) ? $this->product->get_variation_id() : $this->product->get_id();
 	}
 
 	/**
@@ -132,7 +132,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return WC_Product
 	 */
 	public function get_product() {
-		return ! is_null( $this->_product ) ? $this->_product : ( $this->_product = wc_get_product( $this->get_product_id() ) );
+		return ! is_null( $this->product ) ? $this->product : ( $this->product = wc_get_product( $this->get_product_id() ) );
 	}
 
 	/**
@@ -140,7 +140,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_data() {
-		return $this->_data;
+		return $this->data;
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_product_id() {
-		return $this->_data['product_id'];
+		return $this->data['product_id'];
 	}
 
 	/**
@@ -156,7 +156,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_quantity() {
-		return $this->_data['quantity'];
+		return $this->data['quantity'];
 	}
 
 	/**
@@ -164,7 +164,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_variation() {
-		return $this->_data['variation'];
+		return $this->data['variation'];
 	}
 
 	/**
@@ -172,8 +172,8 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @param int $value
 	 */
 	public function set_product_id( $value ) {
-		$this->_data['product_id'] = absint( $value );
-		$this->_product = null;
+		$this->data['product_id'] = absint( $value );
+		$this->product = null;
 	}
 
 	/**
@@ -181,7 +181,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @param int $value
 	 */
 	public function set_quantity( $value ) {
-		$this->_data['quantity'] = wc_stock_amount( $value );
+		$this->data['quantity'] = wc_stock_amount( $value );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class WC_Cart_Item implements ArrayAccess {
 	 * @param array $value
 	 */
 	public function set_variation( $value ) {
-		$this->_data['variation'] = (array) $value;
+		$this->data['variation'] = (array) $value;
 	}
 
 	/**
@@ -204,7 +204,7 @@ class WC_Cart_Item implements ArrayAccess {
 			if ( in_array( $key, array( 'quantity', 'product_id', 'variation', 'product' ) ) ) {
 				$this->{ "set_$key" }( $value );
 			} else {
-				$this->_data[ $key ] = $value;
+				$this->data[ $key ] = $value;
 			}
 		}
 	}

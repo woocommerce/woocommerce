@@ -18,7 +18,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $data = array(
 		'rate_code'          => '',
 		'rate_id'            => 0,
 		'label'              => '',
@@ -69,7 +69,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate_code( $value ) {
-		$this->_data['rate_code'] = wc_clean( $value );
+		$this->data['rate_code'] = wc_clean( $value );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_label( $value ) {
-		$this->_data['label'] = wc_clean( $value );
+		$this->data['label'] = wc_clean( $value );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate_id( $value ) {
-		$this->_data['rate_id'] = absint( $value );
+		$this->data['rate_id'] = absint( $value );
 	}
 
 	/**
@@ -96,7 +96,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_total( $value ) {
-		$this->_data['tax_total'] = wc_format_decimal( $value );
+		$this->data['tax_total'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -105,7 +105,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax_total( $value ) {
-		$this->_data['shipping_tax_total'] = wc_format_decimal( $value );
+		$this->data['shipping_tax_total'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_compound( $value ) {
-		$this->_data['compound'] = (bool) $value;
+		$this->data['compound'] = (bool) $value;
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @return string
 	 */
 	public function get_rate_code() {
-		return $this->_data['rate_code'];
+		return $this->data['rate_code'];
 	}
 
 	/**
@@ -156,7 +156,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @return string
 	 */
 	public function get_label() {
-		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce');
+		return $this->data['label'] ? $this->data['label'] : __( 'Tax', 'woocommerce');
 	}
 
 	/**
@@ -164,7 +164,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @return int
 	 */
 	public function get_rate_id() {
-		return absint( $this->_data['rate_id'] );
+		return absint( $this->data['rate_id'] );
 	}
 
 	/**
@@ -172,7 +172,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @return string
 	 */
 	public function get_tax_total() {
-		return wc_format_decimal( $this->_data['tax_total'] );
+		return wc_format_decimal( $this->data['tax_total'] );
 	}
 
 	/**
@@ -180,7 +180,7 @@ class WC_Item_Tax extends WC_Item {
 	 * @return string
 	 */
 	public function get_shipping_tax_total() {
-		return wc_format_decimal( $this->_data['shipping_tax_total'] );
+		return wc_format_decimal( $this->data['shipping_tax_total'] );
 	}
 
 	/**
@@ -188,6 +188,6 @@ class WC_Item_Tax extends WC_Item {
 	 * @return bool
 	 */
 	public function get_compound() {
-		return (bool) $this->_data['compound'];
+		return (bool) $this->data['compound'];
 	}
 }

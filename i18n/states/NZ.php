@@ -25,6 +25,6 @@ $states['NZ'] = array(
 	'WC' => __( 'West Coast', 'woocommerce' ),
 	'CT' => __( 'Canterbury', 'woocommerce' ),
 	'OT' => __( 'Otago', 'woocommerce' ),
-	'SL' => __( 'Southland', 'woocommerce'),
+	'SL' => __( 'Southland', 'woocommerce' ),
 );
 

@@ -21,7 +21,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * Zone Data
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $data = array(
 		'zone_name'      => '',
 		'zone_order'     => 0,
 		'zone_locations' => array(),
@@ -31,7 +31,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * True when location data needs to be re-saved
 	 * @var bool
 	 */
-	private $_locations_changed = false;
+	private $locations_changed = false;
 
 	/**
 	 * Constructor for zones
@@ -59,7 +59,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return array
 	 */
 	public function get_data() {
-		return array_merge( array( 'zone_id' => $this->get_id() ), $this->_data );
+		return array_merge( array( 'id' => $this->get_id(), 'zone_id' => $this->get_id() ), $this->data, array( 'meta_data' => $this->get_meta_data() ) );
 	}
 
 	/**
@@ -170,7 +170,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return string
 	 */
 	public function get_zone_name() {
-		return $this->_data['zone_name'];
+		return $this->data['zone_name'];
 	}
 
 	/**
@@ -178,7 +178,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return int
 	 */
 	public function get_zone_order() {
-		return absint( $this->_data['zone_order'] );
+		return absint( $this->data['zone_order'] );
 	}
 
 	/**
@@ -186,7 +186,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @return array of zone objects
 	 */
 	public function get_zone_locations() {
-		return $this->_data['zone_locations'];
+		return $this->data['zone_locations'];
 	}
 
 	/**
@@ -240,7 +240,9 @@ class WC_Shipping_Zone extends WC_Data {
 
 		if ( sizeof( $location_parts ) > $max ) {
 			$remaining = sizeof( $location_parts ) - $max;
+			// @codingStandardsIgnoreStart
 			return sprintf( _n( '%s and %d other region', '%s and %d other regions', $remaining, 'woocommerce' ), implode( ', ', array_splice( $location_parts, 0, $max ) ), $remaining );
+			// @codingStandardsIgnoreEnd
 		} elseif ( ! empty( $location_parts ) ) {
 			return implode( ', ', $location_parts );
 		} else {
@@ -339,7 +341,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @param string $set
 	 */
 	public function set_zone_name( $set ) {
-		$this->_data['zone_name'] = wc_clean( $set );
+		$this->data['zone_name'] = wc_clean( $set );
 	}
 
 	/**
@@ -347,7 +349,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @param int $set
 	 */
 	public function set_zone_order( $set ) {
-		$this->_data['zone_order'] = absint( $set );
+		$this->data['zone_order'] = absint( $set );
 	}
 
 	/**
@@ -373,8 +375,8 @@ class WC_Shipping_Zone extends WC_Data {
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type ),
 			);
-			$this->_data['zone_locations'][] = (object) $location;
-			$this->_locations_changed = true;
+			$this->data['zone_locations'][] = (object) $location;
+			$this->locations_changed = true;
 		}
 	}
 
@@ -386,10 +388,10 @@ class WC_Shipping_Zone extends WC_Data {
 		if ( ! is_array( $types ) ) {
 			$types = array( $types );
 		}
-		foreach ( $this->_data['zone_locations'] as $key => $values ) {
+		foreach ( $this->data['zone_locations'] as $key => $values ) {
 			if ( in_array( $values->type, $types ) ) {
-				unset( $this->_data['zone_locations'][ $key ] );
-				$this->_locations_changed = true;
+				unset( $this->data['zone_locations'][ $key ] );
+				$this->locations_changed = true;
 			}
 		}
 	}
@@ -405,7 +407,7 @@ class WC_Shipping_Zone extends WC_Data {
 			$this->add_location( $location['code'], $location['type'] );
 		}
 
-		$this->_locations_changed = true;
+		$this->locations_changed = true;
 	}
 
 	/**
@@ -420,7 +422,7 @@ class WC_Shipping_Zone extends WC_Data {
 				$this->add_location( $location->location_code, $location->location_type );
 			}
 		}
-		$this->_locations_changed = false;
+		$this->locations_changed = false;
 	}
 
 	/**
@@ -429,7 +431,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 */
 	private function save_locations() {
-		if ( ! $this->_locations_changed || null === $this->get_id() ) {
+		if ( ! $this->locations_changed || null === $this->get_id() ) {
 			return false;
 		}
 		global $wpdb;

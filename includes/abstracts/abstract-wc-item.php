@@ -73,8 +73,8 @@ class WC_Item extends WC_Data implements ArrayAccess {
 			return;
 		}
 
-		if ( array_key_exists( $offset, $this->_data ) ) {
-			$this->_data[ $offset ] = $value;
+		if ( array_key_exists( $offset, $this->data ) ) {
+			$this->data[ $offset ] = $value;
 		}
 
 		$this->update_meta_data( '_' . $offset, $value );
@@ -86,12 +86,12 @@ class WC_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function offsetUnset( $offset ) {
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
-			$this->_meta_data = array();
+			$this->meta_data = array();
 			return;
 		}
 
-		if ( array_key_exists( $offset, $this->_data ) ) {
-			unset( $this->_data[ $offset ] );
+		if ( array_key_exists( $offset, $this->data ) ) {
+			unset( $this->data[ $offset ] );
 		}
 
 		$this->delete_meta_data( '_' . $offset );
@@ -103,10 +103,10 @@ class WC_Item extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->_data ) ) {
+		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
-		return array_key_exists( '_' . $offset, wp_list_pluck( $this->_meta_data, 'value', 'key' ) );
+		return array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -115,7 +115,7 @@ class WC_Item extends WC_Data implements ArrayAccess {
 	 */
 	private function get_item_meta_array() {
 		$return = array();
-		foreach ( $this->_meta_data as $meta ) {
+		foreach ( $this->meta_data as $meta ) {
 			$return[ $meta->id ] = $meta;
 		}
 		return $return;
@@ -128,14 +128,14 @@ class WC_Item extends WC_Data implements ArrayAccess {
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		$meta_values = wp_list_pluck( $this->_meta_data, 'value', 'key' );
+		$meta_values = wp_list_pluck( $this->meta_data, 'value', 'key' );
 
 		if ( 'item_meta_array' === $offset ) {
 			return $this->get_item_meta_array();
 		} elseif ( 'item_meta' === $offset ) {
 			return $meta_values;
-		} elseif ( array_key_exists( $offset, $this->_data ) ) {
-			return $this->_data[ $offset ];
+		} elseif ( array_key_exists( $offset, $this->data ) ) {
+			return $this->data[ $offset ];
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			return $meta_values[ '_' . $offset ];
 		}

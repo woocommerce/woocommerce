@@ -841,26 +841,31 @@ function wc_create_refund( $args = array() ) {
 			$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
 			foreach ( $items as $item_id => $item ) {
-				if ( ! isset( $args['line_items'][ $item_id ] ) || ( empty( $args['line_items'][ $item_id ]['qty'] ) && empty( $args['line_items'][ $item_id ]['refund_total'] ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) ) {
+				if ( ! isset( $args['line_items'][ $item_id ] ) ) {
 					continue;
 				}
 
-				if ( ! isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
-					$args['line_items'][ $item_id ]['refund_tax'] = array();
+				$qty          = $args['line_items'][ $item_id ]['qty'];
+				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
+				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
+
+				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					continue;
 				}
 
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
-
 				$refunded_item->set_id( 0 );
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
-				$refunded_item->set_total( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
-				$refunded_item->set_total_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
-				$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $args['line_items'][ $item_id ]['refund_tax'] ) ) );
+				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
+				$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $refund_tax ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_tax ) ) );
 
 				if ( is_callable( array( $refunded_item, 'set_subtotal' ) ) ) {
-					$refunded_item->set_subtotal( wc_format_refund_total( $args['line_items'][ $item_id ]['refund_total'] ) );
-					$refunded_item->set_subtotal_tax( wc_format_refund_total( array_sum( $args['line_items'][ $item_id ]['refund_tax'] ) ) );
+					$refunded_item->set_subtotal( wc_format_refund_total( $refund_total ) );
+				}
+
+				if ( is_callable( array( $refunded_item, 'set_quantity' ) ) ) {
+					$refunded_item->set_quantity( $qty );
 				}
 
 				$refund->add_item( $refunded_item );
@@ -1133,9 +1138,9 @@ function wc_reduce_stock_levels( $order_id ) {
 				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
 
 				if ( ! empty( $item['variation_id'] ) ) {
-					$order->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
+					$order->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
 				} else {
-					$order->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
+					$order->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
 				}
 
 				if ( $new_stock < 0 ) {

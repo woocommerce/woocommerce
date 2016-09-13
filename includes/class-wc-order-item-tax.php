@@ -18,7 +18,7 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $data = array(
 		'order_id'           => 0,
 		'rate_code'          => '',
 		'rate_id'            => 0,
@@ -32,21 +32,21 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 	 * May store an order to prevent retriving it multiple times.
 	 * @var object
 	 */
-	protected $_order;
+	protected $order;
 
 	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $_cache_group = 'order_itemmeta';
+	protected $cache_group = 'order_itemmeta';
 
 	/**
 	 * Meta type. This should match up with
 	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
-	protected $_meta_type = 'order_item';
+	protected $meta_type = 'order_item';
 
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data.
@@ -69,7 +69,7 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 	 * @return object
 	 */
 	public function get_order() {
-		return $this->_order ? $this->_order : $this->_order = wc_get_order( $this->get_order_id() );
+		return $this->order ? $this->order : $this->order = wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -200,7 +200,7 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_id( $value ) {
-		$this->_data['order_id'] = absint( $value );
+		$this->data['order_id'] = absint( $value );
 	}
 
 	/*
@@ -210,10 +210,18 @@ class WC_Order_Item_Tax extends WC_Item_Tax {
 	*/
 
 	/**
+	 * Get label.
+	 * @return string
+	 */
+	public function get_label() {
+		return $this->data['label'] ? $this->data['label'] : __( 'Tax', 'woocommerce' );
+	}
+
+	/**
 	 * Get order ID this meta belongs to.
 	 * @return int
 	 */
 	public function get_order_id() {
-		return $this->_data['order_id'];
+		return $this->data['order_id'];
 	}
 }

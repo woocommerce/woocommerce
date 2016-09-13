@@ -100,7 +100,7 @@ class WC_Shortcodes {
 		if ( $products->have_posts() ) {
 			?>
 
-			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop" ); ?>
+			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>
 
 			<?php woocommerce_product_loop_start(); ?>
 
@@ -112,11 +112,11 @@ class WC_Shortcodes {
 
 			<?php woocommerce_product_loop_end(); ?>
 
-			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop" ); ?>
+			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop", $atts ); ?>
 
 			<?php
 		} else {
-			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results" );
+			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results", $atts );
 		}
 
 		woocommerce_reset_loop();
@@ -231,14 +231,8 @@ class WC_Shortcodes {
 			'ids'        => '',
 		), $atts, 'product_categories' );
 
-		if ( isset( $atts['ids'] ) ) {
-			$ids = explode( ',', $atts['ids'] );
-			$ids = array_map( 'trim', $ids );
-		} else {
-			$ids = array();
-		}
-
-		$hide_empty = ( $atts['hide_empty'] == true || $atts['hide_empty'] == 1 ) ? 1 : 0;
+		$ids        = array_filter( array_map( 'trim', explode( ',', $atts['ids'] ) ) );
+		$hide_empty = ( true === $atts['hide_empty'] || 'true' === $atts['hide_empty'] || 1 === $atts['hide_empty'] || '1' === $atts['hide_empty'] ) ? 1 : 0;
 
 		// get terms and workaround WP bug with parents/pad counts
 		$args = array(
@@ -258,7 +252,7 @@ class WC_Shortcodes {
 
 		if ( $hide_empty ) {
 			foreach ( $product_categories as $key => $category ) {
-				if ( $category->count == 0 ) {
+				if ( 0 == $category->count ) {
 					unset( $product_categories[ $key ] );
 				}
 			}
@@ -696,7 +690,7 @@ class WC_Shortcodes {
 		$preselected_id = '0';
 
 		// check if sku is a variation
-		if ( isset( $atts['sku'] ) && $single_product->have_posts() && $single_product->post->post_type === 'product_variation' ) {
+		if ( isset( $atts['sku'] ) && $single_product->have_posts() && 'product_variation' === $single_product->post->post_type ) {
 
 			$variation = new WC_Product_Variation( $single_product->post->ID );
 			$attributes = $variation->get_variation_attributes();
@@ -730,7 +724,10 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		while ( $single_product->have_posts() ) : $single_product->the_post(); wp_enqueue_script( 'wc-single-product' ); ?>
+		while ( $single_product->have_posts() ) :
+			$single_product->the_post();
+			wp_enqueue_script( 'wc-single-product' );
+			?>
 
 			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
 

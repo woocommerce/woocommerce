@@ -17,28 +17,28 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * May store an order to prevent retriving it multiple times.
 	 * @var object
 	 */
-	protected $_order;
+	protected $order;
 
 	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $_cache_group = 'order_itemmeta';
+	protected $cache_group = 'order_itemmeta';
 
 	/**
 	 * Meta type. This should match up with
 	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
-	protected $_meta_type = 'order_item';
+	protected $meta_type = 'order_item';
 
 	/**
 	 * Data array.
 	 * @since 2.7.0
 	 * @var array
 	 */
-	 protected $_data = array(
+	 protected $data = array(
 		'order_id'     => 0,
 		'name'         => '',
 		'product_id'   => 0,
@@ -344,7 +344,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_id( $value ) {
-		$this->_data['order_id'] = absint( $value );
+		$this->data['order_id'] = absint( $value );
 	}
 
 	/**
@@ -353,7 +353,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_subtotal( $value ) {
-		$this->_data['subtotal'] = wc_format_decimal( $value );
+		$this->data['subtotal'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -362,7 +362,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
-		$this->_data['total'] = wc_format_decimal( $value );
+		$this->data['total'] = wc_format_decimal( $value );
 
 		// Subtotal cannot be less than total
 		if ( ! $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
@@ -376,7 +376,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_subtotal_tax( $value ) {
-		$this->_data['subtotal_tax'] = wc_format_decimal( $value );
+		$this->data['subtotal_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -385,7 +385,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_total_tax( $value ) {
-		$this->_data['total_tax'] = wc_format_decimal( $value );
+		$this->data['total_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -408,7 +408,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 				$tax_data['subtotal'] = $tax_data['total'];
 			}
 		}
-		$this->_data['taxes'] = $tax_data;
+		$this->data['taxes'] = $tax_data;
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
 		$this->set_subtotal_tax( array_sum( $tax_data['subtotal'] ) );
 	}
@@ -424,7 +424,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return object
 	 */
 	public function get_order() {
-		return $this->_order ? $this->_order : $this->_order = wc_get_order( $this->get_order_id() );
+		return $this->order ? $this->order : $this->order = wc_get_order( $this->get_order_id() );
 	}
 
 	/**
@@ -432,7 +432,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return int
 	 */
 	public function get_order_id() {
-		return $this->_data['order_id'];
+		return $this->data['order_id'];
 	}
 
 	/**
@@ -440,7 +440,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return string
 	 */
 	public function get_subtotal() {
-		return wc_format_decimal( $this->_data['subtotal'] );
+		return wc_format_decimal( $this->data['subtotal'] );
 	}
 
 	/**
@@ -448,7 +448,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return string
 	 */
 	public function get_subtotal_tax() {
-		return wc_format_decimal( $this->_data['subtotal_tax'] );
+		return wc_format_decimal( $this->data['subtotal_tax'] );
 	}
 
 	/**
@@ -456,7 +456,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return string
 	 */
 	public function get_total() {
-		return wc_format_decimal( $this->_data['total'] );
+		return wc_format_decimal( $this->data['total'] );
 	}
 
 	/**
@@ -464,7 +464,7 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return string
 	 */
 	public function get_total_tax() {
-		return wc_format_decimal( $this->_data['total_tax'] );
+		return wc_format_decimal( $this->data['total_tax'] );
 	}
 
 	/**
@@ -472,6 +472,6 @@ class WC_Order_Item_Product extends WC_Item_Product {
 	 * @return array
 	 */
 	public function get_taxes() {
-		return $this->_data['taxes'];
+		return $this->data['taxes'];
 	}
 }

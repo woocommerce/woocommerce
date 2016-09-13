@@ -18,7 +18,7 @@ class WC_Item_Product extends WC_Item {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	 protected $_data = array(
+	protected $data = array(
 		'name'         => '',
 		'product_id'   => 0,
 		'variation_id' => 0,
@@ -29,7 +29,7 @@ class WC_Item_Product extends WC_Item {
 	 * Product this item represents.
 	 * @var WC_Product
 	 */
-	protected $_product = null;
+	protected $product = null;
 
 	/**
 	 * offsetGet for ArrayAccess/Backwards compatibility.
@@ -42,7 +42,7 @@ class WC_Item_Product extends WC_Item {
 			case 'data' :
 				return $this->get_product();
 		}
-		return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : '';
+		return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : '';
 	}
 
 	/**
@@ -57,7 +57,7 @@ class WC_Item_Product extends WC_Item {
 				$this->set_product( $value );
 				break;
 			default :
-				$this->_data[ $offset ] = $value;
+				$this->data[ $offset ] = $value;
 				break;
 		}
 	}
@@ -68,7 +68,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'data' ) ) || isset( $this->_data[ $offset ] ) ) {
+		if ( in_array( $offset, array( 'data' ) ) || isset( $this->data[ $offset ] ) ) {
 			return true;
 		}
 		return false;
@@ -79,7 +79,7 @@ class WC_Item_Product extends WC_Item {
 	 * @param string $offset
 	 */
 	public function offsetUnset( $offset ) {
-		unset( $this->_data[ $offset ] );
+		unset( $this->data[ $offset ] );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return WC_Product
 	 */
 	public function get_product() {
-		return ! is_null( $this->_product ) ? $this->_product : ( $this->_product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() ) );
+		return ! is_null( $this->product ) ? $this->product : ( $this->product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() ) );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class WC_Item_Product extends WC_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
-		$this->_data['name'] = wc_clean( $value );
+		$this->data['name'] = wc_clean( $value );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WC_Item_Product extends WC_Item {
 		if ( 0 >= $value ) {
 			$this->error( 'line_item_product_invalid_quantity', __( 'Quantity must be positive', 'woocommerce' ) );
 		}
-		$this->_data['quantity'] = wc_stock_amount( $value );
+		$this->data['quantity'] = wc_stock_amount( $value );
 	}
 
 	/**
@@ -150,7 +150,7 @@ class WC_Item_Product extends WC_Item {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
 			$this->error( 'line_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
-		$this->_data['tax_class'] = $value;
+		$this->data['tax_class'] = $value;
 	}
 
 	/**
@@ -162,7 +162,7 @@ class WC_Item_Product extends WC_Item {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'line_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
-		$this->_data['product_id'] = absint( $value );
+		$this->data['product_id'] = absint( $value );
 	}
 
 	/**
@@ -174,7 +174,7 @@ class WC_Item_Product extends WC_Item {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
 			$this->error( 'line_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
 		}
-		$this->_data['variation_id'] = absint( $value );
+		$this->data['variation_id'] = absint( $value );
 	}
 
 	/**
@@ -196,7 +196,7 @@ class WC_Item_Product extends WC_Item {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$this->error( 'line_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
-		$this->_product = $product;
+		$this->product = $product;
 		$this->set_product_id( $product->get_id() );
 		$this->set_name( $product->get_title() );
 		$this->set_tax_class( $product->get_tax_class() );
@@ -215,7 +215,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return string
 	 */
 	public function get_name() {
-		return $this->_data['name'];
+		return $this->data['name'];
 	}
 
 	/**
@@ -231,7 +231,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return int
 	 */
 	public function get_product_id() {
-		return absint( $this->_data['product_id'] );
+		return absint( $this->data['product_id'] );
 	}
 
 	/**
@@ -239,7 +239,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return int
 	 */
 	public function get_variation_id() {
-		return absint( $this->_data['variation_id'] );
+		return absint( $this->data['variation_id'] );
 	}
 
 	/**
@@ -247,7 +247,7 @@ class WC_Item_Product extends WC_Item {
 	 * @return int
 	 */
 	public function get_quantity() {
-		return wc_stock_amount( $this->_data['quantity'] );
+		return wc_stock_amount( $this->data['quantity'] );
 	}
 
 	/**
@@ -255,6 +255,6 @@ class WC_Item_Product extends WC_Item {
 	 * @return string
 	 */
 	public function get_tax_class() {
-		return $this->_data['tax_class'];
+		return $this->data['tax_class'];
 	}
 }

@@ -159,7 +159,6 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, 'attribute_pa_size', 'large' );
 
 		// Add the variation meta to the main product
-
 		update_post_meta( $product_id, '_max_price_variation_id', $variation_id );
 
 		return new WC_Product_Variable( $product_id );

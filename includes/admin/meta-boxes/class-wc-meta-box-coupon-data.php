@@ -174,7 +174,7 @@ class WC_Meta_Box_Coupon_Data {
 					'label'             => __( 'Email restrictions', 'woocommerce' ),
 					'placeholder'       => __( 'No restrictions', 'woocommerce' ),
 					'description'       => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
-					'value'             => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
+					'value'             => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
 					'desc_tip'          => true,
 					'type'              => 'email',
 					'class'             => '',
@@ -196,7 +196,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array(
 					'id'                => 'usage_limit',
 					'label'             => __( 'Usage limit per coupon', 'woocommerce' ),
-					'placeholder'       => _x('Unlimited usage', 'placeholder', 'woocommerce'),
+					'placeholder'       => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ),
 					'description'       => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ),
 					'type'              => 'number',
 					'desc_tip'          => true,
