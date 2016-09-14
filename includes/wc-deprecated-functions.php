@@ -92,7 +92,7 @@ function woocommerce_get_formatted_product_name( $product ) {
  * @access public
  */
 function woocommerce_legacy_paypal_ipn() {
-	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
+	if ( ! empty( $_GET['paypalListener'] ) && 'paypal_standard_IPN' === $_GET['paypalListener'] ) {
 
 		WC()->payment_gateways();
 
@@ -509,7 +509,7 @@ global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
 	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
+	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

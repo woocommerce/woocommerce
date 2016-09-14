@@ -41,43 +41,43 @@ class WC_Meta_Box_Order_Data {
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'country' => array(
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
 				'class'   => 'js_field-country select short',
 				'type'    => 'select',
-				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
+				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
-				'show'  => false
+				'show'  => false,
 			),
 			'email' => array(
 				'label' => __( 'Email', 'woocommerce' ),
@@ -90,43 +90,43 @@ class WC_Meta_Box_Order_Data {
 		self::$shipping_fields = apply_filters( 'woocommerce_admin_shipping_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'  => false
+				'show'  => false,
 			),
 			'country' => array(
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
 				'type'    => 'select',
 				'class'   => 'js_field-country select short',
-				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries()
+				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
-				'show'  => false
+				'show'  => false,
 			),
 		) );
 	}
@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
+		$payment_method = $order->get_payment_method() ? $order->get_payment_method() : '';
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -166,7 +166,7 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php echo esc_html( sprintf( _x( '%s #%s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
+				<h2><?php echo esc_html( sprintf( _x( '%1$s #%2$s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
@@ -180,8 +180,8 @@ class WC_Meta_Box_Order_Data {
 							}
 						}
 
-						if ( $order->paid_date ) {
-							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), strtotime( $order->paid_date ) ), date_i18n( get_option( 'time_format' ), strtotime( $order->paid_date ) ) );
+						if ( $order->get_date_paid() ) {
+							printf( ' ' . _x( 'on %1$s @ %2$s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
 						}
 
 						echo '. ';
@@ -219,10 +219,11 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( ! empty( $order->customer_user ) ) {
-									$args = array( 'post_status' => 'all',
+								if ( $order->get_user_id() ) {
+									$args = array(
+										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->customer_user )
+										'_customer_user' => absint( $order->get_user_id() ),
 									);
 									printf( '<a href="%s">%s &rarr;</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -233,8 +234,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( ! empty( $order->customer_user ) ) {
-								$user_id     = absint( $order->customer_user );
+							if ( $order->get_user_id() ) {
+								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
 								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 							}
@@ -266,8 +267,8 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'billing_' . $key;
 
-									if ( $order->$field_name ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 									}
 								}
 
@@ -280,7 +281,7 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
 								}
-								if ( ! isset( $field['id'] ) ){
+								if ( ! isset( $field['id'] ) ) {
 									$field['id'] = '_billing_' . $key;
 								}
 								switch ( $field['type'] ) {
@@ -301,7 +302,7 @@ class WC_Meta_Box_Order_Data {
 										$found_method 	= false;
 
 										foreach ( $payment_gateways as $gateway ) {
-											if ( $gateway->enabled == "yes" ) {
+											if ( 'yes' === $gateway->enabled ) {
 												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
 												if ( $payment_method == $gateway->id ) {
 													$found_method = true;
@@ -352,8 +353,8 @@ class WC_Meta_Box_Order_Data {
 
 										$field_name = 'shipping_' . $key;
 
-										if ( ! empty( $order->$field_name ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 										}
 									}
 								}
@@ -372,7 +373,7 @@ class WC_Meta_Box_Order_Data {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
 									}
-									if ( ! isset( $field['id'] ) ){
+									if ( ! isset( $field['id'] ) ) {
 										$field['id'] = '_shipping_' . $key;
 									}
 
@@ -433,7 +434,7 @@ class WC_Meta_Box_Order_Data {
 
 		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
+				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
 				}
 				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
@@ -444,7 +445,7 @@ class WC_Meta_Box_Order_Data {
 
 		if ( ! empty( self::$shipping_fields ) ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
+				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
 				}
 				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
@@ -454,7 +455,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
+			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling
@@ -464,7 +465,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_method       = wc_clean( $_POST['_payment_method'] );
 			$payment_method_title = $payment_method;
 
-			if ( isset( $methods) && isset( $methods[ $payment_method ] ) ) {
+			if ( isset( $methods ) && isset( $methods[ $payment_method ] ) ) {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
 			}
 
@@ -474,7 +475,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time('timestamp');
+			$date = current_time( 'timestamp' );
 		} else {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}

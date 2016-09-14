@@ -41,5 +41,4 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}
-
 }

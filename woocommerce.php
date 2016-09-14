@@ -7,7 +7,7 @@
  * Author: WooThemes
  * Author URI: https://woothemes.com
  * Requires at least: 4.4
- * Tested up to: 4.5
+ * Tested up to: 4.6
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
@@ -188,6 +188,7 @@ final class WooCommerce {
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
+		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
 	}
 
 	/**
@@ -236,6 +237,9 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
+
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
@@ -332,7 +336,7 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
+			$this->customer = new WC_Customer( get_current_user_id(), true );   // Customer class, handles data such as customer location
 		}
 
 		$this->load_webhooks();
@@ -465,7 +469,7 @@ final class WooCommerce {
 				'fields'         => 'ids',
 				'post_type'      => 'shop_webhook',
 				'post_status'    => 'publish',
-				'posts_per_page' => -1
+				'posts_per_page' => -1,
 			) );
 			set_transient( 'woocommerce_webhook_ids', $webhooks );
 		}
@@ -481,11 +485,14 @@ final class WooCommerce {
 	public function wpdb_table_fix() {
 		global $wpdb;
 		$wpdb->payment_tokenmeta    = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
 		$wpdb->order_itemmeta       = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]             = 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]             = 'woocommerce_termmeta';
 		$wpdb->tables[]             = 'woocommerce_order_itemmeta';
+
+		if ( get_option( 'db_version' ) < 34370 ) {
+			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
+			$wpdb->tables[]             = 'woocommerce_termmeta';
+		}
 	}
 
 	/**

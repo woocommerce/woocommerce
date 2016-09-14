@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'taxable'  => __( 'Taxable', 'woocommerce' ),
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' )
+							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="tax_class" name="_tax_class">
 					<?php
 						$options = array(
-							'' => __( 'Standard', 'woocommerce' )
+							'' => __( 'Standard', 'woocommerce' ),
 						);
 
 						$tax_classes = WC_Tax::get_tax_classes();
@@ -126,7 +126,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
-						echo '<option value="' . esc_attr( $value->slug ) . '">'. $value->name .'</option>';
+						echo '<option value="' . esc_attr( $value->slug ) . '">' . $value->name . '</option>';
 					}
 				?>
 				</select>
@@ -143,10 +143,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
 						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' )
+						'hidden'  => __( 'Hidden', 'woocommerce' ),
 					) );
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -164,10 +164,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 					$options = array(
 						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' )
+						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) .'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -176,7 +176,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="stock_fields">
 
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
 				<label class="alignleft manage_stock">
 					<input type="checkbox" name="_manage_stock" value="1">
 					<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
@@ -200,10 +200,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$options = array(
 						'no'     => __( 'Do not allow', 'woocommerce' ),
 						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'    => __( 'Allow', 'woocommerce' )
+						'yes'    => __( 'Allow', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>

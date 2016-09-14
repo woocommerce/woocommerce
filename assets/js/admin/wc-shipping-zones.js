@@ -213,14 +213,14 @@
 							return parseInt( method.method_order, 10 );
 						} );
 
-						_.each( shipping_methods, function( shipping_method, instance_id ) {
+						_.each( shipping_methods, function( shipping_method ) {
 							var class_name = 'method_disabled';
 
 							if ( 'yes' === shipping_method.enabled ) {
 								class_name = 'method_enabled';
 							}
 
-							$method_list.append( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
+							$method_list.append( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + shipping_method.instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 						} );
 					} else {
 						$method_list.append( '<li class="wc-shipping-zone-method">' + data.strings.no_shipping_methods_offered + '</li>' );

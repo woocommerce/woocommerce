@@ -56,7 +56,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'min-width:350px;',
 				'default'  => 'GB',
 				'type'     => 'single_select_country',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -67,12 +67,12 @@ class WC_Settings_General extends WC_Settings_Page {
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
 				'css'      => 'min-width: 350px;',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 				'options'  => array(
 					'all'        => __( 'Sell to All Countries', 'woocommerce' ),
 					'all_except' => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
-					'specific'   => __( 'Sell to Specific Countries', 'woocommerce' )
-				)
+					'specific'   => __( 'Sell to Specific Countries', 'woocommerce' ),
+				),
 			),
 
 			array(
@@ -81,7 +81,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'      => 'woocommerce_all_except_countries',
 				'css'     => 'min-width: 350px;',
 				'default' => '',
-				'type'    => 'multi_select_countries'
+				'type'    => 'multi_select_countries',
 			),
 
 			array(
@@ -90,7 +90,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'      => 'woocommerce_specific_allowed_countries',
 				'css'     => 'min-width: 350px;',
 				'default' => '',
-				'type'    => 'multi_select_countries'
+				'type'    => 'multi_select_countries',
 			),
 
 			array(
@@ -106,7 +106,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'all'      => __( 'Ship to all countries', 'woocommerce' ),
 					'specific' => __( 'Ship to specific countries only', 'woocommerce' ),
 					'disabled' => __( 'Disable shipping &amp; shipping calculations', 'woocommerce' ),
-				)
+				),
 			),
 
 			array(
@@ -115,13 +115,13 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'      => 'woocommerce_specific_ship_to_countries',
 				'css'     => '',
 				'default' => '',
-				'type'    => 'multi_select_countries'
+				'type'    => 'multi_select_countries',
 			),
 
 			array(
 				'title'    => __( 'Default Customer Location', 'woocommerce' ),
 				'id'       => 'woocommerce_default_customer_address',
-				'desc_tip' =>  __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
+				'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
 				'default'  => 'geolocation',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
@@ -138,7 +138,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
 				'id'      => 'woocommerce_calc_taxes',
 				'default' => 'no',
-				'type'    => 'checkbox'
+				'type'    => 'checkbox',
 			),
 
 			array(
@@ -146,7 +146,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc'    => __( 'Enable site-wide store notice text', 'woocommerce' ),
 				'id'      => 'woocommerce_demo_store',
 				'default' => 'no',
-				'type'    => 'checkbox'
+				'type'    => 'checkbox',
 			),
 
 			array(
@@ -156,10 +156,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
 				'type'     => 'textarea',
 				'css'     => 'width:350px; height: 65px;',
-				'autoload' => false
+				'autoload' => false,
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'general_options'),
+			array( 'type' => 'sectionend', 'id' => 'general_options' ),
 
 			array( 'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
 
@@ -171,8 +171,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				'default'  => 'GBP',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
-				'desc_tip' =>  true,
-				'options'  => $currency_code_options
+				'desc_tip' => true,
+				'options'  => $currency_code_options,
 			),
 
 			array(
@@ -187,9 +187,9 @@ class WC_Settings_General extends WC_Settings_Page {
 					'left'        => __( 'Left', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . '99.99)',
 					'right'       => __( 'Right', 'woocommerce' ) . ' (99.99' . get_woocommerce_currency_symbol() . ')',
 					'left_space'  => __( 'Left with space', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ' 99.99)',
-					'right_space' => __( 'Right with space', 'woocommerce' ) . ' (99.99 ' . get_woocommerce_currency_symbol() . ')'
+					'right_space' => __( 'Right with space', 'woocommerce' ) . ' (99.99 ' . get_woocommerce_currency_symbol() . ')',
 				),
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -199,7 +199,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'width:50px;',
 				'default'  => ',',
 				'type'     => 'text',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -209,7 +209,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'width:50px;',
 				'default'  => '.',
 				'type'     => 'text',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 			),
 
 			array(
@@ -218,15 +218,15 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'       => 'woocommerce_price_num_decimals',
 				'css'      => 'width:50px;',
 				'default'  => '2',
-				'desc_tip' =>  true,
+				'desc_tip' => true,
 				'type'     => 'number',
 				'custom_attributes' => array(
 					'min'  => 0,
-					'step' => 1
-				)
+					'step' => 1,
+				),
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'pricing_options' )
+			array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
 		) );
 
@@ -243,7 +243,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	 */
 	public function color_picker( $name, $id, $value, $desc = '' ) {
 		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
-			<input name="' . esc_attr( $id ). '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
+			<input name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
 	}
 
@@ -255,7 +255,6 @@ class WC_Settings_General extends WC_Settings_Page {
 
 		WC_Admin_Settings::save_fields( $settings );
 	}
-
 }
 
 endif;

@@ -32,14 +32,14 @@ class WC_Geolocation {
 		'ipecho'            => 'http://ipecho.net/plain',
 		'ident'             => 'http://ident.me',
 		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
-		'ip.appspot'        => 'http://ip.appspot.com'
+		'ip.appspot'        => 'http://ip.appspot.com',
 	);
 
 	/** @var array API endpoints for geolocating an IP address */
 	private static $geoip_apis = array(
 		'freegeoip'        => 'https://freegeoip.net/json/%s',
 		'telize'           => 'http://www.telize.com/geoip/%s',
-		'geoip-api.meteor' => 'http://geoip-api.meteor.com/lookup/%s'
+		'geoip-api.meteor' => 'http://geoip-api.meteor.com/lookup/%s',
 	);
 
 	/**
@@ -156,7 +156,7 @@ class WC_Geolocation {
 
 		return array(
 			'country' => $country_code,
-			'state'   => ''
+			'state'   => '',
 		);
 	}
 
@@ -176,7 +176,7 @@ class WC_Geolocation {
 	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
 	 */
 	public static function update_database() {
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 
 		if ( ! is_callable( 'gzopen' ) ) {
 			$logger->add( 'geolocation', 'Server does not support gzopen' );
@@ -187,7 +187,7 @@ class WC_Geolocation {
 
 		$tmp_databases = array(
 			'v4' => download_url( self::GEOLITE_DB ),
-			'v6' => download_url( self::GEOLITE_IPV6_DB )
+			'v6' => download_url( self::GEOLITE_IPV6_DB ),
 		);
 
 		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {

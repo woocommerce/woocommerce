@@ -7,16 +7,16 @@ class WC_Mock_WC_Data extends WC_Data {
 	/**
 	 * Data array
 	 */
-	protected $_data = array(
-		'id'      => 0,
-		'content' => '',
+	protected $data = array(
+		'content'    => '',
+		'bool_value' => false,
 	);
 
 	// see WC_Data
-	protected $_cache_group = '';
-	protected $_meta_type = 'post';
+	protected $cache_group = '';
+	protected $meta_type = 'post';
 	protected $object_id_field_for_meta = '';
-	protected $_internal_meta_keys = array();
+	protected $internal_meta_keys = array();
 
 	/*
 	|--------------------------------------------------------------------------
@@ -33,7 +33,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @param string $meta_type
 	 */
 	function set_meta_type( $meta_type ) {
-		$this->_meta_type = $meta_type;
+		$this->meta_type = $meta_type;
 	}
 
 	/**
@@ -56,17 +56,10 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple read.
 	 */
 	public function __construct( $id = '' ) {
+		parent::__construct();
 		if ( ! empty( $id ) ) {
 			$this->read( $id );
 		}
-	}
-
-	/**
-	 * Simple get ID.
-	 * @return integer
-	 */
-	public function get_id() {
-		return intval( $this->_data['id'] );
 	}
 
 	/**
@@ -74,15 +67,34 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @return string
 	 */
 	public function get_content() {
-		return $this->_data['content'];
+		return $this->data['content'];
 	}
 
 	/**
-	 * SImple set content.
+	 * Simple set content.
 	 * @param string $content
 	 */
 	public function set_content( $content ) {
-		$this->_data['content'] = $content;
+		$this->data['content'] = $content;
+	}
+
+	/**
+	 * Simple get bool value.
+	 * @return bool
+	 */
+	public function get_bool_value() {
+		return $this->data['bool_value'];
+	}
+
+	/**
+	 * Simple set bool value.
+	 * @return bool
+	 */
+	public function set_bool_value( $value ) {
+		if ( ! is_bool( $value ) ) {
+			$this->error( 'invalid_bool_value', 'O noes' );
+		}
+		$this->data['bool_value'] = $value;
 	}
 
 	/**
@@ -91,7 +103,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 */
 	public function get_data() {
 		return array_merge(
-			$this->_data,
+			$this->data,
 			array(
 				'meta_data' => $this->get_meta_data(),
 			)
@@ -102,13 +114,13 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple create.
 	 */
 	public function create() {
-		if ( 'user' === $this->_meta_type ) {
+		if ( 'user' === $this->meta_type ) {
 			$content_id = wc_create_new_customer( $this->get_content(), 'username-' . time(), 'hunter2' );
 		} else {
-			$content_id = wp_insert_post( array ( 'post_title' => $this->get_content() ) );
+			$content_id = wp_insert_post( array( 'post_title' => $this->get_content() ) );
 		}
 		if ( $content_id ) {
-			$this->_data['id'] = $content_id;
+			$this->set_id( $content_id );
 		}
 	}
 
@@ -116,18 +128,19 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple read.
 	 */
 	public function read( $id ) {
+		$this->set_defaults();
 
-		if ( 'user' === $this->_meta_type ) {
+		if ( 'user' === $this->meta_type ) {
 			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
 				return;
 			}
-			$this->_data['id'] = absint( $user_object->ID );
+			$this->set_id( absint( $user_object->ID ) );
 			$this->set_content( $user_object->user_email );
 		} else {
 			if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
 				return;
 			}
-			$this->_data['id'] = absint( $post_object->ID );
+			$this->set_id( absint( $post_object->ID ) );
 			$this->set_content( $post_object->post_title );
 		}
 
@@ -141,7 +154,7 @@ class WC_Mock_WC_Data extends WC_Data {
 		global $wpdb;
 		$content_id = $this->get_id();
 
-		if ( 'user' === $this->_meta_type ) {
+		if ( 'user' === $this->meta_type ) {
 			wp_update_user( array( 'ID' => $customer_id, 'user_email' => $this->get_content() ) );
 		} else {
 			wp_update_post( array( 'ID' => $content_id, 'post_title' => $this->get_content() ) );
@@ -152,7 +165,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * Simple delete.
 	 */
 	public function delete() {
-		if ( 'user' === $this->_meta_type ) {
+		if ( 'user' === $this->meta_type ) {
 			wp_delete_user( $this->get_id() );
 		} else {
 			wp_delete_post( $this->get_id() );
@@ -170,5 +183,4 @@ class WC_Mock_WC_Data extends WC_Data {
 		}
 		$this->save_meta_data();
 	}
-
 }

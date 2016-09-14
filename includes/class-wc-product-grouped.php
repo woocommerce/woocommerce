@@ -95,17 +95,15 @@ class WC_Product_Grouped extends WC_Product {
 
 			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 ) {
+				if ( '' !== $sale_price && $sale_price >= 0 ) {
 					$is_on_sale = true;
 				}
 			}
-
 		} else {
 
 			if ( $this->sale_price && $this->sale_price == $this->price ) {
 				$is_on_sale = true;
 			}
-
 		}
 
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
@@ -150,7 +148,7 @@ class WC_Product_Grouped extends WC_Product {
 
 		if ( '' !== $min_price ) {
 			$price   = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
-			$is_free = $min_price == 0 && $max_price == 0;
+			$is_free = ( 0 == $min_price && 0 == $max_price );
 
 			if ( $is_free ) {
 				$price = apply_filters( 'woocommerce_grouped_free_price_html', __( 'Free!', 'woocommerce' ), $this );

@@ -26,7 +26,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	public function __construct() {
 
 		$this->id                 = 'bacs';
-		$this->icon               = apply_filters('woocommerce_bacs_icon', '');
+		$this->icon               = apply_filters( 'woocommerce_bacs_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = __( 'BACS', 'woocommerce' );
 		$this->method_description = __( 'Allows payments by BACS, more commonly known as direct bank/wire transfer.', 'woocommerce' );
@@ -49,8 +49,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'sort_code'      => $this->get_option( 'sort_code' ),
 					'bank_name'      => $this->get_option( 'bank_name' ),
 					'iban'           => $this->get_option( 'iban' ),
-					'bic'            => $this->get_option( 'bic' )
-				)
+					'bic'            => $this->get_option( 'bic' ),
+				),
 			)
 		);
 
@@ -73,7 +73,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable Bank Transfer', 'woocommerce' ),
-				'default' => 'no'
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -97,7 +97,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 			),
 			'account_details' => array(
-				'type'        => 'account_details'
+				'type'        => 'account_details',
 			),
 		);
 
@@ -214,7 +214,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'bank_name'      => $bank_names[ $i ],
 					'sort_code'      => $sort_codes[ $i ],
 					'iban'           => $ibans[ $i ],
-					'bic'            => $bics[ $i ]
+					'bic'            => $bics[ $i ],
 				);
 			}
 		}
@@ -246,11 +246,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 
-		if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+		if ( ! $sent_to_admin && 'bacs' === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
 			if ( $this->instructions ) {
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
-			$this->bank_details( $order->id );
+			$this->bank_details( $order->get_id() );
 		}
 
 	}
@@ -270,7 +270,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order 		= wc_get_order( $order_id );
 
 		// Get the order country and country $locale
-		$country 	= $order->billing_country;
+		$country 	= $order->get_billing_country();
 		$locale		= $this->get_country_locale();
 
 		// Get sortcode label in the $locale array and use appropriate one
@@ -293,22 +293,22 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 				// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
-					'account_number'=> array(
+					'account_number' => array(
 						'label' => __( 'Account Number', 'woocommerce' ),
-						'value' => $bacs_account->account_number
+						'value' => $bacs_account->account_number,
 					),
 					'sort_code'     => array(
 						'label' => $sortcode,
-						'value' => $bacs_account->sort_code
+						'value' => $bacs_account->sort_code,
 					),
 					'iban'          => array(
 						'label' => __( 'IBAN', 'woocommerce' ),
-						'value' => $bacs_account->iban
+						'value' => $bacs_account->iban,
 					),
 					'bic'           => array(
 						'label' => __( 'BIC', 'woocommerce' ),
-						'value' => $bacs_account->bic
-					)
+						'value' => $bacs_account->bic,
+					),
 				), $order_id );
 
 				foreach ( $account_fields as $field_key => $field ) {
@@ -337,7 +337,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order->update_status( 'on-hold', __( 'Awaiting BACS payment', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();
@@ -345,7 +345,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Return thankyou redirect
 		return array(
 			'result'    => 'success',
-			'redirect'  => $this->get_return_url( $order )
+			'redirect'  => $this->get_return_url( $order ),
 		);
 
 	}

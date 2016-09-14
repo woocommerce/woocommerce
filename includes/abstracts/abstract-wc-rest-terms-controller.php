@@ -124,7 +124,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -162,7 +162,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -181,7 +181,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -200,7 +200,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -217,7 +217,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		// Get taxonomy.
 		$taxonomy = $this->get_taxonomy( $request );
 		if ( ! $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Check permissions for a single term.
@@ -225,7 +225,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$term = get_term( $id, $taxonomy );
 
 			if ( ! $term || $term->taxonomy !== $taxonomy ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 
 			return wc_rest_check_product_term_permissions( $taxonomy, $context, $term->term_id );
@@ -370,7 +370,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$parent = get_term( (int) $request['parent'], $taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 
 			$args['parent'] = $parent->term_id;
@@ -474,7 +474,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$parent = get_term( (int) $request['parent'], $taxonomy );
 
 			if ( ! $parent ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$prepared_args['parent'] = $parent->term_id;

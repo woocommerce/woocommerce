@@ -12,10 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h3><?php printf( __( '"%s" Tax Rates', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 
-<table class="wc_tax_rates wc_input_table sortable widefat">
+<table class="wc_tax_rates wc_input_table widefat">
 	<thead>
 		<tr>
-			<th class="sort">&nbsp;</th>
 			<th width="8%"><a href="https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes" target="_blank"><?php _e( 'Country&nbsp;Code', 'woocommerce' ); ?></a>&nbsp;<?php echo wc_help_tip( __( 'A 2 digit country code, e.g. US. Leave blank to apply to all.', 'woocommerce' ) ); ?></th>
 			<th width="8%"><?php _e( 'State&nbsp;Code', 'woocommerce' ); ?>&nbsp;<?php echo wc_help_tip( __( 'A 2 digit state code, e.g. AL. Leave blank to apply to all.', 'woocommerce' ) ); ?></th>
 			<th><?php _e( 'ZIP/Postcode', 'woocommerce' ); ?>&nbsp;<?php echo wc_help_tip( __( 'Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) and ranges for numeric postcodes (e.g. 12345...12350) can also be used.', 'woocommerce' ) ); ?></th>
@@ -29,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tfoot>
 		<tr>
-			<th colspan="10">
+			<th colspan="9">
 				<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
 				<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
 				<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
@@ -39,15 +38,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tfoot>
 	<tbody id="rates">
 		<tr>
-			<th colspan="10" style="text-align: center;"><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></th>
+			<th colspan="9" style="text-align: center;"><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></th>
 		</tr>
 	</tbody>
 </table>
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
-		<td class="sort"></td>
-
 		<td class="country">
 			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" style="text-transform:uppercase" />
 		</td>
@@ -88,7 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-tax-table-row-empty">
 	<tr>
-		<th colspan="10" style="text-align:center"><?php esc_html_e( 'No Matching Tax Rates Found.', 'woocommerce' ); ?></th>
+		<th colspan="9" style="text-align:center"><?php esc_html_e( 'No Matching Tax Rates Found.', 'woocommerce' ); ?></th>
 	</tr>
 </script>
 

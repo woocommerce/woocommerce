@@ -87,7 +87,7 @@ class WC_Admin_API_Keys {
 			'description'   => '',
 			'permissions'   => '',
 			'truncated_key' => '',
-			'last_access'   => ''
+			'last_access'   => '',
 		);
 
 		if ( 0 == $key_id ) {

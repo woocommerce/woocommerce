@@ -68,7 +68,7 @@ class WC_Tracker {
 				'blocking'    => false,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body'        => json_encode( $params ),
-				'cookies'     => array()
+				'cookies'     => array(),
 			)
 		);
 	}
@@ -168,7 +168,7 @@ class WC_Tracker {
 		}
 
 		$wp_data['memory_limit'] = size_format( $memory );
-		$wp_data['debug_mode']   = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
+		$wp_data['debug_mode']   = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'Yes' : 'No';
 		$wp_data['locale']       = get_locale();
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
@@ -216,7 +216,7 @@ class WC_Tracker {
 	 */
 	private static function get_all_plugins() {
 		// Ensure get_plugins function is loaded
-		if( ! function_exists( 'get_plugins' ) ) {
+		if ( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
 		}
 
@@ -242,10 +242,10 @@ class WC_Tracker {
 			}
 			if ( in_array( $k, $active_plugins_keys ) ) {
 				// Remove active plugins from list so we can show active and inactive separately
-				unset( $plugins[$k] );
-				$active_plugins[$k] = $formatted;
+				unset( $plugins[ $k ] );
+				$active_plugins[ $k ] = $formatted;
 			} else {
-				$plugins[$k] = $formatted;
+				$plugins[ $k ] = $formatted;
 			}
 		}
 
@@ -309,7 +309,7 @@ class WC_Tracker {
 		$active_gateways = array();
 		$gateways        = WC()->payment_gateways->payment_gateways();
 		foreach ( $gateways as $id => $gateway ) {
-			if ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) {
+			if ( isset( $gateway->enabled ) && 'yes' === $gateway->enabled ) {
 				$active_gateways[ $id ] = array( 'title' => $gateway->title, 'supports' => $gateway->supports );
 			}
 		}
@@ -325,7 +325,7 @@ class WC_Tracker {
 		$active_methods   = array();
 		$shipping_methods = WC()->shipping->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
-			if ( isset( $shipping_method->enabled ) && $shipping_method->enabled == 'yes' ) {
+			if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
 				$active_methods[ $id ] = array( 'title' => $shipping_method->title, 'tax_status' => $shipping_method->tax_status );
 			}
 		}
@@ -350,7 +350,7 @@ class WC_Tracker {
 			'download_require_login'                => get_option( 'woocommerce_downloads_require_login' ),
 			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
 			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
-			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout'),
+			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout' ),
 			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
 			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
@@ -382,13 +382,13 @@ class WC_Tracker {
 					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 					$theme_file = get_template_directory() . '/woocommerce/' . $file;
 				} else {
 					$theme_file = false;
 				}
 
-				if ( $theme_file !== false ) {
+				if ( false !== $theme_file ) {
 					$override_data[] = basename( $theme_file );
 				}
 			}

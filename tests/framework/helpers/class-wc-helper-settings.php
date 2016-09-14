@@ -30,19 +30,23 @@ class WC_Helper_Settings {
 			'bad'         => 'value',
 			'label'       => __( 'Test Extension', 'woocommerce' ),
 			'description' => __( 'My awesome test settings.', 'woocommerce' ),
+			'option_key'  => '',
 		);
 		$groups[] = array(
 			'id'          => 'sub-test',
 			'parent_id'   => 'test',
 			'label'       => __( 'Sub test', 'woocommerce' ),
 			'description' => '',
+			'option_key'  => '',
 		);
 		$groups[] = array(
 			'id'    => 'coupon-data',
 			'label' => __( 'Coupon Data', 'woocommerce' ),
+			'option_key'  => '',
 		);
 		$groups[] = array(
 			'id' => 'invalid',
+			'option_key'  => '',
 		);
 		return $groups;
 	}
@@ -66,6 +70,7 @@ class WC_Helper_Settings {
 				'subcategories' => __( 'Show categories &amp; subcategories', 'woocommerce' ),
 				'both'          => __( 'Show both', 'woocommerce' ),
 			),
+			'option_key'  => 'woocommerce_shop_page_display',
 		);
 		$settings[] = array(
 			'id'            => 'woocommerce_enable_lightbox',
@@ -74,8 +79,8 @@ class WC_Helper_Settings {
 			'default'       => 'yes',
 			'tip'           => __( 'Product gallery images will open in a lightbox.', 'woocommerce' ),
 			'type'          => 'checkbox',
+			'option_key'    => 'woocommerce_enable_lightbox',
 		);
 		return $settings;
 	}
-
 }

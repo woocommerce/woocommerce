@@ -27,8 +27,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Active Filters', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

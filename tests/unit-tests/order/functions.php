@@ -109,7 +109,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order ) );
 
 		// Assert that wc_get_order() accepts a order post id.
-		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->id ) );
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->get_id() ) );
 
 		// Assert that a non-shop_order post returns false
 		$post = $this->factory->post->create_and_get( array( 'post_type' => 'post' ) );
@@ -132,7 +132,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
-		update_post_meta( $order->id, '_payment_tokens', array( $token->get_id() ) );
+		update_post_meta( $order->get_id(), '_payment_tokens', array( $token->get_id() ) );
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}
@@ -152,5 +152,4 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}
-
 }

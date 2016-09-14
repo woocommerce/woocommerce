@@ -6,9 +6,9 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
+@import 'bourbon';
+@import 'mixins';
+@import 'variables';
 
 /**
  * Style begins
@@ -41,10 +41,10 @@
 				text-align: right !important; // Important to overwrite order status inline styling
 
 				&.order-actions {
-					text-align: left !important;
+					text-align: left !important; // This must always align left on handheld
 				}
 
-				&:before {
+				&::before {
 					content: attr(data-title) ': ';
 					font-weight: 700;
 					float: left;
@@ -52,15 +52,15 @@
 
 				&.product-remove,
 				&.actions {
-					&:before {
+					&::before {
 						display: none;
 					}
 				}
 			}
 
-			&:nth-child(2n) {
+			&:nth-child( 2n ) {
 				td {
-					background-color: rgba(0,0,0,0.025);
+					background-color: rgba(0, 0, 0, 0.025);
 				}
 			}
 		}
@@ -72,13 +72,13 @@
 				&.order-actions {
 					text-align: left;
 
-					&:before {
+					&::before {
 						display: none;
 					}
 
 					.button {
 						float: none;
-						margin: .125em .25em .125em 0;
+						margin: 0.125em 0.25em 0.125em 0;
 					}
 				}
 			}
@@ -99,7 +99,7 @@
 	/**
 	 * Products
 	 */
-	&, &[class*="columns-"] {
+	&, &[class*='columns-'] {
 		ul.products {
 			li.product {
 				width: 48%;
@@ -107,9 +107,9 @@
 				clear: both;
 				margin: 0 0 2.992em;
 
-				&:nth-child(2n) {
+				&:nth-child( 2n ) {
 					float: right;
-					clear: none !important;
+					clear: none !important; // This should never clear.
 				}
 			}
 		}
@@ -142,7 +142,7 @@
 			.coupon {
 				float: none;
 				@include clearfix();
-				padding-bottom: .5em;
+				padding-bottom: 0.5em;
 
 				input,
 				.button,

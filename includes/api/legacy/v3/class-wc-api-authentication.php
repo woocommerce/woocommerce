@@ -87,7 +87,6 @@ class WC_API_Authentication {
 		}
 
 		// if the above is not present, we will do full basic auth
-
 		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {
 			$this->exit_with_unauthorized_headers();
 		}
@@ -136,7 +135,7 @@ class WC_API_Authentication {
 
 		$params = WC()->api->server->params['GET'];
 
-		$param_names =  array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
+		$param_names = array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
 
 		// Check for required OAuth parameters
 		foreach ( $param_names as $param_name ) {
@@ -258,7 +257,7 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
+		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
 			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
 		}
 

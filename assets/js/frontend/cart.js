@@ -70,9 +70,10 @@ jQuery( function( $ ) {
 		// Error message collection
 		var $error = $( '.woocommerce-error', $html );
 		var $message = $( '.woocommerce-message', $html );
+		var $info = $( '.woocommerce-info', $html );
 
 		// Remove errors
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
+		$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 
 		if ( $new_form.length === 0 ) {
 			// If the checkout is also displayed on this page, trigger reload instead.
@@ -88,8 +89,12 @@ jQuery( function( $ ) {
 			// Display errors
 			if ( $error.length > 0 ) {
 				show_notice( $error, $( '.cart-empty' ).closest( '.woocommerce' ) );
-			} else if ( $message.length > 0 ) {
+			}
+			if ( $message.length > 0 ) {
 				show_notice( $message, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			}
+			if ( $info.length > 0 ) {
+				show_notice( $info, $( '.cart-empty' ).closest( '.woocommerce' ) );
 			}
 		} else {
 			// If the checkout is also displayed on this page, trigger update event.
@@ -102,8 +107,12 @@ jQuery( function( $ ) {
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
-			} else if ( $message.length > 0 ) {
+			}
+			if ( $message.length > 0 ) {
 				show_notice( $message );
+			}
+			if ( $info.length > 0 ) {
+				show_notice( $info );
 			}
 
 			update_cart_totals_div( $new_totals );
@@ -131,7 +140,7 @@ jQuery( function( $ ) {
 		if ( ! $target ) {
 			$target = $( '.shop_table.cart' ).closest( 'form' );
 		}
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
+		$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 		$target.before( html_element );
 	};
 
@@ -354,8 +363,9 @@ jQuery( function( $ ) {
 			var $clicked = $( 'input[type=submit][clicked=true]' );
 
 			if ( 0 === $form.find( '.shop_table.cart' ).length ) {
-				return false;
+				return;
 			}
+
 			if ( is_blocked( $form ) ) {
 				return false;
 			}

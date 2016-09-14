@@ -25,5 +25,5 @@ $states['MY'] = array(
 	'SGR' => __( 'Selangor', 'woocommerce' ),
 	'TRG' => __( 'Terengganu', 'woocommerce' ),
 	'PJY' => __( 'Putrajaya', 'woocommerce' ),
-	'KUL' => __( 'Kuala Lumpur', 'woocommerce' )
+	'KUL' => __( 'Kuala Lumpur', 'woocommerce' ),
 );

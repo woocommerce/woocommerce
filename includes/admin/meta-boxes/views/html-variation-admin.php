@@ -40,7 +40,6 @@ extract( $variation_data );
 					foreach ( $post_terms as $term ) {
 						echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
-
 				} else {
 
 					$options = wc_get_text_attributes( $attribute['value'] );
@@ -49,7 +48,6 @@ extract( $variation_data );
 						$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
 						echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 					}
-
 				}
 
 				echo '</select>';
@@ -61,7 +59,7 @@ extract( $variation_data );
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button tips <?php if ( $_thumbnail_id > 0 ) echo 'remove'; ?>" data-tip="<?php if ( $_thumbnail_id > 0 ) { echo __( 'Remove this image', 'woocommerce' ); } else { echo __( 'Upload an image', 'woocommerce' ); } ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
+				<a href="#" class="upload_image_button tips <?php echo ( $_thumbnail_id > 0 ) ? 'remove' : ''; ?>" data-tip="<?php echo ( $_thumbnail_id > 0 ) ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php echo ( ! empty( $image ) ) ? esc_attr( $image ) : esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
 			</p>
 			<?php if ( wc_product_sku_enabled() ) : ?>
 				<p class="sku form-row form-row-last">
@@ -105,7 +103,7 @@ extract( $variation_data );
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Sale end date', 'woocommerce' ); ?></label>
-						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo esc_attr_x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo esc_attr_x( 'To&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 				</div>
 
@@ -212,7 +210,7 @@ extract( $variation_data );
 						'name' 				=> 'variable_shipping_class[' . $loop . ']',
 						'id'				=> '',
 						'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
-						'echo'				=> 0
+						'echo'				=> 0,
 					);
 
 					echo wp_dropdown_categories( $args );
@@ -267,7 +265,7 @@ extract( $variation_data );
 									if ( ! is_array( $file ) ) {
 										$file = array(
 											'file' => $file,
-											'name' => ''
+											'name' => '',
 										);
 									}
 									include( 'html-product-variation-download.php' );
@@ -281,7 +279,7 @@ extract( $variation_data );
 									<a href="#" class="button insert" data-row="<?php
 										$file = array(
 											'file' => '',
-											'name' => ''
+											'name' => '',
 										);
 										ob_start();
 										include( 'html-product-variation-download.php' );

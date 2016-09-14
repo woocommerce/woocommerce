@@ -118,7 +118,7 @@ class WC_API extends WC_Legacy_API {
 		$this->rest_api_includes();
 
 		// Init REST API routes.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
 	/**
@@ -141,6 +141,7 @@ class WC_API extends WC_Legacy_API {
 		// Abstract controllers.
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-posts-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
 
@@ -163,10 +164,17 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-options-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zones-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-locations-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-methods-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-tax-classes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-payment-gateways-controller.php' );
 	}
 
 	/**
@@ -196,10 +204,17 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Reports_Controller',
 			'WC_REST_Settings_Controller',
 			'WC_REST_Settings_Options_Controller',
+			'WC_REST_Shipping_Zones_Controller',
+			'WC_REST_Shipping_Zone_Locations_Controller',
+			'WC_REST_Shipping_Zone_Methods_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
 			'WC_REST_Webhook_Deliveries_Controller',
 			'WC_REST_Webhooks_Controller',
+			'WC_REST_System_Status_Controller',
+			'WC_REST_System_Status_Tools_Controller',
+			'WC_REST_Shipping_Methods_Controller',
+			'WC_REST_Payment_Gateways_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -215,7 +230,12 @@ class WC_API extends WC_Legacy_API {
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
-			new WC_Register_WP_Admin_Settings( $page );
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
 	}
 

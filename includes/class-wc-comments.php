@@ -236,9 +236,13 @@ class WC_Comments {
 	 * @param int $post_id
 	 */
 	public static function clear_transients( $post_id ) {
-		delete_post_meta( $post_id, '_wc_average_rating' );
-		delete_post_meta( $post_id, '_wc_rating_count' );
-		delete_post_meta( $post_id, '_wc_review_count' );
+
+		if ( 'product' === get_post_type( $post_id ) ) {
+			delete_post_meta( $post_id, '_wc_average_rating' );
+			delete_post_meta( $post_id, '_wc_rating_count' );
+			delete_post_meta( $post_id, '_wc_review_count' );
+			WC_Product::sync_average_rating( $post_id );
+		}
 	}
 
 	/**

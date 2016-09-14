@@ -33,7 +33,7 @@ class WC_Report_Stock extends WP_List_Table {
 		parent::__construct( array(
 			'singular'  => __( 'Stock', 'woocommerce' ),
 			'plural'    => __( 'Stock', 'woocommerce' ),
-			'ajax'      => false
+			'ajax'      => false,
 		) );
 	}
 
@@ -51,7 +51,7 @@ class WC_Report_Stock extends WP_List_Table {
 	 */
 	public function display_tablenav( $position ) {
 
-		if ( $position != 'top' ) {
+		if ( 'top' !== $position ) {
 			parent::display_tablenav( $position );
 		}
 	}
@@ -80,7 +80,7 @@ class WC_Report_Stock extends WP_List_Table {
 			$product = wc_get_product( $item->id );
 		}
 
-		switch( $column_name ) {
+		switch ( $column_name ) {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {
@@ -132,14 +132,14 @@ class WC_Report_Stock extends WP_List_Table {
 						$actions['edit'] = array(
 							'url'       => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
 							'name'      => __( 'Edit', 'woocommerce' ),
-							'action'    => "edit"
+							'action'    => "edit",
 						);
 
 						if ( $product->is_visible() ) {
 							$actions['view'] = array(
 								'url'       => get_permalink( $action_id ),
 								'name'      => __( 'View', 'woocommerce' ),
-								'action'    => "view"
+								'action'    => "view",
 							);
 						}
 
@@ -189,7 +189,7 @@ class WC_Report_Stock extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $this->max_items,
 			'per_page'    => $per_page,
-			'total_pages' => ceil( $this->max_items / $per_page )
+			'total_pages' => ceil( $this->max_items / $per_page ),
 		) );
 	}
 }

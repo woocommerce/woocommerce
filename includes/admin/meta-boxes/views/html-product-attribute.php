@@ -31,7 +31,7 @@
 									<?php
 									$args = array(
 										'orderby'    => 'name',
-										'hide_empty' => 0
+										'hide_empty' => 0,
 									);
 									$all_terms = get_terms( $taxonomy, apply_filters( 'woocommerce_product_attribute_terms', $args ) );
 									if ( $all_terms ) {

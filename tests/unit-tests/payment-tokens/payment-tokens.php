@@ -18,12 +18,12 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 */
 	function test_wc_payment_tokens_get_order_tokens() {
 		$order = WC_Helper_Order::create_order();
-		$this->assertEmpty( WC_Payment_Tokens::get_order_tokens( $order->id ) );
+		$this->assertEmpty( WC_Payment_Tokens::get_order_tokens( $order->get_id() ) );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
-		update_post_meta( $order->id, '_payment_tokens', array( $token->get_id() ) );
+		update_post_meta( $order->get_id(), '_payment_tokens', array( $token->get_id() ) );
 
-		$this->assertCount( 1, WC_Payment_Tokens::get_order_tokens( $order->id ) );
+		$this->assertCount( 1, WC_Payment_Tokens::get_order_tokens( $order->get_id() ) );
 
 	}
 
@@ -177,5 +177,4 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$this->assertTrue( $token->is_default() );
 		$this->assertFalse( $token2->is_default() );
 	}
-
 }

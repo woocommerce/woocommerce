@@ -22,11 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product;
 
-$heading = apply_filters( 'woocommerce_product_additional_information_heading', __( 'Additional Information', 'woocommerce' ) );
+$heading = esc_html( apply_filters( 'woocommerce_product_additional_information_heading', __( 'Additional Information', 'woocommerce' ) ) );
 
 ?>
 
-<?php if ( $heading ): ?>
+<?php if ( $heading ) : ?>
 	<h2><?php echo $heading; ?></h2>
 <?php endif; ?>
 
