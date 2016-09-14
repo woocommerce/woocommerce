@@ -237,7 +237,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_quantity( $value ) {
-		if ( 0 >= $value ) {
+		if ( 0 > $value ) {
 			$this->error( 'order_item_product_invalid_quantity', __( 'Quantity must be positive', 'woocommerce' ) );
 		}
 		$this->_data['quantity'] = wc_stock_amount( $value );

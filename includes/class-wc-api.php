@@ -174,6 +174,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-payment-gateways-controller.php' );
 	}
 
 	/**
@@ -213,6 +214,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_System_Status_Controller',
 			'WC_REST_System_Status_Tools_Controller',
 			'WC_REST_Shipping_Methods_Controller',
+			'WC_REST_Payment_Gateways_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -228,7 +230,13 @@ class WC_API extends WC_Legacy_API {
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
-			new WC_Register_WP_Admin_Settings( $page );
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
 	}
+
 }

@@ -310,7 +310,7 @@ class WC_Admin_Post_Types {
 				echo '</strong>';
 
 				if ( $post->post_parent > 0 ) {
-					echo '&nbsp;&nbsp;&larr; <a href="'. get_edit_post_link( $post->post_parent ) .'">'. get_the_title( $post->post_parent ) .'</a>';
+					echo '&nbsp;&nbsp;&larr; <a href="' . get_edit_post_link( $post->post_parent ) . '">' . get_the_title( $post->post_parent ) . '</a>';
 				}
 
 				// Excerpt view
@@ -390,7 +390,7 @@ class WC_Admin_Post_Types {
 				break;
 			case 'featured' :
 				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
-				echo '<a href="' . esc_url( $url ) . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+				echo '<a href="' . esc_url( $url ) . '" title="' . __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
 					echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
@@ -685,7 +685,7 @@ class WC_Admin_Post_Types {
 			case 'shipping_address' :
 
 				if ( $address = $the_order->get_formatted_shipping_address() ) {
-					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) .'</a>';
+					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
 				} else {
 					echo '&ndash;';
 				}
@@ -710,7 +710,7 @@ class WC_Admin_Post_Types {
 
 					$latest_note = current( $latest_notes );
 
-					if ( isset( $latest_note->comment_content ) && $post->comment_count == 1 ) {
+					if ( isset( $latest_note->comment_content ) && 1 == $post->comment_count ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -750,14 +750,14 @@ class WC_Admin_Post_Types {
 				} else {
 					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
 						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-					} else if ( $the_order->get_billing_company() ) {
+					} elseif ( $the_order->get_billing_company() ) {
 						$username = trim( $the_order->get_billing_company() );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
 					}
 				}
 
-				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
+				printf( _x( '%1$s by %2$s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
 				if ( $the_order->get_billing_email() ) {
 					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->get_billing_email() ) . '">' . esc_html( $the_order->get_billing_email() ) . '</a></small>';
@@ -931,10 +931,10 @@ class WC_Admin_Post_Types {
 			return $views;
 		}
 
-		$class            = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
-		$query_string     = remove_query_arg(array( 'orderby', 'order' ));
-		$query_string     = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
-		$query_string     = add_query_arg( 'order', urlencode('ASC'), $query_string );
+		$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
+		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
+		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
+		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
 		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
@@ -1108,16 +1108,16 @@ class WC_Admin_Post_Types {
 			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
 		}
 
-		if ( $product->is_type('simple') || $product->is_type('external') ) {
+		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) {
-				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
+				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
 				update_post_meta( $post_id, '_regular_price', $new_regular_price );
 			} else {
 				$new_regular_price = null;
 			}
 			if ( isset( $_REQUEST['_sale_price'] ) ) {
-				$new_sale_price = $_REQUEST['_sale_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
+				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
 				update_post_meta( $post_id, '_sale_price', $new_sale_price );
 			} else {
 				$new_sale_price = null;
@@ -1136,7 +1136,7 @@ class WC_Admin_Post_Types {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-				if ( ! is_null( $new_sale_price ) && $new_sale_price !== '' ) {
+				if ( ! is_null( $new_sale_price ) && '' !== $new_sale_price ) {
 					update_post_meta( $post_id, '_price', $new_sale_price );
 				} else {
 					update_post_meta( $post_id, '_price', $new_regular_price );
@@ -1162,7 +1162,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle stock
-		if ( ! $product->is_type('grouped') ) {
+		if ( ! $product->is_type( 'grouped' ) ) {
 			if ( isset( $_REQUEST['_manage_stock'] ) ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
 				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
@@ -1254,10 +1254,9 @@ class WC_Admin_Post_Types {
 
 		// Sold Individually
 		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
-			if ( $_REQUEST['_sold_individually'] == 'yes' ) {
+			if ( 'yes' === $_REQUEST['_sold_individually'] ) {
 				update_post_meta( $post_id, '_sold_individually', 'yes' );
-			}
-			else {
+			} else {
 				update_post_meta( $post_id, '_sold_individually', '' );
 			}
 		}
@@ -1296,7 +1295,7 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
+							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
 						}
@@ -1387,7 +1386,7 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 
-				if ( $_REQUEST['_manage_stock'] == 'yes' ) {
+				if ( 'yes' === $_REQUEST['_manage_stock'] ) {
 					update_post_meta( $post_id, '_manage_stock', 'yes' );
 				} else {
 					update_post_meta( $post_id, '_manage_stock', 'no' );
@@ -1507,7 +1506,7 @@ class WC_Admin_Post_Types {
 	public function shop_order_search_custom_fields( $wp ) {
 		global $pagenow;
 
-		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' ) {
+		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] ) {
 			return;
 		}
 
@@ -1538,7 +1537,7 @@ class WC_Admin_Post_Types {
 			return $query;
 		}
 
-		if ( $typenow != 'shop_order' ) {
+		if ( 'shop_order' !== $typenow ) {
 			return $query;
 		}
 
@@ -1659,10 +1658,11 @@ class WC_Admin_Post_Types {
 				foreach ( $types as $name => $type ) {
 					echo '<option value="' . esc_attr( $name ) . '"';
 
-					if ( isset( $_GET['coupon_type'] ) )
+					if ( isset( $_GET['coupon_type'] ) ) {
 						selected( $name, $_GET['coupon_type'] );
+					}
 
-					echo '>' . esc_html__( $type, 'woocommerce' ) . '</option>';
+					echo '>' . esc_html( $type ) . '</option>';
 				}
 			?>
 		</select>
@@ -1982,7 +1982,7 @@ class WC_Admin_Post_Types {
 
 				delete_transient( 'woocommerce_processing_order_count' );
 				wc_delete_shop_order_transients( $id );
-			} else if ( 'product' === $post_type ) {
+			} elseif ( 'product' === $post_type ) {
 				// Check if SKU is valid before untrash the product.
 				$sku = get_post_meta( $id, '_sku', true );
 
@@ -2100,7 +2100,7 @@ class WC_Admin_Post_Types {
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">
 			<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
-				echo isset( $visibility_options[ $current_visibility ]  ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
+				echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
 				if ( 'yes' == $current_featured ) {
 					echo ', ' . __( 'Featured', 'woocommerce' );
@@ -2147,7 +2147,7 @@ class WC_Admin_Post_Types {
 
 			if ( empty( $pathdata['subdir'] ) ) {
 				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url']. '/woocommerce_uploads';
+				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
 				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];

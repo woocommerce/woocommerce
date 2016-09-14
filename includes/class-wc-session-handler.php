@@ -121,7 +121,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} else {
-			require_once( ABSPATH . 'wp-includes/class-phpass.php');
+			require_once( ABSPATH . 'wp-includes/class-phpass.php' );
 			$hasher = new PasswordHash( 8, false );
 			return md5( $hasher->get_random_bytes( 32 ) );
 		}

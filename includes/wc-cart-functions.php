@@ -136,9 +136,9 @@ function wc_format_list_of_items( $items ) {
 	foreach ( $items as $key => $item ) {
 		$item_string .= $item;
 
-		if ( $key + 2 === sizeof( $items ) ) {
+		if ( sizeof( $items ) === $key + 2 ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
-		} elseif ( $key + 1 !== sizeof( $items ) ) {
+		} elseif ( sizeof( $items ) !== $key + 1 ) {
 			$item_string .= ', ';
 		}
 	}
@@ -214,7 +214,9 @@ function wc_cart_totals_shipping_html() {
 			'available_methods'    => $package['rates'],
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
+			// @codingStandardsIgnoreStart
 			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			// @codingStandardsIgnoreEnd
 			'index'                => $i,
 			'chosen_method'        => $chosen_method,
 		) );

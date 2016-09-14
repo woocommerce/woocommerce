@@ -58,7 +58,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								<?php echo wc_get_order_status_name( $order->get_status() ); ?>
 
 							<?php elseif ( 'order-total' === $column_id ) : ?>
-								<?php echo sprintf( _n( '%s for %s item', '%s for %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
+								<?php echo sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
 
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
@@ -107,7 +107,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				<a class="woocommerce-Button woocommerce-Button--previous button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 
-			<?php if ( $current_page !== intval( $customer_orders->max_num_pages ) ) : ?>
+			<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
 				<a class="woocommerce-Button woocommerce-Button--next button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</div>

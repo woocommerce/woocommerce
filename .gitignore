@@ -29,4 +29,5 @@ Thumbs.db
 # Logs
 /logs
 
+# Composer
 /vendor/

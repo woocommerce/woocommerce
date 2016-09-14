@@ -51,10 +51,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	public function init_form_fields() {
 		$shipping_methods = array();
 
-		if ( is_admin() ) {
-			foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
-				$shipping_methods[ $method->id ] = $method->get_method_title();
-			}
+		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
+			$shipping_methods[ $method->id ] = $method->get_method_title();
 		}
 
 		$this->form_fields = array(

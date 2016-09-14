@@ -35,7 +35,7 @@ if ( $rating_count > 0 ) : ?>
 	<div class="woocommerce-product-rating">
 		<div class="star-rating" title="<?php printf( __( 'Rated %s out of 5', 'woocommerce' ), $average ); ?>">
 			<span style="width:<?php echo ( ( $average / 5 ) * 100 ); ?>%">
-				<strong class="rating"><?php echo esc_html( $average ); ?></strong> <?php printf( __( 'out of %s5%s', 'woocommerce' ), '<span>', '</span>' ); ?>
+				<strong class="rating"><?php echo esc_html( $average ); ?></strong> <?php printf( __( 'out of %1$s5%2$s', 'woocommerce' ), '<span>', '</span>' ); ?>
 				<?php printf( _n( 'based on %s customer rating', 'based on %s customer ratings', $rating_count, 'woocommerce' ), '<span class="rating">' . $rating_count . '</span>' ); ?>
 			</span>
 		</div>

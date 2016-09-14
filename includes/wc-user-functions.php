@@ -515,7 +515,7 @@ function wc_get_customer_order_count( $user_id ) {
 
 			WHERE   meta.meta_key       = '_customer_user'
 			AND     posts.post_type     IN ('" . implode( "','", wc_get_order_types( 'order-count' ) ) . "')
-			AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
+			AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "')
 			AND     meta_value          = $user_id
 		" );
 

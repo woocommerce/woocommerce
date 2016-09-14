@@ -210,7 +210,7 @@ class WC_Auth {
 	protected function create_keys( $app_name, $app_user_id, $scope ) {
 		global $wpdb;
 
-		$description = sprintf( __( '%s - API %s (created on %s at %s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
+		$description = sprintf( __( '%1$s - API %2$s (created on %3$s at %4$s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
 		$user        = wp_get_current_user();
 
 		// Created API keys.
@@ -271,7 +271,7 @@ class WC_Auth {
 
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( $response->get_error_message() );
-		} else if ( 200 != $response['response']['code'] ) {
+		} elseif ( 200 != $response['response']['code'] ) {
 			throw new Exception( __( 'An error occurred in the request and at the time were unable to send the consumer data', 'woocommerce' ) );
 		}
 
@@ -331,17 +331,17 @@ class WC_Auth {
 				exit;
 
 			// Redirect with user is logged in
-			} else if ( 'login' == $route && is_user_logged_in() ) {
+			} elseif ( 'login' == $route && is_user_logged_in() ) {
 				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'authorize' ) ) );
 				exit;
 
 			// Redirect with user is not logged in and trying to access the authorize endpoint
-			} else if ( 'authorize' == $route && ! is_user_logged_in() ) {
+			} elseif ( 'authorize' == $route && ! is_user_logged_in() ) {
 				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'login' ) ) );
 				exit;
 
 			// Authorize endpoint
-			} else if ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
+			} elseif ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
 				wc_get_template( 'auth/form-grant-access.php', array(
 					'app_name'    => $_REQUEST['app_name'],
 					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), $this->get_formatted_url( $_REQUEST['return_url'] ) ),
@@ -354,7 +354,7 @@ class WC_Auth {
 				exit;
 
 			// Granted access endpoint
-			} else if ( 'access_granted' == $route && current_user_can( 'manage_woocommerce' ) ) {
+			} elseif ( 'access_granted' == $route && current_user_can( 'manage_woocommerce' ) ) {
 				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( $_GET['wc_auth_nonce'], 'wc_auth_grant_access' ) ) {
 					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}

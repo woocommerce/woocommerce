@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="postbox">
 
 	<?php if ( 'custom' === $current_range && isset( $_GET['start_date'], $_GET['end_date'] ) ) : ?>
-		<h3 class="screen-reader-text"><?php echo esc_html( sprintf( _x( 'From %s to %s', 'start date and end date', 'woocommerce' ), wc_clean( $_GET['start_date'] ), wc_clean( $_GET['end_date'] ) ) ); ?></h3>
+		<h3 class="screen-reader-text"><?php echo esc_html( sprintf( _x( 'From %1$s to %2$s', 'start date and end date', 'woocommerce' ), wc_clean( $_GET['start_date'] ), wc_clean( $_GET['end_date'] ) ) ); ?></h3>
 	<?php else : ?>
 		<h3 class="screen-reader-text"><?php echo esc_html( $ranges[ $current_range ] ); ?></h3>
 	<?php endif; ?>
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<li class="' . ( $current_range == $range ? 'active' : '' ) . '"><a href="' . esc_url( remove_query_arg( array( 'start_date', 'end_date' ), add_query_arg( 'range', $range ) ) ) . '">' . $name . '</a></li>';
 					}
 				?>
-				<li class="custom <?php echo $current_range == 'custom' ? 'active' : ''; ?>">
+				<li class="custom <?php echo ( 'custom' === $current_range ) ? 'active' : ''; ?>">
 					<?php _e( 'Custom:', 'woocommerce' ); ?>
 					<form method="GET">
 						<div>

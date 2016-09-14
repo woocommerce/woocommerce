@@ -37,8 +37,6 @@ before_script:
   - phpenv rehash
 
 script:
-  # Search for PHP syntax errors.
-  - find . \( -name '*.php' -not -path "./vendor/*" \) -exec php -lf {} \;
   # Run PHPUnit tests.
   - phpunit -c phpunit.xml.dist
   # WordPress Coding Standards.
@@ -50,10 +48,11 @@ script:
   # -n flag: Do not print warnings. (shortcut for --warning-severity=0)
   # --standard: Use WordPress as the standard.
   # --extensions: Only sniff PHP files.
-  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
-  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/*.php
-  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/*.php
-  - /tmp/phpcs/scripts/phpcs -p -s -v -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/*.php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/*.php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
+  - /tmp/phpcs/scripts/phpcs -p -s -n ./**/**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
 
 after_script:
   - bash tests/bin/travis.sh after

@@ -2398,6 +2398,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			width: 100%;
 		}
 		a.wc-shipping-zone-delete, a.wc-shipping-class-delete {
+			color: #a00;
+		}
+		a.wc-shipping-zone-delete:hover, a.wc-shipping-class-delete:hover {
 			color: red;
 		}
 		.wc-shipping-zone-postcodes-toggle {

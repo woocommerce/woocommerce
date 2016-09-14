@@ -162,7 +162,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
 		$cost      = $this->get_option( 'cost' );
 
-		if ( $cost !== '' ) {
+		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
@@ -179,7 +179,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 			$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
-			if ( $class_cost_string === '' ) {
+			if ( '' === $class_cost_string ) {
 				continue;
 			}
 
@@ -189,14 +189,14 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
-			if ( $this->type === 'class' ) {
+			if ( 'class' === $this->type ) {
 				$rate['cost'] += $class_cost;
 			} else {
 				$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
 			}
 		}
 
-		if ( $this->type === 'order' && $highest_class_cost ) {
+		if ( 'order' === $this->type && $highest_class_cost ) {
 			$rate['cost'] += $highest_class_cost;
 		}
 
@@ -331,14 +331,16 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function get_extra_cost( $cost_string, $type, $package ) {
 		$cost         = $cost_string;
 		$cost_percent = false;
+		// @codingStandardsIgnoreStart
 		$pattern      =
-			'/' .           // start regex
-			'(\d+\.?\d*)' . // capture digits, optionally capture a `.` and more digits
-			'\s*' .         // match whitespace
-			'(\+|-)' .      // capture the operand
-			'\s*'.          // match whitespace
-			'(\d+\.?\d*)'.  // capture digits, optionally capture a `.` and more digits
-			'\%/';          // match the percent sign & end regex
+			'/' .           // Start regex.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\s*' .         // Match whitespace.
+			'(\+|-)' .      // Capture the operand.
+			'\s*' .         // Match whitespace.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\%/';          // Match the percent sign & end regex.
+		// @codingStandardsIgnoreEnd
 		if ( preg_match( $pattern, $cost_string, $this_cost_matches ) ) {
 			$cost_operator = $this_cost_matches[2];
 			$cost_percent  = $this_cost_matches[3] / 100;

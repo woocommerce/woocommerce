@@ -57,7 +57,8 @@ class WC_API_Resource {
 
 		foreach ( $response_names as $name ) {
 
-			/* remove fields from responses when requests specify certain fields
+			/**
+			 * Remove fields from responses when requests specify certain fields
 			 * note these are hooked at a later priority so data added via
 			 * filters (e.g. customer data to the order response) still has the
 			 * fields filtered properly
@@ -100,7 +101,7 @@ class WC_API_Resource {
 			$post = get_post( $id );
 
 			if ( null === $post ) {
-				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %s found with the ID equal to %s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
+				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %1$s found with the ID equal to %2$s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
 			}
 
 			// For checking permissions, product variations are the same as the product post type
@@ -377,7 +378,6 @@ class WC_API_Resource {
 		} else {
 
 			// delete order/coupon/webhook
-
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
 			if ( ! $result ) {

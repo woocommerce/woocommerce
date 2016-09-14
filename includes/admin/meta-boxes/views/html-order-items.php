@@ -117,7 +117,7 @@ if ( wc_tax_enabled() ) {
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
 						$link    = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item->get_code(), 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ). '</span></a></li>';
+						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a></li>';
 					}
 				?></ul>
 			</div>
@@ -179,7 +179,7 @@ if ( wc_tax_enabled() ) {
 			<td class="total">
 				<div class="view"><?php echo $order->get_formatted_order_total(); ?></div>
 				<div class="edit" style="display: none;">
-					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_total'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_total'][0] ) ) : ''; ?>" />
+					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $order->get_total( true ) ) ); ?>" />
 					<div class="clear"></div>
 				</div>
 			</td>
@@ -271,7 +271,7 @@ if ( wc_tax_enabled() ) {
 		$gateway_supports_refunds = false !== $payment_gateway && $payment_gateway->supports( 'refunds' );
 		$gateway_name             = false !== $payment_gateway ? ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) : __( 'Payment Gateway', 'woocommerce' );
 		?>
-		<button type="button" class="button <?php echo $gateway_supports_refunds ? 'button-primary do-api-refund' : 'tips disabled'; ?>" <?php echo $gateway_supports_refunds ? '' : 'data-tip="' . esc_attr__( 'The payment gateway used to place this order does not support automatic refunds.', 'woocommerce' ) . '"'; ?>><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), $refund_amount, $gateway_name ); ?></button>
+		<button type="button" class="button <?php echo $gateway_supports_refunds ? 'button-primary do-api-refund' : 'tips disabled'; ?>" <?php echo $gateway_supports_refunds ? '' : 'data-tip="' . esc_attr__( 'The payment gateway used to place this order does not support automatic refunds.', 'woocommerce' ) . '"'; ?>><?php printf( _x( 'Refund %1$s via %2$s', 'Refund $amount', 'woocommerce' ), $refund_amount, $gateway_name ); ?></button>
 		<button type="button" class="button button-primary do-manual-refund tips" data-tip="<?php esc_attr_e( 'You will need to manually issue a refund through your payment gateway after using this.', 'woocommerce' ); ?>"><?php printf( _x( 'Refund %s manually', 'Refund $amount manually', 'woocommerce' ), $refund_amount ); ?></button>
 		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 		<div class="clear"></div>

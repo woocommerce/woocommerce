@@ -193,7 +193,7 @@ function wc_get_notices( $notice_type = '' ) {
 function wc_add_wp_error_notices( $errors ) {
 	if ( is_wp_error( $errors ) && $errors->get_error_messages() ) {
 		foreach ( $errors->get_error_messages() as $error ) {
-			wc_add_notice( $error, 'error');
+			wc_add_notice( $error, 'error' );
 		}
 	}
 }

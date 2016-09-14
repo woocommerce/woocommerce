@@ -47,7 +47,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 	function test_coupon_delete() {
 		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
-		$this->assertNotEquals( 0, $coupon_id  );
+		$this->assertNotEquals( 0, $coupon_id );
 		$coupon->delete();
 		$coupon->read( $coupon_id );
 		$this->assertEquals( 0, $coupon->get_id() );
@@ -106,7 +106,7 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 		$new_coupon->save();
 		$new_coupon_id = $new_coupon->get_id();
 		$this->assertEquals( 'dummycoupon3', $new_coupon->get_code() );
-		$this->assertNotEquals( 0, $new_coupon_id  );
+		$this->assertNotEquals( 0, $new_coupon_id );
 	}
 
 	/**

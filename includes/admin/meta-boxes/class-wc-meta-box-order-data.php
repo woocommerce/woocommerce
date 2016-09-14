@@ -166,7 +166,7 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php echo esc_html( sprintf( _x( '%s #%s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
+				<h2><?php echo esc_html( sprintf( _x( '%1$s #%2$s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
@@ -181,7 +181,7 @@ class WC_Meta_Box_Order_Data {
 						}
 
 						if ( $order->get_date_paid() ) {
-							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
+							printf( ' ' . _x( 'on %1$s @ %2$s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
 						}
 
 						echo '. ';
@@ -302,7 +302,7 @@ class WC_Meta_Box_Order_Data {
 										$found_method 	= false;
 
 										foreach ( $payment_gateways as $gateway ) {
-											if ( $gateway->enabled == "yes" ) {
+											if ( 'yes' === $gateway->enabled ) {
 												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
 												if ( $payment_method == $gateway->id ) {
 													$found_method = true;
@@ -465,7 +465,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_method       = wc_clean( $_POST['_payment_method'] );
 			$payment_method_title = $payment_method;
 
-			if ( isset( $methods) && isset( $methods[ $payment_method ] ) ) {
+			if ( isset( $methods ) && isset( $methods[ $payment_method ] ) ) {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
 			}
 
@@ -475,7 +475,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time('timestamp');
+			$date = current_time( 'timestamp' );
 		} else {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}

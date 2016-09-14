@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( $string === 'yes' || $string === 1 || $string === '1' );
+	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || '1' === $string );
 }
 
 /**
@@ -44,7 +44,7 @@ function wc_string_to_array( $string, $delimiter = ',' ) {
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( $taxonomy ) ), $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( urldecode( $taxonomy ) ) ), $taxonomy );
 }
 
 /**
@@ -245,8 +245,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	if ( $dp !== false ) {
-		$dp     = intval( $dp == "" ? wc_get_price_decimals() : $dp );
+	if ( false !== $dp ) {
+		$dp     = intval( '' == $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 
 	// DP is false - don't use number format, just return a string in our format
@@ -557,9 +557,9 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
 
 		$rgb      = array();
-		$rgb['R'] = hexdec( $color{0}.$color{1} );
-		$rgb['G'] = hexdec( $color{2}.$color{3} );
-		$rgb['B'] = hexdec( $color{4}.$color{5} );
+		$rgb['R'] = hexdec( $color{0} . $color{1} );
+		$rgb['G'] = hexdec( $color{2} . $color{3} );
+		$rgb['B'] = hexdec( $color{4} . $color{5} );
 
 		return $rgb;
 	}
@@ -685,13 +685,16 @@ function wc_format_postcode( $postcode, $country ) {
 			break;
 		case 'BR' :
 		case 'PL' :
-			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+			$postcode = substr_replace( $postcode, '-', -3, 0 );
 			break;
 		case 'JP' :
-			$postcode = trim( substr_replace( $postcode, '-', 3, 0 ) );
+			$postcode = substr_replace( $postcode, '-', 3, 0 );
 			break;
 		case 'PT' :
-			$postcode = trim( substr_replace( $postcode, '-', 4, 0 ) );
+			$postcode = substr_replace( $postcode, '-', 4, 0 );
+			break;
+		case 'US' :
+			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
 	}
 

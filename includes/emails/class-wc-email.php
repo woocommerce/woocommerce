@@ -240,7 +240,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), __( $string ) );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
 	/**
@@ -582,7 +582,7 @@ class WC_Email extends WC_Settings_API {
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );
 
-				if ( $f !== false ) {
+				if ( false !== $f ) {
 					fwrite( $f, $code );
 					fclose( $f );
 					$saved = true;
@@ -784,7 +784,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
 							</p>
 
 							<div class="editor" style="display:none">

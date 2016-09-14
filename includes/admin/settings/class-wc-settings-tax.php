@@ -90,7 +90,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		$tax_classes = WC_Tax::get_tax_classes();
 
-		if ( $current_section == 'standard' || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+		if ( 'standard' === $current_section || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
 			$this->output_tax_rates();
 		} else {
 			$settings = $this->get_settings();
@@ -260,7 +260,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// Loop posted fields
 		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
-			$mode        = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
+			$mode        = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
 			$tax_rate    = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
