@@ -98,6 +98,7 @@ class WC_Logger {
 		$result = false;
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
+		    $message = apply_filters('woocommerce_log_message_filter', $message, $handle);
 			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
 			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
