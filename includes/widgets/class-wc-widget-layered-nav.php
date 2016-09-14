@@ -447,6 +447,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			echo '<li class="wc-layered-nav-term ' . ( $option_is_set ? 'chosen' : '' ) . '">';
+			
+			do_action( 'woocommerce_layered_nav_list_before_term', $term, $count, $option_is_set, $link );
 
 			echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>';
 
@@ -456,7 +458,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			echo apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
+			do_action( 'woocommerce_layered_nav_list_after_term', $term, $count, $option_is_set, $link );
+			
 			echo '</li>';
+			
 		}
 
 		echo '</ul>';
