@@ -128,6 +128,9 @@ class WC_Tracker {
 		// Template overrides
 		$data['template_overrides'] = self::get_all_template_overrides();
 
+		// Template overrides
+		$data['admin_user_agents']  = self::get_admin_user_agents();
+
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
 
@@ -394,6 +397,14 @@ class WC_Tracker {
 			}
 		}
 		return $override_data;
+	}
+
+	/**
+	 * When an admin user logs in, there user agent is tracked in user meta and collected here.
+	 * @return array
+	 */
+	private static function get_admin_user_agents() {
+		return array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
 	}
 }
 
