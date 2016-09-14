@@ -1388,28 +1388,36 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				if ( $image && is_array( $image ) ) {
 					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
 						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+						$skip_image = false;
 
 						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 							$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
 
+
 							if ( is_wp_error( $upload ) ) {
-								throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+								if ( ! apply_filters( 'woocommerce_rest_suppress_variation_image_upload_error', false, $upload, $product ) ) {
+									throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+								} else {
+									$skip_image = true;
+								}
+							} else {
+								$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
+							}
+						}
+
+						if ( ! $skip_image ) {
+							// Set the image alt if present.
+							if ( ! empty( $image['alt'] ) ) {
+								update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 							}
 
-							$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
-						}
+							// Set the image name if present.
+							if ( ! empty( $image['name'] ) ) {
+								wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
+							}
 
-						// Set the image alt if present.
-						if ( ! empty( $image['alt'] ) ) {
-							update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+							update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 						}
-
-						// Set the image name if present.
-						if ( ! empty( $image['name'] ) ) {
-							wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
-						}
-
-						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 					}
 				} else {
 					delete_post_meta( $variation_id, '_thumbnail_id' );
