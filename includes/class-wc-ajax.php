@@ -194,7 +194,7 @@ class WC_AJAX {
 		check_ajax_referer( 'apply-coupon', 'security' );
 
 		if ( ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+			WC()->cart->add_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 		}
@@ -392,7 +392,7 @@ class WC_AJAX {
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
+		if ( $passed_validation && false !== wc_add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 

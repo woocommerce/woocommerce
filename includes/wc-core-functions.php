@@ -1133,11 +1133,32 @@ function wc_transaction_query( $type = 'start' ) {
  * Gets the url to the cart page.
  *
  * @since  2.5.0
- *
  * @return string Url to cart page
  */
 function wc_get_cart_url() {
 	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to remove an item from the cart.
+ *
+ * @param string $cart_item_key contains the id of the cart item
+ * @return string url to page
+ */
+function wc_get_cart_remove_url( $cart_item_key ) {
+	$cart_page_url = wc_get_cart_url();
+	return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
+}
+
+/**
+ * Gets the url to re-add an item into the cart.
+ *
+ * @param  string $cart_item_key
+ * @return string url to page
+ */
+function wc_get_cart_undo_url( $cart_item_key ) {
+	$cart_page_url = wc_get_cart_url();
+	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'undo_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
 }
 
 /**
@@ -1419,4 +1440,47 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
 		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
 		do_action_ref_array( $action, $args );
 	}
+}
+
+/**
+ * Based on wp_list_pluck, this calls a method instead of returning a property.
+ *
+ * @since 2.7.0
+ * @param array      $list      List of objects or arrays
+ * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
+ * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
+ *                              Default null.
+ * @return array Array of values.
+ */
+function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
+	// Use wp_list_pluck if this isn't a callback
+	$first_el = current( $list );
+
+	if ( ! is_object( $first_el ) || ! is_callable( array( $first_el, $callback_or_field ) ) ) {
+		return wp_list_pluck( $list, $callback_or_field, $index_key );
+	}
+
+	if ( ! $index_key ) {
+		/*
+		 * This is simple. Could at some point wrap array_column()
+		 * if we knew we had an array of arrays.
+		 */
+		foreach ( $list as $key => $value ) {
+			$list[ $key ] = $value->{$callback_or_field}();
+		}
+		return $list;
+	}
+	/*
+	 * When index_key is not set for a particular item, push the value
+	 * to the end of the stack. This is how array_column() behaves.
+	 */
+	$newlist = array();
+	foreach ( $list as $value ) {
+		if ( isset( $value->$index_key ) ) {
+			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
+		} else {
+			$newlist[] = $value->{$callback_or_field}();
+		}
+	}
+	return $newlist;
 }

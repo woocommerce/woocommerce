@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<tr class="cart-subtotal">
 			<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
-			<td data-title="<?php esc_attr_e( 'Subtotal', 'woocommerce' ); ?>"><?php wc_cart_totals_subtotal_html(); ?></td>
+			<td data-title="<?php esc_attr_e( 'Subtotal', 'woocommerce' ); ?>"><?php wc_cart_subtotal_html(); ?></td>
 		</tr>
 
 		<?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
+		<?php if ( WC()->cart->needs_shipping() && wc_cart_show_shipping() ) : ?>
 
 			<?php do_action( 'woocommerce_cart_totals_before_shipping' ); ?>
 
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
+		<?php if ( wc_tax_enabled() && ! wc_cart_prices_include_tax() ) :
 			$taxable_address = WC()->customer->get_taxable_address();
 			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
 					? sprintf( ' <small>(' . __( 'estimated for %s', 'woocommerce' ) . ')</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )

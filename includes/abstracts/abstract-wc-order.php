@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'abstract-wc-legacy-order.php' );
+include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php' );
 
 /**
  * Abstract Order
@@ -435,8 +435,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_total( $raw = false ) {
-		$value = wc_format_decimal( $this->data['discount_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_total', $value, $this );
+		return $raw ? $this->data['discount_total'] : apply_filters( 'woocommerce_order_amount_discount_total', $this->data['discount_total'], $this );
 	}
 
 	/**
@@ -445,8 +444,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_discount_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['discount_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_tax', $value, $this );
+		return $raw ? $this->data['discount_tax'] : apply_filters( 'woocommerce_order_amount_discount_tax', $this->data['discount_tax'], $this );
 	}
 
 	/**
@@ -455,8 +453,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_total( $raw = false ) {
-		$value = wc_format_decimal( $this->data['shipping_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_total', $value, $this );
+		return $raw ? $this->data['shipping_total'] : apply_filters( 'woocommerce_order_amount_shipping_total', $this->data['shipping_total'], $this );
 	}
 
 	/**
@@ -465,8 +462,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_shipping_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['shipping_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_tax', $value, $this );
+		return $raw ? $this->data['shipping_tax'] : apply_filters( 'woocommerce_order_amount_shipping_tax', $this->data['shipping_tax'], $this );
 	}
 
 	/**
@@ -475,8 +471,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_cart_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['cart_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_cart_tax', $value, $this );
+		return $raw ? $this->data['cart_tax'] : apply_filters( 'woocommerce_order_amount_cart_tax', $this->data['cart_tax'], $this );
 	}
 
 	/**
@@ -499,8 +494,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['total_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total_tax', $value, $this );
+		return $raw ? $this->data['total_tax'] : apply_filters( 'woocommerce_order_amount_total_tax', $this->data['total_tax'], $this );
 	}
 
 	/**
@@ -537,30 +531,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$tax_totals = array();
-
-		foreach ( $this->get_items( 'tax' ) as $key => $tax ) {
-			$code = $tax->get_rate_code();
-
-			if ( ! isset( $tax_totals[ $code ] ) ) {
-				$tax_totals[ $code ] = new stdClass();
-				$tax_totals[ $code ]->amount = 0;
-			}
-
-			$tax_totals[ $code ]->id                = $key;
-			$tax_totals[ $code ]->rate_id           = $tax->get_rate_id();
-			$tax_totals[ $code ]->is_compound       = $tax->is_compound();
-			$tax_totals[ $code ]->label             = $tax->get_label();
-			$tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
-		}
+		$taxes = $this->get_items( 'tax' );
 
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
-			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
-			$tax_totals = array_intersect_key( $tax_totals, $amounts );
+			$zero_amounts = array_filter( wp_list_pluck( $taxes, 'amount' ) );
+			$taxes        = array_intersect_key( $taxes, $zero_amounts );
 		}
 
-		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
+		return apply_filters( 'woocommerce_order_formatted_tax_totals', $taxes );
 	}
 
 	/*

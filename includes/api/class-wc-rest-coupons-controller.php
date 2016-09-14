@@ -226,7 +226,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
 					case 'code' :
-						$coupon_code = apply_filters( 'woocommerce_coupon_code', $value );
+						$coupon_code = wc_format_coupon_code( $value );
 						$id          = $coupon->get_id() ? $coupon->get_id() : 0;
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 

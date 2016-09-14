@@ -63,7 +63,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				throw new WC_CLI_Exception( 'woocommerce_cli_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ) );
 			}
 
-			$coupon_code = apply_filters( 'woocommerce_coupon_code', $assoc_args['code'] );
+			$coupon_code = wc_format_coupon_code( $assoc_args['code'] );
 
 			// Check for duplicate coupon codes.
 			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
@@ -440,7 +440,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
-				$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$coupon_code = wc_format_coupon_code( $data['code'] );
 
 				// Check for duplicate coupon codes
 				$coupon_found = $wpdb->get_var( $wpdb->prepare( "

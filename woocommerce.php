@@ -231,15 +231,21 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
 		include_once( WC_ABSPATH . 'includes/wc-widget-functions.php' );
 		include_once( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-item.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-download-handler.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
-
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
-		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
@@ -261,14 +267,6 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class
 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class
 		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php' ); // Settings API (for gateways, shipping, and integrations)
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
 		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway

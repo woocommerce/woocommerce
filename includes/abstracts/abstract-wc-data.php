@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
+
 /**
  * Abstract WC Data Class
  *

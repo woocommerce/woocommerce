@@ -56,7 +56,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						<?php
 							echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf(
 								'<a href="%s" class="remove" title="%s" data-product_id="%s" data-product_sku="%s">&times;</a>',
-								esc_url( WC()->cart->get_remove_url( $cart_item_key ) ),
+								esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
 								__( 'Remove this item', 'woocommerce' ),
 								esc_attr( $product_id ),
 								esc_attr( $_product->get_sku() )
@@ -85,7 +85,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							}
 
 							// Meta data
-							echo WC()->cart->get_item_data( $cart_item );
+							echo wc_display_item_data( $cart_item );
 
 							// Backorder notification
 							if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {
@@ -96,7 +96,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 					<td class="product-price" data-title="<?php _e( 'Price', 'woocommerce' ); ?>">
 						<?php
-							echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
+							echo apply_filters( 'woocommerce_cart_item_price', wc_cart_product_price_html( $_product ), $cart_item, $cart_item_key );
 						?>
 					</td>
 
@@ -119,7 +119,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 					<td class="product-subtotal" data-title="<?php _e( 'Total', 'woocommerce' ); ?>">
 						<?php
-							echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
+							echo apply_filters( 'woocommerce_cart_item_subtotal', wc_cart_product_price_html( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
 						?>
 					</td>
 				</tr>

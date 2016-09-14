@@ -35,7 +35,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 
 		// Assert
-		$this->assertEquals( $zone->get_zone_id(), 1 );
+		$this->assertEquals( $zone->get_id(), 1 );
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();

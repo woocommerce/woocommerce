@@ -55,7 +55,7 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
-	 * Returns all data for this object.
+	 * Get data.
 	 * @return array
 	 */
 	public function get_data() {

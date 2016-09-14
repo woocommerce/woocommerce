@@ -11,16 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
-class WC_Order_Item_Tax extends WC_Order_Item {
+class WC_Order_Item_Tax extends WC_Item_Tax {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
+	protected $data = array(
 		'order_id'           => 0,
-		'id'                 => 0,
 		'rate_code'          => '',
 		'rate_id'            => 0,
 		'label'              => '',
@@ -30,40 +29,24 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	);
 
 	/**
-	 * Read/populate data properties specific to this order item.
+	 * May store an order to prevent retriving it multiple times.
+	 * @var object
 	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$this->set_props( array(
-			'rate_id'            => get_metadata( 'order_item', $this->get_id(), 'rate_id', true ),
-			'label'              => get_metadata( 'order_item', $this->get_id(), 'label', true ),
-			'compound'           => get_metadata( 'order_item', $this->get_id(), 'compound', true ),
-			'tax_total'          => get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ),
-			'shipping_tax_total' => get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ),
-		) );
-	}
+	protected $order;
 
 	/**
-	 * Save properties specific to this order item.
-	 * @return int Item ID
+	 * Stores meta in cache for future reads.
+	 * A group must be set to to enable caching.
+	 * @var string
 	 */
-	public function save() {
-		parent::save();
-		if ( $this->get_id() ) {
-			wc_update_order_item_meta( $this->get_id(), 'rate_id', $this->get_rate_id() );
-			wc_update_order_item_meta( $this->get_id(), 'label', $this->get_label() );
-			wc_update_order_item_meta( $this->get_id(), 'compound', $this->get_compound() );
-			wc_update_order_item_meta( $this->get_id(), 'tax_amount', $this->get_tax_total() );
-			wc_update_order_item_meta( $this->get_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
-		}
+	protected $cache_group = 'order_itemmeta';
 
-		return $this->get_id();
-	}
+	/**
+	 * Meta type. This should match up with
+	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * WP defines 'post', 'user', 'comment', and 'term'.
+	 */
+	protected $meta_type = 'order_item';
 
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data.
@@ -74,11 +57,135 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	}
 
 	/**
-	 * Is this a compound tax rate?
-	 * @return boolean
+	 * Get quantity.
+	 * @return int
 	 */
-	public function is_compound() {
-		return $this->get_compound();
+	public function get_quantity() {
+		return 1;
+	}
+
+	/**
+	 * Get parent order object.
+	 * @return object
+	 */
+	public function get_order() {
+		return $this->order ? $this->order : $this->order = wc_get_order( $this->get_order_id() );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| CRUD methods
+	|--------------------------------------------------------------------------
+	|
+	| Methods which create, read, update and delete data from the database.
+	|
+	*/
+
+	/**
+	 * Insert data into the database.
+	 * @since 2.7.0
+	 */
+	public function create() {
+		global $wpdb;
+
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
+			'order_item_name' => $this->get_rate_code(),
+			'order_item_type' => $this->get_type(),
+			'order_id'        => $this->get_order_id(),
+		) );
+		$this->set_id( $wpdb->insert_id );
+
+		do_action( 'woocommerce_new_order_item', $this->get_id(), $this, $this->get_order_id() );
+	}
+
+	/**
+	 * Update data in the database.
+	 * @since 2.7.0
+	 */
+	public function update() {
+		global $wpdb;
+
+		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
+			'order_item_name' => $this->get_rate_code(),
+			'order_item_type' => $this->get_type(),
+			'order_id'        => $this->get_order_id(),
+		), array( 'order_item_id' => $this->get_id() ) );
+
+		do_action( 'woocommerce_update_order_item', $this->get_id(), $this, $this->get_order_id() );
+	}
+
+	/**
+	 * Get data either from the passed object, or the DB, or return false;
+	 * @param  mixed $item
+	 * @return object|bool
+	 */
+	private function get_item_data( $item ) {
+		global $wpdb;
+
+		if ( is_numeric( $item ) && ! empty( $item ) ) {
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
+		} elseif ( ! empty( $item->order_item_id ) ) {
+			$data = $item;
+		} else {
+			$data = false;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Read from the database.
+	 * @since 2.7.0
+	 * @param int|object $item ID of object to read, or already queried object.
+	 */
+	public function read( $item ) {
+		$this->set_defaults();
+
+		if ( ! $data = $this->get_item_data( $item ) ) {
+			return;
+		}
+
+		$this->set_id( $data->order_item_id );
+		$this->read_meta_data();
+		$this->set_props( array(
+			'order_id'           => $data->order_id,
+			'rate_code'          => $data->order_item_name,
+			'rate_id'            => get_metadata( 'order_item', $this->get_id(), 'rate_id', true ),
+			'label'              => get_metadata( 'order_item', $this->get_id(), 'label', true ),
+			'compound'           => get_metadata( 'order_item', $this->get_id(), 'compound', true ),
+			'tax_total'          => get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ),
+			'shipping_tax_total' => get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ),
+		) );
+	}
+
+	/**
+	 * Save data to the database.
+	 * @since 2.7.0
+	 * @return int Item ID
+	 */
+	public function save() {
+		$this->get_id() ? $this->update() : $this->create();
+		$this->save_meta_data();
+		wc_update_order_item_meta( $this->get_id(), 'rate_id', $this->get_rate_id() );
+		wc_update_order_item_meta( $this->get_id(), 'label', $this->get_label() );
+		wc_update_order_item_meta( $this->get_id(), 'compound', $this->get_compound() );
+		wc_update_order_item_meta( $this->get_id(), 'tax_amount', $this->get_tax_total() );
+		wc_update_order_item_meta( $this->get_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
+		return $this->get_id();
+	}
+
+	/**
+	 * Delete data from the database.
+	 * @since 2.7.0
+	 */
+	public function delete() {
+		if ( $this->get_id() ) {
+			global $wpdb;
+			do_action( 'woocommerce_before_delete_order_item', $this->get_id() );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_itemmeta', array( 'order_item_id' => $this->get_id() ) );
+			do_action( 'woocommerce_delete_order_item', $this->get_id() );
+		}
 	}
 
 	/*
@@ -88,78 +195,12 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	*/
 
 	/**
-	 * Set order item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_name( $value ) {
-		$this->set_rate_code( $value );
-	}
-
-	/**
-	 * Set item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_rate_code( $value ) {
-		$this->_data['rate_code'] = wc_clean( $value );
-	}
-
-	/**
-	 * Set item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_label( $value ) {
-		$this->_data['label'] = wc_clean( $value );
-	}
-
-	/**
-	 * Set tax rate id.
+	 * Set order ID.
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_rate_id( $value ) {
-		$this->_data['rate_id'] = absint( $value );
-	}
-
-	/**
-	 * Set tax total.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_tax_total( $value ) {
-		$this->_data['tax_total'] = wc_format_decimal( $value );
-	}
-
-	/**
-	 * Set shipping_tax_total
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_tax_total( $value ) {
-		$this->_data['shipping_tax_total'] = wc_format_decimal( $value );
-	}
-
-	/**
-	 * Set compound
-	 * @param bool $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_compound( $value ) {
-		$this->_data['compound'] = (bool) $value;
-	}
-
-	/**
-	 * Set properties based on passed in tax rate by ID.
-	 * @param int $tax_rate_id
-	 * @throws WC_Data_Exception
-	 */
-	public function set_rate( $tax_rate_id ) {
-		$this->set_rate_id( $tax_rate_id );
-		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
+	public function set_order_id( $value ) {
+		$this->data['order_id'] = absint( $value );
 	}
 
 	/*
@@ -169,66 +210,18 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	*/
 
 	/**
-	 * Get order item type.
-	 * @return string
-	 */
-	public function get_type() {
-		return 'tax';
-	}
-
-	/**
-	 * Get rate code/name.
-	 * @return string
-	 */
-	public function get_name() {
-		return $this->get_rate_code();
-	}
-
-	/**
-	 * Get rate code/name.
-	 * @return string
-	 */
-	public function get_rate_code() {
-		return $this->_data['rate_code'];
-	}
-
-	/**
 	 * Get label.
 	 * @return string
 	 */
 	public function get_label() {
-		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce' );
+		return $this->data['label'] ? $this->data['label'] : __( 'Tax', 'woocommerce' );
 	}
 
 	/**
-	 * Get tax rate ID.
+	 * Get order ID this meta belongs to.
 	 * @return int
 	 */
-	public function get_rate_id() {
-		return absint( $this->_data['rate_id'] );
-	}
-
-	/**
-	 * Get tax_total
-	 * @return string
-	 */
-	public function get_tax_total() {
-		return wc_format_decimal( $this->_data['tax_total'] );
-	}
-
-	/**
-	 * Get shipping_tax_total
-	 * @return string
-	 */
-	public function get_shipping_tax_total() {
-		return wc_format_decimal( $this->_data['shipping_tax_total'] );
-	}
-
-	/**
-	 * Get compound.
-	 * @return bool
-	 */
-	public function get_compound() {
-		return (bool) $this->_data['compound'];
+	public function get_order_id() {
+		return $this->data['order_id'];
 	}
 }
