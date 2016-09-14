@@ -1133,7 +1133,7 @@ function wc_reduce_stock_levels( $order_id ) {
 	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
 			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
-				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $order, $item );
+				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 				$new_stock = $product->reduce_stock( $qty );
 				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
 
