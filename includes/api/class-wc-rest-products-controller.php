@@ -1393,7 +1393,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 							$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
 
-
 							if ( is_wp_error( $upload ) ) {
 								if ( ! apply_filters( 'woocommerce_rest_suppress_variation_image_upload_error', false, $upload, $product ) ) {
 									throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
