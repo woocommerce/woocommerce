@@ -16,9 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Structured_Data {
 	
 	/**
-	 * @var null|array $_data
+	 * @var array $_data
 	 */
-	private $_data;
+	private $_data = array();
 
 	/**
 	 * Constructor.
@@ -37,7 +37,7 @@ class WC_Structured_Data {
 		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),             10, 0 );
 
 		// Filters...
-		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10, 1 );
+		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10, 0 );
 	}
 
 	/**
@@ -48,9 +48,7 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
-		if ( ! isset( $data['@type'] ) ) {
-			return false;
-		} elseif ( ! is_string( $data['@type'] ) ) {
+		if ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
 			return false;
 		}
 
@@ -69,7 +67,7 @@ class WC_Structured_Data {
 	 * @return array
 	 */
 	public function get_data() {
-		return isset( $this->_data ) ? $this->_data : array();
+		return $this->_data;
 	}
 
 	/**
@@ -87,7 +85,7 @@ class WC_Structured_Data {
 	 * @return array
 	 */
 	public function get_structured_data( $requested_types = false ) {
-		$data = $this->get_data();
+		$data = $this->_data;
 
 		if ( empty( $data ) || ( $requested_types && ! is_array( $requested_types ) && ! is_string( $requested_types ) || is_null( $requested_types ) ) ) {
 			return array();
@@ -192,11 +190,10 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_structured_data_product_limit` filter hook.
 	 *
-	 * @param  bool $limit_data
-	 * @return bool $limit_data
+	 * @return bool
 	 */
-	public function limit_product_data_in_loops( $limit_data ) {
-		return $limit_data = is_product_taxonomy() || is_shop() ? true : false;
+	public function limit_product_data_in_loops() {
+		return is_product_taxonomy() || is_shop() ? true : false;
 	}
 
 	/*
@@ -230,9 +227,7 @@ class WC_Structured_Data {
 	public function generate_product_data( $product = false, $limit_data = false ) {
 		if ( $product === false ) {
 			global $product;
-		}
-
-		if ( ! is_object( $product ) ) {
+		} elseif ( ! is_object( $product ) ) {
 			return false;
 		}
 
@@ -243,7 +238,7 @@ class WC_Structured_Data {
 		$markup['url']   = $markup['@id'];
 		$markup['name']  = $product->get_title();
 
-		if ( $limit_data ) {
+		if ( true === $limit_data ) {
 			return $this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 		}
 
