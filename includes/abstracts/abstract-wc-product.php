@@ -295,7 +295,7 @@ class WC_Product {
 			do_action( 'woocommerce_product_set_stock', $this );
 
 		// If not managing stock and clearing the stock meta, trigger action to indicate that stock has changed (infinite stock)
-		} elseif ( '' === $amount ) {
+		} elseif ( '' === $amount && '' !== get_post_meta( $this->id, '_stock', true ) ) {
 
 			update_post_meta( $this->id, '_stock', '' );
 

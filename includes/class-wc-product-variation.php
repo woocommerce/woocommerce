@@ -480,10 +480,12 @@ class WC_Product_Variation extends WC_Product {
 		// If not managing stock and clearing the stock meta, trigger action to indicate that stock has changed (infinite stock)
 		} elseif ( '' === $amount ) {
 
-			delete_post_meta( $this->variation_id, '_stock' );
+			if ( false !== get_post_meta( $this->variation_id, '_stock' ) ) {
 
-			// Trigger action
-			do_action( 'woocommerce_variation_set_stock', $this );
+				delete_post_meta( $this->variation_id, '_stock' );
+				// Trigger action
+				do_action( 'woocommerce_variation_set_stock', $this );
+			}
 
 		// If not managing stock and setting stock, apply changes to the parent
 		} elseif ( ! is_null( $amount ) ) {

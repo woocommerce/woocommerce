@@ -1145,8 +1145,6 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle Stock Data
-		$was_managing_stock = get_post_meta( $post_id, '_manage_stock', true );
-
 		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
@@ -1176,10 +1174,7 @@ class WC_Admin_Post_Types {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
-			// Update stock if managing stock or when resetting stock (manage stock flipped from 'yes' to 'no')
-			if ( '' !== $stock_amount || 'yes' === $was_managing_stock ) {
-				wc_update_product_stock( $post_id, $stock_amount );
-			}
+			wc_update_product_stock( $post_id, $stock_amount );
 
 		} else {
 			wc_update_product_stock_status( $post_id, $stock_status );
@@ -1409,10 +1404,7 @@ class WC_Admin_Post_Types {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
-			// Update stock if managing stock or when resetting stock (manage stock flipped from 'yes' to 'no')
-			if ( '' !== $stock_amount || 'yes' === $was_managing_stock ) {
-				wc_update_product_stock( $post_id, $stock_amount );
-			}
+			wc_update_product_stock( $post_id, $stock_amount );
 
 		} else {
 			wc_update_product_stock_status( $post_id, $stock_status );

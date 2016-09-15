@@ -1103,8 +1103,6 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Stock Data
-		$was_managing_stock = get_post_meta( $post_id, '_manage_stock', true );
-
 		$manage_stock = ! empty( $_POST['_manage_stock'] ) && 'grouped' !== $product_type ? 'yes' : 'no';
 		$backorders   = ! empty( $_POST['_backorders'] ) && 'yes' === $manage_stock ? wc_clean( $_POST['_backorders'] ) : 'no';
 		$stock_status = ! empty( $_POST['_stock_status'] ) ? wc_clean( $_POST['_stock_status'] ) : 'instock';
@@ -1128,10 +1126,7 @@ class WC_Meta_Box_Product_Data {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
-			// Update stock if managing stock or when resetting stock (manage stock flipped from 'yes' to 'no')
-			if ( '' !== $stock_amount || 'yes' === $was_managing_stock ) {
-				wc_update_product_stock( $post_id, $stock_amount );
-			}
+			wc_update_product_stock( $post_id, $stock_amount );
 
 		} else {
 			wc_update_product_stock_status( $post_id, $stock_status );
