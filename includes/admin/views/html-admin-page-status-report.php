@@ -67,14 +67,14 @@ $pages          = $system_status->get_pages();
 		<tr>
 			<td data-export-label="WP Multisite"><?php _e( 'WP Multisite', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( $environment['wp_multisite'] ) echo '<span class="dashicons dashicons-yes"></span>'; else echo '&ndash;'; ?></td>
+			<td><?php echo ( $environment['wp_multisite'] ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				if ( $environment['wp_memory_limit'] < 67108864 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: %s', 'woocommerce' ), size_format( $environment['wp_memory_limit'] ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), size_format( $environment['wp_memory_limit'] ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $environment['wp_memory_limit'] ) . '</mark>';
 				}
@@ -126,7 +126,7 @@ $pages          = $system_status->get_pages();
 			<td class="help"><?php echo wc_help_tip( __( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				if ( version_compare( $environment['php_version'], '5.6', '<' ) ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $environment['php_version'] ), '<a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend a minimum PHP version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['php_version'] ), '<a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>';
 				}
@@ -171,7 +171,7 @@ $pages          = $system_status->get_pages();
 				<td>
 					<?php
 					if ( version_compare( $environment['mysql_version'], '5.6', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $environment['mysql_version'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['mysql_version'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $environment['mysql_version'] ) . '</mark>';
 					}
@@ -291,7 +291,7 @@ $pages          = $system_status->get_pages();
 			<td class="help">&nbsp;</td>
 			<td><?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend using a prefix with less than 20 characters. See: %s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -352,7 +352,7 @@ $pages          = $system_status->get_pages();
 						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $plugin['version_latest'] ) ) . '</strong>';
 					}
 
-					if ( $plugin['network_activated'] != false ) {
+					if ( false != $plugin['network_activated'] ) {
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
@@ -448,11 +448,11 @@ $pages          = $system_status->get_pages();
 				if ( ! $page['page_set'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
-				} else if ( ! $page['page_exists'] ) {
+				} elseif ( ! $page['page_exists'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
 					$error = true;
-				} else if ( ! $page['page_visible'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
+				} elseif ( ! $page['page_visible'] ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %1$spublic%2$s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
 					$error = true;
 				} else {
 					// Shortcode check
@@ -563,14 +563,15 @@ $pages          = $system_status->get_pages();
 						<td class="help">&nbsp;</td>
 						<td>
 							<?php
-							for ( $i = 0; $i < count( $theme['overrides'] ); $i++ ) {
+							$total_overrides = count( $theme['overrides'] );
+							for ( $i = 0; $i < $total_overrides; $i++ ) {
 								$override = $theme['overrides'][ $i ];
 								if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
-									printf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );
+									printf( __( '<code>%1$s</code> version <strong style="color:red">%2$s</strong> is out of date. The core version is %3$s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );
 								} else {
 									echo esc_html( $override['file'] );
 								}
-								if ( $i !== ( count( $theme['overrides'] ) - 1 ) ) {
+								if ( ( count( $theme['overrides'] ) - 1 ) !== $i ) {
 									echo ', ';
 								}
 								echo '<br />';

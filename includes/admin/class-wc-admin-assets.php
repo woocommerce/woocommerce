@@ -269,7 +269,7 @@ class WC_Admin_Assets {
 				'revoke_access_nonce'           => wp_create_nonce( 'revoke-access' ),
 				'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 				'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
-				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
+				'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),
@@ -306,7 +306,7 @@ class WC_Admin_Assets {
 		}
 
 		// Product sorting - only when sorting by menu order on the products page
-		if ( current_user_can( 'edit_others_pages' ) && $screen_id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
+		if ( current_user_can( 'edit_others_pages' ) && 'edit-product' === $screen_id && isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) {
 			wp_register_script( 'woocommerce_product_ordering', WC()->plugin_url() . '/assets/js/admin/product-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), WC_VERSION, true );
 			wp_enqueue_script( 'woocommerce_product_ordering' );
 		}

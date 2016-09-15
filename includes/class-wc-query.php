@@ -211,9 +211,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
@@ -445,39 +443,39 @@ class WC_Query {
 
 		// default - menu_order
 		$args['orderby']  = 'menu_order title';
-		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+		$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 		$args['meta_key'] = '';
 
 		switch ( $orderby ) {
 			case 'rand' :
 				$args['orderby']  = 'rand';
-			break;
+				break;
 			case 'date' :
 				$args['orderby']  = 'date ID';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
-			break;
+				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+				break;
 			case 'price' :
 				$args['orderby']  = "meta_value_num ID";
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+				$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
-			break;
+				break;
 			case 'popularity' :
 				$args['meta_key'] = 'total_sales';
 
 				// Sorting handled later though a hook
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
-			break;
+				break;
 			case 'rating' :
 				$args['meta_key'] = '_wc_average_rating';
 				$args['orderby']  = array(
 					'meta_value_num' => 'DESC',
 					'ID'             => 'ASC',
 				);
-			break;
+				break;
 			case 'title' :
-				$args['orderby']  = 'title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-			break;
+				$args['orderby'] = 'title';
+				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+				break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );

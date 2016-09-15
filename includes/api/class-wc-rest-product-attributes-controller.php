@@ -143,7 +143,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
@@ -161,7 +161,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'edit' ) ) {
@@ -179,7 +179,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
@@ -232,7 +232,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 
 		$args = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
 			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
 			'attribute_public'  => true === $request['has_archives'],
@@ -324,7 +324,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$format = array( '%s', '%s', '%s', '%s', '%d' );
 		$args   = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => $request['type'],
 			'attribute_orderby' => $request['order_by'],
 			'attribute_public'  => $request['has_archives'],
@@ -617,7 +617,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		 ", $id ) );
 
 		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
-			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $attribute;

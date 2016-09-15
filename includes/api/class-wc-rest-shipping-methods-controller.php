@@ -113,7 +113,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
         $wc_shipping = WC_Shipping::instance();
         $methods     = $wc_shipping->get_shipping_methods();
         if ( empty( $methods[ $request['id'] ] ) ) {
-            return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+            return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
         }
 
         $method   = $methods[ $request['id'] ];

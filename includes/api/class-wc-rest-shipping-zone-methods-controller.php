@@ -93,7 +93,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $method, $request );
@@ -140,7 +140,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			return $zone;
 		}
 
-		$instance_id = $zone->add_shipping_method( $method_id ) ;
+		$instance_id = $zone->add_shipping_method( $method_id );
 		$methods     = $zone->get_shipping_methods();
 		$method      = false;
 		foreach ( $methods as $method_obj ) {
@@ -155,6 +155,9 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
+		if ( is_wp_error( $method ) ) {
+			return $method;
+		}
 
 		$data = $this->prepare_item_for_response( $method, $request );
 		return rest_ensure_response( $data );
@@ -188,16 +191,20 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
+		if ( is_wp_error( $method ) ) {
+			return $method;
+		}
+
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $method, $request );
 
 		// Actually delete
 		if ( $force ) {
-			$zone->delete_shipping_method( $instance_id ) ;
+			$zone->delete_shipping_method( $instance_id );
 		} else {
 			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.' ), array( 'status' => 501 ) );
 		}
@@ -240,10 +247,13 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
+		if ( is_wp_error( $method ) ) {
+			return $method;
+		}
 
 		$data = $this->prepare_item_for_response( $method, $request );
 		return rest_ensure_response( $data );
@@ -264,11 +274,26 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		if ( isset( $request['settings'] ) ) {
 			$method->init_instance_settings();
 			$instance_settings = $method->instance_settings;
+			$errors_found      = false;
 			foreach ( $method->get_instance_form_fields() as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
-					$instance_settings[ $key ] = $request['settings'][ $key ];
+					if ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
+						$value = $this->{'validate_setting_' . $field['type'] . '_field'}( $request['settings'][ $key ], $field );
+					} else {
+						$value = $this->validate_setting_text_field( $request['settings'][ $key ], $field );
+					}
+					if ( is_wp_error( $value ) ) {
+						$errors_found = true;
+						break;
+					}
+					$instance_settings[ $key ] = $value;
 				}
 			}
+
+			if ( $errors_found ) {
+				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
 			update_option( $method->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method ) );
 		}
 

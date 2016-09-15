@@ -559,7 +559,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Limit number of users returned
 		if ( ! empty( $args['limit'] ) ) {
-			if ( $args['limit'] == -1 ) {
+			if ( -1 == $args['limit'] ) {
 				unset( $query_args['number'] );
 			} else {
 				$query_args['number'] = absint( $args['limit'] );
@@ -606,7 +606,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$query = new WP_User_Query( $query_args );
 
 		// Helper members for pagination headers
-		$query->total_pages = ( $args['limit'] == -1 ) ? 1 : ceil( $query->get_total() / $users_per_page );
+		$query->total_pages = ( -1 == $args['limit'] ) ? 1 : ceil( $query->get_total() / $users_per_page );
 		$query->page = $page;
 
 		return $query;
@@ -821,10 +821,8 @@ class WC_API_Customers extends WC_API_Resource {
 					} else {
 						$customers[] = $edit['customer'];
 					}
-				}
-
-				// Customer don't exists / create customer
-				else {
+				} else {
+					// Customer don't exists / create customer
 					$new = $this->create_customer( array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $new ) ) {

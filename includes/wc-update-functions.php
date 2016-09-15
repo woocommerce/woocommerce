@@ -47,22 +47,22 @@ function wc_update_200_permalinks() {
 
 		$base_slug 		= $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
 
-		$category_base 	= get_option('woocommerce_prepend_shop_page_to_urls') == "yes" ? trailingslashit( $base_slug ) : '';
-		$category_slug 	= get_option('woocommerce_product_category_slug') ? get_option('woocommerce_product_category_slug') : _x( 'product-category', 'slug', 'woocommerce' );
-		$tag_slug 		= get_option('woocommerce_product_tag_slug') ? get_option('woocommerce_product_tag_slug') : _x( 'product-tag', 'slug', 'woocommerce' );
+		$category_base 	= get_option( 'woocommerce_prepend_shop_page_to_urls' ) == "yes" ? trailingslashit( $base_slug ) : '';
+		$category_slug 	= get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
+		$tag_slug 		= get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
 
-		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
+		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
 			$product_base = trailingslashit( $base_slug );
 		} else {
-			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
+			if ( ( $product_slug = get_option( 'woocommerce_product_slug' ) ) !== false && ! empty( $product_slug ) ) {
 				$product_base = trailingslashit( $product_slug );
 			} else {
-				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
+				$product_base = trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
 			}
 		}
 
-		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' )
-			$product_base .= trailingslashit('%product_cat%');
+		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' )
+			$product_base .= trailingslashit( '%product_cat%' );
 
 		$permalinks = array(
 			'product_base' 		=> untrailingslashit( $product_base ),
@@ -110,8 +110,9 @@ function wc_update_200_taxrates() {
 
 				foreach ( $states as $state ) {
 
-					if ( $state == '*' )
+					if ( '*' == $state ) {
 						$state = '';
+					}
 
 					$wpdb->insert(
 						$wpdb->prefix . "woocommerce_tax_rates",
@@ -121,8 +122,8 @@ function wc_update_200_taxrates() {
 							'tax_rate'          => $tax_rate['rate'],
 							'tax_rate_name'     => $tax_rate['label'],
 							'tax_rate_priority' => 1,
-							'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-							'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+							'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+							'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 							'tax_rate_order'    => $loop,
 							'tax_rate_class'    => $tax_rate['class'],
 						)
@@ -138,10 +139,11 @@ function wc_update_200_taxrates() {
 	if ( $local_tax_rates )
 		foreach ( $local_tax_rates as $tax_rate ) {
 
-			$location_type = $tax_rate['location_type'] == 'postcode' ? 'postcode' : 'city';
+			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
 
-			if ( $tax_rate['state'] == '*' )
+			if ( '*' == $tax_rate['state'] ) {
 				$tax_rate['state'] = '';
+			}
 
 			$wpdb->insert(
 				$wpdb->prefix . "woocommerce_tax_rates",
@@ -151,8 +153,8 @@ function wc_update_200_taxrates() {
 					'tax_rate'          => $tax_rate['rate'],
 					'tax_rate_name'     => $tax_rate['label'],
 					'tax_rate_priority' => 2,
-					'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-					'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+					'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+					'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 					'tax_rate_order'    => $loop,
 					'tax_rate_class'    => $tax_rate['class'],
 				)
@@ -317,7 +319,7 @@ function wc_update_200_images() {
 			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' ),
 		) );
 
-		if ( ! empty(  $old_settings  ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ) {
+		if ( ! empty( $old_settings ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ) {
 
 			delete_option( 'woocommerce_' . $value . '_image_width' );
 			delete_option( 'woocommerce_' . $value . '_image_height' );
@@ -383,12 +385,12 @@ function wc_update_209_db_version() {
 
 function wc_update_210_remove_pages() {
 	// Pages no longer used
-	wp_trash_post( get_option('woocommerce_pay_page_id') );
-	wp_trash_post( get_option('woocommerce_thanks_page_id') );
-	wp_trash_post( get_option('woocommerce_view_order_page_id') );
-	wp_trash_post( get_option('woocommerce_change_password_page_id') );
-	wp_trash_post( get_option('woocommerce_edit_address_page_id') );
-	wp_trash_post( get_option('woocommerce_lost_password_page_id') );
+	wp_trash_post( get_option( 'woocommerce_pay_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_thanks_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_edit_address_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_lost_password_page_id' ) );
 }
 
 function wc_update_210_file_paths() {

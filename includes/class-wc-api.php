@@ -230,7 +230,13 @@ class WC_API extends WC_Legacy_API {
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
-			new WC_Register_WP_Admin_Settings( $page );
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
 	}
+
 }

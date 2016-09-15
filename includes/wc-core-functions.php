@@ -247,7 +247,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @return string
  */
 function get_woocommerce_currency() {
-	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
 /**
@@ -995,7 +995,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 	 */
 	function hash_equals( $a, $b ) {
 		$a_length = strlen( $a );
-		if ( $a_length !== strlen( $b ) ) {
+		if ( strlen( $b ) !== $a_length ) {
 			return false;
 		}
 		$result = 0;
@@ -1005,7 +1005,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
 		}
 
-		return $result === 0;
+		return 0 === $result;
 	}
 endif;
 
@@ -1420,3 +1420,16 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
 		do_action_ref_array( $action, $args );
 	}
 }
+
+/**
+ * Store user agents. Used for tracker.
+ * @since 2.7.0
+ */
+function wc_maybe_store_user_agent( $user_login, $user ) {
+	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
+		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+		$admin_user_agents[] = wc_get_user_agent();
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+	}
+}
+add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );

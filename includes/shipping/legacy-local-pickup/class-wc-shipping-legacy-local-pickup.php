@@ -136,7 +136,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function get_valid_postcodes() {
 		$codes = array();
 
-		if ( $this->codes != '' ) {
+		if ( '' !== $this->codes ) {
 			foreach ( explode( ',', $this->codes ) as $code ) {
 				$codes[] = strtoupper( trim( $code ) );
 			}
@@ -196,7 +196,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 		}
 
 		if ( $is_available ) {
-			if ( $this->availability === 'specific' ) {
+			if ( 'specific' === $this->availability ) {
 				$ship_to_countries = $this->countries;
 			} else {
 				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );

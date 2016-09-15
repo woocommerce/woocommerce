@@ -34,11 +34,11 @@ if ( $attachment_ids ) {
 
 			$classes = array( 'zoom' );
 
-			if ( $loop === 0 || $loop % $columns === 0 ) {
+			if ( 0 === $loop || 0 === $loop % $columns ) {
 				$classes[] = 'first';
 			}
 
-			if ( ( $loop + 1 ) % $columns === 0 ) {
+			if ( 0 === ( $loop + 1 ) % $columns ) {
 				$classes[] = 'last';
 			}
 

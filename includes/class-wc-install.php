@@ -277,7 +277,7 @@ class WC_Install {
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-		if ( $held_duration != '' ) {
+		if ( '' != $held_duration ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
@@ -814,7 +814,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
 			$version = trim( $matches[1] );
-			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 			// Check the latest stable version and ignore trunk.
 			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
@@ -854,11 +854,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @return	array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( $file == WC_PLUGIN_BASENAME ) {
+		if ( WC_PLUGIN_BASENAME == $file ) {
 			$row_meta = array(
 				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
 				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 
 			return array_merge( $links, $row_meta );

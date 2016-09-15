@@ -48,13 +48,13 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
 		if ( ! empty( $args['hierarchical'] ) ) {
-			$pad = str_repeat('&nbsp;', $depth * 3);
+			$pad = str_repeat( '&nbsp;', $depth * 3 );
 		} else {
 			$pad = '';
 		}
 
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );
-		$value    = isset( $args['value'] ) && $args['value'] == 'id' ? $cat->term_id : $cat->slug;
+		$value    = ( isset( $args['value'] ) && 'id' === $args['value'] ) ? $cat->term_id : $cat->slug;
 		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . "\"";
 
 		if ( $value === $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'] ) ) ) {

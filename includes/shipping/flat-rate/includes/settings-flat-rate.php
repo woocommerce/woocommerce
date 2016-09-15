@@ -44,7 +44,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'title'			 => __( 'Shipping Class Costs', 'woocommerce' ),
 		'type'			 => 'title',
 		'default'        => '',
-		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' ),
+		'description'    => sprintf( __( 'These costs can optionally be added based on the %1$sproduct shipping class%2$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) . '">', '</a>' ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
