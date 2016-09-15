@@ -47,7 +47,7 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 							if ( has_action( 'woocommerce_account_downloads_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_downloads_column_' . $column_id, $download );
 							} else {
-								switch( $column_id ) {
+								switch ( $column_id ) {
 									case 'download-product' : ?>
 										<a href="<?php echo esc_url( get_permalink( $download['product_id'] ) ); ?>">
 											<?php echo esc_html( $download['product_name'] ); ?>
