@@ -191,12 +191,19 @@ function wc_get_account_orders_columns() {
  * @return array
  */
 function wc_get_account_downloads_columns() {
-	return apply_filters( 'woocommerce_account_downloads_columns', array(
-		'download-file'      => __( 'File', 'woocommerce' ),
-		'download-remaining' => __( 'Remaining', 'woocommerce' ),
+	$columns = apply_filters( 'woocommerce_account_downloads_columns', array(
+		'download-product'   => __( 'Product', 'woocommerce' ),
+		'download-remaining' => __( 'Downloads Remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
+		'download-file'      => __( 'File', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
+
+	if ( ! has_filter( 'woocommerce_account_download_actions' ) ) {
+		unset( $columns['download-actions'] );
+	}
+
+	return $columns;
 }
 
 /**
