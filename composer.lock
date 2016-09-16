@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1c4c514a362fbe7e7c17104c54df0460",
-    "content-hash": "98c6ef11b19d95e7145cf4666917256b",
+    "hash": "c0725e9be114961060a386f5c89f7761",
+    "content-hash": "baf243fe1844691347a33632c8530537",
     "packages": [
         {
             "name": "composer/installers",
@@ -245,53 +245,6 @@
                 "standards"
             ],
             "time": "2016-09-01 23:53:02"
-        },
-        {
-            "name": "wimg/php-compatibility",
-            "version": "7.0.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wimg/PHPCompatibility.git",
-                "reference": "695a68e82039b7034c12b13488bf15255d118944"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wimg/PHPCompatibility/zipball/695a68e82039b7034c12b13488bf15255d118944",
-                "reference": "695a68e82039b7034c12b13488bf15255d118944",
-                "shasum": ""
-            },
-            "require": {
-                "ext-tokenizer": "*",
-                "php": ">=5.1.2",
-                "squizlabs/php_codesniffer": "~2.0"
-            },
-            "require-dev": {
-                "satooshi/php-coveralls": "dev-master"
-            },
-            "type": "phpcodesniffer-standard",
-            "autoload": {
-                "psr-4": {
-                    "PHPCompatibility\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Wim Godden",
-                    "role": "lead"
-                }
-            ],
-            "description": "This is a set of sniffs for PHP_CodeSniffer that checks for PHP version compatibility.",
-            "homepage": "http://techblog.wimgodden.be/tag/codesniffer/",
-            "keywords": [
-                "compatibility",
-                "phpcs",
-                "standards"
-            ],
-            "time": "2016-09-08 21:42:12"
         },
         {
             "name": "wp-coding-standards/wpcs",
