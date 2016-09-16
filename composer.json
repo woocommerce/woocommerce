@@ -10,15 +10,14 @@
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
     "wp-coding-standards/wpcs": "*",
-    "wimg/php-compatibility": "*",
     "simplyadmire/composer-plugins" : "@dev"
   },
   "scripts": {
     "post-install-cmd": [
-      "vendor/bin/phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs"
+      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
     ],
     "post-update-cmd": [
-      "vendor/bin/phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs"
+      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
     ]
   }
 }
