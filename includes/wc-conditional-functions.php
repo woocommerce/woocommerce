@@ -110,7 +110,7 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	function is_checkout_pay_page() {
 		global $wp;
 
-		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
+		return is_checkout() || ! empty( $wp->query_vars['order-pay'] );
 	}
 }
 
