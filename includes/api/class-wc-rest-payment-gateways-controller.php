@@ -112,7 +112,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$this->maybe_define_wp_admin();
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$response         = array();
 		foreach ( $payment_gateways as $payment_gateway_id => $payment_gateway ) {
@@ -131,11 +130,10 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$this->maybe_define_wp_admin();
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -149,22 +147,36 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$this->maybe_define_wp_admin();
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( "Resource does not exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Update settings if present
 		if ( isset( $request['settings'] ) ) {
 			$gateway->init_form_fields();
-			$settings = $gateway->settings;
+			$settings     = $gateway->settings;
+			$errors_found = false;
 			foreach ( $gateway->form_fields as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
-					$settings[ $key ] = $request['settings'][ $key ];
+					if ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
+						$value = $this->{'validate_setting_' . $field['type'] . '_field'}( $request['settings'][ $key ], $field );
+					} else {
+						$value = $this->validate_setting_text_field( $request['settings'][ $key ], $field );
+					}
+					if ( is_wp_error( $value ) ) {
+						$errors_found = true;
+						break;
+					}
+					$settings[ $key ] = $value;
 				}
 			}
+
+			if ( $errors_found ) {
+				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
 			$gateway->settings = $settings;
 			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
@@ -276,19 +288,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			$settings[ $id ] = $data;
 		}
 		return $settings;
-	}
-
-	/**
-	 * Some form fields (like COD) have a setting to limit to specific shipping
-	 * methods. Some of the code for loading these into settings is behind an
-	 * is_admin check. To work correctly with methods that do this, we can
-	 * define the constant here and act as wp-admin (since these settings are
-	 * shown to managers and admins only anyway).
-	 */
-	protected function maybe_define_wp_admin() {
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 	}
 
 	/**

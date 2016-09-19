@@ -170,7 +170,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link  = $this->get_page_base_url();
 			$link  = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
 
-			echo '<li class="wc-layered-nav-rating ' . ( ! empty( $_GET['min_rating'] ) && $rating === absint( $_GET['min_rating'] ) ? 'chosen' : '' ) . '">';
+			echo '<li class="wc-layered-nav-rating ' . ( ( ! empty( $_GET['min_rating'] ) && absint( $_GET['min_rating'] ) === $rating ) ? 'chosen' : '' ) . '">';
 
 			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
 

@@ -352,7 +352,7 @@ $pages          = $system_status->get_pages();
 						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $plugin['version_latest'] ) ) . '</strong>';
 					}
 
-					if ( $plugin['network_activated'] != false ) {
+					if ( false != $plugin['network_activated'] ) {
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
@@ -563,14 +563,15 @@ $pages          = $system_status->get_pages();
 						<td class="help">&nbsp;</td>
 						<td>
 							<?php
-							for ( $i = 0; $i < count( $theme['overrides'] ); $i++ ) {
+							$total_overrides = count( $theme['overrides'] );
+							for ( $i = 0; $i < $total_overrides; $i++ ) {
 								$override = $theme['overrides'][ $i ];
 								if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
 									printf( __( '<code>%1$s</code> version <strong style="color:red">%2$s</strong> is out of date. The core version is %3$s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );
 								} else {
 									echo esc_html( $override['file'] );
 								}
-								if ( $i !== ( count( $theme['overrides'] ) - 1 ) ) {
+								if ( ( count( $theme['overrides'] ) - 1 ) !== $i ) {
 									echo ', ';
 								}
 								echo '<br />';

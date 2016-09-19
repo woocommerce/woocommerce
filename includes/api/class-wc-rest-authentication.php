@@ -36,10 +36,10 @@ class WC_REST_Authentication {
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		// Check if our endpoint.
-		$woocommerce = false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' );
+		$woocommerce = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) );
 
 		// Allow third party plugins use our authentication methods.
-		$third_party = false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc-' );
+		$third_party = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc-' ) );
 
 		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
 	}
@@ -356,7 +356,7 @@ class WC_REST_Authentication {
 		$query_string   = implode( '%26', $query_parameters ); // Join with ampersand.
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
+		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
 			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - signature method is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 

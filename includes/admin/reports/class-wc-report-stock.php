@@ -51,7 +51,7 @@ class WC_Report_Stock extends WP_List_Table {
 	 */
 	public function display_tablenav( $position ) {
 
-		if ( $position != 'top' ) {
+		if ( 'top' !== $position ) {
 			parent::display_tablenav( $position );
 		}
 	}

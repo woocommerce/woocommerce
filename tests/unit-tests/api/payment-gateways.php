@@ -184,6 +184,26 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'PayPal - New Title', $paypal['settings']['title']['value'] );
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
+
+		// test bogus
+		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request->set_body_params( array(
+			'settings' => array(
+				'paymentaction' => 'afasfasf',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request->set_body_params( array(
+			'settings' => array(
+				'paymentaction' => 'authorization',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$paypal   = $response->get_data();
+		$this->assertEquals( 'authorization', $paypal['settings']['paymentaction']['value'] );
 	}
 
 	/**
@@ -250,9 +270,6 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.
 	 */
 	private function get_settings( $gateway_class ) {
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 		$gateway = new $gateway_class;
 		$settings = array();
 		$gateway->init_form_fields();

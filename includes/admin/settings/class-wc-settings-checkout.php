@@ -108,7 +108,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'type'            => 'checkbox',
 				'checkboxgroup'   => '',
 				'show_if_checked' => 'option',
-				'desc_tip'        => __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required).', 'woocommerce' ),
+				'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (%1$san SSL Certificate is required%2$s).', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/ssl-and-https/#section-3" target="_blank">', '</a>' ),
 			),
 
 			'unforce_ssl_checkout' => array(
@@ -325,12 +325,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 									case 'status' :
 										echo '<td class="status">';
-
-										if ( $gateway->enabled == 'yes' )
-											echo '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-										else
-											echo '-';
-
+										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>' : '-';
 										echo '</td>';
 										break;
 

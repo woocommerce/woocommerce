@@ -428,7 +428,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		return apply_filters( 'woocommerce_variation_is_in_stock', $this->stock_status === 'instock', $this );
+		return apply_filters( 'woocommerce_variation_is_in_stock', 'instock' === $this->stock_status, $this );
 	}
 
 	/**
@@ -660,7 +660,7 @@ class WC_Product_Variation extends WC_Product {
 					foreach ( $options as $option ) {
 
 						if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
-							if ( $variation_selected_value !== sanitize_title( $option ) ) {
+							if ( sanitize_title( $option ) !== $variation_selected_value ) {
 								continue;
 							}
 						} else {

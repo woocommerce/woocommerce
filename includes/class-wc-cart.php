@@ -134,7 +134,7 @@ class WC_Cart {
 			break;
 			case 'display_totals_ex_tax' :
 			case 'display_cart_ex_tax' :
-				return $this->tax_display_cart === 'excl';
+				return 'excl' === $this->tax_display_cart;
 			break;
 			case 'cart_contents_weight' :
 				return $this->get_cart_contents_weight();
@@ -760,7 +760,7 @@ class WC_Cart {
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
 
-			if ( $code || $key === apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) ) {
+			if ( $code || apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) === $key ) {
 				if ( ! isset( $tax_totals[ $code ] ) ) {
 					$tax_totals[ $code ] = new stdClass();
 					$tax_totals[ $code ]->amount = 0;
@@ -830,7 +830,7 @@ class WC_Cart {
 	 * @return string cart item key
 	 */
 	public function find_product_in_cart( $cart_id = false ) {
-		if ( $cart_id !== false ) {
+		if ( false !== $cart_id ) {
 			if ( is_array( $this->cart_contents ) && isset( $this->cart_contents[ $cart_id ] ) ) {
 				return $cart_id;
 			}
@@ -1057,7 +1057,7 @@ class WC_Cart {
 	 * @return bool
 	 */
 	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
-		if ( $quantity == 0 || $quantity < 0 ) {
+		if ( 0 == $quantity || $quantity < 0 ) {
 			do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
 			unset( $this->cart_contents[ $cart_item_key ] );
 		} else {
@@ -1593,7 +1593,7 @@ class WC_Cart {
 			if ( $this->shipping_total > 0 ) {
 
 				// Display varies depending on settings
-				if ( $this->tax_display_cart == 'excl' ) {
+				if ( 'excl' === $this->tax_display_cart ) {
 
 					$return = wc_price( $this->shipping_total );
 
@@ -1859,7 +1859,7 @@ class WC_Cart {
 		$coupon_code  = apply_filters( 'woocommerce_coupon_code', $coupon_code );
 		$position     = array_search( $coupon_code, $this->applied_coupons );
 
-		if ( $position !== false ) {
+		if ( false !== $position ) {
 			unset( $this->applied_coupons[ $position ] );
 		}
 
@@ -2090,7 +2090,7 @@ class WC_Cart {
 		} else {
 
 			// Display varies depending on settings
-			if ( $this->tax_display_cart == 'excl' ) {
+			if ( 'excl' === $this->tax_display_cart ) {
 
 				$cart_subtotal = wc_price( $this->subtotal_ex_tax );
 
@@ -2117,7 +2117,7 @@ class WC_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_price( $_product ) {
-		if ( $this->tax_display_cart == 'excl' ) {
+		if ( 'excl' === $this->tax_display_cart ) {
 			$product_price = $_product->get_price_excluding_tax();
 		} else {
 			$product_price = $_product->get_price_including_tax();
@@ -2145,7 +2145,7 @@ class WC_Cart {
 		// Taxable
 		if ( $taxable ) {
 
-			if ( $this->tax_display_cart == 'excl' ) {
+			if ( 'excl' === $this->tax_display_cart ) {
 
 				$row_price        = $_product->get_price_excluding_tax( $quantity );
 				$product_subtotal = wc_price( $row_price );

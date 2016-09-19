@@ -160,7 +160,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'desc_tip' => true,
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'email_notification_settings' ),
+			array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
 
 		) );
 
@@ -204,7 +204,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ) ) ) {
 				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
-					if ( $current_section === sanitize_title( $email_id ) ) {
+					if ( sanitize_title( $email_id ) === $current_section ) {
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
 					}
 				}

@@ -41,18 +41,18 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @covers WC_Register_WP_Admin_Settings::__construct
 	 */
 	public function test_constructor() {
-		$settings = new WC_Register_WP_Admin_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
 
-		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $settings, 'register_group' ) ), 10 );
-		$this->assertEquals( has_filter( 'woocommerce_settings-' . $this->page->get_id(), array( $settings, 'register_settings' ) ), 10 );
+		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $settings, 'register_page_group' ) ), 10 );
+		$this->assertEquals( has_filter( 'woocommerce_settings-' . $this->page->get_id(), array( $settings, 'register_page_settings' ) ), 10 );
 	}
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_group
+	 * @covers WC_Register_WP_Admin_Settings::register_page_group
 	 */
 	public function test_register_group() {
-		$settings = new WC_Register_WP_Admin_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
 
 		$existing = array(
 			'id'    => 'existing-id',
@@ -66,7 +66,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 				'label' => $this->page->get_label(),
 			),
 		);
-		$actual = $settings->register_group( $initial );
+		$actual = $settings->register_page_group( $initial );
 
 		$this->assertEquals( $expected, $actual );
 	}
@@ -79,19 +79,21 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 			// No "id" case
 			array(
 				array(
-					'type' => 'some-type-with-no-id',
+					'type'       => 'some-type-with-no-id',
+					'option_key' => '',
 				),
 				false,
 			),
 			// All optional properties except 'desc_tip'
 			array(
 				array(
-					'id'      => 'setting-id',
-					'type'    => 'select',
-					'title'   => 'Setting Name',
-					'desc'    => 'Setting Description',
-					'default' => 'one',
-					'options' => array( 'one', 'two' ),
+					'id'         => 'setting-id',
+					'type'       => 'select',
+					'title'      => 'Setting Name',
+					'desc'       => 'Setting Description',
+					'default'    => 'one',
+					'options'    => array( 'one', 'two' ),
+					'option_key' => '',
 				),
 				array(
 					'id'          => 'setting-id',
@@ -100,16 +102,18 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'description' => 'Setting Description',
 					'default'     => 'one',
 					'options'     => array( 'one', 'two' ),
+					'option_key'  => '',
 				),
 			),
 			// Boolean 'desc_tip' defaulting to 'desc' value
 			array(
 				array(
-					'id'       => 'setting-id',
-					'type'     => 'select',
-					'title'    => 'Setting Name',
-					'desc'     => 'Setting Description',
-					'desc_tip' => true,
+					'id'        => 'setting-id',
+					'type'      => 'select',
+					'title'     => 'Setting Name',
+					'desc'      => 'Setting Description',
+					'desc_tip'  => true,
+					'option_key' => '',
 				),
 				array(
 					'id'          => 'setting-id',
@@ -117,16 +121,18 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'label'       => 'Setting Name',
 					'description' => 'Setting Description',
 					'tip'         => 'Setting Description',
+					'option_key'  => '',
 				),
 			),
 			// String 'desc_tip'
 			array(
 				array(
-					'id'       => 'setting-id',
-					'type'     => 'select',
-					'title'    => 'Setting Name',
-					'desc'     => 'Setting Description',
-					'desc_tip' => 'Setting Tip',
+					'id'         => 'setting-id',
+					'type'       => 'select',
+					'title'      => 'Setting Name',
+					'desc'       => 'Setting Description',
+					'desc_tip'   => 'Setting Tip',
+					'option_key' => '',
 				),
 				array(
 					'id'          => 'setting-id',
@@ -134,19 +140,22 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'label'       => 'Setting Name',
 					'description' => 'Setting Description',
 					'tip'         => 'Setting Tip',
+					'option_key'  => '',
 				),
 			),
 			// Empty 'title' and 'desc'
 			array(
 				array(
-					'id'       => 'setting-id',
-					'type'     => 'select',
+					'id'         => 'setting-id',
+					'type'       => 'select',
+					'option_key' => '',
 				),
 				array(
 					'id'          => 'setting-id',
 					'type'        => 'select',
 					'label'       => '',
 					'description' => '',
+					'option_key'  => '',
 				),
 			),
 		);
@@ -158,7 +167,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @covers WC_Register_WP_Admin_Settings::register_setting
 	 */
 	public function test_register_setting( $input, $expected ) {
-		$settings = new WC_Register_WP_Admin_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
 
 		$actual = $settings->register_setting( $input );
 
@@ -167,7 +176,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings_one_section() {
 		$this->page
@@ -181,17 +190,17 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 			->with( $this->equalTo( 0 ) )
 			->will( $this->returnValue( array() ) );
 
-		$settings = new WC_Register_WP_Admin_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
 
 		$expected = array();
-		$actual   = $settings->register_settings( array() );
+		$actual   = $settings->register_page_settings( array() );
 
 		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
 	 * @since 2.7.0
-	 * @covers WC_Register_WP_Admin_Settings::register_settings
+	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings() {
 		$this->page
@@ -201,15 +210,18 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 		$settings = array(
 			array(
-				'id'   => 'setting-1',
-				'type' => 'text',
+				'id'          => 'setting-1',
+				'type'        => 'text',
+				'option_key'  => '',
 			),
 			array(
-				'type' => 'no-id',
+				'type'        => 'no-id',
+				'option_key'  => '',
 			),
 			array(
-				'id'   => 'setting-2',
-				'type' => 'textarea',
+				'id'          => 'setting-2',
+				'type'        => 'textarea',
+				'option_key'  => '',
 			),
 		);
 
@@ -218,7 +230,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 			->method( 'get_settings' )
 			->will( $this->returnValue( $settings ) );
 
-		$settings = new WC_Register_WP_Admin_Settings( $this->page );
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
 
 		$expected = array(
 			array(
@@ -226,15 +238,17 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 				'type'        => 'text',
 				'label'       => '',
 				'description' => '',
+				'option_key'  => 'setting-1',
 			),
 			array(
 				'id'          => 'setting-2',
 				'type'        => 'textarea',
 				'label'       => '',
 				'description' => '',
+				'option_key'  => 'setting-2',
 			),
 		);
-		$actual = $settings->register_settings( array() );
+		$actual = $settings->register_page_settings( array() );
 
 		$this->assertEquals( $expected, $actual );
 	}

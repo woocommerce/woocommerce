@@ -674,7 +674,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 								position: "bottom",
 								tickColor: 'transparent',
 								mode: "time",
-								timeformat: "<?php echo ( $this->chart_groupby == 'day' ) ? '%d %b' : '%b'; ?>",
+								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
 								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 								tickLength: 1,
 								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],

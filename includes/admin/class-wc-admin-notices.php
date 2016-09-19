@@ -239,7 +239,7 @@ class WC_Admin_Notices {
 				$theme_file = get_template_directory() . '/woocommerce/' . $file;
 			}
 
-			if ( $theme_file !== false ) {
+			if ( false !== $theme_file ) {
 				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
 				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 

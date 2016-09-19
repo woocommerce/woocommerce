@@ -315,7 +315,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		try {
 			$post_id = (int) $request['id'];
 
-			if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
+			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
 				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 

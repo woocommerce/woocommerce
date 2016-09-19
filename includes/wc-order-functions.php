@@ -4,9 +4,9 @@
  *
  * Functions for order specific things.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
+ * @author      WooThemes
+ * @category    Core
+ * @package     WooCommerce/Functions
  * @version     2.1.0
  */
 
@@ -21,25 +21,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  * custom tables, functions still work.
  *
  * Args:
- * 		status array|string List of order statuses to find
- * 		type array|string Order type, e.g. shop_order or shop_order_refund
- * 		parent int post/order parent
- * 		customer int|string|array User ID or billing email to limit orders to a
- * 			particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
- * 			e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
- * 		limit int Maximum of orders to retrieve.
- * 		offset int Offset of orders to retrieve.
- * 		page int Page of orders to retrieve. Ignored when using the 'offset' arg.
- * 		exclude array Order IDs to exclude from the query.
- * 		orderby string Order by date, title, id, modified, rand etc
- * 		order string ASC or DESC
- * 		return string Type of data to return. Allowed values:
- * 			ids array of order ids
- * 			objects array of order objects (default)
- * 		paginate bool If true, the return value will be an array with values:
- * 			'orders'        => array of data (return value above),
- * 			'total'         => total number of orders matching the query
- * 			'max_num_pages' => max number of pages found
+ *      status array|string List of order statuses to find
+ *      type array|string Order type, e.g. shop_order or shop_order_refund
+ *      parent int post/order parent
+ *      customer int|string|array User ID or billing email to limit orders to a
+ *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
+ *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
+ *      limit int Maximum of orders to retrieve.
+ *      offset int Offset of orders to retrieve.
+ *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ *      exclude array Order IDs to exclude from the query.
+ *      orderby string Order by date, title, id, modified, rand etc
+ *      order string ASC or DESC
+ *      return string Type of data to return. Allowed values:
+ *          ids array of order ids
+ *          objects array of order objects (default)
+ *      paginate bool If true, the return value will be an array with values:
+ *          'orders'        => array of data (return value above),
+ *          'total'         => total number of orders matching the query
+ *          'max_num_pages' => max number of pages found
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -349,14 +349,14 @@ function wc_get_order_type( $type ) {
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
- * 		orders screen.
- * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
- * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
- * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
- * 		viewing orders e.g. on the my account page.
- * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
- * 		- exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
+ *      - exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
+ *      orders screen.
+ *      - add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
+ *      - exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
+ *      - exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
+ *      viewing orders e.g. on the my account page.
+ *      - exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
+ *      - exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
  *
  * @since  2.2
  * @see    register_post_type for $args used in that function
@@ -427,15 +427,15 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 	}
 
 	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
-		'download_id'			=> $download_id,
-		'product_id' 			=> $product_id,
-		'user_id' 				=> absint( $order->get_user_id() ),
-		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->get_id(),
-		'order_key' 			=> $order->get_order_key(),
-		'downloads_remaining' 	=> $limit,
-		'access_granted'		=> current_time( 'mysql' ),
-		'download_count'		=> 0,
+		'download_id'           => $download_id,
+		'product_id'            => $product_id,
+		'user_id'               => absint( $order->get_user_id() ),
+		'user_email'            => $user_email,
+		'order_id'              => $order->get_id(),
+		'order_key'             => $order->get_order_key(),
+		'downloads_remaining'   => $limit,
+		'access_granted'        => current_time( 'mysql' ),
+		'download_count'        => 0,
 	));
 
 	$format = apply_filters( 'woocommerce_downloadable_file_permission_format', array(
@@ -521,8 +521,8 @@ function wc_add_order_item( $order_id, $item ) {
 		return false;
 
 	$defaults = array(
-		'order_item_name' 		=> '',
-		'order_item_type' 		=> 'line_item',
+		'order_item_name'       => '',
+		'order_item_type'       => 'line_item',
 	);
 
 	$item = wp_parse_args( $item, $defaults );
@@ -530,9 +530,9 @@ function wc_add_order_item( $order_id, $item ) {
 	$wpdb->insert(
 		$wpdb->prefix . "woocommerce_order_items",
 		array(
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id,
+			'order_item_name'       => $item['order_item_name'],
+			'order_item_type'       => $item['order_item_type'],
+			'order_id'              => $order_id,
 		),
 		array(
 			'%s',
@@ -683,9 +683,9 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		WHERE 	posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-		AND 	posts.post_status = 'wc-pending'
-		AND 	posts.post_modified < %s
+		WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
+		AND     posts.post_status = 'wc-pending'
+		AND     posts.post_modified < %s
 	", $date ) );
 
 	if ( $unpaid_orders ) {
@@ -1133,7 +1133,7 @@ function wc_reduce_stock_levels( $order_id ) {
 	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
 			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
-				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $order, $item );
+				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 				$new_stock = $product->reduce_stock( $qty );
 				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
 
@@ -1144,8 +1144,8 @@ function wc_reduce_stock_levels( $order_id ) {
 				}
 
 				if ( $new_stock < 0 ) {
-		            do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
-		        }
+					do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
+				}
 			}
 		}
 

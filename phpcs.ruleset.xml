@@ -118,6 +118,7 @@
 		<exclude name="WordPress.Functions.DontExtract.extract" />
 		<exclude name="WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid" />
 		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid" />
+		<exclude name="WordPress.NamingConventions.ValidHookName.UseUnderscores" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.NotSnakeCase" />
 		<exclude name="WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar" />
@@ -126,8 +127,9 @@
 		<exclude name="WordPress.PHP.DiscouragedFunctions.DiscouragedWithAlternative" />
 		<exclude name="WordPress.PHP.StrictComparisons.LooseComparison" />
 		<exclude name="WordPress.PHP.StrictInArray.MissingTrueStrict" />
-		<exclude name="WordPress.PHP.YodaConditions.NotYoda" />
+		<!-- <exclude name="WordPress.PHP.YodaConditions.NotYoda" /> -->
 		<exclude name="WordPress.VIP.AdminBarRemoval.RemovalDetected" />
+		<exclude name="WordPress.VIP.CronInterval.ChangeDetected" />
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.SchemaChange" />

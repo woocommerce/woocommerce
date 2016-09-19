@@ -46,7 +46,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
 
 		if ( false === $zone ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $zone;

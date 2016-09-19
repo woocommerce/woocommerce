@@ -710,7 +710,7 @@ class WC_Admin_Post_Types {
 
 					$latest_note = current( $latest_notes );
 
-					if ( isset( $latest_note->comment_content ) && $post->comment_count == 1 ) {
+					if ( isset( $latest_note->comment_content ) && 1 == $post->comment_count ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -931,7 +931,7 @@ class WC_Admin_Post_Types {
 			return $views;
 		}
 
-		$class            = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
+		$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
 		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
 		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
 		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
@@ -1111,13 +1111,13 @@ class WC_Admin_Post_Types {
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) {
-				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
+				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
 				update_post_meta( $post_id, '_regular_price', $new_regular_price );
 			} else {
 				$new_regular_price = null;
 			}
 			if ( isset( $_REQUEST['_sale_price'] ) ) {
-				$new_sale_price = $_REQUEST['_sale_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
+				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
 				update_post_meta( $post_id, '_sale_price', $new_sale_price );
 			} else {
 				$new_sale_price = null;
@@ -1136,7 +1136,7 @@ class WC_Admin_Post_Types {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-				if ( ! is_null( $new_sale_price ) && $new_sale_price !== '' ) {
+				if ( ! is_null( $new_sale_price ) && '' !== $new_sale_price ) {
 					update_post_meta( $post_id, '_price', $new_sale_price );
 				} else {
 					update_post_meta( $post_id, '_price', $new_regular_price );
@@ -1254,7 +1254,7 @@ class WC_Admin_Post_Types {
 
 		// Sold Individually
 		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
-			if ( $_REQUEST['_sold_individually'] == 'yes' ) {
+			if ( 'yes' === $_REQUEST['_sold_individually'] ) {
 				update_post_meta( $post_id, '_sold_individually', 'yes' );
 			} else {
 				update_post_meta( $post_id, '_sold_individually', '' );
@@ -1386,7 +1386,7 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 
-				if ( $_REQUEST['_manage_stock'] == 'yes' ) {
+				if ( 'yes' === $_REQUEST['_manage_stock'] ) {
 					update_post_meta( $post_id, '_manage_stock', 'yes' );
 				} else {
 					update_post_meta( $post_id, '_manage_stock', 'no' );
@@ -1506,7 +1506,7 @@ class WC_Admin_Post_Types {
 	public function shop_order_search_custom_fields( $wp ) {
 		global $pagenow;
 
-		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' ) {
+		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] ) {
 			return;
 		}
 
@@ -1537,7 +1537,7 @@ class WC_Admin_Post_Types {
 			return $query;
 		}
 
-		if ( $typenow != 'shop_order' ) {
+		if ( 'shop_order' !== $typenow ) {
 			return $query;
 		}
 
