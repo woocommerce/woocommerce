@@ -177,6 +177,12 @@ abstract class WC_Settings_API {
 					$this->add_error( $e->getMessage() );
 				}
 			}
+			
+			//Allow for plugins to declare fields as secure and handle them as such
+			if ( isset( $field['secure'] ) && $field['secure'] ){
+				$this->settings[ $key ] = apply_filters( 'woocommerce_settings_api_secure_field_set', $this->settings[ $key ], $this->id, $key, $field['title'] );
+			}
+			
 		}
 
 		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
