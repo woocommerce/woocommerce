@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
 	<h1>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
-		<a href="https://woocommerce.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
-		<?php WC_Admin_Addons::output_storefront_button(); ?>
 	</h1>
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
@@ -24,7 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 		</ul>
 		<br class="clear" />
-		<?php if ( $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+		<?php if ( 'featured' === $current_section ) : ?>
+			<div class="addons-featured">
+				<?php
+					$featured = WC_Admin_Addons::get_featured();
+				?>
+			</div>
+		<?php endif; ?>
+		<?php if ( 'featured' !== $current_section && $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
 			<ul class="products">
 			<?php foreach ( $addons as $addon ) : ?>
 				<li class="product">
@@ -45,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
 
-	<?php if ( 'Storefront' !== $theme['Name'] ) : ?>
+	<?php if ( 'Storefront' !== $theme['Name'] && 'featured' !== $current_section ) : ?>
 		<div class="storefront">
 			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
 			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
