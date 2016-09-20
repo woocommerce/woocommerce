@@ -1026,7 +1026,7 @@ p.demo_store {
 				text-align: left;
 			}
 			.woocommerce-MyAccount-downloads-file {
-				&:before {
+				&::before {
 					content: '\2193';
 					display: inline-block;
 				}
