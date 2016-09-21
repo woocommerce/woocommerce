@@ -443,7 +443,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'        => add_query_arg(
+				'download_url'          => add_query_arg(
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
@@ -452,14 +452,16 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					),
 					home_url( '/' )
 				),
-				'download_id'         => $result->download_id,
-				'product_id'          => $_product->id,
-				'download_name'       => $download_name,
-				'order_id'            => $order->get_id(),
-				'order_key'           => $order->get_order_key(),
-				'downloads_remaining' => $result->downloads_remaining,
-				'access_expires' 	  => $result->access_expires,
-				'file'                => $download_file,
+				'download_id'           => $result->download_id,
+				'product_id'            => $_product->id,
+				'product_name'          => $_product->get_title(),
+				'download_name'         => $download_name,
+				'order_id'              => $order->get_id(),
+				'order_key'             => $order->get_order_key(),
+				'downloads_remaining'   => $result->downloads_remaining,
+				'access_expires' 	    => $result->access_expires,
+				'file'                  => $download_file,
+				'file_name'             => $download_file['name'],
 			);
 
 			$file_number++;

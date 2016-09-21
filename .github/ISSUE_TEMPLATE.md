@@ -18,7 +18,7 @@ BEFORE POSTING YOUR ISSUE
 - Try to add as much detail as possible. Be specific!
 - GitHub issues ARE NOT FOR SUPPORT! If you have questions, use the either:
   - https://wordpress.org/support/plugin/woocommerce for general support
-  - https://support.woothemes.com for premium plugin support
+  - https://woocommerce.com/my-account/tickets/ for premium plugin support
 - If you're requesting a new feature, explain why you'd like it to be added.
 - Search this repository (top of the page) for the issue and it has not been fixed or reported already.
 
