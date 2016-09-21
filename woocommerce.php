@@ -107,8 +107,8 @@ final class WooCommerce {
 	 * @var WC_Structured_Data
 	 */
 	public $structured_data = null;
-  
-  /**
+
+	/**
 	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.

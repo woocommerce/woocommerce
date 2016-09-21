@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author    Clément Cazaud <opportus@gmail.com>
  */
 class WC_Structured_Data {
-	
+
 	/**
 	 * @var array $_data
 	 */
@@ -31,7 +31,7 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ),              60, 0 );
 		add_action( 'woocommerce_review_meta',            array( $this, 'generate_review_data' ),               20, 1 );
 		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_order_data' ),                20, 3 );
-		
+
 		// Output structured data...
 		add_action( 'woocommerce_email_order_details',    array( $this, 'output_structured_data' ),             30, 0 );
 		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),             10, 0 );
@@ -55,12 +55,12 @@ class WC_Structured_Data {
 		if ( $reset && isset( $this->_data ) ) {
 			unset( $this->_data );
 		}
-		
+
 		$this->_data[] = $data;
 
 		return true;
 	}
-	
+
 	/**
 	 * Gets `$this->_data`.
 	 *
@@ -116,7 +116,7 @@ class WC_Structured_Data {
 
 	/**
 	 * Sanitizes, encodes and outputs structured data.
-	 * 
+	 *
 	 * Hooked into `wp_footer` action hook.
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 *
@@ -124,7 +124,7 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function output_structured_data( $requested_types = true ) {
-		if ( $requested_types === true ) {
+		if ( true === $requested_types ) {
 			$requested_types = array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', array(
 				  is_shop() || is_product_category() || is_product() ? 'product'        : null,
 				  is_shop() && is_front_page()                       ? 'website'        : null,
@@ -136,11 +136,11 @@ class WC_Structured_Data {
 
 		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
 			echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
-			
+
 			return true;
 		} else {
 			return false;
-		}	
+		}
 	}
 
 	/**
@@ -175,7 +175,7 @@ class WC_Structured_Data {
 		if ( ! is_string( $type ) ) {
 			return false;
 		}
-		
+
 		$generate = 'generate_' . $type . '_data';
 
 		if ( method_exists( $this, $generate ) && $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
@@ -225,14 +225,14 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function generate_product_data( $product = false, $limit_data = false ) {
-		if ( $product === false ) {
+		if ( false === $product ) {
 			global $product;
 		} elseif ( ! is_object( $product ) ) {
 			return false;
 		}
 
 		$limit_data = apply_filters( 'woocommerce_structured_data_product_limit', $limit_data );
-		
+
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
 		$markup['url']   = $markup['@id'];
@@ -244,7 +244,7 @@ class WC_Structured_Data {
 
 		if ( $is_variable = $product->is_type( 'variable' ) ) {
 			$variations = $product->get_available_variations();
-			
+
 			foreach ( $variations as $variation ) {
 				$product_variations[] = wc_get_product( $variation['variation_id'] );
 			}
@@ -268,10 +268,10 @@ class WC_Structured_Data {
 				),
 			);
 		}
-		
+
 		$markup['description'] = get_the_excerpt( $product->get_id() );
 		$markup['offers']      = $markup_offers;
-		
+
 		if ( $product->get_rating_count() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
@@ -313,7 +313,7 @@ class WC_Structured_Data {
 			'@type' => 'Person',
 			'name'  => get_comment_author( $comment->comment_ID ),
 		);
-		
+
 		return $this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
 	}
 
@@ -371,7 +371,7 @@ class WC_Structured_Data {
 
 		return $this->set_data( apply_filters( 'woocommerce_structured_data_website', $markup ) );
 	}
-	
+
 	/**
 	 * Generates Order structured data.
 	 *
