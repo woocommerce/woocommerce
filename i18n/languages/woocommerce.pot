@@ -18304,38 +18304,38 @@ msgstr ""
 msgid "Sorry, we could not find that order ID in our database."
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:30
+#: includes/vendor/abstract-wp-rest-controller.php:30
 msgid "The register_routes() method must be overriden"
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:40
-#: includes/vendor/class-wp-rest-controller.php:50
-#: includes/vendor/class-wp-rest-controller.php:60
-#: includes/vendor/class-wp-rest-controller.php:70
-#: includes/vendor/class-wp-rest-controller.php:80
-#: includes/vendor/class-wp-rest-controller.php:90
-#: includes/vendor/class-wp-rest-controller.php:100
-#: includes/vendor/class-wp-rest-controller.php:110
-#: includes/vendor/class-wp-rest-controller.php:120
-#: includes/vendor/class-wp-rest-controller.php:130
-#: includes/vendor/class-wp-rest-controller.php:140
-#: includes/vendor/class-wp-rest-controller.php:151
+#: includes/vendor/abstract-wp-rest-controller.php:40
+#: includes/vendor/abstract-wp-rest-controller.php:50
+#: includes/vendor/abstract-wp-rest-controller.php:60
+#: includes/vendor/abstract-wp-rest-controller.php:70
+#: includes/vendor/abstract-wp-rest-controller.php:80
+#: includes/vendor/abstract-wp-rest-controller.php:90
+#: includes/vendor/abstract-wp-rest-controller.php:100
+#: includes/vendor/abstract-wp-rest-controller.php:110
+#: includes/vendor/abstract-wp-rest-controller.php:120
+#: includes/vendor/abstract-wp-rest-controller.php:130
+#: includes/vendor/abstract-wp-rest-controller.php:140
+#: includes/vendor/abstract-wp-rest-controller.php:151
 msgid "Method '%s' not implemented. Must be over-ridden in subclass."
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:253
+#: includes/vendor/abstract-wp-rest-controller.php:253
 msgid "Current page of the collection."
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:261
+#: includes/vendor/abstract-wp-rest-controller.php:261
 msgid "Maximum number of items to be returned in result set."
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:270
+#: includes/vendor/abstract-wp-rest-controller.php:270
 msgid "Limit results to those matching a string."
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:288
+#: includes/vendor/abstract-wp-rest-controller.php:288
 msgid ""
 "Scope under which the request is made; determines fields present in "
 "response."
