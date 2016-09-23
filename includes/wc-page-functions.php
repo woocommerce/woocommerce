@@ -57,6 +57,8 @@ function wc_get_page_id( $page ) {
 	}
 
 	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
+	
+	do_action( 'wc_polylang_page' );
 
 	return $page ? absint( $page ) : -1;
 }
