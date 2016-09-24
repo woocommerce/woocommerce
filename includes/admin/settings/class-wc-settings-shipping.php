@@ -190,7 +190,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( isset( $_REQUEST['zone_id'] ) ) {
 			$hide_save_button = true;
-			$this->zone_methods_screen( absint( $_REQUEST['zone_id'] ) );
+			$this->zone_methods_screen( wc_clean( $_REQUEST['zone_id'] ) );
 		} elseif ( isset( $_REQUEST['instance_id'] ) ) {
 			$this->instance_settings_screen( absint( $_REQUEST['instance_id'] ) );
 		} else {
@@ -204,16 +204,37 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @param  int $zone_id
 	 */
 	protected function zone_methods_screen( $zone_id ) {
-		$wc_shipping      = WC_Shipping      ::instance();
-		$zone             = WC_Shipping_Zones::get_zone( $zone_id );
-		$shipping_methods = $wc_shipping->get_shipping_methods();
+		if ( 'new' === $zone_id ) {
+			$zone = new WC_Shipping_Zone();
+			$zone->set_zone_name( __( 'New Zone', 'woocommerce' ) );
+		} else {
+			$zone = WC_Shipping_Zones::get_zone( $zone_id );
+		}
 
 		if ( ! $zone ) {
 			wp_die( __( 'Zone does not exist!', 'woocommerce' ) );
 		}
 
+		$allowed_countries = WC()->countries->get_allowed_countries();
+		$wc_shipping       = WC_Shipping ::instance();
+		$shipping_methods  = $wc_shipping->get_shipping_methods();
+		$continents        = WC()->countries->get_continents();
+
+		// Prepare locations
+		$locations = array();
+		$postcodes = array();
+
+		foreach ( $zone->get_zone_locations() as $location ) {
+			if ( 'postcode' === $location->type ) {
+				$postcodes[] = $location->code;
+			} else {
+				$locations[] = $location->type . ':' . $location->code;
+			}
+		}
+
 		wp_localize_script( 'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
 			'methods'                 => $zone->get_shipping_methods(),
+			'zone_name'               => $zone->get_zone_name(),
 			'zone_id'                 => $zone->get_zone_id(),
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(

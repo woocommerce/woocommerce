@@ -2875,49 +2875,14 @@ class WC_AJAX {
 
 			$zone_data = array_intersect_key( $data, array(
 				'zone_id'        => 1,
-				'zone_name'      => 1,
-				'zone_order'     => 1,
-				'zone_locations' => 1,
-				'zone_postcodes' => 1,
+				'zone_order'     => 1
 			) );
 
 			if ( isset( $zone_data['zone_id'] ) ) {
 				$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
 
-				if ( isset( $zone_data['zone_name'] ) ) {
-					$zone->set_zone_name( $zone_data['zone_name'] );
-				}
-
 				if ( isset( $zone_data['zone_order'] ) ) {
 					$zone->set_zone_order( $zone_data['zone_order'] );
-				}
-
-				if ( isset( $zone_data['zone_locations'] ) ) {
-					$zone->clear_locations( array( 'state', 'country', 'continent' ) );
-					$locations = array_filter( array_map( 'wc_clean', (array) $zone_data['zone_locations'] ) );
-					foreach ( $locations as $location ) {
-						// Each posted location will be in the format type:code
-						$location_parts = explode( ':', $location );
-						switch ( $location_parts[0] ) {
-							case 'state' :
-								$zone->add_location( $location_parts[1] . ':' . $location_parts[2], 'state' );
-							break;
-							case 'country' :
-								$zone->add_location( $location_parts[1], 'country' );
-							break;
-							case 'continent' :
-								$zone->add_location( $location_parts[1], 'continent' );
-							break;
-						}
-					}
-				}
-
-				if ( isset( $zone_data['zone_postcodes'] ) ) {
-					$zone->clear_locations( 'postcode' );
-					$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $zone_data['zone_postcodes'] ) ) ) );
-					foreach ( $postcodes as $postcode ) {
-						$zone->add_location( $postcode, 'postcode' );
-					}
 				}
 
 				$zone->save();
@@ -2949,13 +2914,13 @@ class WC_AJAX {
 			exit;
 		}
 
-		$zone_id     = absint( $_POST['zone_id'] );
-		$zone        = WC_Shipping_Zones::get_zone( $zone_id );
+		$zone_id     = wc_clean( $_POST['zone_id'] );
+		$zone        = new WC_Shipping_Zone( $zone_id );
 		$instance_id = $zone->add_shipping_method( wc_clean( $_POST['method_id'] ) );
 
 		wp_send_json_success( array(
 			'instance_id' => $instance_id,
-			'zone_id'     => $zone_id,
+			'zone_id'     => $zone->get_id(),
 			'methods'     => $zone->get_shipping_methods(),
 		) );
 	}
@@ -2964,7 +2929,7 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
 	 */
 	public static function shipping_zone_methods_save_changes() {
-		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
@@ -2981,9 +2946,41 @@ class WC_AJAX {
 
 		global $wpdb;
 
-		$zone_id = absint( $_POST['zone_id'] );
+		$zone_id = wc_clean( $_POST['zone_id'] );
 		$zone    = new WC_Shipping_Zone( $zone_id );
-		$changes = $_POST['changes'];
+		$changes = isset( $_POST['changes'] ) ? $_POST['changes'] : array();
+
+		if ( isset( $_POST['zone_name'] ) ) {
+			$zone->set_zone_name( wc_clean( $_POST['zone_name'] ) );
+		}
+
+		if ( isset( $_POST['zone_locations'] ) ) {
+			$zone->clear_locations( array( 'state', 'country', 'continent' ) );
+			$locations = array_filter( array_map( 'wc_clean', (array) $_POST['zone_locations'] ) );
+			foreach ( $locations as $location ) {
+				// Each posted location will be in the format type:code
+				$location_parts = explode( ':', $location );
+				switch ( $location_parts[0] ) {
+					case 'state' :
+						$zone->add_location( $location_parts[1] . ':' . $location_parts[2], 'state' );
+					break;
+					case 'country' :
+						$zone->add_location( $location_parts[1], 'country' );
+					break;
+					case 'continent' :
+						$zone->add_location( $location_parts[1], 'continent' );
+					break;
+				}
+			}
+		}
+
+		if ( isset( $_POST['zone_postcodes'] ) ) {
+			$zone->clear_locations( 'postcode' );
+			$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $_POST['zone_postcodes'] ) ) ) );
+			foreach ( $postcodes as $postcode ) {
+				$zone->add_location( $postcode, 'postcode' );
+			}
+		}
 
 		foreach ( $changes as $instance_id => $data ) {
 			$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
@@ -3015,7 +3012,10 @@ class WC_AJAX {
 			}
 		}
 
+		$zone->save();
+
 		wp_send_json_success( array(
+			'zone_id' => $zone->get_id(),
 			'methods' => $zone->get_shipping_methods(),
 		) );
 	}

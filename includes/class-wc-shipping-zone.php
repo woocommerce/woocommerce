@@ -455,7 +455,7 @@ class WC_Shipping_Zone extends WC_Data {
 		global $wpdb;
 
 		if ( null === $this->get_id() ) {
-			return 0;
+			$this->save();
 		}
 
 		$instance_id     = 0;

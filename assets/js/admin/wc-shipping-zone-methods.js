@@ -21,19 +21,24 @@
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
-					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
-							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
-							changes                 : this.changes,
-							zone_id                 : data.zone_id
-						}, this.onSaveResponse, 'json' );
-					} else {
-						shippingMethod.trigger( 'saved:methods' );
-					}
+					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
+						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+						changes                 : this.changes,
+						zone_name               : $('#zone_name').val(),
+						zone_locations          : $('#zone_locations').val(),
+						zone_postcodes          : $('#zone_postcodes').val(),
+						zone_id                 : data.zone_id
+					}, this.onSaveResponse, 'json' );
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
+							if ( response.data.zone_id !== data.zone_id ) {
+								data.zone_id = response.data.zone_id;
+								if ( window.history.pushState ) {
+									window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+								}
+							}
 							shippingMethod.set( 'methods', response.data.methods );
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
@@ -57,12 +62,21 @@
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 
-					// Settings modals
+					$( document.body ).on( 'input', '#zone_name', { view: this }, this.onUpdateZoneName );
+					$( document.body ).on( 'input', '#zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
+					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+				},
+				onUpdateZone: function() {
+					shippingMethod.trigger( 'change:methods' );
+				},
+				onUpdateZoneName: function() {
+					$('.wc-shipping-zone-name').text( $( this ).val() );
+					shippingMethod.trigger( 'change:methods' );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -300,6 +314,12 @@
 							zone_id                 : data.zone_id
 						}, function( response, textStatus ) {
 							if ( 'success' === textStatus && response.success ) {
+								if ( response.data.zone_id !== data.zone_id ) {
+									data.zone_id = response.data.zone_id;
+									if ( window.history.pushState ) {
+										window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+									}
+								}
 								// Trigger save if there are changes, or just re-render
 								if ( _.size( shippingMethodView.model.changes ) ) {
 									shippingMethodView.model.save();
@@ -319,6 +339,12 @@
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
 					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
 					$( this ).closest( 'article' ).height( $( this ).parent().height() );
+				},
+				onTogglePostcodes: function( event ) {
+					event.preventDefault();
+					var $tr = $( this ).closest( 'tr');
+					$tr.find( '.wc-shipping-zone-postcodes' ).show();
+					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
 				}
 			} ),
 			shippingMethod = new ShippingMethod({
