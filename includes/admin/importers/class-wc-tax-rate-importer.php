@@ -174,7 +174,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Performs post-import cleanup of files and the cache.
 	 */
 	public function import_end() {
-		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a></p>';
 
 		do_action( 'import_end' );
 	}

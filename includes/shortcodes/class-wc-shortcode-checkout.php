@@ -86,7 +86,7 @@ class WC_Shortcode_Checkout {
 			$order                = wc_get_order( $order_id );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
+				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a></div>';
 				return;
 			}
 

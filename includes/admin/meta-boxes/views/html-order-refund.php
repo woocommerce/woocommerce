@@ -16,7 +16,7 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 			echo esc_attr__( 'Refund', 'woocommerce' ) . ' #' . $refund->get_id() . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), $refund->get_date_created() ) );
 
 			if ( $who_refunded->exists() ) {
-				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
+				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' <abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
 			}
 		?>
 		<?php if ( $refund->get_reason() ) : ?>
