@@ -310,7 +310,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		return $links;
 	}
 
-    /**
+	/**
 	 * Get the payment gateway schema, conforming to JSON Schema.
 	 *
 	 * @return array

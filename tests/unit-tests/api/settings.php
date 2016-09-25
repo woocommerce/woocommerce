@@ -173,7 +173,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
-    		'id' => 'woocommerce_demo_store',
+			'id' => 'woocommerce_demo_store',
 			'label' => 'Store Notice',
 			'description' => 'Enable site-wide store notice text',
 			'type' => 'checkbox',

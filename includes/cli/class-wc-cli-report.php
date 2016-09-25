@@ -133,7 +133,7 @@ class WC_CLI_Report extends WC_CLI_Command {
 				if ( date( ( 'day' == $reporter->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
 					$customer_count++;
 				}
- 			}
+			}
 
 			$period_totals[ $time ] = array(
 				'sales'     => wc_format_decimal( 0.00, 2 ),

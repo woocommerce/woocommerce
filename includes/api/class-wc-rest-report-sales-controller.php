@@ -140,7 +140,7 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				if ( date( ( 'day' == $this->report->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
 					$customer_count++;
 				}
- 			}
+			}
 
 			$period_totals[ $time ] = array(
 				'sales'     => wc_format_decimal( 0.00, 2 ),
