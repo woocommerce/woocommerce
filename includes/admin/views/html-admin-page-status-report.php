@@ -563,7 +563,8 @@ $pages          = $system_status->get_pages();
 						<td class="help">&nbsp;</td>
 						<td>
 							<?php
-							for ( $i = 0; $i < count( $theme['overrides'] ); $i++ ) {
+							$total_overrides = count( $theme['overrides'] );
+							for ( $i = 0; $i < $total_overrides; $i++ ) {
 								$override = $theme['overrides'][ $i ];
 								if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
 									printf( __( '<code>%1$s</code> version <strong style="color:red">%2$s</strong> is out of date. The core version is %3$s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );

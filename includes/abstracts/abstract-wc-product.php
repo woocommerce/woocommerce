@@ -1562,8 +1562,7 @@ class WC_Product {
 		} else {
 			$image = '';
 		}
-
-		return $image;
+		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
 	/**

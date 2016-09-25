@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
+ * @since 2.2.0
+ *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product

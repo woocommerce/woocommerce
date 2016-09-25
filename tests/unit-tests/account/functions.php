@@ -45,9 +45,9 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_downloads_columns() {
 		$this->assertEquals( array(
 			'download-file'      => __( 'File', 'woocommerce' ),
-			'download-remaining' => __( 'Remaining', 'woocommerce' ),
+			'download-remaining' => __( 'Downloads Remaining', 'woocommerce' ),
 			'download-expires'   => __( 'Expires', 'woocommerce' ),
-			'download-actions'   => '&nbsp;',
+			'download-product'   => __( 'Product', 'woocommerce' ),
 		), wc_get_account_downloads_columns() );
 	}
 }

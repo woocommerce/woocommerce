@@ -159,6 +159,9 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * the process is not already running.
 		 */
 		public function maybe_handle() {
+			// Don't lock up other requests while processing
+			session_write_close();
+
 			if ( $this->is_process_running() ) {
 				// Background process already running.
 				wp_die();
