@@ -7,7 +7,7 @@
  * @since 2.7
  */
 
- class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
+class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 
 	 protected $server;
 
