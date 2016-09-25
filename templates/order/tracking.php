@@ -50,4 +50,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</ol>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_view_order', $order->get_id() ); ?>
+<?php do_action( 'woocommerce_view_order', $order->get_id() );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

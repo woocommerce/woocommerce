@@ -56,3 +56,5 @@ foreach ( $items as $item_id => $item ) :
 	}
 	echo "\n\n";
 endforeach;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

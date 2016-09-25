@@ -28,4 +28,6 @@ if ( ! $messages ) {
 
 <?php foreach ( $messages as $message ) : ?>
 	<div class="woocommerce-message"><?php echo wp_kses_post( $message ); ?></div>
-<?php endforeach; ?>
+<?php endforeach;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

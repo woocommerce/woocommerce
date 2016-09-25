@@ -91,4 +91,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_mini_cart' ); ?>
+<?php do_action( 'woocommerce_after_mini_cart' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

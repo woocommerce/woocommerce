@@ -18,4 +18,6 @@ if ( wc_get_page_id( 'terms' ) > 0 && apply_filters( 'woocommerce_checkout_show_
 		<input type="hidden" name="terms-field" value="1" />
 	</p>
 	<?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -163,4 +163,6 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 </div>
 
-<?php do_action( 'woocommerce_after_cart' ); ?>
+<?php do_action( 'woocommerce_after_cart' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

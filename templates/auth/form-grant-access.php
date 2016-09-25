@@ -44,4 +44,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<a href="<?php echo esc_url( $return_url ); ?>" class="button wc-auth-deny"><?php _e( 'Deny', 'woocommerce' ); ?></a>
 </p>
 
-<?php do_action( 'woocommerce_auth_page_footer' ); ?>
+<?php do_action( 'woocommerce_auth_page_footer' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

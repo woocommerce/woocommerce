@@ -82,4 +82,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 </div><!-- #product-<?php the_ID(); ?> -->
 
-<?php do_action( 'woocommerce_after_single_product' ); ?>
+<?php do_action( 'woocommerce_after_single_product' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

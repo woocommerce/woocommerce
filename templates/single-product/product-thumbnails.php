@@ -69,3 +69,5 @@ if ( $attachment_ids ) {
 	?></div>
 	<?php
 }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

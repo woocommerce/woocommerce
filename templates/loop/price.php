@@ -25,4 +25,6 @@ global $product;
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>
 	<span class="price"><?php echo $price_html; ?></span>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

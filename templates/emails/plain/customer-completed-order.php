@@ -49,3 +49,5 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -76,4 +76,6 @@ $col    = 1;
 
 <?php endforeach; ?>
 
-<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) echo '</div>'; ?>
+<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) echo '</div>';
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

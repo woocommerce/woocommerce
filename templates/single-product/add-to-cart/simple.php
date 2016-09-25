@@ -62,4 +62,6 @@ if ( ! $product->is_purchasable() ) {
 
 	<?php do_action( 'woocommerce_after_add_to_cart_form' ); ?>
 
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

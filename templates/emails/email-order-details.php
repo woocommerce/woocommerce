@@ -61,4 +61,6 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 	</tfoot>
 </table>
 
-<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
+<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

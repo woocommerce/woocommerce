@@ -65,4 +65,6 @@ foreach ( $items as $item_id => $item ) :
 		</tr>
 	<?php endif; ?>
 
-<?php endforeach; ?>
+<?php endforeach;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

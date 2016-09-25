@@ -102,4 +102,6 @@ if ( $customer_orders ) : ?>
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

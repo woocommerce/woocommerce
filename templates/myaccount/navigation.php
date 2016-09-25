@@ -33,4 +33,6 @@ do_action( 'woocommerce_before_account_navigation' );
 	</ul>
 </nav>
 
-<?php do_action( 'woocommerce_after_account_navigation' ); ?>
+<?php do_action( 'woocommerce_after_account_navigation' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

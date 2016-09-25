@@ -82,3 +82,5 @@ if ( $has_row ) {
 } else {
 	ob_end_clean();
 }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

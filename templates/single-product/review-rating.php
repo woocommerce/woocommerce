@@ -30,3 +30,5 @@ if ( $rating && get_option( 'woocommerce_enable_review_rating' ) === 'yes' ) { ?
 	</div>
 
 <?php }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

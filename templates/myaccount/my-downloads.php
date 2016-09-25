@@ -48,4 +48,6 @@ if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
 
 	<?php do_action( 'woocommerce_after_available_downloads' ); ?>
 
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

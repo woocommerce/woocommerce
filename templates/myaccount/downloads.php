@@ -101,4 +101,6 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 	</div>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_account_downloads', $has_downloads ); ?>
+<?php do_action( 'woocommerce_after_account_downloads', $has_downloads );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

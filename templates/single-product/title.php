@@ -21,3 +21,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 the_title( '<h1 itemprop="name" class="product_title entry-title">', '</h1>' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

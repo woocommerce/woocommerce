@@ -51,3 +51,5 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * @hooked WC_Emails::email_footer() Output the email footer
  */
 do_action( 'woocommerce_email_footer', $email );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */
