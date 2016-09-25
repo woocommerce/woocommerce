@@ -517,7 +517,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-	), $data );
+		), $data );
 
 		// test get single
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/products/woocommerce_dimension_unit' ) );

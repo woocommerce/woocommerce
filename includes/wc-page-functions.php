@@ -153,8 +153,8 @@ function wc_nav_menu_item_classes( $menu_items ) {
 
 		$classes = (array) $menu_item->classes;
 
-		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
+			// Unset active class for blog page.
 			$menu_items[ $key ]->current = false;
 
 			if ( in_array( 'current_page_parent', $classes ) ) {
@@ -164,15 +164,14 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			if ( in_array( 'current-menu-item', $classes ) ) {
 				unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
 			}
-
-		// Set active state if this is the shop page link
 		} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
+			// Set active state if this is the shop page link.
 			$menu_items[ $key ]->current = true;
 			$classes[] = 'current-menu-item';
 			$classes[] = 'current_page_item';
 
-		// Set parent state if this is a product page
 		} elseif ( is_singular( 'product' ) && $shop_page == $menu_item->object_id ) {
+			// Set parent state if this is a product page.
 			$classes[] = 'current_page_parent';
 		}
 

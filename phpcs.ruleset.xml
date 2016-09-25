@@ -32,7 +32,7 @@
 		<exclude name="Generic.PHP.NoSilencedErrors.Discouraged" />
 		<!-- <exclude name="Generic.Strings.UnnecessaryStringConcat.Found" /> -->
 		<!-- <exclude name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" /> -->
-		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
+		<!-- <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" /> -->
 		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
 		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterCloseBracket" /> -->

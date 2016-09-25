@@ -1055,21 +1055,20 @@ function wc_array_cartesian( $input ) {
 
 	// Loop over the 2D array of indexes and generate all combinations
 	foreach ( $indexes as $key => $values ) {
-		// When result is empty, fill with the values of the first looped array
 		if ( empty( $results ) ) {
+			// When result is empty, fill with the values of the first looped array
 			foreach ( $values as $value ) {
 				$results[] = array( $key => $value );
 			}
-
-		// Second and subsequent input sub-array merging.
 		} else {
+			// Second and subsequent input sub-array merging.
 			foreach ( $results as $result_key => $result ) {
 				foreach ( $values as $value ) {
-					// If the key is not set, we can set it
 					if ( ! isset( $results[ $result_key ][ $key ] ) ) {
+						// If the key is not set, we can set it.
 						$results[ $result_key ][ $key ] = $value;
-					// If the key is set, we can add a new combination to the results array
 					} else {
+						// If the key is set, we can add a new combination to the results array.
 						$new_combination         = $results[ $result_key ];
 						$new_combination[ $key ] = $value;
 						$results[]               = $new_combination;
@@ -1300,9 +1299,8 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 				$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ]: array();
 				$matches[ $object_id ][] = $compare_against;
 			}
-
-		// Wildcard and standard comparison.
 		} elseif ( in_array( $compare_against, $wildcard_postcodes ) ) {
+			// Wildcard and standard comparison.
 			$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ]: array();
 			$matches[ $object_id ][] = $compare_against;
 		}

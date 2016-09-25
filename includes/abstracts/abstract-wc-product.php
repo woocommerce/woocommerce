@@ -742,23 +742,19 @@ class WC_Product {
 	public function is_visible() {
 		if ( ! $this->post ) {
 			$visible = false;
-
-		// Published/private
-	} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
+		} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
+			// Published/private.
 			$visible = false;
-
-		// Out of stock visibility
 		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
+			// Out of stock visibility.
 			$visible = false;
-
-		// visibility setting
 		} elseif ( 'hidden' === $this->visibility ) {
+			// visibility setting.
 			$visible = false;
 		} elseif ( 'visible' === $this->visibility ) {
 			$visible = true;
-
-		// Visibility in loop
 		} elseif ( is_search() ) {
+			// Visibility in loop.
 			$visible = 'search' === $this->visibility;
 		} else {
 			$visible = 'catalog' === $this->visibility;
@@ -785,16 +781,16 @@ class WC_Product {
 
 		$purchasable = true;
 
-		// Products must exist of course
 		if ( ! $this->exists() ) {
+			// Products must exist of course.
 			$purchasable = false;
 
-		// Other products types need a price to be set
 		} elseif ( $this->get_price() === '' ) {
+			// Other products types need a price to be set.
 			$purchasable = false;
 
-		// Check the product is published
-	} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
+		} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
+			// Check the product is published.
 			$purchasable = false;
 		}
 
@@ -879,12 +875,12 @@ class WC_Product {
 					$base_tax_amount    = array_sum( $base_taxes );
 					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
 
-				/**
-				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-				 */
 				} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+					/**
+					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+					 */
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );

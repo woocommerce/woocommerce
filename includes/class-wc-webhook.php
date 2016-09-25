@@ -134,36 +134,36 @@ class WC_Webhook {
 		$should_deliver = true;
 		$current_action = current_action();
 
-		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
+
+			// Only active webhooks can be delivered.
 			$should_deliver = false;
 
-		// only deliver deleted event for coupons, orders, and products
 		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+			// Only deliver deleted event for coupons, orders, and products.
 			$should_deliver = false;
 
 		} elseif ( 'delete_user' == $current_action ) {
 			$user = get_userdata( absint( $arg ) );
 
-			// only deliver deleted customer event for users with customer role
+			// Only deliver deleted customer event for users with customer role.
 			if ( ! $user || ! in_array( 'customer', (array) $user->roles ) ) {
 				$should_deliver = false;
 			}
-
-		// check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
 		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
+			// Check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
 			$should_deliver = false;
 
 		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
-			// the `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
+			// The `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
 			// fire for create and update of products and orders, so check the post
-			// creation date to determine the actual event
+			// creation date to determine the actual event.
 			$resource = get_post( absint( $arg ) );
 
-			// Drafts don't have post_date_gmt so calculate it here
+			// Drafts don't have post_date_gmt so calculate it here.
 			$gmt_date = get_gmt_from_date( $resource->post_date );
 
-			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
+			// A resource is considered created when the hook is executed within 10 seconds of the post creation date.
 			$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
 
 			if ( 'created' == $this->get_event() && ! $resource_created ) {

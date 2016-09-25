@@ -195,10 +195,10 @@ class WC_Checkout {
 
 				// Remove all items - we will re-add them later.
 				$order->remove_order_items();
-			/**
-			 * Not resuming - lets create a new order object.
-			 */
 			} else {
+				/**
+				 * Not resuming - lets create a new order object.
+				 */
 				$order = new WC_Order();
 			}
 

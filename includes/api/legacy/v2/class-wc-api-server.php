@@ -581,10 +581,8 @@ class WC_API_Server {
 				$page = 1;
 				$total_pages = 1;
 			}
-
-		// WP_Query
 		} else {
-
+			// WP_Query
 			$page        = $query->get( 'paged' );
 			$single      = $query->is_single();
 			$total       = $query->found_posts;

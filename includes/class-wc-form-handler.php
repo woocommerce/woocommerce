@@ -697,20 +697,17 @@ class WC_Form_Handler {
 
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
-		// Variable product handling
 		if ( 'variable' === $add_to_cart_handler ) {
+			// Variable product handling.
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
-
-		// Grouped Products
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
+			// Grouped Products.
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
-
-		// Custom Handler
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
+			// Custom Handler.
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
-
-		// Simple Products
 		} else {
+			// Simple Products.
 			$was_added_to_cart = self::add_to_cart_handler_simple( $product_id );
 		}
 

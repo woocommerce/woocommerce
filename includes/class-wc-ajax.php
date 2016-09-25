@@ -641,9 +641,8 @@ class WC_AJAX {
 						// Select based attributes - Format values (posted values are slugs)
 						if ( is_array( $attribute_values[ $i ] ) ) {
 							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
-
-						// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
 						} else {
+							// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
 							$values     = array();
 							$raw_values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute_values[ $i ] ) );
 

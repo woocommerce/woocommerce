@@ -190,11 +190,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response( $this->prepare_item_for_response( array(
-		   'id'          => $request['id'],
-		   'name'        => $tool['name'],
-		   'action'      => $tool['button'],
-		   'description' => $tool['desc'],
-	   ), $request ) );
+			'id'          => $request['id'],
+			'name'        => $tool['name'],
+			'action'      => $tool['button'],
+			'description' => $tool['desc'],
+		), $request ) );
 	}
 
 	/**

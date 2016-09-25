@@ -712,7 +712,7 @@ class WC_API_Products extends WC_API_Resource {
 			$image_id = 0;
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
-			} else if ( ! empty( $image ) ) {
+			} elseif ( ! empty( $image ) ) {
 				$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
@@ -780,7 +780,7 @@ class WC_API_Products extends WC_API_Resource {
 				$image = $data['image'];
 				if ( is_numeric( $image ) ) {
 					$image_id = absint( $image );
-				} else if ( ! empty( $image ) ) {
+				} elseif ( ! empty( $image ) ) {
 					$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
@@ -1432,9 +1432,8 @@ class WC_API_Products extends WC_API_Resource {
 					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', $attribute['options'] ) );
-
-					// Text based, separate by pipe.
 					} else {
+						// Text based, separate by pipe.
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
 					}
 
@@ -1606,7 +1605,7 @@ class WC_API_Products extends WC_API_Resource {
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
 					wc_update_product_stock( $product_id, wc_stock_amount( $data['stock_quantity'] ) );
-				} else if ( isset( $data['inventory_delta'] ) ) {
+				} elseif ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $product_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 
@@ -1823,7 +1822,7 @@ class WC_API_Products extends WC_API_Resource {
 							}
 
 							$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
-						} else if ( isset( $image['id'] ) ) {
+						} elseif ( isset( $image['id'] ) ) {
 							$attachment_id = $image['id'];
 						}
 
@@ -1893,7 +1892,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				} else if ( isset( $data['inventory_delta'] ) ) {
+				} elseif ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 
@@ -2670,9 +2669,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( strlen( $slug ) >= 28 ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), 400 );
 		}
 
@@ -3168,7 +3167,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			if ( ! $term ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product_attribute_term' ), 500 );
-			} else if ( is_wp_error( $term ) ) {
+			} elseif ( is_wp_error( $term ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', $term->get_error_message(), 400 );
 			}
 

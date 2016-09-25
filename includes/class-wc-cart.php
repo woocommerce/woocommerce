@@ -558,16 +558,18 @@ class WC_Cart {
 
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
-				// If this is a term slug, get the term's nice name
 				if ( taxonomy_exists( $taxonomy ) ) {
+
+					// If this is a term slug, get the term's nice name
 					$term = get_term_by( 'slug', $value, $taxonomy );
 					if ( ! is_wp_error( $term ) && $term && $term->name ) {
 						$value = $term->name;
 					}
 					$label = wc_attribute_label( $taxonomy );
 
-				// If this is a custom option slug, get the options name
 				} else {
+
+					// If this is a custom option slug, get the options name.
 					$value              = apply_filters( 'woocommerce_variation_option_name', $value );
 					$product_attributes = $cart_item['data']->get_attributes();
 					if ( isset( $product_attributes[ str_replace( 'attribute_', '', $name ) ] ) ) {
@@ -1144,19 +1146,19 @@ class WC_Cart {
 				$this->subtotal += $line_price;
 				$this->subtotal_ex_tax += $line_price;
 
-			/**
-			 * Prices include tax.
-			 *
-			 * To prevent rounding issues we need to work with the inclusive price where possible.
-			 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
-			 * be 8.325 leading to totals being 1p off.
-			 *
-			 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
-			 * afterwards.
-			 *
-			 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
-			 */
 			} elseif ( $this->prices_include_tax ) {
+				/**
+				 * Prices include tax.
+				 *
+				 * To prevent rounding issues we need to work with the inclusive price where possible.
+				 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+				 * be 8.325 leading to totals being 1p off.
+				 *
+				 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
+				 * afterwards.
+				 *
+				 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
+				 */
 
 				// Get base tax rates
 				if ( empty( $shop_tax_rates[ $_product->tax_class ] ) ) {
@@ -1174,10 +1176,10 @@ class WC_Cart {
 				/**
 				 * ADJUST TAX - Calculations when base tax is not equal to the item tax.
 				 *
-					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-					 */
+				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+				 */
 				if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 					// Work out a new base price without the shop's base tax
@@ -1190,23 +1192,22 @@ class WC_Cart {
 					$tax_result            = WC_Tax::calc_tax( $line_subtotal, $item_tax_rates );
 					$line_subtotal_tax     = array_sum( $tax_result );
 
-				/**
-				 * Regular tax calculation (customer inside base and the tax class is unmodified.
-				 */
 				} else {
+					/**
+					 * Regular tax calculation (customer inside base and the tax class is unmodified.
+					 */
 
 					// Calc tax normally
 					$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates, true );
 					$line_subtotal_tax     = array_sum( $taxes );
 					$line_subtotal         = $line_price - array_sum( $taxes );
 				}
-
-			/**
-			 * Prices exclude tax.
-			 *
-			 * This calculation is simpler - work with the base, untaxed price.
-			 */
 			} else {
+				/**
+				 * Prices exclude tax.
+				 *
+				 * This calculation is simpler - work with the base, untaxed price.
+				 */
 
 				// Get item tax rates
 				if ( empty( $tax_rates[ $_product->get_tax_class() ] ) ) {
@@ -1257,10 +1258,10 @@ class WC_Cart {
 				$line_tax              = 0;
 				$line_total            = round( $discounted_price * $values['quantity'], wc_get_rounding_precision() );
 
-			/**
-			 * Prices include tax.
-			 */
 			} elseif ( $this->prices_include_tax ) {
+				/**
+				 * Prices include tax.
+				 */
 
 				$base_tax_rates = $shop_tax_rates[ $_product->tax_class ];
 				$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
@@ -1296,10 +1297,10 @@ class WC_Cart {
 					$line_tax          = array_sum( $discounted_taxes );
 					$line_total        = $discounted_line_price - $line_tax;
 
-				/**
-				 * Regular tax calculation (customer inside base and the tax class is unmodified.
-				 */
 				} else {
+					/**
+					 * Regular tax calculation (customer inside base and the tax class is unmodified.
+					 */
 
 					// Work out a new base price without the item tax
 					$taxes             = WC_Tax::calc_tax( $line_price, $item_tax_rates, true );
@@ -1320,15 +1321,14 @@ class WC_Cart {
 					$line_total        = $discounted_line_price - $line_tax;
 				}
 
-				// Tax rows - merge the totals we just got
 				foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
+					// Tax rows - merge the totals we just got.
 					$this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 				}
-
-			/**
-			 * Prices exclude tax.
-			 */
 			} else {
+				/**
+				 * Prices exclude tax.
+				 */
 
 				$item_tax_rates        = $tax_rates[ $_product->get_tax_class() ];
 
@@ -2086,8 +2086,7 @@ class WC_Cart {
 
 			$cart_subtotal = wc_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
 
-		// Otherwise we show cart items totals only (before discount)
-		} else {
+		} else { // Otherwise we show cart items totals only (before discount).
 
 			// Display varies depending on settings
 			if ( 'excl' === $this->tax_display_cart ) {
@@ -2162,10 +2161,9 @@ class WC_Cart {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 				}
 			}
-
-		// Non-taxable
 		} else {
 
+			// Non-taxable.
 			$row_price        = $price * $quantity;
 			$product_subtotal = wc_price( $row_price );
 

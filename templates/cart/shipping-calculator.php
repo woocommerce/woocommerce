@@ -68,8 +68,7 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 						</select>
 					</span><?php
 
-				// Standard Input
-				} else {
+				} else { // Standard Input.
 
 					?><input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php esc_attr_e( 'State / county', 'woocommerce' ); ?>" name="calc_shipping_state" id="calc_shipping_state" /><?php
 

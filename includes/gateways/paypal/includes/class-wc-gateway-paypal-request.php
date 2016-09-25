@@ -181,12 +181,12 @@ class WC_Gateway_Paypal_Request {
 
 			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
 
-		/**
-		 * Send order as a single item.
-		 *
-		 * For shipping, we longer use shipping_1 because paypal ignores it if *any* shipping rules are within paypal, and paypal ignores anything over 5 digits (999.99 is the max).
-		 */
 		} else {
+			/**
+			 * Send order as a single item.
+			 *
+			 * For shipping, we longer use shipping_1 because paypal ignores it if *any* shipping rules are within paypal, and paypal ignores anything over 5 digits (999.99 is the max).
+			 */
 
 			$this->delete_line_items();
 
