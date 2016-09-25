@@ -699,7 +699,7 @@ class WC_AJAX {
 						'is_taxonomy' 	=> $is_taxonomy,
 					);
 				}
-			 }
+			}
 		}
 
 		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );

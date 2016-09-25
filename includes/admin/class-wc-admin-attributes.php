@@ -255,17 +255,17 @@ class WC_Admin_Attributes {
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
 			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
 
-			<?php
-
-				if ( ! $attribute_to_edit ) {
-					echo '<div id="woocommerce_errors" class="error"><p>' . __( 'Error: non-existing attribute ID.', 'woocommerce' ) . '</p></div>';
-				} else {
-					$att_type    = $attribute_to_edit->attribute_type;
-					$att_label   = $attribute_to_edit->attribute_label;
-					$att_name    = $attribute_to_edit->attribute_name;
-					$att_orderby = $attribute_to_edit->attribute_orderby;
-					$att_public  = $attribute_to_edit->attribute_public;
-
+			<?php if ( ! $attribute_to_edit ) : ?>
+				<div id="woocommerce_errors" class="error">
+					<p><?php _e( 'Error: non-existing attribute ID.', 'woocommerce' ); ?></p>
+				</div>
+			<?php else : ?>
+				<?php
+				$att_type    = $attribute_to_edit->attribute_type;
+				$att_label   = $attribute_to_edit->attribute_label;
+				$att_name    = $attribute_to_edit->attribute_name;
+				$att_orderby = $attribute_to_edit->attribute_orderby;
+				$att_public  = $attribute_to_edit->attribute_public;
 				?>
 
 				<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
@@ -341,7 +341,7 @@ class WC_Admin_Attributes {
 					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
-			<?php } ?>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -372,65 +372,67 @@ class WC_Admin_Attributes {
 							</thead>
 							<tbody>
 								<?php
-									if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) :
-										foreach ( $attribute_taxonomies as $tax ) :
-											?><tr>
-												<td>
-													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
+								if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) :
+									foreach ( $attribute_taxonomies as $tax ) :
+										?><tr>
+											<td>
+												<strong><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
-													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
-												</td>
-												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? '(' . __( 'Public', 'woocommerce' ) . ')' : ''; ?></td>
-												<td><?php
+												<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
+											</td>
+											<td><?php echo esc_html( $tax->attribute_name ); ?></td>
+											<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? '(' . __( 'Public', 'woocommerce' ) . ')' : ''; ?></td>
+											<td>
+												<?php
+												switch ( $tax->attribute_orderby ) {
+													case 'name' :
+														_e( 'Name', 'woocommerce' );
+													break;
+													case 'name_num' :
+														_e( 'Name (numeric)', 'woocommerce' );
+													break;
+													case 'id' :
+														_e( 'Term ID', 'woocommerce' );
+													break;
+													default:
+														_e( 'Custom ordering', 'woocommerce' );
+													break;
+												}
+												?>
+											</td>
+											<td class="attribute-terms">
+												<?php
+												$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+												if ( taxonomy_exists( $taxonomy ) ) {
+													$terms = get_terms( $taxonomy, 'hide_empty=0' );
+
 													switch ( $tax->attribute_orderby ) {
-														case 'name' :
-															_e( 'Name', 'woocommerce' );
-														break;
 														case 'name_num' :
-															_e( 'Name (numeric)', 'woocommerce' );
+															usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
 														break;
-														case 'id' :
-															_e( 'Term ID', 'woocommerce' );
-														break;
-														default:
-															_e( 'Custom ordering', 'woocommerce' );
+														case 'parent' :
+															usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
 														break;
 													}
-												?></td>
-												<td class="attribute-terms"><?php
-													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
-													if ( taxonomy_exists( $taxonomy ) ) {
-														$terms = get_terms( $taxonomy, 'hide_empty=0' );
-
-														switch ( $tax->attribute_orderby ) {
-															case 'name_num' :
-																usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
-															break;
-															case 'parent' :
-																usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
-															break;
-														}
-
-														$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
-														if ( $terms_string ) {
-															echo $terms_string;
-														} else {
-															echo '<span class="na">&ndash;</span>';
-														}
+													$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
+													if ( $terms_string ) {
+														echo $terms_string;
 													} else {
 														echo '<span class="na">&ndash;</span>';
 													}
+												} else {
+													echo '<span class="na">&ndash;</span>';
+												}
 												?>
-												<br /><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php _e( 'Configure terms', 'woocommerce' ); ?></a>
-												</td>
-											</tr><?php
-										endforeach;
-									else :
-										?><tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ) ?></td></tr><?php
-									endif;
-								?>
+											<br /><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php _e( 'Configure terms', 'woocommerce' ); ?></a>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+								<?php else : ?>
+									<tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ) ?></td></tr>
+								<?php endif; ?>
 							</tbody>
 						</table>
 					</div>

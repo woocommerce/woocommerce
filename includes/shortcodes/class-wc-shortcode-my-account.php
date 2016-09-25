@@ -51,7 +51,7 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-		 } else {
+		} else {
 			// Start output buffer since the html may need discarding for BW compatibility
 			ob_start();
 

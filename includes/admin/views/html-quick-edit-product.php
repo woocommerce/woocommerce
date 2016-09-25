@@ -51,14 +51,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="input-text-wrap">
 					<select class="tax_status" name="_tax_status">
 					<?php
-						$options = array(
-							'taxable'  => __( 'Taxable', 'woocommerce' ),
-							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
-						);
-						foreach ( $options as $key => $value ) {
-							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
-						}
+					$options = array(
+						'taxable'  => __( 'Taxable', 'woocommerce' ),
+						'shipping' => __( 'Shipping only', 'woocommerce' ),
+						'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
+					);
+					foreach ( $options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+					}
 					?>
 					</select>
 				</span>
@@ -69,20 +69,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="input-text-wrap">
 					<select class="tax_class" name="_tax_class">
 					<?php
-						$options = array(
-							'' => __( 'Standard', 'woocommerce' ),
-						);
+					$options = array(
+						'' => __( 'Standard', 'woocommerce' ),
+					);
 
-						$tax_classes = WC_Tax::get_tax_classes();
+					$tax_classes = WC_Tax::get_tax_classes();
 
-						if ( ! empty( $tax_classes ) )
-							foreach ( $tax_classes as $class ) {
-								$options[ sanitize_title( $class ) ] = esc_html( $class );
-							}
-
-						foreach ( $options as $key => $value ) {
-							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+					if ( ! empty( $tax_classes ) ) {
+						foreach ( $tax_classes as $class ) {
+							$options[ sanitize_title( $class ) ] = esc_html( $class );
 						}
+					}
+
+					foreach ( $options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+					}
 					?>
 					</select>
 				</span>
@@ -124,11 +125,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="shipping_class" name="_shipping_class">
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
-				<?php
+					<?php
 					foreach ( $shipping_class as $key => $value ) {
 						echo '<option value="' . esc_attr( $value->slug ) . '">' . $value->name . '</option>';
 					}
-				?>
+					?>
 				</select>
 			</span>
 		</label>
@@ -139,15 +140,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="visibility" name="_visibility">
 				<?php
-					$options = apply_filters( 'woocommerce_product_visibility_options', array(
-						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
-						'catalog' => __( 'Catalog', 'woocommerce' ),
-						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' ),
-					) );
-					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
-					}
+				$options = apply_filters( 'woocommerce_product_visibility_options', array(
+					'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
+					'catalog' => __( 'Catalog', 'woocommerce' ),
+					'search'  => __( 'Search', 'woocommerce' ),
+					'hidden'  => __( 'Hidden', 'woocommerce' ),
+				) );
+				foreach ( $options as $key => $value ) {
+					echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+				}
 				?>
 				</select>
 			</span>

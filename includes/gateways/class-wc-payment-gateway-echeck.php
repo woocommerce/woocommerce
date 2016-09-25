@@ -52,9 +52,9 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 		<fieldset id="<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-echeck-form wc-payment-form'>
 			<?php do_action( 'woocommerce_echeck_form_start', $this->id ); ?>
 			<?php
-				foreach ( $fields as $field ) {
-					echo $field;
-				}
+			foreach ( $fields as $field ) {
+				echo $field;
+			}
 			?>
 			<?php do_action( 'woocommerce_echeck_form_end', $this->id ); ?>
 			<div class="clear"></div>

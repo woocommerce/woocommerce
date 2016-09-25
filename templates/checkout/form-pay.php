@@ -34,22 +34,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tbody>
 			<?php if ( sizeof( $order->get_items() ) > 0 ) : ?>
 				<?php foreach ( $order->get_items() as $item_id => $item ) : ?>
-					<?php
-						if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-							continue;
-						}
-					?>
+					<?php if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) : ?>
+						<?php continue; ?>
+					<?php endif; ?>
 					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 						<td class="product-name">
-							<?php
-								echo apply_filters( 'woocommerce_order_item_name', esc_html( $item->get_name() ), $item, false );
 
-								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+							<?php echo apply_filters( 'woocommerce_order_item_name', esc_html( $item->get_name() ), $item, false ); ?>
 
-								wc_display_item_meta( $item );
+							<?php do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order ); ?>
 
-								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
-							?>
+							<?php wc_display_item_meta( $item ); ?>
+
+							<?php do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order ); ?>
+
 						</td>
 						<td class="product-quantity"><?php echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', esc_html( $item->get_quantity() ) ) . '</strong>', $item ); ?></td>
 						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
@@ -72,15 +70,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
 			<ul class="wc_payment_methods payment_methods methods">
-				<?php
-					if ( ! empty( $available_gateways ) ) {
-						foreach ( $available_gateways as $gateway ) {
-							wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) );
-						}
-					} else {
-						echo '<li>' . apply_filters( 'woocommerce_no_available_payment_methods_message', __( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) ) . '</li>';
-					}
-				?>
+				<?php if ( ! empty( $available_gateways ) ) : ?>
+					<?php foreach ( $available_gateways as $gateway ) : ?>
+						<?php wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) ); ?>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<li><?php echo apply_filters( 'woocommerce_no_available_payment_methods_message', __( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) ); ?></li>
+				<?php endif; ?>
 			</ul>
 		<?php endif; ?>
 		<div class="form-row">

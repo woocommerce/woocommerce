@@ -735,71 +735,71 @@ class WC_Email extends WC_Settings_API {
 			do_action( 'woocommerce_email_settings_after', $this );
 		?>
 
-		<?php if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) { ?>
+		<?php if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) : ?>
 			<div id="template">
 			<?php
-				$templates = array(
-					'template_html'  => __( 'HTML template', 'woocommerce' ),
-					'template_plain' => __( 'Plain text template', 'woocommerce' ),
-				);
+			$templates = array(
+				'template_html'  => __( 'HTML template', 'woocommerce' ),
+				'template_plain' => __( 'Plain text template', 'woocommerce' ),
+			);
 
-				foreach ( $templates as $template_type => $title ) :
-					$template = $this->get_template( $template_type );
+			foreach ( $templates as $template_type => $title ) :
+				$template = $this->get_template( $template_type );
 
-					if ( empty( $template ) ) {
-						continue;
-					}
+				if ( empty( $template ) ) {
+					continue;
+				}
 
-					$local_file    = $this->get_theme_template_file( $template );
-					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
-					$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
-					?>
-					<div class="template <?php echo $template_type; ?>">
+				$local_file    = $this->get_theme_template_file( $template );
+				$core_file     = $this->template_base . $template;
+				$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
+				$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
+				?>
+				<div class="template <?php echo $template_type; ?>">
 
-						<h4><?php echo wp_kses_post( $title ); ?></h4>
+					<h4><?php echo wp_kses_post( $title ); ?></h4>
 
-						<?php if ( file_exists( $local_file ) ) { ?>
+					<?php if ( file_exists( $local_file ) ) { ?>
 
-							<p>
-								<a href="#" class="button toggle_editor"></a>
+						<p>
+							<a href="#" class="button toggle_editor"></a>
 
-								<?php if ( is_writable( $local_file ) ) : ?>
-									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
-								<?php endif; ?>
+							<?php if ( is_writable( $local_file ) ) : ?>
+								<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
+							<?php endif; ?>
 
-								<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
-							</p>
+							<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+						</p>
 
-							<div class="editor" style="display:none">
-								<textarea class="code" cols="25" rows="20" <?php if ( ! is_writable( $local_file ) ) : ?>readonly="readonly" disabled="disabled"<?php else : ?>data-name="<?php echo $template_type . '_code'; ?>"<?php endif; ?>><?php echo file_get_contents( $local_file ); ?></textarea>
-							</div>
+						<div class="editor" style="display:none">
+							<textarea class="code" cols="25" rows="20" <?php if ( ! is_writable( $local_file ) ) : ?>readonly="readonly" disabled="disabled"<?php else : ?>data-name="<?php echo $template_type . '_code'; ?>"<?php endif; ?>><?php echo file_get_contents( $local_file ); ?></textarea>
+						</div>
 
-						<?php } elseif ( file_exists( $template_file ) ) { ?>
+					<?php } elseif ( file_exists( $template_file ) ) { ?>
 
-							<p>
-								<a href="#" class="button toggle_editor"></a>
+						<p>
+							<a href="#" class="button toggle_editor"></a>
 
-								<?php if ( ( is_dir( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) && is_writable( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
-									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
-								<?php } ?>
+							<?php if ( ( is_dir( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) && is_writable( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
+								<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
+							<?php } ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
-							</p>
+							<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+						</p>
 
-							<div class="editor" style="display:none">
-								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo file_get_contents( $template_file ); ?></textarea>
-							</div>
+						<div class="editor" style="display:none">
+							<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo file_get_contents( $template_file ); ?></textarea>
+						</div>
 
-						<?php } else { ?>
+					<?php } else { ?>
 
-							<p><?php _e( 'File was not found.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'File was not found.', 'woocommerce' ); ?></p>
 
-						<?php } ?>
+					<?php } ?>
 
-					</div>
-					<?php
-				endforeach;
+				</div>
+				<?php
+			endforeach;
 			?>
 			</div>
 			<?php
@@ -847,6 +847,7 @@ class WC_Email extends WC_Settings_API {
 					}
 				});
 			" );
-		}
+			?>
+		<?php endif;
 	}
 }

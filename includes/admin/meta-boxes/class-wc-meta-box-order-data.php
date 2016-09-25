@@ -167,13 +167,14 @@ class WC_Meta_Box_Order_Data {
 			<div id="order_data" class="panel">
 
 				<h2><?php echo esc_html( sprintf( _x( '%1$s #%2$s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
-				<p class="order_number"><?php
+				<p class="order_number">
+					<?php
 
 					if ( $payment_method ) {
 						printf( __( 'Payment via %s', 'woocommerce' ), ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) );
 
 						if ( $transaction_id = $order->get_transaction_id() ) {
-								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
+							if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
 								echo ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 							} else {
 								echo ' (' . esc_html( $transaction_id ) . ')';
@@ -190,7 +191,8 @@ class WC_Meta_Box_Order_Data {
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
 						echo __( 'Customer IP', 'woocommerce' ) . ': <span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>';
 					}
-				?></p>
+					?>
+				</p>
 
 				<div class="order_data_column_container">
 					<div class="order_data_column">
@@ -200,25 +202,28 @@ class WC_Meta_Box_Order_Data {
 							<input type="text" class="date-picker" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />@<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" min="0" max="23" step="1" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" min="0" max="59" step="1" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
 						</p>
 
-						<p class="form-field form-field-wide wc-order-status"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?> <?php
-							if ( $order->needs_payment() ) {
-								printf( '<a href="%s">%s &rarr;</a>',
-									esc_url( $order->get_checkout_payment_url() ),
-									__( 'Customer payment page', 'woocommerce' )
-								);
-							}
-						?></label>
-						<select id="order_status" name="order_status" class="wc-enhanced-select">
-							<?php
-								$statuses = wc_get_order_statuses();
-								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status(), false ) . '>' . esc_html( $status_name ) . '</option>';
+						<p class="form-field form-field-wide wc-order-status">
+							<label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?>
+								<?php
+								if ( $order->needs_payment() ) {
+									printf( '<a href="%s">%s &rarr;</a>',
+										esc_url( $order->get_checkout_payment_url() ),
+										__( 'Customer payment page', 'woocommerce' )
+									);
 								}
-							?>
-						</select></p>
+								?>
+							</label>
+							<select id="order_status" name="order_status" class="wc-enhanced-select">
+								<?php $statuses = wc_get_order_statuses(); ?>
+								<?php foreach ( $statuses as $status => $status_name ) : ?>
+									<?php echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status(), false ) . '>' . esc_html( $status_name ) . '</option>'; ?>
+								<?php endforeach; ?>
+							</select>
+						</p>
 
 						<p class="form-field form-field-wide wc-customer-user">
-							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
+							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?>
+								<?php
 								if ( $order->get_user_id() ) {
 									$args = array(
 										'post_status'    => 'all',
@@ -230,7 +235,8 @@ class WC_Meta_Box_Order_Data {
 										__( 'View other orders', 'woocommerce' )
 									);
 								}
-							?></label>
+								?>
+							</label>
 							<?php
 							$user_string = '';
 							$user_id     = '';
@@ -251,80 +257,80 @@ class WC_Meta_Box_Order_Data {
 							<a href="#" class="tips load_customer_billing" data-tip="<?php esc_attr_e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
 						</h3>
 						<?php
-							// Display values
-							echo '<div class="address">';
+						// Display values
+						echo '<div class="address">';
 
-								if ( $order->get_formatted_billing_address() ) {
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
-								} else {
-									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
-								}
+						if ( $order->get_formatted_billing_address() ) {
+							echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
+						} else {
+							echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
+						}
 
-								foreach ( self::$billing_fields as $key => $field ) {
-									if ( isset( $field['show'] ) && false === $field['show'] ) {
-										continue;
-									}
-
-									$field_name = 'billing_' . $key;
-
-									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
-									}
-								}
-
-							echo '</div>';
-
-							// Display form
-							echo '<div class="edit_address">';
-
-							foreach ( self::$billing_fields as $key => $field ) {
-								if ( ! isset( $field['type'] ) ) {
-									$field['type'] = 'text';
-								}
-								if ( ! isset( $field['id'] ) ) {
-									$field['id'] = '_billing_' . $key;
-								}
-								switch ( $field['type'] ) {
-									case 'select' :
-										woocommerce_wp_select( $field );
-									break;
-									default :
-										woocommerce_wp_text_input( $field );
-									break;
-								}
+						foreach ( self::$billing_fields as $key => $field ) {
+							if ( isset( $field['show'] ) && false === $field['show'] ) {
+								continue;
 							}
-							?>
-							<p class="form-field form-field-wide">
-								<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
-								<select name="_payment_method" id="_payment_method" class="first">
-									<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
-									<?php
-										$found_method 	= false;
 
-										foreach ( $payment_gateways as $gateway ) {
-											if ( 'yes' === $gateway->enabled ) {
-												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
-												if ( $payment_method == $gateway->id ) {
-													$found_method = true;
-												}
-											}
+							$field_name = 'billing_' . $key;
+
+							if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+								echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
+							}
+						}
+
+						echo '</div>';
+
+						// Display form
+						echo '<div class="edit_address">';
+
+						foreach ( self::$billing_fields as $key => $field ) {
+							if ( ! isset( $field['type'] ) ) {
+								$field['type'] = 'text';
+							}
+							if ( ! isset( $field['id'] ) ) {
+								$field['id'] = '_billing_' . $key;
+							}
+							switch ( $field['type'] ) {
+								case 'select' :
+									woocommerce_wp_select( $field );
+								break;
+								default :
+									woocommerce_wp_text_input( $field );
+								break;
+							}
+						}
+						?>
+						<p class="form-field form-field-wide">
+							<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
+							<select name="_payment_method" id="_payment_method" class="first">
+								<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+								<?php
+								$found_method 	= false;
+
+								foreach ( $payment_gateways as $gateway ) {
+									if ( 'yes' === $gateway->enabled ) {
+										echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
+										if ( $payment_method == $gateway->id ) {
+											$found_method = true;
 										}
+									}
+								}
 
-										if ( ! $found_method && ! empty( $payment_method ) ) {
-											echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
-										} else {
-											echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
-										}
-									?>
-								</select>
-							</p>
-							<?php
+								if ( ! $found_method && ! empty( $payment_method ) ) {
+									echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+								} else {
+									echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+								}
+								?>
+							</select>
+						</p>
+						<?php
 
-							woocommerce_wp_text_input( array( 'id' => '_transaction_id', 'label' => __( 'Transaction ID', 'woocommerce' ) ) );
+						woocommerce_wp_text_input( array( 'id' => '_transaction_id', 'label' => __( 'Transaction ID', 'woocommerce' ) ) );
 
-							echo '</div>';
+						echo '</div>';
 
-							do_action( 'woocommerce_admin_order_data_after_billing_address', $order );
+						do_action( 'woocommerce_admin_order_data_after_billing_address', $order );
 						?>
 					</div>
 					<div class="order_data_column">
@@ -336,68 +342,68 @@ class WC_Meta_Box_Order_Data {
 							<a href="#" class="tips load_customer_shipping" data-tip="<?php esc_attr_e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
 						</h3>
 						<?php
-							// Display values
-							echo '<div class="address">';
+						// Display values
+						echo '<div class="address">';
 
-								if ( $order->get_formatted_shipping_address() ) {
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
-								} else {
-									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
+						if ( $order->get_formatted_shipping_address() ) {
+							echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+						} else {
+							echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
+						}
+
+						if ( ! empty( self::$shipping_fields ) ) {
+							foreach ( self::$shipping_fields as $key => $field ) {
+								if ( isset( $field['show'] ) && false === $field['show'] ) {
+									continue;
 								}
 
-								if ( ! empty( self::$shipping_fields ) ) {
-									foreach ( self::$shipping_fields as $key => $field ) {
-										if ( isset( $field['show'] ) && false === $field['show'] ) {
-											continue;
-										}
+								$field_name = 'shipping_' . $key;
 
-										$field_name = 'shipping_' . $key;
-
-										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
-										}
-									}
-								}
-
-								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
-									echo '<p><strong>' . __( 'Customer Provided Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
-								}
-
-							echo '</div>';
-
-							// Display form
-							echo '<div class="edit_address">';
-
-							if ( ! empty( self::$shipping_fields ) ) {
-								foreach ( self::$shipping_fields as $key => $field ) {
-									if ( ! isset( $field['type'] ) ) {
-										$field['type'] = 'text';
-									}
-									if ( ! isset( $field['id'] ) ) {
-										$field['id'] = '_shipping_' . $key;
-									}
-
-									switch ( $field['type'] ) {
-										case 'select' :
-											woocommerce_wp_select( $field );
-										break;
-										default :
-											woocommerce_wp_text_input( $field );
-										break;
-									}
+								if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
 								}
 							}
+						}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
-								?>
-								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Provided Note', 'woocommerce' ) ?>:</label>
-								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
-								<?php
+						if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
+							echo '<p><strong>' . __( 'Customer Provided Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+						}
+
+						echo '</div>';
+
+						// Display form
+						echo '<div class="edit_address">';
+
+						if ( ! empty( self::$shipping_fields ) ) {
+							foreach ( self::$shipping_fields as $key => $field ) {
+								if ( ! isset( $field['type'] ) ) {
+									$field['type'] = 'text';
+								}
+								if ( ! isset( $field['id'] ) ) {
+									$field['id'] = '_shipping_' . $key;
+								}
+
+								switch ( $field['type'] ) {
+									case 'select' :
+										woocommerce_wp_select( $field );
+									break;
+									default :
+										woocommerce_wp_text_input( $field );
+									break;
+								}
 							}
+						}
 
-							echo '</div>';
+						if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+							?>
+							<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Provided Note', 'woocommerce' ) ?>:</label>
+							<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
+							<?php
+						}
 
-							do_action( 'woocommerce_admin_order_data_after_shipping_address', $order );
+						echo '</div>';
+
+						do_action( 'woocommerce_admin_order_data_after_shipping_address', $order );
 						?>
 					</div>
 				</div>

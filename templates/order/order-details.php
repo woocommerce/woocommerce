@@ -41,33 +41,29 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 
 		<tbody>
 			<?php
-				foreach ( $order->get_items() as $item_id => $item ) {
-					$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
+			foreach ( $order->get_items() as $item_id => $item ) {
+				$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
 
-					wc_get_template( 'order/order-details-item.php', array(
-						'order'			     => $order,
-						'item_id'		     => $item_id,
-						'item'			     => $item,
-						'show_purchase_note' => $show_purchase_note,
-						'purchase_note'	     => $product ? get_post_meta( $product->id, '_purchase_note', true ) : '',
-						'product'	         => $product,
-					) );
-				}
+				wc_get_template( 'order/order-details-item.php', array(
+					'order'			     => $order,
+					'item_id'		     => $item_id,
+					'item'			     => $item,
+					'show_purchase_note' => $show_purchase_note,
+					'purchase_note'	     => $product ? get_post_meta( $product->id, '_purchase_note', true ) : '',
+					'product'	         => $product,
+				) );
+			}
 			?>
 			<?php do_action( 'woocommerce_order_items_table', $order ); ?>
 		</tbody>
 
 		<tfoot>
-			<?php
-				foreach ( $order->get_order_item_totals() as $key => $total ) {
-					?>
-					<tr>
-						<th scope="row"><?php echo $total['label']; ?></th>
-						<td><?php echo $total['value']; ?></td>
-					</tr>
-					<?php
-				}
-			?>
+			<?php foreach ( $order->get_order_item_totals() as $key => $total ) : ?>
+				<tr>
+					<th scope="row"><?php echo $total['label']; ?></th>
+					<td><?php echo $total['value']; ?></td>
+				</tr>
+			<?php endforeach; ?>
 		</tfoot>
 
 	</table>

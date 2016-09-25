@@ -11,21 +11,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap woocommerce">
 	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
-			foreach ( $reports as $key => $report_group ) {
-				echo '<a href="' . admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ) . '" class="nav-tab ';
-				if ( $current_tab == $key ) {
-					echo 'nav-tab-active';
-				}
-				echo '">' . esc_html( $report_group['title'] ) . '</a>';
+		foreach ( $reports as $key => $report_group ) {
+			echo '<a href="' . admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ) . '" class="nav-tab ';
+			if ( $current_tab == $key ) {
+				echo 'nav-tab-active';
 			}
+			echo '">' . esc_html( $report_group['title'] ) . '</a>';
+		}
 
-			do_action( 'wc_reports_tabs' );
+		do_action( 'wc_reports_tabs' );
 		?>
 	</nav>
-	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
-		?>
+	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) : ?>
 		<ul class="subsubsub">
-			<li><?php
+			<li>
+				<?php
 
 				$links = array();
 
@@ -45,13 +45,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				echo implode( ' | </li><li>', $links );
 
-			?></li>
+				?>
+			</li>
 		</ul>
 		<br class="clear" />
-		<?php
-	}
+	<?php endif; ?>
 
-	if ( isset( $reports[ $current_tab ]['reports'][ $current_report ] ) ) {
+	<?php if ( isset( $reports[ $current_tab ]['reports'][ $current_report ] ) ) : ?>
 
 		$report = $reports[ $current_tab ]['reports'][ $current_report ];
 
@@ -68,6 +68,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) ) {
 			call_user_func( $report['callback'], $current_report );
 		}
-	}
-	?>
+	<?php endif; ?>
 </div>

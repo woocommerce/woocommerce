@@ -615,7 +615,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
 					printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
 
-				break;
+					break;
 				case 'order_date' :
 
 					if ( '0000-00-00 00:00:00' == $post->post_date ) {
@@ -627,7 +627,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
 					echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
 
-				break;
+					break;
 				case 'customer_message' :
 					if ( $the_order->get_customer_note() ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -635,7 +635,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 						echo '<span class="na">&ndash;</span>';
 					}
 
-				break;
+					break;
 				case 'order_items' :
 
 					echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
@@ -668,7 +668,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 						echo '</table>';
 
 					} else echo '&ndash;';
-				break;
+					break;
 				case 'billing_address' :
 
 					if ( $address = $the_order->get_formatted_billing_address() ) {
@@ -681,7 +681,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 						echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
 					}
 
-				break;
+					break;
 				case 'shipping_address' :
 
 					if ( $address = $the_order->get_formatted_shipping_address() ) {
@@ -694,7 +694,7 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 						echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
 					}
 
-				break;
+					break;
 				case 'order_notes' :
 
 					if ( $post->comment_count ) {
@@ -721,14 +721,14 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 						echo '<span class="na">&ndash;</span>';
 					}
 
-				break;
+					break;
 				case 'order_total' :
 					echo $the_order->get_formatted_order_total();
 
 					if ( $the_order->get_payment_method_title() ) {
 						echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_payment_method_title() ) . '</small>';
 					}
-				break;
+					break;
 				case 'order_title' :
 
 					if ( $the_order->get_user_id() ) {
@@ -765,48 +765,48 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
 					echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';
 
-				break;
+					break;
 				case 'order_actions' :
-
-					?><p>
+					?>
+					<p>
 						<?php
-							do_action( 'woocommerce_admin_order_actions_start', $the_order );
+						do_action( 'woocommerce_admin_order_actions_start', $the_order );
 
-							$actions = array();
+						$actions = array();
 
-							if ( $the_order->has_status( array( 'pending', 'on-hold' ) ) ) {
-								$actions['processing'] = array(
-									'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-									'name'      => __( 'Processing', 'woocommerce' ),
-									'action'    => "processing",
-								);
-							}
-
-							if ( $the_order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
-								$actions['complete'] = array(
-									'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-									'name'      => __( 'Complete', 'woocommerce' ),
-									'action'    => "complete",
-								);
-							}
-
-							$actions['view'] = array(
-								'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-								'name'      => __( 'View', 'woocommerce' ),
-								'action'    => "view",
+						if ( $the_order->has_status( array( 'pending', 'on-hold' ) ) ) {
+							$actions['processing'] = array(
+								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
+								'name'      => __( 'Processing', 'woocommerce' ),
+								'action'    => "processing",
 							);
+						}
 
-							$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
+						if ( $the_order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+							$actions['complete'] = array(
+								'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
+								'name'      => __( 'Complete', 'woocommerce' ),
+								'action'    => "complete",
+							);
+						}
 
-							foreach ( $actions as $action ) {
-								printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
-							}
+						$actions['view'] = array(
+							'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
+							'name'      => __( 'View', 'woocommerce' ),
+							'action'    => "view",
+						);
 
-							do_action( 'woocommerce_admin_order_actions_end', $the_order );
+						$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
+
+						foreach ( $actions as $action ) {
+							printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+						}
+
+						do_action( 'woocommerce_admin_order_actions_end', $the_order );
 						?>
-					</p><?php
-
-				break;
+					</p>
+					<?php
+					break;
 			}
 		}
 
@@ -1652,19 +1652,12 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 			?>
 			<select name="coupon_type" id="dropdown_shop_coupon_type">
 				<option value=""><?php _e( 'Show all types', 'woocommerce' ); ?></option>
-				<?php
-					$types = wc_get_coupon_types();
-
-					foreach ( $types as $name => $type ) {
-						echo '<option value="' . esc_attr( $name ) . '"';
-
-						if ( isset( $_GET['coupon_type'] ) ) {
-							selected( $name, $_GET['coupon_type'] );
-						}
-
-						echo '>' . esc_html( $type ) . '</option>';
-					}
-				?>
+				<?php $types = wc_get_coupon_types(); ?>
+				<?php foreach ( $types as $name => $type ) : ?>
+					<option value="<?php echo esc_attr( $name ); ?>" <?php echo ( isset( $_GET['coupon_type'] ) ) ? selected( $name, $_GET['coupon_type'] ) : ''; ?>>
+						<?php echo esc_html( $type ); ?>
+					</option>
+				<?php endforeach; ?>
 			</select>
 			<?php
 		}
@@ -2099,13 +2092,13 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 			) );
 			?>
 			<div class="misc-pub-section" id="catalog-visibility">
-				<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
-					echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
+				<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display">
+					<?php echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility ); ?>
 
-					if ( 'yes' == $current_featured ) {
-						echo ', ' . __( 'Featured', 'woocommerce' );
-					}
-				?></strong>
+					<?php if ( 'yes' == $current_featured ) : ?>
+						<?php echo ', ' . __( 'Featured', 'woocommerce' ); ?>
+					<?php endif; ?>
+				</strong>
 
 				<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 
@@ -2114,17 +2107,19 @@ if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 					<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
 					<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
-					<?php
-						echo '<p>' . __( 'Choose where this product should be displayed in your catalog. The product will always be accessible directly.', 'woocommerce' ) . '</p>';
+					<p><?php _e( 'Choose where this product should be displayed in your catalog. The product will always be accessible directly.', 'woocommerce' ); ?></p>
 
-						foreach ( $visibility_options as $name => $label ) {
-							echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
-						}
+					<?php foreach ( $visibility_options as $name => $label ) : ?>
+						<input type="radio" name="_visibility" id="_visibility_<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( $name ); ?>" <?php echo checked( $current_visibility, $name, false ); ?> data-label="<?php echo esc_attr( $label ); ?>" />
+						<label for="_visibility_<?php echo esc_attr( $name ); ?>" class="selectit"><?php echo esc_html( $label ); ?></label>
+						<br />
+					<?php endforeach; ?>
 
-						echo '<p>' . __( 'Enable this option to feature this product.', 'woocommerce' ) . '</p>';
+					<p><?php _e( 'Enable this option to feature this product.', 'woocommerce' ); ?></p>
 
-						echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'Featured Product', 'woocommerce' ) . '</label><br />';
-					?>
+					<input type="checkbox" name="_featured" id="_featured" <?php echo checked( $current_featured, 'yes', false ); ?> />
+					<label for="_featured"><?php _e( 'Featured Product', 'woocommerce' ); ?></label>
+					<br />
 					<p>
 						<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php _e( 'OK', 'woocommerce' ); ?></a>
 						<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>

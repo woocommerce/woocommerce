@@ -372,24 +372,23 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 									<?php echo implode( ' ', $custom_attributes ); ?>
 									<?php echo ( 'multiselect' == $value['type'] ) ? 'multiple="multiple"' : ''; ?>
 									>
-									<?php
-										foreach ( $value['options'] as $key => $val ) {
-											?>
-											<option value="<?php echo esc_attr( $key ); ?>" <?php
-
-												if ( is_array( $option_value ) ) {
-													selected( in_array( $key, $option_value ), true );
-												} else {
-													selected( $option_value, $key );
-												}
-
-											?>><?php echo $val ?></option>
-											<?php
-										}
-									?>
-								</select> <?php echo $description; ?>
+									<?php foreach ( $value['options'] as $key => $val ) : ?>
+										?>
+										<option value="<?php echo esc_attr( $key ); ?>"
+											<?php if ( is_array( $option_value ) ) : ?>
+												<?php selected( in_array( $key, $option_value ), true ); ?>
+											<?php else : ?>
+												<?php selected( $option_value, $key ); ?>
+											<?php endif; ?>
+										>
+											<?php echo $val ?>
+										</option>
+									<?php endforeach ; ?>
+								</select>
+								<?php echo $description; ?>
 							</td>
-						</tr><?php
+						</tr>
+						<?php
 						break;
 
 					// Radio inputs
@@ -406,23 +405,22 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 								<fieldset>
 									<?php echo $description; ?>
 									<ul>
-									<?php
-										foreach ( $value['options'] as $key => $val ) {
-											?>
+										<?php foreach ( $value['options'] as $key => $val ) : ?>
 											<li>
-												<label><input
-													name="<?php echo esc_attr( $value['id'] ); ?>"
-													value="<?php echo $key; ?>"
-													type="radio"
-													style="<?php echo esc_attr( $value['css'] ); ?>"
-													class="<?php echo esc_attr( $value['class'] ); ?>"
-													<?php echo implode( ' ', $custom_attributes ); ?>
-													<?php checked( $key, $option_value ); ?>
-													/> <?php echo $val ?></label>
+												<label>
+													<input
+														name="<?php echo esc_attr( $value['id'] ); ?>"
+														value="<?php echo $key; ?>"
+														type="radio"
+														style="<?php echo esc_attr( $value['css'] ); ?>"
+														class="<?php echo esc_attr( $value['class'] ); ?>"
+														<?php echo implode( ' ', $custom_attributes ); ?>
+														<?php checked( $key, $option_value ); ?>
+													/>
+													<?php echo $val ?>
+												</label>
 											</li>
-											<?php
-										}
-									?>
+										<?php endforeach; ?>
 									</ul>
 								</fieldset>
 							</td>
@@ -594,20 +592,21 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 							</th>
 							<td class="forminp">
 								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
-									<?php
-										if ( ! empty( $countries ) ) {
-											foreach ( $countries as $key => $val ) {
-												echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections ), true, false ) . '>' . $val . '</option>';
-											}
-										}
-									?>
-								</select> <?php echo ( $description ) ? $description : ''; ?> <br /><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+									<?php if ( ! empty( $countries ) ) : ?>
+										<?php foreach ( $countries as $key => $val ) : ?>
+											<option value="<?php echo esc_attr( $key ); ?>"<?php echo selected( in_array( $key, $selections ), true, false ); ?>>
+												<?php echo $val; ?>
+											</option>
+										<?php endforeach; ?>
+									<?php endif; ?>
+								</select>
+								<?php echo ( $description ) ? $description : ''; ?><br /><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
 							</td>
 						</tr><?php
 						break;
 
-					// Default: run an action
 					default:
+						// Default: run an action
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
 						break;
 				}

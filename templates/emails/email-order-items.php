@@ -19,47 +19,56 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+?>
 
-foreach ( $items as $item_id => $item ) :
-	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-		$product = $item->get_product();
-		?>
+<?php foreach ( $items as $item_id => $item ) : ?>
+	<?php if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) : ?>
+		<?php $product = $item->get_product(); ?>
 		<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;"><?php
+			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
+				<?php if ( $show_image ) : // Show title/image etc. ?>
+					<?php echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $product->get_image_id() ? current( wp_get_attachment_image_src( $product->get_image_id(), 'thumbnail' ) ) : wc_placeholder_img_src() ) . '" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item ); ?>
+				<?php endif; ?>
 
-				// Show title/image etc
-				if ( $show_image ) {
-					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $product->get_image_id() ? current( wp_get_attachment_image_src( $product->get_image_id(), 'thumbnail' ) ) : wc_placeholder_img_src() ) . '" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
-				}
-
-				// Product name
+				<?php
+				/**
+				 * Product name.
+				 */
 				echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+				?>
 
-				// SKU
-				if ( $show_sku && is_object( $product ) && $product->get_sku() ) {
-					echo ' (#' . $product->get_sku() . ')';
-				}
+				<?php if ( $show_sku && is_object( $product ) && $product->get_sku() ) : // SKU. ?>
+					<?php echo ' (#' . $product->get_sku() . ')'; ?>
+				<?php endif; ?>
 
-				// allow other plugins to add additional product information here
+				<?php
+				/**
+				 * Allow other plugins to add additional product information here.
+				 */
 				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
+				?>
 
-				wc_display_item_meta( $item );
+				<?php wc_display_item_meta( $item ); ?>
 
-				if ( $show_download_links ) {
-					wc_display_item_downloads( $item );
-				}
+				<?php if ( $show_download_links ) : ?>
+					<?php wc_display_item_downloads( $item ); ?>
+				<?php endif; ?>
 
-				// allow other plugins to add additional product information here
+				<?php
+				/**
+				 * Allow other plugins to add additional product information here.
+				 */
 				do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
+				?>
 
-			?></td>
+			</td>
 			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ); ?></td>
 			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 		</tr>
-		<?php
-	}
 
-	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) : ?>
+	<?php endif; ?>
+
+	<?php if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) : ?>
 		<tr>
 			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 		</tr>

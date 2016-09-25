@@ -492,25 +492,25 @@ class WC_Admin_Webhooks {
 
 		$html = '<div class="webhook-logs-navigation">';
 
-			$html .= '<p class="info" style="float: left;"><strong>';
-			$html .= sprintf( '%s &ndash; Page %d of %d', _n( '1 item', sprintf( '%d items', $total ), $total, 'woocommerce' ), $current, $pages );
-			$html .= '</strong></p>';
+		$html .= '<p class="info" style="float: left;"><strong>';
+		$html .= sprintf( '%s &ndash; Page %d of %d', _n( '1 item', sprintf( '%d items', $total ), $total, 'woocommerce' ), $current, $pages );
+		$html .= '</strong></p>';
 
-			if ( 1 < $pages ) {
-				$html .= '<p class="tools" style="float: right;">';
-					if ( 1 == $current ) {
-						$html .= '<button class="button-primary" disabled="disabled">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</button> ';
-					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
-					}
-
-					if ( $pages == $current ) {
-						$html .= '<button class="button-primary" disabled="disabled">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</button>';
-					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
-					}
-				$html .= '</p>';
+		if ( 1 < $pages ) {
+			$html .= '<p class="tools" style="float: right;">';
+			if ( 1 == $current ) {
+				$html .= '<button class="button-primary" disabled="disabled">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</button> ';
+			} else {
+				$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
 			}
+
+			if ( $pages == $current ) {
+				$html .= '<button class="button-primary" disabled="disabled">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</button>';
+			} else {
+				$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
+			}
+			$html .= '</p>';
+		}
 
 		$html .= '<div class="clear"></div></div>';
 

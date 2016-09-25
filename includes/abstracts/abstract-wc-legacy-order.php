@@ -123,7 +123,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return int updated order item ID
 	 * @throws WC_Data_Exception
 	 */
-	 public function update_product( $item, $product, $args ) {
+	public function update_product( $item, $product, $args ) {
 		_deprecated_function( 'WC_Order::update_product', '2.7', 'Interact with WC_Order_Item_Product class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );

@@ -9,7 +9,7 @@
 
 class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 
-	 protected $server;
+	protected $server;
 
 	/**
 	 * Setup our test server.

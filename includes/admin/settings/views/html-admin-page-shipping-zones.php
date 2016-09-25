@@ -41,18 +41,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<ul>
 					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 					<?php
-						$worldwide = new WC_Shipping_Zone( 0 );
-						$methods   = $worldwide->get_shipping_methods();
-						uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+					$worldwide = new WC_Shipping_Zone( 0 );
+					$methods   = $worldwide->get_shipping_methods();
+					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
-						if ( ! empty( $methods ) ) {
-							foreach ( $methods as $method ) {
-								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
-							}
-						} else {
-							echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					if ( ! empty( $methods ) ) {
+						foreach ( $methods as $method ) {
+							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+							echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 						}
+					} else {
+						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					}
 					?>
 				</ul>
 			</td>
@@ -100,21 +100,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<div class="edit">
 				<select multiple="multiple" name="zone_locations[{{ data.zone_id }}]" data-attribute="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select">
 					<?php
-						foreach ( $continents as $continent_code => $continent ) {
-							echo '<option value="continent:' . esc_attr( $continent_code ) . '" alt="">' . esc_html( $continent['name'] ) . '</option>';
+					foreach ( $continents as $continent_code => $continent ) {
+						echo '<option value="continent:' . esc_attr( $continent_code ) . '" alt="">' . esc_html( $continent['name'] ) . '</option>';
 
-							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+						$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
 
-							foreach ( $countries as $country_code ) {
-								echo '<option value="country:' . esc_attr( $country_code ) . '" alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
+						foreach ( $countries as $country_code ) {
+							echo '<option value="country:' . esc_attr( $country_code ) . '" alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
 
-								if ( $states = WC()->countries->get_states( $country_code ) ) {
-									foreach ( $states as $state_code => $state_name ) {
-										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
-									}
+							if ( $states = WC()->countries->get_states( $country_code ) ) {
+								foreach ( $states as $state_code => $state_name ) {
+									echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
 								}
 							}
 						}
+					}
 					?>
 				</select>
 				<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
@@ -151,12 +151,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-										if ( ! $method->supports( 'shipping-zones' ) ) {
-											continue;
-										}
-										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+									if ( ! $method->supports( 'shipping-zones' ) ) {
+										continue;
 									}
+									echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+								}
 								?>
 							</select>
 							<input type="hidden" name="zone_id" value="{{{ data.zone_id }}}" />

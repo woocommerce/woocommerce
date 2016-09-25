@@ -19,39 +19,39 @@ extract( $variation_data );
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set admin variation order', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?> </strong>
 		<?php
-			foreach ( $parent_data['attributes'] as $attribute ) {
+		foreach ( $parent_data['attributes'] as $attribute ) {
 
-				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] || 'false' === $attribute['is_variation'] ) {
-					continue;
-				}
-
-				// Get current value for variation (if set)
-				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
-
-				// Name will be something like attribute_pa_color
-				echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
-
-				// Get terms for attribute taxonomy or value if its a custom attribute
-				if ( $attribute['is_taxonomy'] ) {
-
-					$post_terms = wp_get_post_terms( $parent_data['id'], $attribute['name'] );
-
-					foreach ( $post_terms as $term ) {
-						echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
-					}
-				} else {
-
-					$options = wc_get_text_attributes( $attribute['value'] );
-
-					foreach ( $options as $option ) {
-						$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
-						echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
-					}
-				}
-
-				echo '</select>';
+			// Only deal with attributes that are variations
+			if ( ! $attribute['is_variation'] || 'false' === $attribute['is_variation'] ) {
+				continue;
 			}
+
+			// Get current value for variation (if set)
+			$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
+
+			// Name will be something like attribute_pa_color
+			echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+
+			// Get terms for attribute taxonomy or value if its a custom attribute
+			if ( $attribute['is_taxonomy'] ) {
+
+				$post_terms = wp_get_post_terms( $parent_data['id'], $attribute['name'] );
+
+				foreach ( $post_terms as $term ) {
+					echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
+				}
+			} else {
+
+				$options = wc_get_text_attributes( $attribute['value'] );
+
+				foreach ( $options as $option ) {
+					$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
+					echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+				}
+			}
+
+			echo '</select>';
+		}
 		?>
 		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo isset( $menu_order ) ? absint( $menu_order ) : 0; ?>" />
@@ -108,16 +108,16 @@ extract( $variation_data );
 				</div>
 
 				<?php
-					/**
-					 * woocommerce_variation_options_pricing action.
-					 *
-					 * @since 2.5.0
-					 *
-					 * @param int     $loop
-					 * @param array   $variation_data
-					 * @param WP_Post $variation
-					 */
-					do_action( 'woocommerce_variation_options_pricing', $loop, $variation_data, $variation );
+				/**
+				 * woocommerce_variation_options_pricing action.
+				 *
+				 * @since 2.5.0
+				 *
+				 * @param int     $loop
+				 * @param array   $variation_data
+				 * @param WP_Post $variation
+				 */
+				do_action( 'woocommerce_variation_options_pricing', $loop, $variation_data, $variation );
 				?>
 			</div>
 
@@ -131,24 +131,24 @@ extract( $variation_data );
 						<label><?php _e( 'Allow backorders?', 'woocommerce' ); ?></label>
 						<select name="variable_backorders[<?php echo $loop; ?>]">
 							<?php
-								foreach ( $parent_data['backorder_options'] as $key => $value ) {
-									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
-								}
+							foreach ( $parent_data['backorder_options'] as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+							}
 							?>
 						</select>
 					</p>
 
 					<?php
-						/**
-						 * woocommerce_variation_options_inventory action.
-						 *
-						 * @since 2.5.0
-						 *
-						 * @param int     $loop
-						 * @param array   $variation_data
-						 * @param WP_Post $variation
-						 */
-						do_action( 'woocommerce_variation_options_inventory', $loop, $variation_data, $variation );
+					/**
+					 * woocommerce_variation_options_inventory action.
+					 *
+					 * @since 2.5.0
+					 *
+					 * @param int     $loop
+					 * @param array   $variation_data
+					 * @param WP_Post $variation
+					 */
+					do_action( 'woocommerce_variation_options_inventory', $loop, $variation_data, $variation );
 					?>
 				</div>
 			<?php endif; ?>
@@ -158,9 +158,9 @@ extract( $variation_data );
 					<label><?php _e( 'Stock status', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ); ?></label>
 					<select name="variable_stock_status[<?php echo $loop; ?>]">
 						<?php
-							foreach ( $parent_data['stock_status_options'] as $key => $value ) {
-								echo '<option value="' . esc_attr( $key === $_stock_status ? '' : $key ) . '" ' . selected( $key === $_stock_status, true, false ) . '>' . esc_html( $value ) . '</option>';
-							}
+						foreach ( $parent_data['stock_status_options'] as $key => $value ) {
+							echo '<option value="' . esc_attr( $key === $_stock_status ? '' : $key ) . '" ' . selected( $key === $_stock_status, true, false ) . '>' . esc_html( $value ) . '</option>';
+						}
 						?>
 					</select>
 				</p>

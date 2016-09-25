@@ -332,34 +332,34 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					var drawGraph = function( highlight ) {
 						var series = [
 							<?php
-								$index = 0;
-								foreach ( $chart_data as $data ) {
-									$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
-									$width  = $this->barwidth / sizeof( $chart_data );
-									$offset = ( $width * $index );
-									$series = $data['data'];
-									foreach ( $series as $key => $series_data ) {
-										$series[ $key ][0] = $series_data[0] + $offset;
-									}
-									echo '{
-										label: "' . esc_js( $data['category'] ) . '",
-										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
-										color: "' . $color . '",
-										bars: {
-											fillColor: "' . $color . '",
-											fill: true,
-											show: true,
-											lineWidth: 1,
-											align: "center",
-											barWidth: ' . $width * 0.75 . ',
-											stack: false
-										},
-										' . $this->get_currency_tooltip() . ',
-										enable_tooltip: true,
-										prepend_label: true
-									},';
-									$index++;
+							$index = 0;
+							foreach ( $chart_data as $data ) {
+								$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
+								$width  = $this->barwidth / sizeof( $chart_data );
+								$offset = ( $width * $index );
+								$series = $data['data'];
+								foreach ( $series as $key => $series_data ) {
+									$series[ $key ][0] = $series_data[0] + $offset;
 								}
+								echo '{
+									label: "' . esc_js( $data['category'] ) . '",
+									data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
+									color: "' . $color . '",
+									bars: {
+										fillColor: "' . $color . '",
+										fill: true,
+										show: true,
+										lineWidth: 1,
+										align: "center",
+										barWidth: ' . $width * 0.75 . ',
+										stack: false
+									},
+									' . $this->get_currency_tooltip() . ',
+									enable_tooltip: true,
+									prepend_label: true
+								},';
+								$index++;
+							}
 							?>
 						];
 

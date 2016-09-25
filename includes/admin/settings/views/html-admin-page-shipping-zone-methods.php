@@ -102,13 +102,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-										if ( ! $method->supports( 'shipping-zones' ) ) {
-											continue;
-										}
-
-										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+									if ( ! $method->supports( 'shipping-zones' ) ) {
+										continue;
 									}
+
+									echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+								}
 								?>
 							</select>
 						</div>

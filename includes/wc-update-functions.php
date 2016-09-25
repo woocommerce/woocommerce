@@ -101,7 +101,7 @@ function wc_update_200_taxrates() {
 	$loop = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
-	if ( $tax_rates )
+	if ( $tax_rates ) {
 		foreach ( $tax_rates as $tax_rate ) {
 
 			foreach ( $tax_rate['countries'] as $country => $states ) {
@@ -133,10 +133,11 @@ function wc_update_200_taxrates() {
 				}
 			}
 		}
+	}
 
 	$local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-	if ( $local_tax_rates )
+	if ( $local_tax_rates ) {
 		foreach ( $local_tax_rates as $tax_rate ) {
 
 			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
@@ -179,6 +180,7 @@ function wc_update_200_taxrates() {
 
 			$loop++;
 		}
+	}
 
 	update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 	update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );

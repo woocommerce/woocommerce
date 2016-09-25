@@ -376,12 +376,12 @@ class WC_Countries {
 		if ( $this->countries ) foreach ( $this->countries as $key => $value ) :
 			if ( $states = $this->get_states( $key ) ) :
 				echo '<optgroup label="' . esc_attr( $value ) . '">';
-					foreach ( $states as $state_key => $state_value ) :
+				foreach ( $states as $state_key => $state_value ) :
 					echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
 					if ( $selected_country == $key && $selected_state == $state_key ) {
 						echo ' selected="selected"';
-						}
+					}
 
 					echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
 					endforeach;

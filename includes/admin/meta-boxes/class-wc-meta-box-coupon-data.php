@@ -100,8 +100,9 @@ class WC_Meta_Box_Coupon_Data {
 
 				// Product ids
 				?>
-				<p class="form-field"><label><?php _e( 'Products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+				<p class="form-field">
+					<label><?php _e( 'Products', 'woocommerce' ); ?></label>
+					<?php
 					$product_ids = $coupon->get_product_ids();
 					$json_ids    = array();
 
@@ -111,15 +112,17 @@ class WC_Meta_Box_Coupon_Data {
 							$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
 						}
 					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-					?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ); ?></p>
+					$data_selected = json_encode( $json_ids );
+					?>
+					<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php echo esc_attr( $data_selected ); ?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" />
+					<?php echo wc_help_tip( __( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ); ?>
+				</p>
 				<?php
 
 				// Exclude Product ids
 				?>
 				<p class="form-field"><label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+					<?php
 					$product_ids = $coupon->get_excluded_product_ids();
 					$json_ids    = array();
 
@@ -129,9 +132,11 @@ class WC_Meta_Box_Coupon_Data {
 							$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
 						}
 					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ); ?></p>
+					$data_selected = json_encode( $json_ids );
+					?>
+					<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php echo esc_attr( $data_selected ); ?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" />
+					<?php echo wc_help_tip( __( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ); ?>
+				</p>
 				<?php
 
 				echo '</div><div class="options_group">';

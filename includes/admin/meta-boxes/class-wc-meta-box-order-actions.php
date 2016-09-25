@@ -68,8 +68,8 @@ class WC_Meta_Box_Order_Actions {
 			</li>
 
 			<li class="wide">
-				<div id="delete-action"><?php
-
+				<div id="delete-action">
+					<?php
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
@@ -79,7 +79,8 @@ class WC_Meta_Box_Order_Actions {
 						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
-				?></div>
+					?>
+				</div>
 
 				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
 			</li>

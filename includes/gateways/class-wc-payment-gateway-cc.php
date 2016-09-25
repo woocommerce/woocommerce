@@ -76,9 +76,9 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
-				foreach ( $fields as $field ) {
+			foreach ( $fields as $field ) {
 				echo $field;
-				}
+			}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
 			<div class="clear"></div>

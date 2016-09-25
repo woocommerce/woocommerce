@@ -163,9 +163,8 @@ if ( ! class_exists( 'WC_Admin_Profile' ) ) :
 							<td>
 								<?php if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) : ?>
 									<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
-										<?php
-											$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
-											foreach ( $field['options'] as $option_key => $option_value ) : ?>
+										<?php $selected = esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>
+										<?php foreach ( $field['options'] as $option_key => $option_value ) : ?>
 											<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $selected, $option_key, true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 										<?php endforeach; ?>
 									</select>
