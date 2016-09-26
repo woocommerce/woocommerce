@@ -925,6 +925,7 @@ ul.wc_coupon_list_block {
 	}
 	.woocommerce_order_items_wrapper {
 		margin: 0;
+		overflow-x: auto;
 
 		table.woocommerce_order_items {
 			width: 100%;
