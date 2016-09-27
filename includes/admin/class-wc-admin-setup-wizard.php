@@ -26,8 +26,8 @@ class WC_Admin_Setup_Wizard {
 
 	/** @var array Tweets user can optionally send after install */
 	private $tweets = array(
-		'Someone give me woo-t, I just set up a new store with #WordPress and @WooCommerce!',
-		'Someone give me high five, I just set up a new store with #WordPress and @WooCommerce!',
+		__( 'Someone give me woo-t, I just set up a new store with #WordPress and @WooCommerce!', 'woocommerce' ),
+		__( 'Someone give me high five, I just set up a new store with #WordPress and @WooCommerce!', 'woocommerce' ),
 	);
 
 	/**
@@ -150,7 +150,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
-			<h1 id="wc-logo"><a href="https://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
+			<h1 id="wc-logo"><a href="https://woocommerce.com/" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
 		<?php
 	}
 
