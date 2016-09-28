@@ -118,7 +118,7 @@
     "packages-dev": [
         {
             "name": "simplyadmire/composer-plugins",
-            "version": "dev-master",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SimplyAdmire/ComposerPlugins.git",
@@ -248,16 +248,16 @@
         },
         {
             "name": "wimg/php-compatibility",
-            "version": "7.0.5",
+            "version": "7.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wimg/PHPCompatibility.git",
-                "reference": "695a68e82039b7034c12b13488bf15255d118944"
+                "reference": "48583125c9def64c7b09e27c26cf9b72710a6109"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wimg/PHPCompatibility/zipball/695a68e82039b7034c12b13488bf15255d118944",
-                "reference": "695a68e82039b7034c12b13488bf15255d118944",
+                "url": "https://api.github.com/repos/wimg/PHPCompatibility/zipball/48583125c9def64c7b09e27c26cf9b72710a6109",
+                "reference": "48583125c9def64c7b09e27c26cf9b72710a6109",
                 "shasum": ""
             },
             "require": {
@@ -291,7 +291,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2016-09-08 21:42:12"
+            "time": "2016-09-21 17:31:21"
         },
         {
             "name": "wp-coding-standards/wpcs",
@@ -335,7 +335,7 @@
     "stability-flags": {
         "simplyadmire/composer-plugins": 20
     },
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": []
