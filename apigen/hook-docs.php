@@ -50,7 +50,7 @@ class WC_HookFinder {
 		} elseif ( ! empty( $details['function'] ) ) {
 			$link = 'http://docs.woocommerce.com/wc-apidocs/source-function-' . $details['function'] . '.html#' . $details['line'];
 		} else {
-			$link = 'https://github.com/woothemes/woocommerce/search?utf8=%E2%9C%93&q=' . $hook;
+			$link = 'https://github.com/woocommerce/woocommerce/search?utf8=%E2%9C%93&q=' . $hook;
 		}
 
 		return '<a href="' . $link . '">' . $hook . '</a>';

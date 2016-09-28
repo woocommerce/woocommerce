@@ -108,7 +108,7 @@ class WC_Cache_Helper {
 	 * to append a unique string (based on time()) to each transient. When transients.
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
-	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777.
+	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
 	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate
