@@ -1,4 +1,4 @@
-# [WooCommerce](https://woocommerce.com/) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [![Build Status](https://api.travis-ci.org/woocommerce/woocommerce.svg?branch=master)](https://travis-ci.org/woocommerce/woocommerce) [![Coverage Status](https://coveralls.io/repos/github/woothemes/woocommerce/badge.svg?branch=master)](https://coveralls.io/github/woothemes/woocommerce?branch=master) [![Code Climate](https://codeclimate.com/github/woothemes/woocommerce/badges/gpa.svg)](https://codeclimate.com/github/woothemes/woocommerce)
+# [WooCommerce](https://woocommerce.com/) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [![Build Status](https://travis-ci.org/woocommerce/woocommerce.svg?branch=master)](https://travis-ci.org/woocommerce/woocommerce) [![Coverage Status](https://coveralls.io/repos/github/woocommerce/woocommerce/badge.svg?branch=master)](https://coveralls.io/github/woocommerce/woocommerce?branch=master) [![Code Climate](https://codeclimate.com/github/woocommerce/woocommerce/badges/gpa.svg)](https://codeclimate.com/github/woocommerce/woocommerce)
 
 Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
@@ -8,7 +8,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 * [WooCommerce Documentation](https://docs.woocommerce.com/documentation/plugins/woocommerce/)
 * [WooCommerce Knowledge Base](https://support.woothemes.com/hc/en-us/categories/200146917-WooCommerce)
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
-* [WooCommerce REST API Docs](https://woothemes.github.io/woocommerce-rest-api-docs/)
+* [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
