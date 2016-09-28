@@ -194,8 +194,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		$this->widget_start( $args, $instance );
 
-		// Dropdown
-		if ( $dropdown ) {
+		if ( $dropdown ) { // Dropdown.
 			$dropdown_defaults = array(
 				'show_count'         => $count,
 				'hierarchical'       => $hierarchical,
@@ -223,8 +222,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				});
 			" );
 
-		// List
-		} else {
+		} else { // List.
 
 			include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-list-walker.php' );
 

@@ -121,4 +121,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_customer_login_form' ); ?>
+<?php do_action( 'woocommerce_after_customer_login_form' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

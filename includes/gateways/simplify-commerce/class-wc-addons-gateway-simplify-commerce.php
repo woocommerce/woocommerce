@@ -257,16 +257,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		$cart_token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
 		$order      = wc_get_order( $order_id );
 
-		// Processing subscription
 		if ( 'standard' == $this->mode && ( $this->order_contains_subscription( $order->get_id() ) || ( function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id ) ) ) ) {
+			// Processing subscription
 			return $this->process_subscription( $order, $cart_token );
-
-		// Processing pre-order
 		} elseif ( 'standard' == $this->mode && $this->order_contains_pre_order( $order->get_id() ) ) {
+			// Processing pre-order
 			return $this->process_pre_order( $order, $cart_token );
-
-		// Processing regular product
 		} else {
+			// Processing regular product
 			return parent::process_payment( $order_id );
 		}
 	}

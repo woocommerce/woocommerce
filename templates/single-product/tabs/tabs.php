@@ -45,4 +45,6 @@ if ( ! empty( $tabs ) ) : ?>
 		<?php endforeach; ?>
 	</div>
 
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

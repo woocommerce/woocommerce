@@ -30,8 +30,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p><?php _e( 'To reset your password, visit the following address:', 'woocommerce' ); ?></p>
 <p>
 	<a class="link" href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); ?>">
-			<?php _e( 'Click here to reset your password', 'woocommerce' ); ?></a>
+		<?php _e( 'Click here to reset your password', 'woocommerce' ); ?>
+	</a>
 </p>
 <p></p>
 
-<?php do_action( 'woocommerce_email_footer', $email ); ?>
+<?php do_action( 'woocommerce_email_footer', $email );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -46,19 +46,19 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		) ); ?>
 	</tbody>
 	<tfoot>
-		<?php
-			if ( $totals = $order->get_order_item_totals() ) {
-				$i = 0;
-				foreach ( $totals as $total ) {
-					$i++;
-					?><tr>
-						<th class="td" scope="row" colspan="2" style="text-align:left; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['label']; ?></th>
-						<td class="td" style="text-align:left; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['value']; ?></td>
-					</tr><?php
-				}
-			}
-		?>
+		<?php if ( $totals = $order->get_order_item_totals() ) : ?>
+			<?php $i = 0; ?>
+			<?php foreach ( $totals as $total ) : ?>
+				<?php $i++; ?>
+				<tr>
+					<th class="td" scope="row" colspan="2" style="text-align:left; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['label']; ?></th>
+					<td class="td" style="text-align:left; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['value']; ?></td>
+				</tr>
+			<?php endforeach; ?>
+		<?php endif; ?>
 	</tfoot>
 </table>
 
-<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
+<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

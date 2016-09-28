@@ -46,4 +46,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</p>
 </form>
 
-<?php do_action( 'woocommerce_auth_page_footer' ); ?>
+<?php do_action( 'woocommerce_auth_page_footer' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

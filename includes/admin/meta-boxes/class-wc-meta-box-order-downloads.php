@@ -29,39 +29,36 @@ class WC_Meta_Box_Order_Downloads {
 
 			<div class="wc-metaboxes">
 				<?php
-					$download_permissions = $wpdb->get_results( $wpdb->prepare( "
-						SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-						WHERE order_id = %d ORDER BY product_id
-					", $post->ID ) );
+				$download_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d ORDER BY product_id", $post->ID ) );
+				$product      = null;
+				$loop         = 0;
+				$file_counter = 1;
 
-					$product      = null;
-					$loop         = 0;
-					$file_counter = 1;
+				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
-					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
-
-						if ( ! $product || $product->id != $download->product_id ) {
-							$product      = wc_get_product( absint( $download->product_id ) );
-							$file_counter = 1;
-						}
-
-						// don't show permissions to files that have since been removed
-						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) )
-							continue;
-
-						// Show file title instead of count if set
-						$file = $product->get_file( $download->download_id );
-						if ( isset( $file['name'] ) ) {
-							$file_count = $file['name'];
-						} else {
-							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
-						}
-
-						include( 'views/html-order-download-permission.php' );
-
-						$loop++;
-						$file_counter++;
+					if ( ! $product || $product->id != $download->product_id ) {
+						$product      = wc_get_product( absint( $download->product_id ) );
+						$file_counter = 1;
 					}
+
+					// don't show permissions to files that have since been removed
+					if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) ) {
+						continue;
+					}
+
+					// Show file title instead of count if set
+					$file = $product->get_file( $download->download_id );
+					if ( isset( $file['name'] ) ) {
+						$file_count = $file['name'];
+					} else {
+						$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+					}
+
+					include( 'views/html-order-download-permission.php' );
+
+					$loop++;
+					$file_counter++;
+				}
 				?>
 			</div>
 

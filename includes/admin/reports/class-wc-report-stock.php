@@ -100,7 +100,7 @@ class WC_Report_Stock extends WP_List_Table {
 
 					echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';
 				}
-			break;
+				break;
 
 			case 'parent' :
 				if ( $item->parent ) {
@@ -108,7 +108,7 @@ class WC_Report_Stock extends WP_List_Table {
 				} else {
 					echo '-';
 				}
-			break;
+				break;
 
 			case 'stock_status' :
 				if ( $product->is_in_stock() ) {
@@ -117,40 +117,41 @@ class WC_Report_Stock extends WP_List_Table {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $product );
-			break;
+				break;
 
 			case 'stock_level' :
 				echo $product->get_stock_quantity();
-			break;
+				break;
 
-			case 'wc_actions' :
-				?><p>
+			case 'wc_actions' : ?>
+				<p>
 					<?php
-						$actions = array();
-						$action_id = $product->is_type( 'variation' ) ? $item->parent : $item->id;
+					$actions = array();
+					$action_id = $product->is_type( 'variation' ) ? $item->parent : $item->id;
 
-						$actions['edit'] = array(
-							'url'       => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
-							'name'      => __( 'Edit', 'woocommerce' ),
-							'action'    => "edit",
+					$actions['edit'] = array(
+						'url'       => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
+						'name'      => __( 'Edit', 'woocommerce' ),
+						'action'    => "edit",
+					);
+
+					if ( $product->is_visible() ) {
+						$actions['view'] = array(
+							'url'       => get_permalink( $action_id ),
+							'name'      => __( 'View', 'woocommerce' ),
+							'action'    => "view",
 						);
+					}
 
-						if ( $product->is_visible() ) {
-							$actions['view'] = array(
-								'url'       => get_permalink( $action_id ),
-								'name'      => __( 'View', 'woocommerce' ),
-								'action'    => "view",
-							);
-						}
+					$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
 
-						$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
-
-						foreach ( $actions as $action ) {
-							printf( '<a class="button tips %s" href="%s" data-tip="%s ' . __( 'product', 'woocommerce' ) . '">%s</a>', $action['action'], esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
-						}
+					foreach ( $actions as $action ) {
+						printf( '<a class="button tips %s" href="%s" data-tip="%s ' . __( 'product', 'woocommerce' ) . '">%s</a>', $action['action'], esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+					}
 					?>
-				</p><?php
-			break;
+				</p>
+				<?php
+				break;
 		}
 	}
 

@@ -257,17 +257,18 @@ class WC_Product_Variable extends WC_Product {
 		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
 		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		/**
-		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
-		 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
-		 */
 		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
+			/**
+			 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
+			 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
+			 */
 			return $this->prices_array[ $price_hash ];
 
-		/**
-		 * No locally cached value? Get the data from the transient or generate it.
-		 */
 		} else {
+			/**
+			 * No locally cached value? Get the data from the transient or generate it.
+			 */
+
 			// Get value of transient
 			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
@@ -399,9 +400,8 @@ class WC_Product_Variable extends WC_Product {
 				// empty value indicates that all options for given attribute are available
 				if ( in_array( '', $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
-
-				// Get custom attributes (non taxonomy) as defined
 				} elseif ( ! $attribute['is_taxonomy'] ) {
+					// Get custom attributes (non taxonomy) as defined.
 					$text_attributes          = wc_get_text_attributes( $attribute['value'] );
 					$assigned_text_attributes = $values;
 					$values                   = array();
@@ -521,17 +521,21 @@ class WC_Product_Variable extends WC_Product {
 		$matches = get_posts( $query_args );
 
 		if ( $matches && ! is_wp_error( $matches ) ) {
+
 			return current( $matches );
 
-		/**
-		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
-		 */
 	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
+			 */
 			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
 
 		} else {
+
 			return 0;
+
 		}
 	}
 
@@ -778,9 +782,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
 				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
-
-		// Loop the variations
-		} else {
+		} else { // Loop the variations.
 
 			// Set the variable product to be virtual/downloadable if all children are virtual/downloadable
 			foreach ( array( '_downloadable', '_virtual' ) as $meta_key ) {

@@ -61,3 +61,5 @@ if ( $products->have_posts() ) : ?>
 <?php endif;
 
 wp_reset_query();
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

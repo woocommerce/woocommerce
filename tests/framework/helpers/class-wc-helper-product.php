@@ -249,12 +249,12 @@ class WC_Helper_Product {
 	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
-		    'comment_author'       => 'admin',
-		    'comment_author_email' => 'woo@woo.local',
-		    'comment_author_url'   => '',
+			'comment_author'       => 'admin',
+			'comment_author_email' => 'woo@woo.local',
+			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
-		    'comment_content'      => $review_content,
-    		'comment_approved'     => 1,
+			'comment_content'      => $review_content,
+			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
 

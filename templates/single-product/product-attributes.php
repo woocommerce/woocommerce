@@ -58,7 +58,8 @@ ob_start();
 		?>
 		<tr class="<?php if ( ( $alt = $alt * -1 ) == 1 ) echo 'alt'; ?>">
 			<th><?php echo wc_attribute_label( $attribute['name'] ); ?></th>
-			<td><?php
+			<td>
+				<?php
 				if ( $attribute['is_taxonomy'] ) {
 
 					$values = wc_get_product_terms( $product->id, $attribute['name'], array( 'fields' => 'names' ) );
@@ -71,7 +72,8 @@ ob_start();
 					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 
 				}
-			?></td>
+				?>
+			</td>
 		</tr>
 	<?php endforeach; ?>
 
@@ -82,3 +84,5 @@ if ( $has_row ) {
 } else {
 	ob_end_clean();
 }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

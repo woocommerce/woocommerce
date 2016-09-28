@@ -20,3 +20,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 wc_get_template( 'archive-product.php' );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

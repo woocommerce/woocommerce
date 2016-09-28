@@ -50,7 +50,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'free_shipping' . '_settings';
+		return $this->plugin_id . 'free_shipping_settings';
 	}
 
 	/**

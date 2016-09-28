@@ -176,13 +176,15 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<ol class="wc-setup-steps">
 			<?php foreach ( $ouput_steps as $step_key => $step ) : ?>
-				<li class="<?php
-					if ( $step_key === $this->step ) {
-						echo 'active';
-					} elseif ( array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) ) ) {
-						echo 'done';
-					}
-				?>"><?php echo esc_html( $step['name'] ); ?></li>
+				<?php
+				$li_class = '';
+				if ( $step_key === $this->step ) {
+					$li_class = 'active';
+				} elseif ( array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) ) ) {
+					$li_class = 'done';
+				}
+				?>
+				<li class="<?php echo esc_attr( $li_class ); ?>"><?php echo esc_html( $step['name'] ); ?></li>
 			<?php endforeach; ?>
 		</ol>
 		<?php
@@ -437,57 +439,57 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<?php
-					$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-					$tax_rates   = array();
-					$country     = WC()->countries->get_base_country();
-					$state       = WC()->countries->get_base_state();
+				$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+				$tax_rates   = array();
+				$country     = WC()->countries->get_base_country();
+				$state       = WC()->countries->get_base_state();
 
-					if ( isset( $locale_info[ $country ] ) ) {
-						if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
-						} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][''];
-						}
-						if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
-							$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
-						}
+				if ( isset( $locale_info[ $country ] ) ) {
+					if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
+						$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
+					} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
+						$tax_rates = $locale_info[ $country ]['tax_rates'][''];
 					}
-					if ( $tax_rates ) {
-						?>
-						<tr class="tax-rates">
-							<td colspan="2">
-								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
-								<div class="importing-tax-rates">
-									<table class="tax-rates">
-										<thead>
-											<tr>
-												<th><?php _e( 'Country', 'woocommerce' ); ?></th>
-												<th><?php _e( 'State', 'woocommerce' ); ?></th>
-												<th><?php _e( 'Rate (%)', 'woocommerce' ); ?></th>
-												<th><?php _e( 'Name', 'woocommerce' ); ?></th>
-											</tr>
-										</thead>
-										<tbody>
-											<?php
-												foreach ( $tax_rates as $rate ) {
-													?>
-													<tr>
-														<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
-													</tr>
-													<?php
-												}
+					if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
+						$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
+					}
+				}
+				if ( $tax_rates ) {
+					?>
+					<tr class="tax-rates">
+						<td colspan="2">
+							<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
+							<div class="importing-tax-rates">
+								<table class="tax-rates">
+									<thead>
+										<tr>
+											<th><?php _e( 'Country', 'woocommerce' ); ?></th>
+											<th><?php _e( 'State', 'woocommerce' ); ?></th>
+											<th><?php _e( 'Rate (%)', 'woocommerce' ); ?></th>
+											<th><?php _e( 'Name', 'woocommerce' ); ?></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										foreach ( $tax_rates as $rate ) {
 											?>
-										</tbody>
-									</table>
-								</div>
-								<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
-							</td>
-						</tr>
-						<?php
-					}
+											<tr>
+												<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
+												<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
+												<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
+												<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
+											</tr>
+											<?php
+										}
+										?>
+									</tbody>
+								</table>
+							</div>
+							<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
+						</td>
+					</tr>
+					<?php
+				}
 				?>
 			</table>
 			<p class="wc-setup-actions step">

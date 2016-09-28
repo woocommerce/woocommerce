@@ -541,9 +541,8 @@ class WC_API_Server {
 			$total       = $query->get_total();
 			$total_pages = $query->total_pages;
 
-		// WP_Query
 		} else {
-
+			// WP_Query
 			$page        = $query->get( 'paged' );
 			$single      = $query->is_single();
 			$total       = $query->found_posts;

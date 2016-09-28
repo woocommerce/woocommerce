@@ -27,3 +27,5 @@ echo strtoupper( __( 'Customer details', 'woocommerce' ) ) . "\n\n";
 foreach ( $fields as $field ) {
 	echo wp_kses_post( $field['label'] ) . ': ' . wp_kses_post( $field['value'] ) . "\n";
 }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

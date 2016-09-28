@@ -30,11 +30,11 @@ $total          = $count_comments->approved;
 	</tfoot>
 	<tbody>
 		<?php
-			foreach ( $logs as $log ) {
-				$log = $webhook->get_delivery_log( $log->comment_ID );
+		foreach ( $logs as $log ) {
+			$log = $webhook->get_delivery_log( $log->comment_ID );
 
-				include( 'html-webhook-log.php' );
-			}
+			include( 'html-webhook-log.php' );
+		}
 		?>
 	</tbody>
 </table>

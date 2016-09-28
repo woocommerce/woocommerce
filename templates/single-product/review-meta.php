@@ -40,3 +40,5 @@ if ( '0' === $comment->comment_approved ) { ?>
 	</p>
 
 <?php }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

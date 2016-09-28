@@ -23,13 +23,13 @@ abstract class WC_Gateway_Paypal_Response {
 			$order_id  = $custom->order_id;
 			$order_key = $custom->order_key;
 
-		// Fallback to serialized data if safe. This is @deprecated in 2.3.11
 		} elseif ( preg_match( '/^a:2:{/', $raw_custom ) && ! preg_match( '/[CO]:\+?[0-9]+:"/', $raw_custom ) && ( $custom = maybe_unserialize( $raw_custom ) ) ) {
+			// Fallback to serialized data if safe. This is @deprecated in 2.3.11
 			$order_id  = $custom[0];
 			$order_key = $custom[1];
 
-		// Nothing was found.
 		} else {
+			// Nothing was found.
 			WC_Gateway_Paypal::log( 'Error: Order ID and key were not found in "custom".' );
 			return false;
 		}

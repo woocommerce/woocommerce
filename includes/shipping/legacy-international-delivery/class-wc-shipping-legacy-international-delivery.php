@@ -33,7 +33,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'international_delivery' . '_settings';
+		return $this->plugin_id . 'international_delivery_settings';
 	}
 
 	/**

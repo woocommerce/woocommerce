@@ -210,8 +210,8 @@ class WC_Admin_Status {
 		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
 			$update_theme_version = $api->version;
 
-		// Check WooThemes Theme Version.
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) {
+			// Check WooThemes Theme Version.
 			$theme_dir = substr( strtolower( str_replace( ' ','', $theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {

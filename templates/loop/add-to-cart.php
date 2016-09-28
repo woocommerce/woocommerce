@@ -32,3 +32,5 @@ echo apply_filters( 'woocommerce_loop_add_to_cart_link',
 		esc_html( $product->add_to_cart_text() )
 	),
 $product );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

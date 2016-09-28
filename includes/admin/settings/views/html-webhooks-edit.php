@@ -31,10 +31,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td class="forminp">
 					<select name="webhook_status" id="webhook_status" class="wc-enhanced-select">
 						<?php
-							$statuses       = wc_get_webhook_statuses();
-							$current_status = $webhook->get_status();
-
-							foreach ( $statuses as $status_slug => $status_name ) : ?>
+						$statuses       = wc_get_webhook_statuses();
+						$current_status = $webhook->get_status();
+						?>
+						<?php foreach ( $statuses as $status_slug => $status_name ) : ?>
 							<option value="<?php echo esc_attr( $status_slug ); ?>" <?php selected( $current_status, $status_slug, true ); ?>><?php echo esc_html( $status_name ); ?></option>
 						<?php endforeach; ?>
 					</select>
@@ -48,27 +48,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td class="forminp">
 					<select name="webhook_topic" id="webhook_topic" class="wc-enhanced-select">
 						<?php
-							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
+						$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
-							$topics = apply_filters( 'woocommerce_webhook_topics', array(
-								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
-								'coupon.created'   => __( 'Coupon Created', 'woocommerce' ),
-								'coupon.updated'   => __( 'Coupon Updated', 'woocommerce' ),
-								'coupon.deleted'   => __( 'Coupon Deleted', 'woocommerce' ),
-								'customer.created' => __( 'Customer Created', 'woocommerce' ),
-								'customer.updated' => __( 'Customer Updated', 'woocommerce' ),
-								'customer.deleted' => __( 'Customer Deleted', 'woocommerce' ),
-								'order.created'    => __( 'Order Created', 'woocommerce' ),
-								'order.updated'    => __( 'Order Updated', 'woocommerce' ),
-								'order.deleted'    => __( 'Order Deleted', 'woocommerce' ),
-								'product.created'  => __( 'Product Created', 'woocommerce' ),
-								'product.updated'  => __( 'Product Updated', 'woocommerce' ),
-								'product.deleted'  => __( 'Product Deleted', 'woocommerce' ),
-								'action'           => __( 'Action', 'woocommerce' ),
-								'custom'           => __( 'Custom', 'woocommerce' ),
-							) );
+						$topics = apply_filters( 'woocommerce_webhook_topics', array(
+							''                 => __( 'Select an option&hellip;', 'woocommerce' ),
+							'coupon.created'   => __( 'Coupon Created', 'woocommerce' ),
+							'coupon.updated'   => __( 'Coupon Updated', 'woocommerce' ),
+							'coupon.deleted'   => __( 'Coupon Deleted', 'woocommerce' ),
+							'customer.created' => __( 'Customer Created', 'woocommerce' ),
+							'customer.updated' => __( 'Customer Updated', 'woocommerce' ),
+							'customer.deleted' => __( 'Customer Deleted', 'woocommerce' ),
+							'order.created'    => __( 'Order Created', 'woocommerce' ),
+							'order.updated'    => __( 'Order Updated', 'woocommerce' ),
+							'order.deleted'    => __( 'Order Deleted', 'woocommerce' ),
+							'product.created'  => __( 'Product Created', 'woocommerce' ),
+							'product.updated'  => __( 'Product Updated', 'woocommerce' ),
+							'product.deleted'  => __( 'Product Deleted', 'woocommerce' ),
+							'action'           => __( 'Action', 'woocommerce' ),
+							'custom'           => __( 'Custom', 'woocommerce' ),
+						) );
+						?>
 
-							foreach ( $topics as $topic_slug => $topic_name ) : ?>
+						<?php foreach ( $topics as $topic_slug => $topic_name ) : ?>
 							<option value="<?php echo esc_attr( $topic_slug ); ?>" <?php selected( $topic_data['topic'], $topic_slug, true ); ?>><?php echo esc_html( $topic_name ); ?></option>
 						<?php endforeach; ?>
 					</select>

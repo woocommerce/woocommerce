@@ -594,7 +594,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
 	 */
-	 public function set_status( $new_status ) {
+	public function set_status( $new_status ) {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
@@ -614,7 +614,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'from' => $old_status,
 			'to'   => $new_status,
 		);
-	 }
+	}
 
 	/**
 	 * Set order_version

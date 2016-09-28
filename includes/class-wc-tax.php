@@ -563,9 +563,8 @@ class WC_Tax {
 							break;
 						}
 					}
-
-				// If a single tax class is found, use it
 				} elseif ( sizeof( $cart_tax_classes ) == 1 ) {
+					// If a single tax class is found, use it.
 					$matched_tax_rates = self::find_shipping_rates( array(
 						'country' 	=> $country,
 						'state' 	=> $state,

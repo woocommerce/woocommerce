@@ -36,4 +36,6 @@ wc_print_notices();
 			<?php _e( 'Return To Shop', 'woocommerce' ) ?>
 		</a>
 	</p>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -45,3 +45,5 @@ switch ( $template ) {
 		echo '<div id="container"><div id="content" role="main">';
 		break;
 }
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -30,4 +30,6 @@ $heading = esc_html( apply_filters( 'woocommerce_product_additional_information_
 	<h2><?php echo $heading; ?></h2>
 <?php endif; ?>
 
-<?php $product->list_attributes(); ?>
+<?php $product->list_attributes();
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

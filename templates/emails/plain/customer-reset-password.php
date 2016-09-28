@@ -33,3 +33,5 @@ echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => $user_login 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

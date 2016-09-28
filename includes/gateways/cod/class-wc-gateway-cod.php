@@ -103,7 +103,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'type'              => 'checkbox',
 				'default'           => 'yes',
 			),
-	   );
+		);
 	}
 
 	/**

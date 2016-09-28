@@ -249,8 +249,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$dp     = intval( '' == $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 
-	// DP is false - don't use number format, just return a string in our format
 	} elseif ( is_float( $number ) ) {
+		// DP is false - don't use number format, just return a string in our format
 		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
 	}
 

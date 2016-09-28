@@ -51,7 +51,7 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-		 } else {
+		} else {
 			// Start output buffer since the html may need discarding for BW compatibility
 			ob_start();
 
@@ -115,7 +115,7 @@ class WC_Shortcode_My_Account {
 		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
+			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a></div>';
 			return;
 		}
 
@@ -187,16 +187,17 @@ class WC_Shortcode_My_Account {
 	 * Lost password page handling.
 	 */
 	public static function lost_password() {
-		/**
-		 * After sending the reset link, don't show the form again.
-		 */
+
 		if ( ! empty( $_GET['reset-link-sent'] ) ) {
+			/**
+			 * After sending the reset link, don't show the form again.
+			 */
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
 
-		/**
-		 * Process reset key / login from email confirmation link
-		 */
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) {
+			/**
+			 * Process reset key / login from email confirmation link
+			 */
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {
 				list( $rp_login, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) );
 				$user = self::check_password_reset_key( $rp_key, $rp_login );

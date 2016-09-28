@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Abstract Class
  * @author		WooThemes
  */
- abstract class WC_Payment_Token extends WC_Data {
+abstract class WC_Payment_Token extends WC_Data {
 
 	/**
 	 * Token Data (stored in the payment_tokens table).

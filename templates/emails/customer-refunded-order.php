@@ -25,13 +25,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<p><?php
-	if ( $partial_refund ) {
-		printf( __( 'Hi there. Your order on %s has been partially refunded.', 'woocommerce' ), get_option( 'blogname' ) );
-	} else {
-		printf( __( 'Hi there. Your order on %s has been refunded.', 'woocommerce' ), get_option( 'blogname' ) );
-	}
-?></p>
+<p>
+	<?php if ( $partial_refund ) : ?>
+		<?php printf( __( 'Hi there. Your order on %s has been partially refunded.', 'woocommerce' ), get_option( 'blogname' ) ); ?>
+	<?php else : ?>
+		<?php printf( __( 'Hi there. Your order on %s has been refunded.', 'woocommerce' ), get_option( 'blogname' ) ); ?>
+	<?php endif; ?>
+</p>
 
 <?php
 
@@ -57,3 +57,5 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * @hooked WC_Emails::email_footer() Output the email footer
  */
 do_action( 'woocommerce_email_footer', $email );
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

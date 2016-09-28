@@ -228,8 +228,8 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		// Check if we have an absolute path
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
+			// Check if we have an absolute path.
 			$remote_file = false;
 			$file_path   = $parsed_file_path['path'];
 		}

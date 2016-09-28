@@ -44,7 +44,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'local_pickup' . '_settings';
+		return $this->plugin_id . 'local_pickup_settings';
 	}
 
 	/**

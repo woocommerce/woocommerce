@@ -49,7 +49,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'flat_rate' . '_settings';
+		return $this->plugin_id . 'flat_rate_settings';
 	}
 
 	/**

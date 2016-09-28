@@ -164,9 +164,7 @@ class WC_Admin_Report {
 						$joins["order_items"] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
 					}
 
-					$joins[ "order_item_meta_{$key}" ]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
-														"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
-														" AND (order_item_meta_{$key}.meta_key = '{$key}')";
+					$joins[ "order_item_meta_{$key}" ]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON (order_items.order_item_id = order_item_meta_{$key}.order_item_id) AND (order_item_meta_{$key}.meta_key = '{$key}')";
 					break;
 				case 'order_item' :
 					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";

@@ -26,7 +26,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-        $this->assertArrayHasKey( '/wc/v1/shipping_methods', $routes );
+		$this->assertArrayHasKey( '/wc/v1/shipping_methods', $routes );
 		$this->assertArrayHasKey( '/wc/v1/shipping_methods/(?P<id>[\w-]+)', $routes );
 	}
 
@@ -42,7 +42,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$methods = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-        $this->assertContains( array(
+		$this->assertContains( array(
 			'id'          => 'free_shipping',
 			'title'       => 'Free Shipping',
 			'description' => 'Free Shipping is a special method which can be triggered with coupons and minimum spends.',
@@ -84,11 +84,11 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$method   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-        $this->assertEquals( array(
-            'id'          => 'local_pickup',
-            'title'       => 'Local Pickup',
-            'description' => 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.',
-        ), $method );
+		$this->assertEquals( array(
+			'id'          => 'local_pickup',
+			'title'       => 'Local Pickup',
+			'description' => 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.',
+		), $method );
 	}
 
 	/**

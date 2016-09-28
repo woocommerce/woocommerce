@@ -173,7 +173,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
-    		'id' => 'woocommerce_demo_store',
+			'id' => 'woocommerce_demo_store',
 			'label' => 'Store Notice',
 			'description' => 'Enable site-wide store notice text',
 			'type' => 'checkbox',
@@ -517,7 +517,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-	), $data );
+		), $data );
 
 		// test get single
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/products/woocommerce_dimension_unit' ) );

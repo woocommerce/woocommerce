@@ -38,11 +38,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
-        register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
-                'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -64,15 +64,15 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		) );
 	}
 
-    /**
+	/**
 	 * Check whether a given request has permission to view system status tools.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-        if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -156,7 +156,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
 
-    /**
+	/**
 	 * Get a list of system status tools.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -190,11 +190,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response( $this->prepare_item_for_response( array(
-		   'id'          => $request['id'],
-		   'name'        => $tool['name'],
-		   'action'      => $tool['button'],
-		   'description' => $tool['desc'],
-	   ), $request ) );
+			'id'          => $request['id'],
+			'name'        => $tool['name'],
+			'action'      => $tool['button'],
+			'description' => $tool['desc'],
+		), $request ) );
 	}
 
 	/**
@@ -244,7 +244,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		return $response;
 	}
 
-    /**
+	/**
 	 * Get the system status tools schema, conforming to JSON Schema.
 	 *
 	 * @return array

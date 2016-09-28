@@ -947,9 +947,8 @@ class WC_API_Products extends WC_API_Resource {
 					// Array based
 					if ( is_array( $attribute['options'] ) ) {
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', $attribute['options'] ) );
-
-					// Text based, separate by pipe
 					} else {
+						// Text based, separate by pipe
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
 					}
 
