@@ -9,8 +9,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Test some discount logic which has caused issues in the past.
 	 * Tickets:
-	 * 	https://github.com/woothemes/woocommerce/issues/10573
-	 *  https://github.com/woothemes/woocommerce/issues/10963
+	 * 	https://github.com/woocommerce/woocommerce/issues/10573
+	 *  https://github.com/woocommerce/woocommerce/issues/10963
 	 *
 	 * Due to discounts being split amongst products in cart.
 	 */

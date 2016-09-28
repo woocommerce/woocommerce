@@ -5,7 +5,7 @@
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/woothemes/woocommerce.git"
+    "url": "https://github.com/woocommerce/woocommerce.git"
   },
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",

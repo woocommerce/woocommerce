@@ -15,14 +15,14 @@ GitHub is for _bug reports and contributions only_ - if you have a support quest
 
 ### Reporting Issues
 
-Reporting issues is a great way to became a contributor as it doesn't require technical skills. In fact you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and [submit an issue report](https://github.com/woothemes/woocommerce/issues/new) if you spot a bug. Sound like something you're up for? Go for it!
+Reporting issues is a great way to became a contributor as it doesn't require technical skills. In fact you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and [submit an issue report](https://github.com/woocommerce/woocommerce/issues/new) if you spot a bug. Sound like something you're up for? Go for it!
 
 #### How To Submit An Issue Report
 
 If something isn't working, congratulations you've found a bug! Help us fix it by submitting an issue report:
 
 * Make sure you have a [GitHub account](https://github.com/signup/free)
-* Search the [Existing Issues](https://github.com/woothemes/woocommerce/issues) to be sure that the one you've noticed isn't already there
+* Search the [Existing Issues](https://github.com/woocommerce/woocommerce/issues) to be sure that the one you've noticed isn't already there
 * Submit a report for your issue
   * Clearly describe the issue (including steps to reproduce it if it's a bug)
   * Make sure you fill in the earliest version that you know has the issue.
