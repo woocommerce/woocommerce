@@ -637,7 +637,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $sku Product SKU.
 	 */
 	public function set_sku( $sku ) {
-		if ( ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
+		if ( ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
 		}
 
@@ -708,6 +708,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'none',
 		);
 
+		// Set default if empty.
+		if ( empty( $status ) ) {
+			$status = 'taxable';
+		}
+
 		if ( ! in_array( $status, $options, true ) ) {
 			$this->error( 'product_invalid_tax_status', __( 'Invalid product tax status.', 'woocommerce' ) );
 		}
@@ -761,9 +766,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( update_post_meta( $this->get_id(), '_stock_status', $status ) ) {
-			$this->data['stock_status'] = $status;
 			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $status );
 		}
+
+		$this->data['stock_status'] = $status;
 	}
 
 	/**
@@ -872,7 +878,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @param string $purchase_note Purchase note.
 	 */
-	public function set_purchase_note() {
+	public function set_purchase_note( $purchase_note ) {
 		$this->data['purchase_note'] = $purchase_note;
 	}
 
