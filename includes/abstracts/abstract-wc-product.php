@@ -60,8 +60,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'parent_id'          => 0,
 		'reviews_allowed'    => true,
 		'purchase_note'      => '',
-		'attributes'         => '',
-		'default_attributes' => '',
+		'attributes'         => array(),
+		'default_attributes' => array(),
 		'menu_order'         => 0,
 	);
 
@@ -331,7 +331,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Return if should be sold individually.
 	 *
 	 * @since 2.7.0
-	 * @return return
+	 * @return string
 	 */
 	public function get_sold_individually() {
 		return $this->data['sold_individually'];
@@ -360,7 +360,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$length = apply_filters( 'woocommerce_product_length', $this->data['length'], $this );
 
 		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_length', $this->data['length'], $this );
+		return apply_filters( 'woocommerce_product_get_length', $length, $this );
 	}
 
 	/**
@@ -370,10 +370,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_width() {
 		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_width', $this->data['width'], $this );
+		$width = apply_filters( 'woocommerce_product_width', $this->data['width'], $this );
 
 		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_width', $this->data['width'], $this );
+		return apply_filters( 'woocommerce_product_get_width', $width, $this );
 	}
 
 	/**
@@ -383,10 +383,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_height() {
 		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_height', $this->data['height'], $this );
+		$height = apply_filters( 'woocommerce_product_height', $this->data['height'], $this );
 
 		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_height', $this->data['height'], $this );
+		return apply_filters( 'woocommerce_product_get_height', $height, $this );
 	}
 
 	/**
@@ -396,7 +396,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_upsell_ids() {
-		return $this->data['backorders'];
+		return $this->data['upsell_ids'];
 	}
 
 	/**
@@ -413,7 +413,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get parent ID.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return int
 	 */
 	public function get_parent_id() {
 		return $this->data['parent_id'];
@@ -488,7 +488,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get default attributes.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return array
 	 */
 	public function get_default_attributes() {
 		return $this->data['default_attributes'];
@@ -555,7 +555,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get product modified date.
+	 * Set product modified date.
 	 *
 	 * @since 2.7.0
 	 * @param string $timestamp Timestamp.
@@ -565,7 +565,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Return the product type.
+	 * Set the product type.
 	 *
 	 * @return string
 	 */
@@ -574,7 +574,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get product status.
+	 * Set product status.
 	 *
 	 * @since 2.7.0
 	 * @param string $status Product status.
@@ -725,25 +725,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->data['tax_class'] = wc_clean( $class );
 	}
 
-	// @TODO:
-
 	/**
-	 * Return if product manage stock.
+	 * Set if product manage stock.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param string $manage_stock Options: 'yes' or 'no'.
 	 */
-	public function set_manage_stock() {
-		return $this->data['manage_stock'];
+	public function set_manage_stock( $manage_stock ) {
+		$this->data['manage_stock'] = $manage_stock;
 	}
 
 	/**
-	 * Returns number of items available for sale.
+	 * Set number of items available for sale.
 	 *
-	 * @return int
+	 * @since 2.7.0
+	 * @param float|null $quantity Stock quantity.
 	 */
-	public function set_stock_quantity() {
-		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? wc_stock_amount( $this->data['stock_quantity'] ) : null, $this );
+	public function set_stock_quantity( $quantity ) {
+		$this->data['stock_quantity'] = $quantity;
 	}
 
 	/**
@@ -768,190 +767,163 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get backorders.
+	 * Set backorders.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
 	 */
-	public function set_backorders() {
-		return $this->data['backorders'];
+	public function set_backorders( $backorders ) {
+		$this->data['backorders'] = $backorders;
 	}
 
 	/**
-	 * Return if should be sold individually.
+	 * Set if should be sold individually.
 	 *
 	 * @since 2.7.0
-	 * @return return
+	 * @param string $sold_individually Options: 'yes' or 'no'.
 	 */
-	public function set_sold_individually() {
-		return $this->data['sold_individually'];
+	public function set_sold_individually( $sold_individually ) {
+		$this->data['sold_individually'] = $sold_individually;
 	}
 
 	/**
-	 * Returns the product's weight.
-	 *
-	 * @return string
-	 */
-	public function set_weight() {
-		// Legacy filter.
-		$weight = apply_filters( 'woocommerce_product_weight', $this->data['weight'], $this );
-
-		// New filter.
-		return apply_filters( 'woocommerce_product_get_weight', $weight, $this );
-	}
-
-	/**
-	 * Returns the product length.
-	 *
-	 * @return string
-	 */
-	public function set_length() {
-		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_length', $this->data['length'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_length', $this->data['length'], $this );
-	}
-
-	/**
-	 * Returns the product width.
-	 *
-	 * @return string
-	 */
-	public function set_width() {
-		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_width', $this->data['width'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_width', $this->data['width'], $this );
-	}
-
-	/**
-	 * Returns the product height.
-	 *
-	 * @return string
-	 */
-	public function set_height() {
-		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_height', $this->data['height'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_height', $this->data['height'], $this );
-	}
-
-	/**
-	 * Get Upseels IDs.
+	 * Set the product's weight.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param float $weigth Total weigth.
 	 */
-	public function set_upsell_ids() {
-		return $this->data['backorders'];
+	public function set_weight( $weight ) {
+		$this->data['weight'] = $weight;
 	}
 
 	/**
-	 * Get Upseels IDs.
+	 * Set the product length.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param float $weigth Total weigth.
 	 */
-	public function set_cross_sell_ids() {
-		return $this->data['cross_sell_ids'];
+	public function set_length( $length ) {
+		$this->data['length'] = $length;
 	}
 
 	/**
-	 * Get parent ID.
+	 * Set the product width.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param float $width Total width.
 	 */
-	public function set_parent_id() {
-		return $this->data['parent_id'];
+	public function set_width( $width ) {
+		$this->data['width'] = $width;
 	}
 
 	/**
-	 * Return if reviews is allowed.
+	 * Set the product height.
 	 *
 	 * @since 2.7.0
-	 * @return bool
+	 * @param float $height Total height.
 	 */
-	public function set_reviews_allowed() {
-		return $this->data['reviews_allowed'];
+	public function set_height( $height ) {
+		$this->data['height'] = $height;
 	}
 
 	/**
-	 * Get purchase note.
+	 * Set Upseels IDs.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param string $upsell_ids IDs from the up-sell products.
+	 */
+	public function set_upsell_ids( $upsell_ids ) {
+		$this->data['upsell_ids'] = $upsell_ids;
+	}
+
+	/**
+	 * Set Upseels IDs.
+	 *
+	 * @since 2.7.0
+	 * @param string $cross_sell_ids IDs from the cross-sell products.
+	 */
+	public function set_cross_sell_ids( $cross_sell_ids ) {
+		$this->data['cross_sell_ids'] = $cross_sell_ids;
+	}
+
+	/**
+	 * Set parent ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $parent_id Product parent ID.
+	 */
+	public function set_parent_id( $parent_id ) {
+		$this->data['parent_id'] = absint( $parent_id );
+	}
+
+	/**
+	 * Set if reviews is allowed.
+	 *
+	 * @since 2.7.0
+	 * @param bool $reviews_allowed Reviews allowed or not.
+	 */
+	public function set_reviews_allowed( $reviews_allowed ) {
+		$this->data['reviews_allowed'] = (bool) $reviews_allowed;
+	}
+
+	/**
+	 * Set purchase note.
+	 *
+	 * @since 2.7.0
+	 * @param string $purchase_note Purchase note.
 	 */
 	public function set_purchase_note() {
-		return $this->data['purchase_note'];
+		$this->data['purchase_note'] = $purchase_note;
 	}
 
 	/**
-	 * Returns the product categories.
+	 * Set the product categories.
 	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return string
+	 * @since 2.7.0
+	 * @param array $terms_id List of terms IDs.
 	 */
-	public function set_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
+	public function set_categories( $terms_id ) {
+		$this->save_taxonomy_terms( $terms_id, 'cat' );
 	}
 
 	/**
-	 * Returns the product tags.
+	 * Set the product tags.
 	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return array
+	 * @since 2.7.0
+	 * @param array $terms_id List of terms IDs.
 	 */
-	public function set_tags( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
+	public function set_tags( $terms_id ) {
+		$this->save_taxonomy_terms( $terms_id, 'tag' );
 	}
 
 	/**
 	 * Returns product attributes.
 	 *
-	 * @return array
+	 * @since 2.7.0
+	 * @param array $attributes List of product attributes.
 	 */
-	public function set_attributes() {
-		$attributes = array_filter( (array) maybe_unserialize( $this->data['product_attributes'] ) );
-		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
-
-		// Check for any attributes which have been removed globally
-		foreach ( $attributes as $key => $attribute ) {
-			if ( $attribute['is_taxonomy'] ) {
-				if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
-					unset( $attributes[ $key ] );
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_product_attributes', $attributes );
+	public function set_attributes( $attributes ) {
+		$this->data['product_attributes'] = $attributes;
 	}
 
 	/**
-	 * Get default attributes.
+	 * Set default attributes.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @param array $default_attributes List of default attributes.
 	 */
-	public function set_default_attributes() {
-		return $this->data['default_attributes'];
+	public function set_default_attributes( $default_attributes ) {
+		$this->data['default_attributes'] = $default_attributes;
 	}
 
 	/**
-	 * Get menu order.
+	 * Set menu order.
 	 *
 	 * @since 2.7.0
-	 * @return int
+	 * @param int $menu_order Menu order.
 	 */
-	public function set_menu_order() {
-		return $this->data['menu_order'];
+	public function set_menu_order( $menu_order ) {
+		$this->data['menu_order'] = intval( $menu_order );
 	}
 
 	/*
@@ -969,7 +941,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 2.7.0
-	 * @param int $id
+	 * @param int $id Product ID.
 	 */
 	public function read( $id ) {
 		$this->set_defaults();
@@ -2414,5 +2386,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$query           = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->get_id() );
 
 		return $query;
+	}
+
+	/**
+	 * Save taxonomy terms.
+	 *
+	 * @since 2.7.0
+	 * @param array $terms_id Terms ID.
+	 * @param string $taxonomy Taxonomy.
+	 * @return array|WP_Error
+	 */
+	protected function save_taxonomy_terms( $terms_id, $taxonomy = 'cat' ) {
+		$terms_id = array_unique( array_map( 'intval', $terms_id ) );
+
+		return wp_set_object_terms( $this->get_id(), $terms_id, 'product_' . $taxonomy );
 	}
 }
