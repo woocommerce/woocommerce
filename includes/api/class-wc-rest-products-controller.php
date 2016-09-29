@@ -627,7 +627,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $product ) );
+		$response->add_links( $this->prepare_links( $product, $request ) );
 
 		/**
 		 * Filter the data for a response.
@@ -646,9 +646,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given product.
 	 */
-	protected function prepare_links( $product ) {
+	protected function prepare_links( $product, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $product->id ) ),
@@ -1315,10 +1316,14 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return bool
 	 * @throws WC_REST_Exception
 	 */
-	protected function save_variations_data( $product, $request ) {
+	protected function save_variations_data( $product, $request, $single_variation = false ) {
 		global $wpdb;
 
-		$variations = $request['variations'];
+		if ( $single_variation ) {
+			$variations = array( $request );
+		} else {
+			$variations = $request['variations'];
+		}
 		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $variation ) {
@@ -1384,7 +1389,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Thumbnail.
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
-				$image = current( $variation['image'] );
+				$image = $variation['image'];
+				$image = current( $image );
 				if ( $image && is_array( $image ) ) {
 					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
 						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;

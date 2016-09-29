@@ -161,7 +161,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $refund ) );
+		$response->add_links( $this->prepare_links( $refund, $request ) );
 
 		/**
 		 * Filter the data for a response.
@@ -180,9 +180,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Order_Refund $refund Comment object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given order refund.
 	 */
-	protected function prepare_links( $refund ) {
+	protected function prepare_links( $refund, $request ) {
 		$order_id = $refund->get_parent_id();
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
 		$links    = array(
