@@ -166,7 +166,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $post ) );
+		$response->add_links( $this->prepare_links( $post, $request ) );
 
 		/**
 		 * Filter the data for a response.
