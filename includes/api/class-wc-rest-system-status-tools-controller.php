@@ -122,10 +122,10 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'delete_orphaned_variations' => array(
-                'name'      => __( 'Orphaned Variations','woocommerce'),
-                'button'    => __( 'Delete orphaned variations','woocommerce' ),
-                'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
-            ),
+                'name'      => __( 'Orphaned Variations','woocommerce' ), 
+                'button'    => __( 'Delete orphaned variations','woocommerce' ), 
+                'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ), 
+            ), 
 			'recount_terms' => array(
 				'name'    => __( 'Term counts', 'woocommerce' ),
 				'button'  => __( 'Recount terms', 'woocommerce' ),
@@ -379,12 +379,10 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 
 				$message = sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 );
 			break;
+			case 'delete_orphaned_variations' :
 				/**
 	 			* Delete orphans
 	 			*/
-			case 'delete_orphaned_variations' :
-				global $wpdb;
-				// Delete meta and term relationships with no post
 				$result = absint( $wpdb->query( "DELETE products
 					FROM {$wpdb->posts} products
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
