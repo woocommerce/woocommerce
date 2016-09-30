@@ -378,7 +378,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
 			if ( $discounting_amount ) {
-				if ( '' === $this->get_limit_usage_to_x_items() ) {
+				if ( ! $this->get_limit_usage_to_x_items() ) {
 					$limit_usage_qty = $cart_item_qty;
 				} else {
 					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
