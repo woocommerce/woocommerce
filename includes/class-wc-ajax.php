@@ -433,8 +433,10 @@ class WC_AJAX {
 
 	/**
 	 * Get a matching variation based on posted attributes.
+         * 
+         * @param $is_ajax Default is true and will display the variation result in json form and set it to false to return the result.
 	 */
-	public static function get_variation() {
+	public static function get_variation( $is_ajax = true ) {
 		ob_start();
 
 		if ( empty( $_POST['product_id'] ) || ! ( $variable_product = wc_get_product( absint( $_POST['product_id'] ), array( 'product_type' => 'variable' ) ) ) ) {
@@ -448,10 +450,14 @@ class WC_AJAX {
 		} else {
 			$variation = false;
 		}
+                
+                if($is_ajax) {
+                        wp_send_json( $variation );
 
-		wp_send_json( $variation );
-
-		die();
+                        die();
+                } else {
+                        return $variation;
+                }
 	}
 
 	/**
@@ -2176,19 +2182,23 @@ class WC_AJAX {
 
 		global $post;
 
-		$product_id = absint( $_POST['product_id'] );
-		$post       = get_post( $product_id ); // Set $post global so its available like within the admin screens
-		$per_page   = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
-		$page       = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-
+		$product_id              = absint( $_POST['product_id'] );
+		$post                    = get_post( $product_id ); // Set $post global so its available like within the admin screens
+		$per_page                = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
+		$page                    = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+                $is_variation_search     = isset($_POST['search']);// Check if user is searching for variation.
 		// Get attributes
-		$attributes        = array();
-		$posted_attributes = wp_unslash( $_POST['attributes'] );
+		$attributes              = array();
+		$posted_attributes       = wp_unslash( $_POST['attributes'] );
 
 		foreach ( $posted_attributes as $key => $value ) {
 			$attributes[ $key ] = array_map( 'wc_clean', $value );
 		}
-
+                
+                if( $is_variation_search ) {
+                        $variable_product = self::get_variation( false );// Search for variation.
+                }
+                
 		// Get tax classes
 		$tax_classes           = WC_Tax::get_tax_classes();
 		$tax_class_options     = array();
@@ -2252,7 +2262,12 @@ class WC_AJAX {
 			'orderby'        => array( 'menu_order' => 'ASC', 'ID' => 'DESC' ),
 			'post_parent'    => $product_id,
 		), $product_id );
-
+                
+                // Set the limit for the result when looking for a specific product variation
+                if( $is_variation_search && !empty( $variable_product ) ) {
+                        $args['include'] = array( $variable_product['variation_id'] );
+                }
+                
 		$variations = get_posts( $args );
 		$loop = 0;
 

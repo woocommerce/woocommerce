@@ -16,6 +16,8 @@ jQuery( function( $ ) {
 				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock )
 				.on( 'click', 'button.notice-dismiss', this.notice_dismiss )
 				.on( 'click', 'h3 .sort', this.set_menu_order )
+                                .on( 'click', 'a.search-variation', this.trigger_search )
+                                .on( 'click', 'a.clear-search-variation', this.clear_search )
 				.on( 'reload', this.reload );
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
@@ -32,6 +34,21 @@ jQuery( function( $ ) {
 		reload: function() {
 			wc_meta_boxes_product_variations_ajax.load_variations( 1 );
 		},
+                
+                /**
+                 * Clear search results and reload variations.
+                 */
+                clear_search: function() {
+                        $( '.search-product-variation' ).prop( 'selectedIndex', 0 );
+                        wc_meta_boxes_product_variations_actions.reload();
+                },
+                
+                /**
+                 * Search for a variant.
+                 */
+                trigger_search: function() {
+                        wc_meta_boxes_product_variations_ajax.search_variation();
+                },
 
 		/**
 		 * Check if variation is downloadable and show/hide elements
@@ -382,7 +399,41 @@ jQuery( function( $ ) {
 				wc_meta_boxes_product_variations_pagenav.go_to_page();
 			}
 		},
+                
+                /**
+		 * Search variation
+		 */
+		search_variation: function() {
+			var wrapper = $( '#variable_product_options' ).find( '.woocommerce_variations' );
+                        var data = {
+                                action:     'woocommerce_load_variations',
+                                security:   woocommerce_admin_meta_boxes_variations.load_variations_nonce,
+                                product_id: woocommerce_admin_meta_boxes_variations.post_id,
+                                search:     1
+                        };
+                        
+			wc_meta_boxes_product_variations_ajax.block();
+                        
+                        $( '.search-product-variation' ).each(function(){
+                                data[ 'attribute_' + $( this ).data( 'attribute_name' )] = $( this ).val();
+                        });
+                        
+                        data.attributes = woocommerce_admin_meta_boxes_variations.attributes;
+                        
+                        $.ajax({
+				url: woocommerce_admin_meta_boxes_variations.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					wrapper.empty().append( response ).attr( 'data-page', 1 );
 
+					$( '#woocommerce-product-data' ).trigger( 'woocommerce_variations_loaded' );
+
+					wc_meta_boxes_product_variations_ajax.unblock();
+				}
+			});
+		},
+                
 		/**
 		 * Load variations via Ajax
 		 *

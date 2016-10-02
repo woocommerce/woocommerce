@@ -84,6 +84,7 @@ class WC_Admin_Assets {
 		$screen_id    = $screen ? $screen->id : '';
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+                $attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
 
 		// Register scripts
 		wp_register_script( 'woocommerce_admin', WC()->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), WC_VERSION );
@@ -203,6 +204,7 @@ class WC_Admin_Assets {
 				'i18n_variation_count_single'         => esc_js( __( '%qty% variation', 'woocommerce' ) ),
 				'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
 				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
+                                'attributes'                          => $attributes,
 			);
 
 			wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
