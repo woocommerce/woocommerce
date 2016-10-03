@@ -184,7 +184,7 @@ class WC_Payment_Gateways {
 		}
 
 		$current = WC()->session->get( 'chosen_payment_method' );
-		if ( empty($current) && isset( $default_token_gateway ) ) {
+		if ( empty( $current ) && isset( $default_token_gateway ) ) {
 			$current = $default_token_gateway;
 		}
 
