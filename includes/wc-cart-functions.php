@@ -526,13 +526,13 @@ function wc_cart_subtotal_html( $compound = false, $echo = true ) {
 		$cart_subtotal = wc_cart_subtotal_to_display();
 
 		if ( wc_cart_prices_include_tax() ) {
-			$suffix = wc_cart_prices_include_tax() ? '' : '<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+			$suffix = wc_cart_prices_include_tax() ? '' : ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 		} else {
-			$suffix = wc_cart_prices_include_tax() ? '<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
+			$suffix = wc_cart_prices_include_tax() ? ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>' : '';
 		}
 	}
 
-	$html = apply_filters( 'woocommerce_cart_subtotal', wc_price( $cart_subtotal ) . ' ' . $suffix, $compound, WC()->cart );
+	$html = apply_filters( 'woocommerce_cart_subtotal', wc_price( $cart_subtotal ) . $suffix, $compound, WC()->cart );
 
 	if ( $echo ) {
 		echo $html;

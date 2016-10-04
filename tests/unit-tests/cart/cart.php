@@ -34,22 +34,22 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Add product to cart x1, calc and test
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '9.00', number_format( WC()->cart->get_total(), 2, '.', '' ) );
-		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->get_cart_discount_total(), 2, '.', '' ) );
 
 		// Add product to cart x2, calc and test
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '19.00', number_format( WC()->cart->get_total(), 2, '.', '' ) );
-		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->get_cart_discount_total(), 2, '.', '' ) );
 
 		// Add product to cart x3, calc and test
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '29.00', number_format( WC()->cart->get_total(), 2, '.', '' ) );
-		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->get_cart_discount_total(), 2, '.', '' ) );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -76,12 +76,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Tax::_insert_tax_rate( $tax_rate );
 		$product = wc_get_product( $product->id );
 
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 		WC()->cart->add_coupon( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
-		$cart_item = current( WC()->cart->get_cart() );
-		$this->assertEquals( '24.51', number_format( $cart_item['line_total'], 2, '.', '' ) );
+		$item_totals   = WC()->cart->get_item_totals();
+		$cart_item_key = key( WC()->cart->get_cart() );
+		$this->assertEquals( '24.50', number_format( $item_totals[ $cart_item_key ]->total, 2, '.', '' ) );
 
 		// Cleanup
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
@@ -125,7 +126,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			$product_ids[] = $loop_product->id;
 			update_post_meta( $loop_product->id, '_regular_price', $price );
 			update_post_meta( $loop_product->id, '_price', $price );
-			WC()->cart->add_to_cart( $loop_product->id, 1 );
+			wc_add_to_cart( $loop_product->id, 1 );
 		}
 
 		WC()->cart->add_coupon( $coupon->get_code() );
@@ -172,14 +173,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_to_cart_simple() {
-
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
 
 		WC()->cart->empty_cart();
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
-		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
+		$this->assertNotFalse( wc_add_to_cart( $product->id ) );
 
 		// Check if the item is in the cart
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
@@ -205,7 +205,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product->id );
 
 		// Add product to cart
-		$this->assertFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
+		$this->assertFalse( wc_add_to_cart( $product->id, 1 ) );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -225,7 +225,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_shift( $variations );
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
-		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
+		$this->assertNotFalse( wc_add_to_cart( $variation['variation_id'], 1, array( 'variation' => array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) ) );
 
 		// Check if the item is in the cart
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );

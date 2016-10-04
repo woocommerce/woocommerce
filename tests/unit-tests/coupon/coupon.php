@@ -20,7 +20,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$this->assertTrue( WC()->cart->add_coupon( $coupon->get_code() ) );
 
 		// Test if total amount of coupons is 1
-		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
+		$this->assertEquals( 1, count( WC()->cart->get_coupons() ) );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
