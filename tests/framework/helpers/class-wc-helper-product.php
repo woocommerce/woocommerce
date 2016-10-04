@@ -221,7 +221,7 @@ class WC_Helper_Product {
 		$taxonomy_data = array(
 			'labels' => array(
 				'name' => __( 'size', 'woocommerce' ),
-			)
+			),
 		);
 		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
 
