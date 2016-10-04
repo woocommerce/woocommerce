@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
+ * @since 2.2.0
+ *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
@@ -432,6 +434,9 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
+                // Clear prices transient for variable products.
+				delete_transient( 'wc_var_prices_' . $parent );
+                            
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {

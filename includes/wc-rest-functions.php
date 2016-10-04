@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
  *
- * Requered WP 4.4 or later.
+ * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since 2.6.0

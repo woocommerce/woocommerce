@@ -581,7 +581,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$data                 = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 			$dirname              = dirname( $plugin );
 			$theme_version_latest = '';
-			if ( strstr( $data['PluginURI'], 'woothemes.com' ) ) {
+			if ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) {
 				if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );

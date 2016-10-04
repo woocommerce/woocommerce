@@ -476,9 +476,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given post.
 	 */
-	protected function prepare_links( $post ) {
+	protected function prepare_links( $post, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),

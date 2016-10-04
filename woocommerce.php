@@ -5,7 +5,7 @@
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
  * Version: 2.7.0-dev
  * Author: WooThemes
- * Author URI: https://woothemes.com
+ * Author URI: https://woocommerce.com
  * Requires at least: 4.4
  * Tested up to: 4.6
  *

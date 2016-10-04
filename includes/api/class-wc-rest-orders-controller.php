@@ -224,7 +224,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $order ) );
+		$response->add_links( $this->prepare_links( $order, $request ) );
 
 		/**
 		 * Filter the data for a response.
@@ -243,9 +243,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Order $order Order object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given order.
 	 */
-	protected function prepare_links( $order ) {
+	protected function prepare_links( $order, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ),

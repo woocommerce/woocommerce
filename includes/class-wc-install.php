@@ -415,7 +415,7 @@ class WC_Install {
 
 	/**
 	 * Get Table schema.
-	 * https://github.com/woothemes/woocommerce/wiki/Database-Description/
+	 * https://github.com/woocommerce/woocommerce/wiki/Database-Description/
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -443,8 +443,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry bigint(20) NOT NULL,
-  UNIQUE KEY session_id (session_id),
-  PRIMARY KEY  (session_key)
+  PRIMARY KEY  (session_key),
+  UNIQUE KEY session_id (session_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id bigint(20) NOT NULL auto_increment,

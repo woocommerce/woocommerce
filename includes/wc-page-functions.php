@@ -188,7 +188,7 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 /**
  * Fix active class in wp_list_pages for shop page.
  *
- * https://github.com/woothemes/woocommerce/issues/177.
+ * https://github.com/woocommerce/woocommerce/issues/177.
  *
  * @author Jessor, Peter Sterling
  * @param string $pages
