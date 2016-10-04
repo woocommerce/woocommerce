@@ -434,6 +434,9 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
+                                // Clear prices transient for variable products.
+				delete_transient( 'wc_var_prices_' . $parent );
+                            
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {
