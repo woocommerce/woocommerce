@@ -62,7 +62,7 @@ class WC_Post_types {
 				'update_count_callback' => '_wc_term_recount',
 				'label'                 => __( 'Categories', 'woocommerce' ),
 				'labels' => array(
-						'name'              => __( 'Categories', 'woocommerce' ),
+						'name'              => __( 'Product Categories', 'woocommerce' ),
 						'singular_name'     => __( 'Category', 'woocommerce' ),
 						'menu_name'         => _x( 'Categories', 'Admin menu name', 'woocommerce' ),
 						'search_items'      => __( 'Search Categories', 'woocommerce' ),
@@ -98,7 +98,7 @@ class WC_Post_types {
 				'update_count_callback' => '_wc_term_recount',
 				'label'                 => __( 'Product Tags', 'woocommerce' ),
 				'labels'                => array(
-						'name'                       => __( 'Tags', 'woocommerce' ),
+						'name'                       => __( 'Product Tags', 'woocommerce' ),
 						'singular_name'              => __( 'Tag', 'woocommerce' ),
 						'menu_name'                  => _x( 'Tags', 'Admin menu name', 'woocommerce' ),
 						'search_items'               => __( 'Search Tags', 'woocommerce' ),
@@ -135,7 +135,7 @@ class WC_Post_types {
 				'update_count_callback' => '_update_post_term_count',
 				'label'                 => __( 'Shipping Classes', 'woocommerce' ),
 				'labels' => array(
-						'name'              => __( 'Shipping Classes', 'woocommerce' ),
+						'name'              => __( 'Product Shipping Classes', 'woocommerce' ),
 						'singular_name'     => __( 'Shipping Class', 'woocommerce' ),
 						'menu_name'         => _x( 'Shipping Classes', 'Admin menu name', 'woocommerce' ),
 						'search_items'      => __( 'Search Shipping Classes', 'woocommerce' ),
@@ -175,7 +175,7 @@ class WC_Post_types {
 						'hierarchical'          => true,
 						'update_count_callback' => '_update_post_term_count',
 						'labels'                => array(
-								'name'              => $label,
+								'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
 								'singular_name'     => $label,
 								'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
 								'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
