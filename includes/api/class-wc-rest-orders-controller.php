@@ -669,7 +669,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @return bool True if the item resource ID is null, false otherwise.
 	 */
 	protected function item_is_null( $item ) {
-		$keys = array( 'product_id', 'method_id', 'title', 'code' );
+		$keys = array( 'product_id', 'method_id', 'method_title', 'name', 'code' );
 
 		foreach ( $keys as $key ) {
 			if ( array_key_exists( $key, $item ) && is_null( $item[ $key ] ) ) {
