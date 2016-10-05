@@ -54,7 +54,7 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 										</a>
 										<?php break;
 									case 'download-file' : ?>
-										<a href="<?php echo esc_url( get_permalink( $download['product_id'] ) ); ?>" class="woocommerce-MyAccount-downloads-file">
+										<a href="<?php echo esc_url( $download['download_url'] ); ?>" class="woocommerce-MyAccount-downloads-file">
 											<?php echo esc_html( $download['file_name'] ); ?>
 										</a>
 										<?php break;
