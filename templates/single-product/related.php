@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     1.6.4
@@ -37,7 +37,7 @@ $args = apply_filters( 'woocommerce_related_products_args', array(
 	'posts_per_page'       => $posts_per_page,
 	'orderby'              => $orderby,
 	'post__in'             => $related,
-	'post__not_in'         => array( $product->id )
+	'post__not_in'         => array( $product->id ),
 ) );
 
 $products                    = new WP_Query( $args );
@@ -46,9 +46,9 @@ $woocommerce_loop['columns'] = apply_filters( 'woocommerce_related_products_colu
 
 if ( $products->have_posts() ) : ?>
 
-	<div class="related products">
+	<section class="related products">
 
-		<h2><?php _e( 'Related Products', 'woocommerce' ); ?></h2>
+		<h2><?php esc_html_e( 'Related Products', 'woocommerce' ); ?></h2>
 
 		<?php woocommerce_product_loop_start(); ?>
 
@@ -60,7 +60,7 @@ if ( $products->have_posts() ) : ?>
 
 		<?php woocommerce_product_loop_end(); ?>
 
-	</div>
+	</section>
 
 <?php endif;
 

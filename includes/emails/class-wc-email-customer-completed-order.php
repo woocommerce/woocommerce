@@ -55,12 +55,12 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		if ( $order_id ) {
 			$this->object                  = wc_get_order( $order_id );
-			$this->recipient               = $this->object->billing_email;
+			$this->recipient               = $this->object->get_billing_email();
 
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 
-			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
@@ -111,7 +111,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -126,7 +126,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -139,7 +139,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),
 				'type'          => 'checkbox',
 				'label'         => __( 'Enable this email notification', 'woocommerce' ),
-				'default'       => 'yes'
+				'default'       => 'yes',
 			),
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
@@ -147,7 +147,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'heading' => array(
 				'title'         => __( 'Email Heading', 'woocommerce' ),
@@ -155,7 +155,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'subject_downloadable' => array(
 				'title'         => __( 'Subject (downloadable)', 'woocommerce' ),
@@ -163,7 +163,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_downloadable ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'heading_downloadable' => array(
 				'title'         => __( 'Email Heading (downloadable)', 'woocommerce' ),
@@ -171,7 +171,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_downloadable ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),
@@ -180,8 +180,8 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
 				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true
-			)
+				'desc_tip'      => true,
+			),
 		);
 	}
 }

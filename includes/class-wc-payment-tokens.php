@@ -86,7 +86,7 @@ class WC_Payment_Tokens {
 
 		$tokens = self::get_tokens( array(
 			'user_id'    => $customer_id,
-			'gateway_id' => $gateway_id
+			'gateway_id' => $gateway_id,
 		) );
 
 		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
@@ -136,7 +136,7 @@ class WC_Payment_Tokens {
 		}
 
 		$tokens = self::get_tokens( array(
-			'token_id' => $token_ids
+			'token_id' => $token_ids,
 		) );
 
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
@@ -166,10 +166,10 @@ class WC_Payment_Tokens {
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
 
 		if ( class_exists( $token_class ) ) {
-			$meta =  get_metadata( 'payment_token', $token_id );
+			$meta = get_metadata( 'payment_token', $token_id );
 			$passed_meta = array();
 			if ( ! empty( $meta ) ) {
-				foreach( $meta as $meta_key => $meta_value ) {
+				foreach ( $meta as $meta_key => $meta_value ) {
 					$passed_meta[ $meta_key ] = $meta_value[0];
 				}
 			}
@@ -186,7 +186,7 @@ class WC_Payment_Tokens {
 	 */
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
-		if ( ! empty ( $type ) ) {
+		if ( ! empty( $type ) ) {
 			$class = 'WC_Payment_Token_' . $type;
 			$token = new $class( $token_id );
 			$token->delete();
@@ -208,8 +208,10 @@ class WC_Payment_Tokens {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_payment_tokens',
 					array( 'is_default' => 1 ),
-					array( 'token_id' => $token->get_id(),
-				) );
+					array(
+						'token_id' => $token->get_id(),
+					)
+				);
 
 				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
 			} else {
@@ -217,8 +219,10 @@ class WC_Payment_Tokens {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_payment_tokens',
 					array( 'is_default' => 0 ),
-					array( 'token_id' => $token->get_id(),
-				) );
+					array(
+						'token_id' => $token->get_id(),
+					)
+				);
 			}
 		}
 	}
@@ -237,5 +241,4 @@ class WC_Payment_Tokens {
 		) );
 		return $type;
 	}
-
 }

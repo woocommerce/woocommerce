@@ -51,7 +51,7 @@ class WC_Post_types {
 				'show_in_nav_menus' => false,
 				'query_var'         => is_admin(),
 				'rewrite'           => false,
-				'public'            => false
+				'public'            => false,
 			) )
 		);
 
@@ -60,20 +60,20 @@ class WC_Post_types {
 			apply_filters( 'woocommerce_taxonomy_args_product_cat', array(
 				'hierarchical'          => true,
 				'update_count_callback' => '_wc_term_recount',
-				'label'                 => __( 'Product Categories', 'woocommerce' ),
+				'label'                 => __( 'Categories', 'woocommerce' ),
 				'labels' => array(
 						'name'              => __( 'Product Categories', 'woocommerce' ),
-						'singular_name'     => __( 'Product Category', 'woocommerce' ),
+						'singular_name'     => __( 'Category', 'woocommerce' ),
 						'menu_name'         => _x( 'Categories', 'Admin menu name', 'woocommerce' ),
-						'search_items'      => __( 'Search Product Categories', 'woocommerce' ),
-						'all_items'         => __( 'All Product Categories', 'woocommerce' ),
-						'parent_item'       => __( 'Parent Product Category', 'woocommerce' ),
-						'parent_item_colon' => __( 'Parent Product Category:', 'woocommerce' ),
-						'edit_item'         => __( 'Edit Product Category', 'woocommerce' ),
-						'update_item'       => __( 'Update Product Category', 'woocommerce' ),
-						'add_new_item'      => __( 'Add New Product Category', 'woocommerce' ),
-						'new_item_name'     => __( 'New Product Category Name', 'woocommerce' ),
-						'not_found'         => __( 'No Product Category found', 'woocommerce' ),
+						'search_items'      => __( 'Search Categories', 'woocommerce' ),
+						'all_items'         => __( 'All Categories', 'woocommerce' ),
+						'parent_item'       => __( 'Parent Category', 'woocommerce' ),
+						'parent_item_colon' => __( 'Parent Category:', 'woocommerce' ),
+						'edit_item'         => __( 'Edit Category', 'woocommerce' ),
+						'update_item'       => __( 'Update Category', 'woocommerce' ),
+						'add_new_item'      => __( 'Add New Category', 'woocommerce' ),
+						'new_item_name'     => __( 'New Category Name', 'woocommerce' ),
+						'not_found'         => __( 'No categories found', 'woocommerce' ),
 					),
 				'show_ui'               => true,
 				'query_var'             => true,
@@ -99,19 +99,19 @@ class WC_Post_types {
 				'label'                 => __( 'Product Tags', 'woocommerce' ),
 				'labels'                => array(
 						'name'                       => __( 'Product Tags', 'woocommerce' ),
-						'singular_name'              => __( 'Product Tag', 'woocommerce' ),
+						'singular_name'              => __( 'Tag', 'woocommerce' ),
 						'menu_name'                  => _x( 'Tags', 'Admin menu name', 'woocommerce' ),
-						'search_items'               => __( 'Search Product Tags', 'woocommerce' ),
-						'all_items'                  => __( 'All Product Tags', 'woocommerce' ),
-						'edit_item'                  => __( 'Edit Product Tag', 'woocommerce' ),
-						'update_item'                => __( 'Update Product Tag', 'woocommerce' ),
-						'add_new_item'               => __( 'Add New Product Tag', 'woocommerce' ),
-						'new_item_name'              => __( 'New Product Tag Name', 'woocommerce' ),
-						'popular_items'              => __( 'Popular Product Tags', 'woocommerce' ),
-						'separate_items_with_commas' => __( 'Separate Product Tags with commas', 'woocommerce'  ),
-						'add_or_remove_items'        => __( 'Add or remove Product Tags', 'woocommerce' ),
-						'choose_from_most_used'      => __( 'Choose from the most used Product tags', 'woocommerce' ),
-						'not_found'                  => __( 'No Product Tags found', 'woocommerce' ),
+						'search_items'               => __( 'Search Tags', 'woocommerce' ),
+						'all_items'                  => __( 'All Tags', 'woocommerce' ),
+						'edit_item'                  => __( 'Edit Tag', 'woocommerce' ),
+						'update_item'                => __( 'Update Tag', 'woocommerce' ),
+						'add_new_item'               => __( 'Add New Tag', 'woocommerce' ),
+						'new_item_name'              => __( 'New Tag Name', 'woocommerce' ),
+						'popular_items'              => __( 'Popular Tags', 'woocommerce' ),
+						'separate_items_with_commas' => __( 'Separate Tags with commas', 'woocommerce' ),
+						'add_or_remove_items'        => __( 'Add or remove Tags', 'woocommerce' ),
+						'choose_from_most_used'      => __( 'Choose from the most used tags', 'woocommerce' ),
+						'not_found'                  => __( 'No tags found', 'woocommerce' ),
 					),
 				'show_ui'               => true,
 				'query_var'             => true,
@@ -123,7 +123,7 @@ class WC_Post_types {
 				),
 				'rewrite'               => array(
 					'slug'       => empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'],
-					'with_front' => false
+					'with_front' => false,
 				),
 			) )
 		);
@@ -135,7 +135,7 @@ class WC_Post_types {
 				'update_count_callback' => '_update_post_term_count',
 				'label'                 => __( 'Shipping Classes', 'woocommerce' ),
 				'labels' => array(
-						'name'              => __( 'Shipping Classes', 'woocommerce' ),
+						'name'              => __( 'Product Shipping Classes', 'woocommerce' ),
 						'singular_name'     => __( 'Shipping Class', 'woocommerce' ),
 						'menu_name'         => _x( 'Shipping Classes', 'Admin menu name', 'woocommerce' ),
 						'search_items'      => __( 'Search Shipping Classes', 'woocommerce' ),
@@ -145,7 +145,7 @@ class WC_Post_types {
 						'edit_item'         => __( 'Edit Shipping Class', 'woocommerce' ),
 						'update_item'       => __( 'Update Shipping Class', 'woocommerce' ),
 						'add_new_item'      => __( 'Add New Shipping Class', 'woocommerce' ),
-						'new_item_name'     => __( 'New Shipping Class Name', 'woocommerce' )
+						'new_item_name'     => __( 'New Shipping Class Name', 'woocommerce' ),
 					),
 				'show_ui'               => false,
 				'show_in_quick_edit'    => false,
@@ -175,7 +175,7 @@ class WC_Post_types {
 						'hierarchical'          => true,
 						'update_count_callback' => '_update_post_term_count',
 						'labels'                => array(
-								'name'              => $label,
+								'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
 								'singular_name'     => $label,
 								'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
 								'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
@@ -202,14 +202,14 @@ class WC_Post_types {
 							'edit_terms'   => 'edit_product_terms',
 							'delete_terms' => 'delete_product_terms',
 							'assign_terms' => 'assign_product_terms',
-						)
+						),
 					);
 
 					if ( 1 === $tax->attribute_public ) {
 						$taxonomy_data['rewrite'] = array(
 							'slug'         => empty( $permalinks['attribute_base'] ) ? '' : trailingslashit( $permalinks['attribute_base'] ) . sanitize_title( $tax->attribute_name ),
 							'with_front'   => false,
-							'hierarchical' => true
+							'hierarchical' => true,
 						);
 					}
 
@@ -225,7 +225,7 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists('product') ) {
+		if ( post_type_exists( 'product' ) ) {
 			return;
 		}
 
@@ -274,7 +274,7 @@ class WC_Post_types {
 					'query_var'           => true,
 					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes', 'publicize', 'wpcom-markdown' ),
 					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
-					'show_in_nav_menus'   => true
+					'show_in_nav_menus'   => true,
 				)
 			)
 		);
@@ -286,7 +286,7 @@ class WC_Post_types {
 					'public'       => false,
 					'hierarchical' => false,
 					'supports'     => false,
-					'capability_type' => 'product'
+					'capability_type' => 'product',
 				)
 			)
 		);
@@ -347,7 +347,7 @@ class WC_Post_types {
 					'exclude_from_order_views'         => false,
 					'exclude_from_order_reports'       => false,
 					'exclude_from_order_sales_reports' => true,
-					'class_name'                       => 'WC_Order_Refund'
+					'class_name'                       => 'WC_Order_Refund',
 				)
 			)
 		);
@@ -388,7 +388,7 @@ class WC_Post_types {
 						'query_var'           => false,
 						'supports'            => array( 'title' ),
 						'show_in_nav_menus'   => false,
-						'show_in_admin_bar'   => true
+						'show_in_admin_bar'   => true,
 					)
 				)
 			);
@@ -411,7 +411,7 @@ class WC_Post_types {
 						'search_items'       => __( 'Search Webhooks', 'woocommerce' ),
 						'not_found'          => __( 'No Webhooks found', 'woocommerce' ),
 						'not_found_in_trash' => __( 'No Webhooks found in trash', 'woocommerce' ),
-						'parent'             => __( 'Parent Webhook', 'woocommerce' )
+						'parent'             => __( 'Parent Webhook', 'woocommerce' ),
 					),
 					'public'              => false,
 					'show_ui'             => true,
@@ -425,7 +425,7 @@ class WC_Post_types {
 					'query_var'           => false,
 					'supports'            => false,
 					'show_in_nav_menus'   => false,
-					'show_in_admin_bar'   => false
+					'show_in_admin_bar'   => false,
 				)
 			)
 		);
@@ -444,7 +444,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Pending Payment <span class="count">(%s)</span>', 'Pending Payment <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Pending Payment <span class="count">(%s)</span>', 'Pending Payment <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-processing' => array(
 					'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -452,7 +452,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-on-hold'    => array(
 					'label'                     => _x( 'On Hold', 'Order status', 'woocommerce' ),
@@ -460,7 +460,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'On Hold <span class="count">(%s)</span>', 'On Hold <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'On Hold <span class="count">(%s)</span>', 'On Hold <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-completed'  => array(
 					'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
@@ -468,7 +468,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-cancelled'  => array(
 					'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
@@ -476,7 +476,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-refunded'   => array(
 					'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),
@@ -484,7 +484,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Refunded <span class="count">(%s)</span>', 'Refunded <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Refunded <span class="count">(%s)</span>', 'Refunded <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-failed'     => array(
 					'label'                     => _x( 'Failed', 'Order status', 'woocommerce' ),
@@ -492,7 +492,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' )
+					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 			)
 		);

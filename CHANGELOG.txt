@@ -1,5 +1,38 @@
 == Changelog ==
 
+= 2.6.3 - 19/07/16 =
+* Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
+* Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Normalized 'read more' buttons.
+* Fix - Add to cart notices for grouped products.
+* Fix - Do not sanitize passwords in the settings API.
+* Fix - Handle shipping zone location range conversion during update (dashes to ...).
+* Fix - Always remove commas while processing flat rate costs.
+* Fix - Ensures account page layout is only applied to desktop-sized displays.
+* Fix - When getting layered nav counts, take search parameters into consideration.
+* Fix - Free shipping show/hide javascript.
+* Fix - Strip hash characters when exporting reports.
+* Fix - Use permission id to revoke access to downloads to prevent removing wrong rows.
+* Fix - When duplicating product variations, set title, name, and guid.
+* Fix - Set more appropriate default rounding precision based on currency decimal places.
+* Fix - Fix message styles for empty carts.
+* Fix - Fixed the load of the WC_Email_Customer_On_Hold_Order class.
+* Fix - Don't perform cart update on search submit.
+* Dev - API - Added support for WP REST API with custom URL prefixes.
+* Dev - API - Delete variations when deleting a variable product.
+* Dev - API - Fixed how we check for product types.
+* Dev - Added woocommerce_cart_id filter.
+* Dev - Add shortcode name param to shortcode_atts function calls.
+* Dev - Post custom data when fetching a variation via ajax.
+* Dev - Include child prices in grouped_price_html filter.
+* Dev - Allow filtering of variation stock quantity.
+* Dev - Added $_product argument to 'woocommerce_restock_refunded_item' hook.
+* Dev - Added a filter hook for the wc_ajax endpoint url.
+* Tweak - Include account page link in new customer account emails.
+* Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
+* Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
+
 = 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
@@ -102,7 +135,7 @@
 * Tweak - Allow failed orders to be edited.
 * Tweak - If there are no shipping methods setup, don’t prompt for shipping at checkout.
 * Tweak - Allowed country exclusion, rather than just inclusion, in ‘sell to’ setting.
-* Lots, lots more - [see the comparison here: https://github.com/woothemes/woocommerce/compare/2.5.5...2.6.0
+* Lots, lots more - [see the comparison here: https://github.com/woocommerce/woocommerce/compare/2.5.5...2.6.0
 
 = 2.5.5 - 11/03/2016 =
 * Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
@@ -468,14 +501,14 @@
 * Dev - API - Deprecated /product/sku endpoint from v3.
 * Dev - API - Created the /products/id/orders endpoint to fetch orders containing a specific product.
 * Localisation - Added Argentine currency and provinces.
-* [Various other small fixes and enhancements.](https://github.com/woothemes/woocommerce/issues?q=is%3Aissue+milestone%3A%222.4+Helpful+Hedgehog%22+is%3Aclosed)
+* [Various other small fixes and enhancements.](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+milestone%3A%222.4+Helpful+Hedgehog%22+is%3Aclosed)
 
 = 2.3.13 - 07/07/2015 =
 * Fix - Improved the email settings save and tabs for 3rd party plugins.
 * Fix - Datepicker range for variations.
 
 = 2.3.12 - 06/07/2015 =
-* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woothemes.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
+* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://docs.woocommerce.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
 * Fix - Escaped shop url in empty cart template.
 * Fix - Escaped product tabs titles.
 * Fix - Removed deprecated PHP4 constructor on Widget classes.
@@ -949,7 +982,7 @@
 * Dev - Introduces the WC_Order::needs_shipping_address() method.
 * Dev - Gateways can set transaction ID for the order.
 * Dev - Gateways can do refunds via the Payment Gateway API.
-* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woothemes/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
+* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woocommerce/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
@@ -1301,7 +1334,7 @@
 * Tweak - Filterable page installer.
 * Tweak - Order details optimised for small screens.
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
-* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns parameter now affects layout correctly.
 * Tweak - Disabled button styles.
 * Tweak - Hooks for overriding default email inline styles.
@@ -1420,7 +1453,7 @@
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Tweak - Handle pending status for paypal
 * Tweak - Only refresh fragment when cart cookie > 0
-* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total
@@ -1663,7 +1696,7 @@
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
 * Feature - New shop page/category archive display settings, and the ability to change display per-category.
-* Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woothemes/woocommerce/issues/1625
+* Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woocommerce/woocommerce/issues/1625
 * Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in their own table with meta. Existing data can be be updated on upgrade.
 * Feature - Update weights/dimensions for variations if they differ.
 * Feature - is_order_received_page() courtesy of Lee Willis.
@@ -1674,7 +1707,7 @@
 * Feature - Filter coupons in admin by type.
 * Feature - Append view cart link on ajax buttons.
 * Feature - Revised the way coupons are stored per order and added new coupon reports on usage.
-* Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://www.woothemes.com/products/product-csv-import-suite/)).
+* Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](https://woocommerce.com/products/product-csv-import-suite/)).
 * Feature - Option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.
 * Feature - Added set_stock() method to product class.
 * Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)

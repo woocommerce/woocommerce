@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     1.6.4
@@ -33,7 +33,7 @@ $args = array(
 	'posts_per_page'      => apply_filters( 'woocommerce_cross_sells_total', $posts_per_page ),
 	'orderby'             => $orderby,
 	'post__in'            => $crosssells,
-	'meta_query'          => WC()->query->get_meta_query()
+	'meta_query'          => WC()->query->get_meta_query(),
 );
 
 $products                    = new WP_Query( $args );

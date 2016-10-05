@@ -55,7 +55,7 @@ function wc_customer_edit_account_url() {
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
 		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
-		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) )
+		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
 	) );
 
 	if ( $flip ) {
@@ -162,7 +162,7 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
-	return wc_get_endpoint_url( $endpoint );
+	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
 }
 
 /**
@@ -191,12 +191,19 @@ function wc_get_account_orders_columns() {
  * @return array
  */
 function wc_get_account_downloads_columns() {
-	return apply_filters( 'woocommerce_account_downloads_columns', array(
-		'download-file'      => __( 'File', 'woocommerce' ),
-		'download-remaining' => __( 'Remaining', 'woocommerce' ),
+	$columns = apply_filters( 'woocommerce_account_downloads_columns', array(
+		'download-product'   => __( 'Product', 'woocommerce' ),
+		'download-remaining' => __( 'Downloads Remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
+		'download-file'      => __( 'File', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
+
+	if ( ! has_filter( 'woocommerce_account_download_actions' ) ) {
+		unset( $columns['download-actions'] );
+	}
+
+	return $columns;
 }
 
 /**
@@ -259,7 +266,7 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
-			$list[ $type ][$key]['actions']['default'] = array(
+			$list[ $type ][ $key ]['actions']['default'] = array(
 				'url' => $set_default_url,
 				'name' => esc_html__( 'Make Default', 'woocommerce' ),
 			);
@@ -309,7 +316,7 @@ function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_
 	}
 
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] =  esc_html__( 'eCheck', 'woocommerce' );
+	$item['method']['brand'] = esc_html__( 'eCheck', 'woocommerce' );
 
 	return $item;
 }

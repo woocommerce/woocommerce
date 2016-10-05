@@ -41,6 +41,11 @@ class WC_Shortcode_My_Account {
 				wc_add_notice( $message );
 			}
 
+			// After password reset, add confirmation message.
+			if ( ! empty( $_GET['password-reset'] ) ) {
+				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+			}
+
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 				self::lost_password();
 			} else {
@@ -92,7 +97,7 @@ class WC_Shortcode_My_Account {
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-			'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
+			'order_count' => 15, // @deprecated 2.6.0. Keep for backward compatibility.
 		), $atts ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
@@ -110,7 +115,7 @@ class WC_Shortcode_My_Account {
 		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
+			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
 			return;
 		}
 
@@ -121,7 +126,7 @@ class WC_Shortcode_My_Account {
 		wc_get_template( 'myaccount/view-order.php', array(
 			'status'    => $status, // @deprecated 2.2
 			'order'     => wc_get_order( $order_id ),
-			'order_id'  => $order_id
+			'order_id'  => $order_id,
 		) );
 	}
 
@@ -153,7 +158,7 @@ class WC_Shortcode_My_Account {
 			$value = get_user_meta( get_current_user_id(), $key, true );
 
 			if ( ! $value ) {
-				switch( $key ) {
+				switch ( $key ) {
 					case 'billing_email' :
 					case 'shipping_email' :
 						$value = $current_user->user_email;
@@ -174,7 +179,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
-			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
+			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address ),
 		) );
 	}
 
@@ -187,12 +192,6 @@ class WC_Shortcode_My_Account {
 		 */
 		if ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
-
-		/**
-		 * After reset, show confirmation message.
-		 */
-		} elseif ( ! empty( $_GET['reset'] ) ) {
-			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 
 		/**
 		 * Process reset key / login from email confirmation link
@@ -392,7 +391,5 @@ class WC_Shortcode_My_Account {
 			do_action( 'after_woocommerce_add_payment_method' );
 
 		}
-
 	}
-
 }

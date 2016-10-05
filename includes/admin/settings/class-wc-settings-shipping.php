@@ -47,7 +47,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$sections = array(
 			''        => __( 'Shipping Zones', 'woocommerce' ),
 			'options' => __( 'Shipping Options', 'woocommerce' ),
-			'classes' => __( 'Shipping Classes', 'woocommerce' )
+			'classes' => __( 'Shipping Classes', 'woocommerce' ),
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
@@ -83,7 +83,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -92,7 +92,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -107,8 +107,18 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
 				),
 				'autoload'        => false,
-				'desc_tip'        =>  true,
+				'desc_tip'        => true,
 				'show_if_checked' => 'option',
+			),
+
+			array(
+				'title'    => __( 'Debug Mode', 'woocommerce' ),
+				'desc'     => __( 'Enable Debug Mode', 'woocommerce' ),
+				'desc_tip' => __( 'Enable Shipping Debug Mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+				'id'       => 'woocommerce_shipping_debug_mode',
+				'default'  => 'no',
+				'type'     => 'checkbox',
+				'autoload' => false,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
@@ -217,7 +227,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
 
-		include_once( 'views/html-admin-page-shipping-zone-methods.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zone-methods.php' );
 	}
 
 	/**
@@ -246,7 +256,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );
 
-		include_once( 'views/html-admin-page-shipping-zones.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones.php' );
 	}
 
 	/**
@@ -277,7 +287,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$shipping_method->display_errors();
 		}
 
-		include_once( 'views/html-admin-page-shipping-zones-instance.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones-instance.php' );
 	}
 
 	/**
@@ -295,7 +305,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' )
+				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-classes' );
@@ -308,7 +318,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc-shipping-class-count'       => __( 'Product Count', 'woocommerce' ),
 		) );
 
-		include_once( 'views/html-admin-page-shipping-classes.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php' );
 	}
 }
 

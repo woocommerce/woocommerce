@@ -121,7 +121,7 @@ class WC_Meta_Box_Order_Downloads {
 					array(
 						'order_id' 		=> $post_id,
 						'product_id' 	=> absint( $product_ids[ $i ] ),
-						'download_id'	=> wc_clean( $download_ids[ $i ] )
+						'download_id'	=> wc_clean( $download_ids[ $i ] ),
 						),
 					$format, array( '%d', '%d', '%s' )
 				);

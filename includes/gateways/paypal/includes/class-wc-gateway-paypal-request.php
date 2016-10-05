@@ -77,18 +77,18 @@ class WC_Gateway_Paypal_Request {
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
 				'bn'            => 'WooThemes_Cart',
 				'invoice'       => $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(),
-				'custom'        => json_encode( array( 'order_id' => $order->id, 'order_key' => $order->order_key ) ),
+				'custom'        => json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->get_order_key() ) ),
 				'notify_url'    => $this->notify_url,
-				'first_name'    => $order->billing_first_name,
-				'last_name'     => $order->billing_last_name,
-				'company'       => $order->billing_company,
-				'address1'      => $order->billing_address_1,
-				'address2'      => $order->billing_address_2,
-				'city'          => $order->billing_city,
-				'state'         => $this->get_paypal_state( $order->billing_country, $order->billing_state ),
-				'zip'           => $order->billing_postcode,
-				'country'       => $order->billing_country,
-				'email'         => $order->billing_email
+				'first_name'    => $order->get_billing_first_name(),
+				'last_name'     => $order->get_billing_last_name(),
+				'company'       => $order->get_billing_company(),
+				'address1'      => $order->get_billing_address_1(),
+				'address2'      => $order->get_billing_address_2(),
+				'city'          => $order->get_billing_city(),
+				'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
+				'zip'           => $order->get_billing_postcode(),
+				'country'       => $order->get_billing_country(),
+				'email'         => $order->get_billing_email(),
 			),
 			$this->get_phone_number_args( $order ),
 			$this->get_shipping_args( $order ),
@@ -102,8 +102,8 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
-			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
+		if ( in_array( $order->get_billing_country(), array( 'US', 'CA' ) ) ) {
+			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
 				'night_phone_a' => substr( $phone_number, 0, 3 ),
@@ -111,12 +111,12 @@ class WC_Gateway_Paypal_Request {
 				'night_phone_c' => substr( $phone_number, 6, 4 ),
 				'day_phone_a' 	=> substr( $phone_number, 0, 3 ),
 				'day_phone_b' 	=> substr( $phone_number, 3, 3 ),
-				'day_phone_c' 	=> substr( $phone_number, 6, 4 )
+				'day_phone_c' 	=> substr( $phone_number, 6, 4 ),
 			);
 		} else {
 			$phone_args = array(
-				'night_phone_b' => $order->billing_phone,
-				'day_phone_b' 	=> $order->billing_phone
+				'night_phone_b' => $order->get_billing_phone(),
+				'day_phone_b' 	=> $order->get_billing_phone(),
 			);
 		}
 		return $phone_args;
@@ -135,15 +135,15 @@ class WC_Gateway_Paypal_Request {
 			$shipping_args['no_shipping']      = 0;
 
 			// If we are sending shipping, send shipping address instead of billing
-			$shipping_args['first_name']       = $order->shipping_first_name;
-			$shipping_args['last_name']        = $order->shipping_last_name;
-			$shipping_args['company']          = $order->shipping_company;
-			$shipping_args['address1']         = $order->shipping_address_1;
-			$shipping_args['address2']         = $order->shipping_address_2;
-			$shipping_args['city']             = $order->shipping_city;
-			$shipping_args['state']            = $this->get_paypal_state( $order->shipping_country, $order->shipping_state );
-			$shipping_args['country']          = $order->shipping_country;
-			$shipping_args['zip']              = $order->shipping_postcode;
+			$shipping_args['first_name']       = $order->get_shipping_first_name();
+			$shipping_args['last_name']        = $order->get_shipping_last_name();
+			$shipping_args['company']          = $order->get_shipping_company();
+			$shipping_args['address1']         = $order->get_shipping_address_1();
+			$shipping_args['address2']         = $order->get_shipping_address_2();
+			$shipping_args['city']             = $order->get_shipping_city();
+			$shipping_args['state']            = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
+			$shipping_args['country']          = $order->get_shipping_country();
+			$shipping_args['zip']              = $order->get_shipping_postcode();
 		} else {
 			$shipping_args['no_shipping']      = 1;
 		}
@@ -173,10 +173,10 @@ class WC_Gateway_Paypal_Request {
 			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
 			// We also check that shipping is not the **only** cost as PayPal won't allow payment
 			// if the items have no cost.
-			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 && $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
-				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping(), $order );
-			} elseif ( $order->get_total_shipping() > 0 ) {
-				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping(), $order ) );
+			if ( $order->get_shipping_total() > 0 && $order->get_shipping_total() < 999.99 && $this->number_format( $order->get_shipping_total() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
+				$line_item_args['shipping_1'] = $this->number_format( $order->get_shipping_total(), $order );
+			} elseif ( $order->get_shipping_total() > 0 ) {
+				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_shipping_total(), $order ) );
 			}
 
 			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
@@ -192,15 +192,15 @@ class WC_Gateway_Paypal_Request {
 
 			$line_item_args = array();
 			$all_items_name = $this->get_order_item_names( $order );
-			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
+			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_shipping_total() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
 
 			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
 			// We also check that shipping is not the **only** cost as PayPal won't allow payment
 			// if the items have no cost.
-			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 && $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
-				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order );
-			} elseif ( $order->get_total_shipping() > 0 ) {
-				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
+			if ( $order->get_shipping_total() > 0 && $order->get_shipping_total() < 999.99 && $this->number_format( $order->get_shipping_total() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
+				$line_item_args['shipping_1'] = $this->number_format( $order->get_shipping_total() + $order->get_shipping_tax(), $order );
+			} elseif ( $order->get_shipping_total() > 0 ) {
+				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_shipping_total() + $order->get_shipping_tax(), $order ) );
 			}
 
 			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
@@ -218,7 +218,7 @@ class WC_Gateway_Paypal_Request {
 		$item_names = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$item_names[] = $item['name'] . ' x ' . $item['qty'];
+			$item_names[] = $item->get_name() . ' x ' . $item['qty'];
 		}
 
 		return implode( ', ', $item_names );
@@ -231,7 +231,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	protected function get_order_item_name( $order, $item ) {
-		$item_name = $item['name'];
+		$item_name = $item->get_name();
 		$item_meta = new WC_Order_Item_Meta( $item );
 
 		if ( $meta = $item_meta->display( true, true ) ) {
@@ -268,10 +268,10 @@ class WC_Gateway_Paypal_Request {
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			if ( 'fee' === $item['type'] ) {
 				$item_line_total  = $this->number_format( $item['line_total'], $order );
-				$line_item        = $this->add_line_item( $item['name'], 1, $item_line_total );
+				$line_item        = $this->add_line_item( $item->get_name(), 1, $item_line_total );
 				$calculated_total += $item_line_total;
 			} else {
-				$product          = $order->get_product_from_item( $item );
+				$product          = $item->get_product();
 				$sku              = $product ? $product->get_sku() : '';
 				$item_line_total  = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
 				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $item_line_total, $sku );
@@ -284,7 +284,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check for mismatched totals.
-		if ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_total_shipping(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) ) {
+		if ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_shipping_total(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) ) {
 			return false;
 		}
 
@@ -356,7 +356,7 @@ class WC_Gateway_Paypal_Request {
 	protected function round( $price, $order ) {
 		$precision = 2;
 
-		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+		if ( ! $this->currency_has_decimals( $order->get_currency() ) ) {
 			$precision = 0;
 		}
 
@@ -372,7 +372,7 @@ class WC_Gateway_Paypal_Request {
 	protected function number_format( $price, $order ) {
 		$decimals = 2;
 
-		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+		if ( ! $this->currency_has_decimals( $order->get_currency() ) ) {
 			$decimals = 0;
 		}
 

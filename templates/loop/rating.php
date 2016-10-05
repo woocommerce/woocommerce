@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.0.0
@@ -28,4 +28,6 @@ if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' )
 
 <?php if ( $rating_html = $product->get_rating_html() ) : ?>
 	<?php echo $rating_html; ?>
-<?php endif; ?>
+<?php endif;
+
+/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

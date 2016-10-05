@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     1.6.4
@@ -34,7 +34,7 @@ $args = array(
 	'orderby'             => $orderby,
 	'post__in'            => $upsells,
 	'post__not_in'        => array( $product->id ),
-	'meta_query'          => WC()->query->get_meta_query()
+	'meta_query'          => WC()->query->get_meta_query(),
 );
 
 $products                    = new WP_Query( $args );
@@ -43,9 +43,9 @@ $woocommerce_loop['columns'] = apply_filters( 'woocommerce_up_sells_columns', $c
 
 if ( $products->have_posts() ) : ?>
 
-	<div class="up-sells upsells products">
+	<section class="up-sells upsells products">
 
-		<h2><?php _e( 'You may also like&hellip;', 'woocommerce' ) ?></h2>
+		<h2><?php esc_html_e( 'You may also like&hellip;', 'woocommerce' ) ?></h2>
 
 		<?php woocommerce_product_loop_start(); ?>
 
@@ -57,7 +57,7 @@ if ( $products->have_posts() ) : ?>
 
 		<?php woocommerce_product_loop_end(); ?>
 
-	</div>
+	</section>
 
 <?php endif;
 

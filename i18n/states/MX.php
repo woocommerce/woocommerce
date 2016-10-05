@@ -41,5 +41,5 @@ $states['MX'] = array(
 	'Tlaxcala' 				=> __( 'Tlaxcala', 'woocommerce' ),
 	'Veracruz' 				=> __( 'Veracruz', 'woocommerce' ),
 	'Yucatan' 				=> __( 'Yucatán', 'woocommerce' ),
-	'Zacatecas' 			=> __( 'Zacatecas', 'woocommerce' )
+	'Zacatecas' 			=> __( 'Zacatecas', 'woocommerce' ),
 );

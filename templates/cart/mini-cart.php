@@ -12,7 +12,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     https://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.5.0
@@ -29,6 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <ul class="cart_list product_list_widget <?php echo $args['list_class']; ?>">
 
 	<?php if ( ! WC()->cart->is_empty() ) : ?>
+
+		<?php do_action( 'woocommerce_before_mini_cart_contents' ); ?>
 
 		<?php
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -67,6 +69,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 
+		<?php do_action( 'woocommerce_mini_cart_contents' ); ?>
+
 	<?php else : ?>
 
 		<li class="empty"><?php _e( 'No products in the cart.', 'woocommerce' ); ?></li>
@@ -82,8 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
 
 	<p class="buttons">
-		<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="button wc-forward"><?php _e( 'View Cart', 'woocommerce' ); ?></a>
-		<a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="button checkout wc-forward"><?php _e( 'Checkout', 'woocommerce' ); ?></a>
+		<?php do_action( 'woocommerce_widget_shopping_cart_buttons' ); ?>
 	</p>
 
 <?php endif; ?>

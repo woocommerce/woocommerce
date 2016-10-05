@@ -39,7 +39,7 @@ class WC_Download_Handler {
 			'product_id'  => $product_id,
 			'order_key'   => wc_clean( $_GET['order'] ),
 			'email'       => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
-			'download_id' => wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' )
+			'download_id' => wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' ),
 		) );
 
 		if ( $_product && $download_data ) {
@@ -216,7 +216,7 @@ class WC_Download_Handler {
 			network_site_url( '/', 'https' ) => ABSPATH,
 			network_site_url( '/', 'http' )  => ABSPATH,
 			site_url( '/', 'https' )         => ABSPATH,
-			site_url( '/', 'http' )          => ABSPATH
+			site_url( '/', 'http' )          => ABSPATH,
 		);
 
 		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
@@ -236,7 +236,7 @@ class WC_Download_Handler {
 
 		return array(
 			'remote_file' => $remote_file,
-			'file_path'   => $file_path
+			'file_path'   => $file_path,
 		);
 	}
 
@@ -326,9 +326,9 @@ class WC_Download_Handler {
 		header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
-        if ( $size = @filesize( $file_path ) ) {
-        	header( "Content-Length: " . $size );
-        }
+		if ( $size = @filesize( $file_path ) ) {
+			header( "Content-Length: " . $size );
+		}
 	}
 
 	/**

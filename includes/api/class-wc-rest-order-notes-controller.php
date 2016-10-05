@@ -161,7 +161,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_{$this->post_type}_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
@@ -200,7 +200,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$order = wc_get_order( $order );
@@ -228,7 +228,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$response = $this->prepare_item_for_response( $note, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->id, $this->rest_base ), $note_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->get_id(), $this->rest_base ), $note_id ) ) );
 
 		return $response;
 	}
@@ -244,13 +244,13 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
@@ -277,13 +277,13 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );

@@ -80,8 +80,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'default' 		=> 'taxable',
 				'options'		=> array(
 					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-					'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-				)
+					'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
+				),
 			),
 			'cost' => array(
 				'title' 		=> __( 'Cost', 'woocommerce' ),
@@ -89,8 +89,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'placeholder'	=> '0',
 				'description'	=> __( 'Optional cost for local pickup.', 'woocommerce' ),
 				'default'		=> '',
-				'desc_tip'		=> true
-			)
+				'desc_tip'		=> true,
+			),
 		);
 	}
 }

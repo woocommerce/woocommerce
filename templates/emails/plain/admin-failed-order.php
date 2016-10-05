@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
  * @version		2.5.0
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo "= " . $email_heading . " =\n\n";
 
-echo sprintf( __( 'Payment for order #%d from %s has failed. The order was as follows:', 'woocommerce' ), $order->id, $order->get_formatted_billing_full_name() ) . "\n\n";
+echo sprintf( __( 'Payment for order #%1$d from %2$s has failed. The order was as follows:', 'woocommerce' ), $order->get_id(), $order->get_formatted_billing_full_name() ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

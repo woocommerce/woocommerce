@@ -45,5 +45,5 @@ $states['IN'] = array(
 	'DD' => __( 'Daman and Diu', 'woocommerce' ),
 	'DL' => __( 'Delhi', 'woocommerce' ),
 	'LD' => __( 'Lakshadeep', 'woocommerce' ),
-	'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' )
+	'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' ),
 );

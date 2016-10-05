@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.0.0
@@ -32,9 +32,11 @@ get_header( 'shop' ); ?>
 		do_action( 'woocommerce_before_main_content' );
 	?>
 
+    <header class="woocommerce-products-header">
+
 		<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
 
-			<h1 class="page-title"><?php woocommerce_page_title(); ?></h1>
+			<h1 class="woocommerce-products-header__title page-title"><?php woocommerce_page_title(); ?></h1>
 
 		<?php endif; ?>
 
@@ -47,6 +49,8 @@ get_header( 'shop' ); ?>
 			 */
 			do_action( 'woocommerce_archive_description' );
 		?>
+
+    </header>
 
 		<?php if ( have_posts() ) : ?>
 
@@ -83,7 +87,14 @@ get_header( 'shop' ); ?>
 
 		<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
-			<?php wc_get_template( 'loop/no-products-found.php' ); ?>
+			<?php
+				/**
+				 * woocommerce_no_products_found hook.
+				 *
+				 * @hooked wc_no_products_found - 10
+				 */
+				do_action( 'woocommerce_no_products_found' );
+			?>
 
 		<?php endif; ?>
 

@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     https://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
@@ -25,11 +25,11 @@ $customer_id = get_current_user_id();
 if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
 		'billing' => __( 'Billing Address', 'woocommerce' ),
-		'shipping' => __( 'Shipping Address', 'woocommerce' )
+		'shipping' => __( 'Shipping Address', 'woocommerce' ),
 	), $customer_id );
 } else {
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-		'billing' =>  __( 'Billing Address', 'woocommerce' )
+		'billing' => __( 'Billing Address', 'woocommerce' ),
 	), $customer_id );
 }
 
@@ -61,7 +61,7 @@ $col    = 1;
 					'city'        => get_user_meta( $customer_id, $name . '_city', true ),
 					'state'       => get_user_meta( $customer_id, $name . '_state', true ),
 					'postcode'    => get_user_meta( $customer_id, $name . '_postcode', true ),
-					'country'     => get_user_meta( $customer_id, $name . '_country', true )
+					'country'     => get_user_meta( $customer_id, $name . '_country', true ),
 				), $customer_id, $name );
 
 				$formatted_address = WC()->countries->get_formatted_address( $address );

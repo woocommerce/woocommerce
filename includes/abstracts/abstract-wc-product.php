@@ -241,11 +241,11 @@ class WC_Product {
 	 */
 	public function check_stock_status() {
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'outofstock' ) {
+			if ( 'outofstock' !== $this->stock_status ) {
 				$this->set_stock_status( 'outofstock' );
 			}
 		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'instock' ) {
+			if ( 'instock' !== $this->stock_status ) {
 				$this->set_stock_status( 'instock' );
 			}
 		}
@@ -367,7 +367,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_downloadable() {
-		return $this->downloadable == 'yes' ? true : false;
+		return ( 'yes' === $this->downloadable );
 	}
 
 	/**
@@ -400,7 +400,7 @@ class WC_Product {
 				if ( ! is_array( $file ) ) {
 					$downloadable_files[ $key ] = array(
 						'file' => $file,
-						'name' => ''
+						'name' => '',
 					);
 				}
 
@@ -464,7 +464,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', $this->virtual == 'yes' ? true : false, $this );
+		return apply_filters( 'woocommerce_is_virtual', ( 'yes' === $this->virtual ), $this );
 	}
 
 	/**
@@ -599,7 +599,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function managing_stock() {
-		return ( ! isset( $this->manage_stock ) || $this->manage_stock == 'no' || get_option( 'woocommerce_manage_stock' ) !== 'yes' ) ? false : true;
+		return ( ! isset( $this->manage_stock ) || 'no' === $this->manage_stock || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) ? false : true;
 	}
 
 	/**
@@ -608,20 +608,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		$status = $this->stock_status === 'instock';
-
-		/**
-		 * Sanity check to ensure stock qty is not lower than 0 but still listed
-		 * instock.
-		 *
-		 * Check is not required for products on backorder since they can be
-		 * instock regardless of actual stock quantity.
-		 */
-		if ( $this->managing_stock() && ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$status = false;
-		}
-
-		return apply_filters( 'woocommerce_product_is_in_stock', $status );
+		return apply_filters( 'woocommerce_product_is_in_stock', ( 'instock' === $this->stock_status ), $this );
 	}
 
 	/**
@@ -630,7 +617,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_allowed() {
-		return apply_filters( 'woocommerce_product_backorders_allowed', $this->backorders === 'yes' || $this->backorders === 'notify' ? true : false, $this->id, $this );
+		return apply_filters( 'woocommerce_product_backorders_allowed', ( 'yes' === $this->backorders || 'notify' === $this->backorders ), $this->id, $this );
 	}
 
 	/**
@@ -639,7 +626,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_require_notification() {
-		return apply_filters( 'woocommerce_product_backorders_require_notification', $this->managing_stock() && $this->backorders === 'notify' ? true : false, $this );
+		return apply_filters( 'woocommerce_product_backorders_require_notification', ( $this->managing_stock() && 'notify' === $this->backorders ), $this );
 	}
 
 	/**
@@ -744,7 +731,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_featured() {
-		return $this->featured === 'yes' ? true : false;
+		return ( 'yes' === $this->featured ) ? true : false;
 	}
 
 	/**
@@ -757,7 +744,7 @@ class WC_Product {
 			$visible = false;
 
 		// Published/private
-		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+	} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
 			$visible = false;
 
 		// Out of stock visibility
@@ -807,7 +794,7 @@ class WC_Product {
 			$purchasable = false;
 
 		// Check the product is published
-		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+	} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
 			$purchasable = false;
 		}
 
@@ -868,7 +855,7 @@ class WC_Product {
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
 
-		if ( $price === '' ) {
+		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
 
@@ -886,7 +873,7 @@ class WC_Product {
 				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
 				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
 
-				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
+				if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount    = array_sum( $base_taxes );
@@ -908,9 +895,7 @@ class WC_Product {
 					$price = $price * $qty;
 
 				}
-
 			}
-
 		} else {
 			$price = $price * $qty;
 		}
@@ -928,7 +913,7 @@ class WC_Product {
 	 */
 	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		if ( $price === '' ) {
+		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
 
@@ -952,12 +937,12 @@ class WC_Product {
 	 */
 	public function get_display_price( $price = '', $qty = 1 ) {
 
-		if ( $price === '' ) {
+		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
 
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-		$display_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
+		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
 
 		return $display_price;
 	}
@@ -971,27 +956,30 @@ class WC_Product {
 	 */
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 
-		if ( $price === '' ) {
+		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
 
 		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
+		$woocommerce_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 
-		if ( $price_display_suffix ) {
+		if ( $price_display_suffix && 'yes' === $woocommerce_calc_taxes ) {
 
 			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
 
 			$find = array(
 				'{price_including_tax}',
-				'{price_excluding_tax}'
+				'{price_excluding_tax}',
 			);
 
 			$replace = array(
 				wc_price( $this->get_price_including_tax( $qty, $price ) ),
-				wc_price( $this->get_price_excluding_tax( $qty, $price ) )
+				wc_price( $this->get_price_excluding_tax( $qty, $price ) ),
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
+		} else {
+			$price_display_suffix = '';
 		}
 
 		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
@@ -1023,7 +1011,6 @@ class WC_Product {
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
-
 		} elseif ( $this->get_price() === '' ) {
 
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
@@ -1287,7 +1274,6 @@ class WC_Product {
 			} else {
 				$this->shipping_class = '';
 			}
-
 		}
 
 		return $this->shipping_class;
@@ -1342,7 +1328,7 @@ class WC_Product {
 			$cats_array = $this->get_related_terms( 'product_cat' );
 
 			// Don't bother if none are set
-			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
+			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array ) ) {
 				$related_posts = array();
 			} else {
 				// Sanitize
@@ -1389,7 +1375,6 @@ class WC_Product {
 
 				return $attribute['value'];
 			}
-
 		}
 
 		return '';
@@ -1442,7 +1427,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true );
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
 	/**
@@ -1452,6 +1437,15 @@ class WC_Product {
 	 */
 	public function has_dimensions() {
 		return $this->get_dimensions() ? true : false;
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		return false;
 	}
 
 	/**
@@ -1497,6 +1491,15 @@ class WC_Product {
 	}
 
 	/**
+	 * Does a child have a weight set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return false;
+	}
+
+	/**
 	 * Returns formatted dimensions.
 	 * @return string
 	 */
@@ -1511,7 +1514,7 @@ class WC_Product {
 			$dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
 		}
 
-		return  apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
+		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
 	}
 
 	/**
@@ -1519,7 +1522,7 @@ class WC_Product {
 	 */
 	public function list_attributes() {
 		wc_get_template( 'single-product/product-attributes.php', array(
-			'product'    => $this
+			'product'    => $this,
 		) );
 	}
 
@@ -1559,8 +1562,7 @@ class WC_Product {
 		} else {
 			$image = '';
 		}
-
-		return $image;
+		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
 	/**
@@ -1585,7 +1587,7 @@ class WC_Product {
 	 * @return array
 	 */
 	protected function get_related_terms( $term ) {
-		$terms_array = array(0);
+		$terms_array = array( 0 );
 
 		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
 		foreach ( $terms as $term ) {

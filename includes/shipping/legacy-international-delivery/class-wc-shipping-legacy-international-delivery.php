@@ -50,7 +50,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 			'options'		=> array(
 				'including' => __( 'Selected countries', 'woocommerce' ),
 				'excluding' => __( 'Excluding selected countries', 'woocommerce' ),
-			)
+			),
 		);
 	}
 

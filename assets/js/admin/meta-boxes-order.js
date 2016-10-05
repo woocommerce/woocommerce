@@ -399,13 +399,18 @@ jQuery( function ( $ ) {
 			wc_meta_boxes_order_items.block();
 
 			var data = {
-				action:   'woocommerce_add_order_fee',
-				order_id: woocommerce_admin_meta_boxes.post_id,
-				security: woocommerce_admin_meta_boxes.order_item_nonce
+				action   : 'woocommerce_add_order_fee',
+				order_id : woocommerce_admin_meta_boxes.post_id,
+				dataType : 'json',
+				security : woocommerce_admin_meta_boxes.order_item_nonce
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				$( 'table.woocommerce_order_items tbody#order_fee_line_items' ).append( response );
+				if ( response.success ) {
+					$( 'table.woocommerce_order_items tbody#order_fee_line_items' ).append( response.data.html );
+				} else {
+					window.alert( response.data.error );
+				}
 				wc_meta_boxes_order_items.unblock();
 			});
 
@@ -416,13 +421,18 @@ jQuery( function ( $ ) {
 			wc_meta_boxes_order_items.block();
 
 			var data = {
-				action:   'woocommerce_add_order_shipping',
-				order_id: woocommerce_admin_meta_boxes.post_id,
-				security: woocommerce_admin_meta_boxes.order_item_nonce
+				action   : 'woocommerce_add_order_shipping',
+				order_id : woocommerce_admin_meta_boxes.post_id,
+				security : woocommerce_admin_meta_boxes.order_item_nonce,
+				dataType : 'json'
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				$( 'table.woocommerce_order_items tbody#order_shipping_line_items' ).append( response );
+				if ( response.success ) {
+					$( 'table.woocommerce_order_items tbody#order_shipping_line_items' ).append( response.data.html );
+				} else {
+					window.alert( response.data.error );
+				}
 				wc_meta_boxes_order_items.unblock();
 			});
 
@@ -809,24 +819,16 @@ jQuery( function ( $ ) {
 			add: function() {
 				var $button = $( this );
 				var $item = $button.closest( 'tr.item, tr.shipping' );
-
-				var data = {
-					order_item_id: $item.attr( 'data-order_item_id' ),
-					action:        'woocommerce_add_order_item_meta',
-					security:      woocommerce_admin_meta_boxes.order_item_nonce
-				};
-
-				wc_meta_boxes_order_items.block();
-
-				$.ajax({
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
-						$item.find('tbody.meta_items').append( response );
-						wc_meta_boxes_order_items.unblock();
-					}
-				});
+				var $items = $item.find('tbody.meta_items');
+				var index  = $items.find('tr').length + 1;
+				var $row   = '<tr data-meta_id="0">' +
+					'<td>' +
+						'<input type="text" name="meta_key[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']" />' +
+						'<textarea name="meta_value[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']"></textarea>' +
+					'</td>' +
+					'<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>' +
+				'</tr>';
+				$items.append( $row );
 
 				return false;
 			},
@@ -834,24 +836,8 @@ jQuery( function ( $ ) {
 			remove: function() {
 				if ( window.confirm( woocommerce_admin_meta_boxes.remove_item_meta ) ) {
 					var $row = $( this ).closest( 'tr' );
-
-					var data = {
-						meta_id:  $row.attr( 'data-meta_id' ),
-						action:   'woocommerce_remove_order_item_meta',
-						security: woocommerce_admin_meta_boxes.order_item_nonce
-					};
-
-					wc_meta_boxes_order_items.block();
-
-					$.ajax({
-						url: woocommerce_admin_meta_boxes.ajax_url,
-						data: data,
-						type: 'POST',
-						success: function() {
-							$row.remove();
-							wc_meta_boxes_order_items.unblock();
-						}
-					});
+					$row.find( ':input' ).val( '' );
+					$row.hide();
 				}
 				return false;
 			}
@@ -1069,14 +1055,19 @@ jQuery( function ( $ ) {
 					$.each( add_item_ids, function( index, value ) {
 
 						var data = {
-							action:      'woocommerce_add_order_item',
+							action     : 'woocommerce_add_order_item',
 							item_to_add: value,
-							order_id:    woocommerce_admin_meta_boxes.post_id,
-							security:    woocommerce_admin_meta_boxes.order_item_nonce
+							dataType   : 'json',
+							order_id   : woocommerce_admin_meta_boxes.post_id,
+							security   : woocommerce_admin_meta_boxes.order_item_nonce
 						};
 
 						$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-							$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response );
+							if ( response.success ) {
+								$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response.data.html );
+							} else {
+								window.alert( response.data.error );
+							}
 
 							if ( !--count ) {
 								wc_meta_boxes_order.init_tiptip();
@@ -1114,15 +1105,20 @@ jQuery( function ( $ ) {
 					};
 
 					$.ajax({
-						url:  woocommerce_admin_meta_boxes.ajax_url,
-						data: data,
-						type: 'POST',
-						success: function( response ) {
-							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
-							$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-							wc_meta_boxes_order.init_tiptip();
+						url      : woocommerce_admin_meta_boxes.ajax_url,
+						data     : data,
+						dataType : 'json',
+						type     : 'POST',
+						success  : function( response ) {
+							if ( response.success ) {
+								$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+								$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+								wc_meta_boxes_order.init_tiptip();
+								wc_meta_boxes_order_items.stupidtable.init();
+							} else {
+								window.alert( response.data.error );
+							}
 							wc_meta_boxes_order_items.unblock();
-							wc_meta_boxes_order_items.stupidtable.init();
 						}
 					});
 				} else {
@@ -1266,9 +1262,10 @@ jQuery( function ( $ ) {
 
 		revoke_access: function () {
 			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_permission_revoke ) ) {
-				var el      = $( this ).parent().parent();
-				var product = $( this ).attr( 'rel' ).split( ',' )[0];
-				var file    = $( this ).attr( 'rel' ).split( ',' )[1];
+				var el            = $( this ).parent().parent();
+				var product       = $( this ).attr( 'rel' ).split( ',' )[0];
+				var file          = $( this ).attr( 'rel' ).split( ',' )[1];
+				var permission_id = $( this ).data( 'permission_id' );
 
 				if ( product > 0 ) {
 					$( el ).block({
@@ -1280,11 +1277,12 @@ jQuery( function ( $ ) {
 					});
 
 					var data = {
-						action:      'woocommerce_revoke_access_to_download',
-						product_id:  product,
-						download_id: file,
-						order_id:    woocommerce_admin_meta_boxes.post_id,
-						security:    woocommerce_admin_meta_boxes.revoke_access_nonce
+						action:        'woocommerce_revoke_access_to_download',
+						product_id:    product,
+						download_id:   file,
+						permission_id: permission_id,
+						order_id:      woocommerce_admin_meta_boxes.post_id,
+						security:      woocommerce_admin_meta_boxes.revoke_access_nonce
 					};
 
 					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {

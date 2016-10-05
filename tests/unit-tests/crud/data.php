@@ -4,7 +4,7 @@
  * Meta
  * @package WooCommerce\Tests\CRUD
  */
-class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
+class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Create a test post we can add/test meta against.
@@ -29,14 +29,57 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_data
+	 */
+	function test_get_data() {
+		$object = new WC_Mock_WC_Data();
+		$this->assertInternalType( 'array', $object->get_data() );
+	}
+
+	/**
+	 * Test: delete_meta_data_by_mid
+	 */
+	function test_delete_meta_data_by_mid() {
+		$object = $this->create_test_post();
+		$object_id = $object->get_id();
+		$meta_id = add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
+		$object->delete_meta_data_by_mid( $meta_id );
+		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
+	}
+
+	/**
+	 * Test: set_props
+	 */
+	function test_set_props() {
+		$object = new WC_Mock_WC_Data();
+		$data_to_set = array(
+			'content'    => 'I am a fish',
+			'bool_value' => true,
+		);
+		$result = $object->set_props( $data_to_set );
+		$this->assertFalse( is_wp_error( $result ) );
+		$this->assertEquals( 'I am a fish', $object->get_content() );
+		$this->assertEquals( true, $object->get_bool_value() );
+
+		$data_to_set = array(
+			'content'    => 'I am also a fish',
+			'bool_value' => 'thisisinvalid',
+		);
+		$result = $object->set_props( $data_to_set );
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertEquals( 'I am also a fish', $object->get_content() );
+		$this->assertNotEquals( 'thisisinvalid', $object->get_bool_value() );
+	}
+
+	/**
 	 * Tests reading and getting set metadata.
 	 */
 	function test_get_meta_data() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		$meta_data = $object->get_meta_data();
@@ -56,8 +99,8 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 		$object = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3' );
 		$object->read( $object_id );
 
 		// test single meta key
@@ -94,9 +137,9 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 
 		foreach ( $raw_metadata as $meta ) {
 			$metadata[] = (object) array(
-				'key'     => $meta->meta_key,
-				'value'   => $meta->meta_value,
-				'meta_id' =>  $meta->meta_id,
+				'id'    => $meta->meta_id,
+				'key'   => $meta->meta_key,
+				'value' => $meta->meta_value,
 			);
 		}
 
@@ -175,7 +218,6 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 			WHERE post_id = %d ORDER BY meta_id
 		", $object_id ) );
 
-
 		$object->delete_meta_data( 'test_meta_key' );
 		$object->update_meta_data( 'test_meta_key_2', 'updated_value', $raw_metadata[1]->meta_id );
 
@@ -212,5 +254,4 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 		$object->update_meta_data( 'test_field_0', 'another field 2' );
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
-
 }

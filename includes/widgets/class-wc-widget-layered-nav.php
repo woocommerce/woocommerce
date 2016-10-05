@@ -72,13 +72,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			'title' => array(
 				'type'  => 'text',
 				'std'   => __( 'Filter by', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'attribute' => array(
 				'type'    => 'select',
 				'std'     => '',
 				'label'   => __( 'Attribute', 'woocommerce' ),
-				'options' => $attribute_array
+				'options' => $attribute_array,
 			),
 			'display_type' => array(
 				'type'    => 'select',
@@ -86,8 +86,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				'label'   => __( 'Display type', 'woocommerce' ),
 				'options' => array(
 					'list'     => __( 'List', 'woocommerce' ),
-					'dropdown' => __( 'Dropdown', 'woocommerce' )
-				)
+					'dropdown' => __( 'Dropdown', 'woocommerce' ),
+				),
 			),
 			'query_type' => array(
 				'type'    => 'select',
@@ -95,8 +95,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				'label'   => __( 'Query type', 'woocommerce' ),
 				'options' => array(
 					'and' => __( 'AND', 'woocommerce' ),
-					'or'  => __( 'OR', 'woocommerce' )
-				)
+					'or'  => __( 'OR', 'woocommerce' ),
+				),
 			),
 		);
 	}
@@ -248,9 +248,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo '</select>';
 
 			wc_enqueue_js( "
-				jQuery( '.dropdown_layered_nav_". esc_js( $taxonomy_filter_name ) . "' ).change( function() {
+				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).change( function() {
 					var slug = jQuery( this ).val();
-					location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter_name ) ) ) ) ) ) . "&filter_". esc_js( $taxonomy_filter_name ) . "=' + slug;
+					location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter_name ) ) ) ) ) ) . "&filter_" . esc_js( $taxonomy_filter_name ) . "=' + slug;
 				});
 			" );
 		}
@@ -272,7 +272,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		} elseif ( is_product_tag() ) {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
-			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+			$queried_object = get_queried_object();
+			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max
@@ -361,12 +362,18 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
 			" . $tax_query_sql['join'] . $meta_query_sql['join'];
+
 		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 		";
+
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$query['where'] .= ' AND ' . $search;
+		}
+
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
@@ -434,7 +441,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$link = add_query_arg( $filter_name, implode( ',', $current_filter ), $link );
 
 				// Add Query type Arg to URL
-				if ( $query_type === 'or' && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
+				if ( 'or' === $query_type && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
 					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
 				}
 			}

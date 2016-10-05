@@ -36,5 +36,5 @@ $states['BR'] = array(
 	'SC' => __( 'Santa Catarina', 'woocommerce' ),
 	'SP' => __( 'S&atilde;o Paulo', 'woocommerce' ),
 	'SE' => __( 'Sergipe', 'woocommerce' ),
-	'TO' => __( 'Tocantins', 'woocommerce' )
+	'TO' => __( 'Tocantins', 'woocommerce' ),
 );

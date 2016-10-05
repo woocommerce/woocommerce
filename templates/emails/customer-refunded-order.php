@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see      https://docs.woothemes.com/document/template-structure/
+ * @see      https://docs.woocommerce.com/document/template-structure/
  * @author   WooThemes
  * @package  WooCommerce/Templates/Emails
  * @version  2.5.0
@@ -28,8 +28,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <p><?php
 	if ( $partial_refund ) {
 		printf( __( 'Hi there. Your order on %s has been partially refunded.', 'woocommerce' ), get_option( 'blogname' ) );
-	}
-	else {
+	} else {
 		printf( __( 'Hi there. Your order on %s has been refunded.', 'woocommerce' ), get_option( 'blogname' ) );
 	}
 ?></p>

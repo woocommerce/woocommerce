@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.1.7
@@ -51,9 +51,9 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 									$quantites_required = true;
 									woocommerce_quantity_input( array(
 										'input_name'  => 'quantity[' . $product_id . ']',
-										'input_value' => ( isset( $_POST['quantity'][$product_id] ) ? wc_stock_amount( $_POST['quantity'][$product_id] ) : 0 ),
+										'input_value' => ( isset( $_POST['quantity'][ $product_id ] ) ? wc_stock_amount( $_POST['quantity'][ $product_id ] ) : 0 ),
 										'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
-										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
+										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product ),
 									) );
 								?>
 							<?php endif; ?>
@@ -61,11 +61,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 						<td class="label">
 							<label for="product-<?php echo $product_id; ?>">
-								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $product_id ) ) . '">' . esc_html( get_the_title() ) . '</a>' : esc_html( get_the_title() ); ?>
+								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $product_id ) ) . '">' . get_the_title() . '</a>' : get_the_title(); ?>
 							</label>
 						</td>
 
-						<?php do_action ( 'woocommerce_grouped_product_list_before_price', $product ); ?>
+						<?php do_action( 'woocommerce_grouped_product_list_before_price', $product ); ?>
 
 						<td class="price">
 							<?php

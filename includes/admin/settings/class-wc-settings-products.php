@@ -85,7 +85,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title' => __( 'Shop & Product Pages', 'woocommerce' ),
 					'type' 	=> 'title',
 					'desc' 	=> '',
-					'id' 	=> 'catalog_options'
+					'id' 	=> 'catalog_options',
 				),
 
 				array(
@@ -112,7 +112,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'subcategories' => __( 'Show categories', 'woocommerce' ),
 						'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -128,7 +128,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
 						'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -147,7 +147,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
 						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
 					) ),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -156,7 +156,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'            => 'woocommerce_cart_redirect_after_add',
 					'default'       => 'no',
 					'type'          => 'checkbox',
-					'checkboxgroup' => 'start'
+					'checkboxgroup' => 'start',
 				),
 
 				array(
@@ -164,61 +164,61 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'            => 'woocommerce_enable_ajax_add_to_cart',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
-					'checkboxgroup' => 'end'
+					'checkboxgroup' => 'end',
 				),
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'catalog_options'
+					'id' 	=> 'catalog_options',
 				),
 
 				array(
 					'title' => __( 'Product Images', 'woocommerce' ),
 					'type' 	=> 'title',
-					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
-					'id' 	=> 'image_options'
+					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a target="_blank" href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
+					'id' 	=> 'image_options',
 				),
 
 				array(
 					'title'    => __( 'Catalog Images', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used in product listings', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used in product listings. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_catalog_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
 						'width'  => '300',
 						'height' => '300',
-						'crop'   => 1
+						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
 					'title'    => __( 'Single Product Image', 'woocommerce' ),
-					'desc'     => __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
+					'desc'     => __( 'This is the size used by the main image on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_single_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
 						'width'  => '600',
 						'height' => '600',
-						'crop'   => 1
+						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
 					'title'    => __( 'Product Thumbnails', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used for the gallery of images on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_thumbnail_image_size',
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
 						'width'  => '180',
 						'height' => '180',
-						'crop'   => 1
+						'crop'   => 1,
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -227,13 +227,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'            => 'woocommerce_enable_lightbox',
 					'default'       => 'yes',
 					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
-					'type'          => 'checkbox'
+					'type'          => 'checkbox',
 				),
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'image_options'
-				)
+					'id' 	=> 'image_options',
+				),
 
 			));
 		} elseif ( 'inventory' == $current_section ) {
@@ -244,7 +244,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title' => __( 'Inventory', 'woocommerce' ),
 					'type' 	=> 'title',
 					'desc' 	=> '',
-					'id' 	=> 'product_inventory_options'
+					'id' 	=> 'product_inventory_options',
 				),
 
 				array(
@@ -252,7 +252,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'    => __( 'Enable stock management', 'woocommerce' ),
 					'id'      => 'woocommerce_manage_stock',
 					'default' => 'yes',
-					'type'    => 'checkbox'
+					'type'    => 'checkbox',
 				),
 
 				array(
@@ -262,11 +262,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'              => 'number',
 					'custom_attributes' => array(
 						'min'  => 0,
-						'step' => 1
+						'step' => 1,
 					),
 					'css'               => 'width: 80px;',
 					'default'           => '60',
-					'autoload'          => false
+					'autoload'          => false,
 				),
 
 				array(
@@ -276,7 +276,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
-					'autoload'      => false
+					'autoload'      => false,
 				),
 
 				array(
@@ -285,7 +285,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
-					'autoload'      => false
+					'autoload'      => false,
 				),
 
 				array(
@@ -296,34 +296,36 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'  => get_option( 'admin_email' ),
 					'css'      => 'width: 250px;',
 					'autoload' => false,
-					'desc_tip' => true
+					'desc_tip' => true,
 				),
 
 				array(
 					'title'             => __( 'Low Stock Threshold', 'woocommerce' ),
-					'desc'              => '',
+					'desc'              => __( 'When product stock reaches this amount you will be notified via email.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_low_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
 						'min'  => 0,
-						'step' => 1
+						'step' => 1,
 					),
 					'default'           => '2',
-					'autoload'          => false
+					'autoload'          => false,
+					'desc_tip'          => true,
 				),
 
 				array(
 					'title'             => __( 'Out Of Stock Threshold', 'woocommerce' ),
-					'desc'              => '',
+					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_no_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
 						'min'  => 0,
-						'step' => 1
+						'step' => 1,
 					),
-					'default'           => '0'
+					'default'           => '0',
+					'desc_tip'          => true,
 				),
 
 				array(
@@ -331,7 +333,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'     => __( 'Hide out of stock items from the catalog', 'woocommerce' ),
 					'id'       => 'woocommerce_hide_out_of_stock_items',
 					'default'  => 'no',
-					'type'     => 'checkbox'
+					'type'     => 'checkbox',
 				),
 
 				array(
@@ -347,12 +349,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'low_amount' => __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In Stock"', 'woocommerce' ),
 						'no_amount'  => __( 'Never show stock amount', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'product_inventory_options'
+					'id' 	=> 'product_inventory_options',
 				),
 
 			));
@@ -362,7 +364,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'title' => __( 'Downloadable Products', 'woocommerce' ),
 					'type' 	=> 'title',
-					'id' 	=> 'digital_download_options'
+					'id' 	=> 'digital_download_options',
 				),
 
 				array(
@@ -373,13 +375,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'css'      => 'min-width:300px;',
 					'default'  => 'force',
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 					'options'  => array(
 						'force'     => __( 'Force Downloads', 'woocommerce' ),
 						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
 						'redirect'  => __( 'Redirect only', 'woocommerce' ),
 					),
-					'autoload' => false
+					'autoload' => false,
 				),
 
 				array(
@@ -390,7 +392,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'       => 'no',
 					'desc_tip'      => __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
 					'checkboxgroup' => 'start',
-					'autoload'      => false
+					'autoload'      => false,
 				),
 
 				array(
@@ -400,12 +402,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'       => 'yes',
 					'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
 					'checkboxgroup' => 'end',
-					'autoload'      => false
+					'autoload'      => false,
 				),
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'digital_download_options'
+					'id' 	=> 'digital_download_options',
 				),
 
 			));
@@ -415,7 +417,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'title' 	=> __( 'Measurements', 'woocommerce' ),
 					'type' 		=> 'title',
-					'id' 		=> 'product_measurement_options'
+					'id' 		=> 'product_measurement_options',
 				),
 
 				array(
@@ -432,7 +434,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'lbs' => __( 'lbs', 'woocommerce' ),
 						'oz'  => __( 'oz', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -450,7 +452,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'in' => __( 'in', 'woocommerce' ),
 						'yd' => __( 'yd', 'woocommerce' ),
 					),
-					'desc_tip' =>  true,
+					'desc_tip' => true,
 				),
 
 				array(
@@ -507,7 +509,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'product_rating_options'
+					'id' 	=> 'product_rating_options',
 				),
 
 			));

@@ -79,8 +79,8 @@ class WC_Validation {
 			case 'US' :
 				$valid = (bool) preg_match( '/^([0-9]{5})(-[0-9]{4})?$/i', $postcode );
 				break;
-            case 'CA' :
-                // CA Postal codes cannot contain D,F,I,O,Q,U and cannot start with W or Z. https://en.wikipedia.org/wiki/Postal_codes_in_Canada#Number_of_possible_postal_codes
+			case 'CA' :
+				// CA Postal codes cannot contain D,F,I,O,Q,U and cannot start with W or Z. https://en.wikipedia.org/wiki/Postal_codes_in_Canada#Number_of_possible_postal_codes
 				$valid = (bool) preg_match( '/^([ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ])([\ ])?(\d[ABCEGHJKLMNPRSTVWXYZ]\d)$/i', $postcode );
 				break;
 
@@ -112,16 +112,16 @@ class WC_Validation {
 		$pcexp = array();
 
 		// Expression for postcodes: AN NAA, ANN NAA, AAN NAA, and AANN NAA
-		$pcexp[0] = '/^('.$alpha1.'{1}'.$alpha2.'{0,1}[0-9]{1,2})([0-9]{1}'.$alpha5.'{2})$/';
+		$pcexp[0] = '/^(' . $alpha1 . '{1}' . $alpha2 . '{0,1}[0-9]{1,2})([0-9]{1}' . $alpha5 . '{2})$/';
 
 		// Expression for postcodes: ANA NAA
-		$pcexp[1] =  '/^('.$alpha1.'{1}[0-9]{1}'.$alpha3.'{1})([0-9]{1}'.$alpha5.'{2})$/';
+		$pcexp[1] = '/^(' . $alpha1 . '{1}[0-9]{1}' . $alpha3 . '{1})([0-9]{1}' . $alpha5 . '{2})$/';
 
 		// Expression for postcodes: AANA NAA
-		$pcexp[2] =  '/^('.$alpha1.'{1}'.$alpha2.'[0-9]{1}'.$alpha4.')([0-9]{1}'.$alpha5.'{2})$/';
+		$pcexp[2] = '/^(' . $alpha1 . '{1}' . $alpha2 . '[0-9]{1}' . $alpha4 . ')([0-9]{1}' . $alpha5 . '{2})$/';
 
 		// Exception for the special postcode GIR 0AA
-		$pcexp[3] =  '/^(gir)(0aa)$/';
+		$pcexp[3] = '/^(gir)(0aa)$/';
 
 		// Standard BFPO numbers
 		$pcexp[4] = '/^(bfpo)([0-9]{1,4})$/';

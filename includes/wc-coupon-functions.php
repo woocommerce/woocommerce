@@ -24,7 +24,7 @@ function wc_get_coupon_types() {
 		'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
 		'percent'         => __( 'Cart % Discount', 'woocommerce' ),
 		'fixed_product'   => __( 'Product Discount', 'woocommerce' ),
-		'percent_product' => __( 'Product % Discount', 'woocommerce' )
+		'percent_product' => __( 'Product % Discount', 'woocommerce' ),
 	) );
 }
 
@@ -69,4 +69,52 @@ function wc_get_cart_coupon_types() {
  */
 function wc_coupons_enabled() {
 	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
+}
+
+/**
+ * Get coupon code by ID.
+ *
+ * @since 2.7.0
+ * @param int $id Coupon ID.
+ * @return string
+ */
+function wc_get_coupon_code_by_id( $id ) {
+	global $wpdb;
+
+	$code = $wpdb->get_var( $wpdb->prepare( "
+		SELECT post_title
+		FROM $wpdb->posts
+		WHERE ID = %d
+		AND post_type = 'shop_coupon'
+		AND post_status = 'publish';
+	", $id ) );
+
+	return (string) $code;
+}
+
+/**
+ * Get coupon code by ID.
+ *
+ * @since 2.7.0
+ * @param string $code
+ * @param int $exclude Used to exclude an ID from the check if you're checking existance.
+ * @return int
+ */
+function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
+	global $wpdb;
+
+	$ids = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+
+	if ( false === $ids ) {
+		$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC;", $code );
+		$ids = $wpdb->get_col( $sql );
+
+		if ( $ids ) {
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
+		}
+	}
+
+	$ids = array_diff( array_filter( array_map( 'absint', (array) $ids ) ), array( $exclude ) );
+
+	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude );
 }

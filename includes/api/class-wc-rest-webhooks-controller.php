@@ -302,7 +302,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$post = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -347,7 +347,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
+			// @codingStandardsIgnoreStart
 			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+			// @codingStandardsIgnoreEnd
 
 			// Post author.
 			$data->post_author = get_current_user_id();
@@ -414,7 +416,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $post ) );
+		$response->add_links( $this->prepare_links( $post, $request ) );
 
 		/**
 		 * Filter webhook object returned from the REST API.
@@ -518,7 +520,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 				'secret' => array(
 					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
 					'type'        => 'string',
-					'format'      => 'uri',
 					'context'     => array( 'edit' ),
 				),
 				'date_created' => array(

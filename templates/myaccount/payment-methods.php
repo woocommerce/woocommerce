@@ -12,7 +12,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	https://docs.woothemes.com/document/template-structure/
+ * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
@@ -46,15 +46,15 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 							<?php
 							if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
-							} else if ( 'method' === $column_id ) {
-								if ( ! empty ( $method['method']['last4'] ) ) {
-									echo sprintf( __( '%s ending in %s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
+							} elseif ( 'method' === $column_id ) {
+								if ( ! empty( $method['method']['last4'] ) ) {
+									echo sprintf( __( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
 								} else {
 									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
 								}
-							} else if ( 'expires' === $column_id ) {
+							} elseif ( 'expires' === $column_id ) {
 								echo esc_html( $method['expires'] );
-							} else if ( 'actions' === $column_id ) {
+							} elseif ( 'actions' === $column_id ) {
 								foreach ( $method['actions'] as $key => $action ) {
 									echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>&nbsp;';
 								}

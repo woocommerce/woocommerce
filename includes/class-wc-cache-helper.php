@@ -56,11 +56,12 @@ class WC_Cache_Helper {
 	 */
 	public static function geolocation_ajax_get_location_hash() {
 		$customer             = new WC_Customer();
+		$customer->load_session();
 		$location             = array();
-		$location['country']  = $customer->get_country();
-		$location['state']    = $customer->get_state();
-		$location['postcode'] = $customer->get_postcode();
-		$location['city']     = $customer->get_city();
+		$location['country']  = $customer->get_billing_country();
+		$location['state']    = $customer->get_billing_state();
+		$location['postcode'] = $customer->get_billing_postcode();
+		$location['city']     = $customer->get_billing_city();
 		return substr( md5( implode( '', $location ) ), 0, 12 );
 	}
 
@@ -107,7 +108,7 @@ class WC_Cache_Helper {
 	 * to append a unique string (based on time()) to each transient. When transients.
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
-	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777.
+	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
 	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate
@@ -175,7 +176,7 @@ class WC_Cache_Helper {
 		if ( isset( $_GET['download_file'] ) ) {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
-			foreach( $wc_page_uris as $uri ) {
+			foreach ( $wc_page_uris as $uri ) {
 				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;
@@ -209,7 +210,7 @@ class WC_Cache_Helper {
 			return;
 		}
 
-		$config   = w3_instance('W3_Config');
+		$config   = w3_instance( 'W3_Config' );
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
 		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 

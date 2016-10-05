@@ -45,18 +45,18 @@ add_filter( 'the_title', 'wc_page_endpoint_title' );
  */
 function wc_get_page_id( $page ) {
 
-	if ( $page == 'pay' || $page == 'thanks' ) {
+	if ( 'pay' == $page || 'thanks' == $page ) {
 		_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 		$page = 'checkout';
 	}
-	if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
+	if ( 'change_password' === $page || 'edit_address' === $page || 'lost_password' === $page ) {
 		_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
 
 		$page = 'myaccount';
 	}
 
-	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
+	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
 	return $page ? absint( $page ) : -1;
 }
@@ -129,7 +129,7 @@ function wc_nav_menu_items( $items ) {
 		}
 	}
 
-    return $items;
+	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10 );
 
@@ -146,7 +146,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page 		= (int) wc_get_page_id('shop');
+	$shop_page 		= (int) wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) {
@@ -155,14 +155,14 @@ function wc_nav_menu_item_classes( $menu_items ) {
 
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[$key]->current = false;
+			$menu_items[ $key ]->current = false;
 
 			if ( in_array( 'current_page_parent', $classes ) ) {
-				unset( $classes[ array_search('current_page_parent', $classes) ] );
+				unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
 			}
 
 			if ( in_array( 'current-menu-item', $classes ) ) {
-				unset( $classes[ array_search('current-menu-item', $classes) ] );
+				unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
 			}
 
 		// Set active state if this is the shop page link
@@ -188,23 +188,28 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 /**
  * Fix active class in wp_list_pages for shop page.
  *
- * https://github.com/woothemes/woocommerce/issues/177.
+ * https://github.com/woocommerce/woocommerce/issues/177.
  *
  * @author Jessor, Peter Sterling
  * @param string $pages
  * @return string
  */
 function wc_list_pages( $pages ) {
-    if (is_woocommerce()) {
-        $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
-        $shop_page = 'page-item-' . wc_get_page_id('shop'); // find shop_page_id through woocommerce options
+	if ( is_woocommerce() ) {
+		// Remove current_page_parent class from any item.
+		$pages = str_replace( 'current_page_parent', '', $pages );
+		// Find shop_page_id through woocommerce options.
+		$shop_page = 'page-item-' . wc_get_page_id( 'shop' );
 
-        if (is_shop()) :
-        	$pages = str_replace($shop_page, $shop_page . ' current_page_item', $pages); // add current_page_item class to shop page
-    	else :
-    		$pages = str_replace($shop_page, $shop_page . ' current_page_parent', $pages); // add current_page_parent class to shop page
-    	endif;
-    }
-    return $pages;
+		if ( is_shop() ) {
+			// Add current_page_item class to shop page.
+			$pages = str_replace( $shop_page, $shop_page . ' current_page_item', $pages );
+		} else {
+			// Add current_page_parent class to shop page.
+			$pages = str_replace( $shop_page, $shop_page . ' current_page_parent', $pages );
+		}
+	}
+
+	return $pages;
 }
 add_filter( 'wp_list_pages', 'wc_list_pages' );

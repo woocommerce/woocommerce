@@ -57,7 +57,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		// Allow 3rd parties to process shipping cost arguments
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
-		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
 		$this->fee_cost = $args['cost'];
 
 		// Expand shortcodes
@@ -66,11 +66,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );
@@ -136,7 +136,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
 		$cost      = $this->get_option( 'cost' );
 
-		if ( $cost !== '' ) {
+		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
@@ -153,24 +153,24 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 			$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
-			if ( $class_cost_string === '' ) {
+			if ( '' === $class_cost_string ) {
 				continue;
 			}
 
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
-			if ( $this->type === 'class' ) {
+			if ( 'class' === $this->type ) {
 				$rate['cost'] += $class_cost;
 			} else {
 				$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
 			}
 		}
 
-		if ( $this->type === 'order' && $highest_class_cost ) {
+		if ( 'order' === $this->type && $highest_class_cost ) {
 			$rate['cost'] += $highest_class_cost;
 		}
 
