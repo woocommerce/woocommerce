@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.6.7\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-10-26 15:24:57+00:00\n"
+"POT-Creation-Date: 2016-11-08 19:39:03+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5308,16 +5308,24 @@ msgstr ""
 msgid "Items"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:105
+#: includes/admin/class-wc-admin-addons.php:128
 msgid "Need a fresh look? Try Storefront child themes"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:109
+#: includes/admin/class-wc-admin-addons.php:132
 msgid "View more Storefront child themes"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:114
+#: includes/admin/class-wc-admin-addons.php:137
 msgid "Need a theme? Try Storefront"
+msgstr ""
+
+#: includes/admin/class-wc-admin-addons.php:348
+msgid "Free"
+msgstr ""
+
+#: includes/admin/class-wc-admin-addons.php:350
+msgid "Installed"
 msgstr ""
 
 #: includes/admin/class-wc-admin-api-keys-table-list.php:26
@@ -6118,9 +6126,9 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:190
 msgid ""
-"For further assistance with WooCommerce core you can use the %scommunity "
-"forum%s. If you need help with premium add-ons sold by WooThemes, please "
-"%suse our helpdesk%s."
+"For further assistance with WooCommerce core you can use the %1$scommunity "
+"forum%2$s. If you need help with premium extensions sold by WooCommerce, "
+"please %3$suse our helpdesk%4$s."
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:196
@@ -6232,11 +6240,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:105
 #: includes/admin/views/html-admin-page-addons.php:16
-msgid "WooCommerce Add-ons/Extensions"
+msgid "WooCommerce Extensions"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:105
-msgid "Add-ons"
+msgid "Extensions"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:236
@@ -11648,36 +11656,32 @@ msgstr ""
 msgid "Itemized"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:17
-msgid "Browse all extensions"
-msgstr ""
-
-#: includes/admin/views/html-admin-page-addons.php:45
+#: includes/admin/views/html-admin-page-addons.php:50
 msgid ""
 "Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: "
 "<a href=\"%s\">WooCommerce Extensions Catalog</a>"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:51
+#: includes/admin/views/html-admin-page-addons.php:56
 msgid "Looking for a WooCommerce theme?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:52
+#: includes/admin/views/html-admin-page-addons.php:57
 msgid "We recommend Storefront, the %sofficial%s WooCommerce theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:53
+#: includes/admin/views/html-admin-page-addons.php:58
 msgid ""
 "Storefront is an intuitive, flexible and %sfree%s WordPress theme offering "
 "deep integration with WooCommerce and many of the most popular "
 "customer-facing extensions."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:55
+#: includes/admin/views/html-admin-page-addons.php:60
 msgid "Read all about it"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:56
+#: includes/admin/views/html-admin-page-addons.php:61
 msgid "Download &amp; install"
 msgstr ""
 
@@ -15979,7 +15983,7 @@ msgid "Buy Now"
 msgstr ""
 
 #: includes/class-wc-form-handler.php:101
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:200
 msgid "is a required field."
 msgstr ""
 

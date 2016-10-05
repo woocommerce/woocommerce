@@ -187,7 +187,7 @@ class WC_Admin_Help {
 					'</a>'
 				) . '</p>' .
 				'<p>' . sprintf(
-					__( 'For further assistance with WooCommerce core you can use the %scommunity forum%s. If you need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ),
+					__( 'For further assistance with WooCommerce core you can use the %1$scommunity forum%2$s. If you need help with premium extensions sold by WooCommerce, please %3$suse our helpdesk%4$s.', 'woocommerce' ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce">',
 					'</a>',
 					'<a href="https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin">',
