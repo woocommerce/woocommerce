@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap woocommerce wc_addons_wrap">
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
 	<h1>
-		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
+		<?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?>
 	</h1>
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
