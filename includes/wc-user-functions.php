@@ -468,7 +468,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		}
 	}
 
-	return $downloads;
+	return apply_filters( 'woocommerce_customer_available_downloads', $downloads, $customer_id );
 }
 
 /**
