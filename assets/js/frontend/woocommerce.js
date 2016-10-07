@@ -12,4 +12,17 @@ jQuery( function( $ ) {
 			$( this ).val( min );
 		}
 	});
+
+	// Set a cookie and hide the store notice when the dismiss button is clicked
+	jQuery( '.woocommerce-store-notice__dismiss-link' ).click( function() {
+		jQuery.cookie( 'store_notice', 'hidden', { path: '/' } );
+		jQuery( '.woocommerce-store-notice' ).hide();
+	});
+
+	// Check the value of that cookie and show/hide the notice accordingly
+	if ( 'hidden' == jQuery.cookie( 'store_notice' ) ) {
+		jQuery( '.woocommerce-store-notice' ).hide();
+	} else {
+		jQuery( '.woocommerce-store-notice' ).show();
+	}
 });
