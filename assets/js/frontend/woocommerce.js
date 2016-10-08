@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 	});
 
 	// Check the value of that cookie and show/hide the notice accordingly
-	if ( 'hidden' == jQuery.cookie( 'store_notice' ) ) {
+	if ( 'hidden' === jQuery.cookie( 'store_notice' ) ) {
 		jQuery( '.woocommerce-store-notice' ).hide();
 	} else {
 		jQuery( '.woocommerce-store-notice' ).show();
