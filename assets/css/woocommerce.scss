@@ -991,6 +991,14 @@ p.demo_store {
 		}
 	}
 
+	table.woocommerce-checkout-review-order-table {
+		th,
+		td {
+			vertical-align: top;
+			padding: 9px 1em;
+		}
+	}
+
 	table.my_account_orders {
 		font-size: 0.85em;
 

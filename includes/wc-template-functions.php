@@ -2453,3 +2453,79 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'wc_display_item_data' ) ) {
+	/**
+	 * Gets and formats a list of cart item data + variations for display on the frontend. @todo
+	 *
+	 * @since 2.7.0
+	 * @param array $cart_item
+	 * @param bool $flat (default: false)
+	 * @return string
+	 */
+	function wc_display_item_data( $cart_item, $flat = false ) {
+		ob_start();
+		$item_data = array();
+
+		if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
+			foreach ( $cart_item['variation'] as $name => $value ) {
+				if ( '' === $value ) {
+					continue;
+				}
+
+				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', $name ) );
+
+				// If this is a term slug, get the term's nice name
+				if ( taxonomy_exists( $taxonomy ) && ( $term = get_term_by( 'slug', $value, $taxonomy ) ) && ! is_wp_error( $term ) ) {
+					$value = $term->name;
+					$label = wc_attribute_label( $taxonomy );
+
+				// If this is a custom option slug, get the options name
+				} else {
+					$value              = apply_filters( 'woocommerce_variation_option_name', $value );
+					$product_attributes = $cart_item['data']->get_attributes();
+					if ( isset( $product_attributes[ str_replace( 'attribute_', '', $name ) ] ) ) {
+						$label = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', $name ) ]['name'] );
+					} else {
+						$label = $name;
+					}
+				}
+				$item_data[] = array(
+					'key'   => $label,
+					'value' => $value,
+				);
+			}
+		}
+
+		// Filter item data to allow 3rd parties to add more to the array
+		$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
+
+		// Format item data ready to display
+		foreach ( $item_data as $key => $data ) {
+			// Set hidden to true to not display meta on cart.
+			if ( ! empty( $data['hidden'] ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
+			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+		}
+
+		// Output flat or in list format
+		if ( sizeof( $item_data ) > 0 ) {
+			ob_start();
+
+			if ( $flat ) {
+				foreach ( $item_data as $data ) {
+					echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+				}
+			} else {
+				wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+			}
+
+			return ob_get_clean();
+		}
+
+		return ob_get_clean();
+	}
+}

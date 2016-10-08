@@ -92,7 +92,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Add the product to the cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 
 		// Empty the cart
 		wc_empty_cart();
@@ -124,9 +124,9 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	public function test_wc_cart_totals_subtotal_html() {
 		$product = WC_Helper_Product::create_simple_product();
 
-		WC()->cart->add_to_cart( $product->id, 1 );
+		wc_add_to_cart( $product->id, 1 );
 
-		$this->expectOutputString( wc_price( $product->price ), wc_cart_totals_subtotal_html() );
+		$this->expectOutputString( wc_price( $product->price ), wc_cart_subtotal_html() );
 
 		WC_Helper_Product::delete_product( $product->id );
 	}
