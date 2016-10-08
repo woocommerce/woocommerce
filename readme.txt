@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
 * When deleting a tax rate class, remove it's tax rates.
+* Made the store notice dismissible.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
