@@ -2920,7 +2920,8 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'instance_id' => $instance_id,
-			'zone_id'     => $zone->get_id(),
+			'zone_id'     => $zone->get_zone_id(),
+			'zone_name'   => $zone->get_zone_name(),
 			'methods'     => $zone->get_shipping_methods(),
 		) );
 	}
@@ -3015,8 +3016,9 @@ class WC_AJAX {
 		$zone->save();
 
 		wp_send_json_success( array(
-			'zone_id' => $zone->get_id(),
-			'methods' => $zone->get_shipping_methods(),
+			'zone_id'   => $zone->get_zone_id(),
+			'zone_name' => $zone->get_zone_name(),
+			'methods'   => $zone->get_shipping_methods(),
 		) );
 	}
 
@@ -3046,8 +3048,10 @@ class WC_AJAX {
 		$shipping_method->process_admin_options();
 
 		wp_send_json_success( array(
-			'methods' => $zone->get_shipping_methods(),
-			'errors'  => $shipping_method->get_errors(),
+			'zone_id'   => $zone->get_zone_id(),
+			'zone_name' => $zone->get_zone_name(),
+			'methods'   => $zone->get_shipping_methods(),
+			'errors'    => $shipping_method->get_errors(),
 		) );
 	}
 

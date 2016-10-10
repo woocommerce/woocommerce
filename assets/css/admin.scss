@@ -2499,15 +2499,15 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		text-align: center;
 	}
 	td.wc-shipping-zone-methods {
-		color: #999;
+		color: #555;
 		.method_disabled {
 			text-decoration: line-through;
 		}
 		ul {
-			color: #999;
 			position: relative;
 			padding-right: 32px;
 			li {
+				color: #555;
 				display: inline;
 				margin: 0;
 			}

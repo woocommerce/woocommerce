@@ -19,13 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th class="remove">&nbsp;</th>
 		</tr>
 	</thead>
-	<tfoot>
-		<tr>
-			<td colspan="5">
-				<input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled />
-			</td>
-		</tr>
-	</tfoot>
 	<tbody class="wc-shipping-zone-rows"></tbody>
 	<tbody>
 		<tr data-id="0">
@@ -44,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						if ( ! empty( $methods ) ) {
 							foreach ( $methods as $method ) {
 								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
+								echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 							}
 						} else {
 							echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';

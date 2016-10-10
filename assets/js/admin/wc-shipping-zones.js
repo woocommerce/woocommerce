@@ -79,7 +79,6 @@
 					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
-					$save_button.on( 'click', { view: this }, this.onSubmit );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 				},
 				block: function() {
@@ -160,16 +159,11 @@
 								class_name = 'method_enabled';
 							}
 
-							$method_list.append( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + shipping_method.instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
+							$method_list.append( '<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method.title + '</li>' );
 						} );
 					} else {
 						$method_list.append( '<li class="wc-shipping-zone-method">' + data.strings.no_shipping_methods_offered + '</li>' );
 					}
-				},
-				onSubmit: function( event ) {
-					event.data.view.block();
-					event.data.view.model.save();
-					event.preventDefault();
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
@@ -177,19 +171,20 @@
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {},
 						row     = $( this ).closest('tr'),
-						zone_id = $( this ).closest('tr').data('id');
+						zone_id = row.data('id');
 
 					event.preventDefault();
 
-					if ( zones[ zone_id ] ) {
-						delete zones[ zone_id ];
-						changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
-						model.set( 'zones', zones );
-						model.logChanges( changes );
+					if ( window.confirm( data.strings.delete_confirmation_msg ) ) {
+						if ( zones[ zone_id ] ) {
+							delete zones[ zone_id ];
+							changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
+							model.set( 'zones', zones );
+							model.logChanges( changes );
+							event.data.view.block();
+							event.data.view.model.save();
+						}
 					}
-
-					row.remove();
-					view.initRows();
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
@@ -246,6 +241,8 @@
 
 					if ( _.size( changes ) ) {
 						model.logChanges( changes );
+						event.data.view.block();
+						event.data.view.model.save();
 					}
 				}
 			} ),

@@ -13,8 +13,9 @@
 				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
 
-					_.each( changedRows, function( row, id ) {
-						changes[ id ] = _.extend( changes[ id ] || { instance_id : id }, row );
+					_.each( changedRows.methods, function( row, id ) {
+						changes.methods = changes.methods || { methods : {} };
+						changes.methods[ id ] = _.extend( changes.methods[ id ] || { instance_id : id }, row );
 					} );
 
 					this.changes = changes;
@@ -74,9 +75,18 @@
 				onUpdateZone: function() {
 					shippingMethod.trigger( 'change:methods' );
 				},
-				onUpdateZoneName: function() {
-					$('.wc-shipping-zone-name').text( $( this ).val() );
-					shippingMethod.trigger( 'change:methods' );
+				onUpdateZoneName: function( event ) {
+					var view      = event.data.view,
+						model     = view.model,
+						zone_name = $( this ).val(),
+						changes   = {};
+
+					event.preventDefault();
+
+					changes = _.extend( changes || { zone_name : '' }, { zone_name : zone_name } );
+					model.set( 'zone_name', zone_name );
+					model.logChanges( changes );
+					view.render();
 				},
 				block: function() {
 					$( this.el ).block({
@@ -92,7 +102,11 @@
 				},
 				render: function() {
 					var methods     = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
+						zone_name   = this.model.get( 'zone_name' ),
 						view        = this;
+
+					// Set name.
+					$('.wc-shipping-zone-name').text( zone_name );
 
 					// Blank out the contents.
 					this.$el.empty();
@@ -151,7 +165,7 @@
 					event.preventDefault();
 
 					delete methods[ instance_id ];
-					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { deleted : 'deleted' } );
+					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { deleted : 'deleted' } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
 					view.render();
@@ -167,7 +181,8 @@
 
 					event.preventDefault();
 					methods[ instance_id ].enabled = enabled;
-					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { enabled : enabled } );
+					changes.methods = changes.methods || { methods : {} };
+					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { enabled : enabled } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
 					view.render();
@@ -197,8 +212,8 @@
 						changes = {};
 
 					if ( methods[ instance_id ][ attribute ] !== value ) {
-						changes[ instance_id ] = {};
-						changes[ instance_id ][ attribute ] = value;
+						changes.methods[ instance_id ] = {};
+						changes.methods[ instance_id ][ attribute ] = value;
 						methods[ instance_id ][ attribute ]   = value;
 					}
 
@@ -216,7 +231,8 @@
 
 						if ( old_position !== new_position ) {
 							methods[ method.instance_id ].method_order = new_position;
-							changes[ method.instance_id ] = _.extend( changes[ method.instance_id ] || {}, { method_order : new_position } );
+							changes.methods = changes.methods || { methods : {} };
+							changes.methods[ method.instance_id ] = _.extend( changes.methods[ method.instance_id ] || {}, { method_order : new_position } );
 						}
 					} );
 
@@ -349,7 +365,8 @@
 				}
 			} ),
 			shippingMethod = new ShippingMethod({
-				methods: data.methods
+				methods: data.methods,
+				zone_name: data.zone_name
 			} ),
 			shippingMethodView = new ShippingMethodView({
 				model:    shippingMethod,
