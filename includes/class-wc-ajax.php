@@ -2930,7 +2930,7 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
 	 */
 	public static function shipping_zone_methods_save_changes() {
-		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'] ) ) {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
@@ -2949,15 +2949,15 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( $_POST['zone_id'] );
 		$zone    = new WC_Shipping_Zone( $zone_id );
-		$changes = isset( $_POST['changes'] ) ? $_POST['changes'] : array();
+		$changes = $_POST['changes'];
 
-		if ( isset( $_POST['zone_name'] ) ) {
-			$zone->set_zone_name( wc_clean( $_POST['zone_name'] ) );
+		if ( isset( $changes['zone_name'] ) ) {
+			$zone->set_zone_name( wc_clean( $changes['zone_name'] ) );
 		}
 
-		if ( isset( $_POST['zone_locations'] ) ) {
+		if ( isset( $changes['zone_locations'] ) ) {
 			$zone->clear_locations( array( 'state', 'country', 'continent' ) );
-			$locations = array_filter( array_map( 'wc_clean', (array) $_POST['zone_locations'] ) );
+			$locations = array_filter( array_map( 'wc_clean', (array) $changes['zone_locations'] ) );
 			foreach ( $locations as $location ) {
 				// Each posted location will be in the format type:code
 				$location_parts = explode( ':', $location );
@@ -2975,40 +2975,42 @@ class WC_AJAX {
 			}
 		}
 
-		if ( isset( $_POST['zone_postcodes'] ) ) {
+		if ( isset( $changes['zone_postcodes'] ) ) {
 			$zone->clear_locations( 'postcode' );
-			$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $_POST['zone_postcodes'] ) ) ) );
+			$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $changes['zone_postcodes'] ) ) ) );
 			foreach ( $postcodes as $postcode ) {
 				$zone->add_location( $postcode, 'postcode' );
 			}
 		}
 
-		foreach ( $changes as $instance_id => $data ) {
-			$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
+		if ( isset( $changes['methods'] ) ) {
+			foreach ( $changes['methods'] as $instance_id => $data ) {
+				$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
 
-			if ( isset( $data['deleted'] ) ) {
-				$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
-				$option_key      = $shipping_method->get_instance_option_key();
-				if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
-					delete_option( $option_key );
-					do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
+				if ( isset( $data['deleted'] ) ) {
+					$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+					$option_key      = $shipping_method->get_instance_option_key();
+					if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
+						delete_option( $option_key );
+						do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
+					}
+					continue;
 				}
-				continue;
-			}
 
-			$method_data = array_intersect_key( $data, array(
-				'method_order' => 1,
-				'enabled'      => 1,
-			) );
+				$method_data = array_intersect_key( $data, array(
+					'method_order' => 1,
+					'enabled'      => 1,
+				) );
 
-			if ( isset( $method_data['method_order'] ) ) {
-				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
-			}
+				if ( isset( $method_data['method_order'] ) ) {
+					$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+				}
 
-			if ( isset( $method_data['enabled'] ) ) {
-				$is_enabled = absint( 'yes' === $method_data['enabled'] );
-				if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
-					do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method_id, $zone_id, $is_enabled );
+				if ( isset( $method_data['enabled'] ) ) {
+					$is_enabled = absint( 'yes' === $method_data['enabled'] );
+					if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+						do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method_id, $zone_id, $is_enabled );
+					}
 				}
 			}
 		}

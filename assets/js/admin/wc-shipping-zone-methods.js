@@ -18,6 +18,18 @@
 						changes.methods[ id ] = _.extend( changes.methods[ id ] || { instance_id : id }, row );
 					} );
 
+					if ( changedRows.zone_name ) {
+						changes.zone_name = changedRows.zone_name;
+					}
+
+					if ( changedRows.zone_locations ) {
+						changes.zone_locations = changedRows.zone_locations;
+					}
+
+					if ( changedRows.zone_postcodes ) {
+						changes.zone_postcodes = changedRows.zone_postcodes;
+					}
+
 					this.changes = changes;
 					this.trigger( 'change:methods' );
 				},
@@ -25,9 +37,6 @@
 					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
 						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 						changes                 : this.changes,
-						zone_name               : $('#zone_name').val(),
-						zone_locations          : $('#zone_locations').val(),
-						zone_postcodes          : $('#zone_postcodes').val(),
 						zone_id                 : data.zone_id
 					}, this.onSaveResponse, 'json' );
 				},
@@ -63,8 +72,7 @@
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 
-					$( document.body ).on( 'input', '#zone_name', { view: this }, this.onUpdateZoneName );
-					$( document.body ).on( 'input change', '#zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
+					$( document.body ).on( 'input change', '#zone_name, #zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
@@ -72,19 +80,18 @@
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 				},
-				onUpdateZone: function() {
-					shippingMethod.trigger( 'change:methods' );
-				},
-				onUpdateZoneName: function( event ) {
+				onUpdateZone: function( event ) {
 					var view      = event.data.view,
 						model     = view.model,
-						zone_name = $( this ).val(),
+						value     = $( this ).val(),
+						$target   = $( event.target ),
+						attribute = $target.data( 'attribute' ),
 						changes   = {};
 
 					event.preventDefault();
 
-					changes = _.extend( changes || { zone_name : '' }, { zone_name : zone_name } );
-					model.set( 'zone_name', zone_name );
+					changes[ attribute ] = value;
+					model.set( attribute, value );
 					model.logChanges( changes );
 					view.render();
 				},

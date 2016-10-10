@@ -13,49 +13,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
-		<tr valign="top" class="">
-			<th scope="row" class="titledesc">
-				<label for="zone_name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></label>
-				<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); ?>
-			</th>
-			<td class="forminp">
-				<input type="text" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name() ); ?>" placeholder="<?php _e( 'Zone Name', 'woocommerce' ); ?>">
-			</td>
-		</tr>
-		<tr valign="top" class="">
-			<th scope="row" class="titledesc">
-				<label for="zone_locations"><?php esc_html_e( 'Zone Region(s)', 'woocommerce' ); ?></label>
-				<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); ?>
-			</th>
-			<td class="forminp">
-				<select multiple="multiple" id="zone_locations" name="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
-					<?php
-						foreach ( $continents as $continent_code => $continent ) {
-							echo '<option value="continent:' . esc_attr( $continent_code ) . '" ' . selected( in_array( "continent:$continent_code", $locations ), true, false ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
+		<?php if ( 0 !== $zone->get_zone_id() ) : ?>
+			<tr valign="top" class="">
+				<th scope="row" class="titledesc">
+					<label for="zone_name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></label>
+					<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); ?>
+				</th>
+				<td class="forminp">
+					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name() ); ?>" placeholder="<?php _e( 'Zone Name', 'woocommerce' ); ?>">
+				</td>
+			</tr>
+			<tr valign="top" class="">
+				<th scope="row" class="titledesc">
+					<label for="zone_locations"><?php esc_html_e( 'Zone Region(s)', 'woocommerce' ); ?></label>
+					<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); ?>
+				</th>
+				<td class="forminp">
+					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
+						<?php
+							foreach ( $continents as $continent_code => $continent ) {
+								echo '<option value="continent:' . esc_attr( $continent_code ) . '" ' . selected( in_array( "continent:$continent_code", $locations ), true, false ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
 
-							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+								$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
 
-							foreach ( $countries as $country_code ) {
-								echo '<option value="country:' . esc_attr( $country_code ) . '" ' . selected( in_array( "country:$country_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
+								foreach ( $countries as $country_code ) {
+									echo '<option value="country:' . esc_attr( $country_code ) . '" ' . selected( in_array( "country:$country_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
 
-								if ( $states = WC()->countries->get_states( $country_code ) ) {
-									foreach ( $states as $state_code => $state_name ) {
-										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" ' . selected( in_array( "state:$country_code:$state_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
+									if ( $states = WC()->countries->get_states( $country_code ) ) {
+										foreach ( $states as $state_code => $state_name ) {
+											echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" ' . selected( in_array( "state:$country_code:$state_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
+										}
 									}
 								}
 							}
-						}
-					?>
-				</select>
-				<?php if ( empty( $postcodes ) ) : ?>
-					<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
-				<?php endif; ?>
-				<div class="wc-shipping-zone-postcodes">
-					<textarea name="zone_postcodes" id="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"><?php echo esc_textarea( implode( "\n", $postcodes ) ); ?></textarea>
-					<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woocommerce' ) ?></span>
-				</div>
-			</td>
-		</tr>
+						?>
+					</select>
+					<?php if ( empty( $postcodes ) ) : ?>
+						<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
+					<?php endif; ?>
+					<div class="wc-shipping-zone-postcodes">
+						<textarea name="zone_postcodes" data-attribute="zone_postcodes" id="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"><?php echo esc_textarea( implode( "\n", $postcodes ) ); ?></textarea>
+						<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woocommerce' ) ?></span>
+					</div>
+				</td>
+			</tr>
+		<?php endif; ?>
 		<tr valign="top" class="">
 			<th scope="row" class="titledesc">
 				<label><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></label>
