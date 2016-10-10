@@ -159,6 +159,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-shipping-classes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-tags-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-products-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-variations-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-report-sales-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-report-top-sellers-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php' );
@@ -199,6 +200,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Product_Shipping_Classes_Controller',
 			'WC_REST_Product_Tags_Controller',
 			'WC_REST_Products_Controller',
+			'WC_REST_Product_Variations_Controller',
 			'WC_REST_Report_Sales_Controller',
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',

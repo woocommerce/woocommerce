@@ -347,7 +347,7 @@ $pages          = $system_status->get_pages();
 
 				$version_string = '';
 				$network_string = '';
-				if ( strstr( $plugin['url'], 'woothemes.com' ) ) {
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $plugin['version_latest'] ) ) . '</strong>';
 					}

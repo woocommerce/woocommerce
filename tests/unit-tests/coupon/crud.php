@@ -16,9 +16,9 @@ class WC_Tests_CouponCRUD extends WC_Unit_Test_Case {
 	function get_function_name( $function ) {
 		if ( 'exclude_product_ids' === $function ) {
 			$function = 'excluded_product_ids';
-		} else if ( 'exclude_product_categories' === $function ) {
+		} elseif ( 'exclude_product_categories' === $function ) {
 			$function = 'excluded_product_categories';
-		} else if ( 'customer_email' === $function ) {
+		} elseif ( 'customer_email' === $function ) {
 			$function = 'email_restrictions';
 		}
 

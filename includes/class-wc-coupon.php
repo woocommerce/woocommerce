@@ -359,7 +359,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			 *
 			 * Get item discount by dividing item cost by subtotal to get a %.
 			 *
-			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
+			 * Uses price inc tax if prices include tax to work around https://github.com/woocommerce/woocommerce/issues/7669 and https://github.com/woocommerce/woocommerce/issues/8074.
 			 */
 			if ( wc_prices_include_tax() ) {
 				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
@@ -378,7 +378,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
 			if ( $discounting_amount ) {
-				if ( '' === $this->get_limit_usage_to_x_items() ) {
+				if ( ! $this->get_limit_usage_to_x_items() ) {
 					$limit_usage_qty = $cart_item_qty;
 				} else {
 					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );

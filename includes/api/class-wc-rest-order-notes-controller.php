@@ -170,6 +170,24 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 			'type'    => 'order_note',
 		);
 
+		// Allow filter by order note type.
+		if ( 'customer' === $request['type'] ) {
+			$args['meta_query'] = array(
+				array(
+					'key'     => 'is_customer_note',
+					'value'   => 1,
+					'compare' => '=',
+				),
+			);
+		} elseif ( 'internal' === $request['type'] ) {
+			$args['meta_query'] = array(
+				array(
+					'key'     => 'is_customer_note',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 		$notes = get_comments( $args );
@@ -411,8 +429,17 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+		$params            = array();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['type']    = array(
+			'default'           => 'any',
+			'description'       => __( 'Limit result to customers or internal notes.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array( 'any', 'customer', 'internal' ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
+
+		return $params;
 	}
 }

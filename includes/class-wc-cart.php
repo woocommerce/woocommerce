@@ -1228,7 +1228,7 @@ class WC_Cart {
 		}
 
 		// Order cart items by price so coupon logic is 'fair' for customers and not based on order added to cart.
-		uasort( $cart, array( $this, 'sort_by_subtotal' ) );
+		uasort( $cart, apply_filters( 'woocommerce_sort_by_subtotal_callback', array( $this, 'sort_by_subtotal' ) ) );
 
 		/**
 		 * Calculate totals for items.

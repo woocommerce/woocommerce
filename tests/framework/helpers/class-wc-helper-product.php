@@ -55,7 +55,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy simple product.
+	 * Create a dummy variation product.
 	 *
 	 * @since 2.3
 	 *
@@ -176,7 +176,7 @@ class WC_Helper_Product {
 
 		$return = array();
 
-		$attribute_name = 'dummyattribute';
+		$attribute_name = 'size';
 
 		// Create attribute
 		$attribute = array(
@@ -208,7 +208,7 @@ class WC_Helper_Product {
 		// Add the term_taxonomy
 		$wpdb->insert( $wpdb->prefix . 'term_taxonomy', array(
 			'term_id'     => $return['term_id'],
-			'taxonomy'    => 'pa_dummyattribute',
+			'taxonomy'    => 'pa_size',
 			'description' => '',
 			'parent'      => 0,
 			'count'       => 1,
@@ -217,6 +217,13 @@ class WC_Helper_Product {
 
 		// Delete transient
 		delete_transient( 'wc_attribute_taxonomies' );
+
+		$taxonomy_data = array(
+			'labels' => array(
+				'name' => __( 'size', 'woocommerce' ),
+			),
+		);
+		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
 
 		return $return;
 	}

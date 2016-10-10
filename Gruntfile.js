@@ -157,7 +157,7 @@ module.exports = function( grunt ) {
 				type: 'wp-plugin',
 				domainPath: 'i18n/languages',
 				potHeaders: {
-					'report-msgid-bugs-to': 'https://github.com/woothemes/woocommerce/issues',
+					'report-msgid-bugs-to': 'https://github.com/woocommerce/woocommerce/issues',
 					'language-team': 'LANGUAGE <EMAIL@ADDRESS>'
 				}
 			},
@@ -243,7 +243,6 @@ module.exports = function( grunt ) {
 					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
 					'!includes/libraries/**',                                    // Exclude libraries/
 					'!node_modules/**',                                          // Exclude node_modules/
-					'!tests/**',                                                 // Exclude tests/
 					'!tmp/**',                                                   // Exclude tmp/
 					'!vendor/**'                                                 // Exclude vendor/
 				]
