@@ -23,17 +23,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller {
 
 	/**
-	* Endpoint namespace.
-	*
-	* @var string
-	*/
+ 	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
 	protected $namespace = 'wc/v1';
 
 	/**
-	* Route base.
-	*
-	* @var string
-	*/
+	 * Route base.
+	 *
+	 * @var string
+	 */
 	protected $rest_base = 'products/(?P<product_id>[\d]+)/variations';
 
 	/**
@@ -625,7 +625,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $variation->get_variation_id() ) ),
 			),
 			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base) ),
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'up' => array(
 				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product_id ) ),

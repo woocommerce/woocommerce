@@ -128,7 +128,7 @@ For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.c
 
 If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
-For help with premium add-ons from WooThemes, use [our helpdesk](https://support.woothemes.com/).
+For help with premium extensions from WooThemes, use [our helpdesk](https://support.woothemes.com/).
 
 = Will WooCommerce work with my theme? =
 
@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
 * When deleting a tax rate class, remove it's tax rates.
+* Made the store notice dismissible.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
