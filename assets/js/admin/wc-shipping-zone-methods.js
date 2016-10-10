@@ -172,6 +172,7 @@
 					event.preventDefault();
 
 					delete methods[ instance_id ];
+					changes.methods = changes.methods || { methods : {} };
 					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { deleted : 'deleted' } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
