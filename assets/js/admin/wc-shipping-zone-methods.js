@@ -63,7 +63,7 @@
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 
 					$( document.body ).on( 'input', '#zone_name', { view: this }, this.onUpdateZoneName );
-					$( document.body ).on( 'input', '#zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
+					$( document.body ).on( 'input change', '#zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
@@ -215,6 +215,7 @@
 						var new_position = parseInt( $table.find( 'tr[data-id="' + method.instance_id + '"]').index() + 1, 10 );
 
 						if ( old_position !== new_position ) {
+							methods[ method.instance_id ].method_order = new_position;
 							changes[ method.instance_id ] = _.extend( changes[ method.instance_id ] || {}, { method_order : new_position } );
 						}
 					} );
