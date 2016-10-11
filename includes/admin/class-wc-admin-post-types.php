@@ -112,6 +112,10 @@ class WC_Admin_Post_Types {
 
 		// Show blank state
 		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
+
+		// Hide template for CPT archive.
+		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
+		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
 	}
 
 	/**
@@ -2249,6 +2253,9 @@ class WC_Admin_Post_Types {
 		return $post_types;
 	}
 
+	/**
+	 * Show blank slate.
+	 */
 	public function maybe_render_blank_state( $which ) {
 		global $post_type;
 
@@ -2285,6 +2292,35 @@ class WC_Admin_Post_Types {
 			}
 
 			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .wrap .subsubsub  { display: none; } </style></div>';
+		}
+	}
+
+	/**
+	 * When editing the shop page, we should hide templates.
+	 * @return array
+	 */
+	public function hide_cpt_archive_templates( $page_templates, $class, $post ) {
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
+			$page_templates = array();
+		}
+
+		return $page_templates;
+	}
+
+	/**
+	 * Show a notice above the CPT archive.
+	 */
+	public function show_cpt_archive_notice( $post ) {
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
+			?>
+			<div class="notice notice-info">
+				<p><?php printf( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. %sYou can read more about this here%s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/woocommerce-pages/#section-4">', '</a>' ); ?></p>
+			</div>
+			<?php
 		}
 	}
 }
