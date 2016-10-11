@@ -24,7 +24,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->id                 = 'cheque';
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
-		$this->method_title       = _x( 'Check Payments', 'Check payment method', 'woocommerce' );
+		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
 		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' );
 
 		// Load the settings.
@@ -60,7 +60,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
+				'default'     => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'description' => array(

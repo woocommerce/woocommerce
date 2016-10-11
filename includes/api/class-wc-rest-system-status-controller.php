@@ -746,7 +746,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	public function get_pages() {
 		// WC pages to check against
 		$check_pages = array(
-			_x( 'Shop Base', 'Page setting', 'woocommerce' ) => array(
+			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_shop_page_id',
 				'shortcode' => '',
 			),
@@ -758,7 +758,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				'option'    => 'woocommerce_checkout_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
-			_x( 'My Account', 'Page setting', 'woocommerce' ) => array(
+			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),

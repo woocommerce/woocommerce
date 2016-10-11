@@ -310,7 +310,7 @@ class WC_Install {
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
+				'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),
 		) );

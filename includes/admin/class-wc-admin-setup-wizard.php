@@ -599,7 +599,7 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 			'cheque' => array(
-				'name'        => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
+				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',

@@ -137,7 +137,7 @@ class WC_Post_types {
 				'labels' => array(
 						'name'              => __( 'Product Shipping Classes', 'woocommerce' ),
 						'singular_name'     => __( 'Shipping Class', 'woocommerce' ),
-						'menu_name'         => _x( 'Shipping Classes', 'Admin menu name', 'woocommerce' ),
+						'menu_name'         => _x( 'Shipping classes', 'Admin menu name', 'woocommerce' ),
 						'search_items'      => __( 'Search Shipping Classes', 'woocommerce' ),
 						'all_items'         => __( 'All Shipping Classes', 'woocommerce' ),
 						'parent_item'       => __( 'Parent Shipping Class', 'woocommerce' ),
@@ -439,7 +439,7 @@ class WC_Post_types {
 		$order_statuses = apply_filters( 'woocommerce_register_shop_order_post_statuses',
 			array(
 				'wc-pending'    => array(
-					'label'                     => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
+					'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
@@ -455,7 +455,7 @@ class WC_Post_types {
 					'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-on-hold'    => array(
-					'label'                     => _x( 'On Hold', 'Order status', 'woocommerce' ),
+					'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
