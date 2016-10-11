@@ -161,9 +161,9 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( 'incl' === WC()->cart->tax_display_cart ) {
-				$total = $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() );
+				$total = round( $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() ), wc_get_price_decimals() );
 			} else {
-				$total = $total - WC()->cart->get_cart_discount_total();
+				$total = round( $total - WC()->cart->get_cart_discount_total(), wc_get_price_decimals() );
 			}
 
 			if ( $total >= $this->min_amount ) {
