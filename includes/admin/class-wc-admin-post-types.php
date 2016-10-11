@@ -923,7 +923,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Product sorting link.
 	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
 	 *
 	 * @param  array $views
 	 * @return array
