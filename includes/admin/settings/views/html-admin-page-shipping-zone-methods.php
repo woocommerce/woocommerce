@@ -72,12 +72,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<th class="wc-shipping-zone-method-type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
-							<th class="remove">&nbsp;</th>
 						</tr>
 					</thead>
 					<tfoot>
 						<tr>
-							<td colspan="6">
+							<td colspan="5">
 								<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" />
 							</td>
 						</tr>
@@ -94,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
-		<td class="wc-shipping-zone-method-blank-state" colspan="6">
+		<td class="wc-shipping-zone-method-blank-state" colspan="5">
 			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
 			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
 			<p><?php _e( 'Click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
@@ -107,11 +106,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
 			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a>
+			<div class="row-actions">
+				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 		<td class="wc-shipping-zone-method-type">{{ data.method_title }}</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">{{ data.method_description }}</td>
-		<td class="remove"><a href="#" class="wc-shipping-zone-method-delete"><?php _e( 'Remove', 'woocommerce' ); ?></a></td>
 	</tr>
 </script>
 

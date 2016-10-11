@@ -2606,6 +2606,22 @@ table.wc_shipping {
 		}
 	}
 }
+table {
+	tr, tr:hover {
+		table.wc-shipping-zone-methods {
+			tr {
+				.row-actions {
+					position: relative;
+				}
+			}
+			tr:hover {
+				.row-actions {
+					position: static;
+				}
+			}
+		}
+	}
+}
 table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-classes {
 	td, th {
 		vertical-align: top;
@@ -2631,32 +2647,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 	tbody td {
 		padding: 1.5em 1em !important;
-	}
-	th.remove {
-		width: 1%;
-	}
-	td.remove {
-		a {
-			width: 2em;
-			padding: 1em 0 0 0;
-			height: 0;
-			display: inline-block;
-			overflow: hidden;
-			font-size: 1.25em;
-			position: relative;
-			&::before {
-				@include icon_dashicons( '\f335' );
-				position: absolute;
-				top:0;
-				right: 0;
-				line-height: 24px;
-			}
-			&:hover {
-				&::before {
-					color: $red;
-				}
-			}
-		}
 	}
 	td.wc-shipping-zones-blank-state, td.wc-shipping-zone-method-blank-state {
 		background: #f7f1f6 !important;
