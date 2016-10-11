@@ -190,7 +190,7 @@ jQuery( function( $ ) {
 				closeOnScroll:         false,
 				history:               false,
 				hideAnimationDuration: 0,
-				showAnimationDuration: 0,
+				showAnimationDuration: 0
 			};
 
 			// Initializes and opens PhotoSwipe.
