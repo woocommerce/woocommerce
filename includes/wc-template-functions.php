@@ -2060,21 +2060,22 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			'show_option_none' => __( 'Choose an option', 'woocommerce' )
 		) );
 
-		$options   = $args['options'];
-		$product   = $args['product'];
-		$attribute = $args['attribute'];
-		$name      = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
-		$id        = $args['id'] ? $args['id'] : sanitize_title( $attribute );
-		$class     = $args['class'];
+		$options          = $args['options'];
+		$product          = $args['product'];
+		$attribute        = $args['attribute'];
+		$name             = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
+		$id               = $args['id'] ? $args['id'] : sanitize_title( $attribute );
+		$class            = $args['class'];
+		$show_option_none = $args['show_option_none'] ? true : false;
 
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 			$attributes = $product->get_variation_attributes();
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
+		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '"' . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
 
-		if ( $args['show_option_none'] ) {
+		if ( $show_option_none ) {
 			$html .= '<option value="">' . esc_html( $args['show_option_none'] ) . '</option>';
 		}
 
