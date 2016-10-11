@@ -24,6 +24,15 @@
 		}
 	}).change();
 
+	// Stock management
+	$( 'input#woocommerce_manage_stock' ).change( function() {
+		if ( $( this ).is(':checked') ) {
+			$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).show();
+		} else {
+			$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).hide();
+		}
+	}).change();
+
 	// Color picker
 	$( '.colorpick' ).iris({
 		change: function( event, ui ) {
