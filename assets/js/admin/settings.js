@@ -27,17 +27,9 @@
 	// Stock management
 	$( 'input#woocommerce_manage_stock' ).change( function() {
 		if ( $( this ).is(':checked') ) {
-			$( this ).closest('tr').next( 'tr' ).show();
-			$( this ).closest('tr').next().next( 'tr' ).show();
-			$( this ).closest('tr').next().next().next( 'tr' ).show();
-			$( this ).closest('tr').next().next().next().next( 'tr' ).show();
-			$( this ).closest('tr').next().next().next().next().next( 'tr' ).show();
+			$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).show();
 		} else {
-			$( this ).closest('tr').next( 'tr' ).hide();
-			$( this ).closest('tr').next().next( 'tr' ).hide();
-			$( this ).closest('tr').next().next().next( 'tr' ).hide();
-			$( this ).closest('tr').next().next().next().next( 'tr' ).hide();
-			$( this ).closest('tr').next().next().next().next().next( 'tr' ).hide();
+			$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).hide();
 		}
 	}).change();
 
