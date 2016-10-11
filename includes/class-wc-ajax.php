@@ -2875,7 +2875,7 @@ class WC_AJAX {
 
 			$zone_data = array_intersect_key( $data, array(
 				'zone_id'        => 1,
-				'zone_order'     => 1
+				'zone_order'     => 1,
 			) );
 
 			if ( isset( $zone_data['zone_id'] ) ) {
