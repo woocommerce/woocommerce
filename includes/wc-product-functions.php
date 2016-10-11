@@ -736,3 +736,40 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 	}
 	return $props;
 }
+
+/**
+ * Get min/max price meta query args.
+ *
+ * @since 2.7.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	$min = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$max = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
+
+	/**
+	 * Adjust if the store taxes are not displayed how they are stored.
+	 * Max is left alone because the filter was already increased.
+	 * Kicks in when prices excluding tax are displayed including tax.
+	 */
+	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+		$class_min   = $min;
+
+		foreach ( $tax_classes as $tax_class ) {
+			if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
+				$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+			}
+		}
+
+		$min = $class_min;
+	}
+
+	return array(
+		'key'     => '_price',
+		'value'   => array( $min, $max ),
+		'compare' => 'BETWEEN',
+		'type'    => 'DECIMAL',
+	);
+}

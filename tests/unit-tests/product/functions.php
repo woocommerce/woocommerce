@@ -183,4 +183,20 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Delete Product
 		WC_Helper_Product::delete_product( $product->id );
 	}
+
+	/**
+	 * Test wc_get_min_max_price_meta_query()
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_wc_get_min_max_price_meta_query() {
+		$meta_query = wc_get_min_max_price_meta_query( array( 'min_price' => 10, 'max_price' => 100 ) );
+
+		$this->assertEquals( array(
+			'key'     => '_price',
+			'value'   => array( 10, 100 ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL',
+		), $meta_query );
+	}
 }
