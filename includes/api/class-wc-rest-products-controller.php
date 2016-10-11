@@ -201,6 +201,15 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			) );
 		}
 
+		// Filter by tax class.
+		if ( ! empty( $request['tax_class'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'     => '_tax_class',
+				'value'   => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
+				'compare' => '=',
+			) );
+		}
+
 		// Apply all WP_Query filters again.
 		if ( is_array( $request['filter'] ) ) {
 			$args = array_merge( $args, $request['filter'] );
@@ -2735,6 +2744,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
+		if ( wc_tax_enabled() ) {
+			$params['tax_class'] = array(
+				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce' ),
+				'type'              => 'string',
+				'enum'              => array_map( 'sanitize_title', array_merge( array( 'standard' ), WC_Tax::get_tax_classes() ) ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			);
+		}
 
 		return $params;
 	}
