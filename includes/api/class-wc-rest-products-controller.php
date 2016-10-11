@@ -210,6 +210,14 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			) );
 		}
 
+		// Filter product in stock or out of stock.
+		if ( is_bool( $request['in_stock'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'     => '_stock_status',
+				'value'   => true === $request['in_stock'] ? 'instock' : 'outofstock',
+			) );
+		}
+
 		// Apply all WP_Query filters again.
 		if ( is_array( $request['filter'] ) ) {
 			$args = array_merge( $args, $request['filter'] );
@@ -2711,7 +2719,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params['featured'] = array(
 			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
 			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['category'] = array(
@@ -2754,6 +2762,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
+
+		$params['in_stock'] = array(
+			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}
