@@ -45,7 +45,7 @@ class WC_Shipping_Zone extends WC_Data {
 			$this->set_zone_name( $zone->zone_name );
 			$this->set_zone_order( $zone->zone_order );
 			$this->read_zone_locations( $zone->zone_id );
-		} elseif ( 0 === $zone ) {
+		} elseif ( 0 === $zone || "0" === $zone ) {
 			$this->set_id( 0 );
 			$this->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
 			$this->read_zone_locations( 0 );
@@ -455,7 +455,7 @@ class WC_Shipping_Zone extends WC_Data {
 		global $wpdb;
 
 		if ( null === $this->get_id() ) {
-			return 0;
+			$this->save();
 		}
 
 		$instance_id     = 0;
