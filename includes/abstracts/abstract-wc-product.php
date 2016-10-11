@@ -944,7 +944,7 @@ class WC_Product {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
 
-		return $display_price;
+		return apply_filters('woocommerce_get_display_price', $display_price, $price, $qty, $price );
 	}
 
 	/**
