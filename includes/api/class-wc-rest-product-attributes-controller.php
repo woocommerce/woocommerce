@@ -350,17 +350,19 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 			}
 		}
 
-		$update = $wpdb->update(
-			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
-			array( 'attribute_id' => $id ),
-			$format,
-			array( '%d' )
-		);
+		if ( $args ) {
+			$update = $wpdb->update(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				$args,
+				array( 'attribute_id' => $id ),
+				$format,
+				array( '%d' )
+			);
 
-		// Checks for errors.
-		if ( false === $update ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
+			// Checks for errors.
+			if ( false === $update ) {
+				return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		$attribute = $this->get_attribute( $id );
