@@ -187,26 +187,24 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'     => '_sku',
-				'value'   => $request['sku'],
-				'compare' => '=',
+				'key'   => '_sku',
+				'value' => $request['sku'],
 			) );
 		}
 
 		// Filter featured.
 		if ( is_bool( $request['featured'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'     => '_featured',
-				'value'   => true === $request['featured'] ? 'yes' : 'no',
+				'key'   => '_featured',
+				'value' => true === $request['featured'] ? 'yes' : 'no',
 			) );
 		}
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'     => '_tax_class',
-				'value'   => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
-				'compare' => '=',
+				'key'   => '_tax_class',
+				'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
 			) );
 		}
 
@@ -218,8 +216,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'     => '_stock_status',
-				'value'   => true === $request['in_stock'] ? 'instock' : 'outofstock',
+				'key'   => '_stock_status',
+				'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
 			) );
 		}
 
