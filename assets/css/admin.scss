@@ -2830,19 +2830,13 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 	.wc-shipping-zone-method-enabled {
 		text-align: center;
-		.status-enabled {
-			margin-top: 1px;
+
+		a {
 			display: inline-block;
-			&::before {
-				line-height: inherit;
-			}
 		}
-		.status-disabled {
-			margin-top: 1px;
-			display: inline-block;
-			&::before {
-				line-height: inherit;
-			}
+
+		.woocommerce-input-toggle {
+			margin-top: 3px;
 		}
 	}
 	tfoot {
@@ -2856,6 +2850,39 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	.editing {
 		.wc-shipping-zone-view, .wc-shipping-zone-edit {
 			display: none;
+		}
+	}
+}
+
+.woocommerce-input-toggle {
+	height: 16px;
+	width: 32px;
+	border: 2px solid #935687;
+	background-color: #935687;
+	display: inline-block;
+	text-indent: -9999px;
+	border-radius: 10em;
+	position: relative;
+
+	&:before {
+		content: "";
+		display: block;
+		width: 16px;
+		height: 16px;
+		background: #fff;
+		position: absolute;
+		top: 0;
+		right: 0;
+		border-radius: 100%;
+	}
+
+	&.woocommerce-input-toggle--disabled {
+		border-color: #999;
+		background-color: #999;
+
+		&:before {
+			right: auto;
+			left: 0;
 		}
 	}
 }
