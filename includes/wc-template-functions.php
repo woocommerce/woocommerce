@@ -1884,24 +1884,25 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		// Custom attribute handling
-		$custom_attributes = array();
+		$custom_attributes         = array();
+		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'] );
+
+		if ( $args['maxlength'] ) {
+		    $args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+		}
+
+		if ( true === $args['autocomplete'] ) {
+		    $args['custom_attributes']['autocomplete'] = 'true';
+		}
+
+		if ( true === $args['autofocus'] ) {
+		    $args['custom_attributes']['autofocus'] = 'autofocus';
+		}
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
 			foreach ( $args['custom_attributes'] as $attribute => $attribute_value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
 			}
-		}
-
-		if ( $args['maxlength'] ) {
-		    $custom_attributes['maxlength'] = absint( $args['maxlength'] );
-		}
-
-		if ( true === $args['autocomplete'] ) {
-		    $custom_attributes['autocomplete'] = 'true';
-		}
-
-		if ( true === $args['autofocus'] ) {
-		    $custom_attributes['autofocus'] = 'autofocus';
 		}
 
 		if ( ! empty( $args['validate'] ) ) {
