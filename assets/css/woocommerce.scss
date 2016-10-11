@@ -177,7 +177,37 @@ p.demo_store {
 				top: .5em;
 				right: .5em;
 				font-size: 2em;
-				z-index: 999;
+				z-index: 9;
+				width: 36px;
+				height: 36px;
+				background: #fff;
+				text-indent: -9999px;
+				border-radius: 100%;
+
+				&:before {
+					content: "";
+					display: block;
+					width: 10px;
+					height: 10px;
+					border: 2px solid #000;
+					border-radius: 100%;
+					position: absolute;
+					top: 10px;
+					left: 10px;
+				}
+
+				&:after {
+					content: "";
+					display: block;
+					width: 2px;
+					height: 6px;
+					background: #000;
+					border-radius: 6px;
+					position: absolute;
+					top: 20px;
+					left: 22px;
+					@include transform(rotate(-45deg));
+				}
 			}
 
 			.flex-control-thumbs {
@@ -438,6 +468,7 @@ p.demo_store {
 		color: $highlightext;
 		font-size: .857em;
 		-webkit-font-smoothing: antialiased;
+		z-index: 9;
 	}
 
 	/**
