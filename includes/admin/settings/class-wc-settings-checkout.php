@@ -277,7 +277,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	public function payment_gateways_setting() {
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc"><?php _e( 'Gateway Display Order', 'woocommerce' ) ?></th>
+			<th scope="row" class="titledesc"><?php _e( 'Gateway display order', 'woocommerce' ) ?></th>
 			<td class="forminp">
 				<table class="wc_gateways widefat" cellspacing="0">
 					<thead>

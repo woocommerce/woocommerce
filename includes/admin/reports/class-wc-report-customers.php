@@ -105,8 +105,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 		<div class="chart-container">
 			<div class="chart-placeholder customers_vs_guests pie-chart" style="height:200px"></div>
 			<ul class="pie-chart-legend">
-				<li style="border-color: <?php echo $this->chart_colours['customers']; ?>"><?php _e( 'Customer Sales', 'woocommerce' ); ?></li>
-				<li style="border-color: <?php echo $this->chart_colours['guests']; ?>"><?php _e( 'Guest Sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo $this->chart_colours['customers']; ?>"><?php _e( 'Customer sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo $this->chart_colours['guests']; ?>"><?php _e( 'Guest sales', 'woocommerce' ); ?></li>
 			</ul>
 		</div>
 		<script type="text/javascript">
@@ -115,12 +115,12 @@ class WC_Report_Customers extends WC_Admin_Report {
 					jQuery('.chart-placeholder.customers_vs_guests'),
 					[
 						{
-							label: '<?php _e( 'Customer Orders', 'woocommerce' ); ?>',
+							label: '<?php _e( 'Customer orders', 'woocommerce' ); ?>',
 							data:  "<?php echo $customer_order_totals->total_orders ?>",
 							color: '<?php echo $this->chart_colours['customers']; ?>'
 						},
 						{
-							label: '<?php _e( 'Guest Orders', 'woocommerce' ); ?>',
+							label: '<?php _e( 'Guest orders', 'woocommerce' ); ?>',
 							data:  "<?php echo $guest_order_totals->total_orders ?>",
 							color: '<?php echo $this->chart_colours['guests']; ?>'
 						}

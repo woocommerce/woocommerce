@@ -217,7 +217,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Most Popular', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Most popular', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -264,7 +264,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Most Discount', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Most discount', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php

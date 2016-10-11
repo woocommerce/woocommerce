@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <fieldset class="inline-edit-col-left">
 	<div id="woocommerce-fields" class="inline-edit-col">
 
-		<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
+		<h4><?php _e( 'Product data', 'woocommerce' ); ?></h4>
 
 		<?php do_action( 'woocommerce_product_quick_edit_start' ); ?>
 
@@ -32,14 +32,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<label>
 				<span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_regular_price" class="text wc_input_price regular_price" placeholder="<?php esc_attr_e( 'Regular Price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_regular_price" class="text wc_input_price regular_price" placeholder="<?php esc_attr_e( 'Regular price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />
 			<label>
 				<span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_sale_price" class="text wc_input_price sale_price" placeholder="<?php esc_attr_e( 'Sale Price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_sale_price" class="text wc_input_price sale_price" placeholder="<?php esc_attr_e( 'Sale price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( wc_tax_enabled() ) : ?>
 			<label class="alignleft">
-				<span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax status', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_status" name="_tax_status">
 					<?php
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 			<br class="clear" />
 			<label class="alignleft">
-				<span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax class', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_class" name="_tax_class">
 					<?php
@@ -183,7 +183,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</label>
 				<br class="clear" />
 				<label class="stock_qty_field">
-					<span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
+					<span class="title"><?php _e( 'Stock qty', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
 						<input type="number" name="_stock" class="text stock" step="any" value="">
 					</span>

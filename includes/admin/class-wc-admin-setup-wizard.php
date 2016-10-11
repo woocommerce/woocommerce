@@ -206,7 +206,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php _e( 'Let\'s go!', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
@@ -217,13 +217,13 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_pages() {
 		?>
-		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
+		<h1><?php _e( 'Page setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<p><?php printf( __( 'Your store needs a few essential %1$spages%2$s. The following will be created automatically (if they do not already exist):', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
 			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
-						<th class="page-name"><?php _e( 'Page Name', 'woocommerce' ); ?></th>
+						<th class="page-name"><?php _e( 'Page name', 'woocommerce' ); ?></th>
 						<th class="page-description"><?php _e( 'Description', 'woocommerce' ); ?></th>
 					</tr>
 				</thead>
@@ -243,7 +243,7 @@ class WC_Admin_Setup_Wizard {
 						</td>
 					</tr>
 					<tr>
-						<td class="page-name"><?php echo _x( 'My Account', 'Page title', 'woocommerce' ); ?></td>
+						<td class="page-name"><?php echo _x( 'My account', 'Page title', 'woocommerce' ); ?></td>
 						<td>
 							<?php _e( 'Registered customers will be able to manage their account details and view past orders on this page.', 'woocommerce' ); ?>
 						</td>
@@ -291,7 +291,7 @@ class WC_Admin_Setup_Wizard {
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
-		<h1><?php _e( 'Store Locale Setup', 'woocommerce' ); ?></h1>
+		<h1><?php _e( 'Store locale setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<table class="form-table">
 				<tr>
@@ -317,7 +317,7 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="currency_pos"><?php _e( 'Currency Position', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="currency_pos"><?php _e( 'Currency position', 'woocommerce' ); ?></label></th>
 					<td>
 						<select id="currency_pos" name="currency_pos" class="wc-enhanced-select">
 							<option value="left" <?php selected( $currency_pos, 'left' ); ?>><?php echo __( 'Left', 'woocommerce' ); ?></option>
@@ -328,19 +328,19 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ); ?>" />
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="num_decimals"><?php _e( 'Number of decimals', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ); ?>" />
 					</td>
@@ -411,7 +411,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_shipping_taxes() {
 		?>
-		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
+		<h1><?php _e( 'Shipping &amp; Tax setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<p><?php _e( 'If you will be charging sales tax, or shipping physical goods to customers, you can enable these below. This is optional and can be changed later.', 'woocommerce' ); ?></p>
 			<table class="form-table">
@@ -748,7 +748,7 @@ class WC_Admin_Setup_Wizard {
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://woocommerce.com/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooCommerce" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
-		<h1><?php _e( 'Your Store is Ready!', 'woocommerce' ); ?></h1>
+		<h1><?php _e( 'Your store is ready!', 'woocommerce' ); ?></h1>
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
@@ -762,13 +762,13 @@ class WC_Admin_Setup_Wizard {
 
 		<div class="wc-setup-next-steps">
 			<div class="wc-setup-next-steps-first">
-				<h2><?php _e( 'Next Steps', 'woocommerce' ); ?></h2>
+				<h2><?php _e( 'Next steps', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="setup-product"><a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product!', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 			<div class="wc-setup-next-steps-last">
-				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
+				<h2><?php _e( 'Learn more', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-101-video-series/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
 					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>

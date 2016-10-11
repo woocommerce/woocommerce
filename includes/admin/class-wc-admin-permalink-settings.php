@@ -127,7 +127,7 @@ class WC_Admin_Permalink_Settings {
 				<?php endif; ?>
 				<tr>
 					<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( in_array( $product_permalink, $structures ), false ); ?> />
-						<?php _e( 'Custom Base', 'woocommerce' ); ?></label></th>
+						<?php _e( 'Custom base', 'woocommerce' ); ?></label></th>
 					<td>
 						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink ); ?>" class="regular-text code"> <span class="description"><?php _e( 'Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
 					</td>

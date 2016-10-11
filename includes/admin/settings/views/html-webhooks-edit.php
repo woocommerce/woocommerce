@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <input type="hidden" name="webhook_id" value="<?php echo esc_attr( $webhook->id ); ?>" />
 
 <div id="webhook-options" class="settings-panel">
-	<h2><?php _e( 'Webhook Data', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Webhook data', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
 			<tr valign="top">
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top" id="webhook-action-event-wrap">
 				<th scope="row" class="titledesc">
-					<label for="webhook_action_event"><?php _e( 'Action Event', 'woocommerce' ); ?></label>
+					<label for="webhook_action_event"><?php _e( 'Action event', 'woocommerce' ); ?></label>
 					<?php echo wc_help_tip( __( 'Enter the Action that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
@@ -85,7 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top" id="webhook-custom-topic-wrap">
 				<th scope="row" class="titledesc">
-					<label for="webhook_custom_topic"><?php _e( 'Custom Topic', 'woocommerce' ); ?></label>
+					<label for="webhook_custom_topic"><?php _e( 'Custom topic', 'woocommerce' ); ?></label>
 					<?php echo wc_help_tip( __( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
@@ -117,7 +117,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <div id="webhook-actions" class="settings-panel">
-	<h2><?php _e( 'Webhook Actions', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Webhook actions', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
 			<?php if ( '0000-00-00 00:00:00' != $webhook->post_data->post_modified_gmt ) : ?>
@@ -152,7 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
-						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save Webhook', 'woocommerce' ); ?>" />
+						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>" />
 						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
 							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete Permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' ); ?></a>
 						<?php endif; ?>
@@ -164,7 +164,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <div id="webhook-logs" class="settings-panel">
-	<h2><?php _e( 'Webhook Logs', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Webhook logs', 'woocommerce' ); ?></h2>
 
 	<?php WC_Admin_Webhooks::logs_output( $webhook ); ?>
 </div>

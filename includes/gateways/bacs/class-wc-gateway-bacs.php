@@ -120,15 +120,15 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc"><?php _e( 'Account Details', 'woocommerce' ); ?>:</th>
+			<th scope="row" class="titledesc"><?php _e( 'Account details', 'woocommerce' ); ?>:</th>
 			<td class="forminp" id="bacs_accounts">
 				<table class="widefat wc_input_table sortable" cellspacing="0">
 					<thead>
 						<tr>
 							<th class="sort">&nbsp;</th>
-							<th><?php _e( 'Account Name', 'woocommerce' ); ?></th>
-							<th><?php _e( 'Account Number', 'woocommerce' ); ?></th>
-							<th><?php _e( 'Bank Name', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Account name', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Account number', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Bank name', 'woocommerce' ); ?></th>
 							<th><?php echo $sortcode; ?></th>
 							<th><?php _e( 'IBAN', 'woocommerce' ); ?></th>
 							<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
@@ -156,7 +156,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					</tbody>
 					<tfoot>
 						<tr>
-							<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
+							<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
 						</tr>
 					</tfoot>
 				</table>

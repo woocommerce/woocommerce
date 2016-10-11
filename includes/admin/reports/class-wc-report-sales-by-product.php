@@ -195,7 +195,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function products_widget() {
 		?>
-		<h4 class="section_title"><span><?php _e( 'Product Search', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Product search', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<form method="GET">
 				<div>
@@ -210,7 +210,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top Sellers', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Top sellers', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -250,7 +250,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top Freebies', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Top freebies', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -298,7 +298,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top Earners', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Top earners', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php

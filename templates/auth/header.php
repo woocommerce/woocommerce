@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<meta name="viewport" content="width=device-width" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="robots" content="noindex, nofollow" />
-	<title><?php _e( 'Application Authentication Request', 'woocommerce' ); ?></title>
+	<title><?php _e( 'Application authentication request', 'woocommerce' ); ?></title>
 	<?php wp_admin_css( 'install', true ); ?>
 	<link rel="stylesheet" href="<?php echo esc_url( str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/auth.css' ); ?>" type="text/css" />
 </head>

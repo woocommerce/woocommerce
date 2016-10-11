@@ -41,9 +41,9 @@
 									}
 									?>
 								</select>
-								<button class="button plus select_all_attributes"><?php _e( 'Select All', 'woocommerce' ); ?></button>
-								<button class="button minus select_no_attributes"><?php _e( 'Select None', 'woocommerce' ); ?></button>
-								<button class="button fr plus add_new_attribute"><?php _e( 'Add New', 'woocommerce' ); ?></button>
+								<button class="button plus select_all_attributes"><?php _e( 'Select all', 'woocommerce' ); ?></button>
+								<button class="button minus select_no_attributes"><?php _e( 'Select none', 'woocommerce' ); ?></button>
+								<button class="button fr plus add_new_attribute"><?php _e( 'Add new', 'woocommerce' ); ?></button>
 
 							<?php elseif ( 'text' == $attribute_taxonomy->attribute_type ) : ?>
 

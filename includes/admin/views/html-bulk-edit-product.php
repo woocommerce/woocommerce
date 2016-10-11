@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <fieldset class="inline-edit-col-right">
 	<div id="woocommerce-fields-bulk" class="inline-edit-col">
 
-		<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
+		<h4><?php _e( 'Product data', 'woocommerce' ); ?></h4>
 
 		<?php do_action( 'woocommerce_product_bulk_edit_start' ); ?>
 
@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( wc_tax_enabled() ) : ?>
 			<label>
-				<span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax status', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_status" name="_tax_status">
 					<?php
@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 
 			<label>
-				<span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax class', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_class" name="_tax_class">
 					<?php
@@ -165,7 +165,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="title"><?php _e( 'Shipping class', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="shipping_class" name="_shipping_class">
-					<option value=""><?php _e( '— No Change —', 'woocommerce' ); ?></option>
+					<option value=""><?php _e( '— No change —', 'woocommerce' ); ?></option>
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
@@ -252,7 +252,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="inline-edit-group">
 				<label class="alignleft stock_qty_field">
-					<span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
+					<span class="title"><?php _e( 'Stock qty', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
 						<select class="change_stock change_to" name="change_stock">
 						<?php
@@ -268,7 +268,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_stock" class="text stock" placeholder="<?php esc_attr_e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
+					<input type="text" name="_stock" class="text stock" placeholder="<?php esc_attr_e( 'Stock qty', 'woocommerce' ); ?>" step="any" value="">
 				</label>
 			</div>
 
@@ -294,7 +294,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 
 		<label>
-			<span class="title"><?php esc_html_e( 'Sold Individually?', 'woocommerce' ); ?></span>
+			<span class="title"><?php esc_html_e( 'Sold individually?', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="sold_individually" name="_sold_individually">
 					<?php

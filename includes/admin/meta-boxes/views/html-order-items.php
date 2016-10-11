@@ -168,7 +168,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_id() ); ?>
 
 		<tr>
-			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php _e( 'Order total', 'woocommerce' ); ?>:</td>
 			<td>
 				<?php if ( $order->is_editable() ) : ?>
 					<div class="wc-order-edit-line-item-actions">
@@ -218,8 +218,8 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_order_item_add_action_buttons', $order );
 		?>
 		<?php if ( $order->is_editable() ) : ?>
-			<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
-			<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate taxes', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate total', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 	</p>
 </div>
