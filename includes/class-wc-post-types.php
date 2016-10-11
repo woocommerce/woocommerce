@@ -444,7 +444,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'Pending Payment <span class="count">(%s)</span>', 'Pending Payment <span class="count">(%s)</span>', 'woocommerce' ),
+					'label_count'               => _n_noop( 'Pending payment <span class="count">(%s)</span>', 'Pending payment <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-processing' => array(
 					'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -460,7 +460,7 @@ class WC_Post_types {
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
-					'label_count'               => _n_noop( 'On Hold <span class="count">(%s)</span>', 'On Hold <span class="count">(%s)</span>', 'woocommerce' ),
+					'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-completed'  => array(
 					'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
