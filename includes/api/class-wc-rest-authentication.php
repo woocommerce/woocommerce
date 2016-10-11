@@ -538,7 +538,7 @@ class WC_REST_Authentication {
 		global $wc_rest_authentication_error;
 
 		if ( is_wp_error( $wc_rest_authentication_error ) && is_ssl() ) {
-			$auth_message = __( 'WooCommerce API - Use a consumer key in the username field and a consumer secret in the password field.', 'woocommerce' );
+			$auth_message = __( 'WooCommerce API. Use a consumer key in the username field and a consumer secret in the password field.', 'woocommerce' );
 			$response->header( 'WWW-Authenticate', 'Basic realm="' . $auth_message . '"', true );
 		}
 

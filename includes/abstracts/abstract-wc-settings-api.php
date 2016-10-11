@@ -732,7 +732,7 @@ abstract class WC_Settings_API {
 					</select>
 					<?php echo $this->get_description_html( $data ); ?>
 					<?php if ( $data['select_buttons'] ) : ?>
-						<br/><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+						<br/><a class="select_all button" href="#"><?php _e( 'Select All', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select None', 'woocommerce' ); ?></a>
 					<?php endif; ?>
 				</fieldset>
 			</td>

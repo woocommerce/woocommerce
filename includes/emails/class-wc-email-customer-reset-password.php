@@ -46,7 +46,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	public function __construct() {
 
 		$this->id               = 'customer_reset_password';
-		$this->title            = __( 'Reset password', 'woocommerce' );
+		$this->title            = __( 'Reset Password', 'woocommerce' );
 		$this->description      = __( 'Customer "reset password" emails are sent when customers reset their passwords.', 'woocommerce' );
 		$this->customer_email   = true;
 

@@ -459,14 +459,14 @@ class WC_Emails {
 
 		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
-				'label' => __( 'Email', 'woocommerce' ),
+				'label' => __( 'Email Address', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_email() ),
 			);
 	    }
 
 	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
-				'label' => __( 'Tel', 'woocommerce' ),
+				'label' => __( 'Phone', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_phone() ),
 			);
 	    }

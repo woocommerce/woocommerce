@@ -581,7 +581,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'postcode' => array(
-					'description' => __( 'Postcode/ZIP.', 'woocommerce' ),
+					'description' => __( 'Postcode / ZIP.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
