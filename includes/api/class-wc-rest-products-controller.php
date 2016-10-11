@@ -2690,19 +2690,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['category'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific category.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['tag'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['shipping_class'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific shipping class.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -2714,7 +2714,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute_term'] = array(
-			'description'       => __( 'Limit result set to products with a specific attribute term (required an assigned attribute).', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
