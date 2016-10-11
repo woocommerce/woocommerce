@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Add reply-to to admin emails.
 * When deleting a tax rate class, remove it's tax rates.
 * Made the store notice dismissible.
+* Improved the zone setup flow.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

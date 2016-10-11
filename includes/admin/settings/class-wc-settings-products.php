@@ -261,12 +261,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'                => 'woocommerce_hold_stock_minutes',
 					'type'              => 'number',
 					'custom_attributes' => array(
-						'min'  => 0,
-						'step' => 1,
+						'min'           => 0,
+						'step'          => 1,
 					),
 					'css'               => 'width: 80px;',
 					'default'           => '60',
 					'autoload'          => false,
+					'class'             => 'manage_stock_field',
 				),
 
 				array(
@@ -277,6 +278,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 					'autoload'      => false,
+					'class'         => 'manage_stock_field',
 				),
 
 				array(
@@ -286,6 +288,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
 					'autoload'      => false,
+					'class'         => 'manage_stock_field',
 				),
 
 				array(
@@ -297,6 +300,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => 'width: 250px;',
 					'autoload' => false,
 					'desc_tip' => true,
+					'class'    => 'manage_stock_field',
 				),
 
 				array(
@@ -306,12 +310,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
-						'min'  => 0,
-						'step' => 1,
+						'min'           => 0,
+						'step'          => 1,
 					),
 					'default'           => '2',
 					'autoload'          => false,
 					'desc_tip'          => true,
+					'class'             => 'manage_stock_field',
 				),
 
 				array(
@@ -321,11 +326,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
-						'min'  => 0,
-						'step' => 1,
+						'min'           => 0,
+						'step'          => 1,
 					),
 					'default'           => '0',
 					'desc_tip'          => true,
+					'class'             => 'manage_stock_field',
 				),
 
 				array(
