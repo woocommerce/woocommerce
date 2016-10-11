@@ -320,6 +320,24 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Add meta query.
+	 *
+	 * @since 2.7.0
+	 * @param array $args       Query args.
+	 * @param array $meta_query Meta query.
+	 * @return array
+	 */
+	protected function add_meta_query( $args, $meta_query ) {
+		if ( ! empty( $args['meta_query'] ) ) {
+			$args['meta_query'] = array();
+		}
+
+		$args['meta_query'][] = $meta_query;
+
+		return $args['meta_query'];
+	}
+
+	/**
 	 * Get the batch schema, conforming to JSON Schema.
 	 *
 	 * @return array

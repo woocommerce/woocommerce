@@ -186,26 +186,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
-			}
-
-			$args['meta_query'][] = array(
+			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'     => '_sku',
 				'value'   => $request['sku'],
 				'compare' => '=',
-			);
+			) );
 		}
 
+		// Filter featured.
 		if ( is_bool( $request['featured'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
-			}
-
-			$args['meta_query'][] = array(
-				'key' 	=> '_featured',
-				'value' => true === $request['featured'] ? 'yes' : 'no',
-			);
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'     => '_featured',
+				'value'   => true === $request['featured'] ? 'yes' : 'no',
+			) );
 		}
 
 		// Apply all WP_Query filters again.
@@ -2700,6 +2693,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['sku'] = array(
+			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['featured'] = array(
+			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['category'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
@@ -2728,18 +2733,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['sku'] = array(
-			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
-			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['featured'] = array(
-			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
