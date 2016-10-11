@@ -210,6 +210,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			) );
 		}
 
+		// Price filter.
+		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );
+		}
+
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
@@ -2767,6 +2772,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['min_price'] = array(
+			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['max_price'] = array(
+			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
