@@ -545,7 +545,7 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$meta_query = wc_get_min_max_price( $_GET );
+			$meta_query = wc_get_min_max_price_meta_query( $_GET );
 			$meta_query['price_filter'] = true;
 
 			return $meta_query;
