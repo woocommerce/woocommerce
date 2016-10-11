@@ -1862,6 +1862,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'custom_attributes' => array(),
 			'validate'          => array(),
 			'default'           => '',
+			'autofocus'         => '',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -1873,10 +1874,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		} else {
 			$required = '';
 		}
-
-		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
-
-		$args['autocomplete'] = ( $args['autocomplete'] ) ? 'autocomplete="' . esc_attr( $args['autocomplete'] ) . '"' : '';
 
 		if ( is_string( $args['label_class'] ) ) {
 			$args['label_class'] = array( $args['label_class'] );
@@ -1893,6 +1890,18 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			foreach ( $args['custom_attributes'] as $attribute => $attribute_value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
 			}
+		}
+
+		if ( $args['maxlength'] ) {
+		    $custom_attributes['maxlength'] = absint( $args['maxlength'] );
+		}
+
+		if ( true === $args['autocomplete'] ) {
+		    $custom_attributes['autocomplete'] = 'true';
+		}
+
+		if ( true === $args['autofocus'] ) {
+		    $custom_attributes['autofocus'] = 'autofocus';
 		}
 
 		if ( ! empty( $args['validate'] ) ) {
