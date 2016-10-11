@@ -197,6 +197,17 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
+		if ( is_bool( $request['featured'] ) ) {
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array();
+			}
+
+			$args['meta_query'][] = array(
+				'key' 	=> '_featured',
+				'value' => true === $request['featured'] ? 'yes' : 'no',
+			);
+		}
+
 		// Apply all WP_Query filters again.
 		if ( is_array( $request['filter'] ) ) {
 			$args = array_merge( $args, $request['filter'] );
@@ -2723,6 +2734,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['featured'] = array(
+			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
