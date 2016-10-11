@@ -128,9 +128,9 @@
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
 							if ( 'yes' === rowData.enabled ) {
-								rowData.enabled_icon = '<span class="status-enabled">' + data.strings.yes + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' + data.strings.yes + '</span>';
 							} else {
-								rowData.enabled_icon = '<span class="status-disabled">' + data.strings.no + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' + data.strings.no + '</span>';
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
