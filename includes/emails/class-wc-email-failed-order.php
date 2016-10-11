@@ -130,7 +130,7 @@ class WC_Email_Failed_Order extends WC_Email {
 				'desc_tip'      => true,
 			),
 			'email_type' => array(
-				'title'         => __( 'Email type', 'woocommerce' ),
+				'title'         => __( 'Email Type', 'woocommerce' ),
 				'type'          => 'select',
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',

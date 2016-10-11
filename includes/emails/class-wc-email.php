@@ -505,7 +505,7 @@ class WC_Email extends WC_Settings_API {
 				'desc_tip'    => true,
 			),
 			'email_type'      => array(
-				'title'       => __( 'Email type', 'woocommerce' ),
+				'title'       => __( 'Email Type', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'     => 'html',

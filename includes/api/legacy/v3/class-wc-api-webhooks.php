@@ -173,14 +173,14 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			// permission check
 			if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_webhooks', __( 'You do not have permission to create webhooks', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_webhooks', __( 'You do not have permission to create webhooks.', 'woocommerce' ), 401 );
 			}
 
 			$data = apply_filters( 'woocommerce_api_create_webhook_data', $data, $this );
 
 			// validate topic
 			if ( empty( $data['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $data['topic'] ) ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_topic', __( 'Webhook topic is required and must be valid', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_topic', __( 'Webhook topic is required and must be valid.', 'woocommerce' ), 400 );
 			}
 
 			// validate delivery URL
@@ -267,7 +267,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 					$webhook->set_topic( $data['topic'] );
 
 				} else {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_topic', __( 'Webhook topic must be valid', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_topic', __( 'Webhook topic must be valid.', 'woocommerce' ), 400 );
 				}
 			}
 
@@ -439,7 +439,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			$id = absint( $id );
 
 			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery ID', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery ID.', 'woocommerce' ), 404 );
 			}
 
 			$webhook = new WC_Webhook( $webhook_id );
@@ -447,7 +447,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			$log = $webhook->get_delivery_log( $id );
 
 			if ( ! $log ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery.', 'woocommerce' ), 400 );
 			}
 
 			$delivery_log = $log;

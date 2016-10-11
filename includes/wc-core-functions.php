@@ -117,7 +117,7 @@ function wc_create_order( $args = array() ) {
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
-		return new WP_Error( __( 'Invalid order ID', 'woocommerce' ) );
+		return new WP_Error( __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
 }

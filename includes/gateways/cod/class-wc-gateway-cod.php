@@ -57,7 +57,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'       => __( 'Enable COD', 'woocommerce' ),
+				'title'       => __( 'Enable/Disable', 'woocommerce' ),
 				'label'       => __( 'Enable Cash on Delivery', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',

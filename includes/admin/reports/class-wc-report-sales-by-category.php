@@ -230,7 +230,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			</div>
 			<script type="text/javascript">
 				jQuery(function(){
-					// Select all/none
+					// Select All/None
 					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).attr( 'selected', 'selected' );
 						jQuery(this).closest( 'div' ).find('select').change();

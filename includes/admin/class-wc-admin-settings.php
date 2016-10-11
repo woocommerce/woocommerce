@@ -602,7 +602,7 @@ class WC_Admin_Settings {
 										}
 									}
 								?>
-							</select> <?php echo ( $description ) ? $description : ''; ?> <br /><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+							</select> <?php echo ( $description ) ? $description : ''; ?> <br /><a class="select_all button" href="#"><?php _e( 'Select All', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select None', 'woocommerce' ); ?></a>
 						</td>
 					</tr><?php
 					break;

@@ -64,7 +64,7 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'postcode' => array(
-				'label' => __( 'Postcode', 'woocommerce' ),
+				'label' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'show'  => false,
 			),
 			'country' => array(
@@ -75,12 +75,12 @@ class WC_Meta_Box_Order_Data {
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 			),
 			'state' => array(
-				'label' => __( 'State/County', 'woocommerce' ),
+				'label' => __( 'State / County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
 				'show'  => false,
 			),
 			'email' => array(
-				'label' => __( 'Email', 'woocommerce' ),
+				'label' => __( 'Email Address', 'woocommerce' ),
 			),
 			'phone' => array(
 				'label' => __( 'Phone', 'woocommerce' ),
@@ -113,7 +113,7 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'postcode' => array(
-				'label' => __( 'Postcode', 'woocommerce' ),
+				'label' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'show'  => false,
 			),
 			'country' => array(
@@ -124,7 +124,7 @@ class WC_Meta_Box_Order_Data {
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 			),
 			'state' => array(
-				'label' => __( 'State/County', 'woocommerce' ),
+				'label' => __( 'State / County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
 				'show'  => false,
 			),

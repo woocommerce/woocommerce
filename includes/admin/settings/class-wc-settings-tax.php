@@ -176,7 +176,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'csv_data_cols' => array(
 					__( 'Country Code', 'woocommerce' ),
 					__( 'State Code', 'woocommerce' ),
-					__( 'ZIP/Postcode', 'woocommerce' ),
+					__( 'Postcode / ZIP', 'woocommerce' ),
 					__( 'City', 'woocommerce' ),
 					__( 'Rate %', 'woocommerce' ),
 					__( 'Tax Name', 'woocommerce' ),

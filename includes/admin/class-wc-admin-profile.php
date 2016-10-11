@@ -41,11 +41,11 @@ class WC_Admin_Profile {
 				'title' => __( 'Customer Billing Address', 'woocommerce' ),
 				'fields' => array(
 					'billing_first_name' => array(
-						'label'       => __( 'First name', 'woocommerce' ),
+						'label'       => __( 'First Name', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_last_name' => array(
-						'label'       => __( 'Last name', 'woocommerce' ),
+						'label'       => __( 'Last Name', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_company' => array(
@@ -65,7 +65,7 @@ class WC_Admin_Profile {
 						'description' => '',
 					),
 					'billing_postcode' => array(
-						'label'       => __( 'Postcode', 'woocommerce' ),
+						'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_country' => array(
@@ -76,16 +76,16 @@ class WC_Admin_Profile {
 						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 					),
 					'billing_state' => array(
-						'label'       => __( 'State/County', 'woocommerce' ),
-						'description' => __( 'State/County or state code', 'woocommerce' ),
+						'label'       => __( 'State / County', 'woocommerce' ),
+						'description' => __( 'State / County or state code', 'woocommerce' ),
 						'class'       => 'js_field-state',
 					),
 					'billing_phone' => array(
-						'label'       => __( 'Telephone', 'woocommerce' ),
+						'label'       => __( 'Phone', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_email' => array(
-						'label'       => __( 'Email', 'woocommerce' ),
+						'label'       => __( 'Email Address', 'woocommerce' ),
 						'description' => '',
 					),
 				),
@@ -94,11 +94,11 @@ class WC_Admin_Profile {
 				'title' => __( 'Customer Shipping Address', 'woocommerce' ),
 				'fields' => array(
 					'shipping_first_name' => array(
-						'label'       => __( 'First name', 'woocommerce' ),
+						'label'       => __( 'First Name', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_last_name' => array(
-						'label'       => __( 'Last name', 'woocommerce' ),
+						'label'       => __( 'Last Name', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_company' => array(
@@ -118,7 +118,7 @@ class WC_Admin_Profile {
 						'description' => '',
 					),
 					'shipping_postcode' => array(
-						'label'       => __( 'Postcode', 'woocommerce' ),
+						'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_country' => array(
@@ -129,8 +129,8 @@ class WC_Admin_Profile {
 						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 					),
 					'shipping_state' => array(
-						'label'       => __( 'State/County', 'woocommerce' ),
-						'description' => __( 'State/County or state code', 'woocommerce' ),
+						'label'       => __( 'State / County', 'woocommerce' ),
+						'description' => __( 'State / County or state code', 'woocommerce' ),
 						'class'       => 'js_field-state',
 					),
 				),

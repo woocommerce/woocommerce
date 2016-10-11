@@ -121,7 +121,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				'options'		=> array(
 					'' 				=> __( 'N/A', 'woocommerce' ),
 					'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-					'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
+					'min_amount' 	=> __( 'A minimum order amount', 'woocommerce' ),
 					'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
 					'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 				),
