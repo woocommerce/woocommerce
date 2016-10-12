@@ -177,5 +177,4 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$this->assertTrue( $token->is_default() );
 		$this->assertFalse( $token2->is_default() );
 	}
-
 }

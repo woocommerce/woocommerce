@@ -74,6 +74,7 @@ add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_desc
  */
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
+add_action( 'woocommerce_no_products_found', 'wc_no_products_found' );
 
 /**
  * Product Loop Items.

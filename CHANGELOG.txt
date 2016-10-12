@@ -135,7 +135,7 @@
 * Tweak - Allow failed orders to be edited.
 * Tweak - If there are no shipping methods setup, don’t prompt for shipping at checkout.
 * Tweak - Allowed country exclusion, rather than just inclusion, in ‘sell to’ setting.
-* Lots, lots more - [see the comparison here: https://github.com/woothemes/woocommerce/compare/2.5.5...2.6.0
+* Lots, lots more - [see the comparison here: https://github.com/woocommerce/woocommerce/compare/2.5.5...2.6.0
 
 = 2.5.5 - 11/03/2016 =
 * Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
@@ -249,7 +249,7 @@
 * Tweak - Revised email settings screens to show emails in a table and avoid a long sub-nav.
 * Tweak - Default customer role capabilities.
 * Tweak - Expire mini-cart cache after 24 hours.
-* Tweak - Improved refund error messages in PayPal standard.
+* Tweak - Improved refund error messages in PayPal Standard.
 * Tweak - Removed language pack downloader in favour of translate.wordpress.org.
 * Tweak - Added onboarding wizard button to the contextual help so it can be accessed again.
 * Tweak - When a WordPress user is deleted, turn any orders they have into Guest orders.
@@ -501,7 +501,7 @@
 * Dev - API - Deprecated /product/sku endpoint from v3.
 * Dev - API - Created the /products/id/orders endpoint to fetch orders containing a specific product.
 * Localisation - Added Argentine currency and provinces.
-* [Various other small fixes and enhancements.](https://github.com/woothemes/woocommerce/issues?q=is%3Aissue+milestone%3A%222.4+Helpful+Hedgehog%22+is%3Aclosed)
+* [Various other small fixes and enhancements.](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+milestone%3A%222.4+Helpful+Hedgehog%22+is%3Aclosed)
 
 = 2.3.13 - 07/07/2015 =
 * Fix - Improved the email settings save and tabs for 3rd party plugins.
@@ -982,7 +982,7 @@
 * Dev - Introduces the WC_Order::needs_shipping_address() method.
 * Dev - Gateways can set transaction ID for the order.
 * Dev - Gateways can do refunds via the Payment Gateway API.
-* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woothemes/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
+* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woocommerce/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
@@ -1303,7 +1303,7 @@
 * Feature - Customer list reports.
 * Feature - Reports - New design, export csvs, more data.
 * Feature - Ability to link past orders to a customer (before they registered).
-* Feature - Authorize option for paypal standard.
+* Feature - Authorize option for PayPal Standard.
 * Feature - Separate options for countries you can ship to and sell to.
 * Feature - BACS supports multiple account details.
 * Feature - PayPal PDT support (as alternative to IPN).
@@ -1356,8 +1356,8 @@
 * Fix - Tweaked popularity sorting to work better when no sales are present.
 * Fix - Quote encoding in email subjects.
 * Fix - Added $wp_error parameter during checkout process to ensure WP_Error object is returned on error and checkout process is properly stopped.
-* Refactor - Taken out Piwik integration, use https://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on.
-* Refactor - Taken out ShareYourCart integration, use https://wordpress.org/extend/plugins/shareyourcart/ from now on.
+* Refactor - Taken out Piwik integration, use https://wordpress.org/plugins/woocommerce-piwik-integration/ from now on.
+* Refactor - Taken out ShareYourCart integration, use https://wordpress.org/plugins/shareyourcart/ from now on.
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class.
 * Refactor - Improved parameter handling in woocommerce_related_products() function.
 * Refactor - Widget classes (added abstract and combined similar widgets).
@@ -1597,7 +1597,7 @@
 = 2.0.4 - 18/03/2013 =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
 * Tweak - Moved WC_Order_Item_Meta into own file.
-* Tweak - PayPal standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
+* Tweak - PayPal Standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
 * Tweak - Flat rate interface tidy up.
 * Tweak - Add order_id to woocommerce_download_product hook
 * Tweak - Disabled prettyPhoto deeplinking
@@ -1696,7 +1696,7 @@
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
 * Feature - New shop page/category archive display settings, and the ability to change display per-category.
-* Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woothemes/woocommerce/issues/1625
+* Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woocommerce/woocommerce/issues/1625
 * Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in their own table with meta. Existing data can be be updated on upgrade.
 * Feature - Update weights/dimensions for variations if they differ.
 * Feature - is_order_received_page() courtesy of Lee Willis.

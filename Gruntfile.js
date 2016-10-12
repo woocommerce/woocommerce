@@ -28,6 +28,17 @@ module.exports = function( grunt ) {
 			]
 		},
 
+		// Sass linting with Stylelint.
+		stylelint: {
+			options: {
+				stylelintrc: '.stylelintrc'
+			},
+			all: [
+				'<%= dirs.css %>/*.scss',
+				'!<%= dirs.css %>/select2.scss'
+			]
+		},
+
 		// Minify .js files.
 		uglify: {
 			options: {
@@ -150,7 +161,7 @@ module.exports = function( grunt ) {
 				type: 'wp-plugin',
 				domainPath: 'i18n/languages',
 				potHeaders: {
-					'report-msgid-bugs-to': 'https://github.com/woothemes/woocommerce/issues',
+					'report-msgid-bugs-to': 'https://github.com/woocommerce/woocommerce/issues',
 					'language-team': 'LANGUAGE <EMAIL@ADDRESS>'
 				}
 			},
@@ -189,11 +200,12 @@ module.exports = function( grunt ) {
 			},
 			files: {
 				src:  [
-					'**/*.php', // Include all files
-					'!apigen/**', // Exclude apigen/
+					'**/*.php',         // Include all files
+					'!apigen/**',       // Exclude apigen/
 					'!node_modules/**', // Exclude node_modules/
-					'!tests/**', // Exclude tests/
-					'!tmp/**' // Exclude tmp/
+					'!tests/**',        // Exclude tests/
+					'!vendor/**',       // Exclude vendor/
+					'!tmp/**'           // Exclude tmp/
 				],
 				expand: true
 			}
@@ -219,6 +231,26 @@ module.exports = function( grunt ) {
 			apigen: {
 				src: [ 'wc-apidocs' ]
 			}
+		},
+
+		// PHP Code Sniffer.
+		phpcs: {
+			options: {
+				bin: 'vendor/bin/phpcs',
+				standard: './phpcs.ruleset.xml'
+			},
+			dist: {
+				src:  [
+					'**/*.php',                                                  // Include all files
+					'!apigen/**',                                                // Exclude apigen/
+					'!includes/api/legacy/**',                                   // Exclude legacy REST API
+					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
+					'!includes/libraries/**',                                    // Exclude libraries/
+					'!node_modules/**',                                          // Exclude node_modules/
+					'!tmp/**',                                                   // Exclude tmp/
+					'!vendor/**'                                                 // Exclude vendor/
+				]
+			}
 		}
 	});
 
@@ -232,6 +264,8 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
+	grunt.loadNpmTasks( 'grunt-phpcs' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -247,6 +281,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'css', [
+		'stylelint',
 		'sass',
 		'cssmin'
 	]);

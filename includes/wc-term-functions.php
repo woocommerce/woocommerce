@@ -65,7 +65,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				$terms = wp_list_pluck( $terms, 'slug' );
 				break;
 		}
-	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
+	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
 		// wp_get_post_terms doesn't let us use custom sort order
 		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 
@@ -81,7 +81,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
 			// Ensure slugs is valid for get_terms - slugs isn't supported
-			$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
+			$args['fields']     = ( 'slugs' === $args['fields'] ) ? 'id=>slug' : $args['fields'];
 			$terms              = get_terms( $taxonomy, $args );
 		}
 	} else {
@@ -147,12 +147,12 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		'show_uncategorized' => 1,
 		'orderby'            => 'name',
 		'selected'           => $current_product_cat,
-		'menu_order'         => false
+		'menu_order'         => false,
 	);
 
 	$args = wp_parse_args( $args, $defaults );
 
-	if ( $args['orderby'] == 'order' ) {
+	if ( 'order' === $args['orderby'] ) {
 		$args['menu_order'] = 'asc';
 		$args['orderby']    = 'name';
 	}
@@ -164,7 +164,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	}
 
 	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
-	$output .= '<option value="" ' .  selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
 	if ( $args['show_uncategorized'] ) {
 		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
@@ -180,14 +180,14 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
  * @return mixed
  */
 function wc_walk_category_dropdown_tree() {
+	$args = func_get_args();
+
 	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) {
 		include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 	}
 
-	$args = func_get_args();
-
 	// the user's options are the third parameter
-	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) ) {
+	if ( empty( $args[2]['walker'] ) || ! is_a( $args[2]['walker'], 'Walker' ) ) {
 		$walker = new WC_Product_Cat_Dropdown_Walker;
 	} else {
 		$walker = $args[2]['walker'];
@@ -218,7 +218,7 @@ function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new
 						array(
 							'woocommerce_term_id' => $new_term_id,
 							'meta_key'            => $meta_data->meta_key,
-							'meta_value'          => $meta_data->meta_value
+							'meta_value'          => $meta_data->meta_value,
 						)
 					);
 				}
@@ -278,7 +278,7 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * @param bool $unique (default: false)
  * @return bool
  */
-function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
 	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
 }
 
@@ -340,17 +340,17 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 			continue; // our term to order, we skip
 		}
 		// the nextid of our term to order, lets move our term here
-		if (null !== $next_id && $term->term_id == $next_id) {
+		if ( null !== $next_id && $term->term_id == $next_id ) {
 			$index++;
-			$index = wc_set_term_order($id, $index, $taxonomy, true);
+			$index = wc_set_term_order( $id, $index, $taxonomy, true );
 		}
 
 		// set order
 		$index++;
-		$index = wc_set_term_order($term->term_id, $index, $taxonomy);
+		$index = wc_set_term_order( $term->term_id, $index, $taxonomy );
 
 		// if that term has children we walk through them
-		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
+		$children = get_terms( $taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0" );
 		if ( ! empty( $children ) ) {
 			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
 		}
@@ -380,19 +380,19 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	// Meta name
 	if ( taxonomy_is_product_attribute( $taxonomy ) )
-		$meta_name =  'order_' . esc_attr( $taxonomy );
+		$meta_name = 'order_' . esc_attr( $taxonomy );
 	else
 		$meta_name = 'order';
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 
-	if( ! $recursive ) return $index;
+	if ( ! $recursive ) return $index;
 
-	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
+	$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
 
 	foreach ( $children as $term ) {
 		$index++;
-		$index = wc_set_term_order($term->term_id, $index, $taxonomy, true);
+		$index = wc_set_term_order( $term->term_id, $index, $taxonomy, true );
 	}
 
 	clean_term_cache( $term_id, $taxonomy );
@@ -417,12 +417,12 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
 	// No sorting when menu_order is false.
-	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
+	if ( isset( $args['menu_order'] ) && false == $args['menu_order'] ) {
 		return $clauses;
 	}
 
 	// No sorting when orderby is non default.
-	if ( isset( $args['orderby'] ) && $args['orderby'] != 'name' ) {
+	if ( isset( $args['orderby'] ) && 'name' !== $args['orderby'] ) {
 		return $clauses;
 	}
 
@@ -638,7 +638,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		if ( is_object( $term ) ) {
 			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
-			if ( $term_counts[ $term->term_id ] !== '' ) {
+			if ( '' !== $term_counts[ $term->term_id ] ) {
 				$term->count = absint( $term_counts[ $term->term_id ] );
 			}
 		}

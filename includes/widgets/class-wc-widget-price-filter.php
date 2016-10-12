@@ -24,13 +24,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_price_filter';
 		$this->widget_description = __( 'Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_price_filter';
-		$this->widget_name        = __( 'WooCommerce Price Filter', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce price filter', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Filter by price', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
@@ -39,7 +39,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
 			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
 			'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
+			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '',
 		) );
 		parent::__construct();
 	}
@@ -153,9 +153,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT min( CAST( price_meta.meta_value AS UNSIGNED ) ) as min_price, max( CAST( price_meta.meta_value AS UNSIGNED ) ) as max_price FROM {$wpdb->posts} ";
+		$sql  = "SELECT min( CAST( price_meta.meta_value AS DECIMAL(2) ) ) as min_price, max( CAST( price_meta.meta_value AS DECIMAL(2) ) ) as max_price FROM {$wpdb->posts} ";
 		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
-		$sql .= " 	WHERE {$wpdb->posts}.post_type = 'product'
+		$sql .= " 	WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
 					AND {$wpdb->posts}.post_status = 'publish'
 					AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
 					AND price_meta.meta_value > '' ";

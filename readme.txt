@@ -2,7 +2,7 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, BFTrick, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
-Tested up to: 4.5
+Tested up to: 4.6
 Stable tag: 2.6.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -78,7 +78,7 @@ And there’s plenty more where they came from. Visit our [extensions page](http
 
 When you download WooCommerce, you join a community of more than a million store owners, developers, and WordPress enthusiasts. We’re one of the fastest-growing open source communities online, and whether you’re a n00b or a Ninja, we’d love to have you!
 
-If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce) to find out how you can pitch in.
+If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woocommerce/woocommerce) to find out how you can pitch in.
 
 Want to add a new language to WooCommerce? Swell! You can contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce).
 
@@ -88,10 +88,13 @@ And, finally, consider joining or spearheading a WooCommerce Meetup locally, mor
 
 = Minimum Requirements =
 
-* WordPress 3.8 or greater
-* PHP version 5.2.4 or greater
-* MySQL version 5.0 or greater
+* PHP version 5.2.4 or greater (PHP 5.6 or greater is recommended)
+* MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 * Some payment gateways require fsockopen support (for IPN access)
+* WooCommerce 2.5 requires WordPress 4.1+
+* WooCommerce 2.6 requires WordPress 4.4+
+
+Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/) for a detailed list of server requirements.
 
 = Automatic installation =
 
@@ -111,7 +114,7 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 
 = Dummy data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
 
 == Frequently Asked Questions ==
 
@@ -125,7 +128,7 @@ For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.c
 
 If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
-For help with premium add-ons from WooThemes, use [our helpdesk](https://support.woothemes.com/).
+For help with premium extensions from WooThemes, use [our helpdesk](https://support.woothemes.com/).
 
 = Will WooCommerce work with my theme? =
 
@@ -137,15 +140,15 @@ You can vote on and request new features and extensions in our [WooIdeas board](
 
 = Where can I report bugs or contribute to the project? =
 
-Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woothemes/woocommerce/issues).
+Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woocommerce/woocommerce/issues).
 
 = Where can I find the REST API documentation? =
 
-You can find the documentation of our REST API on the [WooCommerce REST API Docs](https://woothemes.github.io/woocommerce-rest-api-docs/).
+You can find the documentation of our REST API on the [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/).
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/woocommerce/) :)
+Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/woocommerce/) :)
 
 == Screenshots ==
 
@@ -163,12 +166,24 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Added Nigerian Provinces to i18n/state.
 * Improved handling of shop page rewrite rules to allow subpages.
 * Redirect to login after password reset.
-* When using authorizations in PayPal standard, automatically capture funds when the order goes processing/completed.
+* When using authorizations in PayPal Standard, automatically capture funds when the order goes processing/completed.
 * On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
 * Show variable weights/dimensions even when parent values are not set.
 * Automatically sort tax rates rather than allow clunky manual sorting.
+* Made WC_Logger pluggable via wc_get_logger function.
+* Use 'average rating' post meta for 'rating' product sorting option.
+* Show better labels in nav menus metabox.
+* Sort “Recently Viewed” products by the view order.
+* Remove checkbox options in system status tools and replace with constants.
+* Allow oAuth1.0a authentication using headers.
+* Removed internal scroll from log viewer.
+* Add reply-to to admin emails.
+* When deleting a tax rate class, remove it's tax rates.
+* Made the store notice dismissible.
+* Improved the zone setup flow.
+* Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
 
-[See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 

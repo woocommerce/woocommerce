@@ -15,11 +15,11 @@ class WC_Helper_Shipping {
 	public static function create_simple_flat_rate() {
 		$flat_rate_settings = array(
 			'enabled'      => 'yes',
-			'title'        => 'Flat Rate',
+			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
 			'tax_status'   => 'taxable',
-			'cost'         => '10'
+			'cost'         => '10',
 		);
 
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );

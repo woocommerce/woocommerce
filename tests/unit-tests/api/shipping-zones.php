@@ -32,7 +32,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		foreach( $this->zones as $zone ) {
+		foreach ( $this->zones as $zone ) {
 			$zone->delete();
 		}
 	}
@@ -297,6 +297,47 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test Shipping Zone delete endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone() {
+		wp_set_current_user( $this->user );
+		$zone = $this->create_shipping_zone( 'Zone 1' );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test Shipping Zone delete endpoint without permissions.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone_without_permission() {
+		wp_set_current_user( 0 );
+		$zone = $this->create_shipping_zone( 'Zone 1' );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test Shipping Zone delete endpoint with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_delete_shipping_zone_invalid_id() {
+		wp_set_current_user( $this->user );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/0' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
 	 * Test getting a single Shipping Zone.
 	 * @since 2.7.0
 	 */
@@ -488,6 +529,25 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$methods     = $zone->get_shipping_methods();
 		$method      = $methods[ $instance_id ];
 
+		$settings = array();
+		$method->init_instance_settings();
+		foreach ( $method->get_instance_form_fields() as $id => $field ) {
+			$data = array(
+				'id'          => $id,
+				'label'       => $field['title'],
+				'description' => ( empty( $field['description'] ) ? '' : $field['description'] ),
+				'type'        => $field['type'],
+				'value'       => $method->instance_settings[ $id ],
+				'default'     => ( empty( $field['default'] ) ? '' : $field['default'] ),
+				'tip'         => ( empty( $field['description'] ) ? '' : $field['description'] ),
+				'placeholder' => ( empty( $field['placeholder'] ) ? '' : $field['placeholder'] ),
+			);
+			if ( ! empty( $field['options'] ) ) {
+				$data['options'] = $field['options'];
+			}
+			$settings[ $id ] = $data;
+		}
+
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods' ) );
 		$data     = $response->get_data();
 		$expected = array(
@@ -498,6 +558,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 			'method_id'          => $method->id,
 			'method_title'       => $method->method_title,
 			'method_description' => $method->method_description,
+			'settings'           => $settings,
 			'_links'             => array(
 				'self'       => array(
 					array(
@@ -555,5 +616,131 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/1' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test updating a Shipping Zone Method.
+	 * @since 2.7.0
+	 */
+	public function test_update_methods() {
+		wp_set_current_user( $this->user );
+
+		$zone        = $this->create_shipping_zone( 'Zone 1' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		$methods     = $zone->get_shipping_methods();
+		$method      = $methods[ $instance_id ];
+
+		// Test defaults
+		$request = new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'title', $data['settings'] );
+		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
+		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
+		$this->assertEquals( 'taxable', $data['settings']['tax_status']['value'] );
+		$this->assertArrayHasKey( 'cost', $data['settings'] );
+		$this->assertEquals( '0', $data['settings']['cost']['value'] );
+
+		// Update a single value
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$request->set_body_params( array(
+			'settings' => array(
+				'cost' => 5,
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'title', $data['settings'] );
+		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
+		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
+		$this->assertEquals( 'taxable', $data['settings']['tax_status']['value'] );
+		$this->assertArrayHasKey( 'cost', $data['settings'] );
+		$this->assertEquals( '5', $data['settings']['cost']['value'] );
+
+		// Test multiple settings
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$request->set_body_params( array(
+			'settings' => array(
+				'cost'       => 10,
+				'tax_status' => 'none',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'title', $data['settings'] );
+		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
+		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
+		$this->assertEquals( 'none', $data['settings']['tax_status']['value'] );
+		$this->assertArrayHasKey( 'cost', $data['settings'] );
+		$this->assertEquals( '10', $data['settings']['cost']['value'] );
+
+		// Test bogus
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$request->set_body_params( array(
+			'settings' => array(
+				'cost'       => 10,
+				'tax_status' => 'this_is_not_a_valid_option',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test other parameters
+		$this->assertTrue( $data['enabled'] );
+		$this->assertEquals( 1, $data['order'] );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$request->set_body_params( array(
+			'enabled' => false,
+			'order'   => 2,
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertFalse( $data['enabled'] );
+		$this->assertEquals( 2, $data['order'] );
+		$this->assertArrayHasKey( 'cost', $data['settings'] );
+		$this->assertEquals( '10', $data['settings']['cost']['value'] );
+	}
+
+	/**
+	 * Test creating a Shipping Zone Method.
+	 * @since 2.7.0
+	 */
+	public function test_create_method() {
+		wp_set_current_user( $this->user );
+		$zone    = $this->create_shipping_zone( 'Zone 1' );
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods' );
+		$request->set_body_params( array(
+			'method_id' => 'flat_rate',
+			'enabled' => false,
+			'order' => 2,
+		) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertFalse( $data['enabled'] );
+		$this->assertEquals( 2, $data['order'] );
+		$this->assertArrayHasKey( 'cost', $data['settings'] );
+		$this->assertEquals( '0', $data['settings']['cost']['value'] );
+	}
+
+	/**
+	 * Test deleting a Shipping Zone Method.
+	 * @since 2.7.0
+	 */
+	public function test_delete_method() {
+		wp_set_current_user( $this->user );
+		$zone        = $this->create_shipping_zone( 'Zone 1' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		$methods     = $zone->get_shipping_methods();
+		$method      = $methods[ $instance_id ];
+		$request     = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+		$request->set_param( 'force', true );
+		$response    = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
 	}
 }

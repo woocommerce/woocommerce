@@ -22,13 +22,13 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav_filters';
 		$this->widget_description = __( 'Shows active layered nav filters so users can see and deactivate them.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_layered_nav_filters';
-		$this->widget_name        = __( 'WooCommerce Layered Nav Filters', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce layered nav filters', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Active Filters', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'std'   => __( 'Active filters', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

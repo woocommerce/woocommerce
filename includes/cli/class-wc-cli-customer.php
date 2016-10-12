@@ -556,7 +556,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 
 		if ( is_numeric( $id_email_or_login ) ) {
 			$user = get_user_by( 'id', $id_email_or_login );
-		} else if ( is_email( $id_email_or_login ) ) {
+		} elseif ( is_email( $id_email_or_login ) ) {
 			$user = get_user_by( 'email', $id_email_or_login );
 		} else {
 			$user = get_user_by( 'login', $id_email_or_login );
@@ -585,7 +585,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 			'last_name'        => $user->last_name,
 			'username'         => $user->user_login,
 			'role'             => $user->roles[0],
-			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
+			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => wc_get_customer_order_count( $user->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $user->ID ), 2 ),
@@ -615,7 +615,6 @@ class WC_CLI_Customer extends WC_CLI_Command {
 				'country'    => $user->shipping_country,
 			),
 		);
-
 
 		// Allow dot notation for nested array so that user can specifies field
 		// like 'billing_address.first_name'.

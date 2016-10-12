@@ -22,13 +22,13 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_product_tag_cloud';
 		$this->widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_product_tag_cloud';
-		$this->widget_name        = __( 'WooCommerce Product Tags', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce product tags', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Product Tags', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'std'   => __( 'Product tags', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();

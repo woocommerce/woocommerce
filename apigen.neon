@@ -10,7 +10,7 @@ extensions: [php]
 # directories and files matching this file mask will not be parsed
 exclude:
     - includes/libraries/
-    - includes/api/
+    - includes/api/legacy/
     - i18n/
     - node_modules/
     - wc-apidocs/

@@ -54,76 +54,59 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- *
- * @return WC_Order|WP_Error WC_Order on success, WP_Error on failure.
+ * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
-		'status'        => '',
+		'status'        => null,
 		'customer_id'   => null,
 		'customer_note' => null,
+		'parent'        => null,
+		'created_via'   => null,
+		'cart_hash'     => null,
 		'order_id'      => 0,
-		'created_via'   => '',
-		'cart_hash'     => '',
-		'parent'        => 0,
 	);
 
-	$args       = wp_parse_args( $args, $default_args );
-	$order_data = array();
+	try {
+		$args  = wp_parse_args( $args, $default_args );
+		$order = new WC_Order( $args['order_id'] );
 
-	if ( $args['order_id'] > 0 ) {
-		$updating         = true;
-		$order_data['ID'] = $args['order_id'];
-	} else {
-		$updating                    = false;
-		$order_data['post_type']     = 'shop_order';
-		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
-		$order_data['ping_status']   = 'closed';
-		$order_data['post_author']   = 1;
-		$order_data['post_password'] = uniqid( 'order_' );
-		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		$order_data['post_parent']   = absint( $args['parent'] );
-	}
-
-	if ( $args['status'] ) {
-		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
-			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
+		// Update props that were set (not null)
+		if ( ! is_null( $args['parent'] ) ) {
+			$order->set_parent_id( absint( $args['parent'] ) );
 		}
-		$order_data['post_status']  = 'wc-' . $args['status'];
+
+		if ( ! is_null( $args['status'] ) ) {
+			$order->set_status( $args['status'] );
+		}
+
+		if ( ! is_null( $args['customer_note'] ) ) {
+			$order->set_customer_note( $args['customer_note'] );
+		}
+
+		if ( ! is_null( $args['customer_id'] ) ) {
+			$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
+		}
+
+		if ( ! is_null( $args['created_via'] ) ) {
+			$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
+		}
+
+		if ( ! is_null( $args['cart_hash'] ) ) {
+			$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
+		}
+
+		// Update other order props set automatically
+		$order->set_currency( get_woocommerce_currency() );
+		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+		$order->set_customer_user_agent( wc_get_user_agent() );
+		$order->save();
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
 	}
 
-	if ( ! is_null( $args['customer_note'] ) ) {
-		$order_data['post_excerpt'] = $args['customer_note'];
-	}
-
-	if ( $updating ) {
-		$order_id = wp_update_post( $order_data );
-	} else {
-		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
-	}
-
-	if ( is_wp_error( $order_id ) ) {
-		return $order_id;
-	}
-
-	if ( ! $updating ) {
-		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
-		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address', WC_Geolocation::get_ip_address() );
-		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
-		update_post_meta( $order_id, '_customer_user', 0 );
-		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
-		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
-	}
-
-	if ( is_numeric( $args['customer_id'] ) ) {
-		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
-	}
-
-	update_post_meta( $order_id, '_order_version', WC_VERSION );
-
-	return wc_get_order( $order_id );
+	return $order;
 }
 
 /**
@@ -134,7 +117,7 @@ function wc_create_order( $args = array() ) {
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
-		return new WP_Error( __( 'Invalid order ID', 'woocommerce' ) );
+		return new WP_Error( __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
 }
@@ -245,7 +228,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	$template = locate_template(
 		array(
 			trailingslashit( $template_path ) . $template_name,
-			$template_name
+			$template_name,
 		)
 	);
 
@@ -264,7 +247,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @return string
  */
 function get_woocommerce_currency() {
-	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
 /**
@@ -526,7 +509,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'JOD' => '&#x62f;.&#x627;',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'KGS' => '&#x43b;&#x432;',
+		'KGS' => '&#x441;&#x43e;&#x43c;',
 		'KHR' => '&#x17db;',
 		'KMF' => 'Fr',
 		'KPW' => '&#x20a9;',
@@ -654,7 +637,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => $width,
 			'height' => $height,
-			'crop'   => $crop
+			'crop'   => $crop,
 		);
 
 		$image_size = $width . '_' . $height;
@@ -669,7 +652,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => '300',
 			'height' => '300',
-			'crop'   => 1
+			'crop'   => 1,
 		);
 	}
 
@@ -915,21 +898,6 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
- * Enables template debug mode.
- */
-function wc_template_debug_mode() {
-	if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
-			define( 'WC_TEMPLATE_DEBUG_MODE', true );
-		} else {
-			define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		}
-	}
-}
-add_action( 'after_setup_theme', 'wc_template_debug_mode', 20 );
-
-/**
  * Formats a string in the format COUNTRY:STATE into an array.
  *
  * @since 2.3.0
@@ -945,7 +913,7 @@ function wc_format_country_state_string( $country_string ) {
 	}
 	return array(
 		'country' => $country,
-		'state'   => $state
+		'state'   => $state,
 	);
 }
 
@@ -980,7 +948,7 @@ function wc_get_customer_default_location() {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
 			// Exclude common bots from geolocation by user agent.
-			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+			$ua = wc_get_user_agent();
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
 				$location = WC_Geolocation::geolocate_ip( '', true, false );
@@ -1002,6 +970,15 @@ function wc_get_customer_default_location() {
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
 }
 
+/**
+ * Get user agent string.
+ * @since  2.7.0
+ * @return string
+ */
+function wc_get_user_agent() {
+	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+}
+
 // This function can be removed when WP 3.9.2 or greater is required.
 if ( ! function_exists( 'hash_equals' ) ) :
 	/**
@@ -1018,7 +995,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 	 */
 	function hash_equals( $a, $b ) {
 		$a_length = strlen( $a );
-		if ( $a_length !== strlen( $b ) ) {
+		if ( strlen( $b ) !== $a_length ) {
 			return false;
 		}
 		$result = 0;
@@ -1028,7 +1005,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
 		}
 
-		return $result === 0;
+		return 0 === $result;
 	}
 endif;
 
@@ -1268,13 +1245,16 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
-	$postcodes       = array( $postcode );
-	$postcode        = wc_format_postcode( $postcode, $country );
-	$postcodes[]     = $postcode;
-	$postcode_length = strlen( $postcode );
+	$formatted_postcode = wc_format_postcode( $postcode, $country );
+	$length             = strlen( $formatted_postcode );
+	$postcodes          = array(
+		$postcode,
+		$formatted_postcode,
+		$formatted_postcode . '*',
+	);
 
-	for ( $i = 0; $i < $postcode_length; $i ++ ) {
-		$postcodes[] = substr( $postcode, 0, ( $i + 1 ) * -1 ) . '*';
+	for ( $i = 0; $i < $length; $i ++ ) {
+		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
 	}
 
 	return $postcodes;
@@ -1415,3 +1395,44 @@ function wc_get_rounding_precision() {
 	}
 	return $precision;
 }
+
+/**
+ * Returns a new instance of a WC Logger.
+ * Use woocommerce_logging_class filter to change the logging class.
+ * @return WC_Logger
+ */
+function wc_get_logger() {
+	if ( ! class_exists( 'WC_Logger' ) ) {
+		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	}
+	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+	return new $class;
+}
+
+/**
+ * Runs a deprecated action with notice only if used.
+ * @since  2.7.0
+ * @param  string $action
+ * @param  array $args
+ * @param  string $deprecated_in
+ * @param  string $replacement
+ */
+function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
+	if ( has_action( $action ) ) {
+		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		do_action_ref_array( $action, $args );
+	}
+}
+
+/**
+ * Store user agents. Used for tracker.
+ * @since 2.7.0
+ */
+function wc_maybe_store_user_agent( $user_login, $user ) {
+	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
+		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+		$admin_user_agents[] = wc_get_user_agent();
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+	}
+}
+add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );

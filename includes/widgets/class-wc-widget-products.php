@@ -22,12 +22,12 @@ class WC_Widget_Products extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_products';
 		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce Products', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -35,17 +35,17 @@ class WC_Widget_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
+				'label' => __( 'Number of products to show', 'woocommerce' ),
 			),
 			'show' => array(
 				'type'  => 'select',
 				'std'   => '',
 				'label' => __( 'Show', 'woocommerce' ),
 				'options' => array(
-					''         => __( 'All Products', 'woocommerce' ),
-					'featured' => __( 'Featured Products', 'woocommerce' ),
-					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
-				)
+					''         => __( 'All products', 'woocommerce' ),
+					'featured' => __( 'Featured products', 'woocommerce' ),
+					'onsale'   => __( 'On-sale products', 'woocommerce' ),
+				),
 			),
 			'orderby' => array(
 				'type'  => 'select',
@@ -56,7 +56,7 @@ class WC_Widget_Products extends WC_Widget {
 					'price'  => __( 'Price', 'woocommerce' ),
 					'rand'   => __( 'Random', 'woocommerce' ),
 					'sales'  => __( 'Sales', 'woocommerce' ),
-				)
+				),
 			),
 			'order' => array(
 				'type'  => 'select',
@@ -65,18 +65,18 @@ class WC_Widget_Products extends WC_Widget {
 				'options' => array(
 					'asc'  => __( 'ASC', 'woocommerce' ),
 					'desc' => __( 'DESC', 'woocommerce' ),
-				)
+				),
 			),
 			'hide_free' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Hide free products', 'woocommerce' )
+				'label' => __( 'Hide free products', 'woocommerce' ),
 			),
 			'show_hidden' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show hidden products', 'woocommerce' )
-			)
+				'label' => __( 'Show hidden products', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -100,7 +100,7 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array()
+			'meta_query'     => array(),
 		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
@@ -124,7 +124,7 @@ class WC_Widget_Products extends WC_Widget {
 			case 'featured' :
 				$query_args['meta_query'][] = array(
 					'key'   => '_featured',
-					'value' => 'yes'
+					'value' => 'yes',
 				);
 				break;
 			case 'onsale' :

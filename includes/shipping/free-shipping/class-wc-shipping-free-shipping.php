@@ -37,8 +37,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	public function __construct( $instance_id = 0 ) {
 		$this->id                 = 'free_shipping';
 		$this->instance_id        = absint( $instance_id );
-		$this->method_title       = __( 'Free Shipping', 'woocommerce' );
-		$this->method_description = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
+		$this->method_title       = __( 'Free shipping', 'woocommerce' );
+		$this->method_description = __( 'Free shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
 		$this->supports           = array(
 			'shipping-zones',
 			'instance-settings',
@@ -78,7 +78,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'requires' => array(
-				'title'   => __( 'Free Shipping Requires...', 'woocommerce' ),
+				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
 				'default' => '',
@@ -91,7 +91,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				),
 			),
 			'min_amount' => array(
-				'title'       => __( 'Minimum Order Amount', 'woocommerce' ),
+				'title'       => __( 'Minimum order amount', 'woocommerce' ),
 				'type'        => 'price',
 				'placeholder' => wc_format_localized_price( 0 ),
 				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
@@ -149,7 +149,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
 			if ( $coupons = WC()->cart->get_coupons() ) {
 				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->enable_free_shipping() ) {
+					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
 						break;
 					}
@@ -161,9 +161,9 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( 'incl' === WC()->cart->tax_display_cart ) {
-				$total = $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() );
+				$total = round( $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() ), wc_get_price_decimals() );
 			} else {
-				$total = $total - WC()->cart->get_cart_discount_total();
+				$total = round( $total - WC()->cart->get_cart_discount_total(), wc_get_price_decimals() );
 			}
 
 			if ( $total >= $this->min_amount ) {

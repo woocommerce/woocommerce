@@ -24,7 +24,7 @@ class WC_Shortcode_Cart {
 			$city     = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? wc_clean( $_POST['calc_shipping_city'] ) : '';
 
 			if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
-				throw new Exception( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+				throw new Exception( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ) );
 			} elseif ( $postcode ) {
 				$postcode = wc_format_postcode( $postcode, $country );
 			}
@@ -37,7 +37,9 @@ class WC_Shortcode_Cart {
 				WC()->customer->set_shipping_to_base();
 			}
 
-			WC()->customer->calculated_shipping( true );
+			WC()->customer->set_calculated_shipping( true );
+
+			WC()->customer->save_to_session();
 
 			wc_add_notice( __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 

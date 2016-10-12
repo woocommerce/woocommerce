@@ -174,7 +174,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -581,7 +581,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'postcode' => array(
-					'description' => __( 'Postcode/ZIP.', 'woocommerce' ),
+					'description' => __( 'Postcode / ZIP.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

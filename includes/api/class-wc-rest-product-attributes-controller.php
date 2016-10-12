@@ -143,7 +143,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
@@ -161,7 +161,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'edit' ) ) {
@@ -179,11 +179,11 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -197,7 +197,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -232,7 +232,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 
 		$args = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
 			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
 			'attribute_public'  => true === $request['has_archives'],
@@ -324,7 +324,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$format = array( '%s', '%s', '%s', '%s', '%d' );
 		$args   = array(
 			'attribute_label'   => $request['name'],
-			'attribute_name'    => $request['slug'],
+			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
 			'attribute_type'    => $request['type'],
 			'attribute_orderby' => $request['order_by'],
 			'attribute_public'  => $request['has_archives'],
@@ -350,17 +350,19 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 			}
 		}
 
-		$update = $wpdb->update(
-			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
-			array( 'attribute_id' => $id ),
-			$format,
-			array( '%d' )
-		);
+		if ( $args ) {
+			$update = $wpdb->update(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				$args,
+				array( 'attribute_id' => $id ),
+				$format,
+				array( '%d' )
+			);
 
-		// Checks for errors.
-		if ( false === $update ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute', 'woocommerce' ), array( 'status' => 400 ) );
+			// Checks for errors.
+			if ( false === $update ) {
+				return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		$attribute = $this->get_attribute( $id );
@@ -617,7 +619,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		 ", $id ) );
 
 		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
-			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $attribute;
@@ -632,11 +634,11 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
 		if ( strlen( $slug ) >= 28 ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		}
 
 		return true;

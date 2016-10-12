@@ -126,7 +126,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -415,7 +415,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$post  = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0;
@@ -476,9 +476,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given post.
 	 */
-	protected function prepare_links( $post ) {
+	protected function prepare_links( $post, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
@@ -521,6 +522,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		if ( 'include' === $query_args['orderby'] ) {
 			$query_args['orderby'] = 'post__in';
+		} elseif ( 'id' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'ID'; // ID must be capitalized
 		}
 
 		return $query_args;

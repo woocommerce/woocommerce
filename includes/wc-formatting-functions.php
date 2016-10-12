@@ -15,6 +15,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Converts a string (e.g. yes or no) to a bool.
+ * @since 2.7.0
+ * @param string $string
+ * @return bool
+ */
+function wc_string_to_bool( $string ) {
+	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || '1' === $string );
+}
+
+/**
+ * Explode a string into an array by $delimiter and remove empty values.
+ * @since 2.7.0
+ * @param string $string
+ * @param string $delimiter
+ * @return array
+ */
+function wc_string_to_array( $string, $delimiter = ',' ) {
+	return is_array( $string ) ? $string : array_filter( explode( $delimiter, $string ) );
+}
+
+/**
  * Sanitize taxonomy names. Slug format (no spaces, lowercase).
  *
  * urldecode is used to reverse munging of UTF8 characters.
@@ -23,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( $taxonomy ) ), $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( urldecode( $taxonomy ) ) ), $taxonomy );
 }
 
 /**
@@ -224,8 +245,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	if ( $dp !== false ) {
-		$dp     = intval( $dp == "" ? wc_get_price_decimals() : $dp );
+	if ( false !== $dp ) {
+		$dp     = intval( '' == $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 
 	// DP is false - don't use number format, just return a string in our format
@@ -411,7 +432,7 @@ function wc_price( $price, $args = array() ) {
 		'decimal_separator'  => wc_get_price_decimal_separator(),
 		'thousand_separator' => wc_get_price_thousand_separator(),
 		'decimals'           => wc_get_price_decimals(),
-		'price_format'       => get_woocommerce_price_format()
+		'price_format'       => get_woocommerce_price_format(),
 	) ) ) );
 
 	$negative        = $price < 0;
@@ -536,9 +557,9 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
 
 		$rgb      = array();
-		$rgb['R'] = hexdec( $color{0}.$color{1} );
-		$rgb['G'] = hexdec( $color{2}.$color{3} );
-		$rgb['B'] = hexdec( $color{4}.$color{5} );
+		$rgb['R'] = hexdec( $color{0} . $color{1} );
+		$rgb['G'] = hexdec( $color{2} . $color{3} );
+		$rgb['B'] = hexdec( $color{4} . $color{5} );
 
 		return $rgb;
 	}
@@ -663,16 +684,17 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 			break;
 		case 'BR' :
-			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+		case 'PL' :
+			$postcode = substr_replace( $postcode, '-', -3, 0 );
 			break;
 		case 'JP' :
-			$postcode = trim( substr_replace( $postcode, '-', 3, 0 ) );
-			break;
-		case 'PL' :
-			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+			$postcode = substr_replace( $postcode, '-', 3, 0 );
 			break;
 		case 'PT' :
-			$postcode = trim( substr_replace( $postcode, '-', 4, 0 ) );
+			$postcode = substr_replace( $postcode, '-', 4, 0 );
+			break;
+		case 'US' :
+			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
 	}
 

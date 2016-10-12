@@ -121,15 +121,15 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$sizes = array(
 			'shop_thumbnail' => array( 'width' => '180', 'height' => '180' ),
 			'shop_single'    => array( 'width' => '600', 'height' => '600' ),
-			'shop_catalog'   => array( 'width' => '300', 'height' => '300' )
+			'shop_catalog'   => array( 'width' => '300', 'height' => '300' ),
 		);
 
 		foreach ( $sizes as $size => $values ) {
-			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
+			$img = '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
 			$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img( $size ) );
 		}
 
-		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
+		$img = '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
 		$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img() );
 	}
 
@@ -140,10 +140,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_product_types() {
 		$product_types = (array) apply_filters( 'product_type_selector', array(
-			'simple'   => __( 'Simple product', 'woocommerce' ),
-			'grouped'  => __( 'Grouped product', 'woocommerce' ),
-			'external' => __( 'External/Affiliate product', 'woocommerce' ),
-			'variable' => __( 'Variable product', 'woocommerce' )
+			'simple'   => 'Simple product',
+			'grouped'  => 'Grouped product',
+			'external' => 'External/Affiliate product',
+			'variable' => 'Variable product',
 		) );
 
 		$this->assertEquals( $product_types, wc_get_product_types() );

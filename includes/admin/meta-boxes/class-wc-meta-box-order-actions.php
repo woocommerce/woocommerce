@@ -50,7 +50,7 @@ class WC_Meta_Box_Order_Actions {
 						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
 								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
+									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . esc_html( $mail->title ) . '</option>';
 								}
 							}
 						}
@@ -59,7 +59,7 @@ class WC_Meta_Box_Order_Actions {
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
-					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
 				</select>
@@ -73,15 +73,15 @@ class WC_Meta_Box_Order_Actions {
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __( 'Delete Permanently', 'woocommerce' );
+							$delete_text = __( 'Delete permanently', 'woocommerce' );
 						} else {
-							$delete_text = __( 'Move to Trash', 'woocommerce' );
+							$delete_text = __( 'Move to trash', 'woocommerce' );
 						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -125,7 +125,7 @@ class WC_Meta_Box_Order_Actions {
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->id );
+							$mail->trigger( $order->get_id() );
 							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
 						}
 					}
@@ -139,7 +139,7 @@ class WC_Meta_Box_Order_Actions {
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
-				$wpdb->delete( 
+				$wpdb->delete(
 					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 					array( 'order_id' => $post_id ),
 					array( '%d' )
@@ -169,5 +169,4 @@ class WC_Meta_Box_Order_Actions {
 	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
 	}
-
 }

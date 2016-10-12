@@ -39,12 +39,12 @@ class WC_Admin_Duplicate_Product {
 			return $actions;
 		}
 
-		if ( $post->post_type != 'product' ) {
+		if ( 'product' !== $post->post_type ) {
 			return $actions;
 		}
 
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
-			. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
+			. '" rel="permalink">' . __( 'Duplicate', 'woocommerce' ) . '</a>';
 
 		return $actions;
 	}
@@ -63,7 +63,7 @@ class WC_Admin_Duplicate_Product {
 			return;
 		}
 
-		if ( $post->post_type != 'product' ) {
+		if ( 'product' !== $post->post_type ) {
 			return;
 		}
 
@@ -156,7 +156,7 @@ class WC_Admin_Duplicate_Product {
 				'post_modified_gmt'         => $new_post_date_gmt,
 				'post_parent'               => $post_parent,
 				'menu_order'                => $post->menu_order,
-				'post_mime_type'            => $post->post_mime_type
+				'post_mime_type'            => $post->post_mime_type,
 			)
 		);
 
@@ -164,14 +164,14 @@ class WC_Admin_Duplicate_Product {
 
 		// Set title for variations
 		if ( 'product_variation' === $post->post_type ) {
-			$post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $new_post_id ), esc_html( get_the_title( $post_parent ) ) );
+			$post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), absint( $new_post_id ), esc_html( get_the_title( $post_parent ) ) );
 			$wpdb->update(
 				$wpdb->posts,
 				array(
 					'post_title' => $post_title,
 				),
 				array(
-					'ID' => $new_post_id
+					'ID' => $new_post_id,
 				)
 			);
 		}
@@ -185,7 +185,7 @@ class WC_Admin_Duplicate_Product {
 					'guid'      => get_permalink( $new_post_id ),
 				),
 				array(
-					'ID' => $new_post_id
+					'ID' => $new_post_id,
 				)
 			);
 	    }

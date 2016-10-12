@@ -72,7 +72,7 @@ class WC_Admin_Attributes {
 			'attribute_name'    => isset( $_POST['attribute_name'] )    ? wc_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) ) : '',
 			'attribute_type'    => isset( $_POST['attribute_type'] )    ? wc_clean( $_POST['attribute_type'] ) : 'select',
 			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( $_POST['attribute_orderby'] ) : '',
-			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0
+			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0,
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {
@@ -253,7 +253,7 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
+			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
@@ -292,7 +292,7 @@ class WC_Admin_Attributes {
 							</tr>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
-									<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+									<label for="attribute_public"><?php _e( 'Enable archives?', 'woocommerce' ); ?></label>
 								</th>
 								<td>
 									<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
@@ -367,7 +367,7 @@ class WC_Admin_Attributes {
 									<th scope="col"><?php _e( 'Slug', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Type', 'woocommerce' ); ?></th>
 									<th scope="col"><?php _e( 'Order by', 'woocommerce' ); ?></th>
-									<th scope="col" colspan="2"><?php _e( 'Terms', 'woocommerce' ); ?></th>
+									<th scope="col"><?php _e( 'Terms', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -422,8 +422,9 @@ class WC_Admin_Attributes {
 													} else {
 														echo '<span class="na">&ndash;</span>';
 													}
-												?></td>
-												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php esc_attr_e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
+												?>
+												<br /><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php _e( 'Configure terms', 'woocommerce' ); ?></a>
+												</td>
 											</tr><?php
 										endforeach;
 									else :
@@ -437,7 +438,7 @@ class WC_Admin_Attributes {
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
+							<h2><?php _e( 'Add new attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
@@ -493,7 +494,7 @@ class WC_Admin_Attributes {
 
 								<?php do_action( 'woocommerce_after_add_attribute_fields' ) ?>
 
-								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
+								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 							</form>
 						</div>

@@ -36,8 +36,8 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
-			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -88,10 +88,10 @@ class WC_Query {
 
 		switch ( $endpoint ) {
 			case 'order-pay' :
-				$title = __( 'Pay for Order', 'woocommerce' );
+				$title = __( 'Pay for order', 'woocommerce' );
 			break;
 			case 'order-received' :
-				$title = __( 'Order Received', 'woocommerce' );
+				$title = __( 'Order received', 'woocommerce' );
 			break;
 			case 'orders' :
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
@@ -108,19 +108,19 @@ class WC_Query {
 				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
-				$title = __( 'Account Details', 'woocommerce' );
+				$title = __( 'Account details', 'woocommerce' );
 			break;
 			case 'edit-address' :
 				$title = __( 'Addresses', 'woocommerce' );
 			break;
 			case 'payment-methods' :
-				$title = __( 'Payment Methods', 'woocommerce' );
+				$title = __( 'Payment methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
-				$title = __( 'Add Payment Method', 'woocommerce' );
+				$title = __( 'Add payment method', 'woocommerce' );
 			break;
 			case 'lost-password' :
-				$title = __( 'Lost Password', 'woocommerce' );
+				$title = __( 'Lost password', 'woocommerce' );
 			break;
 			default :
 				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
@@ -211,9 +211,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
@@ -445,36 +443,39 @@ class WC_Query {
 
 		// default - menu_order
 		$args['orderby']  = 'menu_order title';
-		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+		$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 		$args['meta_key'] = '';
 
 		switch ( $orderby ) {
 			case 'rand' :
 				$args['orderby']  = 'rand';
-			break;
+				break;
 			case 'date' :
 				$args['orderby']  = 'date ID';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
-			break;
+				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+				break;
 			case 'price' :
 				$args['orderby']  = "meta_value_num ID";
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+				$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
-			break;
+				break;
 			case 'popularity' :
 				$args['meta_key'] = 'total_sales';
 
 				// Sorting handled later though a hook
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
-			break;
+				break;
 			case 'rating' :
-				// Sorting handled later though a hook
-				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
-			break;
+				$args['meta_key'] = '_wc_average_rating';
+				$args['orderby']  = array(
+					'meta_value_num' => 'DESC',
+					'ID'             => 'ASC',
+				);
+				break;
 			case 'title' :
-				$args['orderby']  = 'title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-			break;
+				$args['orderby'] = 'title';
+				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+				break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
@@ -498,12 +499,14 @@ class WC_Query {
 	/**
 	 * Order by rating post clauses.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0
 	 * @param array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
+
+		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -661,7 +664,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query[ 'product_cat' ] = array(
+			$tax_query['product_cat'] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array( $args['product_cat'] ),
 				'field'    => 'slug',
@@ -669,7 +672,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query[ 'product_tag' ] = array(
+			$tax_query['product_tag'] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',
