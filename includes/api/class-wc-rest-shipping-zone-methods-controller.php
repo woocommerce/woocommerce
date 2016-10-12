@@ -206,7 +206,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		if ( $force ) {
 			$zone->delete_shipping_method( $instance_id );
 		} else {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.' ), array( 'status' => 501 ) );
+			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		/**
