@@ -1627,6 +1627,14 @@ button.pswp__button--arrow--right:hover {
 	background-image: none !important; /* 1 */
 }
 
+button.pswp__button--close:hover {
+	background-position: 0 -44px;
+}
+
+button.pswp__button--zoom:hover {
+	background-position: -88px 0;
+}
+
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
