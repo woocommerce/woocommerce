@@ -504,7 +504,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		try {
 			if ( ! isset( $data['coupons'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_coupons_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'coupons' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_missing_coupons_data', sprintf( __( 'No %s data specified to create/edit %s', 'woocommerce' ), 'coupons' ), 400 );
 			}
 
 			$data  = $data['coupons'];

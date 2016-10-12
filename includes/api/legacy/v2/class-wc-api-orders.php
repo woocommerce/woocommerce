@@ -1752,7 +1752,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		try {
 			if ( ! isset( $data['orders'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_orders_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'orders' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_missing_orders_data', sprintf( __( 'No %s data specified to create/edit %s', 'woocommerce' ), 'orders' ), 400 );
 			}
 
 			$data  = $data['orders'];

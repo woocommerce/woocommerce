@@ -788,7 +788,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		try {
 			if ( ! isset( $data['customers'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_customers_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'customers' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_missing_customers_data', sprintf( __( 'No %s data specified to create/edit %s', 'woocommerce' ), 'customers' ), 400 );
 			}
 
 			$data  = $data['customers'];

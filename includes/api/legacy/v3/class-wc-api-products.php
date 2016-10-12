@@ -3216,7 +3216,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		try {
 			if ( ! isset( $data['products'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_products_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'products' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_missing_products_data', sprintf( __( 'No %s data specified to create/edit %s', 'woocommerce' ), 'products' ), 400 );
 			}
 
 			$data  = $data['products'];
