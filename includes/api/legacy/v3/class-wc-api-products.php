@@ -2759,7 +2759,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_product_attribute', $id, $data );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			update_option( 'wc_flush_rewrite_rules', true );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			$this->server->send_status( 201 );
@@ -2843,7 +2843,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			update_option( 'wc_flush_rewrite_rules', true );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return $this->get_product_attribute( $id );
@@ -2903,7 +2903,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			update_option( 'wc_flush_rewrite_rules', true );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
