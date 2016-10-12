@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
 	<h1>
-		<?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?>
+		<?php _e( 'WooCommerce extensions', 'woocommerce' ); ?>
 	</h1>
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">

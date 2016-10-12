@@ -45,12 +45,12 @@ class WC_Meta_Box_Coupon_Data {
 							'class'  => 'general_coupon_data',
 						),
 						'usage_restriction' => array(
-							'label'  => __( 'Usage Restriction', 'woocommerce' ),
+							'label'  => __( 'Usage restriction', 'woocommerce' ),
 							'target' => 'usage_restriction_coupon_data',
 							'class'  => '',
 						),
 						'usage_limit' => array(
-							'label'  => __( 'Usage Limits', 'woocommerce' ),
+							'label'  => __( 'Usage limits', 'woocommerce' ),
 							'target' => 'usage_limit_coupon_data',
 							'class'  => '',
 						),

@@ -40,11 +40,11 @@ class WC_Meta_Box_Order_Data {
 
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
-				'label' => __( 'First Name', 'woocommerce' ),
+				'label' => __( 'First name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'last_name' => array(
-				'label' => __( 'Last Name', 'woocommerce' ),
+				'label' => __( 'Last name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'company' => array(
@@ -64,7 +64,7 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'postcode' => array(
-				'label' => __( 'Postcode', 'woocommerce' ),
+				'label' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'show'  => false,
 			),
 			'country' => array(
@@ -75,12 +75,12 @@ class WC_Meta_Box_Order_Data {
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 			),
 			'state' => array(
-				'label' => __( 'State/County', 'woocommerce' ),
+				'label' => __( 'State / County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
 				'show'  => false,
 			),
 			'email' => array(
-				'label' => __( 'Email', 'woocommerce' ),
+				'label' => __( 'Email address', 'woocommerce' ),
 			),
 			'phone' => array(
 				'label' => __( 'Phone', 'woocommerce' ),
@@ -89,11 +89,11 @@ class WC_Meta_Box_Order_Data {
 
 		self::$shipping_fields = apply_filters( 'woocommerce_admin_shipping_fields', array(
 			'first_name' => array(
-				'label' => __( 'First Name', 'woocommerce' ),
+				'label' => __( 'First name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'last_name' => array(
-				'label' => __( 'Last Name', 'woocommerce' ),
+				'label' => __( 'Last name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'company' => array(
@@ -113,7 +113,7 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'postcode' => array(
-				'label' => __( 'Postcode', 'woocommerce' ),
+				'label' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'show'  => false,
 			),
 			'country' => array(
@@ -124,7 +124,7 @@ class WC_Meta_Box_Order_Data {
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 			),
 			'state' => array(
-				'label' => __( 'State/County', 'woocommerce' ),
+				'label' => __( 'State / County', 'woocommerce' ),
 				'class'   => 'js_field-state select short',
 				'show'  => false,
 			),
@@ -246,7 +246,7 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 						<h3>
-							<?php _e( 'Billing Details', 'woocommerce' ); ?>
+							<?php _e( 'Billing details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 							<a href="#" class="tips load_customer_billing" data-tip="<?php esc_attr_e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
 						</h3>
@@ -295,7 +295,7 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<p class="form-field form-field-wide">
-								<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
+								<label><?php _e( 'Payment method:', 'woocommerce' ); ?></label>
 								<select name="_payment_method" id="_payment_method" class="first">
 									<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 									<?php
@@ -330,7 +330,7 @@ class WC_Meta_Box_Order_Data {
 					<div class="order_data_column">
 
 						<h3>
-							<?php _e( 'Shipping Details', 'woocommerce' ); ?>
+							<?php _e( 'Shipping details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 							<a href="#" class="tips billing-same-as-shipping" data-tip="<?php esc_attr_e( 'Copy from billing', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Copy from billing', 'woocommerce' ); ?></a>
 							<a href="#" class="tips load_customer_shipping" data-tip="<?php esc_attr_e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
@@ -360,7 +360,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
-									echo '<p><strong>' . __( 'Customer Provided Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+									echo '<p><strong>' . __( 'Customer provided note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
 								}
 
 							echo '</div>';
@@ -390,7 +390,7 @@ class WC_Meta_Box_Order_Data {
 
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
 								?>
-								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Provided Note', 'woocommerce' ) ?>:</label>
+								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ) ?>:</label>
 								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
 								<?php
 							}

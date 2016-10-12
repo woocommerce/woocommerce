@@ -38,10 +38,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		return array(
 			'cb'            => '<input type="checkbox" />',
 			'description'   => __( 'Description', 'woocommerce' ),
-			'truncated_key' => __( 'Consumer Key Ending In', 'woocommerce' ),
+			'truncated_key' => __( 'Consumer key ending in', 'woocommerce' ),
 			'user'          => __( 'User', 'woocommerce' ),
 			'permissions'   => __( 'Permissions', 'woocommerce' ),
-			'last_access'   => __( 'Last Access', 'woocommerce' ),
+			'last_access'   => __( 'Last access', 'woocommerce' ),
 		);
 	}
 
@@ -67,7 +67,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$output = '<strong>';
 		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
 		if ( empty( $key['description'] ) ) {
-			$output .= esc_html__( 'API Key', 'woocommerce' );
+			$output .= esc_html__( 'API key', 'woocommerce' );
 		} else {
 			$output .= esc_html( $key['description'] );
 		}
@@ -78,7 +78,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$actions = array(
 			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
 			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
-			'trash' => '<a class="submitdelete" title="' . esc_attr__( 'Revoke API Key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>',
+			'trash' => '<a class="submitdelete" title="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>',
 		);
 
 		$row_actions = array();

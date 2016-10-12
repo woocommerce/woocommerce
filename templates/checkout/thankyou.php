@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p class="woocommerce-notice woocommerce-notice--error woocommerce-thankyou-order-failed-actions">
 				<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e( 'Pay', 'woocommerce' ) ?></a>
 				<?php if ( is_user_logged_in() ) : ?>
-					<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" class="button pay"><?php _e( 'My Account', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" class="button pay"><?php _e( 'My account', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 			</p>
 
@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
 
 				<li class="woocommerce-order-overview__order order">
-					<?php _e( 'Order Number:', 'woocommerce' ); ?>
+					<?php _e( 'Order number:', 'woocommerce' ); ?>
 					<strong><?php echo $order->get_order_number(); ?></strong>
 				</li>
 
@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $order->get_payment_method_title() ) : ?>
 
 				<li class="woocommerce-order-overview__payment-method method">
-					<?php _e( 'Payment Method:', 'woocommerce' ); ?>
+					<?php _e( 'Payment method:', 'woocommerce' ); ?>
 					<strong><?php echo $order->get_payment_method_title(); ?></strong>
 				</li>
 

@@ -511,7 +511,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	function woocommerce_page_title( $echo = true ) {
 
 		if ( is_search() ) {
-			$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
+			$page_title = sprintf( __( 'Search results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
 
 			if ( get_query_var( 'paged' ) )
 				$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
@@ -1165,7 +1165,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		// Additional information tab - shows attributes
 		if ( $product && ( $product->has_attributes() || $product->enable_dimensions_display() ) ) {
 			$tabs['additional_information'] = array(
-				'title'    => __( 'Additional Information', 'woocommerce' ),
+				'title'    => __( 'Additional information', 'woocommerce' ),
 				'priority' => 20,
 				'callback' => 'woocommerce_product_additional_information_tab',
 			);
@@ -1420,7 +1420,7 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) 
 	 * @subpackage	Cart
 	 */
 	function woocommerce_widget_shopping_cart_button_view_cart() {
-		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View Cart', 'woocommerce' ) . '</a>';
+		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . __( 'View cart', 'woocommerce' ) . '</a>';
 	}
 }
 

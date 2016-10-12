@@ -135,10 +135,10 @@ class WC_Admin_Post_Types {
 			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
 			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
 			7 => __( 'Product saved.', 'woocommerce' ),
-			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
+			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
-			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
 		$messages['shop_order'] = array(
@@ -278,8 +278,8 @@ class WC_Admin_Post_Types {
 		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
 		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
-		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Message', 'woocommerce' ) . '">' . esc_attr__( 'Customer Message', 'woocommerce' ) . '</span>';
-		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
+		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
+		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order notes', 'woocommerce' ) . '">' . esc_attr__( 'Order notes', 'woocommerce' ) . '</span>';
 		$columns['order_date']       = __( 'Date', 'woocommerce' );
 		$columns['order_total']      = __( 'Total', 'woocommerce' );
 		$columns['order_actions']    = __( 'Actions', 'woocommerce' );
@@ -359,7 +359,7 @@ class WC_Admin_Post_Types {
 				if ( 'grouped' == $the_product->product_type ) {
 					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
 				} elseif ( 'external' == $the_product->product_type ) {
-					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate product', 'woocommerce' ) . '"></span>';
 				} elseif ( 'simple' == $the_product->product_type ) {
 
 					if ( $the_product->is_virtual() ) {
@@ -457,7 +457,7 @@ class WC_Admin_Post_Types {
 			}
 
 			if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $post->ID, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
+				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $post->ID, '', true ) . '">' . __( 'Delete permanently', 'woocommerce' ) . '</a>';
 			}
 		}
 		if ( $post_type_object->public ) {
@@ -584,7 +584,7 @@ class WC_Admin_Post_Types {
 			}
 
 			if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
+				$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete permanently', 'woocommerce' ) . "</a>";
 			}
 		}
 
@@ -682,7 +682,7 @@ class WC_Admin_Post_Types {
 				}
 
 				if ( $the_order->get_billing_phone() ) {
-					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
+					echo '<small class="meta">' . __( 'Phone:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
 				}
 
 			break;
@@ -923,7 +923,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Product sorting link.
 	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
 	 *
 	 * @param  array $views
 	 * @return array
@@ -939,7 +939,7 @@ class WC_Admin_Post_Types {
 		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
 		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
 		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
-		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
+		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort products', 'woocommerce' ) . '</a>';
 
 		return $views;
 	}
@@ -1148,11 +1148,20 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle stock status
-		if ( isset( $_REQUEST['_stock_status'] ) ) {
-			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
+		// Handle Stock Data
+		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
+		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_REQUEST['_stock'] ) : '';
 
-			if ( $product->is_type( 'variable' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+
+			// Apply product type constraints to stock status
+			if ( 'external' === $product->product_type ) {
+				// External always in stock
+				$stock_status = 'instock';
+			} elseif ( 'variable' === $product->product_type ) {
+				// Stock status is always determined by children
 				foreach ( $product->get_children() as $child_id ) {
 					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
 						wc_update_product_stock_status( $child_id, $stock_status );
@@ -1160,24 +1169,19 @@ class WC_Admin_Post_Types {
 				}
 
 				WC_Product_Variable::sync_stock_status( $post_id );
-			} else {
+			}
+
+			update_post_meta( $post_id, '_manage_stock', $manage_stock );
+			update_post_meta( $post_id, '_backorders', $backorders );
+
+			if ( 'variable' !== $product->product_type ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
-		}
 
-		// Handle stock
-		if ( ! $product->is_type( 'grouped' ) ) {
-			if ( isset( $_REQUEST['_manage_stock'] ) ) {
-				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
-			} else {
-				update_post_meta( $post_id, '_manage_stock', 'no' );
-				wc_update_product_stock( $post_id, 0 );
-			}
+			wc_update_product_stock( $post_id, $stock_amount );
 
-			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
-			}
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
@@ -1220,22 +1224,6 @@ class WC_Admin_Post_Types {
 				$tax_class = '';
 			}
 			update_post_meta( $post_id, '_tax_class', $tax_class );
-		}
-
-		if ( ! empty( $_REQUEST['_stock_status'] ) ) {
-			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
-
-			if ( $product->is_type( 'variable' ) ) {
-				foreach ( $product->get_children() as $child_id ) {
-					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-						wc_update_product_stock_status( $child_id, $stock_status );
-					}
-				}
-
-				WC_Product_Variable::sync_stock_status( $post_id );
-			} else {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
@@ -1380,27 +1368,50 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle stock
-		if ( ! $product->is_type( 'grouped' ) ) {
+		// Handle Stock Data
+		$was_managing_stock = get_post_meta( $post_id, '_manage_stock', true );
+		$stock_status       = get_post_meta( $post_id, '_stock_status', true );
+		$backorders         = get_post_meta( $post_id, '_stock_status', true );
 
-			if ( ! empty( $_REQUEST['change_stock'] ) ) {
-				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
-			}
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
-			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
+		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+		} else {
+			$manage_stock = $was_managing_stock;
+		}
 
-				if ( 'yes' === $_REQUEST['_manage_stock'] ) {
-					update_post_meta( $post_id, '_manage_stock', 'yes' );
-				} else {
-					update_post_meta( $post_id, '_manage_stock', 'no' );
-					wc_update_product_stock( $post_id, 0 );
+		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_change_stock'] ) ? wc_stock_amount( $_REQUEST['_change_stock'] ) : '';
+
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+
+			// Apply product type constraints to stock status
+			if ( 'external' === $product->product_type ) {
+				// External always in stock
+				$stock_status = 'instock';
+			} elseif ( 'variable' === $product->product_type ) {
+				// Stock status is always determined by children
+				foreach ( $product->get_children() as $child_id ) {
+					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
+						wc_update_product_stock_status( $child_id, $stock_status );
+					}
 				}
+
+				WC_Product_Variable::sync_stock_status( $post_id );
 			}
 
-			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
+			update_post_meta( $post_id, '_manage_stock', $manage_stock );
+			update_post_meta( $post_id, '_backorders', $backorders );
+
+			if ( 'variable' !== $product->product_type ) {
+				wc_update_product_stock_status( $post_id, $stock_status );
 			}
+
+			wc_update_product_stock( $post_id, $stock_amount );
+
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
@@ -2127,7 +2138,7 @@ class WC_Admin_Post_Types {
 
 					echo '<p>' . __( 'Enable this option to feature this product.', 'woocommerce' ) . '</p>';
 
-					echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'Featured Product', 'woocommerce' ) . '</label><br />';
+					echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'Featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
 					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php _e( 'OK', 'woocommerce' ); ?></a>
@@ -2318,7 +2329,7 @@ class WC_Admin_Post_Types {
 		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
 			?>
 			<div class="notice notice-info">
-				<p><?php printf( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. %sYou can read more about this here%s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/woocommerce-pages/#section-4">', '</a>' ); ?></p>
+				<p><?php printf( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. %1$sYou can read more about this here%2$s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/woocommerce-pages/#section-4">', '</a>' ); ?></p>
 			</div>
 			<?php
 		}

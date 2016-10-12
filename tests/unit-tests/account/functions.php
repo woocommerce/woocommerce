@@ -13,12 +13,12 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_account_menu_items() {
 		$this->assertEquals( array(
-			'dashboard'       => __( 'Dashboard', 'woocommerce' ),
-			'orders'          => __( 'Orders', 'woocommerce' ),
-			'downloads'       => __( 'Downloads', 'woocommerce' ),
-			'edit-address'    => __( 'Addresses', 'woocommerce' ),
-			'edit-account'    => __( 'Account Details', 'woocommerce' ),
-			'customer-logout' => __( 'Logout', 'woocommerce' ),
+			'dashboard'       => 'Dashboard',
+			'orders'          => 'Orders',
+			'downloads'       => 'Downloads',
+			'edit-address'    => 'Addresses',
+			'edit-account'    => 'Account details',
+			'customer-logout' => 'Logout',
 		), wc_get_account_menu_items() );
 	}
 
@@ -29,10 +29,10 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_account_orders_columns() {
 		$this->assertEquals( array(
-			'order-number'  => __( 'Order', 'woocommerce' ),
-			'order-date'    => __( 'Date', 'woocommerce' ),
-			'order-status'  => __( 'Status', 'woocommerce' ),
-			'order-total'   => __( 'Total', 'woocommerce' ),
+			'order-number'  => 'Order',
+			'order-date'    => 'Date',
+			'order-status'  => 'Status',
+			'order-total'   => 'Total',
 			'order-actions' => '&nbsp;',
 		), wc_get_account_orders_columns() );
 	}
@@ -44,10 +44,10 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_account_downloads_columns() {
 		$this->assertEquals( array(
-			'download-file'      => __( 'File', 'woocommerce' ),
-			'download-remaining' => __( 'Downloads Remaining', 'woocommerce' ),
-			'download-expires'   => __( 'Expires', 'woocommerce' ),
-			'download-product'   => __( 'Product', 'woocommerce' ),
+			'download-file'      => 'File',
+			'download-remaining' => 'Downloads remaining',
+			'download-expires'   => 'Expires',
+			'download-product'   => 'Product',
 		), wc_get_account_downloads_columns() );
 	}
 }

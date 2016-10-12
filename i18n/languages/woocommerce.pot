@@ -18143,7 +18143,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:37
 msgid ""
-"PayPal standard sends customers to PayPal to enter their payment "
+"PayPal Standard sends customers to PayPal to enter their payment "
 "information. PayPal IPN requires fsockopen/cURL support to update order "
 "statuses after payment. Check the %1$ssystem status%2$s page for more "
 "details."
@@ -18261,7 +18261,7 @@ msgid "Shipping via %s"
 msgstr ""
 
 #: includes/gateways/paypal/includes/settings-paypal.php:14
-msgid "Enable PayPal standard"
+msgid "Enable PayPal Standard"
 msgstr ""
 
 #: includes/gateways/paypal/includes/settings-paypal.php:28

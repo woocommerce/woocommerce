@@ -37,7 +37,7 @@ class WC_Meta_Box_Product_Data {
 			$product_type = apply_filters( 'default_product_type', 'simple' );
 		}
 
-		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product Type', 'woocommerce' ) . '">';
+		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product type', 'woocommerce' ) . '">';
 
 		foreach ( wc_get_product_types() as $value => $label ) {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) . '>' . esc_html( $label ) . '</option>';
@@ -96,7 +96,7 @@ class WC_Meta_Box_Product_Data {
 							'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
 						),
 						'linked_product' => array(
-							'label'  => __( 'Linked Products', 'woocommerce' ),
+							'label'  => __( 'Linked products', 'woocommerce' ),
 							'target' => 'linked_product_data',
 							'class'  => array(),
 						),
@@ -197,7 +197,7 @@ class WC_Meta_Box_Product_Data {
 											ob_start();
 											include( 'views/html-product-download.php' );
 											echo esc_attr( ob_get_clean() );
-										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+										?>"><?php _e( 'Add file', 'woocommerce' ); ?></a>
 									</th>
 								</tr>
 							</tfoot>
@@ -237,7 +237,7 @@ class WC_Meta_Box_Product_Data {
 						'label'       => __( 'Download type', 'woocommerce' ),
 						'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ),
 						'options'     => array(
-							''            => __( 'Standard Product', 'woocommerce' ),
+							''            => __( 'Standard product', 'woocommerce' ),
 							'application' => __( 'Application/Software', 'woocommerce' ),
 							'music'       => __( 'Music', 'woocommerce' ),
 						),
@@ -300,7 +300,7 @@ class WC_Meta_Box_Product_Data {
 
 				// SKU
 				if ( wc_product_sku_enabled() ) {
-					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="' . __( 'Stock keeping unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
 				} else {
 					echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
 				}
@@ -661,7 +661,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-variations-defaults">
 					<div class="variations-defaults">
-						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
+						<strong><?php _e( 'Default form values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
@@ -747,7 +747,7 @@ class WC_Meta_Box_Product_Data {
 							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
 							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
 								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -781,7 +781,7 @@ class WC_Meta_Box_Product_Data {
 							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
 							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
 								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -1103,28 +1103,20 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Stock Data
+		$manage_stock = ! empty( $_POST['_manage_stock'] ) && 'grouped' !== $product_type ? 'yes' : 'no';
+		$backorders   = ! empty( $_POST['_backorders'] ) && 'yes' === $manage_stock ? wc_clean( $_POST['_backorders'] ) : 'no';
+		$stock_status = ! empty( $_POST['_stock_status'] ) ? wc_clean( $_POST['_stock_status'] ) : 'instock';
+		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_POST['_stock'] ) : '';
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
-			$manage_stock = 'no';
-			$backorders   = 'no';
-			$stock_status = wc_clean( $_POST['_stock_status'] );
-
+			// Apply product type constraints to stock status
 			if ( 'external' === $product_type ) {
-
+				// External always in stock
 				$stock_status = 'instock';
-
 			} elseif ( 'variable' === $product_type ) {
-
 				// Stock status is always determined by children so sync later
 				$stock_status = '';
-
-				if ( ! empty( $_POST['_manage_stock'] ) ) {
-					$manage_stock = 'yes';
-					$backorders   = wc_clean( $_POST['_backorders'] );
-				}
-			} elseif ( 'grouped' !== $product_type && ! empty( $_POST['_manage_stock'] ) ) {
-				$manage_stock = 'yes';
-				$backorders   = wc_clean( $_POST['_backorders'] );
 			}
 
 			update_post_meta( $post_id, '_manage_stock', $manage_stock );
@@ -1134,13 +1126,10 @@ class WC_Meta_Box_Product_Data {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
-			if ( ! empty( $_POST['_manage_stock'] ) ) {
-				wc_update_product_stock( $post_id, wc_stock_amount( $_POST['_stock'] ) );
-			} else {
-				update_post_meta( $post_id, '_stock', '' );
-			}
-		} elseif ( 'variable' !== $product_type ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			wc_update_product_stock( $post_id, $stock_amount );
+
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		// Cross sells and upsells
@@ -1411,7 +1400,7 @@ class WC_Meta_Box_Product_Data {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
-					delete_post_meta( $variation_id, '_stock' );
+					wc_update_product_stock( $variation_id, '' );
 				}
 
 				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level

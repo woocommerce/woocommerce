@@ -1598,7 +1598,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
 			$total_rows['payment_method'] = array(
-				'label' => __( 'Payment Method:', 'woocommerce' ),
+				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $this->get_payment_method_title(),
 			);
 		}

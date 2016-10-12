@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_coupon_types() {
 	return (array) apply_filters( 'woocommerce_coupon_discount_types', array(
-		'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
-		'percent'         => __( 'Cart % Discount', 'woocommerce' ),
-		'fixed_product'   => __( 'Product Discount', 'woocommerce' ),
-		'percent_product' => __( 'Product % Discount', 'woocommerce' ),
+		'fixed_cart'      => __( 'Cart discount', 'woocommerce' ),
+		'percent'         => __( 'Cart % discount', 'woocommerce' ),
+		'fixed_product'   => __( 'Product discount', 'woocommerce' ),
+		'percent_product' => __( 'Product % discount', 'woocommerce' ),
 	) );
 }
 

@@ -155,7 +155,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'subject' => array(
-				'title'         => __( 'Email Subject', 'woocommerce' ),
+				'title'         => __( 'Email subject', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
@@ -163,7 +163,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'desc_tip'      => true,
 			),
 			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
+				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
@@ -171,7 +171,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'desc_tip'      => true,
 			),
 			'subject_paid' => array(
-				'title'         => __( 'Email Subject (paid)', 'woocommerce' ),
+				'title'         => __( 'Email subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
 				'placeholder'   => '',
@@ -179,7 +179,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'desc_tip'      => true,
 			),
 			'heading_paid' => array(
-				'title'         => __( 'Email Heading (paid)', 'woocommerce' ),
+				'title'         => __( 'Email heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
 				'placeholder'   => '',
@@ -187,7 +187,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'desc_tip'      => true,
 			),
 			'email_type' => array(
-				'title'         => __( 'Email Type', 'woocommerce' ),
+				'title'         => __( 'Email type', 'woocommerce' ),
 				'type'          => 'select',
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',

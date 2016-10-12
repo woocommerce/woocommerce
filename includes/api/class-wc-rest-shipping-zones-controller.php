@@ -192,7 +192,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 		if ( $force ) {
 			$zone->delete();
 		} else {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.' ), array( 'status' => 501 ) );
+			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		return $response;
