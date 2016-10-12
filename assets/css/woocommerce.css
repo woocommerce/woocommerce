@@ -326,7 +326,9 @@ p.demo_store {
           transform: rotate(-45deg); }
       .woocommerce div.product div.images .flex-control-thumbs {
         overflow: hidden;
-        zoom: 1; }
+        zoom: 1;
+        margin: 0;
+        padding: 0; }
         .woocommerce div.product div.images .flex-control-thumbs li {
           width: 25%;
           float: left;
