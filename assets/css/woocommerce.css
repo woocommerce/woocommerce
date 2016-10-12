@@ -339,7 +339,8 @@ p.demo_store {
           list-style: none; }
           .woocommerce div.product div.images .flex-control-thumbs li img {
             cursor: pointer;
-            opacity: .5; }
+            opacity: .5;
+            margin: 0; }
             .woocommerce div.product div.images .flex-control-thumbs li img.flex-active, .woocommerce div.product div.images .flex-control-thumbs li img:hover {
               opacity: 1; }
     .woocommerce div.product div.summary {
