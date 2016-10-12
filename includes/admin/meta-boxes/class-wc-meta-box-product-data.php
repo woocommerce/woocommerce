@@ -1103,28 +1103,20 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Stock Data
+		$manage_stock = ! empty( $_POST['_manage_stock'] ) && 'grouped' !== $product_type ? 'yes' : 'no';
+		$backorders   = ! empty( $_POST['_backorders'] ) && 'yes' === $manage_stock ? wc_clean( $_POST['_backorders'] ) : 'no';
+		$stock_status = ! empty( $_POST['_stock_status'] ) ? wc_clean( $_POST['_stock_status'] ) : 'instock';
+		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_POST['_stock'] ) : '';
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
-			$manage_stock = 'no';
-			$backorders   = 'no';
-			$stock_status = wc_clean( $_POST['_stock_status'] );
-
+			// Apply product type constraints to stock status
 			if ( 'external' === $product_type ) {
-
+				// External always in stock
 				$stock_status = 'instock';
-
 			} elseif ( 'variable' === $product_type ) {
-
 				// Stock status is always determined by children so sync later
 				$stock_status = '';
-
-				if ( ! empty( $_POST['_manage_stock'] ) ) {
-					$manage_stock = 'yes';
-					$backorders   = wc_clean( $_POST['_backorders'] );
-				}
-			} elseif ( 'grouped' !== $product_type && ! empty( $_POST['_manage_stock'] ) ) {
-				$manage_stock = 'yes';
-				$backorders   = wc_clean( $_POST['_backorders'] );
 			}
 
 			update_post_meta( $post_id, '_manage_stock', $manage_stock );
@@ -1134,13 +1126,10 @@ class WC_Meta_Box_Product_Data {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
-			if ( ! empty( $_POST['_manage_stock'] ) ) {
-				wc_update_product_stock( $post_id, wc_stock_amount( $_POST['_stock'] ) );
-			} else {
-				update_post_meta( $post_id, '_stock', '' );
-			}
-		} elseif ( 'variable' !== $product_type ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			wc_update_product_stock( $post_id, $stock_amount );
+
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		// Cross sells and upsells
@@ -1411,7 +1400,7 @@ class WC_Meta_Box_Product_Data {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
-					delete_post_meta( $variation_id, '_stock' );
+					wc_update_product_stock( $variation_id, '' );
 				}
 
 				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level

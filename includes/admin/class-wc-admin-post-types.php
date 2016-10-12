@@ -1148,11 +1148,20 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle stock status
-		if ( isset( $_REQUEST['_stock_status'] ) ) {
-			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
+		// Handle Stock Data
+		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
+		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_REQUEST['_stock'] ) : '';
 
-			if ( $product->is_type( 'variable' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+
+			// Apply product type constraints to stock status
+			if ( 'external' === $product->product_type ) {
+				// External always in stock
+				$stock_status = 'instock';
+			} elseif ( 'variable' === $product->product_type ) {
+				// Stock status is always determined by children
 				foreach ( $product->get_children() as $child_id ) {
 					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
 						wc_update_product_stock_status( $child_id, $stock_status );
@@ -1160,24 +1169,19 @@ class WC_Admin_Post_Types {
 				}
 
 				WC_Product_Variable::sync_stock_status( $post_id );
-			} else {
+			}
+
+			update_post_meta( $post_id, '_manage_stock', $manage_stock );
+			update_post_meta( $post_id, '_backorders', $backorders );
+
+			if ( 'variable' !== $product->product_type ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
-		}
 
-		// Handle stock
-		if ( ! $product->is_type( 'grouped' ) ) {
-			if ( isset( $_REQUEST['_manage_stock'] ) ) {
-				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
-			} else {
-				update_post_meta( $post_id, '_manage_stock', 'no' );
-				wc_update_product_stock( $post_id, 0 );
-			}
+			wc_update_product_stock( $post_id, $stock_amount );
 
-			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
-			}
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
@@ -1220,22 +1224,6 @@ class WC_Admin_Post_Types {
 				$tax_class = '';
 			}
 			update_post_meta( $post_id, '_tax_class', $tax_class );
-		}
-
-		if ( ! empty( $_REQUEST['_stock_status'] ) ) {
-			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
-
-			if ( $product->is_type( 'variable' ) ) {
-				foreach ( $product->get_children() as $child_id ) {
-					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-						wc_update_product_stock_status( $child_id, $stock_status );
-					}
-				}
-
-				WC_Product_Variable::sync_stock_status( $post_id );
-			} else {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
@@ -1380,27 +1368,50 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle stock
-		if ( ! $product->is_type( 'grouped' ) ) {
+		// Handle Stock Data
+		$was_managing_stock = get_post_meta( $post_id, '_manage_stock', true );
+		$stock_status       = get_post_meta( $post_id, '_stock_status', true );
+		$backorders         = get_post_meta( $post_id, '_stock_status', true );
 
-			if ( ! empty( $_REQUEST['change_stock'] ) ) {
-				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
-			}
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
-			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
+		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+		} else {
+			$manage_stock = $was_managing_stock;
+		}
 
-				if ( 'yes' === $_REQUEST['_manage_stock'] ) {
-					update_post_meta( $post_id, '_manage_stock', 'yes' );
-				} else {
-					update_post_meta( $post_id, '_manage_stock', 'no' );
-					wc_update_product_stock( $post_id, 0 );
+		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_change_stock'] ) ? wc_stock_amount( $_REQUEST['_change_stock'] ) : '';
+
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+
+			// Apply product type constraints to stock status
+			if ( 'external' === $product->product_type ) {
+				// External always in stock
+				$stock_status = 'instock';
+			} elseif ( 'variable' === $product->product_type ) {
+				// Stock status is always determined by children
+				foreach ( $product->get_children() as $child_id ) {
+					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
+						wc_update_product_stock_status( $child_id, $stock_status );
+					}
 				}
+
+				WC_Product_Variable::sync_stock_status( $post_id );
 			}
 
-			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
+			update_post_meta( $post_id, '_manage_stock', $manage_stock );
+			update_post_meta( $post_id, '_backorders', $backorders );
+
+			if ( 'variable' !== $product->product_type ) {
+				wc_update_product_stock_status( $post_id, $stock_status );
 			}
+
+			wc_update_product_stock( $post_id, $stock_amount );
+
+		} else {
+			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );

@@ -257,9 +257,9 @@ class WC_Product {
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
-	 * @param int $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
+	 * @param  int     $amount  (default: null)
+	 * @param  string  $mode    can be set, add, or subtract
+	 * @return int              new stock level
 	 */
 	public function set_stock( $amount = null, $mode = 'set' ) {
 		global $wpdb;
@@ -290,6 +290,14 @@ class WC_Product {
 
 			// Stock status
 			$this->check_stock_status();
+
+			// Trigger action
+			do_action( 'woocommerce_product_set_stock', $this );
+
+		// If not managing stock and clearing the stock meta, trigger action to indicate that stock has changed (infinite stock)
+		} elseif ( '' === $amount && '' !== get_post_meta( $this->id, '_stock', true ) ) {
+
+			update_post_meta( $this->id, '_stock', '' );
 
 			// Trigger action
 			do_action( 'woocommerce_product_set_stock', $this );
