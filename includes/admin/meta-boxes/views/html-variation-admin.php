@@ -30,7 +30,7 @@ extract( $variation_data );
 				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
 
 				// Name will be something like attribute_pa_color
-				echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+				echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute['name'] ) ) ) . '</option>';
 
 				// Get terms for attribute taxonomy or value if its a custom attribute
 				if ( $attribute['is_taxonomy'] ) {
@@ -88,11 +88,11 @@ extract( $variation_data );
 
 			<div class="variable_pricing">
 				<p class="form-row form-row-first">
-					<label><?php echo __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
+					<label><?php printf( __( 'Regular price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?></label>
 					<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_price" placeholder="<?php esc_attr_e( 'Variation price (required)', 'woocommerce' ); ?>" />
 				</p>
 				<p class="form-row form-row-last">
-					<label><?php echo __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
+					<label><?php printf( __( 'Sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
 					<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_price" />
 				</p>
 
@@ -170,7 +170,7 @@ extract( $variation_data );
 				<div>
 					<?php if ( wc_product_weight_enabled() ) : ?>
 						<p class="form-row hide_if_variation_virtual form-row-first">
-							<label><?php echo __( 'Weight', 'woocommerce' ) . ' (' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . ')'; ?> <?php echo wc_help_tip( __( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ) ); ?></a></label>
+							<label><?php printf( __( 'Weight (%s)', 'woocommerce' ), esc_html( get_option( 'woocommerce_weight_unit' ) ) ); ?> <?php echo wc_help_tip( __( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ) ); ?></a></label>
 							<input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" class="wc_input_decimal" />
 						</p>
 					<?php else : ?>

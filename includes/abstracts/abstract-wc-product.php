@@ -1189,7 +1189,7 @@ class WC_Product {
 
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . $rating . '</strong>' ) . '</span>';
 
 			$rating_html .= '</div>';
 		}
