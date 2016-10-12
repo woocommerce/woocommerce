@@ -209,7 +209,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Output header html.
 	 */
 	public function header() {
-		echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
+		echo '<div class="wrap">';
 		echo '<h1>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h1>';
 	}
 
