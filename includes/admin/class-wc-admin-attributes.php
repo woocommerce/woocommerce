@@ -252,7 +252,7 @@ class WC_Admin_Attributes {
 
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
+			<h1><?php echo get_admin_page_title(); ?></h1>
 
 			<?php
 
@@ -353,7 +353,8 @@ class WC_Admin_Attributes {
 	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
+			<h1><?php echo get_admin_page_title(); ?></h1>
+
 			<br class="clear" />
 			<div id="col-container">
 				<div id="col-right">

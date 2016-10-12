@@ -11,9 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
-	<h1>
-		<?php _e( 'WooCommerce extensions', 'woocommerce' ); ?>
-	</h1>
+	<h1><?php echo get_admin_page_title(); ?></h1>
+
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
 			<?php foreach ( $sections as $section_id => $section ) : ?>
