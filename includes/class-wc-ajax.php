@@ -433,10 +433,8 @@ class WC_AJAX {
 
 	/**
 	 * Get a matching variation based on posted attributes.
-         * 
-         * @param $is_ajax Default is true and will display the variation result in json form and set it to false to return the result.
-	 */
-	public static function get_variation( $is_ajax = true ) {
+         */
+	public static function get_variation() {
 		ob_start();
 
 		if ( empty( $_POST['product_id'] ) || ! ( $variable_product = wc_get_product( absint( $_POST['product_id'] ), array( 'product_type' => 'variable' ) ) ) ) {
@@ -451,13 +449,24 @@ class WC_AJAX {
 			$variation = false;
 		}
                 
-                if($is_ajax) {
-                        wp_send_json( $variation );
+                wp_send_json( $variation );
 
-                        die();
-                } else {
-                        return $variation;
-                }
+                die();
+	}
+        
+        /**
+	 * Get all possible matching variations
+         */
+	public static function search_variations() {
+		ob_start();
+
+		if ( empty( $_POST['product_id'] ) || ! ( $variable_product = wc_get_product( absint( $_POST['product_id'] ), array( 'product_type' => 'variable' ) ) ) ) {
+			die();
+		}
+
+		$variations = $variable_product->get_matching_variations( wp_unslash( $_POST ) );
+                
+                return $variations;
 	}
 
 	/**
@@ -2196,7 +2205,7 @@ class WC_AJAX {
 		}
                 
                 if( $is_variation_search ) {
-                        $variable_product = self::get_variation( false );// Search for variation.
+                        $variable_products = self::search_variations();// Search for variation.
                 }
                 
 		// Get tax classes
@@ -2264,8 +2273,8 @@ class WC_AJAX {
 		), $product_id );
                 
                 // Set the limit for the result when looking for a specific product variation
-                if( $is_variation_search && !empty( $variable_product ) ) {
-                        $args['include'] = array( $variable_product['variation_id'] );
+                if( $is_variation_search && !empty( $variable_products ) ) {
+                        $args['include'] = $variable_products;
                 }
                 
 		$variations = get_posts( $args );

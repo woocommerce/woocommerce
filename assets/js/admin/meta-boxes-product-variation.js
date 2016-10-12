@@ -39,7 +39,9 @@ jQuery( function( $ ) {
                  * Clear search results and reload variations.
                  */
                 clear_search: function() {
+                        var wrapper = $( '#variable_product_options' ).find( '.woocommerce_variations' );
                         $( '.search-product-variation' ).prop( 'selectedIndex', 0 );
+                        wrapper.attr('data-search', 'false');
                         wc_meta_boxes_product_variations_actions.reload();
                 },
                 
@@ -403,14 +405,18 @@ jQuery( function( $ ) {
                 /**
 		 * Search variation
 		 */
-		search_variation: function() {
+		search_variation: function( page, per_page ) {
 			var wrapper = $( '#variable_product_options' ).find( '.woocommerce_variations' );
                         var data = {
                                 action:     'woocommerce_load_variations',
                                 security:   woocommerce_admin_meta_boxes_variations.load_variations_nonce,
                                 product_id: woocommerce_admin_meta_boxes_variations.post_id,
-                                search:     1
+                                search:     1,
+                                page:       page || 1,
+                                per_page:   per_page || woocommerce_admin_meta_boxes_variations.variations_per_page
                         };
+                        
+                        wrapper.attr('data-search', 'true');
                         
 			wc_meta_boxes_product_variations_ajax.block();
                         
@@ -447,7 +453,7 @@ jQuery( function( $ ) {
 			var wrapper = $( '#variable_product_options' ).find( '.woocommerce_variations' );
 
 			wc_meta_boxes_product_variations_ajax.block();
-
+                        
 			$.ajax({
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,
 				data: {
@@ -1015,7 +1021,12 @@ jQuery( function( $ ) {
 
 			wc_meta_boxes_product_variations_ajax.check_for_changes();
 			wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
-			wc_meta_boxes_product_variations_ajax.load_variations( selected );
+                        
+                        if( 'true' === wrapper.attr('data-search') ){
+                            wc_meta_boxes_product_variations_ajax.search_variation( selected );
+                        } else {
+                            wc_meta_boxes_product_variations_ajax.load_variations( selected );  
+                        }
 		},
 
 		/**
@@ -1059,7 +1070,7 @@ jQuery( function( $ ) {
 					total_pages = parseInt( wrapper.attr( 'data-total_pages' ), 10 ),
 					next_page   = parseInt( wrapper.attr( 'data-page' ), 10 ) + 1,
 					new_page    = ( total_pages >= next_page ) ? next_page : total_pages;
-
+                                
 				wc_meta_boxes_product_variations_pagenav.set_page( new_page );
 			}
 
