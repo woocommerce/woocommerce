@@ -252,7 +252,6 @@ class WC_Admin_Attributes {
 
 		?>
 		<div class="wrap woocommerce">
-			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
 			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
 
 			<?php
@@ -354,7 +353,6 @@ class WC_Admin_Attributes {
 	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
-			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
 			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
 			<br class="clear" />
 			<div id="col-container">
