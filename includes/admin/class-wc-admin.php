@@ -179,7 +179,7 @@ class WC_Admin {
 			$mailer        = WC()->mailer();
 
 			// get the preview email subject
-			$email_heading = __( 'HTML Email template', 'woocommerce' );
+			$email_heading = __( 'HTML email template', 'woocommerce' );
 
 			// get the preview email content
 			ob_start();

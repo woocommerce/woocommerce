@@ -86,7 +86,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
         $this->assertEquals( array(
             'id'          => 'local_pickup',
-            'title'       => 'Local Pickup',
+            'title'       => 'Local pickup',
             'description' => 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.',
         ), $method );
 	}

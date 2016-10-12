@@ -20,7 +20,7 @@ $settings = array(
 		'title' 		=> __( 'Method title', 'woocommerce' ),
 		'type' 			=> 'text',
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-		'default'		=> __( 'Flat Rate', 'woocommerce' ),
+		'default'		=> __( 'Flat rate', 'woocommerce' ),
 		'desc_tip'		=> true,
 	),
 	'availability' => array(

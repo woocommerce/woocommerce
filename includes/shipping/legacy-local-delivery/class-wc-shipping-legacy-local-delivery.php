@@ -117,7 +117,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Local Delivery', 'woocommerce' ),
+				'default'     => __( 'Local delivery', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'type' => array(

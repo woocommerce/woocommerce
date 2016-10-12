@@ -295,7 +295,7 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<p class="form-field form-field-wide">
-								<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
+								<label><?php _e( 'Payment method:', 'woocommerce' ); ?></label>
 								<select name="_payment_method" id="_payment_method" class="first">
 									<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 									<?php

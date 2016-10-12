@@ -56,7 +56,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 
 	array(
 		'title'   => __( 'Additional tax classes', 'woocommerce' ),
-		'desc_tip'    => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard Rate".', 'woocommerce' ),
+		'desc_tip'    => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard rate".', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_classes',
 		'css'     => 'width:100%; height: 65px;',
 		'type'    => 'textarea',
