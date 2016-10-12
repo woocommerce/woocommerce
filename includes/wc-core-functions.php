@@ -1245,13 +1245,16 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
-	$postcodes       = array( $postcode );
-	$postcode        = wc_format_postcode( $postcode, $country );
-	$postcodes[]     = $postcode;
-	$postcode_length = strlen( $postcode );
+	$formatted_postcode = wc_format_postcode( $postcode, $country );
+	$length             = strlen( $formatted_postcode );
+	$postcodes          = array(
+		$postcode,
+		$formatted_postcode,
+		$formatted_postcode . '*',
+	);
 
-	for ( $i = 0; $i < $postcode_length; $i ++ ) {
-		$postcodes[] = substr( $postcode, 0, ( $i + 1 ) * -1 ) . '*';
+	for ( $i = 0; $i < $length; $i ++ ) {
+		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
 	}
 
 	return $postcodes;

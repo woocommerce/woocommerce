@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * When deleting a tax rate class, remove it's tax rates.
 * Made the store notice dismissible.
 * Improved the zone setup flow.
+* Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
