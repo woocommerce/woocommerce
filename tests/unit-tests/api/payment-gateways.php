@@ -96,7 +96,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'order' => '',
 			'enabled'    => true,
 			'method_title' => 'PayPal',
-			'method_description' => 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
+			'method_description' => 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
 			'settings' => $this->get_settings( 'WC_Gateway_Paypal' ),
 		), $paypal );
 	}

@@ -249,7 +249,7 @@
 * Tweak - Revised email settings screens to show emails in a table and avoid a long sub-nav.
 * Tweak - Default customer role capabilities.
 * Tweak - Expire mini-cart cache after 24 hours.
-* Tweak - Improved refund error messages in PayPal standard.
+* Tweak - Improved refund error messages in PayPal Standard.
 * Tweak - Removed language pack downloader in favour of translate.wordpress.org.
 * Tweak - Added onboarding wizard button to the contextual help so it can be accessed again.
 * Tweak - When a WordPress user is deleted, turn any orders they have into Guest orders.
@@ -1303,7 +1303,7 @@
 * Feature - Customer list reports.
 * Feature - Reports - New design, export csvs, more data.
 * Feature - Ability to link past orders to a customer (before they registered).
-* Feature - Authorize option for paypal standard.
+* Feature - Authorize option for PayPal Standard.
 * Feature - Separate options for countries you can ship to and sell to.
 * Feature - BACS supports multiple account details.
 * Feature - PayPal PDT support (as alternative to IPN).
@@ -1597,7 +1597,7 @@
 = 2.0.4 - 18/03/2013 =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
 * Tweak - Moved WC_Order_Item_Meta into own file.
-* Tweak - PayPal standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
+* Tweak - PayPal Standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
 * Tweak - Flat rate interface tidy up.
 * Tweak - Add order_id to woocommerce_download_product hook
 * Tweak - Disabled prettyPhoto deeplinking

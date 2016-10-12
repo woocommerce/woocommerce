@@ -82,7 +82,7 @@ class WC_Admin_Help {
 				'url'   => '//fast.wistia.net/embed/iframe/8hyli8wu5f?videoFoam=true',
 			),
 			'wc-settings-checkout-paypal' => array(
-				'title' => __( 'PayPal standard', 'woocommerce' ),
+				'title' => __( 'PayPal Standard', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/rbl7e7l4k2?videoFoam=true',
 			),
 			'wc-settings-checkout-paypalbraintree_cards' => array(

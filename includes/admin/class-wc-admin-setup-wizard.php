@@ -585,7 +585,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
 			'paypal' => array(
-				'name'        => __( 'PayPal standard', 'woocommerce' ),
+				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',

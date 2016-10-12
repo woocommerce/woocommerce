@@ -11,7 +11,7 @@ return array(
 	'enabled' => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
 		'type'    => 'checkbox',
-		'label'   => __( 'Enable PayPal standard', 'woocommerce' ),
+		'label'   => __( 'Enable PayPal Standard', 'woocommerce' ),
 		'default' => 'yes',
 	),
 	'title' => array(
