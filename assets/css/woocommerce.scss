@@ -183,6 +183,7 @@ p.demo_store {
 				background: #fff;
 				text-indent: -9999px;
 				border-radius: 100%;
+				box-sizing: content-box;
 
 				&:before {
 					content: "";
@@ -192,21 +193,23 @@ p.demo_store {
 					border: 2px solid #000;
 					border-radius: 100%;
 					position: absolute;
-					top: 10px;
-					left: 10px;
+					top: 9px;
+					left: 9px;
+					box-sizing: content-box;
 				}
 
 				&:after {
 					content: "";
 					display: block;
 					width: 2px;
-					height: 6px;
+					height: 8px;
 					background: #000;
 					border-radius: 6px;
 					position: absolute;
-					top: 20px;
+					top: 19px;
 					left: 22px;
 					@include transform(rotate(-45deg));
+					box-sizing: content-box;
 				}
 			}
 
