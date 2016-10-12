@@ -499,17 +499,9 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		unset( $data['role'] );
 
 		// Additional non-crud data.
-		$data['last_order']   = null;
 		$data['orders_count'] = $customer->get_order_count();
 		$data['total_spent']  = $customer->get_total_spent();
 		$data['avatar_url']   = $customer->get_avatar_url();
-
-		if ( $last_order_data = $customer->get_last_order() ) {
-			$data['last_order'] = array(
-				'id'   => $last_order_data->get_id(),
-				'date' => $last_order_data->get_date_created() ? wc_rest_prepare_date_response( $last_order_data->get_date_created() ) : null,
-			);
-		}
 
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
@@ -656,26 +648,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 					'description' => __( 'Customer password.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
-				),
-				'last_order' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Last order ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'date' => array(
-							'description' => __( 'UTC DateTime of the customer last order.', 'woocommerce' ),
-							'type'        => 'date-time',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-					),
 				),
 				'orders_count' => array(
 					'description' => __( 'Quantity of orders made by the customer.', 'woocommerce' ),
