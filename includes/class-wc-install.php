@@ -187,7 +187,7 @@ class WC_Install {
 		self::update_wc_version();
 
 		// Flush rules after install
-		flush_rewrite_rules();
+		update_option( 'wc_flush_rewrite_rules', true );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*

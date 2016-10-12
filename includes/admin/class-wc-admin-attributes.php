@@ -125,7 +125,7 @@ class WC_Admin_Attributes {
 
 		do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
 
-		flush_rewrite_rules();
+		update_option( 'wc_flush_rewrite_rules', true );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return true;
@@ -200,7 +200,7 @@ class WC_Admin_Attributes {
 
 		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
 
-		flush_rewrite_rules();
+		update_option( 'wc_flush_rewrite_rules', true );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return true;
