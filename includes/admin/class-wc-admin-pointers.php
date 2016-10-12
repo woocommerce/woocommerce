@@ -57,7 +57,7 @@ class WC_Admin_Pointers {
 						'event'  => 'input',
 					),
 					'options'      => array(
-						'content'  => '<h3>' . esc_html__( 'Product Name', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product name', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Give your new product a name here. This is a required field and will be what your customers will see in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'top',
@@ -70,7 +70,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product-type',
 					'next_trigger' => array(),
 					'options'      => array(
-						'content'  => '<h3>' . esc_html__( 'Product Description', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'This is your products main body of content. Here you should describe your product in detail.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
@@ -86,7 +86,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change blur click',
 					),
 					'options'  => array(
-						'content'  => '<h3>' . esc_html__( 'Choose Product Type', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Choose product type', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Choose a type for this product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes.', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Grouped products are for grouping several simple products into one.', 'woocommerce' ) . '</p>' .
@@ -105,7 +105,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change',
 					),
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Virtual Products', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Virtual products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Check the "Virtual" box if this is a non-physical item, for example a service, which does not need shipping.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
@@ -121,7 +121,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change',
 					),
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Downloadable Products', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Downloadable products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'If purchasing this product gives a customer access to a downloadable file, e.g. software, check this box.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
@@ -153,7 +153,7 @@ class WC_Admin_Pointers {
 						'event'  => 'input',
 					),
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Product Short Description', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product short description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Add a quick summary for your product here. This will appear on the product page under the product name.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
@@ -165,7 +165,7 @@ class WC_Admin_Pointers {
 					'target'       => "#postimagediv",
 					'next'         => 'product_tag',
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Product Images', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product images', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Upload or assign an image to your product here. This image will be shown in your store\'s catalog.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
@@ -177,7 +177,7 @@ class WC_Admin_Pointers {
 					'target'       => "#tagsdiv-product_tag",
 					'next'         => 'product_catdiv',
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Product Tags', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product tags', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
@@ -189,7 +189,7 @@ class WC_Admin_Pointers {
 					'target'       => "#product_catdiv",
 					'next'         => 'submitdiv',
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Product Categories', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Product categories', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Optionally assign categories to your products to make them easier to browse through and find in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
@@ -201,7 +201,7 @@ class WC_Admin_Pointers {
 					'target'       => "#submitdiv",
 					'next'         => '',
 					'options' => array(
-						'content'  => '<h3>' . esc_html__( 'Publish Your Product!', 'woocommerce' ) . '</h3>' .
+						'content'  => '<h3>' . esc_html__( 'Publish your product!', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'When you are finished editing your product, hit the "Publish" button to publish your product to your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',

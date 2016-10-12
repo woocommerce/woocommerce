@@ -115,7 +115,7 @@ class WC_Shortcode_My_Account {
 		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
+			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My account', 'woocommerce' ) . '</a>' . '</div>';
 			return;
 		}
 
@@ -234,7 +234,7 @@ class WC_Shortcode_My_Account {
 
 		if ( empty( $login ) ) {
 
-			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Enter a username or email address.', 'woocommerce' ), 'error' );
 			return false;
 
 		} else {
@@ -250,12 +250,12 @@ class WC_Shortcode_My_Account {
 		do_action( 'lostpassword_post' );
 
 		if ( ! $user_data ) {
-			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
 			return false;
 		}
 
 		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
 			return false;
 		}
 

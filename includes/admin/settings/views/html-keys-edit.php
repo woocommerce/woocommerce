@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div id="key-fields" class="settings-panel">
-	<h2><?php _e( 'Key Details', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Key details', 'woocommerce' ); ?></h2>
 
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 
@@ -59,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( 0 !== $key_id ) : ?>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<?php _e( 'Consumer Key Ending In', 'woocommerce' ); ?>
+						<?php _e( 'Consumer key ending in', 'woocommerce' ); ?>
 					</th>
 					<td class="forminp">
 						<code>&hellip;<?php echo esc_html( $key_data['truncated_key'] ); ?></code>
@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<?php _e( 'Last Access', 'woocommerce' ); ?>
+						<?php _e( 'Last access', 'woocommerce' ); ?>
 					</th>
 					<td class="forminp">
 						<span><?php
@@ -89,12 +89,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php
 		if ( 0 == $key_id ) {
-			submit_button( __( 'Generate API Key', 'woocommerce' ), 'primary', 'update_api_key' );
+			submit_button( __( 'Generate API key', 'woocommerce' ), 'primary', 'update_api_key' );
 		} else {
 			?>
 			<p class="submit">
 				<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'update_api_key', false ); ?>
-				<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ); ?>"><?php _e( 'Revoke Key', 'woocommerce' ); ?></a>
+				<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ); ?>"><?php _e( 'Revoke key', 'woocommerce' ); ?></a>
 			</p>
 			<?php
 		}
@@ -107,7 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tbody>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<?php _e( 'Consumer Key', 'woocommerce' ); ?>
+					<?php _e( 'Consumer key', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
 					<input id="key_consumer_key" type="text" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
@@ -115,7 +115,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<?php _e( 'Consumer Secret', 'woocommerce' ); ?>
+					<?php _e( 'Consumer secret', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
 					<input id="key_consumer_secret" type="text" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>

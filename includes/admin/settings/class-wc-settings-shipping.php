@@ -45,9 +45,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			''        => __( 'Shipping Zones', 'woocommerce' ),
-			'options' => __( 'Shipping Options', 'woocommerce' ),
-			'classes' => __( 'Shipping Classes', 'woocommerce' ),
+			''        => __( 'Shipping zones', 'woocommerce' ),
+			'options' => __( 'Shipping options', 'woocommerce' ),
+			'classes' => __( 'Shipping classes', 'woocommerce' ),
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
@@ -74,7 +74,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	public function get_settings() {
 		$settings = apply_filters( 'woocommerce_shipping_settings', array(
 
-			array( 'title' => __( 'Shipping Options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
+			array( 'title' => __( 'Shipping options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
 
 			array(
 				'title'         => __( 'Calculations', 'woocommerce' ),
@@ -96,7 +96,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Shipping Destination', 'woocommerce' ),
+				'title'   => __( 'Shipping destination', 'woocommerce' ),
 				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
 				'id'      => 'woocommerce_ship_to_destination',
 				'default' => 'billing',
@@ -112,9 +112,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Debug Mode', 'woocommerce' ),
-				'desc'     => __( 'Enable Debug Mode', 'woocommerce' ),
-				'desc_tip' => __( 'Enable Shipping Debug Mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+				'title'    => __( 'Debug mode', 'woocommerce' ),
+				'desc'     => __( 'Enable debug mode', 'woocommerce' ),
+				'desc_tip' => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
 				'id'       => 'woocommerce_shipping_debug_mode',
 				'default'  => 'no',
 				'type'     => 'checkbox',
@@ -206,7 +206,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function zone_methods_screen( $zone_id ) {
 		if ( 'new' === $zone_id ) {
 			$zone = new WC_Shipping_Zone();
-			$zone->set_zone_name( __( 'New Zone', 'woocommerce' ) );
+			$zone->set_zone_name( __( 'New zone', 'woocommerce' ) );
 		} else {
 			$zone = WC_Shipping_Zones::get_zone( absint( $zone_id ) );
 		}
@@ -334,10 +334,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		// Extendable columns to show on the shipping classes screen.
 		$shipping_class_columns = apply_filters( 'woocommerce_shipping_classes_columns', array(
-			'wc-shipping-class-name'        => __( 'Shipping Class', 'woocommerce' ),
+			'wc-shipping-class-name'        => __( 'Shipping class', 'woocommerce' ),
 			'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
 			'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),
-			'wc-shipping-class-count'       => __( 'Product Count', 'woocommerce' ),
+			'wc-shipping-class-count'       => __( 'Product count', 'woocommerce' ),
 		) );
 
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php' );

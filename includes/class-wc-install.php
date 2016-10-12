@@ -310,7 +310,7 @@ class WC_Install {
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
+				'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),
 		) );
@@ -613,7 +613,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		) );
 
 		// Shop manager role
-		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
+		add_role( 'shop_manager', __( 'Shop manager', 'woocommerce' ), array(
 			'level_9'                => true,
 			'level_8'                => true,
 			'level_7'                => true,
@@ -840,7 +840,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );
@@ -856,9 +856,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function plugin_row_meta( $links, $file ) {
 		if ( WC_PLUGIN_BASENAME == $file ) {
 			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API docs', 'woocommerce' ) ) . '">' . __( 'API docs', 'woocommerce' ) . '</a>',
+				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" title="' . esc_attr( __( 'Visit premium customer support', 'woocommerce' ) ) . '">' . __( 'Premium support', 'woocommerce' ) . '</a>',
 			);
 
 			return array_merge( $links, $row_meta );

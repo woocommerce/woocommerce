@@ -47,8 +47,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
@@ -148,10 +148,10 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				<tr>
 					<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
 					<th><?php _e( 'Rate', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Tax Amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax Rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Shipping Tax Amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax Rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Number of orders', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _e( 'Tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Shipping tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
 			<?php if ( ! empty( $tax_rows ) ) : ?>

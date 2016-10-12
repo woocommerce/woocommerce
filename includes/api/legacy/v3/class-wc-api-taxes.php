@@ -531,7 +531,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			// Add standard class
 			$tax_classes[] = array(
 				'slug' => 'standard',
-				'name' => __( 'Standard Rate', 'woocommerce' ),
+				'name' => __( 'Standard rate', 'woocommerce' ),
 			);
 
 			$classes = WC_Tax::get_tax_classes();

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <fieldset class="inline-edit-col-right">
 	<div id="woocommerce-fields-bulk" class="inline-edit-col">
 
-		<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
+		<h4><?php _e( 'Product data', 'woocommerce' ); ?></h4>
 
 		<?php do_action( 'woocommerce_product_bulk_edit_start' ); ?>
 
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="change_regular_price change_to" name="change_regular_price">
 					<?php
 						$options = array(
-							'' 	=> __( '— No Change —', 'woocommerce' ),
+							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="change_sale_price change_to" name="change_sale_price">
 					<?php
 						$options = array(
-							'' 	=> __( '— No Change —', 'woocommerce' ),
+							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
@@ -67,12 +67,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( wc_tax_enabled() ) : ?>
 			<label>
-				<span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax status', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_status" name="_tax_status">
 					<?php
 						$options = array(
-							''         => __( '— No Change —', 'woocommerce' ),
+							''         => __( '— No change —', 'woocommerce' ),
 							'taxable'  => __( 'Taxable', 'woocommerce' ),
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
 							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
@@ -86,12 +86,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 
 			<label>
-				<span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
+				<span class="title"><?php _e( 'Tax class', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="tax_class" name="_tax_class">
 					<?php
 						$options = array(
-							''         => __( '— No Change —', 'woocommerce' ),
+							''         => __( '— No change —', 'woocommerce' ),
 							'standard' => __( 'Standard', 'woocommerce' ),
 						);
 
@@ -119,7 +119,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select class="change_weight change_to" name="change_weight">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -143,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select class="change_dimensions change_to" name="change_dimensions">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -165,7 +165,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="title"><?php _e( 'Shipping class', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="shipping_class" name="_shipping_class">
-					<option value=""><?php _e( '— No Change —', 'woocommerce' ); ?></option>
+					<option value=""><?php _e( '— No change —', 'woocommerce' ); ?></option>
 					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
@@ -182,7 +182,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="visibility" name="_visibility">
 				<?php
 					$options = array(
-						''        => __( '— No Change —', 'woocommerce' ),
+						''        => __( '— No change —', 'woocommerce' ),
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
 						'search'  => __( 'Search', 'woocommerce' ),
@@ -201,7 +201,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="featured" name="_featured">
 				<?php
 					$options = array(
-						''    => __( '— No Change —', 'woocommerce' ),
+						''    => __( '— No change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
 						'no'  => __( 'No', 'woocommerce' ),
 					);
@@ -219,7 +219,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="stock_status" name="_stock_status">
 				<?php
 					$options = array(
-						''           => __( '— No Change —', 'woocommerce' ),
+						''           => __( '— No change —', 'woocommerce' ),
 						'instock'    => __( 'In stock', 'woocommerce' ),
 						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
@@ -238,7 +238,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="manage_stock" name="_manage_stock">
 					<?php
 						$options = array(
-							''    => __( '— No Change —', 'woocommerce' ),
+							''    => __( '— No change —', 'woocommerce' ),
 							'yes' => __( 'Yes', 'woocommerce' ),
 							'no'  => __( 'No', 'woocommerce' ),
 						);
@@ -252,12 +252,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="inline-edit-group">
 				<label class="alignleft stock_qty_field">
-					<span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
+					<span class="title"><?php _e( 'Stock qty', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
 						<select class="change_stock change_to" name="change_stock">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -268,7 +268,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_stock" class="text stock" placeholder="<?php esc_attr_e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
+					<input type="text" name="_stock" class="text stock" placeholder="<?php esc_attr_e( 'Stock qty', 'woocommerce' ); ?>" step="any" value="">
 				</label>
 			</div>
 
@@ -278,7 +278,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="backorders" name="_backorders">
 					<?php
 						$options = array(
-							''       => __( '— No Change —', 'woocommerce' ),
+							''       => __( '— No change —', 'woocommerce' ),
 							'no'     => __( 'Do not allow', 'woocommerce' ),
 							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
 							'yes'    => __( 'Allow', 'woocommerce' ),
@@ -294,12 +294,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 
 		<label>
-			<span class="title"><?php esc_html_e( 'Sold Individually?', 'woocommerce' ); ?></span>
+			<span class="title"><?php esc_html_e( 'Sold individually?', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
 					<select class="sold_individually" name="_sold_individually">
 					<?php
 					$options = array(
-						''    => __( '— No Change —', 'woocommerce' ),
+						''    => __( '— No change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
 						'no'  => __( 'No', 'woocommerce' ),
 					);

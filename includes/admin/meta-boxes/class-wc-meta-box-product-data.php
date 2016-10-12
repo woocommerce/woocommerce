@@ -37,7 +37,7 @@ class WC_Meta_Box_Product_Data {
 			$product_type = apply_filters( 'default_product_type', 'simple' );
 		}
 
-		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product Type', 'woocommerce' ) . '">';
+		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product type', 'woocommerce' ) . '">';
 
 		foreach ( wc_get_product_types() as $value => $label ) {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) . '>' . esc_html( $label ) . '</option>';
@@ -96,7 +96,7 @@ class WC_Meta_Box_Product_Data {
 							'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
 						),
 						'linked_product' => array(
-							'label'  => __( 'Linked Products', 'woocommerce' ),
+							'label'  => __( 'Linked products', 'woocommerce' ),
 							'target' => 'linked_product_data',
 							'class'  => array(),
 						),
@@ -197,7 +197,7 @@ class WC_Meta_Box_Product_Data {
 											ob_start();
 											include( 'views/html-product-download.php' );
 											echo esc_attr( ob_get_clean() );
-										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+										?>"><?php _e( 'Add file', 'woocommerce' ); ?></a>
 									</th>
 								</tr>
 							</tfoot>
@@ -237,7 +237,7 @@ class WC_Meta_Box_Product_Data {
 						'label'       => __( 'Download type', 'woocommerce' ),
 						'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ),
 						'options'     => array(
-							''            => __( 'Standard Product', 'woocommerce' ),
+							''            => __( 'Standard product', 'woocommerce' ),
 							'application' => __( 'Application/Software', 'woocommerce' ),
 							'music'       => __( 'Music', 'woocommerce' ),
 						),
@@ -300,7 +300,7 @@ class WC_Meta_Box_Product_Data {
 
 				// SKU
 				if ( wc_product_sku_enabled() ) {
-					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="' . __( 'Stock keeping unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
 				} else {
 					echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
 				}
@@ -653,7 +653,7 @@ class WC_Meta_Box_Product_Data {
 				<div id="message" class="inline notice woocommerce-message">
 					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 					<p>
-						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn More', 'woocommerce' ); ?></a>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
 					</p>
 				</div>
 
@@ -661,7 +661,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-variations-defaults">
 					<div class="variations-defaults">
-						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
+						<strong><?php _e( 'Default form values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
@@ -747,7 +747,7 @@ class WC_Meta_Box_Product_Data {
 							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
 							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
 								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -781,7 +781,7 @@ class WC_Meta_Box_Product_Data {
 							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
 							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
 								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
