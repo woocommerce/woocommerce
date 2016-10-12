@@ -936,7 +936,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_display_price( $price = '', $qty = 1 ) {
-
 		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
@@ -944,7 +943,7 @@ class WC_Product {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
 
-		return apply_filters('woocommerce_get_display_price', $display_price, $price, $qty, $price );
+		return apply_filters( 'woocommerce_get_display_price', $display_price, $price, $qty );
 	}
 
 	/**
