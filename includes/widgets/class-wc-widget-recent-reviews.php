@@ -22,11 +22,11 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_recent_reviews';
 		$this->widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_recent_reviews';
-		$this->widget_name        = __( 'WooCommerce Recent Reviews', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce recent reviews', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Recent Reviews', 'woocommerce' ),
+				'std'   => __( 'Recent reviews', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(

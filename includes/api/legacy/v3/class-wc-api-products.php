@@ -1363,7 +1363,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $product_id, $new_sku );
 					if ( ! $unique_sku ) {
-						throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), 400 );
+						throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
 					} else {
 						update_post_meta( $product_id, '_sku', $new_sku );
 					}
@@ -1800,7 +1800,7 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), 400 );
+							throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -2362,7 +2362,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check parsed URL.
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure url is valid.
@@ -2414,7 +2414,7 @@ class WC_API_Products extends WC_API_Resource {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), 400 );
 		}
 
 		unset( $response );
@@ -3224,7 +3224,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_products_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_products_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$products = array();

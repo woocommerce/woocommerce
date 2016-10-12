@@ -114,7 +114,7 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 
 = Dummy data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
 
 == Frequently Asked Questions ==
 
@@ -166,7 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Added Nigerian Provinces to i18n/state.
 * Improved handling of shop page rewrite rules to allow subpages.
 * Redirect to login after password reset.
-* When using authorizations in PayPal standard, automatically capture funds when the order goes processing/completed.
+* When using authorizations in PayPal Standard, automatically capture funds when the order goes processing/completed.
 * On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
 * Show variable weights/dimensions even when parent values are not set.
 * Automatically sort tax rates rather than allow clunky manual sorting.
@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * When deleting a tax rate class, remove it's tax rates.
 * Made the store notice dismissible.
 * Improved the zone setup flow.
+* Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

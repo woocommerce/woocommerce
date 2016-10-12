@@ -28,20 +28,20 @@ class WC_Helper_Settings {
 		$groups[] = array(
 			'id'          => 'test',
 			'bad'         => 'value',
-			'label'       => __( 'Test Extension', 'woocommerce' ),
-			'description' => __( 'My awesome test settings.', 'woocommerce' ),
+			'label'       => 'Test extension',
+			'description' => 'My awesome test settings.',
 			'option_key'  => '',
 		);
 		$groups[] = array(
 			'id'          => 'sub-test',
 			'parent_id'   => 'test',
-			'label'       => __( 'Sub test', 'woocommerce' ),
+			'label'       => 'Sub test',
 			'description' => '',
 			'option_key'  => '',
 		);
 		$groups[] = array(
 			'id'    => 'coupon-data',
-			'label' => __( 'Coupon Data', 'woocommerce' ),
+			'label' => 'Coupon data',
 			'option_key'  => '',
 		);
 		$groups[] = array(
@@ -61,23 +61,23 @@ class WC_Helper_Settings {
 	public static function register_test_settings( $settings ) {
 		$settings[] = array(
 			'id'          => 'woocommerce_shop_page_display',
-			'label'       => __( 'Shop Page Display', 'woocommerce' ),
-			'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+			'label'       => 'Shop page display',
+			'description' => 'This controls what is shown on the product archive.',
 			'default'     => '',
 			'type'        => 'select',
 			'options'     => array(
-				''              => __( 'Show products', 'woocommerce' ),
-				'subcategories' => __( 'Show categories &amp; subcategories', 'woocommerce' ),
-				'both'          => __( 'Show both', 'woocommerce' ),
+				''              => 'Show products',
+				'subcategories' => 'Show categories &amp; subcategories',
+				'both'          => 'Show both',
 			),
 			'option_key'  => 'woocommerce_shop_page_display',
 		);
 		$settings[] = array(
 			'id'            => 'woocommerce_enable_lightbox',
-			'label'         => __( 'Product Image Gallery', 'woocommerce' ),
-			'description'   => __( 'Enable Lightbox for product images', 'woocommerce' ),
+			'label'         => 'Product image gallery',
+			'description'   => 'Enable Lightbox for product images',
 			'default'       => 'yes',
-			'tip'           => __( 'Product gallery images will open in a lightbox.', 'woocommerce' ),
+			'tip'           => 'Product gallery images will open in a lightbox.',
 			'type'          => 'checkbox',
 			'option_key'    => 'woocommerce_enable_lightbox',
 		);

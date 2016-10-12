@@ -22,7 +22,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	public function __construct( $instance_id = 0 ) {
 		$this->id                    = 'flat_rate';
 		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Flat Rate', 'woocommerce' );
+		$this->method_title          = __( 'Flat rate', 'woocommerce' );
 		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',

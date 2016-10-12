@@ -111,7 +111,7 @@ class WC_Form_Handler {
 								$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
 								if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
+									wc_add_notice( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ), 'error' );
 								} else {
 									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
 								}
@@ -192,8 +192,8 @@ class WC_Form_Handler {
 
 		// Handle required fields
 		$required_fields = apply_filters( 'woocommerce_save_account_details_required_fields', array(
-			'account_first_name' => __( 'First Name', 'woocommerce' ),
-			'account_last_name'  => __( 'Last Name', 'woocommerce' ),
+			'account_first_name' => __( 'First name', 'woocommerce' ),
+			'account_last_name'  => __( 'Last name', 'woocommerce' ),
 			'account_email'      => __( 'Email address', 'woocommerce' ),
 		) );
 
@@ -397,17 +397,17 @@ class WC_Form_Handler {
 			$delete = true;
 
 			if ( is_null( $token ) ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 
 			if ( get_current_user_id() !== $token->get_user_id() ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 
 			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $token_id ) ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 
@@ -435,17 +435,17 @@ class WC_Form_Handler {
 			$delete = true;
 
 			if ( is_null( $token ) ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 
 			if ( get_current_user_id() !== $token->get_user_id() ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 
 			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'set-default-payment-method-' . $token_id ) ) {
-				wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
 				$delete = false;
 			}
 

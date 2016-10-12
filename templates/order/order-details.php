@@ -28,7 +28,7 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 
 <section class="woocommerce-order-details">
 
-	<h2 class="woocommerce-order-details__title"><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
+	<h2 class="woocommerce-order-details__title"><?php _e( 'Order details', 'woocommerce' ); ?></h2>
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 

@@ -294,7 +294,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 		if ( ! $customer_id ) {
-			return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+			return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 		}
 
 		try {
@@ -318,7 +318,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				}
 			}
 
-			$order->add_order_note( sprintf( __( 'Simplify payment error: %s', 'woocommerce' ), $error_message ) );
+			$order->add_order_note( sprintf( __( 'Simplify payment error: %s.', 'woocommerce' ), $error_message ) );
 
 			return new WP_Error( 'simplify_payment_declined', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -431,7 +431,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 			if ( ! $customer_id ) {
-				return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+				return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 			}
 
 			// Charge the customer

@@ -73,15 +73,15 @@ class WC_Meta_Box_Order_Actions {
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __( 'Delete Permanently', 'woocommerce' );
+							$delete_text = __( 'Delete permanently', 'woocommerce' );
 						} else {
-							$delete_text = __( 'Move to Trash', 'woocommerce' );
+							$delete_text = __( 'Move to trash', 'woocommerce' );
 						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>

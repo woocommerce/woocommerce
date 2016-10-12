@@ -284,7 +284,7 @@ extract( $variation_data );
 										ob_start();
 										include( 'html-product-variation-download.php' );
 										echo esc_attr( ob_get_clean() );
-									?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+									?>"><?php _e( 'Add file', 'woocommerce' ); ?></a>
 								</th>
 							</div>
 						</tfoot>

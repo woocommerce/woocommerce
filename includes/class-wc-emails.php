@@ -459,14 +459,14 @@ class WC_Emails {
 
 		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
-				'label' => __( 'Email', 'woocommerce' ),
+				'label' => __( 'Email address', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_email() ),
 			);
 	    }
 
 	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
-				'label' => __( 'Tel', 'woocommerce' ),
+				'label' => __( 'Phone', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_phone() ),
 			);
 	    }
@@ -553,7 +553,7 @@ class WC_Emails {
 			return;
 		}
 
-		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product Backorder', 'woocommerce' ) );
+		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
 		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(

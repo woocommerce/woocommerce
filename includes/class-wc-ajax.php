@@ -1814,7 +1814,7 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for product ordering.
 	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
 	 */
 	public static function product_ordering() {
 		global $wpdb;
@@ -2144,7 +2144,7 @@ class WC_AJAX {
 				$data['consumer_key']    = $consumer_key;
 				$data['consumer_secret'] = $consumer_secret;
 				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new API keys now. You won\'t be able to see it again!', 'woocommerce' );
-				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke Key', 'woocommerce' ) . '</a>';
+				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 
 			wp_send_json_success( $data );

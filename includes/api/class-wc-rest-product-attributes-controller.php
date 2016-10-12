@@ -634,11 +634,11 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 */
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
 		if ( strlen( $slug ) >= 28 ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		}
 
 		return true;

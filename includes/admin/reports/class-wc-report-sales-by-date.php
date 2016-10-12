@@ -432,9 +432,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	public function output_report() {
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' ),
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
+			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -611,7 +611,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
 						},
 						{
-							label: "<?php echo esc_js( __( 'Gross Sales amount', 'woocommerce' ) ) ?>",
+							label: "<?php echo esc_js( __( 'Gross sales amount', 'woocommerce' ) ) ?>",
 							data: order_data.gross_order_amounts,
 							yaxis: 2,
 							color: '<?php echo $this->chart_colours['sales_amount']; ?>',
@@ -621,7 +621,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
-							label: "<?php echo esc_js( __( 'Net Sales amount', 'woocommerce' ) ) ?>",
+							label: "<?php echo esc_js( __( 'Net sales amount', 'woocommerce' ) ) ?>",
 							data: order_data.net_order_amounts,
 							yaxis: 2,
 							color: '<?php echo $this->chart_colours['net_sales_amount']; ?>',

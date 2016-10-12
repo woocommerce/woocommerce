@@ -257,9 +257,9 @@ class WC_Product {
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
-	 * @param int $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
+	 * @param  int     $amount  (default: null)
+	 * @param  string  $mode    can be set, add, or subtract
+	 * @return int              new stock level
 	 */
 	public function set_stock( $amount = null, $mode = 'set' ) {
 		global $wpdb;
@@ -290,6 +290,14 @@ class WC_Product {
 
 			// Stock status
 			$this->check_stock_status();
+
+			// Trigger action
+			do_action( 'woocommerce_product_set_stock', $this );
+
+		// If not managing stock and clearing the stock meta, trigger action to indicate that stock has changed (infinite stock)
+		} elseif ( '' === $amount && '' !== get_post_meta( $this->id, '_stock', true ) ) {
+
+			update_post_meta( $this->id, '_stock', '' );
 
 			// Trigger action
 			do_action( 'woocommerce_product_set_stock', $this );
@@ -936,7 +944,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_display_price( $price = '', $qty = 1 ) {
-
 		if ( '' === $price ) {
 			$price = $this->get_price();
 		}
@@ -944,7 +951,7 @@ class WC_Product {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
 
-		return $display_price;
+		return apply_filters( 'woocommerce_get_display_price', $display_price, $price, $qty );
 	}
 
 	/**

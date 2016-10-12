@@ -22,7 +22,7 @@ class WC_Widget_Products extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_products';
 		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce Products', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
@@ -42,9 +42,9 @@ class WC_Widget_Products extends WC_Widget {
 				'std'   => '',
 				'label' => __( 'Show', 'woocommerce' ),
 				'options' => array(
-					''         => __( 'All Products', 'woocommerce' ),
-					'featured' => __( 'Featured Products', 'woocommerce' ),
-					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
+					''         => __( 'All products', 'woocommerce' ),
+					'featured' => __( 'Featured products', 'woocommerce' ),
+					'onsale'   => __( 'On-sale products', 'woocommerce' ),
 				),
 			),
 			'orderby' => array(

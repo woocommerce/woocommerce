@@ -253,7 +253,7 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
+			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
@@ -292,7 +292,7 @@ class WC_Admin_Attributes {
 							</tr>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
-									<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+									<label for="attribute_public"><?php _e( 'Enable archives?', 'woocommerce' ); ?></label>
 								</th>
 								<td>
 									<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
@@ -438,7 +438,7 @@ class WC_Admin_Attributes {
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
+							<h2><?php _e( 'Add new attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
@@ -494,7 +494,7 @@ class WC_Admin_Attributes {
 
 								<?php do_action( 'woocommerce_after_add_attribute_fields' ) ?>
 
-								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
+								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 							</form>
 						</div>

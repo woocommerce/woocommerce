@@ -1128,7 +1128,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $product_id, $new_sku );
 					if ( ! $unique_sku ) {
-						throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ) );
+						throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ) );
 					} else {
 						update_post_meta( $product_id, '_sku', $new_sku );
 					}
@@ -1576,7 +1576,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ) );
+							throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -2018,7 +2018,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_image', sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ) );
 		}
 
 		// Ensure url is valid
@@ -2070,7 +2070,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_CLI_Exception( 'woocommerce_cli_product_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_product_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ) );
 		}
 
 		unset( $response );
