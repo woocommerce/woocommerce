@@ -1356,8 +1356,8 @@
 * Fix - Tweaked popularity sorting to work better when no sales are present.
 * Fix - Quote encoding in email subjects.
 * Fix - Added $wp_error parameter during checkout process to ensure WP_Error object is returned on error and checkout process is properly stopped.
-* Refactor - Taken out Piwik integration, use https://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on.
-* Refactor - Taken out ShareYourCart integration, use https://wordpress.org/extend/plugins/shareyourcart/ from now on.
+* Refactor - Taken out Piwik integration, use https://wordpress.org/plugins/woocommerce-piwik-integration/ from now on.
+* Refactor - Taken out ShareYourCart integration, use https://wordpress.org/plugins/shareyourcart/ from now on.
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class.
 * Refactor - Improved parameter handling in woocommerce_related_products() function.
 * Refactor - Widget classes (added abstract and combined similar widgets).
