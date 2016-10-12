@@ -40,11 +40,11 @@ class WC_Meta_Box_Order_Data {
 
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
-				'label' => __( 'First Name', 'woocommerce' ),
+				'label' => __( 'First name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'last_name' => array(
-				'label' => __( 'Last Name', 'woocommerce' ),
+				'label' => __( 'Last name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'company' => array(
@@ -80,7 +80,7 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'email' => array(
-				'label' => __( 'Email Address', 'woocommerce' ),
+				'label' => __( 'Email address', 'woocommerce' ),
 			),
 			'phone' => array(
 				'label' => __( 'Phone', 'woocommerce' ),
@@ -89,11 +89,11 @@ class WC_Meta_Box_Order_Data {
 
 		self::$shipping_fields = apply_filters( 'woocommerce_admin_shipping_fields', array(
 			'first_name' => array(
-				'label' => __( 'First Name', 'woocommerce' ),
+				'label' => __( 'First name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'last_name' => array(
-				'label' => __( 'Last Name', 'woocommerce' ),
+				'label' => __( 'Last name', 'woocommerce' ),
 				'show'  => false,
 			),
 			'company' => array(
@@ -360,7 +360,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
-									echo '<p><strong>' . __( 'Customer Provided Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+									echo '<p><strong>' . __( 'Customer provided note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
 								}
 
 							echo '</div>';

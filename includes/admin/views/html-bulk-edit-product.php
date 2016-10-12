@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="change_regular_price change_to" name="change_regular_price">
 					<?php
 						$options = array(
-							'' 	=> __( '— No Change —', 'woocommerce' ),
+							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="change_sale_price change_to" name="change_sale_price">
 					<?php
 						$options = array(
-							'' 	=> __( '— No Change —', 'woocommerce' ),
+							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
 							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
@@ -72,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="tax_status" name="_tax_status">
 					<?php
 						$options = array(
-							''         => __( '— No Change —', 'woocommerce' ),
+							''         => __( '— No change —', 'woocommerce' ),
 							'taxable'  => __( 'Taxable', 'woocommerce' ),
 							'shipping' => __( 'Shipping only', 'woocommerce' ),
 							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
@@ -91,7 +91,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="tax_class" name="_tax_class">
 					<?php
 						$options = array(
-							''         => __( '— No Change —', 'woocommerce' ),
+							''         => __( '— No change —', 'woocommerce' ),
 							'standard' => __( 'Standard', 'woocommerce' ),
 						);
 
@@ -119,7 +119,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select class="change_weight change_to" name="change_weight">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -143,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select class="change_dimensions change_to" name="change_dimensions">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -182,7 +182,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="visibility" name="_visibility">
 				<?php
 					$options = array(
-						''        => __( '— No Change —', 'woocommerce' ),
+						''        => __( '— No change —', 'woocommerce' ),
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
 						'search'  => __( 'Search', 'woocommerce' ),
@@ -201,7 +201,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="featured" name="_featured">
 				<?php
 					$options = array(
-						''    => __( '— No Change —', 'woocommerce' ),
+						''    => __( '— No change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
 						'no'  => __( 'No', 'woocommerce' ),
 					);
@@ -219,7 +219,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="stock_status" name="_stock_status">
 				<?php
 					$options = array(
-						''           => __( '— No Change —', 'woocommerce' ),
+						''           => __( '— No change —', 'woocommerce' ),
 						'instock'    => __( 'In stock', 'woocommerce' ),
 						'outofstock' => __( 'Out of stock', 'woocommerce' ),
 					);
@@ -238,7 +238,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="manage_stock" name="_manage_stock">
 					<?php
 						$options = array(
-							''    => __( '— No Change —', 'woocommerce' ),
+							''    => __( '— No change —', 'woocommerce' ),
 							'yes' => __( 'Yes', 'woocommerce' ),
 							'no'  => __( 'No', 'woocommerce' ),
 						);
@@ -257,7 +257,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select class="change_stock change_to" name="change_stock">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'' 	=> __( '— No change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 							);
 							foreach ( $options as $key => $value ) {
@@ -278,7 +278,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="backorders" name="_backorders">
 					<?php
 						$options = array(
-							''       => __( '— No Change —', 'woocommerce' ),
+							''       => __( '— No change —', 'woocommerce' ),
 							'no'     => __( 'Do not allow', 'woocommerce' ),
 							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
 							'yes'    => __( 'Allow', 'woocommerce' ),
@@ -299,7 +299,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="sold_individually" name="_sold_individually">
 					<?php
 					$options = array(
-						''    => __( '— No Change —', 'woocommerce' ),
+						''    => __( '— No change —', 'woocommerce' ),
 						'yes' => __( 'Yes', 'woocommerce' ),
 						'no'  => __( 'No', 'woocommerce' ),
 					);

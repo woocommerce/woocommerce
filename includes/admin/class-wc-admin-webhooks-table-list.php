@@ -244,12 +244,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		if ( isset( $_GET['status'] ) && 'trash' == $_GET['status'] ) {
 			return array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete Permanently', 'woocommerce' ),
+				'delete'  => __( 'Delete permanently', 'woocommerce' ),
 			);
 		}
 
 		return array(
-			'trash' => __( 'Move to Trash', 'woocommerce' ),
+			'trash' => __( 'Move to trash', 'woocommerce' ),
 		);
 	}
 
@@ -260,7 +260,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	protected function extra_tablenav( $which ) {
 		if ( 'top' == $which && isset( $_GET['status'] ) && 'trash' == $_GET['status'] && current_user_can( 'delete_shop_webhooks' ) ) {
-			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&empty_trash=1' ), 'empty_trash' ) ) . '">' . __( 'Empty Trash', 'woocommerce' ) . '</a></div>';
+			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&empty_trash=1' ), 'empty_trash' ) ) . '">' . __( 'Empty trash', 'woocommerce' ) . '</a></div>';
 		}
 	}
 

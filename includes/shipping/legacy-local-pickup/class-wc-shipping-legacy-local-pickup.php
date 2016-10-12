@@ -21,8 +21,8 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'legacy_local_pickup';
-		$this->method_title       = __( 'Local Pickup (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title       = __( 'Local pickup (legacy)', 'woocommerce' );
+		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
 		$this->init();
 	}
 
@@ -98,7 +98,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'codes' => array(
-				'title'       => __( 'Allowed ZIP/Post Codes', 'woocommerce' ),
+				'title'       => __( 'Allowed ZIP/post codes', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => __( 'What ZIP/post codes are available for local pickup?', 'woocommerce' ),
 				'default'     => '',
@@ -112,11 +112,11 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'class'    => 'availability wc-enhanced-select',
 				'options'  => array(
 					'all'      => __( 'All allowed countries', 'woocommerce' ),
-					'specific' => __( 'Specific Countries', 'woocommerce' ),
+					'specific' => __( 'Specific countries', 'woocommerce' ),
 				),
 			),
 			'countries' => array(
-				'title'             => __( 'Specific Countries', 'woocommerce' ),
+				'title'             => __( 'Specific countries', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
 				'css'               => 'width: 450px;',

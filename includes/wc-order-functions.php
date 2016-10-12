@@ -940,7 +940,7 @@ function wc_order_fully_refunded( $order_id ) {
 	// Create the refund object
 	wc_create_refund( array(
 		'amount'     => $max_refund,
-		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
+		'reason'     => __( 'Order fully refunded', 'woocommerce' ),
 		'order_id'   => $order_id,
 		'line_items' => array(),
 	) );

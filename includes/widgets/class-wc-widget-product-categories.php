@@ -36,11 +36,11 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_product_categories';
 		$this->widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_product_categories';
-		$this->widget_name        = __( 'WooCommerce Product Categories', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce product categories', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Product Categories', 'woocommerce' ),
+				'std'   => __( 'Product categories', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'orderby' => array(
@@ -48,7 +48,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'std'   => 'name',
 				'label' => __( 'Order by', 'woocommerce' ),
 				'options' => array(
-					'order' => __( 'Category Order', 'woocommerce' ),
+					'order' => __( 'Category order', 'woocommerce' ),
 					'name'  => __( 'Name', 'woocommerce' ),
 				),
 			),

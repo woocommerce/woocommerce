@@ -22,11 +22,11 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_recently_viewed_products';
 		$this->widget_description = __( 'Display a list of recently viewed products.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_recently_viewed_products';
-		$this->widget_name        = __( 'WooCommerce Recently Viewed', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce recently viewed', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Recently Viewed Products', 'woocommerce' ),
+				'std'   => __( 'Recently viewed products', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(

@@ -17,7 +17,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 			'orders'          => __( 'Orders', 'woocommerce' ),
 			'downloads'       => __( 'Downloads', 'woocommerce' ),
 			'edit-address'    => __( 'Addresses', 'woocommerce' ),
-			'edit-account'    => __( 'Account Details', 'woocommerce' ),
+			'edit-account'    => __( 'Account details', 'woocommerce' ),
 			'customer-logout' => __( 'Logout', 'woocommerce' ),
 		), wc_get_account_menu_items() );
 	}
@@ -45,7 +45,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_downloads_columns() {
 		$this->assertEquals( array(
 			'download-file'      => __( 'File', 'woocommerce' ),
-			'download-remaining' => __( 'Downloads Remaining', 'woocommerce' ),
+			'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 			'download-expires'   => __( 'Expires', 'woocommerce' ),
 			'download-product'   => __( 'Product', 'woocommerce' ),
 		), wc_get_account_downloads_columns() );

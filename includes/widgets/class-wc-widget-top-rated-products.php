@@ -24,11 +24,11 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_top_rated_products';
 		$this->widget_description = __( 'Display a list of your top rated products on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_top_rated_products';
-		$this->widget_name        = __( 'WooCommerce Top Rated Products', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce top rated products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Top Rated Products', 'woocommerce' ),
+				'std'   => __( 'Top rated products', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(

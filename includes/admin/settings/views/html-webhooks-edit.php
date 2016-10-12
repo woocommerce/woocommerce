@@ -52,18 +52,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							$topics = apply_filters( 'woocommerce_webhook_topics', array(
 								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
-								'coupon.created'   => __( 'Coupon Created', 'woocommerce' ),
-								'coupon.updated'   => __( 'Coupon Updated', 'woocommerce' ),
-								'coupon.deleted'   => __( 'Coupon Deleted', 'woocommerce' ),
-								'customer.created' => __( 'Customer Created', 'woocommerce' ),
-								'customer.updated' => __( 'Customer Updated', 'woocommerce' ),
-								'customer.deleted' => __( 'Customer Deleted', 'woocommerce' ),
-								'order.created'    => __( 'Order Created', 'woocommerce' ),
-								'order.updated'    => __( 'Order Updated', 'woocommerce' ),
-								'order.deleted'    => __( 'Order Deleted', 'woocommerce' ),
-								'product.created'  => __( 'Product Created', 'woocommerce' ),
-								'product.updated'  => __( 'Product Updated', 'woocommerce' ),
-								'product.deleted'  => __( 'Product Deleted', 'woocommerce' ),
+								'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
+								'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
+								'coupon.deleted'   => __( 'Coupon deleted', 'woocommerce' ),
+								'customer.created' => __( 'Customer created', 'woocommerce' ),
+								'customer.updated' => __( 'Customer updated', 'woocommerce' ),
+								'customer.deleted' => __( 'Customer deleted', 'woocommerce' ),
+								'order.created'    => __( 'Order created', 'woocommerce' ),
+								'order.updated'    => __( 'Order updated', 'woocommerce' ),
+								'order.deleted'    => __( 'Order deleted', 'woocommerce' ),
+								'product.created'  => __( 'Product created', 'woocommerce' ),
+								'product.updated'  => __( 'Product updated', 'woocommerce' ),
+								'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
 								'action'           => __( 'Action', 'woocommerce' ),
 								'custom'           => __( 'Custom', 'woocommerce' ),
 							) );
@@ -77,7 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-action-event-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_action_event"><?php _e( 'Action event', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'Enter the Action that will trigger this webhook.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'Enter the action that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_action_event" id="webhook_action_event" type="text" class="input-text regular-input" value="<?php echo esc_attr( $topic_data['event'] ); ?>" />
@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-custom-topic-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_custom_topic"><?php _e( 'Custom topic', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'Enter the custom topic that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_custom_topic" id="webhook_custom_topic" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_topic() ); ?>" />
@@ -104,7 +104,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_secret"><?php _e( 'Secret', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'The secret key is used to generate a hash of the delivered webhook and provided in the request headers.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />
@@ -154,7 +154,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<p class="submit">
 						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>" />
 						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
-							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete Permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' ); ?></a>
+							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete permanently', 'woocommerce' ) : __( 'Move to trash', 'woocommerce' ); ?></a>
 						<?php endif; ?>
 					</p>
 				</td>

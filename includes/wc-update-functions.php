@@ -770,7 +770,7 @@ function wc_update_240_refunds() {
 		if ( $order_total > $refunded_total ) {
 			wc_create_refund( array(
 				'amount'     => $order_total - $refunded_total,
-				'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
+				'reason'     => __( 'Order fully refunded', 'woocommerce' ),
 				'order_id'   => $refunded_order->ID,
 				'line_items' => array(),
 				'date'       => $refunded_order->post_modified,

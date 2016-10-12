@@ -33,7 +33,7 @@ class WC_Admin_Permalink_Settings {
 	 */
 	public function settings_init() {
 		// Add a section to the permalinks page
-		add_settings_section( 'woocommerce-permalink', __( 'Product Permalinks', 'woocommerce' ), array( $this, 'settings' ), 'permalink' );
+		add_settings_section( 'woocommerce-permalink', __( 'Product permalinks', 'woocommerce' ), array( $this, 'settings' ), 'permalink' );
 
 		// Add our settings
 		add_settings_field(

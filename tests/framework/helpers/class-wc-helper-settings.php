@@ -28,7 +28,7 @@ class WC_Helper_Settings {
 		$groups[] = array(
 			'id'          => 'test',
 			'bad'         => 'value',
-			'label'       => __( 'Test Extension', 'woocommerce' ),
+			'label'       => __( 'Test extension', 'woocommerce' ),
 			'description' => __( 'My awesome test settings.', 'woocommerce' ),
 			'option_key'  => '',
 		);
@@ -41,7 +41,7 @@ class WC_Helper_Settings {
 		);
 		$groups[] = array(
 			'id'    => 'coupon-data',
-			'label' => __( 'Coupon Data', 'woocommerce' ),
+			'label' => __( 'Coupon data', 'woocommerce' ),
 			'option_key'  => '',
 		);
 		$groups[] = array(
@@ -61,7 +61,7 @@ class WC_Helper_Settings {
 	public static function register_test_settings( $settings ) {
 		$settings[] = array(
 			'id'          => 'woocommerce_shop_page_display',
-			'label'       => __( 'Shop Page Display', 'woocommerce' ),
+			'label'       => __( 'Shop page display', 'woocommerce' ),
 			'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
 			'default'     => '',
 			'type'        => 'select',
@@ -74,7 +74,7 @@ class WC_Helper_Settings {
 		);
 		$settings[] = array(
 			'id'            => 'woocommerce_enable_lightbox',
-			'label'         => __( 'Product Image Gallery', 'woocommerce' ),
+			'label'         => __( 'Product image gallery', 'woocommerce' ),
 			'description'   => __( 'Enable Lightbox for product images', 'woocommerce' ),
 			'default'       => 'yes',
 			'tip'           => __( 'Product gallery images will open in a lightbox.', 'woocommerce' ),

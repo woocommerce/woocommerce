@@ -61,17 +61,17 @@ class WC_Admin_Setup_Wizard {
 				'handler' => '',
 			),
 			'pages' => array(
-				'name'    => __( 'Page Setup', 'woocommerce' ),
+				'name'    => __( 'Page setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
 			'locale' => array(
-				'name'    => __( 'Store Locale', 'woocommerce' ),
+				'name'    => __( 'Store locale', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
 				'handler' => array( $this, 'wc_setup_locale_save' ),
 			),
 			'shipping_taxes' => array(
-				'name'    => __( 'Shipping &amp; Tax', 'woocommerce' ),
+				'name'    => __( 'Shipping &amp; tax', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
@@ -585,7 +585,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
 			'paypal' => array(
-				'name'        => __( 'PayPal Standard', 'woocommerce' ),
+				'name'        => __( 'PayPal standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
@@ -605,13 +605,13 @@ class WC_Admin_Setup_Wizard {
 				'class'       => '',
 			),
 			'bacs' => array(
-				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
+				'name'        => __( 'Bank transfer (BACS) payments', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
 			'cod' => array(
-				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
+				'name'        => __( 'Cash on delivery', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',

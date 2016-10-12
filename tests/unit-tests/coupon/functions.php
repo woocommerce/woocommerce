@@ -15,10 +15,10 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_coupon_types() {
 
 		$coupon_types = array(
-			'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
-			'percent'         => __( 'Cart % Discount', 'woocommerce' ),
-			'fixed_product'   => __( 'Product Discount', 'woocommerce' ),
-			'percent_product' => __( 'Product % Discount', 'woocommerce' ),
+			'fixed_cart'      => __( 'Cart discount', 'woocommerce' ),
+			'percent'         => __( 'Cart % discount', 'woocommerce' ),
+			'fixed_product'   => __( 'Product discount', 'woocommerce' ),
+			'percent_product' => __( 'Product % discount', 'woocommerce' ),
 		);
 
 		$this->assertEquals( $coupon_types, wc_get_coupon_types() );

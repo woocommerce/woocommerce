@@ -89,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php
 		if ( 0 == $key_id ) {
-			submit_button( __( 'Generate API Key', 'woocommerce' ), 'primary', 'update_api_key' );
+			submit_button( __( 'Generate API key', 'woocommerce' ), 'primary', 'update_api_key' );
 		} else {
 			?>
 			<p class="submit">

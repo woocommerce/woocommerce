@@ -21,7 +21,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	public function __construct( $instance_id = 0 ) {
 		$this->id                    = 'local_pickup';
 		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Local Pickup', 'woocommerce' );
+		$this->method_title          = __( 'Local pickup', 'woocommerce' );
 		$this->method_description    = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
@@ -74,7 +74,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'tax_status' => array(
-				'title' 		=> __( 'Tax Status', 'woocommerce' ),
+				'title' 		=> __( 'Tax status', 'woocommerce' ),
 				'type' 			=> 'select',
 				'class'         => 'wc-enhanced-select',
 				'default' 		=> 'taxable',
