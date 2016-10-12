@@ -40,6 +40,7 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
+					<?php do_action('woocommerce_order_actions_options_start',$post->ID , $theorder); ?>
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 					<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
@@ -62,6 +63,7 @@ class WC_Meta_Box_Order_Actions {
 					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
+					<?php do_action('woocommerce_order_actions_options_end',$post->ID , $theorder); ?>
 				</select>
 
 				<button class="button wc-reload" title="<?php esc_attr_e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
