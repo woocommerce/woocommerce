@@ -44,8 +44,8 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
         $this->assertContains( array(
 			'id'          => 'free_shipping',
-			'title'       => 'Free Shipping',
-			'description' => 'Free Shipping is a special method which can be triggered with coupons and minimum spends.',
+			'title'       => 'Free shipping',
+			'description' => 'Free shipping is a special method which can be triggered with coupons and minimum spends.',
 			'_links' => array(
 				'self'       => array(
 					array(

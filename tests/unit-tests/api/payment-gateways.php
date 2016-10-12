@@ -44,11 +44,11 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
 			'id'                 => 'cheque',
-			'title'              => 'Check Payments',
+			'title'              => 'Check payments',
 			'description'        => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
 			'order'              => '',
 			'enabled'            => true,
-			'method_title'       => 'Check Payments',
+			'method_title'       => 'Check payments',
 			'method_description' => "Allows check payments. Why would you take checks in this day and age? Well you probably wouldn't but it does allow you to make test purchases for testing order emails and the 'success' pages etc.",
 			'settings'           => $this->get_settings( 'WC_Gateway_Cheque' ),
 			'_links' => array(

@@ -443,7 +443,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_get_tax_classes() {
 		$tax_classes = WC_Tax::get_tax_classes();
 
-		$this->assertEquals( $tax_classes, array( 'Reduced Rate', 'Zero Rate' ) );
+		$this->assertEquals( $tax_classes, array( 'Reduced rate', 'Zero rate' ) );
 	}
 
 	/**
