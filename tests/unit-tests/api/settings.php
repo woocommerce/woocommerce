@@ -47,7 +47,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 
 		$this->assertContains( array(
 			'id'          => 'test',
-			'label'       => 'Test Extension',
+			'label'       => 'Test extension',
 			'parent_id'   => '',
 			'description' => 'My awesome test settings.',
 			'sub_groups'  => array( 'sub-test' ),
@@ -174,7 +174,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
     		'id' => 'woocommerce_demo_store',
-			'label' => 'Store Notice',
+			'label' => 'Store notice',
 			'description' => 'Enable site-wide store notice text',
 			'type' => 'checkbox',
 			'default' => 'no',
@@ -366,7 +366,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assertEquals( 'woocommerce_enable_lightbox', $data['id'] );
-		$this->assertEquals( 'Product Image Gallery', $data['label'] );
+		$this->assertEquals( 'Product image gallery', $data['label'] );
 		$this->assertEquals( 'yes', $data['default'] );
 		$this->assertEquals( 'Product gallery images will open in a lightbox.', $data['tip'] );
 		$this->assertEquals( 'checkbox', $data['type'] );
@@ -499,7 +499,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( is_array( $data ) );
 		$this->assertContains( array(
 			'id'          => 'woocommerce_downloads_require_login',
-			'label'       => 'Access Restriction',
+			'label'       => 'Access restriction',
 			'description' => 'Downloads require login',
 			'type'        => 'checkbox',
 			'default'     => 'no',

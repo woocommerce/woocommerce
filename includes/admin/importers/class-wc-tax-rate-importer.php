@@ -174,7 +174,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Performs post-import cleanup of files and the cache.
 	 */
 	public function import_end() {
-		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View tax rates', 'woocommerce' ) . '</a>' . '</p>';
 
 		do_action( 'import_end' );
 	}
@@ -210,7 +210,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	public function header() {
 		echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
-		echo '<h1>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h1>';
+		echo '<h1>' . __( 'Import tax rates', 'woocommerce' ) . '</h1>';
 	}
 
 	/**

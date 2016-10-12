@@ -38,14 +38,14 @@ class WC_Admin_Profile {
 	public function get_customer_meta_fields() {
 		$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
 			'billing' => array(
-				'title' => __( 'Customer Billing Address', 'woocommerce' ),
+				'title' => __( 'Customer billing address', 'woocommerce' ),
 				'fields' => array(
 					'billing_first_name' => array(
-						'label'       => __( 'First Name', 'woocommerce' ),
+						'label'       => __( 'First name', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_last_name' => array(
-						'label'       => __( 'Last Name', 'woocommerce' ),
+						'label'       => __( 'Last name', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_company' => array(
@@ -85,20 +85,20 @@ class WC_Admin_Profile {
 						'description' => '',
 					),
 					'billing_email' => array(
-						'label'       => __( 'Email Address', 'woocommerce' ),
+						'label'       => __( 'Email address', 'woocommerce' ),
 						'description' => '',
 					),
 				),
 			),
 			'shipping' => array(
-				'title' => __( 'Customer Shipping Address', 'woocommerce' ),
+				'title' => __( 'Customer shipping address', 'woocommerce' ),
 				'fields' => array(
 					'shipping_first_name' => array(
-						'label'       => __( 'First Name', 'woocommerce' ),
+						'label'       => __( 'First name', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_last_name' => array(
-						'label'       => __( 'Last Name', 'woocommerce' ),
+						'label'       => __( 'Last name', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_company' => array(

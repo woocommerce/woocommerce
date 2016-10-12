@@ -22,7 +22,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav';
 		$this->widget_description = __( 'Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_layered_nav';
-		$this->widget_name        = __( 'WooCommerce Layered Nav', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce layered nav', 'woocommerce' );
 		parent::__construct();
 	}
 

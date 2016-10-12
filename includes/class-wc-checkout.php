@@ -122,7 +122,7 @@ class WC_Checkout {
 			'order_comments' => array(
 				'type' => 'textarea',
 				'class' => array( 'notes' ),
-				'label' => __( 'Order Notes', 'woocommerce' ),
+				'label' => __( 'Order notes', 'woocommerce' ),
 				'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
 			),
 		);

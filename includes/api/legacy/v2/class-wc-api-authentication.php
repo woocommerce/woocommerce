@@ -90,7 +90,7 @@ class WC_API_Authentication {
 
 		} else {
 
-			throw new Exception( __( 'Consumer Key is missing.', 'woocommerce' ), 404 );
+			throw new Exception( __( 'Consumer key is missing.', 'woocommerce' ), 404 );
 		}
 
 		// Get consumer secret
@@ -106,13 +106,13 @@ class WC_API_Authentication {
 
 		} else {
 
-			throw new Exception( __( 'Consumer Secret is missing.', 'woocommerce' ), 404 );
+			throw new Exception( __( 'Consumer secret is missing.', 'woocommerce' ), 404 );
 		}
 
 		$keys = $this->get_keys_by_consumer_key( $consumer_key );
 
 		if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $consumer_secret ) ) {
-			throw new Exception( __( 'Consumer Secret is invalid.', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Consumer secret is invalid.', 'woocommerce' ), 401 );
 		}
 
 		return $keys;
@@ -180,7 +180,7 @@ class WC_API_Authentication {
 		", $consumer_key ), ARRAY_A );
 
 		if ( empty( $keys ) ) {
-			throw new Exception( __( 'Consumer Key is invalid.', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Consumer key is invalid.', 'woocommerce' ), 401 );
 		}
 
 		return $keys;
@@ -248,7 +248,7 @@ class WC_API_Authentication {
 
 		// Sort parameters
 		if ( ! uksort( $params, 'strcmp' ) ) {
-			throw new Exception( __( 'Invalid Signature - failed to sort parameters.', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid signature - failed to sort parameters.', 'woocommerce' ), 401 );
 		}
 
 		// Form query string
@@ -262,7 +262,7 @@ class WC_API_Authentication {
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
 		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
-			throw new Exception( __( 'Invalid Signature - signature method is invalid.', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid signature - signature method is invalid.', 'woocommerce' ), 401 );
 		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
@@ -270,7 +270,7 @@ class WC_API_Authentication {
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $keys['consumer_secret'], true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
-			throw new Exception( __( 'Invalid Signature - provided signature does not match.', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid signature - provided signature does not match.', 'woocommerce' ), 401 );
 		}
 	}
 

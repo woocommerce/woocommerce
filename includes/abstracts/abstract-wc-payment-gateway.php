@@ -453,7 +453,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 				<label for="wc-%1$s-new-payment-method" style="display:inline;">%2$s</label>
 			</p>',
 			esc_attr( $this->id ),
-			esc_html__( 'Save to Account', 'woocommerce' )
+			esc_html__( 'Save to account', 'woocommerce' )
 		);
 	}
 }

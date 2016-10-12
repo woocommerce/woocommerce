@@ -415,7 +415,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$post  = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0;

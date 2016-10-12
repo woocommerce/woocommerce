@@ -65,7 +65,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 		if ( $partial_refund ) {
 			$this->id             = 'customer_partially_refunded_order';
-			$this->title          = __( 'Partially Refunded order', 'woocommerce' );
+			$this->title          = __( 'Partially refunded order', 'woocommerce' );
 			$this->description    = __( 'Order partially refunded emails are sent to customers when their orders are partially refunded.', 'woocommerce' );
 			$this->heading        = $this->heading_partial;
 			$this->subject        = $this->subject_partial;
@@ -200,7 +200,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'default' => 'yes',
 			),
 			'subject_full' => array(
-				'title'       => __( 'Full Refund Subject', 'woocommerce' ),
+				'title'       => __( 'Full refund subject', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_full ),
 				'placeholder' => '',
@@ -208,7 +208,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'subject_partial' => array(
-				'title'       => __( 'Partial Refund Subject', 'woocommerce' ),
+				'title'       => __( 'Partial refund subject', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_partial ),
 				'placeholder' => '',
@@ -216,7 +216,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'heading_full' => array(
-				'title'       => __( 'Full Refund Email Heading', 'woocommerce' ),
+				'title'       => __( 'Full refund email heading', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_full ),
 				'placeholder' => '',
@@ -224,7 +224,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'heading_partial' => array(
-				'title'       => __( 'Partial Refund Email Heading', 'woocommerce' ),
+				'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_partial ),
 				'placeholder' => '',
@@ -232,7 +232,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'email_type' => array(
-				'title'       => __( 'Email Type', 'woocommerce' ),
+				'title'       => __( 'Email type', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'     => 'html',
