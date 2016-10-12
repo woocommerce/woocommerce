@@ -2318,7 +2318,7 @@ class WC_Admin_Post_Types {
 		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
 			?>
 			<div class="notice notice-info">
-				<p><?php printf( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. %sYou can read more about this here%s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/woocommerce-pages/#section-4">', '</a>' ); ?></p>
+				<p><?php printf( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. %1$sYou can read more about this here%2$s.', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/woocommerce-pages/#section-4">', '</a>' ); ?></p>
 			</div>
 			<?php
 		}
