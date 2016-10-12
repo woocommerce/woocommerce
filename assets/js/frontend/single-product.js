@@ -65,6 +65,11 @@ jQuery( function( $ ) {
 
 				return false;
 			}
+		})
+		.on( 'woocommerce_init_gallery', function() {
+			if ( $.isFunction( $.fn.zoom ) ) {
+				wc_product_gallery.init_zoom();
+			}
 		});
 
 	//Init Tabs and Star Ratings
@@ -129,6 +134,7 @@ jQuery( function( $ ) {
 		init_zoom: function() {
 			// But only zoom if the img is larger than its container and the visitor is not on a touch device.
 			if ( ( $( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) && ( ! wc_product_gallery.is_touch_device() ) ) {
+				$( '.woocommerce-product-gallery__image' ).trigger('zoom.destroy');
 				$( '.woocommerce-product-gallery__image' ).zoom();
 			}
 		},
@@ -150,13 +156,9 @@ jQuery( function( $ ) {
 						item            = {
 							src: large_image_src,
 							w:   large_image_w,
-							h:   large_image_h
+							h:   large_image_h,
+							title: img.attr( 'title' )
 						};
-
-					var title = img.attr( 'title' );
-
-					item.title = title;
-
 					items.push( item );
 				});
 			}

@@ -486,28 +486,34 @@
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
-		var $form             = this,
-			$product          = $form.closest('.product'),
-			$product_img      = $product.find( 'div.images img:eq(0)' ),
-			$product_link     = $product.find( 'div.images a.zoom:eq(0)' );
+		var $form         = this,
+			$product      = $form.closest('.product'),
+			$gallery_img  = $product.find( '.flex-control-nav li:eq(0) img' ),
+			$product_img_wrap = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0)' ),
+			$product_img  = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' );
 
 		if ( variation && variation.image_src && variation.image_src.length > 1 ) {
+			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image_src );
+			$product_img.wc_set_variation_attr( 'data-large-image', variation.image_src );
 			$product_img.wc_set_variation_attr( 'src', variation.image_src );
-			$product_img.wc_set_variation_attr( 'title', variation.image_title );
-			$product_img.wc_set_variation_attr( 'alt', variation.image_alt );
 			$product_img.wc_set_variation_attr( 'srcset', variation.image_srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image_sizes );
-			$product_link.wc_set_variation_attr( 'href', variation.image_link );
-			$product_link.wc_set_variation_attr( 'title', variation.image_caption );
+			$product_img.wc_set_variation_attr( 'title', variation.image_title );
+			$product_img.wc_set_variation_attr( 'alt', variation.image_alt );
+			$gallery_img.wc_set_variation_attr( 'src', variation.image_src );
+			$gallery_img.click();
 		} else {
+			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
+			$product_img.wc_reset_variation_attr( 'large-image' );
 			$product_img.wc_reset_variation_attr( 'src' );
-			$product_img.wc_reset_variation_attr( 'title' );
-			$product_img.wc_reset_variation_attr( 'alt' );
 			$product_img.wc_reset_variation_attr( 'srcset' );
 			$product_img.wc_reset_variation_attr( 'sizes' );
-			$product_link.wc_reset_variation_attr( 'href' );
-			$product_link.wc_reset_variation_attr( 'title' );
+			$product_img.wc_reset_variation_attr( 'title' );
+			$product_img.wc_reset_variation_attr( 'alt' );
+			$gallery_img.wc_reset_variation_attr( 'src' );
 		}
+
+		$('body').trigger( 'woocommerce_init_gallery' );
 	};
 
 	$( function() {
