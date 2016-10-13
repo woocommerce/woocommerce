@@ -234,7 +234,7 @@ class WC_Gateway_Paypal_Request {
 			$item_names[] = $item_name . ' x ' . $item->get_quantity();
 		}
 
-		return apply_filters( 'woocommerce_paypal_get_order_item_names', implode( ', ', $item_names ), $order );;
+		return apply_filters( 'woocommerce_paypal_get_order_item_names', implode( ', ', $item_names ), $order );
 	}
 
 	/**
