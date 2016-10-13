@@ -309,7 +309,7 @@ class WC_Admin_Setup_Wizard {
 							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( get_woocommerce_currencies() as $code => $name ) {
-								echo '<option value="' . esc_attr( $code ) . '" ' . selected( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
+								echo '<option value="' . esc_attr( $code ) . '" ' . selected( $currency, $code, false ) . '>' . sprintf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ) . '</option>';
 							}
 							?>
 						</select>
