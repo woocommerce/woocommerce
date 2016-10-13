@@ -162,30 +162,6 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates, sanitizes, encodes and outputs specific structured data type.
-	 *
-	 * @param  string $type
-	 * @param  mixed  $object  (default: null)
-	 * @param  mixed  $param_1 (default: null)
-	 * @param  mixed  $param_2 (default: null)
-	 * @param  mixed  $param_3 (default: null)
-	 * @return bool
-	 */
-	public function generate_output_structured_data( $type, $object = null, $param_1 = null, $param_2 = null, $param_3 = null ) {
-		if ( ! is_string( $type ) ) {
-			return false;
-		}
-
-		$generate = 'generate_' . $type . '_data';
-
-		if ( method_exists( $this, $generate ) && $this->$generate( $object, $param_1, $param_2, $param_3 ) ) {
-			return $this->output_structured_data( $type );
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Limits Product structured data on taxonomies and shop page.
 	 *
 	 * Hooked into `woocommerce_structured_data_product_limit` filter hook.
