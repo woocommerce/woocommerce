@@ -21,11 +21,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		$this->id                 = 'cod';
-		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
-		$this->method_title       = __( 'Cash on delivery', 'woocommerce' );
-		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
-		$this->has_fields         = false;
+		// Setup general properties
+		$this->setup_properties();
 
 		// Load the settings
 		$this->init_form_fields();
@@ -43,6 +40,17 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		// Customer Emails
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+	}
+	
+	/**
+	 * Setup general properties for the gateway.
+	 */
+	protected function setup_properties() {
+		$this->id                 = 'cod';
+		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
+		$this->method_title       = __( 'Cash on delivery', 'woocommerce' );
+		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
+		$this->has_fields         = false;
 	}
 
 	/**
