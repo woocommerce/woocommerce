@@ -28,6 +28,7 @@ get_header( 'shop' ); ?>
 		 *
 		 * @hooked woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)
 		 * @hooked woocommerce_breadcrumb - 20
+		 * @hooked WC_Structured_Data::generate_website_data() - 30
 		 */
 		do_action( 'woocommerce_before_main_content' );
 	?>
@@ -69,6 +70,15 @@ get_header( 'shop' ); ?>
 				<?php woocommerce_product_subcategories(); ?>
 
 				<?php while ( have_posts() ) : the_post(); ?>
+
+					<?php
+						/**
+						 * woocommerce_shop_loop hook.
+						 *
+						 * @hooked WC_Structured_Data::generate_product_data() - 10
+						 */
+						do_action( 'woocommerce_shop_loop' );
+					?>
 
 					<?php wc_get_template_part( 'content', 'product' ); ?>
 
