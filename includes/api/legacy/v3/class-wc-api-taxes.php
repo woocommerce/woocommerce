@@ -454,7 +454,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	public function bulk( $data ) {
 		try {
 			if ( ! isset( $data['taxes'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_taxes_data', sprintf( __( 'No %s data specified to create/edit %s', 'woocommerce' ), 'taxes' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_missing_taxes_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'taxes' ), 400 );
 			}
 
 			$data  = $data['taxes'];
