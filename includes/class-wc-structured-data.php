@@ -35,9 +35,6 @@ class WC_Structured_Data {
 		// Output structured data.
 		add_action( 'woocommerce_email_order_details', array( $this, 'output_structured_data' ), 30 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
-
-		// Limite products in structured data.
-		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10 );
 	}
 
 	/**
@@ -138,17 +135,6 @@ class WC_Structured_Data {
 		}
 	}
 
-	/**
-	 * Limits Product structured data on taxonomies and shop page.
-	 *
-	 * Hooked into `woocommerce_structured_data_product_limit` filter hook.
-	 *
-	 * @return bool
-	 */
-	public function limit_product_data_in_loops() {
-		return is_product_taxonomy() || is_shop();
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Generators
@@ -173,15 +159,12 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_single_product_summary` action hook.
 	 * Hooked into `woocommerce_shop_loop` action hook.
 	 *
-	 * @param WC_Product $product    Product data (default: null).
-	 * @param bool       $limit_data If should limit the data (default: false).
+	 * @param WC_Product $product Product data (default: null).
 	 */
-	public function generate_product_data( $product = null, $limit_data = false ) {
+	public function generate_product_data( $product = null ) {
 		if ( ! is_object( $product ) ) {
 			global $product;
 		}
-
-		$limit_data = apply_filters( 'woocommerce_structured_data_product_limit', $limit_data );
 
 		$markup          = array();
 		$markup['@type'] = 'Product';
@@ -189,8 +172,9 @@ class WC_Structured_Data {
 		$markup['url']   = $markup['@id'];
 		$markup['name']  = $product->get_title();
 
-		if ( true === $limit_data ) {
-			return $this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
+		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
+			$this->set_data( apply_filters( 'woocommerce_structured_data_product_archives', $markup, $product ) );
+			return;
 		}
 
 		$products = array();
