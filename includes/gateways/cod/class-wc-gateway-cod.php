@@ -39,7 +39,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->enable_for_virtual = $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes' ? true : false;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou_page' ) );
+		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 
 		// Customer Emails
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
@@ -230,7 +230,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param bool $plain_text
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->get_payment_method() ) {
+		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
 			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 		}
 	}
