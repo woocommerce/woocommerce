@@ -469,5 +469,6 @@ class WC_Emails {
 		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
 
 		WC()->structured_data->generate_order_data( $order, $sent_to_admin, $plain_text );
+		WC()->structured_data->output_structured_data();
 	}
 }
