@@ -591,7 +591,7 @@ class WC_Product_Variable extends WC_Product {
 				$image_alt = $image_title;
 			}
 		} else {
-			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = $attachment = $image_thumbnail_src = $full_attachment = '';
 		}
 
 		$availability      = $variation->get_availability();
