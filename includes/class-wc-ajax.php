@@ -1753,7 +1753,12 @@ class WC_AJAX {
 		if ( ! empty( $customers ) ) {
 			foreach ( $customers as $customer ) {
 				if ( ! in_array( $customer->ID, $exclude ) ) {
-					$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+					$found_customers[ $customer->ID ] = sprintf(
+						esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+						$customer->display_name,
+						$customer->ID,
+						sanitize_email( $customer->user_email )
+					);
 				}
 			}
 		}

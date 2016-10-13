@@ -237,7 +237,12 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() ) {
 								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
-								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
+								$user_string = sprintf(
+									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+									$user->display_name,
+									absint( $user->ID ),
+									$user->user_email
+								);
 							}
 							?>
 							<input type="hidden" class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
