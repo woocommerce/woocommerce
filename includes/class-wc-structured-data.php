@@ -99,7 +99,7 @@ class WC_Structured_Data {
 		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
 		if ( ! empty( $data ) ) {
-			$data = count( $data ) > 1 ?  array( '@graph' => $data ) : $data[0];
+			$data = count( $data ) > 1 ? array( '@graph' => $data ) : $data[0];
 		}
 
 		return $data;
