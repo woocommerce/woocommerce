@@ -252,7 +252,7 @@ class WC_Admin_Attributes {
 
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php echo get_admin_page_title(); ?></h1>
+			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
