@@ -505,7 +505,11 @@
 			$product_img.wc_set_variation_attr( 'data-large-image-width', variation.image_link_h );
 			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image_link_w );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image_thumbnail_src );
-			$( window ).trigger( 'resize' );
+
+			window.setTimeout( function() {
+				$( window ).trigger( 'resize' );
+				$gallery_img.click();
+			}, 10 );
 		} else {
 			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
 			$product_img.wc_reset_variation_attr( 'large-image' );
@@ -520,7 +524,10 @@
 			$product_img.wc_reset_variation_attr( 'data-large-image' );
 			$product_img.wc_reset_variation_attr( 'data-large-image-width' );
 			$product_img.wc_reset_variation_attr( 'data-large-image-height' );
-			$( window ).trigger( 'resize' );
+
+			window.setTimeout( function() {
+				$( window ).trigger( 'resize' );
+			}, 10 );
 		}
 		$('body').trigger( 'woocommerce_init_gallery' );
 	};
