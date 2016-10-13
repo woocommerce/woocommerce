@@ -173,7 +173,7 @@ class WC_Structured_Data {
 		$markup['name']  = $product->get_title();
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
-			$this->set_data( apply_filters( 'woocommerce_structured_data_product_archives', $markup, $product ) );
+			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 			return;
 		}
 
