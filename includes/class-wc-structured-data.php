@@ -41,10 +41,10 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Sets `$this->_data`.
+	 * Sets data.
 	 *
-	 * @param  array $data
-	 * @param  bool  $reset (default: false)
+	 * @param  array $data Structured data.
+	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
@@ -62,7 +62,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Gets `$this->_data`.
+	 * Gets data.
 	 *
 	 * @return array
 	 */
@@ -196,15 +196,12 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_single_product_summary` action hook.
 	 * Hooked into `woocommerce_shop_loop` action hook.
 	 *
-	 * @param  bool|object $product    (default: false)
-	 * @param  bool        $limit_data (default: false)
-	 * @return bool
+	 * @param WC_Product $product    Product data (default: null).
+	 * @param bool       $limit_data If should limit the data (default: false).
 	 */
-	public function generate_product_data( $product = false, $limit_data = false ) {
-		if ( false === $product ) {
+	public function generate_product_data( $product = null, $limit_data = false ) {
+		if ( ! is_object( $product ) ) {
 			global $product;
-		} elseif ( ! is_object( $product ) ) {
-			return false;
 		}
 
 		$limit_data = apply_filters( 'woocommerce_structured_data_product_limit', $limit_data );
@@ -218,25 +215,26 @@ class WC_Structured_Data {
 			return $this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 		}
 
+		$products = array();
 		if ( $is_variable = $product->is_type( 'variable' ) ) {
 			$variations = $product->get_available_variations();
 
 			foreach ( $variations as $variation ) {
-				$product_variations[] = wc_get_product( $variation['variation_id'] );
+				$products[] = wc_get_product( $variation['variation_id'] );
 			}
 		} else {
-			$product_variations[] = $product;
+			$products[] = $product;
 		}
 
-		foreach ( $product_variations as $product_variation ) {
+		foreach ( $products as $_product ) {
 			$markup_offers[] = array(
 				'@type'         => 'Offer',
 				'priceCurrency' => get_woocommerce_currency(),
-				'price'         => $product_variation->get_price(),
-				'availability'  => 'http://schema.org/' . $stock = ( $product_variation->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'sku'           => $product_variation->get_sku(),
-				'image'         => wp_get_attachment_url( $product_variation->get_image_id() ),
-				'description'   => $is_variable ? $product_variation->get_variation_description() : '',
+				'price'         => $_product->get_price(),
+				'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+				'sku'           => $_product->get_sku(),
+				'image'         => wp_get_attachment_url( $_product->get_image_id() ),
+				'description'   => $is_variable ? $_product->get_variation_description() : '',
 				'seller'        => array(
 					'@type' => 'Organization',
 					'name'  => get_bloginfo( 'name' ),
@@ -257,7 +255,7 @@ class WC_Structured_Data {
 			);
 		}
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
 	/**
@@ -265,14 +263,9 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_review_meta` action hook.
 	 *
-	 * @param  object $comment
-	 * @return bool
+	 * @param WP_Comment $comment Comment data.
 	 */
 	public function generate_review_data( $comment ) {
-		if ( ! is_object( $comment ) ) {
-			return false;
-		}
-
 		$markup['@type']         = 'Review';
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
@@ -290,7 +283,7 @@ class WC_Structured_Data {
 			'name'  => get_comment_author( $comment->comment_ID ),
 		);
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
 	}
 
 	/**
@@ -298,15 +291,10 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_breadcrumb` action hook.
 	 *
-	 * @param  object $breadcrumbs
-	 * @return bool|void
+	 * @param WC_Breadcrumb $breadcrumbs Breadcrumb data.
 	 */
 	public function generate_breadcrumblist_data( $breadcrumbs ) {
-		if ( ! is_object( $breadcrumbs ) ) {
-			return false;
-		} elseif ( ! $crumbs = $breadcrumbs->get_breadcrumb() ) {
-			return;
-		}
+		$crumbs = $breadcrumbs->get_breadcrumb();
 
 		foreach ( $crumbs as $key => $crumb ) {
 			$markup_crumbs[ $key ] = array(
@@ -325,15 +313,13 @@ class WC_Structured_Data {
 		$markup['@type']           = 'BreadcrumbList';
 		$markup['itemListElement'] = $markup_crumbs;
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
 	}
 
 	/**
 	 * Generates WebSite structured data.
 	 *
 	 * Hooked into `woocommerce_before_main_content` action hook.
-	 *
-	 * @return bool
 	 */
 	public function generate_website_data() {
 		$markup['@type']           = 'WebSite';
@@ -345,7 +331,7 @@ class WC_Structured_Data {
 			'query-input' => 'required name=search_term_string',
 		);
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_website', $markup ) );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_website', $markup ) );
 	}
 
 	/**
@@ -353,17 +339,24 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 *
-	 * @param  object    $order
-	 * @param  bool	     $sent_to_admin (default: false)
-	 * @param  bool	     $plain_text (default: false)
-	 * @return bool|void
+	 * @param WP_Order $order         Order data.
+	 * @param bool	    $sent_to_admin Send to admin (default: false).
+	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( ! is_object( $order ) ) {
-			return false;
-		} elseif ( $plain_text ) {
+		if ( $plain_text ) {
 			return;
 		}
+
+		$order_statuses = array(
+			'pending'    => 'http://schema.org/OrderPaymentDue',
+			'processing' => 'http://schema.org/OrderProcessing',
+			'on-hold'    => 'http://schema.org/OrderProblem',
+			'completed'  => 'http://schema.org/OrderDelivered',
+			'cancelled'  => 'http://schema.org/OrderCancelled',
+			'refunded'   => 'http://schema.org/OrderReturned',
+			'failed'     => 'http://schema.org/OrderProblem',
+		);
 
 		foreach ( $order->get_items() as $item ) {
 			if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
@@ -402,33 +395,9 @@ class WC_Structured_Data {
 			);
 		}
 
-		switch ( $order->get_status() ) {
-			case 'pending':
-				$order_status = 'http://schema.org/OrderPaymentDue';
-				break;
-			case 'processing':
-				$order_status = 'http://schema.org/OrderProcessing';
-				break;
-			case 'on-hold':
-				$order_status = 'http://schema.org/OrderProblem';
-				break;
-			case 'completed':
-				$order_status = 'http://schema.org/OrderDelivered';
-				break;
-			case 'cancelled':
-				$order_status = 'http://schema.org/OrderCancelled';
-				break;
-			case 'refunded':
-				$order_status = 'http://schema.org/OrderReturned';
-				break;
-			case 'failed':
-				$order_status = 'http://schema.org/OrderProblem';
-				break;
-		}
-
 		$markup['@type']              = 'Order';
 		$markup['url']                = $order_url;
-		$markup['orderStatus']        = $order_status;
+		$markup['orderStatus']        = isset( $order_status[ $order->get_status() ] ) ? $order_status[ $order->get_status() ] : '';
 		$markup['orderNumber']        = $order->get_order_number();
 		$markup['orderDate']          = date( 'c', $order->get_date_created() );
 		$markup['acceptedOffer']      = $markup_offers;
@@ -468,6 +437,6 @@ class WC_Structured_Data {
 			'target' => $order_url,
 		);
 
-		return $this->set_data( apply_filters( 'woocommerce_structured_data_order', $markup, $sent_to_admin, $order ), true );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_order', $markup, $sent_to_admin, $order ), true );
 	}
 }
