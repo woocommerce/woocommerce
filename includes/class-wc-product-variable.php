@@ -573,17 +573,19 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id     = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment        = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
-			$full_attachment   = wp_get_attachment_image_src( $attachment_id, 'full' );
-			$attachment_object = get_post( $attachment_id );
-			$image             = $attachment ? current( $attachment ) : '';
-			$image_link        = $full_attachment ? current( $full_attachment ) : '';
-			$image_title       = get_the_title( $attachment_id );
-			$image_alt         = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-			$image_caption     = $attachment_object->post_excerpt;
-			$image_srcset      = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-			$image_sizes       = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+			$attachment_id       = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment          = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$attachment_thumb    = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+			$full_attachment     = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment_object   = get_post( $attachment_id );
+			$image               = $attachment ? current( $attachment ) : '';
+			$image_thumbnail_src = $attachment_thumb ? current( $attachment_thumb ) : '';
+			$image_link          = $full_attachment ? current( $full_attachment ) : '';
+			$image_title         = get_the_title( $attachment_id );
+			$image_alt           = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+			$image_caption       = $attachment_object->post_excerpt;
+			$image_srcset        = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes         = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 
 			if ( empty( $image_alt ) ) {
 				$image_alt = $image_title;
@@ -605,7 +607,12 @@ class WC_Product_Variable extends WC_Product {
 			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
 			'attributes'             => $variation->get_variation_attributes(),
 			'image_src'              => $image,
+			'image_h'                => $attachment ? $attachment[1] : '',
+			'image_w'                => $attachment ? $attachment[2] : '',
+			'image_thumbnail_src'    => $image_thumbnail_src,
 			'image_link'             => $image_link,
+			'image_link_h'           => $full_attachment ? $full_attachment[1] : '',
+			'image_link_w'           => $full_attachment ? $full_attachment[2] : '',
 			'image_title'            => $image_title,
 			'image_alt'              => $image_alt,
 			'image_caption'          => $image_caption,
