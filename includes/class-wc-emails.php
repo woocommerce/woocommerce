@@ -109,7 +109,6 @@ class WC_Emails {
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
-		add_action( 'woocommerce_email_order_details', array( $this, 'order_schema_markup' ), 20, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
@@ -267,116 +266,6 @@ class WC_Emails {
 		} else {
 			wc_get_template( 'emails/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
 		}
-	}
-
-	/**
-	 * Adds Schema.org markup for order in JSON-LD format.
-	 *
-	 * @since 2.6.0
-	 * @param mixed $order
-	 * @param bool $sent_to_admin (default: false)
-	 * @param bool $plain_text (default: false)
-	 */
-	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
-			return;
-		}
-
-		$accepted_offers = array();
-
-		foreach ( $order->get_items() as $item ) {
-			if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-				continue;
-			}
-
-			$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
-			$product_exists = is_object( $product );
-			$is_visible     = $product_exists && $product->is_visible();
-
-			$item_offered = array(
-				'@type' => 'Product',
-				'name' => apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible ),
-			);
-
-			if ( $product_exists ) {
-				if ( $sku = $product->get_sku() ) {
-					$item_offered['sku'] = $sku;
-				}
-
-				if ( $image_id = $product->get_image_id() ) {
-					$item_offered['image'] = wp_get_attachment_image_url( $image_id, 'thumbnail' );
-				}
-			}
-
-			if ( $is_visible ) {
-				$item_offered['url'] = get_permalink( $product->get_id() );
-			} else {
-				$item_offered['url'] = get_home_url();
-			}
-
-			$accepted_offer = (object) array(
-				'@type'            => 'Offer',
-				'itemOffered'      => $item_offered,
-				'price'            => $order->get_line_subtotal( $item ),
-				'priceCurrency'    => $order->get_currency(),
-				'eligibleQuantity' => (object) array(
-					'@type' => 'QuantitativeValue',
-					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ),
-				),
-				'url'              => get_home_url(),
-			);
-
-			$accepted_offers[] = $accepted_offer;
-		}
-
-		$markup = array(
-			'@context' => 'http://schema.org',
-			'@type'    => 'Order',
-			'merchant' => (object) array(
-				'@type' => 'Organization',
-				'name'  => get_bloginfo( 'name' ),
-			),
-			'orderNumber'    => strval( $order->get_order_number() ),
-			'priceCurrency'  => $order->get_currency(),
-			'price'          => $order->get_total(),
-			'acceptedOffer'  => $accepted_offers,
-			'url'            => $order->get_view_order_url(),
-		);
-
-		switch ( $order->get_status() ) {
-			case 'pending':
-				$markup['orderStatus'] = 'http://schema.org/OrderPaymentDue';
-				break;
-			case 'processing':
-				$markup['orderStatus'] = 'http://schema.org/OrderProcessing';
-				break;
-			case 'on-hold':
-				$markup['orderStatus'] = 'http://schema.org/OrderProblem';
-				break;
-			case 'completed':
-				$markup['orderStatus'] = 'http://schema.org/OrderDelivered';
-				break;
-			case 'cancelled':
-				$markup['orderStatus'] = 'http://schema.org/OrderCancelled';
-				break;
-			case 'refunded':
-				$markup['orderStatus'] = 'http://schema.org/OrderReturned';
-				break;
-			case 'failed':
-				$markup['orderStatus'] = 'http://schema.org/OrderProblem';
-				break;
-		}
-
-		if ( $sent_to_admin ) {
-			$markup['potentialAction'] = (object) array(
-				'@type'  => 'ViewAction',
-				'target' => admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ),
-			);
-		}
-
-		$markup = apply_filters( 'woocommerce_email_order_schema_markup', $markup, $sent_to_admin, $order );
-
-		echo '<div style="display:none;"><script type="application/ld+json">' . wp_json_encode( (object) $markup ) . '</script></div>';
 	}
 
 	/**
@@ -563,5 +452,22 @@ class WC_Emails {
 			apply_filters( 'woocommerce_email_headers', '', 'backorder', $args ),
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args )
 		);
+	}
+
+	/**
+	 * Adds Schema.org markup for order in JSON-LD format.
+	 *
+	 * @deprecated 2.7.0
+	 * @see WC_Structured_Data::generate_order_data()
+	 *
+	 * @since 2.6.0
+	 * @param mixed $order
+	 * @param bool $sent_to_admin (default: false)
+	 * @param bool $plain_text (default: false)
+	 */
+	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
+		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
+
+		WC()->structured_data->generate_output_structured_data( 'order', $order, $sent_to_admin, $plain_text );
 	}
 }
