@@ -234,7 +234,7 @@ class WC_Checkout {
 					'quantity'     => $values['quantity'],
 					'name'         => $product ? $product->get_title() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
-					'product_id'   => $product ? $product->get_id() : '',
+					'product_id'   => $product && isset( $product->id ) ? $product->id : 0,
 					'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
 					'variation'    => $values['variation'],
 					'subtotal'     => $values['line_subtotal'],
