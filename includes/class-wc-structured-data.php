@@ -206,6 +206,7 @@ class WC_Structured_Data {
 
 		$limit_data = apply_filters( 'woocommerce_structured_data_product_limit', $limit_data );
 
+		$markup          = array();
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
 		$markup['url']   = $markup['@id'];
@@ -226,6 +227,7 @@ class WC_Structured_Data {
 			$products[] = $product;
 		}
 
+		$markup_offers = array();
 		foreach ( $products as $_product ) {
 			$markup_offers[] = array(
 				'@type'         => 'Offer',
@@ -266,6 +268,7 @@ class WC_Structured_Data {
 	 * @param WP_Comment $comment Comment data.
 	 */
 	public function generate_review_data( $comment ) {
+		$markup                  = array();
 		$markup['@type']         = 'Review';
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
@@ -296,8 +299,12 @@ class WC_Structured_Data {
 	public function generate_breadcrumblist_data( $breadcrumbs ) {
 		$crumbs = $breadcrumbs->get_breadcrumb();
 
+		$markup                    = array();
+		$markup['@type']           = 'BreadcrumbList';
+		$markup['itemListElement'] = array();
+
 		foreach ( $crumbs as $key => $crumb ) {
-			$markup_crumbs[ $key ] = array(
+			$markup['itemListElement'][ $key ] = array(
 				'@type'    => 'ListItem',
 				'position' => $key + 1,
 				'item'     => array(
@@ -306,12 +313,9 @@ class WC_Structured_Data {
 			);
 
 			if ( ! empty( $crumb[1] ) && sizeof( $crumbs ) !== $key + 1 ) {
-				$markup_crumbs[ $key ]['item'] += array( '@id' => $crumb[1] );
+				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $crumb[1] );
 			}
 		}
-
-		$markup['@type']           = 'BreadcrumbList';
-		$markup['itemListElement'] = $markup_crumbs;
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
 	}
@@ -322,6 +326,7 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_before_main_content` action hook.
 	 */
 	public function generate_website_data() {
+		$markup                    = array();
 		$markup['@type']           = 'WebSite';
 		$markup['name']            = get_bloginfo( 'name' );
 		$markup['url']             = get_bloginfo( 'url' );
@@ -358,6 +363,7 @@ class WC_Structured_Data {
 			'failed'     => 'http://schema.org/OrderProblem',
 		);
 
+		$markup_offers = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 				continue;
@@ -395,6 +401,7 @@ class WC_Structured_Data {
 			);
 		}
 
+		$markup                       = array();
 		$markup['@type']              = 'Order';
 		$markup['url']                = $order_url;
 		$markup['orderStatus']        = isset( $order_status[ $order->get_status() ] ) ? $order_status[ $order->get_status() ] : '';
