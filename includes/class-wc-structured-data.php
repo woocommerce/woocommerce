@@ -40,7 +40,7 @@ class WC_Structured_Data {
 	/**
 	 * Sets data.
 	 *
-	 * @param  array $data Structured data.
+	 * @param  array $data  Structured data.
 	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */
@@ -305,7 +305,7 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 *
-	 * @param WP_Order $order         Order data.
+	 * @param WP_Order  $order         Order data.
 	 * @param bool	    $sent_to_admin Send to admin (default: false).
 	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
