@@ -85,7 +85,7 @@ class WC_Structured_Data {
 		$data = array();
 
 		// Put together the values of same type of structured data.
-		foreach ( $this->_data as $value ) {
+		foreach ( $this->get_data() as $value ) {
 			$data[ strtolower( $value['@type'] ) ][] = $value;
 		}
 
