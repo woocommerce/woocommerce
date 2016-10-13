@@ -169,7 +169,7 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function limit_product_data_in_loops() {
-		return is_product_taxonomy() || is_shop() ? true : false;
+		return is_product_taxonomy() || is_shop();
 	}
 
 	/*
