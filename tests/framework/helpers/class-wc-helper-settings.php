@@ -72,15 +72,6 @@ class WC_Helper_Settings {
 			),
 			'option_key'  => 'woocommerce_shop_page_display',
 		);
-		$settings[] = array(
-			'id'            => 'woocommerce_enable_lightbox',
-			'label'         => 'Product image gallery',
-			'description'   => 'Enable Lightbox for product images',
-			'default'       => 'yes',
-			'tip'           => 'Product gallery images will open in a lightbox.',
-			'type'          => 'checkbox',
-			'option_key'    => 'woocommerce_enable_lightbox',
-		);
 		return $settings;
 	}
 }

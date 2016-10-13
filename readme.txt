@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Made the store notice dismissible.
 * Improved the zone setup flow.
 * Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
+* New gallery on single product pages with better mobile support, PhotoSwipe and Zoom.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
