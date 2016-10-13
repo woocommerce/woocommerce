@@ -1,17 +1,17 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
- * @class     WC_Structured_Data
- * @since     2.7.0
- * @version   2.7.0
- * @package   WooCommerce/Classes
- * @author    Clément Cazaud <opportus@gmail.com>
+ * @class   WC_Structured_Data
+ * @since   2.7.0
+ * @version 2.7.0
+ * @package WooCommerce/Classes
+ * @author  Clément Cazaud <opportus@gmail.com>
  */
 class WC_Structured_Data {
 
@@ -24,20 +24,20 @@ class WC_Structured_Data {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Generate data...
-		add_action( 'woocommerce_before_main_content',    array( $this, 'generate_website_data' ),              30, 0 );
-		add_action( 'woocommerce_breadcrumb',             array( $this, 'generate_breadcrumblist_data' ),       10, 1 );
-		add_action( 'woocommerce_shop_loop',              array( $this, 'generate_product_data' ),              10, 0 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ),              60, 0 );
-		add_action( 'woocommerce_review_meta',            array( $this, 'generate_review_data' ),               20, 1 );
-		add_action( 'woocommerce_email_order_details',    array( $this, 'generate_order_data' ),                20, 3 );
+		// Generate structured data.
+		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
+		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
+		add_action( 'woocommerce_shop_loop', array( $this, 'generate_product_data' ), 10 );
+		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
+		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
+		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
-		// Output structured data...
-		add_action( 'woocommerce_email_order_details',    array( $this, 'output_structured_data' ),             30, 0 );
-		add_action( 'wp_footer',                          array( $this, 'output_structured_data' ),             10, 0 );
+		// Output structured data.
+		add_action( 'woocommerce_email_order_details', array( $this, 'output_structured_data' ), 30 );
+		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 
-		// Filters...
-		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10, 0 );
+		// Limite products in structured data.
+		add_filter( 'woocommerce_structured_data_product_limit', array( $this, 'limit_product_data_in_loops' ), 10 );
 	}
 
 	/**
