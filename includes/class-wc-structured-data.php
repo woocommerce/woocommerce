@@ -81,37 +81,47 @@ class WC_Structured_Data {
 	 * 'website',
 	 * 'order',
 	 *
-	 * @param  bool|array|string $requested_types (default: false)
+	 * @param  array $types Structured data types.
 	 * @return array
 	 */
-	public function get_structured_data( $requested_types = false ) {
-		$data = $this->_data;
-
-		if ( empty( $data ) || ( $requested_types && ! is_array( $requested_types ) && ! is_string( $requested_types ) || is_null( $requested_types ) ) ) {
-			return array();
-		} elseif ( $requested_types && is_string( $requested_types ) ) {
-			$requested_types = array( $requested_types );
-		}
+	public function get_structured_data( $types ) {
+		$data = array();
 
 		// Put together the values of same type of structured data.
-		foreach ( $data as $value ) {
-			$structured_data[ strtolower( $value['@type'] ) ][] = $value;
+		foreach ( $this->_data as $value ) {
+			$data[ strtolower( $value['@type'] ) ][] = $value;
 		}
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
-		foreach ( $structured_data as $type => $value ) {
-			$structured_data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$structured_data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $structured_data, $type, $value ) + $structured_data[ $type ];
+		foreach ( $data as $type => $value ) {
+			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
-		$structured_data = $requested_types ? array_values( array_intersect_key( $structured_data, array_flip( $requested_types ) ) ) : array_values( $structured_data );
+		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
-		if ( ! empty( $structured_data ) ) {
-			$structured_data = count( $structured_data ) > 1 ?  array( '@graph' => $structured_data ) : $structured_data[0];
+		if ( ! empty( $data ) ) {
+			$data = count( $data ) > 1 ?  array( '@graph' => $data ) : $data[0];
 		}
 
-		return $structured_data;
+		return $data;
+	}
+
+	/**
+	 * Get data types for pages.
+	 *
+	 * @return array
+	 */
+	protected function get_data_type_for_page() {
+		$types   = array();
+		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
+		$types[] = is_shop() && is_front_page() ? 'website' : '';
+		$types[] = is_product() ? 'review' : '';
+		$types[] = ! is_shop() ? 'breadcrumblist' : '';
+		$types[] = 'order';
+
+		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
 	}
 
 	/**
@@ -119,46 +129,13 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `wp_footer` action hook.
 	 * Hooked into `woocommerce_email_order_details` action hook.
-	 *
-	 * @param  bool|array|string $requested_types (default: true)
-	 * @return bool
 	 */
-	public function output_structured_data( $requested_types = true ) {
-		if ( true === $requested_types ) {
-			$requested_types = array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', array(
-				  is_shop() || is_product_category() || is_product() ? 'product'        : null,
-				  is_shop() && is_front_page()                       ? 'website'        : null,
-				  is_product()                                       ? 'review'         : null,
-				! is_shop()                                          ? 'breadcrumblist' : null,
-				                                                       'order',
-			) ) );
+	public function output_structured_data() {
+		$types = $this->get_data_type_for_page();
+
+		if ( $data = wc_clean( $this->get_structured_data( $types ) ) ) {
+			echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>';
 		}
-
-		if ( $structured_data = $this->sanitize_data( $this->get_structured_data( $requested_types ) ) ) {
-			echo '<script type="application/ld+json">' . wp_json_encode( $structured_data ) . '</script>';
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Sanitizes data.
-	 *
-	 * @param  array $data
-	 * @return array
-	 */
-	public function sanitize_data( $data ) {
-		if ( ! $data || ! is_array( $data ) ) {
-			return array();
-		}
-
-		foreach ( $data as $key => $value ) {
-			$sanitized_data[ sanitize_text_field( $key ) ] = is_array( $value ) ? $this->sanitize_data( $value ) : sanitize_text_field( $value );
-		}
-
-		return $sanitized_data;
 	}
 
 	/**
