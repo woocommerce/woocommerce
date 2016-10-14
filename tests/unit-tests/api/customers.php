@@ -83,7 +83,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'last_order'    => null,
 			'orders_count'  => 0,
 			'total_spent'   => '0.00',
 			'avatar_url'    => $customer_1->get_avatar_url(),
@@ -167,7 +166,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data' => array(),
-			'last_order'    => null,
 			'orders_count'  => 0,
 			'total_spent'   => '0.00',
 			'avatar_url'    => $data['avatar_url'],
@@ -228,7 +226,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data' => array(),
-			'last_order'    => null,
 			'orders_count'  => 0,
 			'total_spent'   => '0.00',
 			'avatar_url'    => $data['avatar_url'],
@@ -309,7 +306,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'meta_data' => array(),
 			'last_name'     => '',
 			'username'      => 'get_customer_test',
-			'last_order'    => null,
 			'orders_count'  => 0,
 			'total_spent'   => '0.00',
 			'avatar_url'    => $data['avatar_url'],
@@ -500,9 +496,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'last_name', $properties );
 		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'password', $properties );
-		$this->assertArrayHasKey( 'last_order', $properties );
-		$this->assertArrayHasKey( 'id', $properties['last_order']['properties'] );
-		$this->assertArrayHasKey( 'date', $properties['last_order']['properties'] );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 		$this->assertArrayHasKey( 'total_spent', $properties );
 		$this->assertArrayHasKey( 'avatar_url', $properties );
