@@ -42,7 +42,7 @@
 					// Check that the field is shown in the form - some plugins and force create account remove it
 					if ( $( 'input#createaccount' ).length && ! $('input#createaccount').is( ':checked' ) ) {
 						$wcTokenizationForm.hideSaveNewCheckbox();
-      				}
+					}
 
 				};
 
@@ -74,7 +74,7 @@
 			return wcTokenizationForm;
 		})();
 
-		$( document.body ).on( 'updated_checkout', function() {
+		$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
 			// Loop over gateways with saved payment methods
 			var $saved_payment_methods = $( 'ul.woocommerce-SavedPaymentMethods' );
 
