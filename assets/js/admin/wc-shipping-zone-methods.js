@@ -18,15 +18,15 @@
 						changes.methods[ id ] = _.extend( changes.methods[ id ] || { instance_id : id }, row );
 					} );
 
-					if ( changedRows.zone_name ) {
+					if ( typeof changedRows.zone_name !== 'undefined' ) {
 						changes.zone_name = changedRows.zone_name;
 					}
 
-					if ( changedRows.zone_locations ) {
+					if ( typeof changedRows.zone_locations !== 'undefined' ) {
 						changes.zone_locations = changedRows.zone_locations;
 					}
 
-					if ( changedRows.zone_postcodes ) {
+					if ( typeof changedRows.zone_postcodes !== 'undefined' ) {
 						changes.zone_postcodes = changedRows.zone_postcodes;
 					}
 
