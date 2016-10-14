@@ -392,7 +392,7 @@ class WC_Product_Variable extends WC_Product {
 				) ) );
 
 				// empty value indicates that all options for given attribute are available
-				if ( in_array( '', $values ) ) {
+				if ( in_array( '', $values ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
 				// Get custom attributes (non taxonomy) as defined
