@@ -1047,6 +1047,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			'step'        => apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
 			'pattern'     => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
 			'inputmode'   => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
+			'input_title' => apply_filters( 'woocommerce_quantity_input_title', esc_attr_x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ), $product )
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
