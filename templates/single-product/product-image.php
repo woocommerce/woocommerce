@@ -10,10 +10,10 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.6.3
+ * @see     https://docs.woocommerce.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,32 +21,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product;
+$columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
+$post_thumbnail_id = get_post_thumbnail_id( $post->ID );
+$full_size_image   = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
+$thumbnail_post    = get_post( $post_thumbnail_id );
+$image_title       = $thumbnail_post->post_content;
+
 ?>
-<div class="images">
-	<?php
+<div class="woocommerce-product-gallery <?php echo 'woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ); ?> images">
+	<figure class="woocommerce-product-gallery__wrapper">
+		<?php
+		$attributes = array(
+			'title'                   => $image_title,
+			'data-large-image'        => $full_size_image[0],
+			'data-large-image-width'  => $full_size_image[1],
+			'data-large-image-height' => $full_size_image[2],
+		);
 		if ( has_post_thumbnail() ) {
-			$attachment_count = count( $product->get_gallery_attachment_ids() );
-			$gallery          = $attachment_count > 0 ? '[product-gallery]' : '';
-			$props            = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
-			$image            = get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ), array(
-				'title'	 => $props['title'],
-				'alt'    => $props['alt'],
-			) );
-			echo apply_filters(
-				'woocommerce_single_product_image_html',
-				sprintf(
-					'<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto%s">%s</a>',
-					esc_url( $props['url'] ),
-					esc_attr( $props['caption'] ),
-					$gallery,
-					$image
-				),
-				$post->ID
-			);
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">' . get_the_post_thumbnail( $post->ID, 'shop_single', $attributes ) . '</figure>' );
 		} else {
-			echo apply_filters( 'woocommerce_single_product_image_html', sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) ), $post->ID );
+			echo sprintf( '<figure class="woocommerce-product-gallery__image--placeholder"><img src="%s" alt="%s" /></figure>', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
 		}
 
 		do_action( 'woocommerce_product_thumbnails' );
-	?>
+		?>
+	</figure>
 </div>

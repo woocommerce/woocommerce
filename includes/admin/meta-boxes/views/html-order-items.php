@@ -44,7 +44,7 @@ if ( wc_tax_enabled() ) {
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
 							$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
-							$column_tip     = $tax_item['name'] . ' (' . $tax_class_name . ')';
+							$column_tip     = sprintf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $tax_item['name'], $tax_class_name );
 							?>
 							<th class="line_tax tips" data-tip="<?php echo esc_attr( $column_tip ); ?>">
 								<?php echo esc_attr( $column_label ); ?>

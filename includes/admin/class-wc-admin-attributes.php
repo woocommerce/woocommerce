@@ -353,7 +353,8 @@ class WC_Admin_Attributes {
 	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
+			<h1><?php echo get_admin_page_title(); ?></h1>
+
 			<br class="clear" />
 			<div id="col-container">
 				<div id="col-right">
@@ -379,7 +380,7 @@ class WC_Admin_Attributes {
 													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
 												</td>
 												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? '(' . __( 'Public', 'woocommerce' ) . ')' : ''; ?></td>
+												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? __( '(Public)', 'woocommerce' ) : ''; ?></td>
 												<td><?php
 													switch ( $tax->attribute_orderby ) {
 														case 'name' :

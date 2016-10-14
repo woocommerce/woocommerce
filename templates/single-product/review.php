@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 ?>
-<li itemprop="review" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
@@ -49,6 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_meta - 10
+			 * @hooked WC_Structured_Data::generate_review_data() - 20
 			 */
 			do_action( 'woocommerce_review_meta', $comment );
 
