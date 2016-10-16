@@ -31,7 +31,7 @@ class WC_HTTPS {
 				'style_loader_src',
 				'template_directory_uri',
 				'stylesheet_directory_uri',
-				'site_url'
+				'site_url',
 			);
 
 			foreach ( $filters as $filter ) {

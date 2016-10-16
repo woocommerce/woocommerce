@@ -439,7 +439,7 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	 * @since 2.2
 	 * @param $response
 	 */
-	protected function check_create_webhook_response( $response )  {
+	protected function check_create_webhook_response( $response ) {
 
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'webhook', $response );
@@ -497,5 +497,4 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 
 		$this->assertEquals( $delivery, $response );
 	}
-
 }

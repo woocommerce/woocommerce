@@ -146,7 +146,18 @@ jQuery( function( $ ) {
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
+
+				if ( $( this ).data( 'sortable' ) ) {
+					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
+						containment: 'parent',
+						start: function() { $( this ).select2( 'onSortStart' ); },
+						update: function() { $( this ).select2( 'onSortEnd' ); }
+					});
+				}
+
 			});
+
+
 
 			// Ajax customer search boxes
 			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
@@ -215,6 +226,15 @@ jQuery( function( $ ) {
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
+
+				if ( $( this ).data( 'sortable' ) ) {
+					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
+						containment: 'parent',
+						start: function() { $( this ).select2( 'onSortStart' ); },
+						update: function() { $( this ).select2( 'onSortEnd' ); }
+					});
+				}
+
 			});
 		})
 

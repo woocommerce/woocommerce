@@ -40,7 +40,6 @@ if ( ! empty( $breadcrumb ) ) {
 		if ( sizeof( $breadcrumb ) !== $key + 1 ) {
 			echo $delimiter;
 		}
-
 	}
 
 	echo $wrap_after;

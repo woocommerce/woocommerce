@@ -174,7 +174,7 @@ class WC_Post_Data {
 	 * @param  mixed $_meta_value
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) ) {
 			$product = wc_get_product( $object_id );
 			$product->check_stock_status();
 		}
@@ -191,12 +191,10 @@ class WC_Post_Data {
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {
-				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		}
-
-		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
 			$product_type = stripslashes( $_POST['product-type'] );
 			switch ( $product_type ) {
 				case 'grouped' :

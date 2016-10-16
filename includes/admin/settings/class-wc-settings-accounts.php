@@ -40,10 +40,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	public function get_settings() {
 		$settings = apply_filters( 'woocommerce_' . $this->id . '_settings', array(
 
-			array( 'title' => __( 'Account Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'These pages need to be set so that WooCommerce knows where to send users to access account related functionality.', 'woocommerce' ), 'id' => 'account_page_options' ),
+			array( 'title' => __( 'Account pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'These pages need to be set so that WooCommerce knows where to send users to access account related functionality.', 'woocommerce' ), 'id' => 'account_page_options' ),
 
 			array(
-				'title'    => __( 'My Account Page', 'woocommerce' ),
+				'title'    => __( 'My account page', 'woocommerce' ),
 				'desc'     => __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 				'id'       => 'woocommerce_myaccount_page_id',
 				'type'     => 'single_select_page',
@@ -55,25 +55,25 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
+			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
-				'title'         => __( 'Enable Registration', 'woocommerce' ),
+				'title'         => __( 'Enable registration', 'woocommerce' ),
 				'desc'          => __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
-				'desc'          => __( 'Enable registration on the "My Account" page', 'woocommerce' ),
+				'desc'          => __( 'Enable registration on the "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -83,17 +83,17 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
-				'title'         => __( 'Account Creation', 'woocommerce' ),
+				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'Automatically generate username from customer email', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_username',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array(
@@ -102,16 +102,16 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
-				'autoload'      => false
+				'autoload'      => false,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'account_registration_options' ),
 
-			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique and can be left blank to disable the endpoint.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
+			array( 'title' => __( 'My account endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique and can be left blank to disable the endpoint.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
 
 			array(
 				'title'    => __( 'Orders', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Orders page', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Orders', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_orders_endpoint',
 				'type'     => 'text',
 				'default'  => 'orders',
@@ -119,8 +119,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'View Order', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; View Order page', 'woocommerce' ),
+				'title'    => __( 'View order', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'View order', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_view_order_endpoint',
 				'type'     => 'text',
 				'default'  => 'view-order',
@@ -129,7 +129,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Downloads', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Downloads page', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Downloads', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_downloads_endpoint',
 				'type'     => 'text',
 				'default'  => 'downloads',
@@ -137,8 +137,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Edit Account', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Edit Account page', 'woocommerce' ),
+				'title'    => __( 'Edit account', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Edit account', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_edit_account_endpoint',
 				'type'     => 'text',
 				'default'  => 'edit-account',
@@ -147,7 +147,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Addresses', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Addresses page', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Addresses', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_edit_address_endpoint',
 				'type'     => 'text',
 				'default'  => 'edit-address',
@@ -155,8 +155,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Payment Methods', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Payment Methods page', 'woocommerce' ),
+				'title'    => __( 'Payment methods', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Payment methods', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_payment_methods_endpoint',
 				'type'     => 'text',
 				'default'  => 'payment-methods',
@@ -164,8 +164,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Lost Password', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Lost Password page', 'woocommerce' ),
+				'title'    => __( 'Lost password', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Lost password', 'woocommerce' ) ),
 				'id'       => 'woocommerce_myaccount_lost_password_endpoint',
 				'type'     => 'text',
 				'default'  => 'lost-password',

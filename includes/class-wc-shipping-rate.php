@@ -62,7 +62,7 @@ class WC_Shipping_Rate {
 	 * @return array
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_get_shipping_tax', sizeof( $this->taxes ) > 0 && ! WC()->customer->is_vat_exempt() ? array_sum( $this->taxes ) : 0, $this );
+		return apply_filters( 'woocommerce_get_shipping_tax', sizeof( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? array_sum( $this->taxes ) : 0, $this );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_label() {
-		return apply_filters( 'woocommerce_shipping_rate_label', $this->label );
+		return apply_filters( 'woocommerce_shipping_rate_label', $this->label, $this );
 	}
 
 	/**

@@ -25,13 +25,14 @@
   */
  do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
- <p><?php printf( __( 'Payment for order #%d from %s has failed. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->get_formatted_billing_full_name() ); ?></p>
+ <p><?php printf( __( 'Payment for order #%1$d from %2$s has failed. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->get_formatted_billing_full_name() ); ?></p>
 
  <?php
 
  /**
   * @hooked WC_Emails::order_details() Shows the order details table.
-  * @hooked WC_Emails::order_schema_markup() Adds Schema.org markup.
+  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
   * @since 2.5.0
   */
  do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );

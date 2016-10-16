@@ -12,11 +12,13 @@ class WC_HookFinder {
 
 	private static function get_files( $pattern, $flags = 0, $path = '' ) {
 
-	    if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
+		if ( ! $path && ( $dir = dirname( $pattern ) ) != '.' ) {
 
-	        if ($dir == '\\' || $dir == '/') { $dir = ''; } // End IF Statement
+			if ( '\\' == $dir || '/' == $dir ) {
+				$dir = '';
+			}
 
-	        return self::get_files(basename( $pattern ), $flags, $dir . '/' );
+	        return self::get_files( basename( $pattern ), $flags, $dir . '/' );
 
 	    } // End IF Statement
 
@@ -37,7 +39,6 @@ class WC_HookFinder {
 		   		if ( is_array( $files ) && is_array( $found_files ) ) {
 		   			$files = array_merge( $files, $found_files );
 		   		}
-
 		    } // End FOREACH Loop
 	    }
 	    return $files;
@@ -45,11 +46,11 @@ class WC_HookFinder {
 
 	private static function get_hook_link( $hook, $details = array() ) {
 		if ( ! empty( $details['class'] ) ) {
-			$link = 'http://docs.woothemes.com/wc-apidocs/source-class-' . $details['class'] . '.html#' . $details['line'];
+			$link = 'http://docs.woocommerce.com/wc-apidocs/source-class-' . $details['class'] . '.html#' . $details['line'];
 		} elseif ( ! empty( $details['function'] ) ) {
-			$link = 'http://docs.woothemes.com/wc-apidocs/source-function-' . $details['function'] . '.html#' . $details['line'];
+			$link = 'http://docs.woocommerce.com/wc-apidocs/source-function-' . $details['function'] . '.html#' . $details['line'];
 		} else {
-			$link = 'https://github.com/woothemes/woocommerce/search?utf8=%E2%9C%93&q=' . $hook;
+			$link = 'https://github.com/woocommerce/woocommerce/search?utf8=%E2%9C%93&q=' . $hook;
 		}
 
 		return '<a href="' . $link . '">' . $hook . '</a>';
@@ -103,15 +104,16 @@ class WC_HookFinder {
 
 				foreach ( $tokens as $index => $token ) {
 					if ( is_array( $token ) ) {
-						if ( $token[0] == T_CLASS ) {
+						$trimmed_token_1 = trim( $token[1] );
+						if ( T_CLASS == $token[0] ) {
 							$token_type = 'class';
-						} elseif ( $token[0] == T_FUNCTION ) {
+						} elseif ( T_FUNCTION == $token[0] ) {
 							$token_type = 'function';
-						} elseif ( $token[1] === 'do_action' ) {
+						} elseif ( 'do_action' === $token[1] ) {
 							$token_type = 'action';
-						} elseif ( $token[1] === 'apply_filters' ) {
+						} elseif ( 'apply_filters' === $token[1] ) {
 							$token_type = 'filter';
-						} elseif ( $token_type && ! empty( trim( $token[1] ) ) ) {
+						} elseif ( $token_type && ! empty( $trimmed_token_1 ) ) {
 							switch ( $token_type ) {
 								case 'class' :
 									$current_class = $token[1];
@@ -169,7 +171,7 @@ class WC_HookFinder {
 											'class'    => $current_class,
 											'function' => $current_function,
 											'file'     => array( self::$current_file ),
-											'type'     => $token_type
+											'type'     => $token_type,
 										);
 									}
 								break;

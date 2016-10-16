@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Legacy_API' ) ) {
-	include_once( 'class-wc-legacy-api.php' );
+	include_once( dirname( __FILE__ ) . '/class-wc-legacy-api.php' );
 }
 
 class WC_API extends WC_Legacy_API {
@@ -110,17 +110,15 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_init() {
-		global $wp_version;
-
 		// REST API was included starting WordPress 4.4.
-		if ( version_compare( $wp_version, 4.4, '<' ) ) {
+		if ( ! class_exists( 'WP_REST_Server' ) ) {
 			return;
 		}
 
 		$this->rest_api_includes();
 
 		// Init REST API routes.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
 	/**
@@ -129,43 +127,55 @@ class WC_API extends WC_Legacy_API {
 	 */
 	private function rest_api_includes() {
 		// Exception handler.
-		include_once( 'api/class-wc-rest-exception.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-exception.php' );
 
 		// Authentication.
-		include_once( 'api/class-wc-rest-authentication.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php' );
 
 		// WP-API classes and functions.
-		include_once( 'vendor/wp-rest-functions.php' );
+		include_once( dirname( __FILE__ ) . '/vendor/wp-rest-functions.php' );
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
-			include_once( 'vendor/class-wp-rest-controller.php' );
+			include_once( dirname( __FILE__ ) . '/vendor/class-wp-rest-controller.php' );
 		}
 
 		// Abstract controllers.
-		include_once( 'abstracts/abstract-wc-rest-controller.php' );
-		include_once( 'abstracts/abstract-wc-rest-posts-controller.php' );
-		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-posts-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
 
 		// REST API controllers.
-		include_once( 'api/class-wc-rest-coupons-controller.php' );
-		include_once( 'api/class-wc-rest-customer-downloads-controller.php' );
-		include_once( 'api/class-wc-rest-customers-controller.php' );
-		include_once( 'api/class-wc-rest-order-notes-controller.php' );
-		include_once( 'api/class-wc-rest-order-refunds-controller.php' );
-		include_once( 'api/class-wc-rest-orders-controller.php' );
-		include_once( 'api/class-wc-rest-product-attribute-terms-controller.php' );
-		include_once( 'api/class-wc-rest-product-attributes-controller.php' );
-		include_once( 'api/class-wc-rest-product-categories-controller.php' );
-		include_once( 'api/class-wc-rest-product-reviews-controller.php' );
-		include_once( 'api/class-wc-rest-product-shipping-classes-controller.php' );
-		include_once( 'api/class-wc-rest-product-tags-controller.php' );
-		include_once( 'api/class-wc-rest-products-controller.php' );
-		include_once( 'api/class-wc-rest-report-sales-controller.php' );
-		include_once( 'api/class-wc-rest-report-top-sellers-controller.php' );
-		include_once( 'api/class-wc-rest-reports-controller.php' );
-		include_once( 'api/class-wc-rest-tax-classes-controller.php' );
-		include_once( 'api/class-wc-rest-taxes-controller.php' );
-		include_once( 'api/class-wc-rest-webhook-deliveries.php' );
-		include_once( 'api/class-wc-rest-webhooks-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customers-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-notes-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-refunds-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-orders-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-attributes-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-categories-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-reviews-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-shipping-classes-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-tags-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-products-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-variations-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-report-sales-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-report-top-sellers-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-options-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zones-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-locations-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-methods-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-tax-classes-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-payment-gateways-controller.php' );
 	}
 
 	/**
@@ -173,6 +183,9 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	public function register_rest_routes() {
+		// Register settings to the REST API.
+		$this->register_wp_admin_settings();
+
 		$controllers = array(
 			'WC_REST_Coupons_Controller',
 			'WC_REST_Customer_Downloads_Controller',
@@ -187,13 +200,23 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Product_Shipping_Classes_Controller',
 			'WC_REST_Product_Tags_Controller',
 			'WC_REST_Products_Controller',
+			'WC_REST_Product_Variations_Controller',
 			'WC_REST_Report_Sales_Controller',
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',
+			'WC_REST_Settings_Controller',
+			'WC_REST_Settings_Options_Controller',
+			'WC_REST_Shipping_Zones_Controller',
+			'WC_REST_Shipping_Zone_Locations_Controller',
+			'WC_REST_Shipping_Zone_Methods_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
 			'WC_REST_Webhook_Deliveries_Controller',
 			'WC_REST_Webhooks_Controller',
+			'WC_REST_System_Status_Controller',
+			'WC_REST_System_Status_Tools_Controller',
+			'WC_REST_Shipping_Methods_Controller',
+			'WC_REST_Payment_Gateways_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -201,4 +224,21 @@ class WC_API extends WC_Legacy_API {
 			$this->$controller->register_routes();
 		}
 	}
+
+	/**
+	 * Register WC settings from WP-API to the REST API.
+	 * @since  2.7.0
+	 */
+	public function register_wp_admin_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
+		}
+	}
+
 }

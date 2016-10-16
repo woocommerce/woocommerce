@@ -25,7 +25,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		parent::__construct( array(
 			'singular' => __( 'webhook', 'woocommerce' ),
 			'plural'   => __( 'webhooks', 'woocommerce' ),
-			'ajax'     => false
+			'ajax'     => false,
 		) );
 	}
 
@@ -92,7 +92,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		// Get actions
 		$actions = array(
-			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id )
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id ),
 		);
 
 		if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
@@ -106,7 +106,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
 			}
 			if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
+				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete permanently', 'woocommerce' ) . '</a>';
 			}
 		}
 
@@ -117,7 +117,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
 		}
 
-		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
+		$output .= '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>';
 
 		return $output;
 	}
@@ -244,12 +244,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		if ( isset( $_GET['status'] ) && 'trash' == $_GET['status'] ) {
 			return array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete Permanently', 'woocommerce' )
+				'delete'  => __( 'Delete permanently', 'woocommerce' ),
 			);
 		}
 
 		return array(
-			'trash' => __( 'Move to Trash', 'woocommerce' )
+			'trash' => __( 'Move to trash', 'woocommerce' ),
 		);
 	}
 
@@ -260,7 +260,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	protected function extra_tablenav( $which ) {
 		if ( 'top' == $which && isset( $_GET['status'] ) && 'trash' == $_GET['status'] && current_user_can( 'delete_shop_webhooks' ) ) {
-			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&empty_trash=1' ), 'empty_trash' ) ) . '">' . __( 'Empty Trash', 'woocommerce' ) . '</a></div>';
+			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&empty_trash=1' ), 'empty_trash' ) ) . '">' . __( 'Empty trash', 'woocommerce' ) . '</a></div>';
 		}
 	}
 
@@ -283,7 +283,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			'post_type'           => 'shop_webhook',
 			'posts_per_page'      => $per_page,
 			'ignore_sticky_posts' => true,
-			'paged'               => $current_page
+			'paged'               => $current_page,
 		);
 
 		// Handle the status query
@@ -303,7 +303,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $webhooks->found_posts,
 			'per_page'    => $per_page,
-			'total_pages' => $webhooks->max_num_pages
+			'total_pages' => $webhooks->max_num_pages,
 		) );
 	}
 }

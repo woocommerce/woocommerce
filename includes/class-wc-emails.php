@@ -80,7 +80,7 @@ class WC_Emails {
 			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
+			'woocommerce_created_customer',
 		) );
 
 		foreach ( $email_actions as $action ) {
@@ -93,8 +93,8 @@ class WC_Emails {
 	 * @internal param array $args (default: array())
 	 */
 	public static function send_transactional_email() {
-		self::instance();
 		$args = func_get_args();
+		self::instance();
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
@@ -109,7 +109,6 @@ class WC_Emails {
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
-		add_action( 'woocommerce_email_order_details', array( $this, 'order_schema_markup' ), 20, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
@@ -129,7 +128,7 @@ class WC_Emails {
 	 */
 	public function init() {
 		// Include email classes
-		include_once( 'emails/class-wc-email.php' );
+		include_once( dirname( __FILE__ ) . '/emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
@@ -147,7 +146,7 @@ class WC_Emails {
 
 		// include css inliner
 		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
-			include_once( 'libraries/class-emogrifier.php' );
+			include_once( dirname( __FILE__ ) . '/libraries/class-emogrifier.php' );
 		}
 	}
 
@@ -270,116 +269,6 @@ class WC_Emails {
 	}
 
 	/**
-	 * Adds Schema.org markup for order in JSON-LD format.
-	 *
-	 * @since 2.6.0
-	 * @param mixed $order
-	 * @param bool $sent_to_admin (default: false)
-	 * @param bool $plain_text (default: false)
-	 */
-	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
-			return;
-		}
-
-		$accepted_offers = array();
-
-		foreach ( $order->get_items() as $item ) {
-			if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-				continue;
-			}
-
-			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-			$product_exists = is_object( $product );
-			$is_visible     = $product_exists && $product->is_visible();
-
-			$item_offered = array(
-				'@type' => 'Product',
-				'name' => apply_filters( 'woocommerce_order_item_name', $item['name'], $item, $is_visible ),
-			);
-
-			if ( $product_exists ) {
-				if ( $sku = $product->get_sku() ) {
-					$item_offered['sku'] = $sku;
-				}
-
-				if ( $image_id = $product->get_image_id() ) {
-					$item_offered['image'] = wp_get_attachment_image_url( $image_id, 'thumbnail' );
-				}
-			}
-
-			if ( $is_visible ) {
-				$item_offered['url'] = get_permalink( $product->get_id() );
-			} else {
-				$item_offered['url'] = get_home_url();
-			}
-
-			$accepted_offer = (object) array(
-				'@type'            => 'Offer',
-				'itemOffered'      => $item_offered,
-				'price'            => $order->get_line_subtotal( $item ),
-				'priceCurrency'    => $order->get_order_currency(),
-				'eligibleQuantity' => (object) array(
-					'@type' => 'QuantitativeValue',
-					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
-				),
-				'url'              => get_home_url(),
-			);
-
-			$accepted_offers[] = $accepted_offer;
-		}
-
-		$markup = array(
-			'@context' => 'http://schema.org',
-			'@type'    => 'Order',
-			'merchant' => (object) array(
-				'@type' => 'Organization',
-				'name'  => get_bloginfo( 'name' ),
-			),
-			'orderNumber'    => strval( $order->get_order_number() ),
-			'priceCurrency'  => $order->get_order_currency(),
-			'price'          => $order->get_total(),
-			'acceptedOffer'  => $accepted_offers,
-			'url'            => $order->get_view_order_url(),
-		);
-
-		switch ( $order->get_status() ) {
-			case 'pending':
-				$markup['orderStatus'] = 'http://schema.org/OrderPaymentDue';
-				break;
-			case 'processing':
-				$markup['orderStatus'] = 'http://schema.org/OrderProcessing';
-				break;
-			case 'on-hold':
-				$markup['orderStatus'] = 'http://schema.org/OrderProblem';
-				break;
-			case 'completed':
-				$markup['orderStatus'] = 'http://schema.org/OrderDelivered';
-				break;
-			case 'cancelled':
-				$markup['orderStatus'] = 'http://schema.org/OrderCancelled';
-				break;
-			case 'refunded':
-				$markup['orderStatus'] = 'http://schema.org/OrderReturned';
-				break;
-			case 'failed':
-				$markup['orderStatus'] = 'http://schema.org/OrderProblem';
-				break;
-		}
-
-		if ( $sent_to_admin ) {
-			$markup['potentialAction'] = (object) array(
-				'@type'  => 'ViewAction',
-				'target' => admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ),
-			);
-		}
-
-		$markup = apply_filters( 'woocommerce_email_order_schema_markup', $markup, $sent_to_admin, $order );
-
-		echo '<div style="display:none;"><script type="application/ld+json">' . wp_json_encode( (object) $markup ) . '</script></div>';
-	}
-
-	/**
 	 * Add order meta to email templates.
 	 *
 	 * @param mixed $order
@@ -405,7 +294,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) ),
 				);
 			}
 		}
@@ -419,7 +308,6 @@ class WC_Emails {
 						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
-
 			} else {
 
 				foreach ( $fields as $field ) {
@@ -451,24 +339,24 @@ class WC_Emails {
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
 
-		if ( $order->customer_note ) {
+		if ( $order->get_customer_note() ) {
 			$fields['customer_note'] = array(
 				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->customer_note )
+				'value' => wptexturize( $order->get_customer_note() ),
 			);
 		}
 
-		if ( $order->billing_email ) {
+		if ( $order->get_billing_email() ) {
 			$fields['billing_email'] = array(
-				'label' => __( 'Email', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_email )
+				'label' => __( 'Email address', 'woocommerce' ),
+				'value' => wptexturize( $order->get_billing_email() ),
 			);
 	    }
 
-	    if ( $order->billing_phone ) {
+	    if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
-				'label' => __( 'Tel', 'woocommerce' ),
-				'value' => wptexturize( $order->billing_phone )
+				'label' => __( 'Phone', 'woocommerce' ),
+				'value' => wptexturize( $order->get_billing_phone() ),
 			);
 	    }
 
@@ -545,7 +433,7 @@ class WC_Emails {
 		$args = wp_parse_args( $args, array(
 			'product'  => '',
 			'quantity' => '',
-			'order_id' => ''
+			'order_id' => '',
 		) );
 
 		extract( $args );
@@ -554,7 +442,7 @@ class WC_Emails {
 			return;
 		}
 
-		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product Backorder', 'woocommerce' ) );
+		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
 		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
@@ -564,5 +452,23 @@ class WC_Emails {
 			apply_filters( 'woocommerce_email_headers', '', 'backorder', $args ),
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args )
 		);
+	}
+
+	/**
+	 * Adds Schema.org markup for order in JSON-LD format.
+	 *
+	 * @deprecated 2.7.0
+	 * @see WC_Structured_Data::generate_order_data()
+	 *
+	 * @since 2.6.0
+	 * @param mixed $order
+	 * @param bool $sent_to_admin (default: false)
+	 * @param bool $plain_text (default: false)
+	 */
+	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
+		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
+
+		WC()->structured_data->generate_order_data( $order, $sent_to_admin, $plain_text );
+		WC()->structured_data->output_structured_data();
 	}
 }

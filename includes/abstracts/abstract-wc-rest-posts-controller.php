@@ -126,7 +126,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -152,7 +152,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$post = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $post, $request );
@@ -415,7 +415,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$post  = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0;
@@ -476,9 +476,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given post.
 	 */
-	protected function prepare_links( $post ) {
+	protected function prepare_links( $post, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
@@ -521,6 +522,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		if ( 'include' === $query_args['orderby'] ) {
 			$query_args['orderby'] = 'post__in';
+		} elseif ( 'id' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'ID'; // ID must be capitalized
 		}
 
 		return $query_args;
@@ -574,6 +577,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'posts_per_page',
 			'meta_query',
 			'tax_query',
+			'meta_key',
+			'meta_value',
+			'meta_compare',
+			'meta_value_num',
 		);
 		$valid_vars = array_merge( $valid_vars, $rest_valid );
 
@@ -618,7 +625,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
@@ -659,13 +666,13 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$post_type_obj = get_post_type_object( $this->post_type );
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
-				'description'       => __( 'Limit result set to all items except those of a particular parent id.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),

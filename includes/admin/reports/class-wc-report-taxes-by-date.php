@@ -31,7 +31,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="table"
 		>
@@ -47,8 +47,8 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
@@ -61,7 +61,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$hide_sidebar = true;
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
@@ -74,22 +74,22 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'_order_tax' => array(
 				'type'            => 'meta',
 				'function'        => 'SUM',
-				'name'            => 'tax_amount'
+				'name'            => 'tax_amount',
 			),
 			'_order_shipping_tax' => array(
 				'type'            => 'meta',
 				'function'        => 'SUM',
-				'name'            => 'shipping_tax_amount'
+				'name'            => 'shipping_tax_amount',
 			),
 			'_order_total' => array(
 				'type'     => 'meta',
 				'function' => 'SUM',
-				'name'     => 'total_sales'
+				'name'     => 'total_sales',
 			),
 			'_order_shipping' => array(
 				'type'     => 'meta',
 				'function' => 'SUM',
-				'name'     => 'total_shipping'
+				'name'     => 'total_shipping',
 			),
 			'ID' => array(
 				'type'     => 'post_data',
@@ -100,7 +100,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'post_date' => array(
 				'type'     => 'post_data',
 				'function' => '',
-				'name'     => 'post_date'
+				'name'     => 'post_date',
 			),
 		);
 
@@ -111,7 +111,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'   => 'get_results',
 			'filter_range' => true,
 			'order_types'  => wc_get_order_types( 'sales-reports' ),
-			'order_status' => array( 'completed', 'processing', 'on-hold' )
+			'order_status' => array( 'completed', 'processing', 'on-hold' ),
 		) );
 
 		$tax_rows_partial_refunds = $this->get_order_report_data( array(
@@ -121,14 +121,14 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
 			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ) // Partial refunds inside refunded orders should be ignored
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),// Partial refunds inside refunded orders should be ignored
 		) );
 
 		// Merge
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders as $tax_row ) {
-			$key                                   = date( $this->chart_groupby == 'month' ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$key                                   = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
 			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
 			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
@@ -138,7 +138,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		}
 
 		foreach ( $tax_rows_partial_refunds as $tax_row ) {
-			$key                                   = date( $this->chart_groupby == 'month' ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$key                                   = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
 			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
 			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
@@ -150,10 +150,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			<thead>
 				<tr>
 					<th><?php _e( 'Period', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Order Total' field within your orders.", 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Number of orders', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _e( 'Total sales', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Order total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total shipping', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Shipping total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "Total sales minus shipping and tax.", 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
@@ -165,12 +165,9 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 						$total_tax = $tax_row->tax_amount + $tax_row->shipping_tax_amount;
 						?>
 						<tr>
-							<th scope="row"><?php
-								if ( $this->chart_groupby == 'month' )
-									echo date_i18n( 'F', strtotime( $date . '01' ) );
-								else
-									echo date_i18n( get_option( 'date_format' ), strtotime( $date ) );
-							?></th>
+							<th scope="row">
+								<?php echo ( 'month' === $this->chart_groupby ) ? date_i18n( 'F', strtotime( $date . '01' ) ) : date_i18n( get_option( 'date_format' ), strtotime( $date ) ); ?>
+							</th>
 							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
 							<td class="total_row"><?php echo wc_price( $gross ); ?></td>
 							<td class="total_row"><?php echo wc_price( $tax_row->total_shipping ); ?></td>

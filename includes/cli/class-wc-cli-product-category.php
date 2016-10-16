@@ -143,7 +143,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			'description' => $term->description,
 			'display'     => $display_type ? $display_type : 'default',
 			'image'       => $image ? esc_url( $image ) : '',
-			'count'       => intval( $term->count )
+			'count'       => intval( $term->count ),
 		);
 	}
 

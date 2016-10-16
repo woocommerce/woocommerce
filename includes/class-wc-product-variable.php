@@ -117,7 +117,7 @@ class WC_Product_Variable extends WC_Product {
 				'order'       => 'ASC',
 				'fields'      => 'ids',
 				'post_status' => 'publish',
-				'numberposts' => -1
+				'numberposts' => -1,
 			);
 
 			if ( $visible_only ) {
@@ -149,7 +149,7 @@ class WC_Product_Variable extends WC_Product {
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id, array(
 			'parent_id' => $this->id,
-			'parent' 	=> $this
+			'parent' 	=> $this,
 		) );
 	}
 
@@ -254,21 +254,30 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 
-		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
+		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		// If the value has already been generated, we don't need to grab the values again.
-		if ( empty( $this->prices_array[ $price_hash ] ) ) {
+		/**
+		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
+		 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
+		 */
+		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
+			return $this->prices_array[ $price_hash ];
 
+		/**
+		 * No locally cached value? Get the data from the transient or generate it.
+		 */
+		} else {
 			// Get value of transient
-			$prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
+			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
-			// If the product version has changed, reset cache
-			if ( empty( $prices_array['version'] ) || $prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
-				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+			// If the product version has changed since the transient was last saved, reset the transient cache.
+			if ( empty( $transient_cached_prices_array['version'] ) || WC_Cache_Helper::get_transient_version( 'product' ) !== $transient_cached_prices_array['version'] ) {
+				$transient_cached_prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
-			// If the prices are not stored for this hash, generate them
-			if ( empty( $prices_array[ $price_hash ] ) ) {
+			// If the prices are not stored for this hash, generate them and add to the transient.
+			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
 				$prices         = array();
 				$regular_prices = array();
 				$sale_prices    = array();
@@ -313,25 +322,21 @@ class WC_Product_Variable extends WC_Product {
 				asort( $regular_prices );
 				asort( $sale_prices );
 
-				$prices_array[ $price_hash ] = array(
+				$transient_cached_prices_array[ $price_hash ] = array(
 					'price'         => $prices,
 					'regular_price' => $regular_prices,
 					'sale_price'    => $sale_prices,
 				);
 
-				set_transient( $transient_name, json_encode( $prices_array ), DAY_IN_SECONDS * 30 );
+				set_transient( $transient_name, json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
 
 			/**
-			 * Give plugins one last chance to filter the variation prices array which has been generated.
+			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
+			 * This value may differ from the transient cache. It is filtered once before storing locally.
 			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $prices_array[ $price_hash ], $this, $display );
+			return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $this, $display );
 		}
-
-		/**
-		 * Return the values.
-		 */
-		return $this->prices_array[ $price_hash ];
 	}
 
 	/**
@@ -351,7 +356,7 @@ class WC_Product_Variable extends WC_Product {
 			$min_price = current( $prices['price'] );
 			$max_price = end( $prices['price'] );
 			$price     = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
-			$is_free   = $min_price == 0 && $max_price == 0;
+			$is_free   = 0 == $min_price && 0 == $max_price;
 
 			if ( $this->is_on_sale() ) {
 				$min_regular_price = current( $prices['regular_price'] );
@@ -392,7 +397,7 @@ class WC_Product_Variable extends WC_Product {
 				) ) );
 
 				// empty value indicates that all options for given attribute are available
-				if ( in_array( '', $values ) ) {
+				if ( in_array( '', $values ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
 				// Get custom attributes (non taxonomy) as defined
@@ -479,7 +484,7 @@ class WC_Product_Variable extends WC_Product {
 			'fields'      => 'ids',
 			'post_status' => 'publish',
 			'numberposts' => 1,
-			'meta_query'  => array()
+			'meta_query'  => array(),
 		);
 
 		foreach ( $this->get_attributes() as $attribute ) {
@@ -500,11 +505,11 @@ class WC_Product_Variable extends WC_Product {
 				array(
 					'key'     => $attribute_field_name,
 					'value'   => array( '', $value ),
-					'compare' => 'IN'
+					'compare' => 'IN',
 				),
 				array(
 					'key'     => $attribute_field_name,
-					'compare' => 'NOT EXISTS'
+					'compare' => 'NOT EXISTS',
 				)
 			);
 
@@ -523,7 +528,7 @@ class WC_Product_Variable extends WC_Product {
 		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
 		 */
 	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-			return $match_attributes === array_map( 'sanitize_title', $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
 
 		} else {
 			return 0;
@@ -568,23 +573,25 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id     = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment        = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
-			$full_attachment   = wp_get_attachment_image_src( $attachment_id, 'full' );
-			$attachment_object = get_post( $attachment_id );
-			$image             = $attachment ? current( $attachment ) : '';
-			$image_link        = $full_attachment ? current( $full_attachment ) : '';
-			$image_title       = get_the_title( $attachment_id );
-			$image_alt         = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-			$image_caption     = $attachment_object->post_excerpt;
-			$image_srcset      = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-			$image_sizes       = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+			$attachment_id       = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment          = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$attachment_thumb    = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+			$full_attachment     = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment_object   = get_post( $attachment_id );
+			$image               = $attachment ? current( $attachment ) : '';
+			$image_thumbnail_src = $attachment_thumb ? current( $attachment_thumb ) : '';
+			$image_link          = $full_attachment ? current( $full_attachment ) : '';
+			$image_title         = get_the_title( $attachment_id );
+			$image_alt           = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+			$image_caption       = $attachment_object->post_excerpt;
+			$image_srcset        = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes         = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 
 			if ( empty( $image_alt ) ) {
 				$image_alt = $image_title;
 			}
 		} else {
-			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = $attachment = $image_thumbnail_src = $full_attachment = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -600,7 +607,12 @@ class WC_Product_Variable extends WC_Product {
 			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
 			'attributes'             => $variation->get_variation_attributes(),
 			'image_src'              => $image,
+			'image_h'                => $attachment ? $attachment[1] : '',
+			'image_w'                => $attachment ? $attachment[2] : '',
+			'image_thumbnail_src'    => $image_thumbnail_src,
 			'image_link'             => $image_link,
+			'image_link_h'           => $full_attachment ? $full_attachment[1] : '',
+			'image_link_w'           => $full_attachment ? $full_attachment[2] : '',
 			'image_title'            => $image_title,
 			'image_alt'              => $image_alt,
 			'image_caption'          => $image_caption,
@@ -609,13 +621,13 @@ class WC_Product_Variable extends WC_Product {
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'      => $availability_html,
 			'sku'                    => $variation->get_sku(),
-			'weight'                 => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
 			'min_qty'                => 1,
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'backorders_allowed'     => $variation->backorders_allowed(),
 			'is_in_stock'            => $variation->is_in_stock(),
-			'is_downloadable'        => $variation->is_downloadable() ,
+			'is_downloadable'        => $variation->is_downloadable(),
 			'is_virtual'             => $variation->is_virtual(),
 			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
 			'variation_description'  => $variation->get_variation_description(),
@@ -655,10 +667,10 @@ class WC_Product_Variable extends WC_Product {
 	public static function sync_stock_status( $product_id ) {
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
+			'post_status'	=> 'publish',
 		) );
 
 		$stock_status = 'outofstock';
@@ -682,10 +694,10 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $children ) {
 			$children = get_posts( array(
 				'post_parent' 	=> $product_id,
-				'posts_per_page'=> -1,
+				'posts_per_page' => -1,
 				'post_type' 	=> 'product_variation',
 				'fields' 		=> 'ids',
-				'post_status'	=> 'any'
+				'post_status'	=> 'any',
 			) );
 		}
 
@@ -705,7 +717,7 @@ class WC_Product_Variable extends WC_Product {
 					}
 					if ( sanitize_title( $value[0] ) === $value[0] ) {
 						foreach ( $parent_attributes as $attribute ) {
-							if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+							if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
 								continue;
 							}
 							$text_attributes = wc_get_text_attributes( $attribute['value'] );
@@ -723,6 +735,33 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Does a child have a weight set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return (bool) get_post_meta( $this->id, '_child_has_weight', true );
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		return (bool) get_post_meta( $this->id, '_child_has_dimensions', true );
+	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
+
+	/**
 	 * Sync the variable product with it's children.
 	 */
 	public static function sync( $product_id ) {
@@ -730,15 +769,17 @@ class WC_Product_Variable extends WC_Product {
 
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
+			'posts_per_page' => -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
+			'post_status'	=> 'publish',
 		) );
 
 		// No published variations - product won't be purchasable.
 		if ( ! $children ) {
 			update_post_meta( $product_id, '_price', '' );
+			delete_post_meta( $product_id, '_child_has_weight' );
+			delete_post_meta( $product_id, '_child_has_dimensions' );
 			delete_transient( 'wc_products_onsale' );
 
 			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
@@ -785,14 +826,14 @@ class WC_Product_Variable extends WC_Product {
 					$child_price = get_post_meta( $child_id, '_' . $price_type, true );
 
 					// Skip non-priced variations
-					if ( $child_price === '' ) {
+					if ( '' === $child_price ) {
 						continue;
 					}
 
 					// Skip hidden variations
 					if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 						$stock = get_post_meta( $child_id, '_stock', true );
-						if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						if ( '' !== $stock && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 							continue;
 						}
 					}
@@ -824,6 +865,22 @@ class WC_Product_Variable extends WC_Product {
 			add_post_meta( $product_id, '_price', $min_price, false );
 			add_post_meta( $product_id, '_price', $max_price, false );
 			delete_transient( 'wc_products_onsale' );
+
+			// Sync weights
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_weight', true ) ) {
+					update_post_meta( $product_id, '_child_has_weight', true );
+					break;
+				}
+			}
+
+			// Sync dimensions
+			foreach ( $children as $child_id ) {
+				if ( get_post_meta( $child_id, '_height', true ) || get_post_meta( $child_id, '_width', true ) || get_post_meta( $child_id, '_length', true ) ) {
+					update_post_meta( $product_id, '_child_has_dimensions', true );
+					break;
+				}
+			}
 
 			// Sync attributes
 			self::sync_attributes( $product_id, $children );

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) : 'status';
 $tabs        = array(
-	'status' => __( 'System Status', 'woocommerce' ),
+	'status' => __( 'System status', 'woocommerce' ),
 	'tools'  => __( 'Tools', 'woocommerce' ),
 	'logs'   => __( 'Logs', 'woocommerce' ),
 );

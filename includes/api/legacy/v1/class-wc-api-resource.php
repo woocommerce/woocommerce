@@ -213,14 +213,13 @@ class WC_API_Resource {
 				$meta = (array) get_post_meta( $resource->id );
 			}
 
-			foreach( $meta as $meta_key => $meta_value ) {
+			foreach ( $meta as $meta_key => $meta_value ) {
 
 				// don't add hidden meta by default
 				if ( ! is_protected_meta( $meta_key ) ) {
 					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
 				}
 			}
-
 		}
 
 		return $data;
@@ -268,7 +267,6 @@ class WC_API_Resource {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
-
 			} else {
 
 				// remove non-matching top-level fields
@@ -309,7 +307,6 @@ class WC_API_Resource {
 		} else {
 
 			// delete order/coupon/product
-
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
 			if ( ! $result )
@@ -398,5 +395,4 @@ class WC_API_Resource {
 		else
 			return false;
 	}
-
 }

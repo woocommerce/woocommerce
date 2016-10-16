@@ -37,6 +37,29 @@ class WC_Tax {
 	public static function init() {
 		self::$precision         = wc_get_rounding_precision();
 		self::$round_at_subtotal = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+		add_action( 'update_option_woocommerce_tax_classes', array( __CLASS__, 'maybe_remove_tax_class_rates' ), 10, 2 );
+	}
+
+	/**
+	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
+	 * @param  string $old_value
+	 * @param  string $value
+	 */
+	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
+		$old     = array_filter( array_map( 'trim', explode( "\n", $old_value ) ) );
+		$new     = array_filter( array_map( 'trim', explode( "\n", $value ) ) );
+		$removed = array_filter( array_map( 'sanitize_title', array_diff( $old, $new ) ) );
+
+		if ( $removed ) {
+			global $wpdb;
+
+			foreach ( $removed as $removed_tax_class ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", $removed_tax_class ) );
+				$wpdb->query( "DELETE locations FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations LEFT JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON rates.tax_rate_id = locations.tax_rate_id WHERE rates.tax_rate_id IS NULL;" );
+			}
+
+			WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		}
 	}
 
 	/**
@@ -125,11 +148,13 @@ class WC_Tax {
 
 		$regular_tax_rates = $compound_tax_rates = 0;
 
-		foreach ( $rates as $key => $rate )
-			if ( $rate['compound'] == 'yes' )
+		foreach ( $rates as $key => $rate ) {
+			if ( 'yes' === $rate['compound'] ) {
 				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
-			else
+			} else {
 				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
+			}
+		}
 
 		$regular_tax_rate 	= 1 + ( $regular_tax_rates / 100 );
 		$compound_tax_rate 	= 1 + ( $compound_tax_rates / 100 );
@@ -141,7 +166,7 @@ class WC_Tax {
 
 			$the_rate      = $rate['rate'] / 100;
 
-			if ( $rate['compound'] == 'yes' ) {
+			if ( 'yes' === $rate['compound'] ) {
 				$the_price = $price;
 				$the_rate  = $the_rate / $compound_tax_rate;
 			} else {
@@ -171,8 +196,9 @@ class WC_Tax {
 			// Multiple taxes
 			foreach ( $rates as $key => $rate ) {
 
-				if ( $rate['compound'] == 'yes' )
+				if ( 'yes' === $rate['compound'] ) {
 					continue;
+				}
 
 				$tax_amount = $price * ( $rate['rate'] / 100 );
 
@@ -191,8 +217,9 @@ class WC_Tax {
 			// Compound taxes
 			foreach ( $rates as $key => $rate ) {
 
-				if ( $rate['compound'] == 'no' )
+				if ( 'no' === $rate['compound'] ) {
 					continue;
+				}
 
 				$the_price_inc_tax = $price + ( $pre_compound_total );
 
@@ -202,10 +229,11 @@ class WC_Tax {
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
 
 				// Add rate
-				if ( ! isset( $taxes[ $key ] ) )
+				if ( ! isset( $taxes[ $key ] ) ) {
 					$taxes[ $key ] = $tax_amount;
-				else
+				} else {
 					$taxes[ $key ] += $tax_amount;
+				}
 			}
 		}
 
@@ -224,7 +252,7 @@ class WC_Tax {
 			'state'     => '',
 			'city'      => '',
 			'postcode'  => '',
-			'tax_class' => ''
+			'tax_class' => '',
 		) );
 
 		extract( $args, EXTR_SKIP );
@@ -264,6 +292,51 @@ class WC_Tax {
 		}
 
 		return $shipping_rates;
+	}
+
+	/**
+	 * Does the sort comparison.
+	 */
+	private static function sort_rates_callback( $rate1, $rate2 ) {
+		if ( $rate1->tax_rate_priority !== $rate2->tax_rate_priority ) {
+			return $rate1->tax_rate_priority < $rate2->tax_rate_priority ? -1 : 1; // ASC
+		} elseif ( $rate1->tax_rate_country !== $rate2->tax_rate_country ) {
+			if ( '' === $rate1->tax_rate_country ) {
+				return 1;
+			}
+			if ( '' === $rate2->tax_rate_country ) {
+				return -1;
+			}
+			return strcmp( $rate1->tax_rate_country, $rate2->tax_rate_country ) > 0 ? 1 : -1;
+		} elseif ( $rate1->tax_rate_state !== $rate2->tax_rate_state ) {
+			if ( '' === $rate1->tax_rate_state ) {
+				return 1;
+			}
+			if ( '' === $rate2->tax_rate_state ) {
+				return -1;
+			}
+			return strcmp( $rate1->tax_rate_state, $rate2->tax_rate_state ) > 0 ? 1 : -1;
+		} else {
+			return $rate1->tax_rate_id < $rate2->tax_rate_id ? -1 : 1; // Identical - use ID
+		}
+	}
+
+	/**
+	 * Logical sort order for tax rates based on the following in order of priority:
+	 * 		- Priority
+	 * 		- County code
+	 * 		- State code
+	 * @param  array $rates
+	 * @return array
+	 * @todo   remove tax_rate_order column
+	 */
+	private static function sort_rates( $rates ) {
+		uasort( $rates, __CLASS__ . '::sort_rates_callback' );
+		$i = 0;
+		foreach ( $rates as $key => $rate ) {
+			$rates[ $key ]->tax_rate_order = $i++;
+		}
+		return $rates;
 	}
 
 	/**
@@ -338,9 +411,10 @@ class WC_Tax {
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
 			WHERE 1=1 AND " . implode( ' AND ', $criteria ) . "
 			GROUP BY tax_rate_id
-			ORDER BY tax_rate_priority, tax_rate_order
+			ORDER BY tax_rate_priority
 		" );
 
+		$found_rates       = self::sort_rates( $found_rates );
 		$matched_tax_rates = array();
 		$found_priority    = array();
 
@@ -353,7 +427,7 @@ class WC_Tax {
 				'rate'     => $found_rate->tax_rate,
 				'label'    => $found_rate->tax_rate_name,
 				'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
-				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
+				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no',
 			);
 
 			$found_priority[] = $found_rate->tax_rate_priority;
@@ -380,7 +454,7 @@ class WC_Tax {
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
 				WC()->countries->get_base_postcode(),
-				WC()->countries->get_base_city()
+				WC()->countries->get_base_city(),
 			);
 		}
 
@@ -405,7 +479,7 @@ class WC_Tax {
 				'state' 	=> $state,
 				'postcode' 	=> $postcode,
 				'city' 		=> $city,
-				'tax_class' => $tax_class
+				'tax_class' => $tax_class,
 			) );
 		}
 
@@ -424,7 +498,7 @@ class WC_Tax {
 			'state' 	=> WC()->countries->get_base_state(),
 			'postcode' 	=> WC()->countries->get_base_postcode(),
 			'city' 		=> WC()->countries->get_base_city(),
-			'tax_class' => $tax_class
+			'tax_class' => $tax_class,
 		) ), $tax_class );
 	}
 
@@ -464,7 +538,7 @@ class WC_Tax {
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
 					'city' 		=> $city,
-					'tax_class' => $tax_class
+					'tax_class' => $tax_class,
 				) );
 
 			} else {
@@ -484,7 +558,7 @@ class WC_Tax {
 								'state' 	=> $state,
 								'postcode' 	=> $postcode,
 								'city' 		=> $city,
-								'tax_class' => $tax_class
+								'tax_class' => $tax_class,
 							) );
 							break;
 						}
@@ -497,7 +571,7 @@ class WC_Tax {
 						'state' 	=> $state,
 						'postcode' 	=> $postcode,
 						'city' 		=> $city,
-						'tax_class' => $cart_tax_classes[0]
+						'tax_class' => $cart_tax_classes[0],
 					) );
 				}
 			}
@@ -508,7 +582,7 @@ class WC_Tax {
 					'country' 	=> $country,
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
-					'city' 		=> $city
+					'city' 		=> $city,
 				) );
 			}
 		}
@@ -637,7 +711,7 @@ class WC_Tax {
 	 */
 	private static function format_tax_rate_state( $state ) {
 		$state = strtoupper( $state );
-		return $state === '*' ? '' : $state;
+		return ( '*' === $state ) ? '' : $state;
 	}
 
 	/**
@@ -647,7 +721,7 @@ class WC_Tax {
 	 */
 	private static function format_tax_rate_country( $country ) {
 		$country = strtoupper( $country );
-		return $country === '*' ? '' : $country;
+		return ( '*' === $country ) ? '' : $country;
 	}
 
 	/**
@@ -688,7 +762,7 @@ class WC_Tax {
 		if ( ! in_array( $class, $sanitized_classes ) ) {
 			$class = '';
 		}
-		return $class === 'standard' ? '' : $class;
+		return ( 'standard' === $class ) ? '' : $class;
 	}
 
 	/**
@@ -772,7 +846,7 @@ class WC_Tax {
 			$wpdb->prefix . "woocommerce_tax_rates",
 			self::prepare_tax_rate( $tax_rate ),
 			array(
-				'tax_rate_id' => $tax_rate_id
+				'tax_rate_id' => $tax_rate_id,
 			)
 		);
 
@@ -892,7 +966,7 @@ class WC_Tax {
 		global $wpdb;
 
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
+		$rates     = self::sort_rates( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		if ( ! empty( $rates ) ) {

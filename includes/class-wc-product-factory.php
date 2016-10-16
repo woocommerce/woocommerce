@@ -75,7 +75,7 @@ class WC_Product_Factory {
 				$terms        = get_the_terms( $the_product, 'product_type' );
 				$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
 			}
-		} elseif( 'product_variation' === $post_type ) {
+		} elseif ( 'product_variation' === $post_type ) {
 			$product_type = 'variation';
 		} else {
 			$product_type = false;

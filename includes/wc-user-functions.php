@@ -176,17 +176,18 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  * @param int $order_id
  */
 function wc_paying_customer( $order_id ) {
-	$order = wc_get_order( $order_id );
+	$order       = wc_get_order( $order_id );
+	$customer_id = $order->get_customer_id();
 
-	if ( $order->user_id > 0 && 'refund' !== $order->order_type ) {
-		update_user_meta( $order->user_id, 'paying_customer', 1 );
+	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
+		update_user_meta( $customer_id, 'paying_customer', 1 );
 
-		$old_spent = absint( get_user_meta( $order->user_id, '_money_spent', true ) );
-		update_user_meta( $order->user_id, '_money_spent', $old_spent + $order->order_total );
+		$old_spent = absint( get_user_meta( $customer_id, '_money_spent', true ) );
+		update_user_meta( $customer_id, '_money_spent', $old_spent + $order->get_total( true ) );
 	}
-	if ( $order->user_id > 0 && 'simple' === $order->order_type ) {
-		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
-		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
+	if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
+		$old_count = absint( get_user_meta( $customer_id, '_order_count', true ) );
+		update_user_meta( $customer_id, '_order_count', $old_count + 1 );
 	}
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
@@ -258,7 +259,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->user_id ) {
+				if ( $order && $user_id == $order->get_user_id() ) {
 					$allcaps['view_order'] = true;
 				}
 			break;
@@ -274,7 +275,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
+				if ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
@@ -282,7 +283,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['order_again'] = true;
 				}
 			break;
@@ -290,7 +291,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $user_id == $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
 				}
 			break;
@@ -313,9 +314,9 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @param  array $roles
  * @return array
  */
-function wc_modify_editable_roles( $roles ){
+function wc_modify_editable_roles( $roles ) {
 	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles[ 'administrator' ] );
+		unset( $roles['administrator'] );
 	}
 	return $roles;
 }
@@ -401,7 +402,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
-			if ( ! $order || $order->id != $result->order_id ) {
+			if ( ! $order || $order->get_id() != $result->order_id ) {
 				// new order
 				$order    = wc_get_order( $result->order_id );
 				$_product = null;
@@ -442,30 +443,32 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'        => add_query_arg(
+				'download_url'          => add_query_arg(
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
-						'email'         => $result->user_email,
-						'key'           => $result->download_id
+						'email'         => urlencode( $result->user_email ),
+						'key'           => $result->download_id,
 					),
 					home_url( '/' )
 				),
-				'download_id'         => $result->download_id,
-				'product_id'          => $product_id,
-				'download_name'       => $download_name,
-				'order_id'            => $order->id,
-				'order_key'           => $order->order_key,
-				'downloads_remaining' => $result->downloads_remaining,
-				'access_expires' 	  => $result->access_expires,
-				'file'                => $download_file
+				'download_id'           => $result->download_id,
+				'product_id'            => $_product->id,
+				'product_name'          => $_product->get_title(),
+				'download_name'         => $download_name,
+				'order_id'              => $order->get_id(),
+				'order_key'             => $order->get_order_key(),
+				'downloads_remaining'   => $result->downloads_remaining,
+				'access_expires' 	    => $result->access_expires,
+				'file'                  => $download_file,
+				'file_name'             => $download_file['name'],
 			);
 
 			$file_number++;
 		}
 	}
 
-	return $downloads;
+	return apply_filters( 'woocommerce_customer_available_downloads', $downloads, $customer_id );
 }
 
 /**
@@ -474,27 +477,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
-	$spent = get_user_meta( $user_id, '_money_spent', true );
-	if ( '' === $spent ) {
-		global $wpdb;
-
-		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
-			FROM $wpdb->posts as posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-
-			WHERE   meta.meta_key       = '_customer_user'
-			AND     meta.meta_value     = $user_id
-			AND     posts.post_type     IN ('" . implode( "','", wc_get_order_types( 'reports' ) ) . "')
-			AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
-			AND     meta2.meta_key      = '_order_total'
-		" );
-
-		update_user_meta( $user_id, '_money_spent', $spent );
-	}
-
-	return $spent;
+	$customer = new WC_Customer( $user_id );
+	return $customer->get_total_spent();
 }
 
 /**
@@ -503,25 +487,8 @@ function wc_get_customer_total_spent( $user_id ) {
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
-	$count = get_user_meta( $user_id, '_order_count', true );
-	if ( '' === $count ) {
-		global $wpdb;
-
-		$count = $wpdb->get_var( "SELECT COUNT(*)
-			FROM $wpdb->posts as posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-
-			WHERE   meta.meta_key       = '_customer_user'
-			AND     posts.post_type     IN ('" . implode( "','", wc_get_order_types( 'order-count' ) ) . "')
-			AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
-			AND     meta_value          = $user_id
-		" );
-
-		update_user_meta( $user_id, '_order_count', absint( $count ) );
-	}
-
-	return absint( $count );
+	$customer = new WC_Customer( $user_id );
+	return $customer->get_order_count();
 }
 
 /**

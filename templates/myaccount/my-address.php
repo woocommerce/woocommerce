@@ -24,12 +24,12 @@ $customer_id = get_current_user_id();
 
 if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-		'billing' => __( 'Billing Address', 'woocommerce' ),
-		'shipping' => __( 'Shipping Address', 'woocommerce' )
+		'billing' => __( 'Billing address', 'woocommerce' ),
+		'shipping' => __( 'Shipping address', 'woocommerce' ),
 	), $customer_id );
 } else {
 	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-		'billing' =>  __( 'Billing Address', 'woocommerce' )
+		'billing' => __( 'Billing address', 'woocommerce' ),
 	), $customer_id );
 }
 
@@ -61,7 +61,7 @@ $col    = 1;
 					'city'        => get_user_meta( $customer_id, $name . '_city', true ),
 					'state'       => get_user_meta( $customer_id, $name . '_state', true ),
 					'postcode'    => get_user_meta( $customer_id, $name . '_postcode', true ),
-					'country'     => get_user_meta( $customer_id, $name . '_country', true )
+					'country'     => get_user_meta( $customer_id, $name . '_country', true ),
 				), $customer_id, $name );
 
 				$formatted_address = WC()->countries->get_formatted_address( $address );

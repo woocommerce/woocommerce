@@ -73,5 +73,5 @@ $states['BD'] = array(
 	'SUN'  => __( 'Sunamganj', 'woocommerce' ),
 	'SYL'  => __( 'Sylhet', 'woocommerce' ),
 	'TAN'  => __( 'Tangail', 'woocommerce' ),
-	'THA'  => __( 'Thakurgaon', 'woocommerce' )
+	'THA'  => __( 'Thakurgaon', 'woocommerce' ),
 );

@@ -16,10 +16,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->add_to_cart_text() );
+		$this->assertEquals( 'Add to cart', $product->add_to_cart_text() );
 
 		$product->stock_status = 'outofstock';
-		$this->assertEquals( __( 'Read more', 'woocommerce' ), $product->add_to_cart_text() );
+		$this->assertEquals( 'Read more', $product->add_to_cart_text() );
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );
@@ -34,7 +34,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->single_add_to_cart_text() );
+		$this->assertEquals( 'Add to cart', $product->single_add_to_cart_text() );
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );

@@ -182,7 +182,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 					),
 				),
 				'parent' => array(
-					'description' => __( 'The id for the parent of the resource.', 'woocommerce' ),
+					'description' => __( 'The ID for the parent of the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),

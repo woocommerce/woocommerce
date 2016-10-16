@@ -6,9 +6,9 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
+@import 'bourbon';
+@import 'mixins';
+@import 'variables';
 
 /**
  * Styling begins
@@ -378,14 +378,6 @@
 
 		div.product.hentry.has-post-thumbnail {
 			margin-top: 0;
-		}
-
-		.product {
-			.images {
-				img {
-					margin-bottom: 1em;
-				}
-			}
 		}
 	}
 }

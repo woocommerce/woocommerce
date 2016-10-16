@@ -35,7 +35,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
 			this.$checkout_form.on( 'change keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
@@ -55,12 +55,17 @@ jQuery( function( $ ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
 			}
 		},
-		init_payment_methods: function() {
+		init_payment_methods: function( selectedPaymentMethod ) {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
 			// If there is one method, we can hide the radio input
 			if ( 1 === $payment_methods.length ) {
 				$payment_methods.eq(0).hide();
+			}
+
+			// If there was a previously selected method, check that one.
+			if ( selectedPaymentMethod ) {
+				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
 			}
 
 			// If there are none selected, select the first.
@@ -271,6 +276,9 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
 				data:		data,
 				success:	function( data ) {
+
+					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
+
 					// Reload the page if requested
 					if ( 'true' === data.reload ) {
 						window.location.reload();
@@ -321,10 +329,10 @@ jQuery( function( $ ) {
 					}
 
 					// Re-init methods
-					wc_checkout_form.init_payment_methods();
+					wc_checkout_form.init_payment_methods( selectedPaymentMethod );
 
-					// Fire updated_checkout e
-					$( document.body ).trigger( 'updated_checkout' );
+					// Fire updated_checkout event.
+					$( document.body ).trigger( 'updated_checkout', [ data ] );
 				}
 
 			});
