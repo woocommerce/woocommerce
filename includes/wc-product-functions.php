@@ -815,7 +815,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
  * @return array
  */
 function wc_get_related_terms( $product_id, $taxonomy ) {
-	$terms = apply_filters( 'woocommerce_get_related_' . $taxonomy . '_terms', get_the_terms( $product_id, $term ), $product_id );
+	$terms = apply_filters( 'woocommerce_get_related_' . $taxonomy . '_terms', get_the_terms( $product_id, $taxonomy ), $product_id );
 
 	return array_map( 'absint', wp_list_pluck( $terms, 'term_id' ) );
 }
