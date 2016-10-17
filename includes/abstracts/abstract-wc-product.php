@@ -632,7 +632,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @param string $timestamp Sale to date.
 	 */
-	public function set_date_on_sale_to( $date ) {
+	public function set_date_on_sale_to( $timestamp ) {
 		return $this->data['date_on_sale_to'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
