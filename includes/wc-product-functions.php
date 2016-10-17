@@ -790,9 +790,11 @@ function wc_get_min_max_price_meta_query( $args ) {
 
 /**
  * Get relateed products.
- * @param  integer  $product_id
- * @param  integer  $limit
- * @param  array    $exclude_ids
+ *
+ * @since  2.7.0
+ * @param  int   $product_id  Product ID
+ * @param  int   $limit       Limit of results.
+ * @param  array $exclude_ids Exclude IDs from the results.
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
@@ -804,9 +806,9 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	$related_posts  = get_transient( $transient_name );
 	$limit          = $limit > 0 ? $limit : 5;
 
-	// We want to query related posts if they are not cached, or we don't have enough
+	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
-		// Related products are found from category and tags
+		// Related products are found from category and tags.
 		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ) {
 			$cats_array = wc_get_related_terms( $product_id, 'product_cat' );
 		} else {
@@ -823,46 +825,54 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
 			$related_posts = array();
 		} else {
-			// Generate query - but query an extra 10 results to give the appearance of random results
+			// Generate query - but query an extra 10 results to give the appearance of random results.
 			$query = apply_filters( 'woocommerce_product_related_posts_query', wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id );
 
-			// Get the posts
+			// Get the posts.
 			$related_posts = $wpdb->get_col( implode( ' ', $query ) );
 		}
 
 		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
 	}
 
-	// Randomise the results
+	// Randomise the results.
 	shuffle( $related_posts );
 
-	// Limit the returned results
+	// Limit the returned results.
 	return array_slice( $related_posts, 0, $limit );
 }
 
 /**
  * Retrieves related product terms.
- * @since 2.7.0
- * @param integer $product_id
- * @param string $taxonomy
+ *
+ * @since  2.7.0
+ * @param  int    $product_id Product ID.
+ * @param  string $taxonomy   Taxonomy slug.
  * @return array
  */
 function wc_get_related_terms( $product_id, $taxonomy ) {
 	$terms = apply_filters( 'woocommerce_get_related_' . $taxonomy . '_terms', wp_get_post_terms( $product_id, $term ), $product_id );
+
 	return array_map( 'absint', wp_list_pluck( $terms, 'term_id' ) );
 }
 
 /**
  * Builds the related posts query.
  *
- * @param array $cats_array
- * @param array $tags_array
- * @param array $exclude_ids
- * @param int   $limit
+ * @since 2.7.0
+ * @param array $cats_array  List of categories IDs.
+ * @param array $tags_array  List of tags IDs.
+ * @param array $exclude_ids Excluded IDs.
+ * @param int   $limit       Limit of results.
  * @return string
  */
 function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
 	global $wpdb;
+
+	// Arrays to string.
+	$exclude_ids = implode( ',', $exclude_ids );
+	$cats_array  = implode( ',', $cats_array );
+	$tags_array  = implode( ',', $tags_array );
 
 	$limit           = absint( $limit );
 	$query           = array();
@@ -876,10 +886,10 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
 		$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
 	}
 
-	$query['where']  = " WHERE 1=1";
+	$query['where']  = ' WHERE 1=1';
 	$query['where'] .= " AND p.post_status = 'publish'";
 	$query['where'] .= " AND p.post_type = 'product'";
-	$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
+	$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
 	$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
 
 	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
@@ -890,14 +900,14 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
 		$query['where'] .= ' AND (';
 
 		if ( $cats_array ) {
-			$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
+			$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
 			if ( $relate_by_tag ) {
 				$query['where'] .= ' OR ';
 			}
 		}
 
 		if ( $tags_array ) {
-			$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
+			$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( {$tags_array} ) ) ";
 		}
 
 		$query['where'] .= ')';
