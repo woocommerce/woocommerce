@@ -756,7 +756,7 @@ function wc_get_product_visibility_options() {
  * Get relateed products.
  *
  * @since  2.7.0
- * @param  int   $product_id  Product ID
+ * @param  int   $product_id  Product ID.
  * @param  int   $limit       Limit of results.
  * @param  array $exclude_ids Exclude IDs from the results.
  * @return array
@@ -771,7 +771,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	$limit          = $limit > 0 ? $limit : 5;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
-	if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
+	if ( false === $related_posts || count( $related_posts ) < $limit ) {
 		// Related products are found from category and tags.
 		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ) {
 			$cats_array = wc_get_related_terms( $product_id, 'product_cat' );
