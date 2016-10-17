@@ -29,11 +29,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected $data = array(
 		'name'               => '',
 		'slug'               => '',
-		'permalink'          => '',
+		//'permalink'          => '',
 		'date_created'       => '',
 		'date_modified'      => '',
 		'status'             => '',
-		'featured'           => 'no',
+		'featured'           => false,
 		'catalog_visibility' => 'hidden',
 		'description'        => '',
 		'short_description'  => '',
@@ -45,17 +45,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'total_sales'        => '',
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
-		'manage_stock'       => 'no',
+		'manage_stock'       => false,
 		'stock_quantity'     => null,
 		'stock_status'       => '',
 		'backorders'         => 'no',
-		'sold_individually'  => 'no',
+		'sold_individually'  => false,
 		'weight'             => '',
 		'length'             => '',
 		'width'              => '',
 		'height'             => '',
-		'upsell_ids'         => '',
-		'cross_sell_ids'     => '',
+		'upsell_ids'         => array(),
+		'cross_sell_ids'     => array(),
 		'parent_id'          => 0,
 		'reviews_allowed'    => true,
 		'purchase_note'      => '',
@@ -96,6 +96,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 	}
 
+	/**
+	 * Get internal type.
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_type() {
+		return 'simple';
+	}
+
+	/**
+	 * Product permalink.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return get_permalink( $this->get_id() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -115,40 +132,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get internal type.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_type() {
-		return 'simple';
-	}
-
-	// @todo below.
-
-
-
-
-
-
-
-
-	/**
 	 * Get product slug.
-	 *
 	 * @since 2.7.0
 	 * @return string
 	 */
 	public function get_slug() {
 		return $this->data['slug'];
-	}
-
-	/**
-	 * Product permalink.
-	 *
-	 * @return string
-	 */
-	public function get_permalink() {
-		return $this->data['permalink'];
 	}
 
 	/**
@@ -185,7 +174,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * If the product is featured.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return boolean
 	 */
 	public function get_featured() {
 		return $this->data['featured'];
@@ -300,7 +289,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Return if product manage stock.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return boolean
 	 */
 	public function get_manage_stock() {
 		return $this->data['manage_stock'];
@@ -309,7 +298,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns number of items available for sale.
 	 *
-	 * @return int
+	 * @return int|null
 	 */
 	public function get_stock_quantity() {
 		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? wc_stock_amount( $this->data['stock_quantity'] ) : null, $this );
@@ -329,7 +318,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get backorders.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return string yes no or notify
 	 */
 	public function get_backorders() {
 		return $this->data['backorders'];
@@ -339,7 +328,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Return if should be sold individually.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return boolean
 	 */
 	public function get_sold_individually() {
 		return $this->data['sold_individually'];
@@ -352,7 +341,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_weight() {
 		// Legacy filter.
-		$weight = apply_filters( 'woocommerce_product_weight', $this->data['weight'], $this );
+		$weight = apply_filters( 'woocommerce_product_weight', $this->data['weight'], $this ); // @todo standardize these filter names and move BW compat to deprecated class file.
 
 		// New filter.
 		return apply_filters( 'woocommerce_product_get_weight', $weight, $this );
@@ -398,20 +387,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get Upseels IDs.
+	 * Get upsel IDs.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return array
 	 */
 	public function get_upsell_ids() {
 		return $this->data['upsell_ids'];
 	}
 
 	/**
-	 * Get Upseels IDs.
+	 * Get cross sell IDs.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return array
 	 */
 	public function get_cross_sell_ids() {
 		return $this->data['cross_sell_ids'];
@@ -448,36 +437,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns the product categories.
-	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return string
-	 */
-	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
-	}
-
-	/**
-	 * Returns the product tags.
-	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return array
-	 */
-	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
-	}
-
-	/**
 	 * Returns product attributes.
 	 *
 	 * @return array
 	 */
 	public function get_attributes() {
-		$attributes = array_filter( (array) maybe_unserialize( $this->data['product_attributes'] ) );
+		$attributes = $this->data['product_attributes'];
 		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
 
 		// Check for any attributes which have been removed globally
@@ -543,16 +508,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set product permalink.
-	 *
-	 * @since 2.7.0
-	 * @param string $permalink Product permalink.
-	 */
-	public function set_permalink( $permalink ) {
-		$this->data['permalink'] = $permalink;
-	}
-
-	/**
 	 * Set product created date.
 	 *
 	 * @since 2.7.0
@@ -586,10 +541,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set if the product is featured.
 	 *
 	 * @since 2.7.0
-	 * @param string $featured Options: 'yes' or 'no'.
+	 * @param bool|string
 	 */
 	public function set_featured( $featured ) {
-		$this->data['featured'] = $featured;
+		$this->data['featured'] = wc_string_to_bool( $featured );
 	}
 
 	/**
@@ -604,7 +559,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( ! in_array( $visibility, $options, true ) ) {
 			$this->error( 'product_invalid_catalog_visibility', __( 'Invalid catalog visibility option.', 'woocommerce' ) );
 		}
-
 		$this->data['catalog_visibility'] = $visibility;
 	}
 
@@ -639,7 +593,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
 		}
-
 		$this->data['sku'] = $sku;
 	}
 
@@ -650,7 +603,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price Regular price.
 	 */
 	public function set_regular_price( $price ) {
-		$this->data['regular_price'] = $price;
+		$this->data['regular_price'] = wc_format_decimal( $price );
 	}
 
 	/**
@@ -660,27 +613,27 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price sale price.
 	 */
 	public function set_sale_price( $price ) {
-		$this->data['sale_price'] = $price;
+		$this->data['sale_price'] = wc_format_decimal( $price );
 	}
 
 	/**
 	 * Set date on sale from.
 	 *
 	 * @since 2.7.0
-	 * @param string $data Sale from date.
+	 * @param string $timestamp Sale from date.
 	 */
-	public function set_date_on_sale_from( $date ) {
-		$this->data['date_on_sale_from'] = $date;
+	public function set_date_on_sale_from( $timestamp ) {
+		$this->data['date_on_sale_from'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
 	/**
 	 * Set date on sale to.
 	 *
 	 * @since 2.7.0
-	 * @param string $data Sale to date.
+	 * @param string $timestamp Sale to date.
 	 */
 	public function set_date_on_sale_to( $date ) {
-		return $this->data['date_on_sale_to'] = $date;
+		return $this->data['date_on_sale_to'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
 	/**
@@ -733,10 +686,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set if product manage stock.
 	 *
 	 * @since 2.7.0
-	 * @param string $manage_stock Options: 'yes' or 'no'.
+	 * @param bool
 	 */
 	public function set_manage_stock( $manage_stock ) {
-		$this->data['manage_stock'] = $manage_stock;
+		$this->data['manage_stock'] = wc_string_to_bool( $manage_stock );
 	}
 
 	/**
@@ -785,10 +738,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set if should be sold individually.
 	 *
 	 * @since 2.7.0
-	 * @param string $sold_individually Options: 'yes' or 'no'.
+	 * @param bool
 	 */
 	public function set_sold_individually( $sold_individually ) {
-		$this->data['sold_individually'] = $sold_individually;
+		$this->data['sold_individually'] = wc_string_to_bool( $sold_individually );
 	}
 
 	/**
@@ -832,23 +785,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set Upseels IDs.
+	 * Set upsell IDs.
 	 *
 	 * @since 2.7.0
 	 * @param string $upsell_ids IDs from the up-sell products.
 	 */
 	public function set_upsell_ids( $upsell_ids ) {
-		$this->data['upsell_ids'] = $upsell_ids;
+		$this->data['upsell_ids'] = array_filter( (array) $upsell_ids );
 	}
 
 	/**
-	 * Set Upseels IDs.
+	 * Set crosssell IDs.
 	 *
 	 * @since 2.7.0
 	 * @param string $cross_sell_ids IDs from the cross-sell products.
 	 */
 	public function set_cross_sell_ids( $cross_sell_ids ) {
-		$this->data['cross_sell_ids'] = $cross_sell_ids;
+		$this->data['cross_sell_ids'] = array_filter( (array) $cross_sell_ids );
 	}
 
 	/**
@@ -868,7 +821,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool $reviews_allowed Reviews allowed or not.
 	 */
 	public function set_reviews_allowed( $reviews_allowed ) {
-		$this->data['reviews_allowed'] = (bool) $reviews_allowed;
+		$this->data['reviews_allowed'] = wc_string_to_bool( $reviews_allowed );
 	}
 
 	/**
@@ -882,33 +835,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set the product categories.
-	 *
-	 * @since 2.7.0
-	 * @param array $terms_id List of terms IDs.
-	 */
-	public function set_categories( $terms_id ) {
-		$this->save_taxonomy_terms( $terms_id, 'cat' );
-	}
-
-	/**
-	 * Set the product tags.
-	 *
-	 * @since 2.7.0
-	 * @param array $terms_id List of terms IDs.
-	 */
-	public function set_tags( $terms_id ) {
-		$this->save_taxonomy_terms( $terms_id, 'tag' );
-	}
-
-	/**
 	 * Returns product attributes.
 	 *
 	 * @since 2.7.0
 	 * @param array $attributes List of product attributes.
 	 */
 	public function set_attributes( $attributes ) {
-		$this->data['product_attributes'] = $attributes;
+		$this->data['product_attributes'] = $attributes; // @todo ensure unserialised, array, and filtered out empty values
 	}
 
 	/**
@@ -930,6 +863,69 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_menu_order( $menu_order ) {
 		$this->data['menu_order'] = intval( $menu_order );
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/**
+	 * Returns the product categories. @todo store in class and save?
+	 *
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return string
+	 */
+	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
+		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
+	}
+
+	/**
+	 * Returns the product tags. @todo store in class and save?
+	 *
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return array
+	 */
+	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
+		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
+	}
+
+	/**
+	 * Set the product categories. @todo store in class and save?
+	 *
+	 * @since 2.7.0
+	 * @param array $terms_id List of terms IDs.
+	 */
+	public function set_categories( $terms_id ) {
+		$this->save_taxonomy_terms( $terms_id, 'cat' );
+	}
+
+	/**
+	 * Set the product tags. @todo store in class and save?
+	 *
+	 * @since 2.7.0
+	 * @param array $terms_id List of terms IDs.
+	 */
+	public function set_tags( $terms_id ) {
+		$this->save_taxonomy_terms( $terms_id, 'tag' );
+	}
+
+
 
 	/*
 	|--------------------------------------------------------------------------
