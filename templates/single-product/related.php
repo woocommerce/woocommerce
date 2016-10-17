@@ -26,7 +26,7 @@ if ( empty( $product ) || ! $product->exists() ) {
 	return;
 }
 
-if ( ! $related = $product->get_related( $posts_per_page ) ) {
+if ( ! $related = wc_get_related_products( $product->get_id(), $posts_per_page, $product->get_upsells() ) ) {
 	return;
 }
 

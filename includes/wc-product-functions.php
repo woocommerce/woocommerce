@@ -751,3 +751,123 @@ function wc_get_product_visibility_options() {
 		'hidden'  => __( 'Hidden', 'woocommerce' ),
 	) );
 }
+
+/**
+ * Get relateed products.
+ * @param  integer  $product_id
+ * @param  integer  $limit
+ * @param  array    $exclude_ids
+ * @return array
+ */
+function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
+	global $wpdb;
+
+	$product_id     = absint( $product_id );
+	$exclude_ids    = array_map( 'absint', array_merge( array( 0, $product_id ), $exclude_ids ) );
+	$transient_name = 'wc_related_' . $product_id;
+	$related_posts  = get_transient( $transient_name );
+	$limit          = $limit > 0 ? $limit : 5;
+
+	// We want to query related posts if they are not cached, or we don't have enough
+	if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
+		// Related products are found from category and tags
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ) {
+			$cats_array = wc_get_related_terms( $product_id, 'product_cat' );
+		} else {
+			$cats_array = array();
+		}
+
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ) {
+			$tags_array = wc_get_related_terms( $product_id, 'product_tag' );
+		} else {
+			$tags_array = array();
+		}
+
+		// Don't bother if none are set, unless woocommerce_product_related_posts_force_display is set to true in which case all products are related.
+		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
+			$related_posts = array();
+		} else {
+			// Generate query - but query an extra 10 results to give the appearance of random results
+			$query = apply_filters( 'woocommerce_product_related_posts_query', wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id );
+
+			// Get the posts
+			$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+		}
+
+		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
+	}
+
+	// Randomise the results
+	shuffle( $related_posts );
+
+	// Limit the returned results
+	return array_slice( $related_posts, 0, $limit );
+}
+
+/**
+ * Retrieves related product terms.
+ * @since 2.7.0
+ * @param integer $product_id
+ * @param string $taxonomy
+ * @return array
+ */
+function wc_get_related_terms( $product_id, $taxonomy ) {
+	$terms = apply_filters( 'woocommerce_get_related_' . $taxonomy . '_terms', wp_get_post_terms( $product_id, $term ), $product_id );
+	return array_map( 'absint', wp_list_pluck( $terms, 'term_id' ) );
+}
+
+/**
+ * Builds the related posts query.
+ *
+ * @param array $cats_array
+ * @param array $tags_array
+ * @param array $exclude_ids
+ * @param int   $limit
+ * @return string
+ */
+function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
+	global $wpdb;
+
+	$limit           = absint( $limit );
+	$query           = array();
+	$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
+	$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
+	$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
+	$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
+	$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
+
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
+	}
+
+	$query['where']  = " WHERE 1=1";
+	$query['where'] .= " AND p.post_status = 'publish'";
+	$query['where'] .= " AND p.post_type = 'product'";
+	$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
+	$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
+
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		$query['where'] .= " AND pm2.meta_value = 'instock'";
+	}
+
+	if ( $cats_array || $tags_array ) {
+		$query['where'] .= ' AND (';
+
+		if ( $cats_array ) {
+			$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
+			if ( $relate_by_tag ) {
+				$query['where'] .= ' OR ';
+			}
+		}
+
+		if ( $tags_array ) {
+			$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
+		}
+
+		$query['where'] .= ')';
+	}
+
+	$query['limits'] = " LIMIT {$limit} ";
+
+	return $query;
+}
