@@ -801,7 +801,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	global $wpdb;
 
 	$product_id     = absint( $product_id );
-	$exclude_ids    = array_map( 'absint', array_merge( array( 0, $product_id ), $exclude_ids ) );
+	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
 	$related_posts  = get_transient( $transient_name );
 	$limit          = $limit > 0 ? $limit : 5;
@@ -870,9 +870,9 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
 	global $wpdb;
 
 	// Arrays to string.
-	$exclude_ids = implode( ',', $exclude_ids );
-	$cats_array  = implode( ',', $cats_array );
-	$tags_array  = implode( ',', $tags_array );
+	$exclude_ids = implode( ',', array_map( 'absint', $exclude_ids ) );
+	$cats_array  = implode( ',', array_map( 'absint', $cats_array ) );
+	$tags_array  = implode( ',', array_map( 'absint', $tags_array ) );
 
 	$limit           = absint( $limit );
 	$query           = array();
