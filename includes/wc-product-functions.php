@@ -753,6 +753,7 @@ function wc_get_product_visibility_options() {
 }
 
 /**
+<<<<<<< 34f579cfc4db9f4642b71f2af4f08df516d644b7
  * Get min/max price meta query args.
  *
  * @since 2.7.0
@@ -789,7 +790,7 @@ function wc_get_min_max_price_meta_query( $args ) {
 	);
 
 /**
- * Get relateed products.
+ * Get related products based on product category and tags.
  *
  * @since  2.7.0
  * @param  int   $product_id  Product ID.
@@ -808,37 +809,22 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
-		// Related products are found from category and tags.
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ) {
-			$cats_array = wc_get_related_terms( $product_id, 'product_cat' );
-		} else {
-			$cats_array = array();
-		}
-
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ) {
-			$tags_array = wc_get_related_terms( $product_id, 'product_tag' );
-		} else {
-			$tags_array = array();
-		}
+		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? wc_get_related_terms( $product_id, 'product_cat' ) : array();
+		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? wc_get_related_terms( $product_id, 'product_tag' ) : array();
 
 		// Don't bother if none are set, unless woocommerce_product_related_posts_force_display is set to true in which case all products are related.
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
 			$related_posts = array();
 		} else {
-			// Generate query - but query an extra 10 results to give the appearance of random results.
-			$query = apply_filters( 'woocommerce_product_related_posts_query', wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id );
-
-			// Get the posts.
-			$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+			// Generate query - but query an extra 10 results to give the appearance of random results when later shuffled.
+			$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id ) ) );
 		}
 
 		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
 	}
 
-	// Randomise the results.
 	shuffle( $related_posts );
 
-	// Limit the returned results.
 	return array_slice( $related_posts, 0, $limit );
 }
 
