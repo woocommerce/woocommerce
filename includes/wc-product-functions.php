@@ -734,7 +734,7 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		$props['alt']     = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) ) : $props['alt'];
 		$props['alt']     = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
 	}
-	return $props;
+	return apply_filters('product_attachment_props', $props, $attachment_id, $product);
 }
 
 /**
