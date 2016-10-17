@@ -700,7 +700,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
  * @return array
  */
 function wc_get_product_cat_ids( $product_id ) {
-	$product_cats = wp_get_post_terms( $product_id, 'product_cat', array( "fields" => "ids" ) );
+	$product_cats = wc_get_product_term_ids( $product_id, 'product_cat' );
 
 	foreach ( $product_cats as $product_cat ) {
 		$product_cats = array_merge( $product_cats, get_ancestors( $product_cat, 'product_cat' ) );
@@ -809,8 +809,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
-		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? wc_get_related_terms( $product_id, 'product_cat' ) : array();
-		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? wc_get_related_terms( $product_id, 'product_tag' ) : array();
+		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
+		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
 
 		// Don't bother if none are set, unless woocommerce_product_related_posts_force_display is set to true in which case all products are related.
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
@@ -829,17 +829,15 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 }
 
 /**
- * Retrieves related product terms.
+ * Retrieves product term ids for a taxonomy.
  *
  * @since  2.7.0
  * @param  int    $product_id Product ID.
  * @param  string $taxonomy   Taxonomy slug.
  * @return array
  */
-function wc_get_related_terms( $product_id, $taxonomy ) {
-	$terms = apply_filters( 'woocommerce_get_related_' . $taxonomy . '_terms', get_the_terms( $product_id, $taxonomy ), $product_id );
-
-	return array_map( 'absint', wp_list_pluck( $terms, 'term_id' ) );
+function wc_get_product_term_ids( $product_id, $taxonomy ) {
+	return wp_list_pluck( get_the_terms( $product_id, $taxonomy ), 'term_id' );
 }
 
 /**

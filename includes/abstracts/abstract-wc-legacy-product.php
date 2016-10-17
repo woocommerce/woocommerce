@@ -32,11 +32,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Retrieves related product terms.
-	 * @deprecated 2.7.0 Use wc_get_related_terms instead.
+	 * @deprecated 2.7.0 Use wc_get_product_term_ids instead.
 	 */
 	protected function get_related_terms( $term ) {
-		_deprecated_function( 'WC_Product::get_related_terms', '2.7', 'wc_get_related_terms' );
-		return array_merge( array( 0 ), wc_get_related_terms( $this->get_id(), $term ) );
+		_deprecated_function( 'WC_Product::get_related_terms', '2.7', 'wc_get_product_term_ids' );
+		return array_merge( array( 0 ), wc_get_product_term_ids( $this->get_id(), $term ) );
 	}
 
 	/**
