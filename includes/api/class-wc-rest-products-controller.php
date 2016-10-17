@@ -146,36 +146,30 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
-				$terms = explode( ',', $request[ $key ] );
-
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
 			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -2728,19 +2722,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params['category'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['tag'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['shipping_class'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute'] = array(
@@ -2752,7 +2746,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params['attribute_term'] = array(
 			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
