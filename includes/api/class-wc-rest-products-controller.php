@@ -221,6 +221,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			) );
 		}
 
+		// Filter by on sale products.
+		if ( is_bool( $request['on_sale'] ) ) {
+			$on_sale_key           = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
+		}
+
 		// Apply all WP_Query filters again.
 		if ( is_array( $request['filter'] ) ) {
 			$args = array_merge( $args, $request['filter'] );
@@ -2768,6 +2774,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		$params['in_stock'] = array(
 			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['on_sale'] = array(
+			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
