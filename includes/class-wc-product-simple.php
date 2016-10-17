@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The default product type kinda product.
  *
  * @class 		WC_Product_Simple
- * @version		2.0.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -23,10 +22,21 @@ class WC_Product_Simple extends WC_Product {
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
-		$this->product_type = 'simple';
 		$this->supports[]   = 'ajax_add_to_cart';
 		parent::__construct( $product );
 	}
+
+	/**
+	 * Get internal type.
+	 * @return string
+	 */
+	public function get_type() {
+		return 'simple';
+	}
+
+
+
+
 
 	/**
 	 * Get the add to url used mainly in loops.

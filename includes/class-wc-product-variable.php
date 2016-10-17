@@ -24,13 +24,11 @@ class WC_Product_Variable extends WC_Product {
 	private $prices_array = array();
 
 	/**
-	 * Constructor.
-	 *
-	 * @param mixed $product
+	 * Get internal type.
+	 * @return string
 	 */
-	public function __construct( $product ) {
-		$this->product_type = 'variable';
-		parent::__construct( $product );
+	public function get_type() {
+		return 'variable';
 	}
 
 	/**
