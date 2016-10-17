@@ -22,14 +22,13 @@ include_once( 'abstract-wc-legacy-product.php' );
 class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
-	 * Stores customer data.
+	 * Stores product data.
 	 *
 	 * @var array
 	 */
 	protected $data = array(
 		'name'               => '',
 		'slug'               => '',
-		//'permalink'          => '',
 		'date_created'       => '',
 		'date_modified'      => '',
 		'status'             => '',
@@ -87,6 +86,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
+		parent::__construct( $product );
 		if ( is_numeric( $product ) && $product > 0 ) {
 			$this->read( $product );
 		} elseif ( $product instanceof self ) {
@@ -925,8 +925,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->save_taxonomy_terms( $terms_id, 'tag' );
 	}
 
-
-
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -991,8 +989,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'menu_order'         => $post_object->menu_order,
 		) );
 		$this->read_meta_data();
-
-		do_action( 'woocommerce_product_loaded', $this );
 	}
 
 	/**
@@ -1007,7 +1003,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_type'     => 'product',
 			'post_status'   => 'publish',
 			'post_author'   => get_current_user_id(),
-			'post_title'    => $this->get_code(),
+			'post_title'    => $this->get_name(),
 			'post_content'  => '',
 			'post_excerpt'  => $this->get_description(),
 			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
@@ -1028,7 +1024,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	public function update() {
+		$post_data = array(
+			'ID'           => $this->get_id(),
+			// @todo implement other post fields
+		);
+		wp_update_post( $post_data );
 
+		$this->update_post_meta( $this->get_id() );
+		$this->save_meta_data();
+		do_action( 'woocommerce_update_product', $this->get_id() );
 	}
 
 	/**
@@ -1061,8 +1065,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @param int $id Object ID.
 	 */
-	private function update_post_meta( $id ) {
-		// update_post_meta( $id, 'discount_type', $this->get_discount_type() );
+	protected function update_post_meta( $id ) {
+		 update_post_meta( $id, '_regular_price', $this->get_regular_price() );
 	}
 
 	/*
