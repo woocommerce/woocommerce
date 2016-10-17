@@ -18,14 +18,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_External extends WC_Product {
 
 	/**
-	 * Constructor.
-	 *
-	 * @access public
-	 * @param mixed $product
+	 * Get internal type.
+	 * @return string
 	 */
-	public function __construct( $product ) {
-		$this->product_type = 'external';
-		parent::__construct( $product );
+	public function get_type() {
+		return 'external';
 	}
 
 	/**

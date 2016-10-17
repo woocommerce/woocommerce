@@ -21,14 +21,11 @@ class WC_Product_Grouped extends WC_Product {
 	public $children;
 
 	/**
-	 * Constructor.
-	 *
-	 * @access public
-	 * @param mixed $product
+	 * Get internal type.
+	 * @return string
 	 */
-	public function __construct( $product ) {
-		$this->product_type = 'grouped';
-		parent::__construct( $product );
+	public function get_type() {
+		return 'grouped';
 	}
 
 	/**

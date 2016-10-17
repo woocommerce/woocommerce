@@ -84,6 +84,13 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'post' :
 				$value = get_post( $this->get_id() );
 				break;
+
+			case 'product_type' :  // @todo What do we do with 3rd party use of product_type now it's hardcoded?
+				$value = $this->get_type();
+				break;
+
+
+
 			default :
 				$value = get_post_meta( $this->id, '_' . $key, true );
 

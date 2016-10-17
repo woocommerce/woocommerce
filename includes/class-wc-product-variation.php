@@ -85,7 +85,6 @@ class WC_Product_Variation extends WC_Product {
 			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->variation_id ), 422 );
 		}
 
-		$this->product_type = 'variation';
 		$this->parent       = ! empty( $args['parent'] ) ? $args['parent'] : wc_get_product( $this->id );
 		$this->post         = ! empty( $this->parent->post ) ? $this->parent->post : array();
 
@@ -93,6 +92,14 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! is_a( $this->parent, 'WC_Product' ) ) {
 			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->variation_id ), 422 );
 		}
+	}
+
+	/**
+	 * Get internal type.
+	 * @return string
+	 */
+	public function get_type() {
+		return 'variation';
 	}
 
 	/**

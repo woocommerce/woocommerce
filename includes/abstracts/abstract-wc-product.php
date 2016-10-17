@@ -32,7 +32,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'permalink'          => '',
 		'date_created'       => '',
 		'date_modified'      => '',
-		'type'               => '',
 		'status'             => '',
 		'featured'           => 'no',
 		'catalog_visibility' => 'hidden',
@@ -116,6 +115,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get internal type.
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_type() {
+		return 'simple';
+	}
+
+	// @todo below.
+
+
+
+
+
+
+
+
+	/**
 	 * Get product slug.
 	 *
 	 * @since 2.7.0
@@ -152,15 +169,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_date_modified() {
 		return $this->data['date_modified'];
-	}
-
-	/**
-	 * Return the product type.
-	 *
-	 * @return string
-	 */
-	public function get_type() {
-		return $this->data['type'];
 	}
 
 	/**
@@ -562,15 +570,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_date_modified( $timestamp ) {
 		$this->data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-	}
-
-	/**
-	 * Set the product type.
-	 *
-	 * @return string
-	 */
-	public function set_type( $type ) {
-		$this->data['type'] = $type;
 	}
 
 	/**
@@ -1212,7 +1211,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_type( $type ) {
-		return ( $this->product_type == $type || ( is_array( $type ) && in_array( $this->product_type, $type ) ) ) ? true : false;
+		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
 	}
 
 	/**
