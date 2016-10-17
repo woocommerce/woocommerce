@@ -22,6 +22,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
+	 * Get and return related products.
+	 * @deprecated 2.7.0 Use wc_get_related_products instead.
+	 */
+	public function get_related( $limit = 5 ) {
+		_deprecated_function( 'WC_Product::get_related', '2.7', 'wc_get_related_products' );
+		return wc_get_related_products( $this->get_id(), $limit );
+	}
+
+	/**
+	 * Retrieves related product terms.
+	 * @deprecated 2.7.0 Use wc_get_related_terms instead.
+	 */
+	protected function get_related_terms( $term ) {
+		_deprecated_function( 'WC_Product::get_related_terms', '2.7', 'wc_get_related_terms' );
+		return array_merge( array( 0 ), wc_get_related_terms( $this->get_id(), $term ) );
+	}
+
+	/**
+	 * Builds the related posts query.
+	 * @deprecated 2.7.0 Use wc_get_related_products_query instead.
+	 */
+	protected function build_related_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
+		_deprecated_function( 'WC_Product::build_related_query', '2.7', 'wc_get_related_products_query' );
+		return wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
+	}
+
+
+
+
+	/**
 	 * The product's type (simple, variable etc).
 	 *
 	 * @var string
