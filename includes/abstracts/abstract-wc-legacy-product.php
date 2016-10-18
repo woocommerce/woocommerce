@@ -139,6 +139,27 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return int
 	 */
 	public function get_parent() {
+		_deprecated_function( 'WC_Product::get_parent', '2.7', 'WC_Product::get_parent_id' );
 		return apply_filters( 'woocommerce_product_parent', absint( $this->post->post_parent ), $this );
+	}
+
+	/**
+	 * Returns the upsell product ids.
+	 *
+	 * @return array
+	 */
+	public function get_upsells() {
+		_deprecated_function( 'WC_Product::get_upsells', '2.7', 'WC_Product::get_upsell_ids' );
+		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ), $this );
+	}
+
+	/**
+	 * Returns the cross sell product ids.
+	 *
+	 * @return array
+	 */
+	public function get_cross_sells() {
+		_deprecated_function( 'WC_Product::get_cross_sells', '2.7', 'WC_Product::get_cross_sell_ids' );
+		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
 	}
 }

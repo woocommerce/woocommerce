@@ -22,17 +22,16 @@ include_once( 'abstract-wc-legacy-product.php' );
 class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
-	 * Stores customer data.
+	 * Stores product data.
 	 *
 	 * @var array
 	 */
 	protected $data = array(
 		'name'               => '',
 		'slug'               => '',
-		//'permalink'          => '',
 		'date_created'       => '',
 		'date_modified'      => '',
-		'status'             => '',
+		'status'             => 'publish',
 		'featured'           => false,
 		'catalog_visibility' => 'hidden',
 		'description'        => '',
@@ -87,6 +86,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
+		parent::__construct( $product );
 		if ( is_numeric( $product ) && $product > 0 ) {
 			$this->read( $product );
 		} elseif ( $product instanceof self ) {
@@ -95,6 +95,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->read( absint( $product->ID ) );
 		}
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the product object.
+	*/
 
 	/**
 	 * Get internal type.
@@ -112,14 +120,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_permalink() {
 		return get_permalink( $this->get_id() );
 	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	|
-	| Methods for getting data from the product object.
-	*/
 
 	/**
 	 * Get product name.
@@ -442,14 +442,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		$attributes = $this->data['product_attributes'];
+		$attributes = $this->data['attributes'];
 		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
 
 		// Check for any attributes which have been removed globally
-		foreach ( $attributes as $key => $attribute ) {
-			if ( $attribute['is_taxonomy'] ) {
-				if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
-					unset( $attributes[ $key ] );
+		if ( is_array( $attributes ) && count( $attributes ) > 0 ) {
+			foreach ( $attributes as $key => $attribute ) {
+				if ( $attribute['is_taxonomy'] ) {
+					if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
+						unset( $attributes[ $key ] );
+					}
 				}
 			}
 		}
@@ -475,6 +477,30 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_menu_order() {
 		return $this->data['menu_order'];
+	}
+
+	/**
+	 * Returns the product categories. @todo store in class and save?
+	 *
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return string
+	 */
+	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
+		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
+	}
+
+	/**
+	 * Returns the product tags. @todo store in class and save?
+	 *
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return array
+	 */
+	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
+		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
 	}
 
 	/*
@@ -835,13 +861,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns product attributes.
+	 * Set product attributes.
 	 *
 	 * @since 2.7.0
 	 * @param array $attributes List of product attributes.
 	 */
 	public function set_attributes( $attributes ) {
-		$this->data['product_attributes'] = $attributes; // @todo ensure unserialised, array, and filtered out empty values
+		$this->data['attributes'] = $attributes; // @todo ensure unserialised, array, and filtered out empty values
 	}
 
 	/**
@@ -864,47 +890,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->data['menu_order'] = intval( $menu_order );
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/**
-	 * Returns the product categories. @todo store in class and save?
-	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return string
-	 */
-	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
-	}
-
-	/**
-	 * Returns the product tags. @todo store in class and save?
-	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return array
-	 */
-	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
-	}
-
 	/**
 	 * Set the product categories. @todo store in class and save?
 	 *
@@ -924,8 +909,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_tags( $terms_id ) {
 		$this->save_taxonomy_terms( $terms_id, 'tag' );
 	}
-
-
 
 	/*
 	|--------------------------------------------------------------------------
@@ -961,7 +944,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'type'               => '',
 			'status'             => $post_object->post_status,
 			'featured'           => get_post_meta( $id, '_featured', true ),
-			'catalog_visibility' => 'hidden',
+			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
 			'description'        => $post_object->post_content,
 			'short_description'  => $post_object->post_excerpt,
 			'sku'                => get_post_meta( $id, '_sku', true ),
@@ -972,7 +955,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'total_sales'        => get_post_meta( $id, 'total_sales', true ),
 			'tax_status'         => get_post_meta( $id, '_tax_status', true ),
 			'tax_class'          => get_post_meta( $id, '_tax_class', true ),
-			'manage_stock'       => 'no',
+			'manage_stock'       => get_post_meta( $id, '_manage_stock', true ),
 			'stock_quantity'     => get_post_meta( $id, '_stock', true ),
 			'stock_status'       => get_post_meta( $id, '_stock_status', true ),
 			'backorders'         => get_post_meta( $id, '_backorders', true ),
@@ -1004,14 +987,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_date_created( current_time( 'timestamp' ) );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
-			'post_type'     => 'product',
-			'post_status'   => 'publish',
-			'post_author'   => get_current_user_id(),
-			'post_title'    => $this->get_code(),
-			'post_content'  => '',
-			'post_excerpt'  => $this->get_description(),
-			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+			'post_type'      => 'product',
+			'post_status'    => $this->get_status(),
+			'post_author'    => get_current_user_id(),
+			'post_title'     => $this->get_name(),
+			'post_content'   => $this->get_description(),
+			'post_excerpt'   => $this->get_short_description(),
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => $this->get_reviews_allowed(),
+			'menu_order'     => $this->get_menu_order(),
+			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
 		) ), true );
 
 		if ( $id ) {
@@ -1028,7 +1014,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	public function update() {
-
+		$post_data = array(
+			'ID'             => $this->get_id(),
+			'post_content'   => $this->get_description(),
+			'post_excerpt'   => $this->get_short_description(),
+			'post_title'     => $this->get_name(),
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => $this->get_reviews_allowed(),
+			'post_status'    => $this->get_status(),
+			'menu_order'     => $this->get_menu_order(),
+		);
+		wp_update_post( $post_data );
+		$this->update_post_meta( $this->get_id() );
+		$this->save_meta_data();
+		do_action( 'woocommerce_update_product', $this->get_id() );
 	}
 
 	/**
@@ -1062,7 +1061,30 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $id Object ID.
 	 */
 	private function update_post_meta( $id ) {
-		// update_post_meta( $id, 'discount_type', $this->get_discount_type() );
+		update_post_meta( $id, '_featured', $this->get_featured() );
+		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
+		update_post_meta( $id, '_sku', $this->get_sku() );
+		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
+		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
+		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
+		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
+		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
+		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
+		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
+		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
+		update_post_meta( $id, '_stock', $this->get_stock_quantity() );
+		update_post_meta( $id, '_stock_status', $this->get_stock_status() );
+		update_post_meta( $id, '_backorders', $this->get_backorders() );
+		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
+		update_post_meta( $id, '_weight', $this->get_weight() );
+		update_post_meta( $id, '_length', $this->get_length() );
+		update_post_meta( $id, '_width', $this->get_width() );
+		update_post_meta( $id, '_height', $this->get_height() );
+		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
+		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
+		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
+		update_post_meta( $id, '_attributes', $this->get_attributes() );
+		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 	}
 
 	/*
@@ -2012,24 +2034,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		return apply_filters( 'woocommerce_product_review_count', $count, $this );
-	}
-
-	/**
-	 * Returns the upsell product ids.
-	 *
-	 * @return array
-	 */
-	public function get_upsells() {
-		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ), $this );
-	}
-
-	/**
-	 * Returns the cross sell product ids.
-	 *
-	 * @return array
-	 */
-	public function get_cross_sells() {
-		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
 	}
 
 	/**
