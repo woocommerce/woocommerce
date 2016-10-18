@@ -47,7 +47,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'taxable' );
+		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 
@@ -75,7 +75,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'taxable' );
+		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 
@@ -120,7 +120,7 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_manage_stock', 'no' );
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
-		update_post_meta( $product_id, '_virtual', 'taxable' );
+		update_post_meta( $product_id, '_virtual', 'no' );
 		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
@@ -161,7 +161,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
@@ -183,7 +183,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
