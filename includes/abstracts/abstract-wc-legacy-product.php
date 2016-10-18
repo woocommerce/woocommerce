@@ -159,7 +159,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_title() {
-		_deprecated_function( 'WC_Product::get_title', '2.7', 'WC_Product::get_name' );
 		return apply_filters( 'woocommerce_product_title', $this->post ? $this->post->post_title : '', $this );
 	}
 

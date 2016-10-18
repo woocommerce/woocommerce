@@ -31,7 +31,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'slug'               => '',
 		'date_created'       => '',
 		'date_modified'      => '',
-		'status'             => '',
+		'status'             => 'publish',
 		'featured'           => false,
 		'catalog_visibility' => 'hidden',
 		'description'        => '',
@@ -988,7 +988,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
 			'post_type'      => 'product',
-			'post_status'    => 'publish',
+			'post_status'    => $this->get_status(),
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $this->get_name(),
 			'post_content'   => $this->get_description(),
@@ -1021,6 +1021,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_title'     => $this->get_name(),
 			'post_parent'    => $this->get_parent_id(),
 			'comment_status' => $this->get_reviews_allowed(),
+			'post_status'    => $this->get_status(),
 			'menu_order'     => $this->get_menu_order(),
 		);
 		wp_update_post( $post_data );
@@ -1065,7 +1066,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_sku', $this->get_sku() );
 		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
 		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
-		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
 		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
 		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
 		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
