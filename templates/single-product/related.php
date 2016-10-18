@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ if ( empty( $product ) || ! $product->exists() ) {
 	return;
 }
 
-if ( ! $related = $product->get_related( $posts_per_page ) ) {
+if ( ! $related = wc_get_related_products( $product->get_id(), $posts_per_page, $product->get_upsell_ids() ) ) {
 	return;
 }
 
@@ -37,7 +37,6 @@ $args = apply_filters( 'woocommerce_related_products_args', array(
 	'posts_per_page'       => $posts_per_page,
 	'orderby'              => $orderby,
 	'post__in'             => $related,
-	'post__not_in'         => array( $product->id ),
 ) );
 
 $products                    = new WP_Query( $args );
