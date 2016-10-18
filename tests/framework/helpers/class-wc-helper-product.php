@@ -32,14 +32,13 @@ class WC_Helper_Product {
 	 *
 	 * @return WC_Product_Simple
 	 */
-	public static function create_simple_product( $parent = 0 ) {
+	public static function create_simple_product() {
 
 		// Create the product
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'post_parent' => $parent,
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -93,8 +92,9 @@ class WC_Helper_Product {
 			'post_type'   => 'product',
 			'post_status' => 'publish',
 		) );
-		$simple_product_1 = self::create_simple_product( $product->ID );
-		$simple_product_2 = self::create_simple_product( $product->ID );
+		$simple_product_1 = self::create_simple_product( $product );
+		$simple_product_2 = self::create_simple_product( $product );
+		update_post_meta( $product, '_children', array( $simple_product_1->id, $simple_product_2->id ) );
 		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
