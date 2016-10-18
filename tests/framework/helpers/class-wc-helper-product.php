@@ -82,6 +82,29 @@ class WC_Helper_Product {
 	}
 
 	/**
+	 * Create external product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_External
+	 */
+	public static function create_external_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy External Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		update_post_meta( $product, '_price', '10' );
+		update_post_meta( $product, '_regular_price', '10' );
+		update_post_meta( $product, '_sale_price', '' );
+		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
+		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
+		update_post_meta( $product, '_button_text', 'Buy external product' );
+		return new WC_Product_External( $product );
+	}
+
+	/**
 	 * Create a dummy variation product.
 	 *
 	 * @since 2.3
@@ -116,7 +139,7 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_manage_stock', 'no' );
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
-		update_post_meta( $product_id, '_virtual', 'taxable' );
+		update_post_meta( $product_id, '_virtual', 'no' );
 		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
@@ -157,7 +180,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
@@ -179,7 +202,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
@@ -283,12 +306,12 @@ class WC_Helper_Product {
 	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
-		    'comment_author'       => 'admin',
-		    'comment_author_email' => 'woo@woo.local',
-		    'comment_author_url'   => '',
+			'comment_author'       => 'admin',
+			'comment_author_email' => 'woo@woo.local',
+			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
-		    'comment_content'      => $review_content,
-    		'comment_approved'     => 1,
+			'comment_content'      => $review_content,
+			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
 

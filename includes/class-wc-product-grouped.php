@@ -163,26 +163,18 @@ class WC_Product_Grouped extends WC_Product {
 	public function read( $id ) {
 		parent::read( $id );
 
-		$transient_name   = 'wc_product_children_' . $this->get_id();
-		$grouped_products = array_filter( wp_parse_id_list( (array) get_transient( $transient_name ) ) );
-
-		if ( empty( $grouped_products ) ) {
-			$grouped_products = get_posts( apply_filters( 'woocommerce_grouped_children_args', array(
-				'post_parent' 	 => $this->get_id(),
-				'post_type'		 => 'product',
-				'orderby'		 => 'menu_order',
-				'order'			 => 'ASC',
-				'fields'		 => 'ids',
-				'post_status'	 => 'publish',
-				'numberposts'	 => -1,
-			) ) );
-			set_transient( $transient_name, $grouped_products, DAY_IN_SECONDS * 30 );
-		}
-
 		$this->set_props( array(
-			'children' => $grouped_products,
+			'children' => wp_parse_id_list( get_post_meta( $id, '_children', true ) ),
 		) );
 		do_action( 'woocommerce_product_loaded', $this );
 		do_action( 'woocommerce_product_' . $this->get_type() . '_loaded', $this );
+	}
+
+	/**
+	 * Helper method that updates all the post meta for a grouped product.
+	 */
+	protected function update_post_meta() {
+		parent::update_post_meta();
+		update_post_meta( $this->get_id(), '_children', $this->get_children() );
 	}
 }
