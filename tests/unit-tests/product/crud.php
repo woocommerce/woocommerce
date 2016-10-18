@@ -137,10 +137,10 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_grouped_product_read() {
-		$product = WC_Helper_Product::create_grouped_product();
-		$product = new WC_Product_Grouped( $product->get_id() );
+		$product      = WC_Helper_Product::create_grouped_product();
+		$read_product = new WC_Product_Grouped( $product->get_id() );
 		$this->assertEquals( 'Dummy Grouped Product', $read_product->get_name() );
-		$this->assertEquals( 2, count( $product->get_children() ) );
+		$this->assertEquals( 2, count( $read_product->get_children() ) );
 	}
 	/**
 	 * Test updating an grouped product.
@@ -150,17 +150,17 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	function test_grouped_product_update() {
 		$product        = WC_Helper_Product::create_grouped_product();
 		$simple_product = WC_Helper_Product::create_simple_product();
-		$this->assertEquals( 'My Grouped Product', $product->get_name() );
-		$this->assertEquals( array( $simple_product->get_id() ), $product->get_children() );
+		$this->assertEquals( 'Dummy Grouped Product', $product->get_name() );
+		$this->assertEquals( 2, count( $product->get_children() ) );
 		$children   = $product->get_children();
 		$children[] = $simple_product->get_id();
 		$product->set_children( $children );
-		$product->set_name( 'My Grouped Product 2' );
+		$product->set_name( 'Dummy Grouped Product 2' );
 		$product->save();
 		// Reread from database
 		$product = new WC_Product_Grouped( $product->get_id() );
 		$this->assertEquals( 3, count( $product->get_children() ) );
-		$this->assertEquals( 'My Grouped Product 2', $read_product->get_name() );
+		$this->assertEquals( 'Dummy Grouped Product 2', $product->get_name() );
 	}
 	/**
 	 * Test grouped product setters and getters
@@ -178,12 +178,12 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		}
 	 }
 
-	 /**
+	/**
 	 * Test creating a new external product.
 	 *
 	 * @since 2.7.0
 	 */
-	 function test_external_product_create() {
+	function test_external_product_create() {
 		 $product = new WC_Product_External;
 		 $product->set_regular_price( 42 );
 		 $product->set_button_text( 'Test CRUD' );
