@@ -1396,7 +1396,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_child() {
-		return false;
+		return 0 < count( $this->get_children() );
 	}
 
 	/**
