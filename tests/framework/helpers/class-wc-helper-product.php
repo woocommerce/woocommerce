@@ -32,13 +32,14 @@ class WC_Helper_Product {
 	 *
 	 * @return WC_Product_Simple
 	 */
-	public static function create_simple_product() {
+	public static function create_simple_product( $parent = 0 ) {
 
 		// Create the product
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
+			'post_parent' => $parent,
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -72,6 +73,29 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_regular_price', '10' );
 		update_post_meta( $product, '_sale_price', '' );
 		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
+		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
+		update_post_meta( $product, '_button_text', 'Buy external product' );
+
+		return new WC_Product_External( $product );
+	}
+
+	/**
+	 * Create grouped product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_Grouped
+	 */
+	public static function create_grouped_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy Grouped Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		$simple_product_1 = self::create_simple_product( $product->ID );
+		$simple_product_2 = self::create_simple_product( $product->ID );
+		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
@@ -79,10 +103,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 
-		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
-		update_post_meta( $product, '_button_text', 'Buy external product' );
-
-		return new WC_Product_External( $product );
+		return new WC_Product_Grouped( $product );
 	}
 
 	/**
