@@ -974,8 +974,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'menu_order'         => $post_object->menu_order,
 		) );
 		$this->read_meta_data();
-
-		do_action( 'woocommerce_product_loaded', $this );
 	}
 
 	/**
@@ -1058,9 +1056,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @since 2.7.0
-	 * @param int $id Object ID.
 	 */
-	private function update_post_meta( $id ) {
+	protected function update_post_meta() {
+		$id = $this->get_id();
 		update_post_meta( $id, '_featured', $this->get_featured() );
 		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
 		update_post_meta( $id, '_sku', $this->get_sku() );
