@@ -47,11 +47,42 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'taxable' );
+		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 
 		return new WC_Product_Simple( $product );
+	}
+
+	/**
+	 * Create external product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_External
+	 */
+	public static function create_external_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy External Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		update_post_meta( $product, '_price', '10' );
+		update_post_meta( $product, '_regular_price', '10' );
+		update_post_meta( $product, '_sale_price', '' );
+		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
+		update_post_meta( $product, '_manage_stock', 'no' );
+		update_post_meta( $product, '_tax_status', 'taxable' );
+		update_post_meta( $product, '_downloadable', 'no' );
+		update_post_meta( $product, '_virtual', 'no' );
+		update_post_meta( $product, '_visibility', 'visible' );
+		update_post_meta( $product, '_stock_status', 'instock' );
+
+		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
+		update_post_meta( $product, '_button_text', 'Buy external product' );
+
+		return new WC_Product_External( $product );
 	}
 
 	/**
@@ -89,7 +120,7 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_manage_stock', 'no' );
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
-		update_post_meta( $product_id, '_virtual', 'taxable' );
+		update_post_meta( $product_id, '_virtual', 'no' );
 		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
@@ -130,7 +161,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
@@ -152,7 +183,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
