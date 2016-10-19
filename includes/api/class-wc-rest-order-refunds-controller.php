@@ -209,9 +209,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
-		$args['post_status']     = 'any';
+		$args['post_status']     = array_keys( wc_get_order_statuses() );
 		$args['post_parent__in'] = array( absint( $request['order_id'] ) );
-
 		return $args;
 	}
 
