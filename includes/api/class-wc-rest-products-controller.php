@@ -1665,12 +1665,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+							$term = get_term_by( 'name', $value, $attribute_name );
 
 							if ( $term && ! is_wp_error( $term ) ) {
 								$value = $term->slug;
 							} else {
-								$value = sanitize_title( $attribute_value );
+								$value = sanitize_title( $value );
 							}
 						}
 
