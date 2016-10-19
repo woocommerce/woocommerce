@@ -180,6 +180,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - Fixed undefined order ID.
 * Fix - API - Allow API to save refund reason.
 * Fix - Handle info notices in cart, not just error messages.
+* Fix - Don't remove hyphens in attribute labels.
+* Fix - Start sales on variations after they are saved, if applicable.
+* Fix - Made the text showing max variations you can link match the actual filtered value.
+* Fix - Add missing tables to wpmu_drop_tables function.
+* Fix - When syncing variation stock, ensure post is a variation.
+* Fix - Resolved some sales by date sum issues.
 
 = 2.6.4 - 26/07/16 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
