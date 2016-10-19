@@ -83,6 +83,9 @@ class WC_Validation {
 				// CA Postal codes cannot contain D,F,I,O,Q,U and cannot start with W or Z. https://en.wikipedia.org/wiki/Postal_codes_in_Canada#Number_of_possible_postal_codes
 				$valid = (bool) preg_match( '/^([ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ])([\ ])?(\d[ABCEGHJKLMNPRSTVWXYZ]\d)$/i', $postcode );
 				break;
+			case 'PL':
+				$valid = (bool) preg_match( '/^([0-9]{2})([-])([0-9]{3})$/', $postcode );
+				break;
 
 			default :
 				$valid = true;
