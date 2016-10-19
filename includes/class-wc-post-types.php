@@ -27,8 +27,8 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
-		add_action( 'init', array( __CLASS__, 'flush_rewrite_rules' ) );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
+		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 	}
 
@@ -505,14 +505,10 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Flush rewrite rules if needed after init of attribute taxonomies.
+	 * Flush rewrite rules.
 	 */
 	public static function flush_rewrite_rules() {
-		$flush_rewrite_rules = get_option( 'wc_flush_rewrite_rules' );
-		if ( $flush_rewrite_rules ) {
-			flush_rewrite_rules();
-			update_option( 'wc_flush_rewrite_rules', false );
-		}
+		flush_rewrite_rules();
 	}
 
 	/**

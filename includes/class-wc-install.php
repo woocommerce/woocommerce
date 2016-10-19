@@ -187,7 +187,7 @@ class WC_Install {
 		self::update_wc_version();
 
 		// Flush rules after install
-		update_option( 'wc_flush_rewrite_rules', true );
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
