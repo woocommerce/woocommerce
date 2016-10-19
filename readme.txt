@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.5 - 31/08/16 =
+= 2.6.5 - 19/10/16 =
 * Fix - Shipping classes URL in admin.
 * Fix - Notice in reports when using custom date ranges.
 * Fix - When checking needs_shipping, ignore anything after : in the method ID.
