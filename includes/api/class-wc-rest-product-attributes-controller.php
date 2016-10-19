@@ -285,7 +285,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$response->header( 'Location', rest_url( '/' . $this->namespace . '/' . $this->rest_base . '/' . $attribute->attribute_id ) );
 
 		// Clear transients.
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return $response;
@@ -386,7 +386,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		$response = $this->prepare_item_for_response( $attribute, $request );
 
 		// Clear transients.
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return rest_ensure_response( $response );
@@ -449,7 +449,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 		do_action( 'woocommerce_attribute_deleted', $attribute->attribute_id, $attribute->attribute_name, $taxonomy );
 
 		// Clear transients.
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return $response;
