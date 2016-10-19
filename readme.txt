@@ -191,6 +191,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix cart update in IE when enter key is pressed.
 * Fix - Variation is_on_backorder when parent manages stock.
 * Fix - Fix variation script malfunctioning when show_option_none arg is set to false.
+* Fix - Fire tokenisation event on load for pay page.
+* Fix - Populate attribute dropdown when empty.
+* Fix - Fix email check on my account page.
+* Fix - Send processing email on on-hold to processing transition.
 
 = 2.6.4 - 26/07/16 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
