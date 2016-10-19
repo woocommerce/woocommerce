@@ -104,23 +104,86 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 			 'purchase_note'      => 'A note',
 			 'menu_order'         => 2,
 		 );
-		 $product = new WC_Product;
-		  foreach ( $getters_and_setters as $function => $value ) {
-			 $product->{"set_{$function}"}( $value );
-		 }
-		 $product->create();
-		 $product = new WC_Product_Simple( $product->get_id() );
-		 foreach ( $getters_and_setters as $function => $value ) {
+		$product = new WC_Product;
+		foreach ( $getters_and_setters as $function => $value ) {
+			$product->{"set_{$function}"}( $value );
+		}
+		$product->create();
+		$product = new WC_Product_Simple( $product->get_id() );
+		foreach ( $getters_and_setters as $function => $value ) {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 	 }
 
-	 /**
+	/**
+	 * Test creating a new grouped product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_grouped_product_create() {
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$product = new WC_Product_Grouped;
+		$product->set_children( array( $simple_product->get_id() ) );
+		$product->set_name( 'My Grouped Product' );
+		$product->create();
+		$read_product = new WC_Product_Grouped( $product->get_id() );
+		$this->assertEquals( 'My Grouped Product', $read_product->get_name() );
+		$this->assertEquals( array( $simple_product->get_id() ), $read_product->get_children() );
+	 }
+
+	/**
+	 * Test getting / reading an grouped product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_grouped_product_read() {
+		$product      = WC_Helper_Product::create_grouped_product();
+		$read_product = new WC_Product_Grouped( $product->get_id() );
+		$this->assertEquals( 'Dummy Grouped Product', $read_product->get_name() );
+		$this->assertEquals( 2, count( $read_product->get_children() ) );
+	}
+	/**
+	 * Test updating an grouped product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_grouped_product_update() {
+		$product        = WC_Helper_Product::create_grouped_product();
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$this->assertEquals( 'Dummy Grouped Product', $product->get_name() );
+		$this->assertEquals( 2, count( $product->get_children() ) );
+		$children   = $product->get_children();
+		$children[] = $simple_product->get_id();
+		$product->set_children( $children );
+		$product->set_name( 'Dummy Grouped Product 2' );
+		$product->save();
+		// Reread from database
+		$product = new WC_Product_Grouped( $product->get_id() );
+		$this->assertEquals( 3, count( $product->get_children() ) );
+		$this->assertEquals( 'Dummy Grouped Product 2', $product->get_name() );
+	}
+	/**
+	 * Test grouped product setters and getters
+	 *
+	 * @since 2.7.0
+	 */
+	 public function test_grouped_product_getters_and_setters() {
+		$getters_and_setters = array(
+			'children' => array( 1, 2, 3 ),
+		);
+		$product = new WC_Product_Grouped;
+		foreach ( $getters_and_setters as $function => $value ) {
+			$product->{"set_{$function}"}( $value );
+			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
+		}
+	 }
+
+	/**
 	 * Test creating a new external product.
 	 *
 	 * @since 2.7.0
 	 */
-	 function test_external_product_create() {
+	function test_external_product_create() {
 		 $product = new WC_Product_External;
 		 $product->set_regular_price( 42 );
 		 $product->set_button_text( 'Test CRUD' );

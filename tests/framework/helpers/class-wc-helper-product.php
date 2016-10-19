@@ -55,6 +55,33 @@ class WC_Helper_Product {
 	}
 
 	/**
+	 * Create grouped product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_Grouped
+	 */
+	public static function create_grouped_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy Grouped Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		$simple_product_1 = self::create_simple_product( $product );
+		$simple_product_2 = self::create_simple_product( $product );
+		update_post_meta( $product, '_children', array( $simple_product_1->id, $simple_product_2->id ) );
+		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
+		update_post_meta( $product, '_manage_stock', 'no' );
+		update_post_meta( $product, '_tax_status', 'taxable' );
+		update_post_meta( $product, '_downloadable', 'no' );
+		update_post_meta( $product, '_virtual', 'no' );
+		update_post_meta( $product, '_visibility', 'visible' );
+		update_post_meta( $product, '_stock_status', 'instock' );
+		return new WC_Product_Grouped( $product );
+	}
+
+	/**
 	 * Create external product.
 	 *
 	 * @since 2.7.0
@@ -72,16 +99,8 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_regular_price', '10' );
 		update_post_meta( $product, '_sale_price', '' );
 		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
-		update_post_meta( $product, '_manage_stock', 'no' );
-		update_post_meta( $product, '_tax_status', 'taxable' );
-		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_visibility', 'visible' );
-		update_post_meta( $product, '_stock_status', 'instock' );
-
 		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
 		update_post_meta( $product, '_button_text', 'Buy external product' );
-
 		return new WC_Product_External( $product );
 	}
 
@@ -287,12 +306,12 @@ class WC_Helper_Product {
 	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
-		    'comment_author'       => 'admin',
-		    'comment_author_email' => 'woo@woo.local',
-		    'comment_author_url'   => '',
+			'comment_author'       => 'admin',
+			'comment_author_email' => 'woo@woo.local',
+			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
-		    'comment_content'      => $review_content,
-    		'comment_approved'     => 1,
+			'comment_content'      => $review_content,
+			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
 
