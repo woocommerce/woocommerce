@@ -174,12 +174,12 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
-		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? $_POST[ 'password_current' ] : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
 		$save_pass          = true;
 
 		$user->first_name   = $account_first_name;
@@ -196,13 +196,13 @@ class WC_Form_Handler {
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			$value = wc_clean( $_POST[ $field_key ] );
-			if ( empty( $value ) ) {
+			if ( empty( $_POST[ $field_key ] ) ) {
 				wc_add_notice( '<strong>' . esc_html( $field_name ) . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 		}
 
 		if ( $account_email ) {
+			$account_email = sanitize_email( $account_email );
 			if ( ! is_email( $account_email ) ) {
 				wc_add_notice( __( 'Please provide a valid email address.', 'woocommerce' ), 'error' );
 			} elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email ) {
