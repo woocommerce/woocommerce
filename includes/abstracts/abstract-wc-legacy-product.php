@@ -375,4 +375,18 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		_deprecated_function( 'WC_Product::get_cross_sells', '2.7', 'WC_Product::get_cross_sell_ids' );
 		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
 	}
+
+	/**
+	 * Check if variable product has default attributes set.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function has_default_attributes() {
+		_deprecated_function( 'WC_Product_Variable::has_default_attributes', '2.7', 'Check WC_Product::get_default_attributes directly' );
+		if ( ! $this->get_default_attributes() ) {
+			return true;
+		}
+		return false;
+	}
 }
