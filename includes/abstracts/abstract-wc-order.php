@@ -1349,7 +1349,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		foreach ( $shipping_methods as $shipping_method ) {
-			if ( strpos( $shipping_method->get_method_id(), $method_id ) === 0 ) {
+			if ( strpos( $shipping_method['method_id'], $method_id ) === 0 ) {
 				$has_method = true;
 			}
 		}

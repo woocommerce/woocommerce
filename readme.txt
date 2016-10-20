@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 2.6.5
+Stable tag: 2.6.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.6.6 - 20/10/16 =
+* Fix - Conflict with Local Pickup Plus extension due to 2.7.x code in has_shipping_method().
 
 = 2.6.5 - 19/10/16 =
 * Fix - Shipping classes URL in admin.
