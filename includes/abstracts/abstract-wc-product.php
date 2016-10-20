@@ -1308,6 +1308,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @return string Formatted product name
+	 */
+	public function get_formatted_name() {
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->get_id();
+		}
+		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
+	}
+
+	/**
 	 * Get the add to url used mainly in loops.
 	 *
 	 * @return string
@@ -1371,28 +1385,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
 	|--------------------------------------------------------------------------
-	| Other Actions
+	| @todo
 	|--------------------------------------------------------------------------
 	*/
-
-
 
 	/**
 	 * Returns the gallery attachment ids.
@@ -1402,6 +1399,30 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_gallery_attachment_ids() {
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
 	}
+
+	/**
+	 * Returns the children.
+	 *
+	 * @return array
+	 */
+	public function get_children() {
+		return array();
+	}
+
+	/**
+	 * Returns whether or not the product has any child product.
+	 *
+	 * @return bool
+	 */
+	public function has_child() {
+		return 0 < count( $this->get_children() );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| @todo stock functions
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Get total stock - This is the stock of parent and children combined.
@@ -1516,9 +1537,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->set_stock( $amount, 'add' );
 	}
 
-
-
-
+	/*
+	|--------------------------------------------------------------------------
+	| @todo download functions
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Check if downloadable product has a file attached.
@@ -1608,38 +1631,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 
-
-
-
-
-
-
-	/**
-	 * Returns the children.
-	 *
-	 * @return array
-	 */
-	public function get_children() {
-		return array();
-	}
-
-	/**
-	 * Returns whether or not the product has any child product.
-	 *
-	 * @return bool
-	 */
-	public function has_child() {
-		return 0 < count( $this->get_children() );
-	}
-
-
-
-
-
-
-
-
-
+	/*
+	|--------------------------------------------------------------------------
+	| @todo price functions
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Set a products price dynamically.
@@ -1787,6 +1783,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| @todo taxonomy functions
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
 	 * Returns the product shipping class.
 	 *
@@ -1878,6 +1880,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return false;
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| @todo misc
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
 	 * Returns whether or not we are showing dimensions on the product page.
 	 *
@@ -1886,8 +1894,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function enable_dimensions_display() {
 		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
-
-
 
 	/**
 	 * Does a child have dimensions set?
@@ -1924,24 +1930,5 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
-	}
-
-
-
-
-
-	/**
-	 * Get product name with SKU or ID. Used within admin.
-	 *
-	 * @return string Formatted product name
-	 */
-	public function get_formatted_name() {
-		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
-		} else {
-			$identifier = '#' . $this->get_id();
-		}
-
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_title() );
 	}
 }
