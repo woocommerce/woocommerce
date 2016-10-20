@@ -147,6 +147,17 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Adjust a products price dynamically.
+	 *
+	 * @deprecated 2.7.0
+	 * @param mixed $price
+	 */
+	public function adjust_price( $price ) {
+		_deprecated_function( 'WC_Product::adjust_price', '2.7', 'WC_Product::set_price / WC_Product::get_price' );
+		$this->data['price'] = $this->data['price'] + $price;
+	}
+
+	/**
 	 * Returns the availability of the product.
 	 *
 	 * If stock management is enabled at global and product level, a stock message

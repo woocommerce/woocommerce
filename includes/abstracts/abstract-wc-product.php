@@ -37,6 +37,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
+		'price'              => '', // @todo save and set this
 		'regular_price'      => '',
 		'sale_price'         => '',
 		'date_on_sale_from'  => '',
@@ -61,8 +62,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'attributes'         => array(),
 		'default_attributes' => array(),
 		'menu_order'         => 0,
-		'virtual' => false, // @todo
-		'downloadable' => false, // @todo
+		'virtual'            => false, // @todo
+		'downloadable'       => false, // @todo
 	);
 
 	/**
@@ -219,6 +220,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_sku() {
 		return apply_filters( 'woocommerce_get_sku', $this->data['sku'], $this );
+	}
+
+	/**
+	 * Returns the product's active price.
+	 *
+	 * @return string price
+	 */
+	public function get_price() {
+		return apply_filters( 'woocommerce_get_price', $this->data['price'], $this );
 	}
 
 	/**
@@ -625,6 +635,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set the product's active price.
+	 *
+	 * @param string $price Price.
+	 */
+	public function set_price( $price ) {
+		$this->data['price'] = wc_format_decimal( $price );
+	}
+
+	/**
 	 * Set the product's regular price.
 	 *
 	 * @since 2.7.0
@@ -975,6 +994,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
 		) );
+		if ( $this->is_on_sale() ) {
+			$this->set_price( $this->get_sale_price() );
+		} else {
+			$this->set_price( $this->get_regular_price() );
+		}
 		$this->read_meta_data();
 	}
 
@@ -1085,6 +1109,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
 		update_post_meta( $id, '_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
+
+		if ( $this->is_on_sale() ) {
+			update_post_meta( $id, '_price', $this->get_sale_price() );
+		} else {
+			update_post_meta( $id, '_price', $this->get_regular_price() );
+		}
 	}
 
 	/*
@@ -1197,7 +1227,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
+		if ( '' !== $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
+			$onsale = true;
+
+			if ( '' !== $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$onsale = false;
+			}
+
+			if ( '' !== $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$onsale = false;
+			}
+		} else {
+			$onsale = false;
+		}
+		return apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this );
 	}
 
 	/**
@@ -1306,6 +1349,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	| Non-CRUD Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Returns the price in html format.
+	 * @todo Should this be moved out of the classes?
+	 * @return string
+	 */
+	public function get_price_html( $deprecated = '' ) {
+		if ( '' === $this->get_price() ) {
+			return apply_filters( 'woocommerce_empty_price_html', '', $this );
+		}
+
+		if ( $this->is_on_sale() ) {
+			$price = wc_format_price_range( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+		} else {
+			$price = wc_price( wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+		}
+
+		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
 
 	/**
 	 * Get product name with SKU or ID. Used within admin.
@@ -1629,63 +1691,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| @todo price functions
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Set a products price dynamically.
-	 *
-	 * @param float $price Price to set.
-	 */
-	public function set_price( $price ) {
-		$this->price = $price;
-	}
-
-	/**
-	 * Adjust a products price dynamically.
-	 *
-	 * @param mixed $price
-	 */
-	public function adjust_price( $price ) {
-		$this->price = $this->price + $price;
-	}
-
-	/**
-	 * Returns the product's active price.
-	 *
-	 * @return string price
-	 */
-	public function get_price() {
-		if ( $this->is_on_sale() ) {
-			$price = $this->get_sale_price();
-		} else {
-			$price = $this->get_regular_price();
-		}
-		return apply_filters( 'woocommerce_get_price', $price, $this );
-	}
-
-	/**
-	 * Returns the price in html format.
-	 *
-	 * @return string
-	 */
-	public function get_price_html( $deprecated = '' ) {
-		if ( '' === $this->get_price() ) {
-			return apply_filters( 'woocommerce_empty_price_html', '', $this );
-		}
-
-		if ( $this->is_on_sale() ) {
-			$price = wc_format_price_range( $this->get_display_price( $this->get_regular_price() ), $this->get_display_price() ) . wc_get_price_suffix( $this );
-		} else {
-			$price = wc_price( $this->get_display_price() ) . wc_get_price_suffix( $this );
-		}
-
-		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
 	/*
