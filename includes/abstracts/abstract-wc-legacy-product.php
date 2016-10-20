@@ -120,6 +120,19 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_to_display instead.
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_display_price( $price = '', $qty = 1 ) {
+		_deprecated_function( 'WC_Product::get_display_price', '2.7', 'wc_get_price_to_display' );
+		return wc_get_price_to_display( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *

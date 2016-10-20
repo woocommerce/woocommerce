@@ -1670,24 +1670,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
-	 *
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_display_price( $price = '', $qty = 1 ) {
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
-
-		return apply_filters( 'woocommerce_get_display_price', $display_price, $price, $qty );
-	}
-
-	/**
 	 * Returns the price in html format.
 	 *
 	 * @return string

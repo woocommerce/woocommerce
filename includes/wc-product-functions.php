@@ -977,3 +977,22 @@ function wc_get_price_excluding_tax( $product, $args ) {
 
 	return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $product );
 }
+
+/**
+ * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+ * @since  2.7.0
+ * @param  WC_Product $product
+ * @param  array $args
+ * @return float
+ */
+public function wc_get_price_to_display( $product, $args ) {
+	$args = wp_parse_args( $args, array(
+		'qty'   => 1,
+		'price' => $product->get_price(),
+	) );
+
+	$price = $args['price'];
+	$qty   = $args['qty'];
+
+	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) ? wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) : wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price );
+}
