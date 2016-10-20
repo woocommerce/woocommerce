@@ -2468,14 +2468,14 @@ function wc_display_product_attributes( $product ) {
  * @param  WC_Product $product
  * @return string
  */
-function wc_get_product_stock_html( $product ) {
+function wc_get_stock_html( $product ) {
 	ob_start();
 
 	wc_get_template( 'single-product/stock.php', array(
 		'product' => $product,
 	) );
 
-	return apply_filters( 'woocommerce_get_product_stock_html', ob_get_clean(), $product ); // @todo map old woocommerce_stock_html filter to this
+	return apply_filters( 'woocommerce_get_stock_html', ob_get_clean(), $product ); // @todo map old woocommerce_stock_html filter to this
 }
 
 /**
