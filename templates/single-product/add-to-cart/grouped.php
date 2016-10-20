@@ -70,7 +70,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						<td class="price">
 							<?php
 								echo $product->get_price_html();
-								echo wc_get_product_stock_html( $product );
+								echo wc_get_stock_html( $product );
 							?>
 						</td>
 					</tr>
