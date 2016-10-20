@@ -26,17 +26,9 @@ if ( ! $product->is_purchasable() ) {
 	return;
 }
 
-?>
+echo wc_get_stock_html( $product );
 
-<?php
-	// Availability
-	$availability      = $product->get_availability();
-	$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>';
-
-	echo apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $product );
-?>
-
-<?php if ( $product->is_in_stock() ) : ?>
+if ( $product->is_in_stock() ) : ?>
 
 	<?php do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 

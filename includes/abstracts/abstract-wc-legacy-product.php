@@ -48,8 +48,140 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		return wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
 	}
 
+	/**
+	 * Returns the child product.
+	 * @deprecated 2.7.0 Use wc_get_product instead.
+	 * @param mixed $child_id
+	 * @return WC_Product|WC_Product|WC_Product_variation
+	 */
+	public function get_child( $child_id ) {
+		_deprecated_function( 'WC_Product::get_child', '2.7', 'wc_get_product' );
+		return wc_get_product( $child_id );
+	}
 
+	/**
+	 * Functions for getting parts of a price, in html, used by get_price_html.
+	 *
+	 * @deprecated 2.7.0
+	 * @return string
+	 */
+	public function get_price_html_from_text() {
+		_deprecated_function( 'WC_Product::get_price_html_from_text', '2.7' );
+		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
+		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
+	}
 
+	/**
+	 * Functions for getting parts of a price, in html, used by get_price_html.
+	 *
+	 * @deprecated 2.7.0 Use wc_format_price_range instead.
+	 * @param  string $from String or float to wrap with 'from' text
+	 * @param  mixed $to String or float to wrap with 'to' text
+	 * @return string
+	 */
+	public function get_price_html_from_to( $from, $to ) {
+		_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_price_range' );
+		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_price_range( $from, $to ), $from, $to, $this );
+	}
+
+	/**
+	 * Get the suffix to display after prices > 0.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_suffix instead.
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+		_deprecated_function( 'WC_Product::get_price_suffix', '2.7', 'wc_get_price_suffix' );
+		return wc_get_price_suffix( $this, $price, $qty );
+	}
+
+	/**
+	 * Lists a table of attributes for the product page.
+	 * @deprecated 2.7.0 Use wc_display_product_attributes instead.
+	 */
+	public function list_attributes() {
+		_deprecated_function( 'WC_Product::list_attributes', '2.7', 'wc_display_product_attributes' );
+		wc_display_product_attributes( $this );
+	}
+
+	/**
+	 * Returns the availability of the product.
+	 *
+	 * If stock management is enabled at global and product level, a stock message
+	 * will be shown. e.g. In stock, In stock x10, Out of stock.
+	 *
+	 * If stock management is disabled at global or product level, out of stock
+	 * will be shown when needed, but in stock will be hidden from view.
+	 *
+	 * This can all be changed through use of the woocommerce_get_availability filter.
+	 *
+	 * @return string
+	 */
+	public function get_availability() {
+		return apply_filters( 'woocommerce_get_availability', array(
+			'availability' => $this->get_availability_text(),
+			'class'        => $this->get_availability_class(),
+		), $this );
+	}
+
+	/**
+	 * Get availability text based on stock status.
+	 *
+	 * @return string
+	 */
+	protected function get_availability_text() {
+		if ( ! $this->is_in_stock() ) {
+			$availability = __( 'Out of stock', 'woocommerce' );
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
+		} elseif ( $this->managing_stock() ) {
+			switch ( get_option( 'woocommerce_stock_format' ) ) {
+				case 'no_amount' :
+					$availability = __( 'In stock', 'woocommerce' );
+				break;
+				case 'low_amount' :
+					if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+						}
+					} else {
+						$availability = __( 'In stock', 'woocommerce' );
+					}
+				break;
+				default :
+					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
+
+					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+					}
+				break;
+			}
+		} else {
+			$availability = '';
+		}
+		return apply_filters( 'woocommerce_get_availability_text', $availability, $this );
+	}
+
+	/**
+	 * Get availability classname based on stock status.
+	 *
+	 * @return string
+	 */
+	protected function get_availability_class() {
+		if ( ! $this->is_in_stock() ) {
+			$class = 'out-of-stock';
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) && $this->backorders_require_notification() ) {
+			$class = 'available-on-backorder';
+		} else {
+			$class = 'in-stock';
+		}
+
+		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
+	}
 
 	/**
 	 * The product's type (simple, variable etc).
