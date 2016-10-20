@@ -48,7 +48,16 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		return wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
 	}
 
-
+	/**
+	 * Returns the child product.
+	 * @deprecated 2.7.0 Use wc_get_product instead.
+	 * @param mixed $child_id
+	 * @return WC_Product|WC_Product|WC_Product_variation
+	 */
+	public function get_child( $child_id ) {
+		_deprecated_function( 'WC_Product::get_child', '2.7', 'wc_get_product' );
+		return wc_get_product( $child_id );
+	}
 
 
 	/**
