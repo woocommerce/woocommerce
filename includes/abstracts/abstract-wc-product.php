@@ -1775,9 +1775,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( $this->is_on_sale() ) {
-			$price = wc_format_price_range( $product->get_display_price( $product->get_regular_price() ), $product->get_display_price() ) . wc_get_price_suffix( $this );
+			$price = wc_format_price_range( $this->get_display_price( $this->get_regular_price() ), $this->get_display_price() ) . wc_get_price_suffix( $this );
 		} else {
-			$price = wc_price( $product->get_display_price() ) . wc_get_price_suffix( $this );
+			$price = wc_price( $this->get_display_price() ) . wc_get_price_suffix( $this );
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
