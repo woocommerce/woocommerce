@@ -1653,89 +1653,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string price
 	 */
 	public function get_price() {
-		return apply_filters( 'woocommerce_get_price', $this->price, $this );
-	}
-
-	/**
-	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_including_tax( $qty = 1, $price = '' ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		if ( $this->is_taxable() ) {
-
-			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
-
-				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
-				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
-				$tax_amount = WC_Tax::get_tax_total( $taxes );
-				$price      = round( $price * $qty + $tax_amount, wc_get_price_decimals() );
-
-			} else {
-
-				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
-				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
-
-				if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$base_tax_amount    = array_sum( $base_taxes );
-					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
-
-				/**
-				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-				 */
-				} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
-					$price              = round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
-
-				} else {
-
-					$price = $price * $qty;
-
-				}
-			}
+		if ( $this->is_on_sale() ) {
+			$price = $this->get_sale_price();
 		} else {
-			$price = $price * $qty;
+			$price = $this->get_regular_price();
 		}
-
-		return apply_filters( 'woocommerce_get_price_including_tax', $price, $qty, $this );
-	}
-
-	/**
-	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
-	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
-			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
-			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
-			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
-		} else {
-			$price = $price * $qty;
-		}
-
-		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
+		return apply_filters( 'woocommerce_get_price', $price, $this );
 	}
 
 	/**

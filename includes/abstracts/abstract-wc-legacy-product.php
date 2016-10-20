@@ -107,6 +107,33 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_including_tax instead.
+	 * @param  int $qty
+	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @return string
+	 */
+	public function get_price_including_tax( $qty = 1, $price = '' ) {
+		_deprecated_function( 'WC_Product::get_price_including_tax', '2.7', 'wc_get_price_including_tax' );
+		return wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
+	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
+	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_excluding_tax instead.
+	 * @param  int $qty
+	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @return string
+	 */
+	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
+		_deprecated_function( 'WC_Product::get_price_excluding_tax', '2.7', 'wc_get_price_excluding_tax' );
+		return wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
 	 * Returns the availability of the product.
 	 *
 	 * If stock management is enabled at global and product level, a stock message
