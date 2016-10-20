@@ -590,10 +590,6 @@ class WC_Product_Variable extends WC_Product {
 			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
 		}
 
-		$availability      = $variation->get_availability();
-		$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
-		$availability_html = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
-
 		return apply_filters( 'woocommerce_available_variation', array(
 			'variation_id'           => $variation->variation_id,
 			'variation_is_visible'   => $variation->variation_is_visible(),
@@ -610,7 +606,7 @@ class WC_Product_Variable extends WC_Product {
 			'image_srcset'			 => $image_srcset ? $image_srcset : '',
 			'image_sizes'			 => $image_sizes ? $image_sizes : '',
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-			'availability_html'      => $availability_html,
+			'availability_html'      => wc_get_product_stock_html( $variation ),
 			'sku'                    => $variation->get_sku(),
 			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
