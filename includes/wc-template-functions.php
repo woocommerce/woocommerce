@@ -2450,3 +2450,61 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 		wc_get_template( 'single-product/photoswipe.php' );
 	}
 }
+
+/**
+ * Outputs a list of product attributes.
+ * @since  2.7.0
+ * @param  WC_Product $product
+ */
+function wc_display_product_attributes( $product ) {
+	wc_get_template( 'single-product/product-attributes.php', array(
+		'product' => $product,
+	) );
+}
+
+/**
+ * Get HTML to show product stock.
+ * @since  2.7.0
+ * @param  WC_Product $product
+ * @return string
+ */
+function wc_get_product_stock_html( $product ) {
+	ob_start();
+
+	wc_get_template( 'single-product/stock.php', array(
+		'product' => $product,
+	) );
+
+	return apply_filters( 'woocommerce_get_product_stock_html', ob_get_clean(), $product ); // @todo map old woocommerce_stock_html filter to this
+}
+
+/**
+ * Get the price suffix for a product if needed.
+ * @since  2.7.0
+ * @param  WC_Product  $product
+ * @param  string  $price
+ * @param  integer $qty
+ * @return string
+ */
+function wc_get_price_suffix( $product, $price = '', $qty = 1 ) {
+	if ( ( $price_display_suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
+		$price                = '' === $price ? $product->get_price() : $price;
+		$price_display_suffix = ' <small class="woocommerce-price-suffix">' . wp_kses_post( $price_display_suffix ) . '</small>';
+
+		$find = array(
+			'{price_including_tax}',
+			'{price_excluding_tax}',
+		);
+
+		$replace = array(
+			wc_price( $product->get_price_including_tax( $qty, $price ) ),
+			wc_price( $product->get_price_excluding_tax( $qty, $price ) ),
+		);
+
+		$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
+	} else {
+		$price_display_suffix = '';
+	}
+
+	return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $product );
+}

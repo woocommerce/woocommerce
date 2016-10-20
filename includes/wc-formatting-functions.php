@@ -898,3 +898,44 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 		return $numeric_postcode;
 	}
 }
+
+/**
+ * Format the stock amount ready for display based on settings.
+ * @since  2.7.0
+ * @param  int  $stock_amount
+ * @param  boolean $show_backorder_notification
+ * @return string
+ */
+function wc_format_stock_for_display( $stock_amount, $show_backorder_notification = false ) {
+	$display = __( 'In stock', 'woocommerce' );
+
+	switch ( get_option( 'woocommerce_stock_format' ) ) {
+		case 'low_amount' :
+			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $stock_amount );
+			}
+		break;
+		case '' :
+			$display = sprintf( __( '%s in stock', 'woocommerce' ), $stock_amount );
+		break;
+	}
+
+	if ( $show_backorder_notification ) {
+		$display .= ' ' . __( '(can be backordered)', 'woocommerce' );
+	}
+
+	return $display;
+}
+
+/**
+ * Format a price range for display.
+ * @since  2.7.0
+ * @param  string $from
+ * @param  string $to
+ * @return string
+ */
+function wc_format_price_range( $from, $to ) {
+	$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
+
+	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
+}

@@ -100,128 +100,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Conditionals
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Check if a product supports a given feature.
-	 *
-	 * Product classes should override this to declare support (or lack of support) for a feature.
-	 *
-	 * @param string $feature string The name of a feature to test support for.
-	 * @return bool True if the product supports the feature, false otherwise.
-	 * @since 2.5.0
-	 */
-	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
-	}
-
-	/**
-	 * Returns whether or not the product post exists.
-	 *
-	 * @return bool
-	 */
-	public function exists() {
-		return false !== $this->get_status();
-	}
-
-	/**
-	 * Checks the product type.
-	 *
-	 * Backwards compat with downloadable/virtual.
-	 *
-	 * @param string $type Array or string of types
-	 * @return bool
-	 */
-	public function is_type( $type ) {
-		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
-	}
-
-	/**
-	 * Checks if a product is downloadable.
-	 *
-	 * @return bool
-	 */
-	public function is_downloadable() {
-		return apply_filters( 'woocommerce_is_downloadable', true === $this->data['downloadable'] , $this );
-	}
-
-	/**
-	 * Checks if a product is virtual (has no shipping).
-	 *
-	 * @return bool
-	 */
-	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', true === $this->data['virtual'], $this );
-	}
-
-	/**
-	 * Returns whether or not the product is featured.
-	 *
-	 * @return bool
-	 */
-	public function is_featured() {
-		return true === $this->get_featured();
-	}
-
-	/**
-	 * Check if a product is sold individually (no quantities).
-	 *
-	 * @return bool
-	 */
-	public function is_sold_individually() {
-		return apply_filters( 'woocommerce_is_sold_individually', true === $this->get_sold_individually(), $this );
-	}
-
-	/**
-	 * Returns whether or not the product is visible in the catalog.
-	 *
-	 * @return bool
-	 */
-	public function is_visible() {
-		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
-
-		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
-			$visible = false;
-		}
-
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
-			$visible = false;
-		}
-
-		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
-	}
-
-	/**
-	 * Returns false if the product cannot be bought.
-	 *
-	 * @return bool
-	 */
-	public function is_purchasable() {
-		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
-	}
-
-	/**
-	 * Returns whether or not the product has dimensions set.
-	 *
-	 * @return bool
-	 */
-	public function has_dimensions() {
-		return $this->get_length() || $this->get_height() || $this->get_width();
-	}
-
-	/**
-	 * Returns whether or not the product has weight set.
-	 *
-	 * @return bool
-	 */
-	public function has_weight() {
-		return $this->get_weight() ? true : false;
-	}
-
-	/*
-	|--------------------------------------------------------------------------
 	| Getters
 	|--------------------------------------------------------------------------
 	|
@@ -1021,7 +899,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $terms_id List of terms IDs.
 	 */
 	public function set_categories( $terms_id ) {
-		$this->save_taxonomy_terms( $terms_id, 'cat' );
+		//$this->save_taxonomy_terms( $terms_id, 'cat' );
 	}
 
 	/**
@@ -1031,7 +909,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $terms_id List of terms IDs.
 	 */
 	public function set_tags( $terms_id ) {
-		$this->save_taxonomy_terms( $terms_id, 'tag' );
+		//$this->save_taxonomy_terms( $terms_id, 'tag' );
 	}
 
 	/*
@@ -1209,22 +1087,289 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Conditionals
+	|--------------------------------------------------------------------------
+	*/
 
+	/**
+	 * Check if a product supports a given feature.
+	 *
+	 * Product classes should override this to declare support (or lack of support) for a feature.
+	 *
+	 * @param string $feature string The name of a feature to test support for.
+	 * @return bool True if the product supports the feature, false otherwise.
+	 * @since 2.5.0
+	 */
+	public function supports( $feature ) {
+		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+	}
 
+	/**
+	 * Returns whether or not the product post exists.
+	 *
+	 * @return bool
+	 */
+	public function exists() {
+		return false !== $this->get_status();
+	}
 
+	/**
+	 * Checks the product type.
+	 *
+	 * Backwards compat with downloadable/virtual.
+	 *
+	 * @param string $type Array or string of types
+	 * @return bool
+	 */
+	public function is_type( $type ) {
+		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
+	}
 
+	/**
+	 * Checks if a product is downloadable.
+	 *
+	 * @return bool
+	 */
+	public function is_downloadable() {
+		return apply_filters( 'woocommerce_is_downloadable', true === $this->data['downloadable'] , $this );
+	}
 
+	/**
+	 * Checks if a product is virtual (has no shipping).
+	 *
+	 * @return bool
+	 */
+	public function is_virtual() {
+		return apply_filters( 'woocommerce_is_virtual', true === $this->data['virtual'], $this );
+	}
 
+	/**
+	 * Returns whether or not the product is featured.
+	 *
+	 * @return bool
+	 */
+	public function is_featured() {
+		return true === $this->get_featured();
+	}
 
+	/**
+	 * Check if a product is sold individually (no quantities).
+	 *
+	 * @return bool
+	 */
+	public function is_sold_individually() {
+		return apply_filters( 'woocommerce_is_sold_individually', true === $this->get_sold_individually(), $this );
+	}
 
+	/**
+	 * Returns whether or not the product is visible in the catalog.
+	 *
+	 * @return bool
+	 */
+	public function is_visible() {
+		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
 
+		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+			$visible = false;
+		}
 
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
+			$visible = false;
+		}
 
+		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
+	}
 
+	/**
+	 * Returns false if the product cannot be bought.
+	 *
+	 * @return bool
+	 */
+	public function is_purchasable() {
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+	}
 
+	/**
+	 * Returns whether or not the product is on sale.
+	 *
+	 * @return bool
+	 */
+	public function is_on_sale() {
+		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
+	}
 
+	/**
+	 * Returns whether or not the product has dimensions set.
+	 *
+	 * @return bool
+	 */
+	public function has_dimensions() {
+		return $this->get_length() || $this->get_height() || $this->get_width();
+	}
 
+	/**
+	 * Returns whether or not the product has weight set.
+	 *
+	 * @return bool
+	 */
+	public function has_weight() {
+		return $this->get_weight() ? true : false;
+	}
 
+	/**
+	 * Returns whether or not the product is in stock.
+	 *
+	 * @return bool
+	 */
+	public function is_in_stock() {
+		return apply_filters( 'woocommerce_product_is_in_stock', 'instock' === $this->get_stock_status(), $this );
+	}
+
+	/**
+	 * Checks if a product needs shipping.
+	 *
+	 * @return bool
+	 */
+	public function needs_shipping() {
+		return apply_filters( 'woocommerce_product_needs_shipping', ! $this->is_virtual(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is taxable.
+	 *
+	 * @return bool
+	 */
+	public function is_taxable() {
+		return apply_filters( 'woocommerce_product_is_taxable', $this->get_tax_status() === 'taxable' && wc_tax_enabled(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product shipping is taxable.
+	 *
+	 * @return bool
+	 */
+	public function is_shipping_taxable() {
+		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping';
+	}
+
+	/**
+	 * Returns whether or not the product is stock managed.
+	 *
+	 * @return bool
+	 */
+	public function managing_stock() {
+		return $this->get_manage_stock() && 'yes' === get_option( 'woocommerce_manage_stock' );
+	}
+
+	/**
+	 * Returns whether or not the product can be backordered.
+	 *
+	 * @return bool
+	 */
+	public function backorders_allowed() {
+		return apply_filters( 'woocommerce_product_backorders_allowed', ( 'yes' === $this->get_backorders() || 'notify' === $this->get_backorders() ), $this->get_id(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product needs to notify the customer on backorder.
+	 *
+	 * @return bool
+	 */
+	public function backorders_require_notification() {
+		return apply_filters( 'woocommerce_product_backorders_require_notification', ( $this->managing_stock() && 'notify' === $this->get_backorders() ), $this );
+	}
+
+	/**
+	 * Check if a product is on backorder.
+	 *
+	 * @param int $qty_in_cart (default: 0)
+	 * @return bool
+	 */
+	public function is_on_backorder( $qty_in_cart = 0 ) {
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
+	}
+
+	/**
+	 * Returns whether or not the product has enough stock for the order.
+	 *
+	 * @param mixed $quantity
+	 * @return bool
+	 */
+	public function has_enough_stock( $quantity ) {
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get the add to url used mainly in loops.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_url() {
+		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->get_id() ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text for the single page.
+	 *
+	 * @return string
+	 */
+	public function single_add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Read more', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Gets the main product image ID.
+	 *
+	 * @return int
+	 */
+	public function get_image_id() {
+		if ( has_post_thumbnail( $this->get_id() ) ) {
+			$image_id = get_post_thumbnail_id( $this->get_id() );
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
+			$image_id = get_post_thumbnail_id( $parent_id );
+		} else {
+			$image_id = 0;
+		}
+		return $image_id;
+	}
+
+	/**
+	 * Returns the main product image.
+	 *
+	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array $attr
+	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
+	 * @return string
+	 */
+	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
+		if ( has_post_thumbnail( $this->get_id() ) ) {
+			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
+			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
+		} elseif ( $placeholder ) {
+			$image = wc_placeholder_img( $size );
+		} else {
+			$image = '';
+		}
+		return str_replace( array( 'https://', 'http://' ), '//', $image );
+	}
 
 
 
@@ -1302,9 +1447,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
-	 * @param  int     $amount  (default: null)
-	 * @param  string  $mode    can be set, add, or subtract
-	 * @return int              new stock level
+	 * @param int $amount (default: null)
+	 * @param string $mode can be set, add, or subtract
+	 * @return int new stock level
 	 */
 	public function set_stock( $amount = null, $mode = 'set' ) {
 		global $wpdb;
@@ -1465,14 +1610,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 
 
-	/**
-	 * Checks if a product needs shipping.
-	 *
-	 * @return bool
-	 */
-	public function needs_shipping() {
-		return apply_filters( 'woocommerce_product_needs_shipping', $this->is_virtual() ? false : true, $this );
-	}
+
 
 
 
@@ -1496,200 +1634,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 
 
-	/**
-	 * Returns whether or not the product is taxable.
-	 *
-	 * @return bool
-	 */
-	public function is_taxable() {
-		$taxable = $this->get_tax_status() === 'taxable' && wc_tax_enabled() ? true : false;
-		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
-	}
-
-	/**
-	 * Returns whether or not the product shipping is taxable.
-	 *
-	 * @return bool
-	 */
-	public function is_shipping_taxable() {
-		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' ? true : false;
-	}
-
-	/**
-	 * Get the add to url used mainly in loops.
-	 *
-	 * @return string
-	 */
-	public function add_to_cart_url() {
-		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->get_id() ), $this );
-	}
-
-	/**
-	 * Get the add to cart button text for the single page.
-	 *
-	 * @return string
-	 */
-	public function single_add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Get the add to cart button text.
-	 *
-	 * @return string
-	 */
-	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Read more', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Returns whether or not the product is stock managed.
-	 *
-	 * @return bool
-	 */
-	public function managing_stock() {
-		$managing_stock = 'no' === $this->get_manage_stock() || 'yes' !== get_option( 'woocommerce_manage_stock' );
-
-		return ! $managing_stock;
-	}
-
-	/**
-	 * Returns whether or not the product is in stock.
-	 *
-	 * @return bool
-	 */
-	public function is_in_stock() {
-		return apply_filters( 'woocommerce_product_is_in_stock', ( 'instock' === $this->stock_status ), $this );
-	}
-
-	/**
-	 * Returns whether or not the product can be backordered.
-	 *
-	 * @return bool
-	 */
-	public function backorders_allowed() {
-		return apply_filters( 'woocommerce_product_backorders_allowed', ( 'yes' === $this->get_backorders() || 'notify' === $this->get_backorders() ), $this->get_id(), $this );
-	}
-
-	/**
-	 * Returns whether or not the product needs to notify the customer on backorder.
-	 *
-	 * @return bool
-	 */
-	public function backorders_require_notification() {
-		return apply_filters( 'woocommerce_product_backorders_require_notification', ( $this->managing_stock() && 'notify' === $this->backorders ), $this );
-	}
-
-	/**
-	 * Check if a product is on backorder.
-	 *
-	 * @param int $qty_in_cart (default: 0)
-	 * @return bool
-	 */
-	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
-	}
-
-	/**
-	 * Returns whether or not the product has enough stock for the order.
-	 *
-	 * @param mixed $quantity
-	 * @return bool
-	 */
-	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
-	}
-
-	/**
-	 * Returns the availability of the product.
-	 *
-	 * If stock management is enabled at global and product level, a stock message
-	 * will be shown. e.g. In stock, In stock x10, Out of stock.
-	 *
-	 * If stock management is disabled at global or product level, out of stock
-	 * will be shown when needed, but in stock will be hidden from view.
-	 *
-	 * This can all be changed through use of the woocommerce_get_availability filter.
-	 *
-	 * @return string
-	 */
-	public function get_availability() {
-		return apply_filters( 'woocommerce_get_availability', array(
-			'availability' => $this->get_availability_text(),
-			'class'        => $this->get_availability_class(),
-		), $this );
-	}
-
-	/**
-	 * Get availability text based on stock status.
-	 *
-	 * @return string
-	 */
-	protected function get_availability_text() {
-		if ( ! $this->is_in_stock() ) {
-			$availability = __( 'Out of stock', 'woocommerce' );
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
-			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
-		} elseif ( $this->managing_stock() ) {
-			switch ( get_option( 'woocommerce_stock_format' ) ) {
-				case 'no_amount' :
-					$availability = __( 'In stock', 'woocommerce' );
-				break;
-				case 'low_amount' :
-					if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-						/* translators: %s: total items in stock */
-						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
-
-						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-						}
-					} else {
-						$availability = __( 'In stock', 'woocommerce' );
-					}
-				break;
-				default :
-					/* translators: %s: total items in stock */
-					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
-
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-					}
-				break;
-			}
-		} else {
-			$availability = '';
-		}
-		return apply_filters( 'woocommerce_get_availability_text', $availability, $this );
-	}
-
-	/**
-	 * Get availability classname based on stock status.
-	 *
-	 * @return string
-	 */
-	protected function get_availability_class() {
-		if ( ! $this->is_in_stock() ) {
-			$class = 'out-of-stock';
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) && $this->backorders_require_notification() ) {
-			$class = 'available-on-backorder';
-		} else {
-			$class = 'in-stock';
-		}
-
-		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
-	}
 
 
 
 
-	/**
-	 * Returns whether or not the product is on sale.
-	 *
-	 * @return bool
-	 */
-	public function is_on_sale() {
-		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
-	}
 
 
 
@@ -1821,115 +1769,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get the suffix to display after prices > 0.
-	 *
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_price_suffix( $price = '', $qty = 1 ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
-		$woocommerce_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
-
-		if ( $price_display_suffix && 'yes' === $woocommerce_calc_taxes ) {
-
-			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
-
-			$find = array(
-				'{price_including_tax}',
-				'{price_excluding_tax}',
-			);
-
-			$replace = array(
-				wc_price( $this->get_price_including_tax( $qty, $price ) ),
-				wc_price( $this->get_price_excluding_tax( $qty, $price ) ),
-			);
-
-			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
-		} else {
-			$price_display_suffix = '';
-		}
-
-		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
-	}
-
-	/**
 	 * Returns the price in html format.
 	 *
-	 * @param string $price (default: '')
 	 * @return string
 	 */
-	public function get_price_html( $price = '' ) {
+	public function get_price_html( $deprecated = '' ) {
+		if ( '' === $this->get_price() ) {
+			return apply_filters( 'woocommerce_empty_price_html', '', $this );
+		}
 
-		$display_price         = $this->get_display_price();
-		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
-
-		if ( $this->get_price() > 0 ) {
-
-			if ( $this->is_on_sale() && $this->get_regular_price() ) {
-
-				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $this->get_price_suffix();
-
-				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
-
-			} else {
-
-				$price .= wc_price( $display_price ) . $this->get_price_suffix();
-
-				$price = apply_filters( 'woocommerce_price_html', $price, $this );
-
-			}
-		} elseif ( $this->get_price() === '' ) {
-
-			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
-
-		} elseif ( $this->get_price() == 0 ) {
-
-			if ( $this->is_on_sale() && $this->get_regular_price() ) {
-
-				$price .= $this->get_price_html_from_to( $display_regular_price, __( 'Free!', 'woocommerce' ) );
-
-				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
-
-			} else {
-
-				$price = '<span class="amount">' . __( 'Free!', 'woocommerce' ) . '</span>';
-
-				$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
-
-			}
+		if ( $this->is_on_sale() ) {
+			$price = wc_format_price_range( $product->get_display_price( $product->get_regular_price() ), $product->get_display_price() ) . wc_get_price_suffix( $this );
+		} else {
+			$price = wc_price( $product->get_display_price() ) . wc_get_price_suffix( $this );
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
-	}
-
-	/**
-	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
-	 * @return string
-	 */
-	public function get_price_html_from_text() {
-		$from = '<span class="from">' . _x( 'From:', 'From minimum price', 'woocommerce' ) . ' </span>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
-	}
-
-	/**
-	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
-	 * @param  string $from String or float to wrap with 'from' text
-	 * @param  mixed $to String or float to wrap with 'to' text
-	 * @return string
-	 */
-	public function get_price_html_from_to( $from, $to ) {
-		$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $from, $to, $this );
 	}
 
 	/**
@@ -2071,53 +1926,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
 	}
 
-	/**
-	 * Lists a table of attributes for the product page.
-	 */
-	public function list_attributes() {
-		wc_get_template( 'single-product/product-attributes.php', array(
-			'product'    => $this,
-		) );
-	}
 
-	/**
-	 * Gets the main product image ID.
-	 *
-	 * @return int
-	 */
-	public function get_image_id() {
 
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image_id = get_post_thumbnail_id( $this->get_id() );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image_id = get_post_thumbnail_id( $parent_id );
-		} else {
-			$image_id = 0;
-		}
 
-		return $image_id;
-	}
-
-	/**
-	 * Returns the main product image.
-	 *
-	 * @param string $size (default: 'shop_thumbnail')
-	 * @param array $attr
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
-	 * @return string
-	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
-		} elseif ( $placeholder ) {
-			$image = wc_placeholder_img( $size );
-		} else {
-			$image = '';
-		}
-		return str_replace( array( 'https://', 'http://' ), '//', $image );
-	}
 
 	/**
 	 * Get product name with SKU or ID. Used within admin.
@@ -2132,19 +1943,5 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		return sprintf( '%s &ndash; %s', $identifier, $this->get_title() );
-	}
-
-	/**
-	 * Save taxonomy terms.
-	 *
-	 * @since 2.7.0
-	 * @param array $terms_id Terms ID.
-	 * @param string $taxonomy Taxonomy.
-	 * @return array|WP_Error
-	 */
-	protected function save_taxonomy_terms( $terms_id, $taxonomy = 'cat' ) {
-		$terms_id = array_unique( array_map( 'intval', $terms_id ) );
-
-		return wp_set_object_terms( $this->get_id(), $terms_id, 'product_' . $taxonomy );
 	}
 }
