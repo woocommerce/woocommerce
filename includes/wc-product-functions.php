@@ -872,7 +872,7 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
  * @param  array $args
  * @return float
  */
-function wc_get_price_including_tax( $product, $args ) {
+function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args( $args, array(
 		'qty'   => 1,
 		'price' => $product->get_price(),
@@ -921,7 +921,7 @@ function wc_get_price_including_tax( $product, $args ) {
  * @param  array $args
  * @return float
  */
-function wc_get_price_excluding_tax( $product, $args ) {
+function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args( $args, array(
 		'qty'   => 1,
 		'price' => $product->get_price(),
@@ -948,7 +948,7 @@ function wc_get_price_excluding_tax( $product, $args ) {
  * @param  array $args
  * @return float
  */
-public function wc_get_price_to_display( $product, $args ) {
+function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args( $args, array(
 		'qty'   => 1,
 		'price' => $product->get_price(),
@@ -957,5 +957,5 @@ public function wc_get_price_to_display( $product, $args ) {
 	$price = $args['price'];
 	$qty   = $args['qty'];
 
-	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) ? wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) : wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price );
+	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ? wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) : wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price ) );
 }

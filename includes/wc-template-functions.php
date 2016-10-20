@@ -2500,14 +2500,13 @@ function wc_get_price_suffix( $product, $price = '', $qty = 1 ) {
 		);
 
 		$replace = array(
-			wc_price( $product->get_price_including_tax( $qty, $price ) ),
-			wc_price( $product->get_price_excluding_tax( $qty, $price ) ),
+			wc_price( wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) ),
+			wc_price( wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) ),
 		);
 
 		$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
 	} else {
 		$price_display_suffix = '';
 	}
-
 	return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $product );
 }
