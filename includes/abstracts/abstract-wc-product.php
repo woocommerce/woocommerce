@@ -1417,7 +1417,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function has_child() {
 		return 0 < count( $this->get_children() );
 	}
-	
+
 	/*
 	|--------------------------------------------------------------------------
 	| @todo stock functions
@@ -1923,5 +1923,144 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
+	}
+
+	/**
+	 * Get the average rating of product. This is calculated once and stored in postmeta.
+	 * @return string
+	 */
+	public function get_average_rating() {
+		// No meta data? Do the calculation
+		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_average_rating' ) ) {
+			$this->sync_average_rating( $this->get_id() );
+		}
+
+		return (string) floatval( get_post_meta( $this->get_id(), '_wc_average_rating', true ) );
+	}
+
+	/**
+	 * Get the total amount (COUNT) of ratings.
+	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
+	 * @return int
+	 */
+	public function get_rating_count( $value = null ) {
+		// No meta data? Do the calculation
+		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_rating_count' ) ) {
+			$this->sync_rating_count( $this->get_id() );
+		}
+
+		$counts = get_post_meta( $this->get_id(), '_wc_rating_count', true );
+
+		if ( is_null( $value ) ) {
+			return array_sum( $counts );
+		} else {
+			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
+		}
+	}
+
+	/**
+	 * Sync product rating. Can be called statically.
+	 * @param  int $post_id
+	 */
+	public static function sync_average_rating( $post_id ) {
+		if ( ! metadata_exists( 'post', $post_id, '_wc_rating_count' ) ) {
+			self::sync_rating_count( $post_id );
+		}
+
+		$count = array_sum( (array) get_post_meta( $post_id, '_wc_rating_count', true ) );
+
+		if ( $count ) {
+			global $wpdb;
+
+			$ratings = $wpdb->get_var( $wpdb->prepare("
+				SELECT SUM(meta_value) FROM $wpdb->commentmeta
+				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+				WHERE meta_key = 'rating'
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+				AND meta_value > 0
+			", $post_id ) );
+			$average = number_format( $ratings / $count, 2, '.', '' );
+		} else {
+			$average = 0;
+		}
+		update_post_meta( $post_id, '_wc_average_rating', $average );
+	}
+
+	/**
+	 * Sync product rating count. Can be called statically.
+	 * @param  int $post_id
+	 */
+	public static function sync_rating_count( $post_id ) {
+		global $wpdb;
+
+		$counts     = array();
+		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
+			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
+			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+			WHERE meta_key = 'rating'
+			AND comment_post_ID = %d
+			AND comment_approved = '1'
+			AND meta_value > 0
+			GROUP BY meta_value
+		", $post_id ) );
+
+		foreach ( $raw_counts as $count ) {
+			$counts[ $count->meta_value ] = $count->meta_value_count;
+		}
+
+		update_post_meta( $post_id, '_wc_rating_count', $counts );
+	}
+
+	/**
+	 * Returns the product rating in html format.
+	 *
+	 * @param string $rating (default: '')
+	 *
+	 * @return string
+	 */
+	public function get_rating_html( $rating = null ) {
+		$rating_html = '';
+
+		if ( ! is_numeric( $rating ) ) {
+			$rating = $this->get_average_rating();
+		}
+
+		if ( $rating > 0 ) {
+
+			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+
+			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+
+			$rating_html .= '</div>';
+		}
+
+		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+	}
+
+	/**
+	 * Get the total amount (COUNT) of reviews.
+	 *
+	 * @since 2.3.2
+	 * @return int The total numver of product reviews
+	 */
+	public function get_review_count() {
+		global $wpdb;
+
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_review_count' ) ) {
+			$count = $wpdb->get_var( $wpdb->prepare("
+				SELECT COUNT(*) FROM $wpdb->comments
+				WHERE comment_parent = 0
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+			", $this->get_id() ) );
+
+			update_post_meta( $this->get_id(), '_wc_review_count', $count );
+		} else {
+			$count = get_post_meta( $this->get_id(), '_wc_review_count', true );
+		}
+
+		return apply_filters( 'woocommerce_product_review_count', $count, $this );
 	}
 }
