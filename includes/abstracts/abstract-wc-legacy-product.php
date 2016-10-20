@@ -107,6 +107,57 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_including_tax instead.
+	 * @param  int $qty
+	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @return string
+	 */
+	public function get_price_including_tax( $qty = 1, $price = '' ) {
+		_deprecated_function( 'WC_Product::get_price_including_tax', '2.7', 'wc_get_price_including_tax' );
+		return wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
+	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_to_display instead.
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_display_price( $price = '', $qty = 1 ) {
+		_deprecated_function( 'WC_Product::get_display_price', '2.7', 'wc_get_price_to_display' );
+		return wc_get_price_to_display( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
+	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
+	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
+	 *
+	 * @deprecated 2.7.0 Use wc_get_price_excluding_tax instead.
+	 * @param  int $qty
+	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @return string
+	 */
+	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
+		_deprecated_function( 'WC_Product::get_price_excluding_tax', '2.7', 'wc_get_price_excluding_tax' );
+		return wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) );
+	}
+
+	/**
+	 * Adjust a products price dynamically.
+	 *
+	 * @deprecated 2.7.0
+	 * @param mixed $price
+	 */
+	public function adjust_price( $price ) {
+		_deprecated_function( 'WC_Product::adjust_price', '2.7', 'WC_Product::set_price / WC_Product::get_price' );
+		$this->data['price'] = $this->data['price'] + $price;
+	}
+
+	/**
 	 * Returns the availability of the product.
 	 *
 	 * If stock management is enabled at global and product level, a stock message

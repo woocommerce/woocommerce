@@ -37,6 +37,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
+		'price'              => '', // @todo save and set this
 		'regular_price'      => '',
 		'sale_price'         => '',
 		'date_on_sale_from'  => '',
@@ -61,8 +62,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'attributes'         => array(),
 		'default_attributes' => array(),
 		'menu_order'         => 0,
-		'virtual' => false, // @todo
-		'downloadable' => false, // @todo
+		'virtual'            => false, // @todo
+		'downloadable'       => false, // @todo
 	);
 
 	/**
@@ -219,6 +220,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_sku() {
 		return apply_filters( 'woocommerce_get_sku', $this->data['sku'], $this );
+	}
+
+	/**
+	 * Returns the product's active price.
+	 *
+	 * @return string price
+	 */
+	public function get_price() {
+		return apply_filters( 'woocommerce_get_price', $this->data['price'], $this );
 	}
 
 	/**
@@ -625,6 +635,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set the product's active price.
+	 *
+	 * @param string $price Price.
+	 */
+	public function set_price( $price ) {
+		$this->data['price'] = wc_format_decimal( $price );
+	}
+
+	/**
 	 * Set the product's regular price.
 	 *
 	 * @since 2.7.0
@@ -975,6 +994,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
 		) );
+		if ( $this->is_on_sale() ) {
+			$this->set_price( $this->get_sale_price() );
+		} else {
+			$this->set_price( $this->get_regular_price() );
+		}
 		$this->read_meta_data();
 	}
 
@@ -1085,6 +1109,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
 		update_post_meta( $id, '_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
+
+		if ( $this->is_on_sale() ) {
+			update_post_meta( $id, '_price', $this->get_sale_price() );
+		} else {
+			update_post_meta( $id, '_price', $this->get_regular_price() );
+		}
 	}
 
 	/*
@@ -1197,7 +1227,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
+		if ( '' !== $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
+			$onsale = true;
+
+			if ( '' !== $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$onsale = false;
+			}
+
+			if ( '' !== $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$onsale = false;
+			}
+		} else {
+			$onsale = false;
+		}
+		return apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this );
 	}
 
 	/**
@@ -1306,6 +1349,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	| Non-CRUD Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Returns the price in html format.
+	 * @todo Should this be moved out of the classes?
+	 * @return string
+	 */
+	public function get_price_html( $deprecated = '' ) {
+		if ( '' === $this->get_price() ) {
+			return apply_filters( 'woocommerce_empty_price_html', '', $this );
+		}
+
+		if ( $this->is_on_sale() ) {
+			$price = wc_format_price_range( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+		} else {
+			$price = wc_price( wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+		}
+
+		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
 
 	/**
 	 * Get product name with SKU or ID. Used within admin.
@@ -1621,159 +1683,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| @todo price functions
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Set a products price dynamically.
-	 *
-	 * @param float $price Price to set.
-	 */
-	public function set_price( $price ) {
-		$this->price = $price;
-	}
-
-	/**
-	 * Adjust a products price dynamically.
-	 *
-	 * @param mixed $price
-	 */
-	public function adjust_price( $price ) {
-		$this->price = $this->price + $price;
-	}
-
-	/**
-	 * Returns the product's active price.
-	 *
-	 * @return string price
-	 */
-	public function get_price() {
-		return apply_filters( 'woocommerce_get_price', $this->price, $this );
-	}
-
-	/**
-	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_including_tax( $qty = 1, $price = '' ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		if ( $this->is_taxable() ) {
-
-			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
-
-				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
-				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
-				$tax_amount = WC_Tax::get_tax_total( $taxes );
-				$price      = round( $price * $qty + $tax_amount, wc_get_price_decimals() );
-
-			} else {
-
-				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
-				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
-
-				if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$base_tax_amount    = array_sum( $base_taxes );
-					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
-
-				/**
-				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-				 */
-				} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
-					$price              = round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
-
-				} else {
-
-					$price = $price * $qty;
-
-				}
-			}
-		} else {
-			$price = $price * $qty;
-		}
-
-		return apply_filters( 'woocommerce_get_price_including_tax', $price, $qty, $this );
-	}
-
-	/**
-	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
-	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
-			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
-			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
-			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
-		} else {
-			$price = $price * $qty;
-		}
-
-		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
-	}
-
-	/**
-	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
-	 *
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_display_price( $price = '', $qty = 1 ) {
-
-		if ( '' === $price ) {
-			$price = $this->get_price();
-		}
-
-		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-		$display_price    = ( 'incl' === $tax_display_mode ) ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
-
-		return $display_price;
-	}
-
-	/**
-	 * Returns the price in html format.
-	 *
-	 * @return string
-	 */
-	public function get_price_html( $deprecated = '' ) {
-		if ( '' === $this->get_price() ) {
-			return apply_filters( 'woocommerce_empty_price_html', '', $this );
-		}
-
-		if ( $this->is_on_sale() ) {
-			$price = wc_format_price_range( $this->get_display_price( $this->get_regular_price() ), $this->get_display_price() ) . wc_get_price_suffix( $this );
-		} else {
-			$price = wc_price( $this->get_display_price() ) . wc_get_price_suffix( $this );
-		}
-
-		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
 	/*
