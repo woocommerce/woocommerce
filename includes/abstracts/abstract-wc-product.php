@@ -31,7 +31,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'slug'               => '',
 		'date_created'       => '',
 		'date_modified'      => '',
-		'status'             => 'publish',
+		'status'             => false,
 		'featured'           => false,
 		'catalog_visibility' => 'hidden',
 		'description'        => '',
@@ -61,6 +61,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'attributes'         => array(),
 		'default_attributes' => array(),
 		'menu_order'         => 0,
+		'virtual' => false, // @todo
+		'downloadable' => false, // @todo
 	);
 
 	/**
@@ -94,6 +96,128 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( ! empty( $product->ID ) ) {
 			$this->read( absint( $product->ID ) );
 		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Conditionals
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Check if a product supports a given feature.
+	 *
+	 * Product classes should override this to declare support (or lack of support) for a feature.
+	 *
+	 * @param string $feature string The name of a feature to test support for.
+	 * @return bool True if the product supports the feature, false otherwise.
+	 * @since 2.5.0
+	 */
+	public function supports( $feature ) {
+		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+	}
+
+	/**
+	 * Returns whether or not the product post exists.
+	 *
+	 * @return bool
+	 */
+	public function exists() {
+		return false !== $this->get_status();
+	}
+
+	/**
+	 * Checks the product type.
+	 *
+	 * Backwards compat with downloadable/virtual.
+	 *
+	 * @param string $type Array or string of types
+	 * @return bool
+	 */
+	public function is_type( $type ) {
+		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
+	}
+
+	/**
+	 * Checks if a product is downloadable.
+	 *
+	 * @return bool
+	 */
+	public function is_downloadable() {
+		return apply_filters( 'woocommerce_is_downloadable', true === $this->data['downloadable'] , $this );
+	}
+
+	/**
+	 * Checks if a product is virtual (has no shipping).
+	 *
+	 * @return bool
+	 */
+	public function is_virtual() {
+		return apply_filters( 'woocommerce_is_virtual', true === $this->data['virtual'], $this );
+	}
+
+	/**
+	 * Returns whether or not the product is featured.
+	 *
+	 * @return bool
+	 */
+	public function is_featured() {
+		return true === $this->get_featured();
+	}
+
+	/**
+	 * Check if a product is sold individually (no quantities).
+	 *
+	 * @return bool
+	 */
+	public function is_sold_individually() {
+		return apply_filters( 'woocommerce_is_sold_individually', true === $this->get_sold_individually(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is visible in the catalog.
+	 *
+	 * @return bool
+	 */
+	public function is_visible() {
+		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
+
+		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+			$visible = false;
+		}
+
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
+			$visible = false;
+		}
+
+		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
+	}
+
+	/**
+	 * Returns false if the product cannot be bought.
+	 *
+	 * @return bool
+	 */
+	public function is_purchasable() {
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product has dimensions set.
+	 *
+	 * @return bool
+	 */
+	public function has_dimensions() {
+		return $this->get_length() || $this->get_height() || $this->get_width();
+	}
+
+	/**
+	 * Returns whether or not the product has weight set.
+	 *
+	 * @return bool
+	 */
+	public function has_weight() {
+		return $this->get_weight() ? true : false;
 	}
 
 	/*
@@ -1085,24 +1209,45 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/*
 	|--------------------------------------------------------------------------
 	| Other Actions
 	|--------------------------------------------------------------------------
 	*/
 
-	/**
-	 * Check if a product supports a given feature.
-	 *
-	 * Product classes should override this to declare support (or lack of support) for a feature.
-	 *
-	 * @param string $feature string The name of a feature to test support for.
-	 * @return bool True if the product supports the feature, false otherwise.
-	 * @since 2.5.0
-	 */
-	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
-	}
+
 
 	/**
 	 * Returns the gallery attachment ids.
@@ -1218,26 +1363,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->set_stock( $amount, 'add' );
 	}
 
-	/**
-	 * Checks the product type.
-	 *
-	 * Backwards compat with downloadable/virtual.
-	 *
-	 * @param string $type Array or string of types
-	 * @return bool
-	 */
-	public function is_type( $type ) {
-		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
-	}
 
-	/**
-	 * Checks if a product is downloadable.
-	 *
-	 * @return bool
-	 */
-	public function is_downloadable() {
-		return ( 'yes' === $this->downloadable );
-	}
+
+
 
 	/**
 	 * Check if downloadable product has a file attached.
@@ -1327,14 +1455,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 
-	/**
-	 * Checks if a product is virtual (has no shipping).
-	 *
-	 * @return bool
-	 */
-	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', ( 'yes' === $this->virtual ), $this );
-	}
+
 
 	/**
 	 * Checks if a product needs shipping.
@@ -1345,31 +1466,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_product_needs_shipping', $this->is_virtual() ? false : true, $this );
 	}
 
-	/**
-	 * Check if a product is sold individually (no quantities).
-	 *
-	 * @return bool
-	 */
-	public function is_sold_individually() {
 
-		$return = false;
-
-		if ( 'yes' == $this->sold_individually ) {
-			$return = true;
-		}
-
-		return apply_filters( 'woocommerce_is_sold_individually', $return, $this );
-	}
-
-	/**
-	 * Returns the child product.
-	 *
-	 * @param mixed $child_id
-	 * @return WC_Product|WC_Product|WC_Product_variation
-	 */
-	public function get_child( $child_id ) {
-		return wc_get_product( $child_id );
-	}
 
 	/**
 	 * Returns the children.
@@ -1389,14 +1486,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return 0 < count( $this->get_children() );
 	}
 
-	/**
-	 * Returns whether or not the product post exists.
-	 *
-	 * @return bool
-	 */
-	public function exists() {
-		return empty( $this->post ) ? false : true;
-	}
+
 
 	/**
 	 * Returns whether or not the product is taxable.
@@ -1579,47 +1669,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
 	}
 
-	/**
-	 * Returns whether or not the product is featured.
-	 *
-	 * @return bool
-	 */
-	public function is_featured() {
-		return 'yes' === $this->get_featured();
-	}
 
-	/**
-	 * Returns whether or not the product is visible in the catalog.
-	 *
-	 * @return bool
-	 */
-	public function is_visible() {
-		if ( ! $this->post ) {
-			$visible = false;
 
-		// Published/private.
-		} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->get_id() ) ) {
-			$visible = false;
-
-		// Out of stock visibility.
-		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
-			$visible = false;
-
-		// visibility setting.
-		} elseif ( 'hidden' === $this->visibility ) {
-			$visible = false;
-		} elseif ( 'visible' === $this->visibility ) {
-			$visible = true;
-
-		// Visibility in loop.
-		} elseif ( is_search() ) {
-			$visible = 'search' === $this->visibility;
-		} else {
-			$visible = 'catalog' === $this->visibility;
-		}
-
-		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
-	}
 
 	/**
 	 * Returns whether or not the product is on sale.
@@ -1630,30 +1681,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
 	}
 
-	/**
-	 * Returns false if the product cannot be bought.
-	 *
-	 * @return bool
-	 */
-	public function is_purchasable() {
 
-		$purchasable = true;
-
-		// Products must exist of course.
-		if ( ! $this->exists() ) {
-			$purchasable = false;
-
-		// Other products types need a price to be set.
-		} elseif ( $this->get_price() === '' ) {
-			$purchasable = false;
-
-		// Check the product is published.
-		} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->get_id() ) ) {
-			$purchasable = false;
-		}
-
-		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
-	}
 
 	/**
 	 * Set a products price dynamically.
@@ -1895,144 +1923,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $from, $to, $this );
 	}
 
-	/**
-	 * Get the average rating of product. This is calculated once and stored in postmeta.
-	 * @return string
-	 */
-	public function get_average_rating() {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_average_rating' ) ) {
-			$this->sync_average_rating( $this->get_id() );
-		}
 
-		return (string) floatval( get_post_meta( $this->get_id(), '_wc_average_rating', true ) );
-	}
 
-	/**
-	 * Get the total amount (COUNT) of ratings.
-	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
-	 * @return int
-	 */
-	public function get_rating_count( $value = null ) {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_rating_count' ) ) {
-			$this->sync_rating_count( $this->get_id() );
-		}
 
-		$counts = get_post_meta( $this->get_id(), '_wc_rating_count', true );
-
-		if ( is_null( $value ) ) {
-			return array_sum( $counts );
-		} else {
-			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
-		}
-	}
-
-	/**
-	 * Sync product rating. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_average_rating( $post_id ) {
-		if ( ! metadata_exists( 'post', $post_id, '_wc_rating_count' ) ) {
-			self::sync_rating_count( $post_id );
-		}
-
-		$count = array_sum( (array) get_post_meta( $post_id, '_wc_rating_count', true ) );
-
-		if ( $count ) {
-			global $wpdb;
-
-			$ratings = $wpdb->get_var( $wpdb->prepare("
-				SELECT SUM(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-				AND meta_value > 0
-			", $post_id ) );
-			$average = number_format( $ratings / $count, 2, '.', '' );
-		} else {
-			$average = 0;
-		}
-		update_post_meta( $post_id, '_wc_average_rating', $average );
-	}
-
-	/**
-	 * Sync product rating count. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_rating_count( $post_id ) {
-		global $wpdb;
-
-		$counts     = array();
-		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-			GROUP BY meta_value
-		", $post_id ) );
-
-		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = $count->meta_value_count;
-		}
-
-		update_post_meta( $post_id, '_wc_rating_count', $counts );
-	}
-
-	/**
-	 * Returns the product rating in html format.
-	 *
-	 * @param string $rating (default: '')
-	 *
-	 * @return string
-	 */
-	public function get_rating_html( $rating = null ) {
-		$rating_html = '';
-
-		if ( ! is_numeric( $rating ) ) {
-			$rating = $this->get_average_rating();
-		}
-
-		if ( $rating > 0 ) {
-
-			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
-
-			$rating_html .= '</div>';
-		}
-
-		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
-	}
-
-	/**
-	 * Get the total amount (COUNT) of reviews.
-	 *
-	 * @since 2.3.2
-	 * @return int The total numver of product reviews
-	 */
-	public function get_review_count() {
-		global $wpdb;
-
-		// No meta date? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_review_count' ) ) {
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(*) FROM $wpdb->comments
-				WHERE comment_parent = 0
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->get_id() ) );
-
-			update_post_meta( $this->get_id(), '_wc_review_count', $count );
-		} else {
-			$count = get_post_meta( $this->get_id(), '_wc_review_count', true );
-		}
-
-		return apply_filters( 'woocommerce_product_review_count', $count, $this );
-	}
 
 	/**
 	 * Returns the product shipping class.
@@ -2134,14 +2027,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
-	/**
-	 * Returns whether or not the product has dimensions set.
-	 *
-	 * @return bool
-	 */
-	public function has_dimensions() {
-		return $this->get_dimensions() ? true : false;
-	}
+
 
 	/**
 	 * Does a child have dimensions set?
@@ -2151,15 +2037,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function child_has_dimensions() {
 		return false;
-	}
-
-	/**
-	 * Returns whether or not the product has weight set.
-	 *
-	 * @return bool
-	 */
-	public function has_weight() {
-		return $this->get_weight() ? true : false;
 	}
 
 	/**
