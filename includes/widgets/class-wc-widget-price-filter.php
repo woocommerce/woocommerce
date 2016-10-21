@@ -192,7 +192,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT min( CAST( price_meta.meta_value AS DECIMAL(2) ) ) as min_price, max( CAST( price_meta.meta_value AS DECIMAL(2) ) ) as max_price FROM {$wpdb->posts} ";
+		$sql  = "SELECT min( FLOOR( price_meta.meta_value ) ) as min_price, max( CEILING( price_meta.meta_value ) ) as max_price FROM {$wpdb->posts} ";
 		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
 		$sql .= " 	WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
 					AND {$wpdb->posts}.post_status = 'publish'
