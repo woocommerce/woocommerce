@@ -76,7 +76,7 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function is_on_sale() {
 		global $wpdb;
-		$on_sale = 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
+		$on_sale = $this->get_children() && 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
 		return apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this );
 	}
 
@@ -174,7 +174,16 @@ class WC_Product_Grouped extends WC_Product {
 	 * Helper method that updates all the post meta for a grouped product.
 	 */
 	protected function update_post_meta() {
+		if ( update_post_meta( $this->get_id(), '_children', $this->get_children() ) ) {
+			$child_prices = array();
+			foreach ( $this->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				$child_prices[] = $child->get_price();
+			}
+			delete_post_meta( $this->get_id(), '_price' );
+			add_post_meta( $this->get_id(), '_price', min( $child_prices ) );
+			add_post_meta( $this->get_id(), '_price', max( $child_prices ) );
+		}
 		parent::update_post_meta();
-		update_post_meta( $this->get_id(), '_children', $this->get_children() );
 	}
 }
