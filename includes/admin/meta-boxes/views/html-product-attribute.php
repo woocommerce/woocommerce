@@ -77,6 +77,7 @@
 						</div>
 					</td>
 				</tr>
+				<?php do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i ); ?>
 			</tbody>
 		</table>
 	</div>
