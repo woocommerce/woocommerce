@@ -74,6 +74,7 @@ class WC_Install {
 		),
 		'2.7.0' => array(
 			'wc_update_270_webhooks',
+			'wc_update_270_grouped_products',
 		),
 	);
 
