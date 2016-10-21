@@ -27,7 +27,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @var array
 	 */
 	protected $data = array(
-		'name'               => '',
+		'name'               => 'New Product',
 		'slug'               => '',
 		'date_created'       => '',
 		'date_modified'      => '',
@@ -37,7 +37,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
-		'price'              => '', // @todo save and set this
+		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
 		'date_on_sale_from'  => '',
@@ -64,6 +64,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'menu_order'         => 0,
 		'virtual'            => false, // @todo
 		'downloadable'       => false, // @todo
+		'category_ids'       => array(),
+		'tag_ids'            => array(),
 	);
 
 	/**
@@ -88,7 +90,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param int|WC_Product|object $product Product to init.
 	 */
-	public function __construct( $product = 0 ) {
+	function __construct( $product = 0 ) {
 		parent::__construct( $product );
 		if ( is_numeric( $product ) && $product > 0 ) {
 			$this->read( $product );
@@ -492,27 +494,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns the product categories. @todo store in class and save?
+	 * Get category ids.
 	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
-	 * @return string
+	 * @since 2.7.0
+	 * @return array
 	 */
-	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_cat', $before, $sep, $after );
+	public function get_category_ids() {
+		return $this->data['category_ids'];
 	}
 
 	/**
-	 * Returns the product tags. @todo store in class and save?
+	 * Get tag ids.
 	 *
-	 * @param string $sep (default: ', ').
-	 * @param string $before (default: '').
-	 * @param string $after (default: '').
+	 * @since 2.7.0
 	 * @return array
 	 */
-	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
+	public function get_tag_ids() {
+		return $this->data['tag_ids'];
 	}
 
 	/*
@@ -915,20 +913,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set the product categories. @todo store in class and save?
 	 *
 	 * @since 2.7.0
-	 * @param array $terms_id List of terms IDs.
+	 * @param array $term_ids List of terms IDs.
 	 */
-	public function set_categories( $terms_id ) {
-		//$this->save_taxonomy_terms( $terms_id, 'cat' );
+	public function set_category_ids( $term_ids ) {
+		$this->data['category_ids'] = $this->sanitize_term_ids( $term_ids, 'product_cat' );
 	}
 
 	/**
 	 * Set the product tags. @todo store in class and save?
 	 *
 	 * @since 2.7.0
-	 * @param array $terms_id List of terms IDs.
+	 * @param array $term_ids List of terms IDs.
 	 */
-	public function set_tags( $terms_id ) {
-		//$this->save_taxonomy_terms( $terms_id, 'tag' );
+	public function set_tag_ids( $term_ids ) {
+		$this->data['tag_ids'] = $this->sanitize_term_ids( $term_ids, 'product_tag' );
 	}
 
 	/*
@@ -941,6 +939,42 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	| A save method is included for convenience (chooses update or create based
 	| on if the order exists yet).
 	*/
+
+	/**
+	 * Get and store terms from a taxonomy.
+	 *
+	 * @since  2.7.0
+	 * @param  string $taxonomy Taxonomy name e.g. product_cat
+	 * @return array of terms
+	 */
+	protected function get_term_ids( $taxonomy ) {
+		return wp_get_post_terms( $this->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
+	}
+
+	/**
+	 * Get term ids from either a list of names, ids, or terms.
+	 *
+	 * @since 2.7.0
+	 * @param array $terms
+	 * @param string $taxonomy
+	 */
+	protected function sanitize_term_ids( $terms, $taxonomy ) {
+		$term_ids = array();
+		foreach ( $terms as $term ) {
+			if ( is_object( $term ) ) {
+				$term_ids[] = $term->term_id;
+			} elseif ( is_integer( $term ) ) {
+				$term_ids[] = absint( $term );
+			} else {
+				$term_object = get_term_by( 'name', $term, $taxonomy );
+
+				if ( $term_object && ! is_wp_error( $term_object ) ) {
+					$term_ids[] = $term_object->term_id;
+				}
+			}
+		}
+		return $term_ids;
+	}
 
 	/**
 	 * Reads a product from the database and sets its data to the class.
@@ -993,6 +1027,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'attributes'         => get_post_meta( $id, '_attributes', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
+			'category_ids'       => $this->get_term_ids( 'product_cat' ),
+			'tag_ids'            => $this->get_term_ids( 'product_tag' ),
 		) );
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -1012,7 +1048,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
 			'post_type'      => 'product',
-			'post_status'    => $this->get_status(),
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $this->get_name(),
 			'post_content'   => $this->get_description(),
@@ -1024,9 +1060,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
 		) ), true );
 
-		if ( $id ) {
+		if ( $id && ! is_wp_error( $id ) ) {
 			$this->set_id( $id );
-			$this->update_post_meta( $id );
+			$this->update_post_meta();
+			$this->update_terms();
 			$this->save_meta_data();
 			do_action( 'woocommerce_new_product', $id );
 		}
@@ -1045,11 +1082,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_title'     => $this->get_name(),
 			'post_parent'    => $this->get_parent_id(),
 			'comment_status' => $this->get_reviews_allowed(),
-			'post_status'    => $this->get_status(),
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'menu_order'     => $this->get_menu_order(),
 		);
 		wp_update_post( $post_data );
-		$this->update_post_meta( $this->get_id() );
+		$this->update_post_meta();
+		$this->update_terms();
 		$this->save_meta_data();
 		do_action( 'woocommerce_update_product', $this->get_id() );
 	}
@@ -1115,6 +1153,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			update_post_meta( $id, '_price', $this->get_regular_price() );
 		}
+	}
+
+	/**
+	 * For all stored terms in all taxonomies, save them to the DB.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function update_terms() {
+		wp_set_post_terms( $this->get_id(), $this->data['category_ids'], 'product_cat', false );
+		wp_set_post_terms( $this->get_id(), $this->data['tag_ids'], 'product_tag', false );
 	}
 
 	/*
