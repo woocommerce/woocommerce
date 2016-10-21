@@ -179,7 +179,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
-			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address ),
+			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
 		) );
 	}
 
