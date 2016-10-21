@@ -158,6 +158,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.7 - x =
+* Fix - Use FLOOR and CEIL to get price filter values. Fixes the issue where max price is capped at 99.
+
 = 2.6.6 - 20/10/16 =
 * Fix - Conflict with Local Pickup Plus extension due to 2.7.x code in has_shipping_method().
 * Fix - Shipping method display order on frontend.
