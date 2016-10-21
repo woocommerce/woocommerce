@@ -359,6 +359,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Returns the upsell product ids.
 	 *
+	 * @deprecated 2.7.0
 	 * @return array
 	 */
 	public function get_upsells() {
@@ -369,6 +370,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Returns the cross sell product ids.
 	 *
+	 * @deprecated 2.7.0
 	 * @return array
 	 */
 	public function get_cross_sells() {
@@ -379,7 +381,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Check if variable product has default attributes set.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0
 	 * @return bool
 	 */
 	public function has_default_attributes() {

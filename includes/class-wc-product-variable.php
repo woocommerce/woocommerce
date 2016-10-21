@@ -146,7 +146,6 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns the price in html format.
 	 *
-	 * @access public
 	 * @param string $price (default: '')
 	 * @return string
 	 */
@@ -372,7 +371,6 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the add to cart button text.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function add_to_cart_text() {
@@ -688,13 +686,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Set stock status.
 	 */
 	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
-
-		if ( update_post_meta( $this->get_id(), '_stock_status', $status ) ) {
-			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $status );
-		}
-
-		$this->data['stock_status'] = $status;
+		$this->data['stock_status'] = 'outofstock' === $status ? 'outofstock' : 'instock';
 	}
 
 	/**
@@ -956,6 +948,16 @@ class WC_Product_Variable extends WC_Product {
 			 * This value may differ from the transient cache. It is filtered once before storing locally.
 			 */
 			return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $this, $include_taxes );
+		}
+	}
+
+	/**
+	 * Helper method that updates all the post meta
+	 */
+	protected function update_post_meta() {
+		parent::update_post_meta();
+		if ( update_post_meta( $this->get_id(), '_stock_status', $this->get_stock_status() ) ) {
+			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $this->get_stock_status() );
 		}
 	}
 

@@ -460,7 +460,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Check for any attributes which have been removed globally
 		if ( is_array( $attributes ) && count( $attributes ) > 0 ) {
 			foreach ( $attributes as $key => $attribute ) {
-				if ( ! empty( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+				if ( ! empty( $attribute['is_taxonomy'] ) ) {
 					if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
 						unset( $attributes[ $key ] );
 					}

@@ -76,14 +76,7 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function is_on_sale() {
 		global $wpdb;
-		$on_sale = false;
-		if ( $this->has_child() ) {
-			$on_sale = 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
-		} else {
-			if ( $this->get_sale_price() && $this->get_sale_price() == $this->get_price() ) {
-				$on_sale = true;
-			}
-		}
+		$on_sale = $this->get_children() && 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
 		return apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this );
 	}
 
