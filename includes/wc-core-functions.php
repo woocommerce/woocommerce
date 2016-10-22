@@ -503,7 +503,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'INR' => '&#8377;',
 		'IQD' => '&#x639;.&#x62f;',
 		'IRR' => '&#xfdfc;',
-		'ISK' => 'Kr.',
+		'ISK' => 'kr.',
 		'JEP' => '&pound;',
 		'JMD' => '&#36;',
 		'JOD' => '&#x62f;.&#x627;',
@@ -776,7 +776,7 @@ function wc_get_page_children( $page_id ) {
 function flush_rewrite_rules_on_shop_page_save( $post_id ) {
 	$shop_page_id = wc_get_page_id( 'shop' );
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
-		flush_rewrite_rules();
+		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
 add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );

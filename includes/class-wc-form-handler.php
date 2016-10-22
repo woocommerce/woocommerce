@@ -178,7 +178,7 @@ class WC_Form_Handler {
 
 		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
 		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? sanitize_email( $_POST['account_email'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
 		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
 		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
 		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
@@ -198,13 +198,13 @@ class WC_Form_Handler {
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			$value = wc_clean( $_POST[ $field_key ] );
-			if ( empty( $value ) ) {
+			if ( empty( $_POST[ $field_key ] ) ) {
 				wc_add_notice( '<strong>' . esc_html( $field_name ) . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 		}
 
 		if ( $account_email ) {
+			$account_email = sanitize_email( $account_email );
 			if ( ! is_email( $account_email ) ) {
 				wc_add_notice( __( 'Please provide a valid email address.', 'woocommerce' ), 'error' );
 			} elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email ) {
@@ -806,50 +806,56 @@ class WC_Form_Handler {
 
 		$variation = wc_get_product( $variation_id );
 
-		// Verify all attributes
-		foreach ( $attributes as $attribute ) {
-			if ( ! $attribute['is_variation'] ) {
-				continue;
+		// Validate the attributes.
+		try {
+			if ( empty( $variation_id ) ) {
+				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			}
-
-			$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
-
-			if ( isset( $_REQUEST[ $taxonomy ] ) ) {
-
-				// Get value from post data
-				if ( $attribute['is_taxonomy'] ) {
-					// Don't use wc_clean as it destroys sanitized characters
-					$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
-				} else {
-					$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
-				}
-
-				// Get valid value from variation
-				$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
-
-				// Allow if valid
-				if ( '' === $valid_value || $valid_value === $value ) {
-					$variations[ $taxonomy ] = $value;
+			foreach ( $attributes as $attribute ) {
+				if ( ! $attribute['is_variation'] ) {
 					continue;
 				}
-			} else {
-				$missing_attributes[] = wc_attribute_label( $attribute['name'] );
+
+				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+
+				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
+					// Get value from post data
+					if ( $attribute['is_taxonomy'] ) {
+						// Don't use wc_clean as it destroys sanitized characters
+						$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					} else {
+						$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					}
+
+					// Get valid value from variation
+					$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
+
+					// Allow if valid or show error.
+					if ( '' === $valid_value || $valid_value === $value ) {
+						$variations[ $taxonomy ] = $value;
+					} else {
+						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
+					}
+				} else {
+					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
+				}
 			}
+			if ( ! empty( $missing_attributes ) ) {
+				throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
+			return false;
 		}
 
-		if ( ! empty( $missing_attributes ) ) {
-			wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
-		} elseif ( empty( $variation_id ) ) {
-			wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
-		} else {
-			// Add to cart validation
-			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
+		// Add to cart validation
+		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
-				wc_add_to_cart_message( array( $product_id => $quantity ), true );
-				return true;
-			}
+		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
+			wc_add_to_cart_message( array( $product_id => $quantity ), true );
+			return true;
 		}
+
 		return false;
 	}
 

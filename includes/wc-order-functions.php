@@ -1104,10 +1104,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		}
 	}
 }
-add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_cancelled', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
 
 /**
  * When a payment is complete, we can reduce stock levels for items within an order.

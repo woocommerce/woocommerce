@@ -205,13 +205,10 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'photoswipe-ui-default', $assets_path . 'js/photoswipe/photoswipe-ui-default' . $suffix . '.js', array( 'photoswipe' ), '4.1.1', true );
 			self::enqueue_style( 'photoswipe', $assets_path . 'css/photoswipe/photoswipe.css' );
 			self::enqueue_style( 'photoswipe-default-skin', $assets_path . 'css/photoswipe/default-skin/default-skin.css' );
-
 			self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
-		}
-
-		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
-			$flexslider_options = apply_filters( 'woocommerce_single_product_carousel_options', $options = array(
+
+			wp_localize_script( 'wc-single-product', 'flexslider_options', apply_filters( 'woocommerce_single_product_carousel_options', array(
 				'rtl'            => is_rtl(),
 				'animation'      => 'slide',
 				'smoothHeight'   => true,
@@ -219,9 +216,9 @@ class WC_Frontend_Scripts {
 				'controlNav'     => 'thumbnails',
 				'slideshow'      => false,
 				'animationSpeed' => 500,
-			) );
-			wp_localize_script( 'wc-single-product', 'flexslider_options', $flexslider_options );
+			) ) );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			// Exclude common bots from geolocation by user agent.
 			$ua = wc_get_user_agent();

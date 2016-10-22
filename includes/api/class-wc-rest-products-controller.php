@@ -146,36 +146,30 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
-				$terms = explode( ',', $request[ $key ] );
-
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
 			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -219,6 +213,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'key'   => '_stock_status',
 				'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
 			) );
+		}
+
+		// Filter by on sale products.
+		if ( is_bool( $request['on_sale'] ) ) {
+			$on_sale_key           = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
 		}
 
 		// Apply all WP_Query filters again.
@@ -1665,12 +1665,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+							$term = get_term_by( 'name', $value, $attribute_name );
 
 							if ( $term && ! is_wp_error( $term ) ) {
 								$value = $term->slug;
 							} else {
-								$value = sanitize_title( $attribute_value );
+								$value = sanitize_title( $value );
 							}
 						}
 
@@ -2728,19 +2728,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params['category'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['tag'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['shipping_class'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute'] = array(
@@ -2752,7 +2752,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params['attribute_term'] = array(
 			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -2768,6 +2768,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		$params['in_stock'] = array(
 			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['on_sale'] = array(
+			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',

@@ -297,6 +297,8 @@ class WC_Shipping_Zone extends WC_Data {
 			}
 		}
 
+		uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+
 		return apply_filters( 'woocommerce_shipping_zone_shipping_methods', $methods, $raw_methods, $allowed_classes, $this );
 	}
 
