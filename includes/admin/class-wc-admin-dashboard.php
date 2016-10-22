@@ -189,7 +189,7 @@ class WC_Admin_Dashboard {
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 				echo '<div class="star-rating" title="' . esc_attr( $rating ) . '">
-					<span style="width:' . ( $rating * 20 ) . '%">' .  sprintf( __( '%s out of 5', 'woocommerce' ), $rating ) . '</span></div>';
+					<span style="width:' . ( $rating * 20 ) . '%">' . sprintf( __( '%s out of 5', 'woocommerce' ), $rating ) . '</span></div>';
 
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( __( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
