@@ -255,16 +255,21 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return integer
 	 */
 	public function get_order_count() {
-		global $wpdb;
+		$count = get_user_meta( $this->get_id(), '_order_count', true );
 
-		$count = $wpdb->get_var( "SELECT COUNT(*)
-			FROM $wpdb->posts as posts
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			WHERE   meta.meta_key = '_customer_user'
-			AND     posts.post_type = 'shop_order'
-			AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			AND     meta_value = '" . esc_sql( $this->get_id() ) . "'
-		" );
+		if ( '' === $count ) {
+			global $wpdb;
+
+			$count = $wpdb->get_var( "SELECT COUNT(*)
+				FROM $wpdb->posts as posts
+				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+				WHERE   meta.meta_key = '_customer_user'
+				AND     posts.post_type = 'shop_order'
+				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+				AND     meta_value = '" . esc_sql( $this->get_id() ) . "'
+			" );
+			update_user_meta( $this->get_id(), '_order_count', $count );
+		}
 
 		return absint( $count );
 	}
@@ -275,21 +280,26 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return float
 	 */
 	public function get_total_spent() {
-		global $wpdb;
+		$spent = get_user_meta( $this->get_id(), '_money_spent', true );
 
-		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
-			FROM $wpdb->posts as posts
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-			WHERE   meta.meta_key       = '_customer_user'
-			AND     meta.meta_value     = '" . esc_sql( $this->get_id() ) . "'
-			AND     posts.post_type     = 'shop_order'
-			AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
-			AND     meta2.meta_key      = '_order_total'
-		" );
+		if ( '' === $spent ) {
+			global $wpdb;
 
-		if ( ! $spent ) {
-			$spent = 0;
+			$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+				FROM $wpdb->posts as posts
+				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+				WHERE   meta.meta_key       = '_customer_user'
+				AND     meta.meta_value     = '" . esc_sql( $this->get_id() ) . "'
+				AND     posts.post_type     = 'shop_order'
+				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
+				AND     meta2.meta_key      = '_order_total'
+			" );
+
+			if ( ! $spent ) {
+				$spent = 0;
+			}
+			update_user_meta( $this->get_id(), '_money_spent', $spent );
 		}
 
 		return wc_format_decimal( $spent, 2 );
@@ -1063,36 +1073,43 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		if ( ! is_wp_error( $customer_id ) ) {
 			$this->set_id( $customer_id );
-			update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
-			update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
-			update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
-			update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
-			update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
-			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
-			update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
-			update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
-			update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
-			update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
-			update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
-			update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-			update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-			update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-			update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
-			update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
-			update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
-			update_user_meta( $this->get_id(), 'shipping_address_2', $this->get_shipping_address_2() );
-			update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
-			update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
-			update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-			update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
-			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
-			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
+			$this->update_post_meta();
 			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
 			$wp_user = new WP_User( $this->get_id() );
 			$this->set_date_created( strtotime( $wp_user->user_registered ) );
 			$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
 			$this->read_meta_data();
 		}
+	}
+
+	/**
+	 * Helper method that updates all the meta for a customer. Used for update & create.
+	 * @since 2.7.0
+	 */
+	private function update_post_meta() {
+		update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
+		update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
+		update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
+		update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
+		update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
+		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
+		update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
+		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
+		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
+		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
+		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
+		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
+		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
+		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
+		update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
+		update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
+		update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
+		update_user_meta( $this->get_id(), 'shipping_address_2', $this->get_shipping_address_2() );
+		update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
+		update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
+		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
+		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
+		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 	}
 
 	/**
@@ -1149,33 +1166,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->password = '';
 		}
 
-		update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
-		update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
-		update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
-		update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
-		update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
-		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
-		update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
-		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
-		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
-		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
-		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
-		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-		update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
-		update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
-		update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
-		update_user_meta( $this->get_id(), 'shipping_address_2', $this->get_shipping_address_2() );
-		update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
-		update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
-		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
-		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
-		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
+		$this->update_post_meta();
 		$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
 		$this->save_meta_data();
 	}

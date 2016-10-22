@@ -152,7 +152,6 @@ class WC_Frontend_Scripts {
 		}
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		$lightbox_en          = 'yes' === get_option( 'woocommerce_enable_lightbox' );
 		$ajax_cart_en         = 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' );
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
@@ -195,14 +194,31 @@ class WC_Frontend_Scripts {
 		if ( is_lost_password_page() ) {
 			self::enqueue_script( 'wc-lost-password', $frontend_script_path . 'lost-password' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
 		}
-		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
-			self::enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
-			self::enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
-			self::enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
-		}
-		if ( is_product() ) {
+
+		self::register_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
+		self::register_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
+		self::register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
+
+		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+			self::enqueue_script( 'flexslider', $assets_path . 'js/flexslider/jquery.flexslider' . $suffix . '.js', array( 'jquery' ), '2.7.0', true );
+			self::enqueue_script( 'photoswipe', $assets_path . 'js/photoswipe/photoswipe' . $suffix . '.js', '4.1.1', true );
+			self::enqueue_script( 'photoswipe-ui-default', $assets_path . 'js/photoswipe/photoswipe-ui-default' . $suffix . '.js', array( 'photoswipe' ), '4.1.1', true );
+			self::enqueue_style( 'photoswipe', $assets_path . 'css/photoswipe/photoswipe.css' );
+			self::enqueue_style( 'photoswipe-default-skin', $assets_path . 'css/photoswipe/default-skin/default-skin.css' );
+			self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
 			self::enqueue_script( 'wc-single-product' );
+
+			wp_localize_script( 'wc-single-product', 'flexslider_options', apply_filters( 'woocommerce_single_product_carousel_options', array(
+				'rtl'            => is_rtl(),
+				'animation'      => 'slide',
+				'smoothHeight'   => true,
+				'directionNav'   => false,
+				'controlNav'     => 'thumbnails',
+				'slideshow'      => false,
+				'animationSpeed' => 500,
+			) ) );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			// Exclude common bots from geolocation by user agent.
 			$ua = wc_get_user_agent();

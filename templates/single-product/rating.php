@@ -32,18 +32,18 @@ $average      = $product->get_average_rating();
 
 if ( $rating_count > 0 ) : ?>
 
-	<div class="woocommerce-product-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+	<div class="woocommerce-product-rating">
 		<div class="star-rating" title="<?php printf( __( 'Rated %s out of 5', 'woocommerce' ), $average ); ?>">
 			<span style="width:<?php echo ( ( $average / 5 ) * 100 ); ?>%">
 				<?php printf(
 					__( '%1$s out of %2$s', 'woocommerce' ),
-					'<strong itemprop="ratingValue" class="rating">' . esc_html( $average ) . '</strong>',
-					'<span itemprop="bestRating">5</span>'
+					'<strong class="rating">' . esc_html( $average ) . '</strong>',
+					'<span>5</span>'
 				); ?>
-				<?php printf( _n( 'based on %s customer rating', 'based on %s customer ratings', $rating_count, 'woocommerce' ), '<span itemprop="ratingCount" class="rating">' . $rating_count . '</span>' ); ?>
+				<?php printf( _n( 'based on %s customer rating', 'based on %s customer ratings', $rating_count, 'woocommerce' ), '<span class="rating">' . $rating_count . '</span>' ); ?>
 			</span>
 		</div>
-		<?php if ( comments_open() ) : ?><a href="#reviews" class="woocommerce-review-link" rel="nofollow">(<?php printf( _n( '%s customer review', '%s customer reviews', $review_count, 'woocommerce' ), '<span itemprop="reviewCount" class="count">' . $review_count . '</span>' ); ?>)</a><?php endif ?>
+		<?php if ( comments_open() ) : ?><a href="#reviews" class="woocommerce-review-link" rel="nofollow">(<?php printf( _n( '%s customer review', '%s customer reviews', $review_count, 'woocommerce' ), '<span class="count">' . $review_count . '</span>' ); ?>)</a><?php endif ?>
 	</div>
 
 <?php endif; ?>

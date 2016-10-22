@@ -711,7 +711,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		if ( $coupon_id ) {
 			$this->set_id( $coupon_id );
-			$this->update_post_meta( $coupon_id );
+			$this->update_post_meta();
 			$this->save_meta_data();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
 		}
@@ -731,7 +731,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		);
 
 		wp_update_post( $post_data );
-		$this->update_post_meta( $coupon_id );
+		$this->update_post_meta();
 		$this->save_meta_data();
 		do_action( 'woocommerce_update_coupon', $coupon_id );
 	}
@@ -761,26 +761,25 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 * @since 2.7.0
-	 * @param int $coupon_id
 	 */
-	private function update_post_meta( $coupon_id ) {
-		update_post_meta( $coupon_id, 'discount_type', $this->get_discount_type() );
-		update_post_meta( $coupon_id, 'coupon_amount', $this->get_amount() );
-		update_post_meta( $coupon_id, 'individual_use', ( true === $this->get_individual_use() ) ? 'yes' : 'no' );
-		update_post_meta( $coupon_id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_product_ids() ) ) ) );
-		update_post_meta( $coupon_id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_excluded_product_ids() ) ) ) );
-		update_post_meta( $coupon_id, 'usage_limit', $this->get_usage_limit() );
-		update_post_meta( $coupon_id, 'usage_limit_per_user', $this->get_usage_limit_per_user() );
-		update_post_meta( $coupon_id, 'limit_usage_to_x_items', $this->get_limit_usage_to_x_items() );
-		update_post_meta( $coupon_id, 'usage_count', $this->get_usage_count() );
-		update_post_meta( $coupon_id, 'expiry_date', $this->get_date_expires() );
-		update_post_meta( $coupon_id, 'free_shipping', ( true === $this->get_free_shipping() ) ? 'yes' : 'no' );
-		update_post_meta( $coupon_id, 'product_categories', array_filter( array_map( 'intval', $this->get_product_categories() ) ) );
-		update_post_meta( $coupon_id, 'exclude_product_categories', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) );
-		update_post_meta( $coupon_id, 'exclude_sale_items', ( true === $this->get_exclude_sale_items() ) ? 'yes' : 'no' );
-		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
-		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
-		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
+	private function update_post_meta() {
+		update_post_meta( $this->get_id(), 'discount_type', $this->get_discount_type() );
+		update_post_meta( $this->get_id(), 'coupon_amount', $this->get_amount() );
+		update_post_meta( $this->get_id(), 'individual_use', ( true === $this->get_individual_use() ) ? 'yes' : 'no' );
+		update_post_meta( $this->get_id(), 'product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_product_ids() ) ) ) );
+		update_post_meta( $this->get_id(), 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_excluded_product_ids() ) ) ) );
+		update_post_meta( $this->get_id(), 'usage_limit', $this->get_usage_limit() );
+		update_post_meta( $this->get_id(), 'usage_limit_per_user', $this->get_usage_limit_per_user() );
+		update_post_meta( $this->get_id(), 'limit_usage_to_x_items', $this->get_limit_usage_to_x_items() );
+		update_post_meta( $this->get_id(), 'usage_count', $this->get_usage_count() );
+		update_post_meta( $this->get_id(), 'expiry_date', $this->get_date_expires() );
+		update_post_meta( $this->get_id(), 'free_shipping', ( true === $this->get_free_shipping() ) ? 'yes' : 'no' );
+		update_post_meta( $this->get_id(), 'product_categories', array_filter( array_map( 'intval', $this->get_product_categories() ) ) );
+		update_post_meta( $this->get_id(), 'exclude_product_categories', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) );
+		update_post_meta( $this->get_id(), 'exclude_sale_items', ( true === $this->get_exclude_sale_items() ) ? 'yes' : 'no' );
+		update_post_meta( $this->get_id(), 'minimum_amount', $this->get_minimum_amount() );
+		update_post_meta( $this->get_id(), 'maximum_amount', $this->get_maximum_amount() );
+		update_post_meta( $this->get_id(), 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
 	}
 
 	/**

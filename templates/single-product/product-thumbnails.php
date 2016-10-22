@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.6.3
+ * @version     2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,51 +21,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product, $woocommerce;
-
 $attachment_ids = $product->get_gallery_attachment_ids();
 
 if ( $attachment_ids ) {
-	$loop 		= 0;
-	$columns 	= apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
-	?>
-	<div class="thumbnails <?php echo 'columns-' . $columns; ?>"><?php
+	foreach ( $attachment_ids as $attachment_id ) {
+		$full_size_image  = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$thumbnail        = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$thumbnail_post   = get_post( $attachment_id );
+		$image_title      = $thumbnail_post->post_content;
 
-		foreach ( $attachment_ids as $attachment_id ) {
+		$attributes = array(
+			'title'                   => $image_title,
+			'data-large-image'        => $full_size_image[0],
+			'data-large-image-width'  => $full_size_image[1],
+			'data-large-image-height' => $full_size_image[2],
+		);
 
-			$classes = array( 'zoom' );
-
-			if ( 0 === $loop || 0 === $loop % $columns ) {
-				$classes[] = 'first';
-			}
-
-			if ( 0 === ( $loop + 1 ) % $columns ) {
-				$classes[] = 'last';
-			}
-
-			$image_class = implode( ' ', $classes );
-			$props       = wc_get_product_attachment_props( $attachment_id, $post );
-
-			if ( ! $props['url'] ) {
-				continue;
-			}
-
-			echo apply_filters(
-				'woocommerce_single_product_image_thumbnail_html',
-				sprintf(
-					'<a href="%s" class="%s" title="%s" data-rel="prettyPhoto[product-gallery]">%s</a>',
-					esc_url( $props['url'] ),
-					esc_attr( $image_class ),
-					esc_attr( $props['caption'] ),
-					wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $props )
-				),
-				$attachment_id,
-				$post->ID,
-				esc_attr( $image_class )
-			);
-
-			$loop++;
-		}
-
-	?></div>
-	<?php
+		echo '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image">';
+			echo wp_get_attachment_image( $attachment_id, 'shop_single', false, $attributes );
+		echo '</figure>';
+	}
 }

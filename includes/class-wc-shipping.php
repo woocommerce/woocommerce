@@ -296,7 +296,7 @@ class WC_Shipping {
 				}
 
 				// Store total costs
-				if ( $chosen_method ) {
+				if ( $chosen_method && isset( $package['rates'][ $chosen_method ] ) ) {
 					$rate = $package['rates'][ $chosen_method ];
 
 					// Merge cost and taxes - label and ID will be the same

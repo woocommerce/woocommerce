@@ -21,11 +21,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		$this->id                 = 'cod';
-		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
-		$this->method_title       = __( 'Cash on delivery', 'woocommerce' );
-		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
-		$this->has_fields         = false;
+		// Setup general properties
+		$this->setup_properties();
 
 		// Load the settings
 		$this->init_form_fields();
@@ -39,10 +36,21 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->enable_for_virtual = $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes' ? true : false;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou_page' ) );
+		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 
 		// Customer Emails
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+	}
+
+	/**
+	 * Setup general properties for the gateway.
+	 */
+	protected function setup_properties() {
+		$this->id                 = 'cod';
+		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
+		$this->method_title       = __( 'Cash on delivery', 'woocommerce' );
+		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
+		$this->has_fields         = false;
 	}
 
 	/**
@@ -230,7 +238,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param bool $plain_text
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->get_payment_method() ) {
+		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
 			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 		}
 	}

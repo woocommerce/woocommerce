@@ -146,36 +146,30 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
-				$terms = explode( ',', $request[ $key ] );
-
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
 			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -186,15 +180,45 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
-			}
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'   => '_sku',
+				'value' => $request['sku'],
+			) );
+		}
 
-			$args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $request['sku'],
-				'compare' => '=',
-			);
+		// Filter featured.
+		if ( is_bool( $request['featured'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'   => '_featured',
+				'value' => true === $request['featured'] ? 'yes' : 'no',
+			) );
+		}
+
+		// Filter by tax class.
+		if ( ! empty( $request['tax_class'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'   => '_tax_class',
+				'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
+			) );
+		}
+
+		// Price filter.
+		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );
+		}
+
+		// Filter product in stock or out of stock.
+		if ( is_bool( $request['in_stock'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, array(
+				'key'   => '_stock_status',
+				'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
+			) );
+		}
+
+		// Filter by on sale products.
+		if ( is_bool( $request['on_sale'] ) ) {
+			$on_sale_key           = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
 		}
 
 		// Apply all WP_Query filters again.
@@ -1641,12 +1665,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+							$term = get_term_by( 'name', $value, $attribute_name );
 
 							if ( $term && ! is_wp_error( $term ) ) {
 								$value = $term->slug;
 							} else {
-								$value = sanitize_title( $attribute_value );
+								$value = sanitize_title( $value );
 							}
 						}
 
@@ -2689,22 +2713,34 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['category'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific category.', 'woocommerce' ),
+		$params['sku'] = array(
+			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['featured'] = array(
+			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['category'] = array(
+			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['tag'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['shipping_class'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific shipping class.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute'] = array(
@@ -2714,13 +2750,42 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute_term'] = array(
-			'description'       => __( 'Limit result set to products with a specific attribute term (required an assigned attribute).', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		if ( wc_tax_enabled() ) {
+			$params['tax_class'] = array(
+				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce' ),
+				'type'              => 'string',
+				'enum'              => array_map( 'sanitize_title', array_merge( array( 'standard' ), WC_Tax::get_tax_classes() ) ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			);
+		}
+
+		$params['in_stock'] = array(
+			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['on_sale'] = array(
+			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['min_price'] = array(
+			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['sku'] = array(
-			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
+		$params['max_price'] = array(
+			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',

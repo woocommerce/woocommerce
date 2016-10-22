@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-return apply_filters( 'woocommerce_tax_settings', array(
+$settings = array(
 
 	array( 'title' => __( 'Tax options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
@@ -34,7 +34,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		),
 	),
 
-	array(
+	'shipping-tax-class' => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
@@ -112,4 +112,10 @@ return apply_filters( 'woocommerce_tax_settings', array(
 
 	array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
-) );
+);
+
+if ( ! wc_shipping_enabled() ) {
+	unset( $settings['shipping-tax-class'] );
+}
+
+return apply_filters( 'woocommerce_tax_settings', $settings );

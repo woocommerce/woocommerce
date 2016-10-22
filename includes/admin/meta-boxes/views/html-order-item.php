@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 $product      = $item->get_product();
-$product_link = $product ? admin_url( 'post.php?post=' . $product->get_id() . '&action=edit' ) : '';
+$product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 ?>
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item, $order ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
@@ -29,7 +29,7 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
 					echo esc_html( $item->get_variation_id() );
 				} else {
-					printf( __( '%s (No longer exists)', 'woocommerce' ), esc_html( $item->get_variation_id() ) );
+					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 				}
 				echo '</div>';
 			}
