@@ -571,13 +571,13 @@ class WC_Countries {
 			),
 			'address_1' => array(
 				'label'        => __( 'Address', 'woocommerce' ),
-				'placeholder'  => _x( 'Street address', 'placeholder', 'woocommerce' ),
+				'placeholder'  => esc_attr__( 'Street address', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
 			),
 			'address_2' => array(
-				'placeholder'  => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
+				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc. (optional)', 'woocommerce' ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'required'     => false,
 				'autocomplete' => 'address-line2',

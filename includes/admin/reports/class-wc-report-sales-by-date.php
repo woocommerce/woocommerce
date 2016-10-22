@@ -408,7 +408,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 0,
 		);
 		$legend[] = array(
-			'title' => sprintf( _nx( '%1$s refunded %2$d order', '%1$s refunded %2$d orders', $this->report_data->total_refunded_orders, '%s = amount of the refunds, %d = number of refunded orders.', 'woocommerce' ), '<strong>' . wc_price( $data->total_refunds ) . '</strong>', $this->report_data->total_refunded_orders ) . ' (' . sprintf( _n( '%d item', '%d items', $this->report_data->refunded_order_items, 'woocommerce' ), $this->report_data->refunded_order_items ) . ')',
+			/* translators: 1: total refunds 2: total refunded orders 3: refunded items */
+			'title' => sprintf(
+				_n( '%1$s refunded %2$d order (%3$d item)', '%1$s refunded %2$d orders (%3$d items)', $this->report_data->total_refunded_orders, 'woocommerce' ),
+				'<strong>' . wc_price( $data->total_refunds ) . '</strong>',
+				$this->report_data->total_refunded_orders,
+				$this->report_data->refunded_order_items
+			),
 			'color' => $this->chart_colours['refund_amount'],
 			'highlight_series' => 8,
 		);

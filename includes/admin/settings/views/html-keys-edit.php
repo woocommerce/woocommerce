@@ -77,7 +77,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td class="forminp">
 						<span><?php
 							if ( ! empty( $key_data['last_access'] ) ) {
-								$date = sprintf( _x( '%1$s at %2$s', 'date and time', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
+								/* translators: 1: last access date 2: last access time */
+								$date = sprintf( __( '%1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
 
 								echo apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key_data['last_access'] );
 							} else {
