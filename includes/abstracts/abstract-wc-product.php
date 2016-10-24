@@ -27,7 +27,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @var array
 	 */
 	protected $data = array(
-		'name'               => 'New Product',
+		'name'               => '',
 		'slug'               => '',
 		'date_created'       => '',
 		'date_modified'      => '',
@@ -1050,7 +1050,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_type'      => 'product',
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->get_name(),
+			'post_title'     => $this->get_name() ? $this->get_name() : __( 'Product', 'woocommerce' ),
 			'post_content'   => $this->get_description(),
 			'post_excerpt'   => $this->get_short_description(),
 			'post_parent'    => $this->get_parent_id(),
