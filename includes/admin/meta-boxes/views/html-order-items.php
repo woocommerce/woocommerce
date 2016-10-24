@@ -126,7 +126,7 @@ if ( wc_tax_enabled() ) {
 	?>
 	<table class="wc-order-totals">
 		<tr>
-			<td class="label"><?php echo wc_help_tip( __( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ) ); ?> <?php _e( 'Discount', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php echo wc_help_tip( __( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ) ); ?> <?php _e( 'Discount:', 'woocommerce' ); ?></td>
 			<td width="1%"></td>
 			<td class="total">
 				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
@@ -136,7 +136,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
 
 		<tr>
-			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping:', 'woocommerce' ); ?></td>
 			<td width="1%"></td>
 			<td class="total"><?php
 				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
@@ -257,7 +257,7 @@ if ( wc_tax_enabled() ) {
 			</td>
 		</tr>
 		<tr>
-			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?> <?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label></td>
+			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?> <?php _e( 'Reason for refund (optional):', 'woocommerce' ); ?></label></td>
 			<td class="total">
 				<input type="text" class="text" id="refund_reason" name="refund_reason" />
 				<div class="clear"></div>
