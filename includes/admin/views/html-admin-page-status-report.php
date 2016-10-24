@@ -55,7 +55,7 @@ $pages          = $system_status->get_pages();
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'To allow logging, make <code>%s</code> writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', $environment['log_directory'] );
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . $environment['log_directory'] . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
 				}
 			?></td>
 		</tr>
@@ -568,7 +568,13 @@ $pages          = $system_status->get_pages();
 							for ( $i = 0; $i < $total_overrides; $i++ ) {
 								$override = $theme['overrides'][ $i ];
 								if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
-									printf( __( '<code>%1$s</code> version <strong style="color:red">%2$s</strong> is out of date. The core version is %3$s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );
+									$current_version = $override['version'] ? $override['version'] : '-';
+									printf(
+										__( '%1$s version %2$s is out of date. The core version is %3$s', 'woocommerce' ),
+										'<code>' . $override['file'] . '</code>',
+										'<strong style="color:red">' . $current_version . '</strong>',
+										$override['core_version']
+									);
 								} else {
 									echo esc_html( $override['file'] );
 								}
