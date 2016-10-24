@@ -83,7 +83,8 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo $rating_html;
 
-				printf( '<span class="reviewer">' . _x( 'by %1$s', 'by comment author', 'woocommerce' ) . '</span>', get_comment_author() );
+				/* translators: %s: comment author */
+				echo '<span class="reviewer">' . sprintf( __( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>';
 
 				echo '</li>';
 			}

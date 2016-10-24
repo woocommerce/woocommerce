@@ -92,7 +92,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-tax-table-pagination">
 	<div class="tablenav">
 		<div class="tablenav-pages">
-			<span class="displaying-num"><?php printf( _x( '%s items', '%s will be a number eventually, but must be a string for now.', 'woocommerce' ), '{{ data.qty_rates }}' ); ?></span>
+			<span class="displaying-num"><?php
+				/* translators: %s: number */
+				printf(
+					__( '%s items', 'woocommerce' ), // %s will be a number eventually, but must be a string for now.
+					'{{ data.qty_rates }}'
+				);
+			?></span>
 			<span class="pagination-links">
 
 				<a class="tablenav-pages-navspan" data-goto="1">
@@ -106,9 +112,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<span class="paging-input">
 					<label for="current-page-selector" class="screen-reader-text"><?php esc_html_e( 'Current page', 'woocommerce' ); ?></label>
-					<?php printf( esc_html_x( '%1$s of %2$s', 'Pagination, like `1 of 3`', 'woocommerce' ),
-									'<input class="current-page" id="current-page-selector" type="text" name="paged" value="{{ data.current_page }}" size="<# print( data.qty_pages.toString().length ) #>" aria-describedby="table-paging">',
-									'<span class="total-pages">{{ data.qty_pages }}</span>' ); ?>
+					<?php
+						/* translators: 1: current page 2: total pages */
+						printf(
+							esc_html_x( '%1$s of %2$s', 'Pagination', 'woocommerce' ),
+							'<input class="current-page" id="current-page-selector" type="text" name="paged" value="{{ data.current_page }}" size="<# print( data.qty_pages.toString().length ) #>" aria-describedby="table-paging">',
+							'<span class="total-pages">{{ data.qty_pages }}</span>'
+						);
+					?>
 				</span>
 
 				<a class="tablenav-pages-navspan" data-goto="<# print( Math.min( data.qty_pages, parseInt( data.current_page, 10 ) + 1 ) ) #>">
