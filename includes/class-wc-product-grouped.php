@@ -185,4 +185,21 @@ class WC_Product_Grouped extends WC_Product {
 		do_action( 'woocommerce_product_loaded', $this );
 		do_action( 'woocommerce_product_' . $this->get_type() . '_loaded', $this );
 	}
+
+	/**
+	 * Helper method that updates all the post meta for a grouped product.
+	 */
+	protected function update_post_meta() {
+		if ( update_post_meta( $this->get_id(), '_children', $this->get_children() ) ) {
+			$child_prices = array();
+			foreach ( $this->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				$child_prices[] = $child->get_price();
+			}
+			delete_post_meta( $this->get_id(), '_price' );
+			add_post_meta( $this->get_id(), '_price', min( $child_prices ) );
+			add_post_meta( $this->get_id(), '_price', max( $child_prices ) );
+		}
+		parent::update_post_meta();
+	}
 }

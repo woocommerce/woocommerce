@@ -128,7 +128,6 @@ class WC_AJAX {
 			'delete_order_note'                                => false,
 			'json_search_products'                             => false,
 			'json_search_products_and_variations'              => false,
-			'json_search_grouped_products'                     => false,
 			'json_search_downloadable_products_and_variations' => false,
 			'json_search_customers'                            => false,
 			'term_ordering'                                    => false,
@@ -1597,68 +1596,6 @@ class WC_AJAX {
 	 */
 	public static function json_search_products_and_variations() {
 		self::json_search_products( '', array( 'product', 'product_variation' ) );
-	}
-
-	/**
-	 * Search for grouped products and return json.
-	 */
-	public static function json_search_grouped_products() {
-		ob_start();
-
-		check_ajax_referer( 'search-products', 'security' );
-
-		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
-		$exclude = array();
-
-		if ( empty( $term ) ) {
-			die();
-		}
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
-		}
-
-		$found_products = array();
-
-		if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
-
-			$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
-
-			if ( sizeof( $posts_in ) > 0 ) {
-
-				$args = array(
-					'post_type'        => 'product',
-					'post_status'      => 'any',
-					'numberposts'      => -1,
-					'orderby'          => 'title',
-					'order'            => 'asc',
-					'post_parent'      => 0,
-					'suppress_filters' => 0,
-					'include'          => $posts_in,
-					's'                => $term,
-					'fields'           => 'ids',
-					'exclude'          => $exclude,
-				);
-
-				$posts = get_posts( $args );
-
-				if ( ! empty( $posts ) ) {
-					foreach ( $posts as $post ) {
-						$product = wc_get_product( $post );
-
-						if ( ! current_user_can( 'read_product', $post ) ) {
-							continue;
-						}
-
-						$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
-					}
-				}
-			}
-		}
-
-		$found_products = apply_filters( 'woocommerce_json_search_found_grouped_products', $found_products );
-
-		wp_send_json( $found_products );
 	}
 
 	/**

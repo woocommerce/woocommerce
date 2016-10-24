@@ -506,7 +506,6 @@ class WC_Meta_Box_Product_Data {
 			<div id="linked_product_data" class="panel woocommerce_options_panel hidden">
 
 				<div class="options_group">
-
 					<p class="form-field">
 						<label for="upsell_ids"><?php _e( 'Up-sells', 'woocommerce' ); ?></label>
 						<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
@@ -540,31 +539,23 @@ class WC_Meta_Box_Product_Data {
 							echo esc_attr( json_encode( $json_ids ) );
 						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ); ?>
 					</p>
-				</div>
 
-				<div class="options_group grouping show_if_simple show_if_external">
+					<p class="form-field show_if_grouped">
+						<label for="grouped_products"><?php _e( 'Grouped products', 'woocommerce' ); ?></label>
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="grouped_products" name="grouped_products" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
+						$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_children', true ) ) );
+						$json_ids    = array();
 
-					<p class="form-field">
-						<label for="parent_id"><?php _e( 'Grouping', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-allow_clear="true" data-multiple="false" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-							$parent_id = absint( $post->post_parent );
-
-							if ( $parent_id ) {
-								$parent    = wc_get_product( $parent_id );
-								if ( is_object( $parent ) ) {
-									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
-								}
-
-								echo esc_attr( $parent_title );
+						foreach ( $product_ids as $product_id ) {
+							$product = wc_get_product( $product_id );
+							if ( is_object( $product ) ) {
+								$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 							}
-						?>" value="<?php echo $parent_id ? $parent_id : ''; ?>" /> <?php echo wc_help_tip( __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ); ?>
+						}
+
+						echo esc_attr( json_encode( $json_ids ) );
+						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'This lets you choose which products are part of this group.', 'woocommerce' ) ); ?>
 					</p>
-
-					<?php
-						woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
-
-						do_action( 'woocommerce_product_options_grouping' );
-					?>
 				</div>
 
 				<?php do_action( 'woocommerce_product_options_related' ); ?>
@@ -1054,47 +1045,6 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		if ( $post->post_parent > 0 || 'grouped' === $product_type || $_POST['previous_parent_id'] > 0 ) {
-
-			$clear_parent_ids = array();
-
-			if ( $post->post_parent > 0 ) {
-				$clear_parent_ids[] = $post->post_parent;
-			}
-
-			if ( 'grouped' === $product_type ) {
-				$clear_parent_ids[] = $post_id;
-			}
-
-			if ( $_POST['previous_parent_id'] > 0 ) {
-				$clear_parent_ids[] = absint( $_POST['previous_parent_id'] );
-			}
-
-			if ( ! empty( $clear_parent_ids ) ) {
-				foreach ( $clear_parent_ids as $clear_id ) {
-					$children_by_price = get_posts( array(
-						'post_parent'    => $clear_id,
-						'orderby'        => 'meta_value_num',
-						'order'          => 'asc',
-						'meta_key'       => '_price',
-						'posts_per_page' => 1,
-						'post_type'      => 'product',
-						'fields'         => 'ids',
-					) );
-
-					if ( $children_by_price ) {
-						foreach ( $children_by_price as $child ) {
-							$child_price = get_post_meta( $child, '_price', true );
-							update_post_meta( $clear_id, '_price', $child_price );
-						}
-					}
-
-					wc_delete_product_transients( $clear_id );
-				}
-			}
-		}
-
 		// Sold Individually
 		if ( ! empty( $_POST['_sold_individually'] ) ) {
 			update_post_meta( $post_id, '_sold_individually', 'yes' );
@@ -1132,15 +1082,17 @@ class WC_Meta_Box_Product_Data {
 			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
-		// Cross sells and upsells
-		$upsells    = isset( $_POST['upsell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ) ) : array();
-		$crosssells = isset( $_POST['crosssell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ) ) : array();
+		// Cross sells, upsells, and grouped products.
+		$upsells          = isset( $_POST['upsell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ) )             : array();
+		$crosssells       = isset( $_POST['crosssell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ) )       : array();
+		$grouped_products = isset( $_POST['grouped_products'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['grouped_products'] ) ) ) : array();
 
 		update_post_meta( $post_id, '_upsell_ids', $upsells );
 		update_post_meta( $post_id, '_crosssell_ids', $crosssells );
+		update_post_meta( $post_id, '_children', $grouped_products );
 
 		// Downloadable options
-		if ( 'yes' == $is_downloadable ) {
+		if ( 'yes' === $is_downloadable ) {
 
 			$_download_limit = absint( $_POST['_download_limit'] );
 			if ( ! $_download_limit ) {
@@ -1225,7 +1177,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Product url
-		if ( 'external' == $product_type ) {
+		if ( 'external' === $product_type ) {
 
 			if ( isset( $_POST['_product_url'] ) ) {
 				update_post_meta( $post_id, '_product_url', esc_url_raw( $_POST['_product_url'] ) );
@@ -1236,9 +1188,8 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Save variations
-		if ( 'variable' == $product_type ) {
-			// Update parent if variable so price sorting works and stays in sync with the cheapest child
+		// Sync related products.
+		if ( 'variable' === $product_type ) {
 			WC_Product_Variable::sync( $post_id );
 			WC_Product_Variable::sync_stock_status( $post_id );
 		}
