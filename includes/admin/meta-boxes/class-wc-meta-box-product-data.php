@@ -7,11 +7,11 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin/Meta Boxes
- * @version  2.4.0
+ * @version  2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -29,7 +29,8 @@ class WC_Meta_Box_Product_Data {
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		$thepostid = $post->ID;
+		$thepostid      = $post->ID;
+		$product_object = wc_get_product( $thepostid );
 
 		if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) ) {
 			$product_type = sanitize_title( current( $terms )->name );
@@ -799,36 +800,36 @@ class WC_Meta_Box_Product_Data {
 	public static function save( $post_id, $post ) {
 		global $wpdb;
 
-		// Add any default post meta
-		add_post_meta( $post_id, 'total_sales', '0', true );
-
-		// Get types
 		$product_type    = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$is_downloadable = isset( $_POST['_downloadable'] ) ? 'yes' : 'no';
-		$is_virtual      = isset( $_POST['_virtual'] ) ? 'yes' : 'no';
+
+		$product = wc_get_product( $post_id );
+		//$coupon = new WC_Coupon( $post_id );
+
+		$product->set_props( array(
+			'purchase_note' => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
+			'downloadable'  => isset( $_POST['_downloadable'] ) ,
+			'virtual'       => isset( $_POST['_virtual'] ),
+			'tax_status'    => wc_clean( $_POST['_tax_status'] ),
+			'tax_class'     => wc_clean( $_POST['_tax_class'] ),
+
+			'weight'        => wc_clean( $_POST['_weight'] ),
+			'length'        => wc_clean( $_POST['_length'] ),
+			'width'         => wc_clean( $_POST['_width'] ),
+			'height'        => wc_clean( $_POST['_height'] ),
+		) );
+
+
+
+
+
+
+
 
 		// Product type + Downloadable/Virtual
 		wp_set_object_terms( $post_id, $product_type, 'product_type' );
 		update_post_meta( $post_id, '_downloadable', $is_downloadable );
 		update_post_meta( $post_id, '_virtual', $is_virtual );
 
-		// Update post meta
-		if ( isset( $_POST['_tax_status'] ) ) {
-			update_post_meta( $post_id, '_tax_status', wc_clean( $_POST['_tax_status'] ) );
-		}
-
-		if ( isset( $_POST['_tax_class'] ) ) {
-			update_post_meta( $post_id, '_tax_class', wc_clean( $_POST['_tax_class'] ) );
-		}
-
-		if ( isset( $_POST['_purchase_note'] ) ) {
-			update_post_meta( $post_id, '_purchase_note', wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ) );
-		}
-
-		// Featured
-		if ( update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' ) ) {
-			delete_transient( 'wc_featured_products' );
-		}
 
 		// Dimensions
 		if ( 'no' == $is_virtual ) {

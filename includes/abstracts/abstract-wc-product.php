@@ -42,7 +42,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'sale_price'         => '',
 		'date_on_sale_from'  => '',
 		'date_on_sale_to'    => '',
-		'total_sales'        => '',
+		'total_sales'        => '0',
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
 		'manage_stock'       => false,
@@ -515,6 +515,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return get_the_term_list( $this->get_id(), 'product_tag', $before, $sep, $after );
 	}
 
+	/**
+	 * Get virtual.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function set_virtual( $virtual ) {
+		return $this->data['virtual'];
+	}
+
+	/**
+	 * Get downloadable.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function set_downloadable( $downloadable ) {
+		return $this->data['downloadable'];
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -798,7 +818,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_weight( $weight ) {
-		$this->data['weight'] = $weight;
+		$this->data['weight'] = '' === $weight ? '' : wc_format_decimal( $weight );
 	}
 
 	/**
@@ -808,7 +828,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_length( $length ) {
-		$this->data['length'] = $length;
+		$this->data['length'] = '' === $length ? '' : wc_format_decimal( $length );
 	}
 
 	/**
@@ -818,7 +838,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $width Total width.
 	 */
 	public function set_width( $width ) {
-		$this->data['width'] = $width;
+		$this->data['width'] = '' === $width ? '' : wc_format_decimal( $width );
 	}
 
 	/**
@@ -828,7 +848,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $height Total height.
 	 */
 	public function set_height( $height ) {
-		$this->data['height'] = $height;
+		$this->data['height'] = '' === $height ? '' : wc_format_decimal( $height );
 	}
 
 	/**
@@ -929,6 +949,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_tags( $terms_id ) {
 		//$this->save_taxonomy_terms( $terms_id, 'tag' );
+	}
+
+	/**
+	 * Set if the product is virtual.
+	 *
+	 * @since 2.7.0
+	 * @param bool|string
+	 */
+	public function set_virtual( $virtual ) {
+		$this->data['virtual'] = wc_string_to_bool( $virtual );
+	}
+
+	/**
+	 * Set if the product is downloadable.
+	 *
+	 * @since 2.7.0
+	 * @param bool|string
+	 */
+	public function set_downloadable( $downloadable ) {
+		$this->data['downloadable'] = wc_string_to_bool( $downloadable );
 	}
 
 	/*
@@ -1085,7 +1125,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	protected function update_post_meta() {
 		$id = $this->get_id();
-		update_post_meta( $id, '_featured', $this->get_featured() );
 		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
 		update_post_meta( $id, '_sku', $this->get_sku() );
 		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
@@ -1109,6 +1148,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
 		update_post_meta( $id, '_product_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
+
+		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
+			delete_transient( 'wc_featured_products' );
+		}
 
 		if ( $this->is_on_sale() ) {
 			update_post_meta( $id, '_price', $this->get_sale_price() );
@@ -1794,7 +1837,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
+		return apply_filters( 'wc_product_enable_dimensions_display', ! $this->get_virtual() ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
 	/**
