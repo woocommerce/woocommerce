@@ -94,7 +94,7 @@ class WC_Helper_Product {
 		) );
 		$simple_product_1 = self::create_simple_product( $product );
 		$simple_product_2 = self::create_simple_product( $product );
-		update_post_meta( $product, '_children', array( $simple_product_1->id, $simple_product_2->id ) );
+		update_post_meta( $product, '_children', array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
 		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );

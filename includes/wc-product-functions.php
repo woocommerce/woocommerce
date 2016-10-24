@@ -996,3 +996,29 @@ function wc_get_price_to_display( $product, $args = array() ) {
 
 	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ? wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) : wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price ) );
 }
+
+/**
+ * Returns the product categories in a list.
+ *
+ * @param int $product_id
+ * @param string $sep (default: ', ').
+ * @param string $before (default: '').
+ * @param string $after (default: '').
+ * @return string
+ */
+function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '' ) {
+	return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+}
+
+/**
+ * Returns the product tags in a list.
+ *
+ * @param int $product_id
+ * @param string $sep (default: ', ').
+ * @param string $before (default: '').
+ * @param string $after (default: '').
+ * @return string
+ */
+function wc_get_product_tag_list( $product_id, $sep = ', ', $before = '', $after = '' ) {
+	return get_the_term_list( $product_id, 'product_tag', $before, $sep, $after );
+}
