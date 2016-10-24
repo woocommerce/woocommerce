@@ -67,42 +67,42 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product setters and getters
-	 * @todo needs tests for tags, categories, and attributes
+	 * @todo needs tests for attributes
 	 * @since 2.7.0
 	 */
-	 public function test_product_getters_and_setters() {
-		 $getters_and_setters = array(
-			 'name'               => 'Test',
-			 'slug'               => 'test',
-			 'status'             => 'publish',
-			 'catalog_visibility' => 'search',
-			 'featured'           => false,
-			 'description'        => 'Hello world',
-			 'short_description'  => 'hello',
-			 'sku'                => 'TEST SKU',
-			 'regular_price'      => 15.00,
-			 'sale_price'         => 10.00,
-			 'date_on_sale_from'  => '1475798400',
-			 'date_on_sale_to'    => '1477267200',
-			 'total_sales'        => 20,
-			 'tax_status'         => 'none',
-			 'tax_class'          => '',
-			 'manage_stock'       => true,
-			 'stock_quantity'     => 10,
-			 'stock_status'       => 'instock',
-			 'backorders'         => 'notify',
-			 'sold_individually'  => false,
-			 'weight'             => 100,
-			 'length'             => 10,
-			 'width'              => 10,
-			 'height'             => 10,
-			 'upsell_ids'         => array( 2, 3 ),
-			 'cross_sell_ids'     => array( 4, 5 ),
-			 'parent_id'          => 0,
-			 'reviews_allowed'    => true,
-			 'default_attributes' => array(),
-			 'purchase_note'      => 'A note',
-			 'menu_order'         => 2,
+	public function test_product_getters_and_setters() {
+		$getters_and_setters = array(
+			'name'               => 'Test',
+			'slug'               => 'test',
+			'status'             => 'publish',
+			'catalog_visibility' => 'search',
+			'featured'           => false,
+			'description'        => 'Hello world',
+			'short_description'  => 'hello',
+			'sku'                => 'TEST SKU',
+			'regular_price'      => 15.00,
+			'sale_price'         => 10.00,
+			'date_on_sale_from'  => '1475798400',
+			'date_on_sale_to'    => '1477267200',
+			'total_sales'        => 20,
+			'tax_status'         => 'none',
+			'tax_class'          => '',
+			'manage_stock'       => true,
+			'stock_quantity'     => 10,
+			'stock_status'       => 'instock',
+			'backorders'         => 'notify',
+			'sold_individually'  => false,
+			'weight'             => 100,
+			'length'             => 10,
+			'width'              => 10,
+			'height'             => 10,
+			'upsell_ids'         => array( 2, 3 ),
+			'cross_sell_ids'     => array( 4, 5 ),
+			'parent_id'          => 0,
+			'reviews_allowed'    => true,
+			'default_attributes' => array(),
+			'purchase_note'      => 'A note',
+			'menu_order'         => 2,
 		 );
 		$product = new WC_Product;
 		foreach ( $getters_and_setters as $function => $value ) {
@@ -114,6 +114,32 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 	 }
+
+	/**
+	 * Test product term setters and getters
+	 * @since 2.7.0
+	 */
+	public function test_product_term_getters_and_setters() {
+		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
+		$test_cat_2 = wp_insert_term( 'Testing 2', 'product_cat' );
+
+		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
+		$test_tag_2 = wp_insert_term( 'Tag 2', 'product_tag' );
+
+		$getters_and_setters = array(
+			'tag_ids'      => array( 'Tag 1', 'Tag 2' ),
+			'category_ids' => array( $test_cat_1['term_id'], $test_cat_2['term_id'] ),
+		);
+		$product = new WC_Product;
+		foreach ( $getters_and_setters as $function => $value ) {
+			$product->{"set_{$function}"}( $value );
+		}
+		$product->create();
+		$product = new WC_Product_Simple( $product->get_id() );
+
+		$this->assertEquals( array( $test_cat_1['term_id'], $test_cat_2['term_id'] ), $product->get_category_ids() );
+		$this->assertEquals( array( $test_tag_1['term_id'], $test_tag_2['term_id'] ), $product->get_tag_ids() );
+	}
 
 	/**
 	 * Test creating a new grouped product.
