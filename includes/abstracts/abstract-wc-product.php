@@ -910,7 +910,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set the product categories. @todo store in class and save?
+	 * Set the product categories.
 	 *
 	 * @since 2.7.0
 	 * @param array $term_ids List of terms IDs.
@@ -920,7 +920,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set the product tags. @todo store in class and save?
+	 * Set the product tags.
 	 *
 	 * @since 2.7.0
 	 * @param array $term_ids List of terms IDs.

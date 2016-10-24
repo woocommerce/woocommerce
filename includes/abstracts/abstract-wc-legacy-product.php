@@ -158,7 +158,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Returns the product categories. @todo store in class and save?
+	 * Returns the product categories.
 	 *
 	 * @deprecated 2.7.0
 	 * @param string $sep (default: ', ').
