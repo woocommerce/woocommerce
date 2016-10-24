@@ -664,7 +664,7 @@ class WC_Meta_Box_Product_Data {
 						<strong><?php _e( 'Default form values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
-
+                                                        $search_variation_field = '';
 							foreach ( $attributes as $attribute ) {
 
 								// Only deal with attributes that are variations
@@ -674,17 +674,21 @@ class WC_Meta_Box_Product_Data {
 
 								// Get current value for variation (if set)
 								$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
-
+                                                                
 								// Name will be something like attribute_pa_color
 								echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '" data-current="' . esc_attr( $variation_selected_value ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
-
+                                                                
+                                                                // Include the attribute on the search.
+                                                                $search_variation_field .= '<select class="search-product-variation"  name="search_attribute_' . sanitize_title( $attribute['name'] ) . '" data-attribute_name="'. sanitize_title( $attribute['name'] ) .'"><option value="">' . __( 'Select', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '</option>';
+                                                                
 								// Get terms for attribute taxonomy or value if its a custom attribute
 								if ( $attribute['is_taxonomy'] ) {
 									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
 
 									foreach ( $post_terms as $term ) {
 										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
-									}
+                                                                                $search_variation_field .= '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
+                                                                        }
 								} else {
 									$options = wc_get_text_attributes( $attribute['value'] );
 
@@ -695,12 +699,23 @@ class WC_Meta_Box_Product_Data {
 								}
 
 								echo '</select>';
+                                                                $search_variation_field .= '</select>';
 							}
 						?>
-					</div>
+                                        </div>
 					<div class="clear"></div>
 				</div>
-
+                                
+                                <div class="toolbar toolbar-top">
+                                        <div class="search-variation">
+                                                <strong><?php _e( 'Search the Variation', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'Use this to search for the variation you want to modify.', 'woocommerce' ) ); ?></strong>
+                                                <?php echo $search_variation_field; ?>
+                                                <a class="button search-variation"><?php _e('Search', 'woocommerce'); ?></a>
+                                                <a class="button clear-search-variation"><?php _e('Clear Search', 'woocommerce'); ?></a>
+                                                <div class="clear"></div>
+                                        </div>
+                                </div>
+                                
 				<div class="toolbar toolbar-top">
 					<select id="field_to_edit" class="variation_actions">
 						<option data-global="true" value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
@@ -765,7 +780,7 @@ class WC_Meta_Box_Product_Data {
 				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php
 					// esc_attr does not double encode - htmlspecialchars does
 					echo htmlspecialchars( json_encode( $attributes ) );
-				?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
+				?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false" data-search="false">
 				</div>
 
 				<div class="toolbar">

@@ -534,7 +534,58 @@ class WC_Product_Variable extends WC_Product {
 			return 0;
 		}
 	}
+        
+        /**
+	 * Get all possible match of given attributes with their corresponding values using a WP_Query.
+	 * @since  2.8
+	 * @param  $match_attributes
+	 * @return array Variation IDs of all possible match
+	 */
+	public function get_matching_variations( $match_attributes = array() ) {
+            global $wpdb;
 
+            $query_args = array(
+                'post_parent' => $this->id,
+                'post_type'   => 'product_variation',
+                'orderby'     => 'menu_order',
+                'order'       => 'ASC',
+                'fields'      => 'ids',
+                'post_status' => 'publish',
+                'numberposts' => (isset($_POST['per_page']) ? absint($_POST['per_page']) : 1),
+                'meta_query'  => array(),
+            );
+
+            foreach ( $this->get_attributes() as $attribute ) {
+                if ( ! $attribute['is_variation'] ) {
+                    continue;
+                }
+
+                $attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+
+                if ( empty( $match_attributes[ $attribute_field_name ] ) ) {
+                    continue;
+                }
+
+                $value = wc_clean( $match_attributes[ $attribute_field_name ] );
+
+                $query_args['meta_query'][] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => $attribute_field_name,
+                        'value'   => $value
+                    )
+                );
+
+            }
+
+            // Allow large queries in case user has many variations
+            $wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+            
+            $matches = get_posts( $query_args );
+            
+            return $matches;
+	}
+        
 	/**
 	 * Get an array of available variations for the current product.
 	 * @return array
