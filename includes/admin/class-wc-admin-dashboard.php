@@ -126,7 +126,7 @@ class WC_Admin_Dashboard {
 			<li class="sales-this-month">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ); ?>">
 					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time( 'timestamp' ) ) ) ); ?>
-					<?php printf( __( "<strong>%s</strong> net sales this month", 'woocommerce' ), wc_price( $report_data->net_sales ) ); ?>
+					<?php printf( __( '%s net sales this month', 'woocommerce' ), '<strong>' . wc_price( $report_data->net_sales ) . '</strong>' ); ?>
 				</a>
 			</li>
 			<?php if ( $top_seller && $top_seller->qty ) : ?>

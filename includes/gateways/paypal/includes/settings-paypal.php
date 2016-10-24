@@ -48,7 +48,7 @@ return array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging', 'woocommerce' ),
 		'default'     => 'no',
-		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) ),
+		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s', 'woocommerce' ), '<code>' . wc_get_log_file_path( 'paypal' ) . '</code>' ),
 	),
 	'advanced' => array(
 		'title'       => __( 'Advanced options', 'woocommerce' ),

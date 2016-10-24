@@ -491,7 +491,7 @@ class WC_Email extends WC_Settings_API {
 			'subject'         => array(
 				'title'       => __( 'Email subject', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,
@@ -499,7 +499,7 @@ class WC_Email extends WC_Settings_API {
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,
@@ -768,7 +768,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
-								<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'This template has been overridden by your theme and can be found in: %s.', 'woocommerce' ), '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>
 
 							<div class="editor" style="display:none">
@@ -784,7 +784,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'To override and edit this email template copy %1$s to your theme folder: %2$s.', 'woocommerce' ), '<code>' . plugin_basename( $template_file ) . '</code>', '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>
 
 							<div class="editor" style="display:none">
