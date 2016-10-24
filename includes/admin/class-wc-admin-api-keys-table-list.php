@@ -151,7 +151,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 */
 	public function column_last_access( $key ) {
 		if ( ! empty( $key['last_access'] ) ) {
-			$date = sprintf( _x( '%1$s at %2$s', 'date and time', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key['last_access'] ) ) );
+			/* translators: 1: last access date 2: last access time */
+			$date = sprintf( __( '%1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key['last_access'] ) ) );
 
 			return apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key['last_access'] );
 		}

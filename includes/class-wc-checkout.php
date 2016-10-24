@@ -105,7 +105,7 @@ class WC_Checkout {
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
 				'required'      => true,
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' ),
+				'placeholder' 	=> esc_attr__( 'Username', 'woocommerce' ),
 			);
 		}
 
@@ -114,7 +114,7 @@ class WC_Checkout {
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
 				'required'          => true,
-				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
+				'placeholder' 		=> esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
 
@@ -123,7 +123,7 @@ class WC_Checkout {
 				'type' => 'textarea',
 				'class' => array( 'notes' ),
 				'label' => __( 'Order notes', 'woocommerce' ),
-				'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
+				'placeholder' => esc_attr__( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce' ),
 			),
 		);
 
@@ -468,16 +468,19 @@ class WC_Checkout {
 					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || "" === $this->posted[ $key ] ) ) {
 						switch ( $fieldset_key ) {
 							case 'shipping' :
-								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
+								/* translators: %s: field name */
+								$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field['label'] );
 							break;
 							case 'billing' :
-								$field_label = sprintf( _x( 'Billing %s', 'Billing FIELDNAME', 'woocommerce' ), $field['label'] );
+								/* translators: %s: field name */
+								$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field['label'] );
 							break;
 							default :
 								$field_label = $field['label'];
 							break;
 						}
-						wc_add_notice( apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( _x( '%s is a required field.', 'FIELDNAME is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), $field_label ), 'error' );
+						/* translators: %s: field name */
+						wc_add_notice( apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), $field_label ), 'error' );
 					}
 
 					if ( ! empty( $this->posted[ $key ] ) ) {

@@ -166,7 +166,14 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php echo esc_html( sprintf( _x( '%1$s #%2$s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
+				<h2><?php
+					/* translators: 1: order type 2: order number */
+					printf(
+						esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+						$order_type_object->labels->singular_name,
+						$order->get_order_number()
+					);
+				?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
@@ -181,7 +188,8 @@ class WC_Meta_Box_Order_Data {
 						}
 
 						if ( $order->get_date_paid() ) {
-							printf( ' ' . _x( 'on %1$s @ %2$s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
+							/* translators: 1: date 2: time */
+							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
 						}
 
 						echo '. ';
