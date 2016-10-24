@@ -683,7 +683,7 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Set stock status.
+	 * Set stock status. This is synced with children (variations), not set directly.
 	 */
 	public function set_stock_status( $status ) {
 		$this->data['stock_status'] = 'outofstock' === $status ? 'outofstock' : 'instock';
@@ -959,6 +959,17 @@ class WC_Product_Variable extends WC_Product {
 		if ( update_post_meta( $this->get_id(), '_stock_status', $this->get_stock_status() ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $this->get_stock_status() );
 		}
+	}
+
+	/**
+	 * Save data (either create or update depending on if we are working on an existing product).
+	 *
+	 * @since 2.7.0
+	 */
+	public function save() {
+		parent::save();
+		WC_Product_Variable::sync( $this->get_id() );
+		WC_Product_Variable::sync_stock_status( $this->get_id() );
 	}
 
 }

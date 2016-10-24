@@ -406,6 +406,7 @@ abstract class WC_Data {
 
 	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * Only sets using public methods.
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
@@ -419,7 +420,11 @@ abstract class WC_Data {
 				}
 				$setter = "set_$prop";
 				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
-					$this->{$setter}( $value );
+					$reflection = new ReflectionMethod( $this, $setter );
+
+					if ( $reflection->isPublic() ) {
+						$this->{$setter}( $value );
+					}
 				}
 			} catch ( WC_Data_Exception $e ) {
 				$errors->add( $e->getErrorCode(), $e->getMessage() );
