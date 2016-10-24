@@ -15,7 +15,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.3
+ * @version     2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,7 +33,7 @@ ob_start();
 
 	<?php if ( $product->enable_dimensions_display() ) : ?>
 
-		<?php if ( $product->has_weight() || get_post_meta( $product->id, '_child_has_weight', true ) ) : $has_row = true; ?>
+		<?php if ( $product->has_weight() || $product->child_has_weight() ) : $has_row = true; ?>
 			<tr class="<?php if ( ( $alt = $alt * -1 ) === 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
 				<td class="product_weight"><?php echo $product->get_weight() ? wc_format_localized_decimal( $product->get_weight() ) . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : __( 'N/A', 'woocommerce' ); ?></td>

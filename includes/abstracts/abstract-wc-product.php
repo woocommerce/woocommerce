@@ -460,7 +460,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Check for any attributes which have been removed globally
 		if ( is_array( $attributes ) && count( $attributes ) > 0 ) {
 			foreach ( $attributes as $key => $attribute ) {
-				if ( $attribute['is_taxonomy'] ) {
+				if ( ! empty( $attribute['is_taxonomy'] ) ) {
 					if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
 						unset( $attributes[ $key ] );
 					}
@@ -888,7 +888,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $attributes List of product attributes.
 	 */
 	public function set_attributes( $attributes ) {
-		$this->data['attributes'] = $attributes; // @todo ensure unserialised, array, and filtered out empty values
+		$this->data['attributes'] = array_filter(  (array) maybe_unserialize( $attributes ) );
 	}
 
 	/**
@@ -990,7 +990,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'parent_id'          => $post_object->post_parent,
 			'reviews_allowed'    => $post_object->comment_status,
 			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
-			'attributes'         => get_post_meta( $id, '_attributes', true ),
+			'attributes'         => get_post_meta( $id, '_product_attributes', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
 		) );
@@ -1107,7 +1107,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
 		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_attributes', $this->get_attributes() );
+		update_post_meta( $id, '_product_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 
 		if ( $this->is_on_sale() ) {
