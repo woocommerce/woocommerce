@@ -158,6 +158,34 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Returns the product categories.
+	 *
+	 * @deprecated 2.7.0
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return string
+	 */
+	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
+		_deprecated_function( 'WC_Product::get_categories', '2.7', 'wc_get_product_category_list' );
+		return wc_get_product_category_list( $this->get_id(), $sep, $before, $after );
+	}
+
+	/**
+	 * Returns the product tags.
+	 *
+	 * @deprecated 2.7.0
+	 * @param string $sep (default: ', ').
+	 * @param string $before (default: '').
+	 * @param string $after (default: '').
+	 * @return array
+	 */
+	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
+		_deprecated_function( 'WC_Product::get_tags', '2.7', 'wc_get_product_tag_list' );
+		return wc_get_product_tag_list( $this->get_id(), $sep, $before, $after );
+	}
+
+	/**
 	 * Returns the availability of the product.
 	 *
 	 * If stock management is enabled at global and product level, a stock message
