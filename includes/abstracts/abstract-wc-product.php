@@ -925,6 +925,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set an attribute to null so it's cleared later.
+	 * @since 2.7.0
+	 * @param $attribute array
+	 * return array
+	 */
+	protected function set_attribute_null( $attribute ) {
+		$attribute['options'] = null;
+		return $attribute;
+	}
+
+	/**
 	 * Set product attributes.
 	 *
 	 * Attributes are made up of:
@@ -934,15 +945,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * 		position - integer sort order.
 	 * 		visible - If visible on frontend.
 	 * 		variation - If used for variations.
+	 * 	Indexed by unqiue key to allow clearing old ones after a set.
 	 *
 	 * @since 2.7.0
 	 * @param array $raw_attributes List of product attributes.
 	 */
 	public function set_attributes( $raw_attributes ) {
-		$attributes = array_fill_keys( array_keys( $this->data['attributes'] ), null );
+		$attributes = array_map( array( $this, 'set_attribute_null' ), $this->data['attributes'] );
 
 		foreach ( $raw_attributes as $raw_attribute ) {
-			$attributes[] = wp_parse_args( $raw_attribute, array(
+			if ( empty( $raw_attribute['id'] ) && empty( $raw_attribute['name'] ) ) {
+				continue;
+			}
+			$attribute = wp_parse_args( $raw_attribute, array(
 				'id'        => 0,
 				'name'      => '',
 				'options'   => '',
@@ -950,6 +965,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				'visible'   => 0,
 				'variation' => 0,
 			) );
+			$attributes[ $attribute['id'] ? 'id:' . $attribute['id'] : 'name:' . $attribute['name'] ] = $attribute;
 		}
 
 		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
@@ -1185,7 +1201,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'parent_id'          => $post_object->post_parent,
 			'reviews_allowed'    => $post_object->comment_status,
 			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
-			'attributes'         => get_post_meta( $id, '_product_attributes', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
 			'category_ids'       => $this->get_term_ids( 'product_cat' ),
@@ -1200,6 +1215,36 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_price( $this->get_regular_price() );
 		}
 		$this->read_meta_data();
+		$this->read_attributes();
+	}
+
+	/**
+	 * Read attributes from post meta.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_attributes() {
+		$meta_values = maybe_unserialize( get_post_meta( $this->get_id(), '_product_attributes', true ) );
+
+		if ( $meta_values ) {
+			$attributes = array();
+			foreach ( $meta_values as $meta_value ) {
+				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
+					$options = wp_get_post_terms( $this->get_id(), $meta_value['name'], array( 'fields' => 'ids' ) );
+				} else {
+					$options = wc_get_text_attributes( $meta_value['value'] );
+				}
+				$attributes[] = array(
+					'id'        => wc_attribute_taxonomy_id_by_name( $meta_value['name'] ),
+					'name'      => $meta_value['name'],
+					'options'   => $options,
+					'position'  => $meta_value['position'],
+					'visible'   => $meta_value['is_visible'],
+					'variation' => $meta_value['is_variation'],
+				);
+			}
+			$this->set_attributes( $attributes );
+		}
 	}
 
 	/**
@@ -1355,20 +1400,59 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_attributes() {
-		$attributes = $this->get_attributes();
+		$attributes  = $this->get_attributes();
+		$meta_values = array();
+
 		if ( $attributes ) {
-			foreach ( $attributes as $key => $attribute ) {
-				// Handle attributes that have been unset.
-				if ( is_null( $attribute ) && taxonomy_exists( $key ) ) {
-					wp_set_object_terms( $this->get_id(), array(), $key );
-				} elseif ( $attribute['is_taxonomy'] ) {
-					wp_set_object_terms( $this->get_id(), array(), $key );
+			foreach ( $attributes as $attribute ) {
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$is_taxonomy    = true;
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = wc_clean( $attribute['name'] );
+					$is_taxonomy    = false;
 				}
+
+				// Handle attributes that have been unset.
+				if ( is_null( $attribute['options'] ) && taxonomy_exists( $attribute_name ) ) {
+					wp_set_object_terms( $this->get_id(), array(), $attribute_name );
+
+				} elseif ( $is_taxonomy ) {
+					$terms = array();
+					foreach ( $attribute['options'] as $option ) {
+						if ( is_int( $option ) ) {
+							$terms[] = $option;
+						} else {
+							$term = get_term_by( 'name', $option, $attribute_name );
+
+							if ( $term && ! is_wp_error( $term ) ) {
+								$terms[] = $term->term_id;
+							} else {
+								$terms[] = sanitize_title( $option );
+							}
+						}
+					}
+					wp_set_object_terms( $this->get_id(), $terms, $attribute_name );
+
+				} else {
+					$values = $attribute['variation'] ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
+				}
+
+				// Store in format WC uses in meta.
+				$meta_values[ sanitize_title( $attribute['name'] ) ] = array(
+					'name'         => $attribute_name,
+					'value'        => $is_taxonomy ? '' : $attribute['options'],
+					'position'     => count( $meta_values ),
+					'is_visible'   => $attribute['visible'],
+					'is_variation' => $attribute['variation'],
+					'is_taxonomy'  => $is_taxonomy ? 1 : 0,
+				);
 			}
-			update_post_meta( $this->get_id(), '_product_attributes', $attributes );
-		} else {
-			update_post_meta( $this->get_id(), '_product_attributes', array() );
 		}
+
+		update_post_meta( $this->get_id(), '_product_attributes', $meta_values );
 	}
 
 	/*
