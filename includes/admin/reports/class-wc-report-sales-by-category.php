@@ -279,7 +279,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		if ( empty( $this->show_categories ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'woocommerce' ); ?></p>
+				<p class="chart-prompt"><?php _e( 'Choose a category to view stats', 'woocommerce' ); ?></p>
 			</div>
 			<?php
 		} else {

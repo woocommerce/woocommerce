@@ -1653,7 +1653,7 @@ class WC_Admin_Post_Types {
 					$output .= selected( 'downloadable', $wp_query->query['product_type'], false );
 				}
 
-				$output .= '> &rarr; ' . __( 'Downloadable', 'woocommerce' ) . '</option>';
+				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Downloadable', 'woocommerce' ) . '</option>';
 
 				$output .= '<option value="virtual" ';
 
@@ -1661,7 +1661,7 @@ class WC_Admin_Post_Types {
 					$output .= selected( 'virtual', $wp_query->query['product_type'], false );
 				}
 
-				$output .= '> &rarr;  ' . __( 'Virtual', 'woocommerce' ) . '</option>';
+				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Virtual', 'woocommerce' ) . '</option>';
 			}
 		}
 
