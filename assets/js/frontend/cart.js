@@ -446,11 +446,11 @@ jQuery( function( $ ) {
 		remove_coupon_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var cart = this;
-			var $tr = $( evt.currentTarget ).parents( 'tr' );
-			var coupon = $( evt.currentTarget ).attr( 'data-coupon' );
+			var cart     = this;
+			var $wrapper = $( evt.currentTarget ).closest( '.cart_totals' );
+			var coupon   = $( evt.currentTarget ).attr( 'data-coupon' );
 
-			block( $tr.parents( 'table' ) );
+			block( $wrapper );
 
 			var data = {
 				security: wc_cart_params.remove_coupon_nonce,
@@ -466,7 +466,7 @@ jQuery( function( $ ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon' );
-					unblock( $tr.parents( 'table' ) );
+					unblock( $wrapper );
 				},
 				complete: function() {
 					cart.update_cart_totals();
