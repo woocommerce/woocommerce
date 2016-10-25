@@ -1794,6 +1794,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
+	/**
+	 * Returns the product shipping class SLUG.
+	 *
+	 * @return string
+	 */
+	public function get_shipping_class() {
+		if ( $class_id = $this->get_shipping_class_id() ) {
+			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				return $term->slug;
+			}
+		}
+		return '';
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| @todo
@@ -2038,26 +2054,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	|--------------------------------------------------------------------------
 	*/
 
-	/**
-	 * Returns the product shipping class.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_class() {
 
-		if ( ! $this->shipping_class ) {
-
-			$classes = get_the_terms( $this->get_id(), 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->shipping_class = current( $classes )->slug;
-			} else {
-				$this->shipping_class = '';
-			}
-		}
-
-		return $this->shipping_class;
-	}
 
 	/**
 	 * Returns a single product attribute.
