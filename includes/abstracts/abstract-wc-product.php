@@ -70,6 +70,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'tag_ids'            => array(),
 		'shipping_class_id'  => 0,
 		'downloads'          => array(),
+		'thumbnail_id'           => '',
+		'gallery_attachment_ids' => array(),
+		'download_limit'         => -1,
+		'download_expiry'        => -1,
+		'download_type'          => 'standard',
 	);
 
 	/**
@@ -553,6 +558,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Returns the gallery attachment ids.
+	 *
+	 * @return array
+	 */
+	public function get_gallery_attachment_ids() {
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( $this->data['gallery_attachment_ids'] ), 'wp_attachment_is_image' ), $this );
+	}
+
+	/**
+	 * Get download limit.
+	 *
+	 * @since 2.7.0
+	 * @return int
+	 */
+	public function get_download_limit() {
+		return $this->data['download_limit'];
+	}
+
+	/**
 	 * Get shipping class ID.
 	 *
 	 * @since 2.7.0
@@ -570,6 +594,36 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_downloads() {
 		return $this->data['downloads'];
+	}
+
+	/**
+	 * Get download expiry.
+	 *
+	 * @since 2.7.0
+	 * @return int
+	 */
+	public function get_download_expiry() {
+		return $this->data['download_expiry'];
+	}
+
+	/**
+	 * Get download type.
+	 *
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_download_type() {
+		return $this->data['download_type'];
+	}
+
+	/**
+	 * Get thumbnail ID.
+	 *
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_thumbnail_id() {
+		return $this->data['thumbnail_id'];
 	}
 
 	/*
@@ -1102,6 +1156,56 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 	}
 
+	/**
+	 * Set gallery attachment ids.
+	 *
+	 * @since 2.7.0
+	 * @param array $gallery_ids
+	 */
+	public function set_gallery_attachment_ids( $gallery_ids ) {
+		$this->data['gallery_attachment_ids'] = $gallery_ids;
+	}
+
+	/**
+	 * Set download limit.
+	 *
+	 * @since 2.7.0
+	 * @param int $download_limit
+	 */
+	public function set_download_limit( $download_limit ) {
+		$this->data['download_limit'] = -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit );
+	}
+
+	/**
+	 * Set download expiry.
+	 *
+	 * @since 2.7.0
+	 * @param int $download_expiry
+	 */
+	public function set_download_expiry( $download_expiry ) {
+		$this->data['download_expiry'] = -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry );
+	}
+
+	/**
+	 * Set download type.
+	 *
+	 * @since 2.7.0
+	 * @param string $download_type
+	 */
+	public function set_download_type( $download_type ) {
+		$this->data['download_type'] = $download_type;
+	}
+
+	/**
+	 * Set thumbnail ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $thumbnail_id
+	 */
+	public function set_thumbnail_id( $thumbnail_id = '' ) {
+		$this->data['thumbnail_id'] = $thumbnail_id;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -1205,6 +1309,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'virtual'            => get_post_meta( $id, '_virtual', true ),
 			'downloadable'       => get_post_meta( $id, '_downloadable', true ),
 			'downloads'          => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
+			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
+			'download_limit'         =>  get_post_meta( $id, '_download_limit', true ),
+			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
+			'download_type'          => get_post_meta( $id, '_download_type', true ),
+			'thumbnail_id'           => get_post_thumbnail_id( $id ),
 		) );
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -1264,6 +1373,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_excerpt'   => $this->get_short_description(),
 			'post_parent'    => $this->get_parent_id(),
 			'comment_status' => $this->get_reviews_allowed() ? 'open' : 'closed',
+			'ping_status'    => 'closed',
 			'menu_order'     => $this->get_menu_order(),
 			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
 			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
@@ -1271,6 +1381,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$this->set_id( $id );
+			wp_set_object_terms( $id, $this->get_type(), 'product_type' );
 			$this->update_post_meta();
 			$this->update_terms();
 			$this->update_attributes();
@@ -1365,9 +1476,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
 		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
+		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
+		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
+		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
+		update_post_meta( $id, '_download_type', $this->get_download_type() );
 
 		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
 			delete_transient( 'wc_featured_products' );
+		}
+
+		if ( ! empty( $this->get_thumbnail_id() ) ) {
+			set_post_thumbnail( $id, $this->get_thumbnail_id() );
+		} else {
+			delete_post_meta( $id, '_thumbnail_id' );
 		}
 
 		if ( $this->is_on_sale() ) {
@@ -1838,21 +1959,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return '';
 		}
 		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| @todo
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Returns the gallery attachment ids.
-	 *
-	 * @return array
-	 */
-	public function get_gallery_attachment_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
 	}
 
 	/*

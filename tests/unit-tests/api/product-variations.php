@@ -28,6 +28,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations', $routes );
 		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations/batch', $routes );
 	}
 
 	/**
@@ -210,7 +211,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_update_variation_with_invalid_id() {
-		wp_set_current_user( 0 );
+		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_variation_product();
 		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->id . '/variations/0' );
 		$request->set_body_params( array(

@@ -103,6 +103,11 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 			'default_attributes' => array(),
 			'purchase_note'      => 'A note',
 			'menu_order'         => 2,
+			'gallery_attachment_ids' => array(),
+			'download_type'          => 'standard',
+			'download_expiry'        => -1,
+			'download_limit'         => 5,
+			'thumbnail_id'           => 2,
 		 );
 		$product = new WC_Product;
 		foreach ( $getters_and_setters as $function => $value ) {
