@@ -1048,7 +1048,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		$from = '<span class="from">' . __( 'From:', 'woocommerce' ) . ' </span>';
+		$from = '<span class="from">' . _x( 'From:', 'From minimum price', 'woocommerce' ) . ' </span>';
 
 		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
 	}
