@@ -94,7 +94,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param int|WC_Product|object $product Product to init.
 	 */
-	function __construct( $product = 0 ) {
+	public function __construct( $product = 0 ) {
 		parent::__construct( $product );
 		if ( is_numeric( $product ) && $product > 0 ) {
 			$this->read( $product );
