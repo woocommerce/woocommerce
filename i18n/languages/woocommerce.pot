@@ -19083,18 +19083,18 @@ msgstr ""
 msgid "The register_routes() method must be overriden"
 msgstr ""
 
-#: includes/vendor/class-wp-rest-controller.php:40
-#: includes/vendor/class-wp-rest-controller.php:50
-#: includes/vendor/class-wp-rest-controller.php:60
-#: includes/vendor/class-wp-rest-controller.php:70
-#: includes/vendor/class-wp-rest-controller.php:80
-#: includes/vendor/class-wp-rest-controller.php:90
-#: includes/vendor/class-wp-rest-controller.php:100
-#: includes/vendor/class-wp-rest-controller.php:110
-#: includes/vendor/class-wp-rest-controller.php:120
-#: includes/vendor/class-wp-rest-controller.php:130
-#: includes/vendor/class-wp-rest-controller.php:140
-#: includes/vendor/class-wp-rest-controller.php:151
+#: includes/vendor/abstract-wp-rest-controller.php:40
+#: includes/vendor/abstract-wp-rest-controller.php:50
+#: includes/vendor/abstract-wp-rest-controller.php:60
+#: includes/vendor/abstract-wp-rest-controller.php:70
+#: includes/vendor/abstract-wp-rest-controller.php:80
+#: includes/vendor/abstract-wp-rest-controller.php:90
+#: includes/vendor/abstract-wp-rest-controller.php:100
+#: includes/vendor/abstract-wp-rest-controller.php:110
+#: includes/vendor/abstract-wp-rest-controller.php:120
+#: includes/vendor/abstract-wp-rest-controller.php:130
+#: includes/vendor/abstract-wp-rest-controller.php:140
+#: includes/vendor/abstract-wp-rest-controller.php:151
 msgid "Method '%s' not implemented. Must be over-ridden in subclass."
 msgstr ""
 

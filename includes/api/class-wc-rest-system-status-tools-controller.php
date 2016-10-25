@@ -139,17 +139,29 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			'clear_sessions' => array(
 				'name'    => __( 'Customer sessions', 'woocommerce' ),
 				'button'  => __( 'Clear all sessions', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+				'desc'    => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' )
+				),
 			),
 			'install_pages' => array(
 				'name'    => __( 'Install WooCommerce pages', 'woocommerce' ),
 				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+				'desc'    => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' )
+				),
 			),
 			'delete_taxes' => array(
 				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
 				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+				'desc'    => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This option will delete ALL of your tax rates, use with caution.', 'woocommerce' )
+				),
 			),
 			'reset_tracking' => array(
 				'name'    => __( 'Reset usage tracking settings', 'woocommerce' ),

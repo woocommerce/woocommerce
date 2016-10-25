@@ -107,31 +107,33 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
-		wc_enqueue_js( "
-			jQuery( function( $ ) {
-				function wcFreeShippingShowHideMinAmountField( el ) {
-					var form = $( el ).closest( 'form' );
-					var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
-					if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
-						minAmountField.hide();
-					} else {
-						minAmountField.show();
+		if ( is_admin() ) {
+			wc_enqueue_js( "
+				jQuery( function( $ ) {
+					function wcFreeShippingShowHideMinAmountField( el ) {
+						var form = $( el ).closest( 'form' );
+						var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+						if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
+							minAmountField.hide();
+						} else {
+							minAmountField.show();
+						}
 					}
-				}
 
-				$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
-					wcFreeShippingShowHideMinAmountField( this );
+					$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
+						wcFreeShippingShowHideMinAmountField( this );
+					});
+
+					// Change while load.
+					$( '#woocommerce_free_shipping_requires' ).change();
+					$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
+						if ( 'wc-modal-shipping-method-settings' === target ) {
+							wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
+						}
+					} );
 				});
-
-				// Change while load.
-				$( '#woocommerce_free_shipping_requires' ).change();
-				$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
-					if ( 'wc-modal-shipping-method-settings' === target ) {
-						wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
-					}
-				} );
-			});
-		" );
+			" );
+		}
 
 		return parent::get_instance_form_fields();
 	}

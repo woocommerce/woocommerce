@@ -157,7 +157,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'subject' => array(
 				'title'         => __( 'Email subject', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
@@ -165,7 +165,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
@@ -173,7 +173,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'subject_paid' => array(
 				'title'         => __( 'Email subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_paid . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
@@ -181,7 +181,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'heading_paid' => array(
 				'title'         => __( 'Email heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_paid . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
