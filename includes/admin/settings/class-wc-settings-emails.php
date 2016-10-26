@@ -111,7 +111,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'         => 'width:300px; height: 75px;',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',
-				'default'     => get_bloginfo( 'name', 'display' ) . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
+				'default'     => sprintf( __( '%s - Powered by WooCommerce', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
 				'autoload'    => false,
 				'desc_tip'    => true,
 			),

@@ -661,7 +661,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-variations-defaults">
 					<div class="variations-defaults">
-						<strong><?php _e( 'Default form values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
+						<strong><?php _e( 'Default form values:', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
