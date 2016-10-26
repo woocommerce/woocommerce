@@ -489,7 +489,7 @@ class WC_Meta_Box_Order_Data {
 			$props['payment_method_title'] = $payment_method_title;
 		}
 
-		// Update date
+		// Update date.
 		if ( empty( $_POST['order_date'] ) ) {
 			$date = current_time( 'timestamp' );
 		} else {
