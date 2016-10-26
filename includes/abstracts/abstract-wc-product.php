@@ -24,6 +24,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Stores product data.
 	 *
+	 * @todo download_limit download_expiry download_type downloads
+	 *
 	 * @var array
 	 */
 	protected $data = array(
@@ -42,7 +44,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'sale_price'         => '',
 		'date_on_sale_from'  => '',
 		'date_on_sale_to'    => '',
-		'total_sales'        => '',
+		'total_sales'        => '0',
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
 		'manage_stock'       => false,
@@ -62,10 +64,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'attributes'         => array(),
 		'default_attributes' => array(),
 		'menu_order'         => 0,
-		'virtual'            => false, // @todo
-		'downloadable'       => false, // @todo
+		'virtual'            => false,
+		'downloadable'       => false,
 		'category_ids'       => array(),
 		'tag_ids'            => array(),
+		'shipping_class_id'  => 0,
+		'downloads'          => array(),
 	);
 
 	/**
@@ -74,7 +78,36 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array();
+	protected $internal_meta_keys = array(
+		'_visibility',
+		'_sku',
+		'_price',
+		'_regular_price',
+		'_sale_price',
+		'_sale_price_dates_from',
+		'_sale_price_dates_to',
+		'total_sales',
+		'_tax_status',
+		'_tax_class',
+		'_manage_stock',
+		'_stock',
+		'_stock_status',
+		'_backorders',
+		'_sold_individually',
+		'_weight',
+		'_length',
+		'_width',
+		'_height',
+		'_upsell_ids',
+		'_crosssell_ids',
+		'_purchase_note',
+		'_default_attributes',
+		'_product_attributes',
+		'_virtual',
+		'_downloadable',
+		'_featured',
+		'_downloadable_files',
+	);
 
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
@@ -90,7 +123,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param int|WC_Product|object $product Product to init.
 	 */
-	function __construct( $product = 0 ) {
+	public function __construct( $product = 0 ) {
 		parent::__construct( $product );
 		if ( is_numeric( $product ) && $product > 0 ) {
 			$this->read( $product );
@@ -456,21 +489,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		$attributes = $this->data['attributes'];
-		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
-
-		// Check for any attributes which have been removed globally
-		if ( is_array( $attributes ) && count( $attributes ) > 0 ) {
-			foreach ( $attributes as $key => $attribute ) {
-				if ( ! empty( $attribute['is_taxonomy'] ) ) {
-					if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
-						unset( $attributes[ $key ] );
-					}
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_product_attributes', $attributes );
+		return apply_filters( 'woocommerce_get_product_attributes', $this->data['attributes'] );
 	}
 
 	/**
@@ -511,6 +530,46 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_tag_ids() {
 		return $this->data['tag_ids'];
+	}
+
+	/**
+	 * Get virtual.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function get_virtual() {
+		return $this->data['virtual'];
+	}
+
+	/**
+	 * Get downloadable.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function get_downloadable() {
+		return $this->data['downloadable'];
+	}
+
+	/**
+	 * Get shipping class ID.
+	 *
+	 * @since 2.7.0
+	 * @return int
+	 */
+	public function get_shipping_class_id() {
+		return $this->data['shipping_class_id'];
+	}
+
+	/**
+	 * Get downloads.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_downloads() {
+		return $this->data['downloads'];
 	}
 
 	/*
@@ -626,6 +685,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $sku Product SKU.
 	 */
 	public function set_sku( $sku ) {
+		$sku = (string) $sku;
 		if ( ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
 		}
@@ -796,7 +856,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_weight( $weight ) {
-		$this->data['weight'] = $weight;
+		$this->data['weight'] = '' === $weight ? '' : wc_format_decimal( $weight );
 	}
 
 	/**
@@ -806,7 +866,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_length( $length ) {
-		$this->data['length'] = $length;
+		$this->data['length'] = '' === $length ? '' : wc_format_decimal( $length );
 	}
 
 	/**
@@ -816,7 +876,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $width Total width.
 	 */
 	public function set_width( $width ) {
-		$this->data['width'] = $width;
+		$this->data['width'] = '' === $width ? '' : wc_format_decimal( $width );
 	}
 
 	/**
@@ -826,7 +886,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $height Total height.
 	 */
 	public function set_height( $height ) {
-		$this->data['height'] = $height;
+		$this->data['height'] = '' === $height ? '' : wc_format_decimal( $height );
 	}
 
 	/**
@@ -882,11 +942,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set product attributes.
 	 *
+	 * Attributes are made up of:
+	 * 		id - 0 for product level attributes. ID for global attributes.
+	 * 		name - Attribute name.
+	 * 		options - attribute value or array of term ids/names.
+	 * 		position - integer sort order.
+	 * 		visible - If visible on frontend.
+	 * 		variation - If used for variations.
+	 * 	Indexed by unqiue key to allow clearing old ones after a set.
+	 *
 	 * @since 2.7.0
-	 * @param array $attributes List of product attributes.
+	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
 	 */
-	public function set_attributes( $attributes ) {
-		$this->data['attributes'] = array_filter(  (array) maybe_unserialize( $attributes ) );
+	public function set_attributes( $raw_attributes ) {
+		$attributes = array_fill_keys( array_keys( $this->data['attributes'] ), null );
+
+		foreach ( $raw_attributes as $attribute ) {
+			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
+			}
+		}
+
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
+		$this->data['attributes'] = $attributes;
 	}
 
 	/**
@@ -927,6 +1005,100 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_tag_ids( $term_ids ) {
 		$this->data['tag_ids'] = $this->sanitize_term_ids( $term_ids, 'product_tag' );
+	}
+
+	/**
+	 * Set if the product is virtual.
+	 *
+	 * @since 2.7.0
+	 * @param bool|string
+	 */
+	public function set_virtual( $virtual ) {
+		$this->data['virtual'] = wc_string_to_bool( $virtual );
+	}
+
+	/**
+	 * Set if the product is downloadable.
+	 *
+	 * @since 2.7.0
+	 * @param bool|string
+	 */
+	public function set_downloadable( $downloadable ) {
+		$this->data['downloadable'] = wc_string_to_bool( $downloadable );
+	}
+
+	/**
+	 * Set shipping class ID.
+	 *
+	 * @since 2.7.0
+	 * @param int
+	 */
+	public function set_shipping_class_id( $id ) {
+		$this->data['shipping_class_id'] = absint( $id );
+	}
+
+	/**
+	 * Set downloads.
+	 *
+	 * @since 2.7.0
+	 * @param $raw_downloads array of arrays with download data (name/file)
+	 */
+	public function set_downloads( $raw_downloads ) {
+		$downloads = array();
+		$errors    = array();
+
+		foreach ( $raw_downloads as $raw_download ) {
+			// Find type and file URL
+			if ( 0 === strpos( $raw_download['file'], 'http' ) ) {
+				$file_is  = 'absolute';
+				$file_url = esc_url_raw( $raw_download['file'] );
+			} elseif ( '[' === substr( $raw_download['file'], 0, 1 ) && ']' === substr( $raw_download['file'], -1 ) ) {
+				$file_is  = 'shortcode';
+				$file_url = wc_clean( $raw_download['file'] );
+			} else {
+				$file_is = 'relative';
+				$file_url = wc_clean( $raw_download['file'] );
+			}
+
+			$file_name = wc_clean( $raw_download['name'] );
+			$file_hash = md5( $file_url );
+
+			// Validate the file extension
+			if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+				$file_type  = wp_check_filetype( strtok( $file_url, '?' ), $allowed_file_types );
+				$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+				$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+				if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' );
+					continue;
+				}
+			}
+
+			// Validate the file exists
+			if ( 'relative' === $file_is ) {
+				$_file_url = $file_url;
+				if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
+					$_file_url = realpath( ABSPATH . $file_url );
+				}
+
+				if ( ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $_file_url ), $file_url ) ) {
+					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' );
+					continue;
+				}
+			}
+
+			$downloads[ $file_hash ] = array(
+				'name' => $file_name,
+				'file' => $file_url,
+			);
+		}
+
+		$this->data['downloads'] = $downloads;
+
+		if ( $errors ) {
+			$this->error( 'product_invalid_download', $errors[0] );
+		}
 	}
 
 	/*
@@ -1024,11 +1196,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'parent_id'          => $post_object->post_parent,
 			'reviews_allowed'    => $post_object->comment_status,
 			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
-			'attributes'         => get_post_meta( $id, '_product_attributes', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
 			'category_ids'       => $this->get_term_ids( 'product_cat' ),
 			'tag_ids'            => $this->get_term_ids( 'product_tag' ),
+			'shipping_class_id'  => current( $this->get_term_ids( 'product_shipping_class' ) ),
+			'virtual'            => get_post_meta( $id, '_virtual', true ),
+			'downloadable'       => get_post_meta( $id, '_downloadable', true ),
 		) );
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -1036,6 +1210,39 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_price( $this->get_regular_price() );
 		}
 		$this->read_meta_data();
+		$this->read_attributes();
+	}
+
+	/**
+	 * Read attributes from post meta.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_attributes() {
+		$meta_values = maybe_unserialize( get_post_meta( $this->get_id(), '_product_attributes', true ) );
+
+		if ( $meta_values ) {
+			$attributes = array();
+			foreach ( $meta_values as $meta_value ) {
+				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
+					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
+						continue;
+					}
+					$options = wp_get_post_terms( $this->get_id(), $meta_value['name'], array( 'fields' => 'ids' ) );
+				} else {
+					$options = wc_get_text_attributes( $meta_value['value'] );
+				}
+				$attribute = new WC_Product_Attribute();
+				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
+				$attribute->set_name( $meta_value['name'] );
+				$attribute->set_options( $options );
+				$attribute->set_position( $meta_value['position'] );
+				$attribute->set_visible( $meta_value['is_visible'] );
+				$attribute->set_variation( $meta_value['is_variation'] );
+				$attributes[] = $attribute;
+			}
+			$this->set_attributes( $attributes );
+		}
 	}
 
 	/**
@@ -1064,6 +1271,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_id( $id );
 			$this->update_post_meta();
 			$this->update_terms();
+			$this->update_attributes();
 			$this->save_meta_data();
 			do_action( 'woocommerce_new_product', $id );
 		}
@@ -1088,6 +1296,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		wp_update_post( $post_data );
 		$this->update_post_meta();
 		$this->update_terms();
+		$this->update_attributes();
 		$this->save_meta_data();
 		do_action( 'woocommerce_update_product', $this->get_id() );
 	}
@@ -1103,6 +1312,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$this->create();
 		}
+		// Make sure we store the product type.
+		$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
+		wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
+
+		// Version is set to current WC version to track data changes.
+		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
+		wc_delete_product_transients( $this->get_id() );
 	}
 
 	/**
@@ -1123,7 +1339,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	protected function update_post_meta() {
 		$id = $this->get_id();
-		update_post_meta( $id, '_featured', $this->get_featured() );
 		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
 		update_post_meta( $id, '_sku', $this->get_sku() );
 		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
@@ -1145,13 +1360,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
 		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_product_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
+		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
+		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
+
+		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
+			delete_transient( 'wc_featured_products' );
+		}
 
 		if ( $this->is_on_sale() ) {
 			update_post_meta( $id, '_price', $this->get_sale_price() );
 		} else {
 			update_post_meta( $id, '_price', $this->get_regular_price() );
+		}
+
+		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
+			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
+			do_action( 'woocommerce_process_product_file_download_paths', $id, 0, $this->get_downloads() );
 		}
 	}
 
@@ -1163,6 +1388,48 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function update_terms() {
 		wp_set_post_terms( $this->get_id(), $this->data['category_ids'], 'product_cat', false );
 		wp_set_post_terms( $this->get_id(), $this->data['tag_ids'], 'product_tag', false );
+		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
+	}
+
+	/**
+	 * Update attributes which are a mix of terms and meta data.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function update_attributes() {
+		$attributes  = $this->get_attributes();
+		$meta_values = array();
+
+		if ( $attributes ) {
+			foreach ( $attributes as $attribute_key => $attribute ) {
+				$value = '';
+
+				if ( is_null( $attribute ) ) {
+					if ( taxonomy_exists( $attribute_key ) ) {
+						// Handle attributes that have been unset.
+						wp_set_object_terms( $this->get_id(), array(), $attribute_key );
+					}
+					continue;
+
+				} elseif ( $attribute->is_taxonomy() ) {
+					wp_set_object_terms( $this->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
+
+				} else {
+					$value = wc_implode_text_attributes( $attribute->get_options() );
+				}
+
+				// Store in format WC uses in meta.
+				$meta_values[ $attribute_key ] = array(
+					'name'         => $attribute->get_name(),
+					'value'        => $value,
+					'position'     => $attribute->get_position(),
+					'is_visible'   => $attribute->get_visible() ? 1 : 0,
+					'is_variation' => $attribute->get_variation() ? 1 : 0,
+					'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+				);
+			}
+		}
+		update_post_meta( $this->get_id(), '_product_attributes', $meta_values );
 	}
 
 	/*
@@ -1392,6 +1659,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
 	}
 
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		return apply_filters( 'wc_product_enable_dimensions_display', ! $this->get_virtual() ) && ( $this->has_dimensions() || $this->has_weight() );
+	}
+
+	/**
+	 * Returns whether or not the product has any visible attributes.
+	 *
+	 * @return boolean
+	 */
+	public function has_attributes() {
+		foreach ( $this->get_attributes() as $attribute ) {
+			if ( $attribute->get_visible() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1495,6 +1785,41 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
+	/**
+	 * Returns the product shipping class SLUG.
+	 *
+	 * @return string
+	 */
+	public function get_shipping_class() {
+		if ( $class_id = $this->get_shipping_class_id() ) {
+			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				return $term->slug;
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Returns a single product attribute as a string.
+	 * @param  string $attribute to get.
+	 * @return string
+	 */
+	public function get_attribute( $attribute ) {
+		$attributes = $this->get_attributes();
+		$attribute  = sanitize_title( $attribute );
+
+		if ( isset( $attributes[ $attribute ] ) ) {
+			$attribute_object = $attributes[ $attribute ];
+		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
+			$attribute_object = $attributes[ 'pa_' . $attribute ];
+		} else {
+			return '';
+		}
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| @todo
@@ -1573,7 +1898,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set stock level of the product.
+	 * Set stock level of the product. @todo '' stock if not managing it.
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
@@ -1743,115 +2068,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/*
 	|--------------------------------------------------------------------------
-	| @todo taxonomy functions
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Returns the product shipping class.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_class() {
-
-		if ( ! $this->shipping_class ) {
-
-			$classes = get_the_terms( $this->get_id(), 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->shipping_class = current( $classes )->slug;
-			} else {
-				$this->shipping_class = '';
-			}
-		}
-
-		return $this->shipping_class;
-	}
-
-	/**
-	 * Returns the product shipping class ID.
-	 *
-	 * @return int
-	 */
-	public function get_shipping_class_id() {
-
-		if ( ! $this->shipping_class_id ) {
-
-			$classes = get_the_terms( $this->get_id(), 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->shipping_class_id = current( $classes )->term_id;
-			} else {
-				$this->shipping_class_id = 0;
-			}
-		}
-
-		return absint( $this->shipping_class_id );
-	}
-
-	/**
-	 * Returns a single product attribute.
-	 *
-	 * @param mixed $attr
-	 * @return string
-	 */
-	public function get_attribute( $attr ) {
-
-		$attributes = $this->get_attributes();
-
-		$attr = sanitize_title( $attr );
-
-		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
-
-			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
-
-			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-
-				return implode( ', ', wc_get_product_terms( $this->get_id(), $attribute['name'], array( 'fields' => 'names' ) ) );
-
-			} else {
-
-				return $attribute['value'];
-			}
-		}
-
-		return '';
-	}
-
-	/**
-	 * Returns whether or not the product has any attributes set.
-	 *
-	 * @return boolean
-	 */
-	public function has_attributes() {
-
-		if ( sizeof( $this->get_attributes() ) > 0 ) {
-
-			foreach ( $this->get_attributes() as $attribute ) {
-
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/*
-	|--------------------------------------------------------------------------
 	| @todo misc
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() );
-	}
 
 	/**
 	 * Does a child have dimensions set?

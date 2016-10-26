@@ -1363,7 +1363,7 @@ function wc_set_time_limit( $limit = 0 ) {
  * @since 2.6.0
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	if ( $a['position'] == $b['position'] ) {
+	if ( $a['position'] === $b['position'] ) {
 		return 0;
 	}
 	return ( $a['position'] < $b['position'] ) ? -1 : 1;

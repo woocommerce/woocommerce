@@ -54,7 +54,7 @@ class WC_Product_Factory {
 	 * @param  string $product_type
 	 * @return string|false
 	 */
-	private function get_classname_from_product_type( $product_type ) {
+	public static function get_classname_from_product_type( $product_type ) {
 		return $product_type ? 'WC_Product_' . implode( '_', array_map( 'ucfirst', explode( '-', $product_type ) ) ) : false;
 	}
 
