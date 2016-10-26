@@ -158,9 +158,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.7 - x =
+= 2.6.7 - 26/10/16 =
 * Fix - Use FLOOR and CEIL to get price filter values. Fixes the issue where max price is capped at 99.
 * Fix - Hide "Sales this month" information from Dashboard widget for users that don't have `view_woocommerce_reports` capability.
+* Fix - Remove notices only once on cart so subsequent notices do not remove older notices.
 * Tweak - Improve credit card fields for better mobile experience.
 
 = 2.6.6 - 20/10/16 =
