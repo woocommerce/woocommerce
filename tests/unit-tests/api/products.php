@@ -311,6 +311,8 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
+		//error_log( print_r ( $data, 1 ) );
+
 		$this->assertEquals( 'DUMMY SKU VARIABLE API', $data['sku'] );
 		$this->assertEquals( 'Test Variable Product', $data['name'] );
 		$this->assertEquals( 'variable', $data['type'] );
