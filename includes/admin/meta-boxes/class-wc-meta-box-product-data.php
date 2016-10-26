@@ -850,37 +850,28 @@ class WC_Meta_Box_Product_Data {
 				$attribute_name = wc_clean( $attribute_names[ $i ] );
 				$is_taxonomy    = $attribute_is_taxonomy[ $i ];
 				$is_variation   = $attribute_variation[ $i ];
+				$options        = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
 
 				if ( $is_taxonomy ) {
-					$values = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
 
-					if ( is_array( $values ) ) {
-						$values = wp_parse_id_list( $values ); // Term ids.
+
+					if ( is_array( $options ) ) {
+						$options = wp_parse_id_list( $options ); // Term ids.
 					} else {
-						$values = array_filter( array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $values ) ) ), 'strlen' ); // Names.
+						$options = array_filter( array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $options ) ) ), 'strlen' ); // Names.
 					}
-
-					$attribute = array(
-						'id'        => wc_attribute_taxonomy_id_by_name( $attribute_name ),
-						'name'      => $attribute_name,
-						'options'   => $values,
-						'position'  => absint( $attribute_position[ $i ] ),
-						'visible'   => (bool) $attribute_visibility[ $i ],
-						'variation' => (bool) $attribute_variation[ $i ],
-					);
 				} else {
-					$values    = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
-					$values    = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
-					$attribute = array(
-						'id'        => 0,
-						'name'      => $attribute_name,
-						'options'   => $values,
-						'position'  => absint( $attribute_position[ $i ] ),
-						'visible'   => (bool) $attribute_visibility[ $i ],
-						'variation' => (bool) $attribute_variation[ $i ],
-					);
+					$options = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					$options = wc_get_text_attributes( $options );
 				}
 
+				$attribute = new WC_Product_Attribute();
+				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $attribute_name ) );
+				$attribute->set_name( $attribute_name );
+				$attribute->set_options( $options );
+				$attribute->set_position( $attribute_position[ $i ] );
+				$attribute->set_visible( (bool) $attribute_visibility[ $i ] );
+				$attribute->set_variation( (bool) $attribute_variation[ $i ] );
 				$attributes[] = $attribute;
 			}
 		}

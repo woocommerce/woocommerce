@@ -460,21 +460,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		$attributes = $this->data['attributes'];
-		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
-
-		// Check for any attributes which have been removed globally
-		if ( is_array( $attributes ) && count( $attributes ) > 0 ) {
-			foreach ( $attributes as $key => $attribute ) {
-				if ( ! empty( $attribute['is_taxonomy'] ) ) {
-					if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
-						unset( $attributes[ $key ] );
-					}
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_product_attributes', $attributes );
+		return apply_filters( 'woocommerce_get_product_attributes', $this->data['attributes'] );
 	}
 
 	/**
@@ -948,24 +934,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * 	Indexed by unqiue key to allow clearing old ones after a set.
 	 *
 	 * @since 2.7.0
-	 * @param array $raw_attributes List of product attributes.
+	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
 	 */
 	public function set_attributes( $raw_attributes ) {
 		$attributes = array_map( array( $this, 'set_attribute_null' ), $this->data['attributes'] );
 
-		foreach ( $raw_attributes as $raw_attribute ) {
-			if ( empty( $raw_attribute['id'] ) && empty( $raw_attribute['name'] ) ) {
-				continue;
+		foreach ( $raw_attributes as $attribute ) {
+			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+				$attributes[ $attribute->get_id() ? 'id:' . $attribute->get_id() : 'name:' . $attribute->get_name() ] = $attribute;
 			}
-			$attribute = wp_parse_args( $raw_attribute, array(
-				'id'        => 0,
-				'name'      => '',
-				'options'   => '',
-				'position'  => 0,
-				'visible'   => 0,
-				'variation' => 0,
-			) );
-			$attributes[ $attribute['id'] ? 'id:' . $attribute['id'] : 'name:' . $attribute['name'] ] = $attribute;
 		}
 
 		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
@@ -1234,14 +1211,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
-				$attributes[] = array(
-					'id'        => wc_attribute_taxonomy_id_by_name( $meta_value['name'] ),
-					'name'      => $meta_value['name'],
-					'options'   => $options,
-					'position'  => $meta_value['position'],
-					'visible'   => $meta_value['is_visible'],
-					'variation' => $meta_value['is_variation'],
-				);
+				$attribute = new WC_Product_Attribute();
+				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
+				$attribute->set_name( $meta_value['name'] );
+				$attribute->set_options( $options );
+				$attribute->set_position( $meta_value['position'] );
+				$attribute->set_visible( $meta_value['is_visible'] );
+				$attribute->set_variation( $meta_value['is_variation'] );
+				$attributes[] = $attribute;
 			}
 			$this->set_attributes( $attributes );
 		}
@@ -1362,7 +1339,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
 		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
 		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_product_attributes', $this->get_attributes() );
 		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
 		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
 		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
@@ -1691,6 +1667,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return apply_filters( 'wc_product_enable_dimensions_display', ! $this->get_virtual() ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
+	/**
+	 * Returns whether or not the product has any visible attributes.
+	 *
+	 * @return boolean
+	 */
+	public function has_attributes() {
+		foreach ( $this->get_attributes() as $attribute ) {
+			if ( $attribute->get_visible() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1807,6 +1797,32 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				return $term->slug;
 			}
 		}
+		return '';
+	}
+
+	/**
+	 * Returns a single product attribute as a string. @todo
+	 * @param  string $attr
+	 * @return string
+	 */
+	public function get_attribute( $attr ) {
+		$attributes = $this->get_attributes();
+		$attr       = sanitize_title( $attr );
+
+		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
+
+			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
+
+			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+
+				return implode( ', ', wc_get_product_terms( $this->get_id(), $attribute['name'], array( 'fields' => 'names' ) ) );
+
+			} else {
+
+				return $attribute['value'];
+			}
+		}
+
 		return '';
 	}
 
@@ -2046,63 +2062,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| @todo taxonomy functions
-	|--------------------------------------------------------------------------
-	*/
-
-
-
-	/**
-	 * Returns a single product attribute.
-	 *
-	 * @param mixed $attr
-	 * @return string
-	 */
-	public function get_attribute( $attr ) {
-
-		$attributes = $this->get_attributes();
-
-		$attr = sanitize_title( $attr );
-
-		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
-
-			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
-
-			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-
-				return implode( ', ', wc_get_product_terms( $this->get_id(), $attribute['name'], array( 'fields' => 'names' ) ) );
-
-			} else {
-
-				return $attribute['value'];
-			}
-		}
-
-		return '';
-	}
-
-	/**
-	 * Returns whether or not the product has any attributes set.
-	 *
-	 * @return boolean
-	 */
-	public function has_attributes() {
-
-		if ( sizeof( $this->get_attributes() ) > 0 ) {
-
-			foreach ( $this->get_attributes() as $attribute ) {
-
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	/*
