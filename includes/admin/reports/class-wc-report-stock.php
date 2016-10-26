@@ -146,7 +146,13 @@ class WC_Report_Stock extends WP_List_Table {
 						$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
 
 						foreach ( $actions as $action ) {
-							printf( '<a class="button tips %s" href="%s" data-tip="%s ' . __( 'product', 'woocommerce' ) . '">%s</a>', $action['action'], esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+							printf(
+								'<a class="button tips %1$s" href="%2$s" data-tip="%3$s">%4$s</a>',
+								esc_attr( $action['action'] ),
+								esc_url( $action['url'] ),
+								sprintf( esc_attr__( '%s product', 'woocommerce' ), $action['name'] ),
+								esc_html( $action['name'] )
+							);
 						}
 					?>
 				</p><?php
