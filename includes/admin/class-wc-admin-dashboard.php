@@ -97,7 +97,7 @@ class WC_Admin_Dashboard {
 			<li class="sales-this-month">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ); ?>">
 					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time( 'timestamp' ) ) ) ); ?>
-					<?php printf( __( '%s net sales this month', 'woocommerce' ), '<strong>' . wc_price( $report_data->net_sales ) . '</strong>' ); ?>
+					<?php printf( __( '<strong>%s</strong> net sales this month', 'woocommerce' ), wc_price( $report_data->net_sales ) ); ?>
 				</a>
 			</li>
 			<?php
@@ -108,7 +108,7 @@ class WC_Admin_Dashboard {
 			<li class="best-seller-this-month">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ); ?>">
 					<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, date( 'd', current_time( 'timestamp' ) ) ), 'count' ); ?>
-					<?php printf( __( '%1$s top seller this month (sold %2$d)', 'woocommerce' ), '<strong>' . get_the_title( $top_seller->product_id ) . '</strong>', $top_seller->qty ); ?>
+					<?php printf( __( '%s top seller this month (sold %d)', 'woocommerce' ), '<strong>' . get_the_title( $top_seller->product_id ) . '</strong>', $top_seller->qty ); ?>
 				</a>
 			</li>
 			<?php
