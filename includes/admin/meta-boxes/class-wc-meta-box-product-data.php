@@ -468,7 +468,7 @@ class WC_Meta_Box_Product_Data {
 
 						foreach ( $attributes as $attribute ) {
 							$i++;
-							$metabox_class      = array();
+							$metabox_class = array();
 
 							if ( $attribute->is_taxonomy() ) {
 								$metabox_class[] = 'taxonomy';
