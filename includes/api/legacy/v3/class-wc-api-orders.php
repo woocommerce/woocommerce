@@ -961,7 +961,7 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		$item->set_product( $product );
-		$item->set_order_id( $order->id );
+		$item->set_order_id( $order->get_id() );
 
 		if ( isset( $item['quantity'] ) ) {
 			$item->set_quantity( $item['quantity'] );
