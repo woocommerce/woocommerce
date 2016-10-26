@@ -100,7 +100,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * Set ID (this is the attribute ID).
+	 * Set options.
 	 * @param array $value
 	 */
 	public function set_options( $value ) {
