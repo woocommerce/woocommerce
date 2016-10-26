@@ -423,10 +423,9 @@ class WC_Meta_Box_Order_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
-	 * @param WP_Post $post
+	 * @param int $order_id Order ID.
 	 */
-	public static function save( $post_id, $post ) {
+	public static function save( $order_id ) {
 		global $wpdb;
 
 		self::init_address_fields();
@@ -436,7 +435,7 @@ class WC_Meta_Box_Order_Data {
 		WC()->shipping();
 
 		// Get order object.
-		$order = wc_get_order( $post_id );
+		$order = wc_get_order( $order_id );
 		$props = array();
 
 		// Create order key.
@@ -499,7 +498,7 @@ class WC_Meta_Box_Order_Data {
 
 		$props['date_created'] = $date;
 
-		clean_post_cache( $post_id );
+		clean_post_cache( $order_id );
 
 		// Order data saved, now get it so we can manipulate status.
 		$order->set_props( $props );
@@ -508,6 +507,6 @@ class WC_Meta_Box_Order_Data {
 		// Order status.
 		$order->update_status( $_POST['order_status'], '', true );
 
-		wc_delete_shop_order_transients( $post_id );
+		wc_delete_shop_order_transients( $order_id );
 	}
 }
