@@ -684,6 +684,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_item_for_database( $request ) {
 		$allowed_types = array( 'simple', 'grouped', 'external', 'variable', 'variation' );
+		// @ todo - use WC_Product_Factory::get_classname_from_product_type instead
+		/*
+		$classname    = WC_Product_Factory::get_classname_from_product_type( $product_type );
+		if ( ! class_exists( $classname ) ) {
+			$classname = 'WC_Product_Simple';
+  		}
+		*/
 		if ( isset( $request['type'] ) && in_array( $request['type'], $allowed_types ) ) {
 			$classname = "WC_Product_{$request['type']}";
 		} else {
@@ -1077,6 +1084,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Attributes.
+		error_log( print_r ( $request['attributes'], 1 ) );
 		if ( isset( $request['attributes'] ) ) {
 			$attributes = array();
 
@@ -1095,6 +1103,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
+
+				error_log( print_r ( 'test', 1 ) );
+				error_log( print_r ( $attribute_id, 1 ) );
+				error_log( print_r ( $attribute_name, 1 ) );
 
 				if ( $attribute_id ) {
 
@@ -1420,6 +1432,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Save variations.
+	 * @todo after variations CRUD is done
 	 *
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
@@ -1866,7 +1879,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Delete product.
-		wp_delete_post( $post->ID, true );
+		$product = wc_get_product( $post->ID );
+		$product->delete();
 	}
 
 	/**
@@ -1876,9 +1890,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id    = (int) $request['id'];
-		$force = (bool) $request['force'];
-		$post  = get_post( $id );
+		$id      = (int) $request['id'];
+		$force   = (bool) $request['force'];
+		$post    = get_post( $id );
+		$product = wc_get_product( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post ID.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -1905,26 +1920,23 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-			$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
 
-			if ( ! empty( $child_product_variations ) ) {
-				foreach ( $child_product_variations as $child ) {
-					wp_delete_post( $child->ID, true );
+			if ( $product->is_type( 'variable' ) ) {
+				foreach ( $product->get_children() as $child_id ) {
+					$child = wc_get_product( $child_id );
+					$child->delete();
 				}
-			}
-
-			$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
-
-			if ( ! empty( $child_products ) ) {
-				foreach ( $child_products as $child ) {
-					$child_post                = array();
-					$child_post['ID']          = $child->ID;
-					$child_post['post_parent'] = 0;
-					wp_update_post( $child_post );
+			} elseif ( $product->is_type( 'grouped' ) ) {
+				foreach ( $product->get_children() as $child_id ) {
+					$child = wc_get_product( $child_id );
+					$child->set_parent_id( 0 );
+					$child->save();
 				}
 			}
 
 			$result = wp_delete_post( $id, true );
+			$product->delete();
+			$result = $product->get_id() > 0 ? fase : true;
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
