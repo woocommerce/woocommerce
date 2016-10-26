@@ -431,49 +431,53 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
-		// Ensure gateways are loaded in case they need to insert data into the emails
+		// Ensure gateways are loaded in case they need to insert data into the emails.
 		WC()->payment_gateways();
 		WC()->shipping();
 
-		$customer_changed = false;
+		// Get order object.
+		$order = wc_get_order( $post_id );
+		$props = array();
 
-		// Add key
-		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
-
-		// Update meta
-		if ( update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) ) ) {
-			$customer_changed = true;
+		// Create order key.
+		if ( ! $order->get_order_key() ) {
+			$props['order_key'] = 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) );
 		}
 
+		// Update customer.
+		$customer_id = absint( $_POST['customer_user'] );
+		if ( $customer_id !== $order->get_customer_id() ) {
+			$props['customer_id'] = $customer_id;
+		}
+
+		// Update billing fields.
 		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
 				}
-				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
-					$customer_changed = true;
-				}
+
+				$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
 			}
 		}
 
+		// Update shipping fields.
 		if ( ! empty( self::$shipping_fields ) ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
 				}
-				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
-					$customer_changed = true;
-				}
+
+				$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
 			}
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST['_transaction_id'] ) );
+			$props['transaction_id'] = wc_clean( $_POST['_transaction_id'] );
 		}
 
-		// Payment method handling
-		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
-
+		// Payment method handling.
+		if ( $order->get_payment_method() !== wp_unslash( $_POST['_payment_method'] ) ) {
 			$methods              = WC()->payment_gateways->payment_gateways();
 			$payment_method       = wc_clean( $_POST['_payment_method'] );
 			$payment_method_title = $payment_method;
@@ -482,8 +486,8 @@ class WC_Meta_Box_Order_Data {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
 			}
 
-			update_post_meta( $post_id, '_payment_method', $payment_method );
-			update_post_meta( $post_id, '_payment_method_title', $payment_method_title );
+			$props['payment_method'] = $payment_method;
+			$props['payment_method_title'] = $payment_method_title;
 		}
 
 		// Update date
@@ -493,36 +497,15 @@ class WC_Meta_Box_Order_Data {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}
 
-		$date = date_i18n( 'Y-m-d H:i:s', $date );
-
-		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+		$props['date_created'] = $date;
 
 		clean_post_cache( $post_id );
 
-		// If customer changed, update any downloadable permissions
-		if ( $customer_changed ) {
-			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
-				array(
-					'user_id'    => absint( get_post_meta( $post->ID, '_customer_user', true ) ),
-					'user_email' => wc_clean( get_post_meta( $post->ID, '_billing_email', true ) ),
-				),
-				array(
-					'order_id' 		=> $post_id,
-				),
-				array(
-					'%d',
-					'%s',
-				),
-				array(
-					'%d',
-				)
-			);
-		}
+		// Order data saved, now get it so we can manipulate status.
+		$order->set_props( $props );
+		$order->update();
 
-		// Order data saved, now get it so we can manipulate status
-		$order = wc_get_order( $post_id );
-
-		// Order status
+		// Order status.
 		$order->update_status( $_POST['order_status'], '', true );
 
 		wc_delete_shop_order_transients( $post_id );
