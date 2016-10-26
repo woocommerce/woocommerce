@@ -25,23 +25,36 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-		global $post, $thepostid;
+		global $post, $thepostid, $product_object;
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
 		$thepostid      = $post->ID;
-		$product_object = wc_get_product( $thepostid );
-		$product_type   = $product_object->get_type();
+		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 
-		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product Type', 'woocommerce' ) . '">';
+		include( 'views/html-product-data-panel.php' );
+	}
 
-		foreach ( wc_get_product_types() as $value => $label ) {
-			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) . '>' . esc_html( $label ) . '</option>';
-		}
+	/**
+	 * Show tab content/settings.
+	 */
+	private static function output_tabs() {
+		global $post, $thepostid, $product_object;
 
-		$type_box .= '</optgroup></select></label>';
+		include( 'views/html-product-data-general.php' );
+		include( 'views/html-product-data-inventory.php' );
+		include( 'views/html-product-data-shipping.php' );
+		include( 'views/html-product-data-linked-products.php' );
+		include( 'views/html-product-data-attributes.php' );
+		include( 'views/html-product-data-advanced.php' );
+	}
 
-		$product_type_options = apply_filters( 'product_type_options', array(
+	/**
+	 * Return array of product type options.
+	 * @return array
+	 */
+	private static function get_product_type_options() {
+		return apply_filters( 'product_type_options', array(
 			'virtual' => array(
 				'id'            => '_virtual',
 				'wrapper_class' => 'show_if_simple',
@@ -57,235 +70,50 @@ class WC_Meta_Box_Product_Data {
 				'default'       => 'no',
 			),
 		) );
+	}
 
-		foreach ( $product_type_options as $key => $option ) {
-			$selected_value = get_post_meta( $post->ID, '_' . $key, true );
-
-			if ( '' == $selected_value && isset( $option['default'] ) ) {
-				$selected_value = $option['default'];
-			}
-
-			$type_box .= '<label for="' . esc_attr( $option['id'] ) . '" class="' . esc_attr( $option['wrapper_class'] ) . ' tips" data-tip="' . esc_attr( $option['description'] ) . '">' . esc_html( $option['label'] ) . ': <input type="checkbox" name="' . esc_attr( $option['id'] ) . '" id="' . esc_attr( $option['id'] ) . '" ' . checked( $selected_value, 'yes', false ) . ' /></label>';
-		}
-
-		?>
-		<div class="panel-wrap product_data">
-
-			<span class="type_box hidden"> &mdash; <?php echo $type_box; ?></span>
-
-			<ul class="product_data_tabs wc-tabs">
-				<?php
-					$product_data_tabs = apply_filters( 'woocommerce_product_data_tabs', array(
-						'general' => array(
-							'label'  => __( 'General', 'woocommerce' ),
-							'target' => 'general_product_data',
-							'class'  => array( 'hide_if_grouped' ),
-						),
-						'inventory' => array(
-							'label'  => __( 'Inventory', 'woocommerce' ),
-							'target' => 'inventory_product_data',
-							'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
-						),
-						'shipping' => array(
-							'label'  => __( 'Shipping', 'woocommerce' ),
-							'target' => 'shipping_product_data',
-							'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
-						),
-						'linked_product' => array(
-							'label'  => __( 'Linked Products', 'woocommerce' ),
-							'target' => 'linked_product_data',
-							'class'  => array(),
-						),
-						'attribute' => array(
-							'label'  => __( 'Attributes', 'woocommerce' ),
-							'target' => 'product_attributes',
-							'class'  => array(),
-						),
-						'variations' => array(
-							'label'  => __( 'Variations', 'woocommerce' ),
-							'target' => 'variable_product_options',
-							'class'  => array( 'variations_tab', 'show_if_variable' ),
-						),
-						'advanced' => array(
-							'label'  => __( 'Advanced', 'woocommerce' ),
-							'target' => 'advanced_product_data',
-							'class'  => array(),
-						),
-					) );
-
-					foreach ( $product_data_tabs as $key => $tab ) {
-						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
-							<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
-						</li><?php
-					}
-
-					do_action( 'woocommerce_product_write_panel_tabs' );
-				?>
-			</ul>
-
-
-
-
-
-
-			<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
-				<div class="toolbar toolbar-top">
-					<span class="expand-close">
-						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
-					</span>
-					<select name="attribute_taxonomy" class="attribute_taxonomy">
-						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
-						<?php
-							global $wc_product_attributes;
-
-							// Array of defined attribute taxonomies
-							$attribute_taxonomies = wc_get_attribute_taxonomies();
-
-							if ( ! empty( $attribute_taxonomies ) ) {
-								foreach ( $attribute_taxonomies as $tax ) {
-									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
-									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
-									echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
-								}
-							}
-						?>
-					</select>
-					<button type="button" class="button add_attribute"><?php _e( 'Add', 'woocommerce' ); ?></button>
-				</div>
-				<div class="product_attributes wc-metaboxes">
-					<?php
-						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
-						$attributes = $product_object->get_attributes();
-						$i          = -1;
-
-						foreach ( $attributes as $attribute ) {
-							$i++;
-							$metabox_class      = array();
-
-							if ( $attribute->is_taxonomy() ) {
-								$metabox_class[] = 'taxonomy';
-								$metabox_class[] = $attribute->get_name();
-							}
-
-							include( 'views/html-product-attribute.php' );
-						}
-					?>
-				</div>
-				<div class="toolbar">
-					<span class="expand-close">
-						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
-					</span>
-					<button type="button" class="button save_attributes button-primary"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
-				</div>
-				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
-			</div>
-			<div id="linked_product_data" class="panel woocommerce_options_panel hidden">
-
-				<div class="options_group">
-					<p class="form-field">
-						<label for="upsell_ids"><?php _e( 'Up-sells', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-							$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
-							$json_ids    = array();
-
-							foreach ( $product_ids as $product_id ) {
-								$product = wc_get_product( $product_id );
-								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
-								}
-							}
-
-							echo esc_attr( json_encode( $json_ids ) );
-						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ); ?>
-					</p>
-
-					<p class="form-field">
-						<label for="crosssell_ids"><?php _e( 'Cross-sells', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-							$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
-							$json_ids    = array();
-
-							foreach ( $product_ids as $product_id ) {
-								$product = wc_get_product( $product_id );
-								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
-								}
-							}
-
-							echo esc_attr( json_encode( $json_ids ) );
-						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ); ?>
-					</p>
-
-					<p class="form-field show_if_grouped">
-						<label for="grouped_products"><?php _e( 'Grouped products', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="grouped_products" name="grouped_products" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-						$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_children', true ) ) );
-						$json_ids    = array();
-
-						foreach ( $product_ids as $product_id ) {
-							$product = wc_get_product( $product_id );
-							if ( is_object( $product ) ) {
-								$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
-							}
-						}
-
-						echo esc_attr( json_encode( $json_ids ) );
-						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'This lets you choose which products are part of this group.', 'woocommerce' ) ); ?>
-					</p>
-				</div>
-
-				<?php do_action( 'woocommerce_product_options_related' ); ?>
-			</div>
-
-			<div id="advanced_product_data" class="panel woocommerce_options_panel hidden">
-
-				<div class="options_group hide_if_external">
-					<?php
-						// Purchase note
-						woocommerce_wp_textarea_input( array( 'id' => '_purchase_note', 'label' => __( 'Purchase note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
-					?>
-				</div>
-
-				<div class="options_group">
-					<?php
-						// menu_order
-						woocommerce_wp_text_input( array(
-							'id'          => 'menu_order',
-							'label'       => __( 'Menu order', 'woocommerce' ),
-							'desc_tip'    => 'true',
-							'description' => __( 'Custom ordering position.', 'woocommerce' ),
-							'value'       => intval( $post->menu_order ),
-							'type'        => 'number',
-							'custom_attributes' => array(
-								'step' 	=> '1',
-							),
-						) );
-					?>
-				</div>
-
-				<div class="options_group reviews">
-					<?php
-						woocommerce_wp_checkbox( array( 'id' => 'comment_status', 'label' => __( 'Enable reviews', 'woocommerce' ), 'cbvalue' => 'open', 'value' => esc_attr( $post->comment_status ) ) );
-
-						do_action( 'woocommerce_product_options_reviews' );
-					?>
-				</div>
-
-				<?php do_action( 'woocommerce_product_options_advanced' ); ?>
-
-			</div>
-
-			<?php
-				self::output_variations();
-
-				do_action( 'woocommerce_product_data_panels' );
-				do_action( 'woocommerce_product_write_panels' ); // _deprecated
-			?>
-
-			<div class="clear"></div>
-
-		</div>
-		<?php
+	/**
+	 * Return array of tabs to show.
+	 * @return array
+	 */
+	private static function get_product_data_tabs() {
+		return apply_filters( 'woocommerce_product_data_tabs', array(
+			'general' => array(
+				'label'  => __( 'General', 'woocommerce' ),
+				'target' => 'general_product_data',
+				'class'  => array( 'hide_if_grouped' ),
+			),
+			'inventory' => array(
+				'label'  => __( 'Inventory', 'woocommerce' ),
+				'target' => 'inventory_product_data',
+				'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
+			),
+			'shipping' => array(
+				'label'  => __( 'Shipping', 'woocommerce' ),
+				'target' => 'shipping_product_data',
+				'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
+			),
+			'linked_product' => array(
+				'label'  => __( 'Linked Products', 'woocommerce' ),
+				'target' => 'linked_product_data',
+				'class'  => array(),
+			),
+			'attribute' => array(
+				'label'  => __( 'Attributes', 'woocommerce' ),
+				'target' => 'product_attributes',
+				'class'  => array(),
+			),
+			'variations' => array(
+				'label'  => __( 'Variations', 'woocommerce' ),
+				'target' => 'variable_product_options',
+				'class'  => array( 'variations_tab', 'show_if_variable' ),
+			),
+			'advanced' => array(
+				'label'  => __( 'Advanced', 'woocommerce' ),
+				'target' => 'advanced_product_data',
+				'class'  => array(),
+			),
+		) );
 	}
 
 	/**
@@ -565,7 +393,7 @@ class WC_Meta_Box_Product_Data {
 
 		$product = new $classname( $post_id );
 		$errors  = $product->set_props( array(
-			'sku'               => wc_clean( $_POST['_sku'] ),
+			'sku'               => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
 			'purchase_note'     => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
 			'downloadable'      => isset( $_POST['_downloadable'] ) ,
 			'virtual'           => isset( $_POST['_virtual'] ),
@@ -586,7 +414,7 @@ class WC_Meta_Box_Product_Data {
 			'manage_stock'      => ! empty( $_POST['_manage_stock'] ),
 			'backorders'        => wc_clean( $_POST['_backorders'] ),
 			'stock_status'      => wc_clean( $_POST['_stock_status'] ),
-			'stock'             => wc_stock_amount( $_POST['_stock'] ),
+			'stock_quantity'    => wc_stock_amount( $_POST['_stock'] ),
 			'attributes'        => self::prepare_attributes(),
 			'download_limit'    => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'   => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
@@ -595,6 +423,7 @@ class WC_Meta_Box_Product_Data {
 			'product_url'       => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'       => wc_clean( $_POST['_button_text'] ),
 			'children'          => 'grouped' === $product_type ? self::prepare_children() : null,
+			'reviews_allowed'   => ! empty( $_POST['_reviews_allowed'] ),
 		) );
 
 		if ( is_wp_error( $errors ) ) {

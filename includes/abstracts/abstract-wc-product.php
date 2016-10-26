@@ -1194,7 +1194,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'upsell_ids'         => get_post_meta( $id, '_upsell_ids', true ),
 			'cross_sell_ids'     => get_post_meta( $id, '_crosssell_ids', true ),
 			'parent_id'          => $post_object->post_parent,
-			'reviews_allowed'    => $post_object->comment_status,
+			'reviews_allowed'    => 'open' === $post_object->comment_status,
 			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
 			'menu_order'         => $post_object->menu_order,
@@ -1261,7 +1261,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_content'   => $this->get_description(),
 			'post_excerpt'   => $this->get_short_description(),
 			'post_parent'    => $this->get_parent_id(),
-			'comment_status' => $this->get_reviews_allowed(),
+			'comment_status' => $this->get_reviews_allowed() ? 'open' : 'closed',
 			'menu_order'     => $this->get_menu_order(),
 			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
 			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
@@ -1289,7 +1289,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'post_excerpt'   => $this->get_short_description(),
 			'post_title'     => $this->get_name(),
 			'post_parent'    => $this->get_parent_id(),
-			'comment_status' => $this->get_reviews_allowed(),
+			'comment_status' => $this->get_reviews_allowed() ? 'open' : 'closed',
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'menu_order'     => $this->get_menu_order(),
 		);
@@ -1682,11 +1682,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return false;
 	}
 
+	/**
+	 * Returns whether or not the product has any child product.
+	 *
+	 * @return bool
+	 */
+	public function has_child() {
+		return 0 < count( $this->get_children() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Returns the children IDs if applicable. Overridden by child classes.
+	 *
+	 * @return array of IDs
+	 */
+	public function get_children() {
+		return array();
+	}
 
 	/**
 	 * Returns the price in html format.
@@ -1833,24 +1851,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_gallery_attachment_ids() {
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
-	}
-
-	/**
-	 * Returns the children.
-	 *
-	 * @return array
-	 */
-	public function get_children() {
-		return array();
-	}
-
-	/**
-	 * Returns whether or not the product has any child product.
-	 *
-	 * @return bool
-	 */
-	public function has_child() {
-		return 0 < count( $this->get_children() );
 	}
 
 	/*
