@@ -49,7 +49,7 @@
 								<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php
 
 									// Text attributes should list terms pipe separated
-									echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', wp_list_pluck( 'name', $attribute->get_terms() ) ) );
+									echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', wp_list_pluck( $attribute->get_terms(), 'name' ) ) );
 
 								?>" placeholder="<?php echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) ); ?>" />
 

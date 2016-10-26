@@ -502,28 +502,18 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		global $wc_product_attributes;
-
-		$thepostid     = 0;
-		$taxonomy      = sanitize_text_field( $_POST['taxonomy'] );
 		$i             = absint( $_POST['i'] );
-		$position      = 0;
 		$metabox_class = array();
-		$attribute     = array(
-			'name'         => $taxonomy,
-			'value'        => '',
-			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
-			'is_variation' => apply_filters( 'woocommerce_attribute_default_is_variation', 0 ),
-			'is_taxonomy'  => $taxonomy ? 1 : 0,
-		);
+		$attribute     = new WC_Product_Attribute();
 
-		if ( $taxonomy ) {
-			$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
-			$metabox_class[]    = 'taxonomy';
-			$metabox_class[]    = $taxonomy;
-			$attribute_label    = wc_attribute_label( $taxonomy );
-		} else {
-			$attribute_label = '';
+		$attribute->set_id( wc_attribute_taxonomy_id_by_name( sanitize_text_field( $_POST['taxonomy'] ) ) );
+		$attribute->set_name( sanitize_text_field( $_POST['taxonomy'] ) );
+		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
+		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 0 ) );
+
+		if ( $attribute->is_taxonomy() ) {
+			$metabox_class[] = 'taxonomy';
+			$metabox_class[] = $attribute->get_name();
 		}
 
 		include( 'admin/meta-boxes/views/html-product-attribute.php' );
@@ -600,112 +590,13 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		// Get post data
 		parse_str( $_POST['data'], $data );
-		$post_id = absint( $_POST['post_id'] );
+		$post_id    = absint( $_POST['post_id'] );
+		$product    = wc_get_product( $post_id );
+		$attributes = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 
-		// Save Attributes
-		$attributes = array();
-
-		if ( isset( $data['attribute_names'] ) ) {
-
-			$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
-			$attribute_values = isset( $data['attribute_values'] ) ? $data['attribute_values'] : array();
-
-			if ( isset( $data['attribute_visibility'] ) ) {
-				$attribute_visibility = $data['attribute_visibility'];
-			}
-
-			if ( isset( $data['attribute_variation'] ) ) {
-				$attribute_variation = $data['attribute_variation'];
-			}
-
-			$attribute_is_taxonomy   = $data['attribute_is_taxonomy'];
-			$attribute_position      = $data['attribute_position'];
-			$attribute_names_max_key = max( array_keys( $attribute_names ) );
-
-			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
-				if ( empty( $attribute_names[ $i ] ) ) {
-					continue;
-				}
-
-				$is_visible   = isset( $attribute_visibility[ $i ] ) ? 1 : 0;
-				$is_variation = isset( $attribute_variation[ $i ] ) ? 1 : 0;
-				$is_taxonomy  = $attribute_is_taxonomy[ $i ] ? 1 : 0;
-
-				if ( $is_taxonomy ) {
-
-					if ( isset( $attribute_values[ $i ] ) ) {
-
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute_values[ $i ] ) ) {
-							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
-
-						// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
-						} else {
-							$values     = array();
-							$raw_values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute_values[ $i ] ) );
-
-							foreach ( $raw_values as $value ) {
-								$term = get_term_by( 'name', $value, $attribute_names[ $i ] );
-								if ( ! $term ) {
-									$term = wp_insert_term( $value, $attribute_names[ $i ] );
-
-									if ( $term && ! is_wp_error( $term ) ) {
-										$values[] = $term['term_id'];
-									}
-								} else {
-									$values[] = $term->term_id;
-								}
-							}
-						}
-
-						// Remove empty items in the array
-						$values = array_filter( $values, 'strlen' );
-
-					} else {
-						$values = array();
-					}
-
-					// Update post terms
-					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
-						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
-					}
-
-					if ( ! empty( $values ) ) {
-						// Add attribute to array, but don't set values
-						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-							'name' 			=> wc_clean( $attribute_names[ $i ] ),
-							'value' 		=> '',
-							'position' 		=> $attribute_position[ $i ],
-							'is_visible' 	=> $is_visible,
-							'is_variation' 	=> $is_variation,
-							'is_taxonomy' 	=> $is_taxonomy,
-						);
-					}
-				} elseif ( isset( $attribute_values[ $i ] ) ) {
-
-					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
-					$values = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
-					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
-
-					// Custom attribute - Add attribute to array and set the values
-					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-						'name' 			=> wc_clean( $attribute_names[ $i ] ),
-						'value' 		=> $values,
-						'position' 		=> $attribute_position[ $i ],
-						'is_visible' 	=> $is_visible,
-						'is_variation' 	=> $is_variation,
-						'is_taxonomy' 	=> $is_taxonomy,
-					);
-				}
-			 }
-		}
-
-		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
-
-		update_post_meta( $post_id, '_product_attributes', $attributes );
-
+		$product->set_attributes( $attributes );
+		$product->save();
 		die();
 	}
 
@@ -876,38 +767,35 @@ class WC_AJAX {
 		}
 
 		$variations = array();
-		$_product   = wc_get_product( $post_id, array( 'product_type' => 'variable' ) );
+		$product    = wc_get_product( $post_id, array( 'product_type' => 'variable' ) );
 
 		// Put variation attributes into an array
-		foreach ( $_product->get_attributes() as $attribute ) {
-
-			if ( ! $attribute['is_variation'] ) {
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_variation() ) {
 				continue;
 			}
 
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
 
-			if ( $attribute['is_taxonomy'] ) {
-				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
+			if ( $attribute->is_taxonomy() ) {
+				$options = wc_get_product_terms( $post_id, $attribute->get_name(), array( 'fields' => 'slugs' ) );
 			} else {
-				$options = explode( WC_DELIMITER, $attribute['value'] );
+				$options = $attribute->get_options();
 			}
-
-			$options = array_map( 'trim', $options );
 
 			$variations[ $attribute_field_name ] = $options;
 		}
 
 		// Quit out if none were found
-		if ( sizeof( $variations ) == 0 ) {
+		if ( 0 === sizeof( $variations ) ) {
 			die();
 		}
 
 		// Get existing variations so we don't create duplicates
 		$available_variations = array();
 
-		foreach ( $_product->get_children() as $child_id ) {
-			$child = $_product->get_child( $child_id );
+		foreach ( $product->get_children() as $child_id ) {
+			$child = $product->get_child( $child_id );
 
 			if ( ! empty( $child->variation_id ) ) {
 				$available_variations[] = $child->get_variation_attributes();

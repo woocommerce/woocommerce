@@ -78,7 +78,36 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array();
+	protected $internal_meta_keys = array(
+		'_visibility',
+		'_sku',
+		'_price',
+		'_regular_price',
+		'_sale_price',
+		'_sale_price_dates_from',
+		'_sale_price_dates_to',
+		'total_sales',
+		'_tax_status',
+		'_tax_class',
+		'_manage_stock',
+		'_stock',
+		'_stock_status',
+		'_backorders',
+		'_sold_individually',
+		'_weight',
+		'_length',
+		'_width',
+		'_height',
+		'_upsell_ids',
+		'_crosssell_ids',
+		'_purchase_note',
+		'_default_attributes',
+		'_product_attributes',
+		'_virtual',
+		'_downloadable',
+		'_featured',
+		'_downloadable_files',
+	);
 
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
@@ -1375,12 +1404,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			foreach ( $attributes as $attribute_key => $attribute ) {
 				$value = '';
 
-				if ( is_null( $attribute ) && taxonomy_exists( $attribute_key ) ) {
-					// Handle attributes that have been unset.
-					wp_set_object_terms( $this->get_id(), array(), $attribute_key );
+				if ( is_null( $attribute ) ) {
+					if ( taxonomy_exists( $attribute_key ) ) {
+						// Handle attributes that have been unset.
+						wp_set_object_terms( $this->get_id(), array(), $attribute_key );
+					}
+					continue;
 
 				} elseif ( $attribute->is_taxonomy() ) {
-					wp_set_object_terms( $this->get_id(), wp_list_pluck( 'term_id', $attribute->get_terms() ), $attribute->get_name() );
+					wp_set_object_terms( $this->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
 
 				} else {
 					$value = implode( ' ' . WC_DELIMITER . ' ', $attribute->get_options() );
@@ -1397,7 +1429,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				);
 			}
 		}
-
 		update_post_meta( $this->get_id(), '_product_attributes', $meta_values );
 	}
 

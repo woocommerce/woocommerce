@@ -468,7 +468,6 @@ class WC_Meta_Box_Product_Data {
 
 						foreach ( $attributes as $attribute ) {
 							$i++;
-							$attribute_taxonomy = $attribute->get_taxonomy_object();
 							$metabox_class      = array();
 
 							if ( $attribute->is_taxonomy() ) {
@@ -815,15 +814,19 @@ class WC_Meta_Box_Product_Data {
 	 * Prepare attributes for save.
 	 * @return array
 	 */
-	private static function prepare_attributes() {
+	public static function prepare_attributes( $data = false ) {
 		$attributes = array();
 
-		if ( isset( $_POST['attribute_names'], $_POST['attribute_values'] ) ) {
-			$attribute_names         = $_POST['attribute_names'];
-			$attribute_values        = $_POST['attribute_values'];
-			$attribute_visibility    = isset( $_POST['attribute_visibility'] ) ? $_POST['attribute_visibility'] : array();
-			$attribute_variation     = isset( $_POST['attribute_variation'] ) ? $_POST['attribute_variation'] : array();
-			$attribute_position      = $_POST['attribute_position'];
+		if ( ! $data ) {
+			$data = $_POST;
+		}
+
+		if ( isset( $data['attribute_names'], $data['attribute_values'] ) ) {
+			$attribute_names         = $data['attribute_names'];
+			$attribute_values        = $data['attribute_values'];
+			$attribute_visibility    = isset( $data['attribute_visibility'] ) ? $data['attribute_visibility'] : array();
+			$attribute_variation     = isset( $data['attribute_variation'] ) ? $data['attribute_variation'] : array();
+			$attribute_position      = $data['attribute_position'];
 			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
@@ -839,7 +842,7 @@ class WC_Meta_Box_Product_Data {
 					$options = wp_parse_id_list( $options );
 				} else {
 					// Terms or text sent in textarea.
-					$options = 0 < $attribute_id ? wc_sanitize_textarea( strip_tags( $options ) ) : wc_sanitize_textarea( $options );
+					$options = 0 < $attribute_id ? wc_sanitize_textarea( wc_sanitize_term_text_based( $options ) ) : wc_sanitize_textarea( $options );
 					$options = wc_get_text_attributes( $options );
 				}
 
@@ -848,8 +851,8 @@ class WC_Meta_Box_Product_Data {
 				$attribute->set_name( $attribute_name );
 				$attribute->set_options( $options );
 				$attribute->set_position( $attribute_position[ $i ] );
-				$attribute->set_visible( (bool) $attribute_visibility[ $i ] );
-				$attribute->set_variation( (bool) $attribute_variation[ $i ] );
+				$attribute->set_visible( isset( $attribute_visibility[ $i ] ) );
+				$attribute->set_variation( isset( $attribute_variation[ $i ] ) );
 				$attributes[] = $attribute;
 			}
 		}
