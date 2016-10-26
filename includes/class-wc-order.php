@@ -351,9 +351,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 2.7.0
 	 */
 	public function update() {
-		// Store additonal order data
+		global $wpdb;
+
+		// Store additonal order data.
 		$this->update_post_meta( '_order_key', $this->get_order_key() );
-		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
+		$customer_changed = $this->update_post_meta( '_customer_user', $this->get_customer_id() );
 		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
 		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
 		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
@@ -363,7 +365,7 @@ class WC_Order extends WC_Abstract_Order {
 		$this->update_post_meta( '_billing_state', $this->get_billing_state() );
 		$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
 		$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-		$this->update_post_meta( '_billing_email', $this->get_billing_email() );
+		$email_changed = $this->update_post_meta( '_billing_email', $this->get_billing_email() );
 		$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
 		$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
 		$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
@@ -385,14 +387,12 @@ class WC_Order extends WC_Abstract_Order {
 		$this->update_post_meta( '_date_paid', $this->get_date_paid() );
 		$this->update_post_meta( '_cart_hash', $this->get_cart_hash() );
 
-		$customer_changed = $this->update_post_meta( '_customer_user', $this->get_customer_id() );
-
-		// Update parent
+		// Update parent.
 		parent::update();
 
-		// If customer changed, update any downloadable permissions
-		if ( $customer_changed ) {
-			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
+		// If customer changed, update any downloadable permissions.
+		if ( $customer_changed || $email_changed ) {
+			$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 				array(
 					'user_id'    => $this->get_customer_id(),
 					'user_email' => $this->get_billing_email(),
@@ -410,7 +410,7 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
-		// Handle status change
+		// Handle status change.
 		$this->status_transition();
 	}
 
