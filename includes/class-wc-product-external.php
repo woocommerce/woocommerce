@@ -99,6 +99,48 @@ class WC_Product_External extends WC_Product {
 		$this->data['button_text'] = $button_text;
 	}
 
+	/**
+	 * External products cannot be stock managed.
+	 *
+	 * @since 2.7.0
+	 * @param bool
+	 */
+	public function set_manage_stock( $manage_stock ) {
+		$this->data['manage_stock'] = false;
+
+		if ( true === $manage_stock ) {
+			$this->error( 'product_external_invalid_manage_stock', __( 'External products cannot be stock managed.', 'woocommerce' ) );
+		}
+	}
+
+	/**
+	 * External products cannot be stock managed.
+	 *
+	 * @since 2.7.0
+	 * @param bool
+	 */
+	public function set_stock_status( $stock_status ) {
+		$this->data['stock_status'] = 'instock';
+
+		if ( 'instock' !== $stock_status ) {
+			$this->error( 'product_external_invalid_stock_status', __( 'External products cannot be stock managed.', 'woocommerce' ) );
+		}
+	}
+
+	/**
+	 * xternal products cannot be backordered.
+	 *
+	 * @since 2.7.0
+	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
+	 */
+	public function set_backorders( $backorders ) {
+		$this->data['backorders'] = 'no';
+
+		if ( 'no' !== $backorders ) {
+			$this->error( 'product_external_invalid_backorders', __( 'External products cannot be backordered.', 'woocommerce' ) );
+		}
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Other Actions
