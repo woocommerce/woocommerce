@@ -502,14 +502,14 @@ class WC_Checkout {
 										$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
 										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) ) {
-											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+											wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 										}
 										break;
 									case 'email' :
 										$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
 										if ( ! is_email( $this->posted[ $key ] ) ) {
-											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+											wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 										}
 										break;
 									case 'state' :
@@ -528,7 +528,7 @@ class WC_Checkout {
 										// Only validate if the country has specific state options
 										if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
 											if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) ) {
-												wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ), 'error' );
+												wc_add_notice( sprintf( __( '%s is not valid. Please enter one of the following: %s', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>', implode( ', ', $valid_states ) ), 'error' );
 											}
 										}
 										break;

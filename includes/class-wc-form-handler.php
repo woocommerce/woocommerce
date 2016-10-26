@@ -120,14 +120,14 @@ class WC_Form_Handler {
 								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
 								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
-									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), $field['label'] ), 'error' );
+									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
 								break;
 							case 'email' :
 								$_POST[ $key ] = strtolower( $_POST[ $key ] );
 
 								if ( ! is_email( $_POST[ $key ] ) ) {
-									wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), $field['label'] ), 'error' );
+									wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
 								break;
 						}
@@ -199,7 +199,7 @@ class WC_Form_Handler {
 
 		foreach ( $required_fields as $field_key => $field_name ) {
 			if ( empty( $_POST[ $field_key ] ) ) {
-				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), esc_html( $field_name ) ), 'error' );
+				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_name ) . '</strong>' ), 'error' );
 			}
 		}
 
