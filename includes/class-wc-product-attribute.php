@@ -208,7 +208,7 @@ class WC_Product_Attribute implements ArrayAccess {
 				return $this->is_taxonomy() ? 1 : 0;
 				break;
 			case 'value' :
-				return $this->is_taxonomy() ? '' : implode( ' ' . WC_DELIMITER . ' ', $this->get_options() );
+				return $this->is_taxonomy() ? '' : wc_implode_text_attributes( $this->get_options() );
 				break;
 			default :
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {

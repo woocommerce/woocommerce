@@ -1431,11 +1431,11 @@ class WC_API_Products extends WC_API_Resource {
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
-						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', $attribute['options'] ) );
+						$values = wc_implode_text_attributes( array_map( 'wc_clean', $attribute['options'] ) );
 
 					// Text based, separate by pipe.
 					} else {
-						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
+						$values = wc_implode_text_attributes( array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
 					}
 
 					// Custom attribute - Add attribute to array and set the values.

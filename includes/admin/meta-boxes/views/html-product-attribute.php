@@ -49,7 +49,7 @@
 								<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php
 
 									// Text attributes should list terms pipe separated
-									echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', wp_list_pluck( $attribute->get_terms(), 'name' ) ) );
+									echo esc_attr( wc_implode_text_attributes( wp_list_pluck( $attribute->get_terms(), 'name' ) ) );
 
 								?>" placeholder="<?php echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) ); ?>" />
 
@@ -59,7 +59,7 @@
 
 						<?php else : ?>
 
-							<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php echo esc_attr( sprintf( __( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ) ); ?>"><?php echo esc_textarea( implode( ' ' . WC_DELIMITER . ' ', $attribute->get_options() ) ); ?></textarea>
+							<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php echo esc_attr( sprintf( __( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ) ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
 
 						<?php endif; ?>
 					</td>

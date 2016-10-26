@@ -32,6 +32,16 @@ function wc_get_text_attributes_filter_callback( $value ) {
 }
 
 /**
+ * Implode an array of attributes using WC_DELIMITER.
+ * @since  2.7.0
+ * @param  array $attributes
+ * @return string
+ */
+function wc_implode_text_attributes( $attributes ) {
+	return implode( ' ' . WC_DELIMITER . ' ', $attributes );
+}
+
+/**
  * Get attribute taxonomies.
  *
  * @return array of objects
