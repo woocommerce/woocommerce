@@ -333,7 +333,7 @@ class WC_Structured_Data {
 			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
-			$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ) : $order->get_view_order_url();
+			$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
 
 			$markup_offers[]  = array(
 				'@type'              => 'Offer',

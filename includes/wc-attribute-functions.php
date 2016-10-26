@@ -19,7 +19,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	return array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) );
+	return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
+}
+
+/**
+ * See if an attribute is actually valid.
+ * @since  2.7.0
+ * @param  string $value
+ * @return bool
+ */
+function wc_get_text_attributes_filter_callback( $value ) {
+	return '' !== $value;
 }
 
 /**
