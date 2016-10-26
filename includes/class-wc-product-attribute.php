@@ -31,71 +31,50 @@ class WC_Product_Attribute implements ArrayAccess {
 	);
 
 	/**
-	 * offsetGet for ArrayAccess/Backwards compatibility.
-	 * @param string $offset
-	 * @return mixed
+	 * Return if this attribute is a taxonomy.
+	 * @return boolean
 	 */
-	public function offsetGet( $offset ) {
-		switch ( $offset ) {
-			case 'is_variation' :
-
-				break;
-			case 'is_visible' :
-
-				break;
-			case 'is_taxonomy' :
-
-				break;
-			case 'value' :
-
-				break;
-			default :
-				if ( is_callable( array( $this, "get_$offset" ) ) ) {
-					return $this->{"get_$offset"}();
-				}
-				break;
-		}
-		return '';
+	public function is_taxonomy() {
+		return 0 < $this->get_id();
 	}
 
 	/**
-	 * offsetSet for ArrayAccess/Backwards compatibility.
-	 * @param string $offset
-	 * @param mixed $value
+	 * Get taxonomy name if applicable.
+	 * @return string
 	 */
-	public function offsetSet( $offset, $value ) {
-		switch ( $offset ) {
-			case 'is_variation' :
-
-				break;
-			case 'is_visible' :
-
-				break;
-			case 'is_taxonomy' :
-
-				break;
-			case 'value' :
-
-				break;
-			default :
-				if ( is_callable( array( $this, "set_$offset" ) ) ) {
-					return $this->{"set_$offset"}( $value );
-				}
-				break;
-		}
-	}
-
-	public function offsetUnset( $offset ) {
-
+	public function get_taxonomy() {
+		return $this->is_taxonomy() ? $this->get_name() : '';
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
-	 * @param string $offset
-	 * @return bool
+	 * Get taxonomy object.
+	 * @return array|null
 	 */
-	public function offsetExists( $offset ) {
-		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ) );
+	public function get_taxonomy_object() {
+		global $wc_product_attributes;
+		return $this->is_taxonomy() ? $wc_product_attributes[ $this->get_name() ] : null;
+	}
+
+	/**
+	 * Gets terms from the stored options.
+	 * @return array|null
+	 */
+	public function get_terms() {
+		if ( ! $this->is_taxonomy() || ! taxonomy_exists( $this->get_name() ) ) {
+			return null;
+		}
+		foreach ( $this->get_options() as $option ) {
+			if ( is_int( $option ) ) {
+				$term = get_term_by( 'id', $option, $this->get_name() );
+			} else {
+				$term = get_term_by( 'name', $option, $this->get_name() );
+			}
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				$terms[] = $term;
+			}
+		}
+		return $terms;
 	}
 
 	/*
@@ -122,7 +101,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set ID (this is the attribute ID).
-	 * @param string|array $value
+	 * @param array $value
 	 */
 	public function set_options( $value ) {
 		$this->data['options'] = $value;
@@ -176,7 +155,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get options.
-	 * @return string|array
+	 * @return array
 	 */
 	public function get_options() {
 		return $this->data['options'];
@@ -204,5 +183,78 @@ class WC_Product_Attribute implements ArrayAccess {
 	 */
 	public function get_variation() {
 		return $this->data['variation'];
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| ArrayAccess/Backwards compatibility.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * offsetGet
+	 * @param string $offset
+	 * @return mixed
+	 */
+	public function offsetGet( $offset ) {
+		switch ( $offset ) {
+			case 'is_variation' :
+				return $this->get_variation() ? 1 : 0;
+				break;
+			case 'is_visible' :
+				return $this->get_visible() ? 1 : 0;
+				break;
+			case 'is_taxonomy' :
+				return $this->is_taxonomy() ? 1 : 0;
+				break;
+			case 'value' :
+				return $this->is_taxonomy() ? '' : implode( ' ' . WC_DELIMITER . ' ', $this->get_options() );
+				break;
+			default :
+				if ( is_callable( array( $this, "get_$offset" ) ) ) {
+					return $this->{"get_$offset"}();
+				}
+				break;
+		}
+		return '';
+	}
+
+	/**
+	 * offsetSet
+	 * @param string $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet( $offset, $value ) {
+		switch ( $offset ) {
+			case 'is_variation' :
+				$this->set_variation( $value );
+				break;
+			case 'is_visible' :
+				$this->set_visible( $value );
+				break;
+			case 'value' :
+				$this->set_options( $value );
+				break;
+			default :
+				if ( is_callable( array( $this, "set_$offset" ) ) ) {
+					return $this->{"set_$offset"}( $value );
+				}
+				break;
+		}
+	}
+
+	/**
+	 * offsetUnset
+	 * @param string $offset
+	 */
+	public function offsetUnset( $offset ) {}
+
+	/**
+	 * offsetExists
+	 * @param string $offset
+	 * @return bool
+	 */
+	public function offsetExists( $offset ) {
+		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ) );
 	}
 }

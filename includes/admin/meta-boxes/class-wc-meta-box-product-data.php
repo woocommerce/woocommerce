@@ -463,36 +463,20 @@ class WC_Meta_Box_Product_Data {
 				<div class="product_attributes wc-metaboxes">
 					<?php
 						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
-						$attributes           = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
+						$attributes = $product_object->get_attributes();
+						$i          = -1;
 
-						// Output All Set Attributes
-						if ( ! empty( $attributes ) ) {
-							$attribute_keys  = array_keys( $attributes );
-							$attribute_total = sizeof( $attribute_keys );
+						foreach ( $attributes as $attribute ) {
+							$i++;
+							$attribute_taxonomy = $attribute->get_taxonomy_object();
+							$metabox_class      = array();
 
-							for ( $i = 0; $i < $attribute_total; $i ++ ) {
-								$attribute     = $attributes[ $attribute_keys[ $i ] ];
-								$position      = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
-								$taxonomy      = '';
-								$metabox_class = array();
-
-								if ( $attribute['is_taxonomy'] ) {
-									$taxonomy = $attribute['name'];
-
-									if ( ! taxonomy_exists( $taxonomy ) ) {
-										continue;
-									}
-
-									$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
-									$metabox_class[]    = 'taxonomy';
-									$metabox_class[]    = $taxonomy;
-									$attribute_label    = wc_attribute_label( $taxonomy );
-								} else {
-									$attribute_label    = apply_filters( 'woocommerce_attribute_label', $attribute['name'], $attribute['name'], false );
-								}
-
-								include( 'views/html-product-attribute.php' );
+							if ( $attribute->is_taxonomy() ) {
+								$metabox_class[] = 'taxonomy';
+								$metabox_class[] = $attribute->get_name();
 							}
+
+							include( 'views/html-product-attribute.php' );
 						}
 					?>
 				</div>
@@ -839,7 +823,6 @@ class WC_Meta_Box_Product_Data {
 			$attribute_values        = $_POST['attribute_values'];
 			$attribute_visibility    = isset( $_POST['attribute_visibility'] ) ? $_POST['attribute_visibility'] : array();
 			$attribute_variation     = isset( $_POST['attribute_variation'] ) ? $_POST['attribute_variation'] : array();
-			$attribute_is_taxonomy   = $_POST['attribute_is_taxonomy'];
 			$attribute_position      = $_POST['attribute_position'];
 			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
@@ -848,25 +831,20 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 				$attribute_name = wc_clean( $attribute_names[ $i ] );
-				$is_taxonomy    = $attribute_is_taxonomy[ $i ];
-				$is_variation   = $attribute_variation[ $i ];
+				$attribute_id   = wc_attribute_taxonomy_id_by_name( $attribute_name );
 				$options        = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
 
-				if ( $is_taxonomy ) {
-
-
-					if ( is_array( $options ) ) {
-						$options = wp_parse_id_list( $options ); // Term ids.
-					} else {
-						$options = array_filter( array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $options ) ) ), 'strlen' ); // Names.
-					}
+				if ( is_array( $options ) ) {
+					// Term ids sent as array.
+					$options = wp_parse_id_list( $options );
 				} else {
-					$options = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					// Terms or text sent in textarea.
+					$options = 0 < $attribute_id ? wc_sanitize_textarea( strip_tags( $options ) ) : wc_sanitize_textarea( $options );
 					$options = wc_get_text_attributes( $options );
 				}
 
 				$attribute = new WC_Product_Attribute();
-				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $attribute_name ) );
+				$attribute->set_id( $attribute_id );
 				$attribute->set_name( $attribute_name );
 				$attribute->set_options( $options );
 				$attribute->set_position( $attribute_position[ $i ] );

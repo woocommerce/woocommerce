@@ -911,17 +911,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set an attribute to null so it's cleared later.
-	 * @since 2.7.0
-	 * @param $attribute array
-	 * return array
-	 */
-	protected function set_attribute_null( $attribute ) {
-		$attribute['options'] = null;
-		return $attribute;
-	}
-
-	/**
 	 * Set product attributes.
 	 *
 	 * Attributes are made up of:
@@ -937,11 +926,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
 	 */
 	public function set_attributes( $raw_attributes ) {
-		$attributes = array_map( array( $this, 'set_attribute_null' ), $this->data['attributes'] );
+		$attributes = array_fill_keys( array_keys( $this->data['attributes'] ), null );
 
 		foreach ( $raw_attributes as $attribute ) {
 			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-				$attributes[ $attribute->get_id() ? 'id:' . $attribute->get_id() : 'name:' . $attribute->get_name() ] = $attribute;
+				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
 			}
 		}
 
@@ -1207,6 +1196,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
+					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
+						continue;
+					}
 					$options = wp_get_post_terms( $this->get_id(), $meta_value['name'], array( 'fields' => 'ids' ) );
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
@@ -1380,50 +1372,28 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$meta_values = array();
 
 		if ( $attributes ) {
-			foreach ( $attributes as $attribute ) {
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-					$is_taxonomy    = true;
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = wc_clean( $attribute['name'] );
-					$is_taxonomy    = false;
-				}
+			foreach ( $attributes as $attribute_key => $attribute ) {
+				$value = '';
 
-				// Handle attributes that have been unset.
-				if ( is_null( $attribute['options'] ) && taxonomy_exists( $attribute_name ) ) {
-					wp_set_object_terms( $this->get_id(), array(), $attribute_name );
+				if ( is_null( $attribute ) && taxonomy_exists( $attribute_key ) ) {
+					// Handle attributes that have been unset.
+					wp_set_object_terms( $this->get_id(), array(), $attribute_key );
 
-				} elseif ( $is_taxonomy ) {
-					$terms = array();
-					foreach ( $attribute['options'] as $option ) {
-						if ( is_int( $option ) ) {
-							$terms[] = $option;
-						} else {
-							$term = get_term_by( 'name', $option, $attribute_name );
-
-							if ( $term && ! is_wp_error( $term ) ) {
-								$terms[] = $term->term_id;
-							} else {
-								$terms[] = sanitize_title( $option );
-							}
-						}
-					}
-					wp_set_object_terms( $this->get_id(), $terms, $attribute_name );
+				} elseif ( $attribute->is_taxonomy() ) {
+					wp_set_object_terms( $this->get_id(), wp_list_pluck( 'term_id', $attribute->get_terms() ), $attribute->get_name() );
 
 				} else {
-					$values = $attribute['variation'] ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
-					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
+					$value = implode( ' ' . WC_DELIMITER . ' ', $attribute->get_options() );
 				}
 
 				// Store in format WC uses in meta.
-				$meta_values[ sanitize_title( $attribute['name'] ) ] = array(
-					'name'         => $attribute_name,
-					'value'        => $is_taxonomy ? '' : $attribute['options'],
-					'position'     => count( $meta_values ),
-					'is_visible'   => $attribute['visible'],
-					'is_variation' => $attribute['variation'],
-					'is_taxonomy'  => $is_taxonomy ? 1 : 0,
+				$meta_values[ $attribute_key ] = array(
+					'name'         => $attribute->get_name(),
+					'value'        => $value,
+					'position'     => $attribute->get_position(),
+					'is_visible'   => $attribute->get_visible() ? 1 : 0,
+					'is_variation' => $attribute->get_variation() ? 1 : 0,
+					'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
 				);
 			}
 		}
@@ -1801,29 +1771,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns a single product attribute as a string. @todo
-	 * @param  string $attr
+	 * Returns a single product attribute as a string.
+	 * @param  string $attribute to get.
 	 * @return string
 	 */
-	public function get_attribute( $attr ) {
+	public function get_attribute( $attribute ) {
 		$attributes = $this->get_attributes();
-		$attr       = sanitize_title( $attr );
+		$attribute  = sanitize_title( $attribute );
 
-		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
-
-			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
-
-			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-
-				return implode( ', ', wc_get_product_terms( $this->get_id(), $attribute['name'], array( 'fields' => 'names' ) ) );
-
-			} else {
-
-				return $attribute['value'];
-			}
+		if ( isset( $attributes[ $attribute ] ) ) {
+			$attribute_object = $attributes[ $attribute ];
+		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
+			$attribute_object = $attributes[ 'pa_' . $attribute ];
+		} else {
+			return '';
 		}
-
-		return '';
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : implode( ' ' . WC_DELIMITER . ' ', $attribute_object->get_options() );
 	}
 
 	/*

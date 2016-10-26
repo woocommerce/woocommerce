@@ -312,6 +312,16 @@ function wc_clean( $var ) {
 }
 
 /**
+ * Run wc_clean over posted textarea but maintain line breaks.
+ * @since  2.7.0
+ * @param string $var
+ * @return string
+ */
+function wc_sanitize_textarea( $var ) {
+	return implode( "\n", array_map( 'wc_clean', explode( "\n", $var ) ) );
+}
+
+/**
  * Sanitize a string destined to be a tooltip.
  *
  * @since 2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
