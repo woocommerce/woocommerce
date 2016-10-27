@@ -601,7 +601,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Add variation via ajax function.
+	 * Add variation via ajax function. @todo CRUD
 	 */
 	public static function add_variation() {
 
@@ -744,7 +744,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Link all variations via ajax function.
+	 * Link all variations via ajax function. @todo CRUD
 	 */
 	public static function link_all_variations() {
 
@@ -2148,7 +2148,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Save variations via AJAX.
+	 * Save variations via AJAX. @todo CRUD
 	 */
 	public static function save_variations() {
 		ob_start();
@@ -2197,7 +2197,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Bulk action - Toggle Enabled.
+	 * Bulk action - Toggle Enabled. @todo CRUD
 	 * @access private
 	 * @used-by bulk_edit_variations
 	 * @param  array $variations
