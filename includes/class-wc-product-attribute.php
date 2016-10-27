@@ -86,7 +86,7 @@ class WC_Product_Attribute implements ArrayAccess {
 			'is_visible'   => $this->get_visible() ? 1   : 0,
 			'is_variation' => $this->get_variation() ? 1 : 0,
 			'is_taxonomy'  => $this->is_taxonomy() ? 1   : 0,
-			'value'        => $this->is_taxonomy() ? ''  : implode( ' ' . WC_DELIMITER . ' ', $this->get_options() ),
+			'value'        => $this->is_taxonomy() ? ''  : wc_implode_text_attributes( $this->get_options() ),
 		) );
 	}
 
@@ -113,7 +113,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * Set ID (this is the attribute ID).
+	 * Set options.
 	 * @param array $value
 	 */
 	public function set_options( $value ) {
@@ -221,7 +221,7 @@ class WC_Product_Attribute implements ArrayAccess {
 				return $this->is_taxonomy() ? 1 : 0;
 				break;
 			case 'value' :
-				return $this->is_taxonomy() ? '' : implode( ' ' . WC_DELIMITER . ' ', $this->get_options() );
+				return $this->is_taxonomy() ? '' : wc_implode_text_attributes( $this->get_options() );
 				break;
 			default :
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {

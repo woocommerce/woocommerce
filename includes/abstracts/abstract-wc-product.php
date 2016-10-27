@@ -1415,7 +1415,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 					wp_set_object_terms( $this->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
 
 				} else {
-					$value = implode( ' ' . WC_DELIMITER . ' ', $attribute->get_options() );
+					$value = wc_implode_text_attributes( $attribute->get_options() );
 				}
 
 				// Store in format WC uses in meta.
@@ -1835,7 +1835,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			return '';
 		}
-		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : implode( ' ' . WC_DELIMITER . ' ', $attribute_object->get_options() );
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
 	/*
