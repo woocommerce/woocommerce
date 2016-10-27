@@ -182,16 +182,13 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Help &amp; Support', 'woocommerce' ) . '</h2>' .
 				'<p>' . sprintf(
-					__( 'Should you need help understanding, using, or extending WooCommerce, %1$splease read our documentation%2$s. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
-					'<a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin">',
-					'</a>'
+					__( 'Should you need help understanding, using, or extending WooCommerce, <a href="%s">please read our documentation</a>. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
+					esc_url( 'https://docs.woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin' )
 				) . '</p>' .
 				'<p>' . sprintf(
-					__( 'For further assistance with WooCommerce core you can use the %1$scommunity forum%2$s. If you need help with premium extensions sold by WooCommerce, please %3$suse our helpdesk%4$s.', 'woocommerce' ),
-					'<a href="https://wordpress.org/support/plugin/woocommerce">',
-					'</a>',
-					'<a href="https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin">',
-					'</a>'
+					__( 'For further assistance with WooCommerce core you can use the <a href="%1$s">community forum</a>. If you need help with premium extensions sold by WooCommerce, please <a href="%2$s">use our helpdesk</a>.', 'woocommerce' ),
+					esc_url( 'https://wordpress.org/support/plugin/woocommerce' ),
+					esc_url( 'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' )
 				) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
 				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="' . esc_url( 'https://wordpress.org/support/plugin/woocommerce' ) . '" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="' . esc_url( 'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin' ) . '" class="button">' . __( 'WooCommerce helpdesk', 'woocommerce' ) . '</a></p>',
