@@ -1044,10 +1044,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param $raw_downloads array of arrays with download data (name/file)
 	 */
 	public function set_downloads( $raw_downloads ) {
-		$downloads = array();
-		$errors    = array();
+		$downloads          = array();
+		$errors             = array();
+		$allowed_file_types = apply_filters( 'woocommerce_downloadable_file_allowed_mime_types', get_allowed_mime_types() );
 
 		foreach ( $raw_downloads as $raw_download ) {
+			$file_name = wc_clean( $raw_download['name'] );
+
 			// Find type and file URL
 			if ( 0 === strpos( $raw_download['file'], 'http' ) ) {
 				$file_is  = 'absolute';
@@ -1061,14 +1064,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 
 			$file_name = wc_clean( $raw_download['name'] );
-			$file_hash = md5( $file_url );
 
 			// Validate the file extension
 			if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
 				$file_type  = wp_check_filetype( strtok( $file_url, '?' ), $allowed_file_types );
 				$parsed_url = parse_url( $file_url, PHP_URL_PATH );
 				$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
-
 				if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
 					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' );
 					continue;
@@ -1083,12 +1084,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				}
 
 				if ( ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $_file_url ), $file_url ) ) {
-					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' );
+					$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' );
 					continue;
 				}
 			}
 
-			$downloads[ $file_hash ] = array(
+			$downloads[ md5( $file_url ) ] = array(
 				'name' => $file_name,
 				'file' => $file_url,
 			);
@@ -1203,6 +1204,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'shipping_class_id'  => current( $this->get_term_ids( 'product_shipping_class' ) ),
 			'virtual'            => get_post_meta( $id, '_virtual', true ),
 			'downloadable'       => get_post_meta( $id, '_downloadable', true ),
+			'downloads'          => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 		) );
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );

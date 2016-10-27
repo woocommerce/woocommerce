@@ -65,11 +65,9 @@
 				</thead>
 				<tbody>
 					<?php
-					$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
-
-					if ( $downloadable_files ) {
+					if ( $downloadable_files = $product_object->get_downloads() ) {
 						foreach ( $downloadable_files as $key => $file ) {
-							include( 'views/html-product-download.php' );
+							include( 'html-product-download.php' );
 						}
 					}
 					?>
@@ -83,7 +81,7 @@
 									'name' => '',
 								);
 								ob_start();
-								include( 'views/html-product-download.php' );
+								include( 'html-product-download.php' );
 								echo esc_attr( ob_get_clean() );
 							?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
 						</th>
