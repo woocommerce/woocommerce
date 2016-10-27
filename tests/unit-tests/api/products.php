@@ -171,8 +171,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		error_log( print_r ( $data, 1 ) );
-
 		$this->assertContains( 'Testing', $data['description'] );
 		$this->assertEquals( '8', $data['price'] );
 		$this->assertEquals( '8', $data['sale_price'] );
@@ -190,12 +188,16 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->id );
 		$request->set_body_params( array(
-			'attributes'  => array( array( 'id' => 0, 'name' => 'pa_size', 'options' => array( 'small', 'medium' ), 'visible' => false, 'variation' => 1 ) )
+			'attributes'  => array(
+				array( 'id' => 0, 'name' => 'pa_color', 'options' => array( 'red', 'yellow' ), 'visible' => false, 'variation' => 1 ),
+				array( 'name' => 'pa_size', 'options' => array( 'small' ), 'visible' => false, 'variation' => 1 ),
+			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( array( 'small', 'medium' ), $data['attributes'][0]['options'] );
+		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
+		$this->assertEquals( array( 'red', 'yellow' ), $data['attributes'][1]['options'] );
 
 		// test external product
 		$product  = WC_Helper_Product::create_external_product();
@@ -260,6 +262,14 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_create_product() {
 		wp_set_current_user( $this->user );
 
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/shipping_classes' );
+		$request->set_body_params( array(
+			'name' => 'Test',
+		) );
+		$response          = $this->server->dispatch( $request );
+		$data              = $response->get_data();
+		$shipping_class_id = $data['id'];
+
 		// Create simple
 		$request = new WP_REST_Request( 'POST', '/wc/v1/products' );
 		$request->set_body_params( array(
@@ -267,6 +277,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			'name'           => 'Test Simple Product',
 			'sku'            => 'DUMMY SKU SIMPLE API',
 			'regular_price'  => '10',
+			'shipping_class' => 'test',
 		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -277,6 +288,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'DUMMY SKU SIMPLE API', $data['sku'] );
 		$this->assertEquals( 'Test Simple Product', $data['name'] );
 		$this->assertEquals( 'simple', $data['type'] );
+		$this->assertEquals( $shipping_class_id, $data['shipping_class_id'] );
 
 		// Create external
 		$request = new WP_REST_Request( 'POST', '/wc/v1/products' );
@@ -310,8 +322,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
-
-		//error_log( print_r ( $data, 1 ) );
 
 		$this->assertEquals( 'DUMMY SKU VARIABLE API', $data['sku'] );
 		$this->assertEquals( 'Test Variable Product', $data['name'] );
