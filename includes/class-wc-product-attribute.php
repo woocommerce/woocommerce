@@ -77,6 +77,19 @@ class WC_Product_Attribute implements ArrayAccess {
 		return $terms;
 	}
 
+	/**
+	 * Returns all data for this object.
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge( $this->data, array(
+			'is_visible'   => $this->get_visible() ? 1   : 0,
+			'is_variation' => $this->get_variation() ? 1 : 0,
+			'is_taxonomy'  => $this->is_taxonomy() ? 1   : 0,
+			'value'        => $this->is_taxonomy() ? ''  : wc_implode_text_attributes( $this->get_options() ),
+		) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

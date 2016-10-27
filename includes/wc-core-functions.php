@@ -1433,3 +1433,45 @@ function wc_maybe_store_user_agent( $user_login, $user ) {
 	}
 }
 add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
+
+/**
+ * Based on wp_list_pluck, this calls a method instead of returning a property.
+ *
+ * @since 2.7.0
+ * @param array      $list      List of objects or arrays
+ * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
+ * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
+ *                              Default null.
+ * @return array Array of values.
+ */
+function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
+	// Use wp_list_pluck if this isn't a callback
+	$first_el = current( $list );
+	if ( ! is_object( $first_el ) || ! is_callable( array( $first_el, $callback_or_field ) ) ) {
+		return wp_list_pluck( $list, $callback_or_field, $index_key );
+	}
+	if ( ! $index_key ) {
+		/*
+		 * This is simple. Could at some point wrap array_column()
+		 * if we knew we had an array of arrays.
+		 */
+		foreach ( $list as $key => $value ) {
+			$list[ $key ] = $value->{$callback_or_field}();
+		}
+		return $list;
+	}
+
+	/*
+	 * When index_key is not set for a particular item, push the value
+	 * to the end of the stack. This is how array_column() behaves.
+	 */
+	$newlist = array();
+	foreach ( $list as $value ) {
+		if ( isset( $value->$index_key ) ) {
+			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
+		} else {
+			$newlist[] = $value->{$callback_or_field}();
+		}
+	}
+	return $newlist;
+}
