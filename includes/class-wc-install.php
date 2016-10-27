@@ -997,11 +997,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%1$s could not be installed (%2$s). %3$sPlease install it manually by clicking here.%4$s', 'woocommerce' ),
+							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							'<a href="' . esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) ) . '">',
-							'</a>'
+							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) )
 						)
 					);
 				}
@@ -1024,10 +1023,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%1$s was installed but could not be activated. %2$sPlease activate it manually by clicking here.%3$s', 'woocommerce' ),
+							__( '%1$s was installed but could not be activated. <a href="%2$s">Please activate it manually.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
-							'<a href="' . admin_url( 'plugins.php' ) . '">',
-							'</a>'
+							admin_url( 'plugins.php' )
 						)
 					);
 				}
