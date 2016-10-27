@@ -68,6 +68,12 @@ jQuery( function( $ ) {
 		var $new_totals = $( '.cart_totals', $html );
 		var $notices    = $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html );
 
+		// No form, cannot do this.
+		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
+			window.location.reload();
+			return;
+		}
+
 		// Remove errors
 		$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 
