@@ -45,15 +45,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</ul>
 		<?php endif; ?>
 	<?php else : ?>
-		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
+		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), esc_url( 'https://woocommerce.com/product-category/woocommerce-extensions/' ) ); ?></p>
 	<?php endif; ?>
 
 	<?php if ( 'Storefront' !== $theme['Name'] && 'featured' !== $current_section ) : ?>
 		<div class="storefront">
 			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
 			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
-			<p><?php printf( __( 'We recommend Storefront, the %1$sofficial%2$s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
-			<p><?php printf( __( 'Storefront is an intuitive, flexible and %1$sfree%2$s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+			<p><?php _e( 'We recommend Storefront, the <strong>official</strong> WooCommerce theme.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ); ?></p>
 			<p>
 				<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank" class="button"><?php _e( 'Read all about it', 'woocommerce' ) ?></a>
 				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>

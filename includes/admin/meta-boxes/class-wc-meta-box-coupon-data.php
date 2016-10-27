@@ -72,7 +72,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => wc_format_localized_price( 0 ), 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
 				// Free Shipping
-				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ) ) );
+				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), esc_url( 'https://docs.woocommerce.com/document/free-shipping/' ) ) ) );
 
 				// Expiry date
 				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
