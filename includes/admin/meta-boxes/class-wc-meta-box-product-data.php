@@ -282,33 +282,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function save_variations( $post_id, $post ) {
-		if ( isset( $_POST['variable_post_id'] ) ) {
-			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
-
-			for ( $i = 0; $i <= $max_loop; $i ++ ) {
-
-				if ( ! isset( $variable_post_id[ $i ] ) ) {
-					continue;
-				}
-
-				$variation_id = absint( $variable_post_id[ $i ] );
-				$variation    = new WC_Product_Variation( $variation_id );
-				$errors       = $variation->set_props( array(
-					'' => '',
-				) );
-
-				if ( is_wp_error( $errors ) ) {
-					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
-				}
-
-				$variation->save();
-
-				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
-			}
-		}
-
-
-
+		global $wpdb;
 
 		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
@@ -449,7 +423,7 @@ class WC_Meta_Box_Product_Data {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
-					delete_post_meta( $variation_id, '_stock' );
+					wc_update_product_stock( $variation_id, '' );
 				}
 
 				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
