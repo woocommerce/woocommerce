@@ -436,7 +436,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Get order object.
 		$order = wc_get_order( $order_id );
-		$props = array();
+		$props = array( 'status' => wc_clean( $_POST['order_status'] ) );
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
@@ -498,15 +498,8 @@ class WC_Meta_Box_Order_Data {
 
 		$props['date_created'] = $date;
 
-		clean_post_cache( $order_id );
-
-		// Order data saved, now get it so we can manipulate status.
+		// Save order data.
 		$order->set_props( $props );
-		$order->update();
-
-		// Order status.
-		$order->update_status( $_POST['order_status'], '', true );
-
-		wc_delete_shop_order_transients( $order_id );
+		$order->save();
 	}
 }

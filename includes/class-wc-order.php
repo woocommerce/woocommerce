@@ -410,8 +410,13 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
+		// Clear order cache.
+		clean_post_cache( $this->get_id() );
+		wc_delete_shop_order_transients( $this->get_id() );
+
 		// Handle status change.
 		$this->status_transition();
+
 	}
 
 	/**
