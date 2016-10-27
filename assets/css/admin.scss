@@ -3323,8 +3323,12 @@ img.help_tip {
 		}
 
 		input, select {
-			margin: -3px 0 0 0.5em;
+			margin-top: -3px 0 0;
 			vertical-align: middle;
+		}
+
+		select {
+			margin-left: 0.5em;
 		}
 	}
 
