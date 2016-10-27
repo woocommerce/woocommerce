@@ -38,7 +38,8 @@
 		self::output_tabs();
 		self::output_variations();
 		do_action( 'woocommerce_product_data_panels' );
-		do_action( 'woocommerce_product_write_panels' ); // _deprecated
+		wc_do_deprecated_action( 'woocommerce_product_write_panels', array(), '2.6', 'Use woocommerce_product_data_panels action instead.' );
+		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	?>
 	<div class="clear"></div>
 </div>

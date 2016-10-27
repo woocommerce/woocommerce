@@ -27,8 +27,6 @@ class WC_Meta_Box_Product_Data {
 	public static function output( $post ) {
 		global $post, $thepostid, $product_object;
 
-		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
-
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 
@@ -117,184 +115,27 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
+	 * Filter callback for finding variation attributes.
+	 * @param  WC_Product_Attribute $attribute
+	 * @return bool
+	 */
+	private static function filter_variation_attributes( $attribute ) {
+		return true === $attribute->get_variation();
+	}
+
+	/**
 	 * Show options for the variable product type.
 	 */
 	public static function output_variations() {
-		global $post, $wpdb;
+		global $post, $wpdb, $product_object;
 
-		// Get attributes
-		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
-
-		// See if any are set
-		$variation_attribute_found = false;
-
-		if ( $attributes ) {
-			foreach ( $attributes as $attribute ) {
-				if ( ! empty( $attribute['is_variation'] ) ) {
-					$variation_attribute_found = true;
-					break;
-				}
-			}
-		}
-
+		$variation_attributes   = array_filter( $product_object->get_attributes(), array( __CLASS__, 'filter_variation_attributes' ) );
+		$default_attributes     = $product_object->get_default_attributes();
 		$variations_count       = absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation' AND post_status IN ('publish', 'private')", $post->ID ) ) );
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
-		?>
-		<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden"><div id="variable_product_options_inner">
 
-			<?php if ( ! $variation_attribute_found ) : ?>
-
-				<div id="message" class="inline notice woocommerce-message">
-					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
-					<p>
-						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
-					</p>
-				</div>
-
-			<?php else : ?>
-
-				<div class="toolbar toolbar-variations-defaults">
-					<div class="variations-defaults">
-						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
-						<?php
-							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
-
-							foreach ( $attributes as $attribute ) {
-
-								// Only deal with attributes that are variations
-								if ( ! $attribute['is_variation'] ) {
-									continue;
-								}
-
-								// Get current value for variation (if set)
-								$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
-
-								// Name will be something like attribute_pa_color
-								echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '" data-current="' . esc_attr( $variation_selected_value ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
-
-								// Get terms for attribute taxonomy or value if its a custom attribute
-								if ( $attribute['is_taxonomy'] ) {
-									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
-
-									foreach ( $post_terms as $term ) {
-										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
-									}
-								} else {
-									$options = wc_get_text_attributes( $attribute['value'] );
-
-									foreach ( $options as $option ) {
-										$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( $variation_selected_value, sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
-										echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
-									}
-								}
-
-								echo '</select>';
-							}
-						?>
-					</div>
-					<div class="clear"></div>
-				</div>
-
-				<div class="toolbar toolbar-top">
-					<select id="field_to_edit" class="variation_actions">
-						<option data-global="true" value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
-						<option data-global="true" value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
-						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
-						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
-							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
-							<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
-							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
-							<option value="variable_regular_price"><?php _e( 'Set regular prices', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_increase"><?php _e( 'Increase regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_decrease"><?php _e( 'Decrease regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price"><?php _e( 'Set sale prices', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_increase"><?php _e( 'Increase sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_decrease"><?php _e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_schedule"><?php _e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
-							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
-							<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
-							<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
-							<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
-							<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-							<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
-							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
-							<option value="variable_download_expiry"><?php _e( 'Download expiry', 'woocommerce' ); ?></option>
-						</optgroup>
-						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
-					</select>
-					<a class="button bulk_edit do_variation_action"><?php _e( 'Go', 'woocommerce' ); ?></a>
-
-					<div class="variations-pagenav">
-						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
-						<span class="expand-close">
-							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
-						</span>
-						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
-							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
-									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-									<?php endfor; ?>
-								</select>
-								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
-							</span>
-							<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
-						</span>
-					</div>
-					<div class="clear"></div>
-				</div>
-
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php
-					// esc_attr does not double encode - htmlspecialchars does
-					echo htmlspecialchars( json_encode( $attributes ) );
-				?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
-				</div>
-
-				<div class="toolbar">
-					<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save changes', 'woocommerce' ); ?></button>
-					<button type="button" class="button cancel-variation-changes" disabled="disabled"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
-
-					<div class="variations-pagenav">
-						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
-						<span class="expand-close">
-							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
-						</span>
-						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
-							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
-									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-									<?php endfor; ?>
-								</select>
-								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
-							</span>
-							<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
-						</span>
-					</div>
-
-					<div class="clear"></div>
-				</div>
-
-			<?php endif; ?>
-		</div></div>
-		<?php
+		include( 'views/html-product-data-variations.php' );
 	}
 
 	/**
@@ -318,7 +159,6 @@ class WC_Meta_Box_Product_Data {
 				}
 			}
 		}
-
 		return $downloads;
 	}
 
@@ -395,7 +235,7 @@ class WC_Meta_Box_Product_Data {
 		$errors  = $product->set_props( array(
 			'sku'               => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
 			'purchase_note'     => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
-			'downloadable'      => isset( $_POST['_downloadable'] ) ,
+			'downloadable'      => isset( $_POST['_downloadable'] ),
 			'virtual'           => isset( $_POST['_virtual'] ),
 			'tax_status'        => wc_clean( $_POST['_tax_status'] ),
 			'tax_class'         => wc_clean( $_POST['_tax_class'] ),
@@ -432,7 +272,6 @@ class WC_Meta_Box_Product_Data {
 
 		$product->save();
 
-		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 	}
 
@@ -443,7 +282,33 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function save_variations( $post_id, $post ) {
-		global $wpdb;
+		if ( isset( $_POST['variable_post_id'] ) ) {
+			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
+
+			for ( $i = 0; $i <= $max_loop; $i ++ ) {
+
+				if ( ! isset( $variable_post_id[ $i ] ) ) {
+					continue;
+				}
+
+				$variation_id = absint( $variable_post_id[ $i ] );
+				$variation    = new WC_Product_Variation( $variation_id );
+				$errors       = $variation->set_props( array(
+					'' => '',
+				) );
+
+				if ( is_wp_error( $errors ) ) {
+					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
+				}
+
+				$variation->save();
+
+				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
+			}
+		}
+
+
+
 
 		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
