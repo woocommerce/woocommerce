@@ -41,7 +41,7 @@ return array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable PayPal sandbox', 'woocommerce' ),
 		'default'     => 'no',
-		'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
+		'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a <a href="%s">developer account</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 	),
 	'debug' => array(
 		'title'       => __( 'Debug log', 'woocommerce' ),
@@ -115,7 +115,7 @@ return array(
 	'api_details' => array(
 		'title'       => __( 'API credentials', 'woocommerce' ),
 		'type'        => 'title',
-		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your PayPal API Credentials %1$shere%2$s.', 'woocommerce' ), '<a href="https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#creating-an-api-signature">', '</a>' ),
+		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#creating-an-api-signature' ),
 	),
 	'api_username' => array(
 		'title'       => __( 'API username', 'woocommerce' ),

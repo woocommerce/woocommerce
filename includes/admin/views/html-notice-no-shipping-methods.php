@@ -16,6 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<p class="submit">
 		<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>"><?php _e( 'Setup shipping zones', 'woocommerce' ); ?></a>
-		<a class="button-secondary" href="<?php echo esc_url( 'https://docs.woocommerce.com/document/setting-up-shipping-zones/' ); ?>"><?php _e( 'Learn more about shipping zones', 'woocommerce' ); ?></a>
+		<a class="button-secondary" href="https://docs.woocommerce.com/document/setting-up-shipping-zones/"><?php _e( 'Learn more about shipping zones', 'woocommerce' ); ?></a>
 	</p>
 </div>
