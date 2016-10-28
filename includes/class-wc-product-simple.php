@@ -21,7 +21,7 @@ class WC_Product_Simple extends WC_Product {
 	 *
 	 * @param mixed $product
 	 */
-	public function __construct( $product ) {
+	public function __construct( $product = 0 ) {
 		$this->supports[]   = 'ajax_add_to_cart';
 		parent::__construct( $product );
 	}
@@ -33,10 +33,6 @@ class WC_Product_Simple extends WC_Product {
 	public function get_type() {
 		return 'simple';
 	}
-
-
-
-
 
 	/**
 	 * Get the add to url used mainly in loops.
@@ -66,11 +62,11 @@ class WC_Product_Simple extends WC_Product {
 	 * @return string
 	 */
 	public function get_title() {
+		$post  = get_post( $this->get_id() );
+		$title = $post->post_title;
 
-		$title = $this->post->post_title;
-
-		if ( $this->get_parent() > 0 ) {
-			$title = get_the_title( $this->get_parent() ) . ' &rarr; ' . $title;
+		if ( $this->get_parent_id() > 0 ) {
+			$title = get_the_title( $this->get_parent_id() ) . ' &rarr; ' . $title;
 		}
 
 		return apply_filters( 'woocommerce_product_title', $title, $this );
@@ -80,10 +76,10 @@ class WC_Product_Simple extends WC_Product {
 	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately).
 	 */
 	public function grouped_product_sync() {
-		if ( ! $this->get_parent() ) return;
+		if ( ! $this->get_parent_id() ) return;
 
 		$children_by_price = get_posts( array(
-			'post_parent'    => $this->get_parent(),
+			'post_parent'    => $this->get_parent_id(),
 			'orderby'        => 'meta_value_num',
 			'order'          => 'asc',
 			'meta_key'       => '_price',
@@ -94,7 +90,7 @@ class WC_Product_Simple extends WC_Product {
 		if ( $children_by_price ) {
 			foreach ( $children_by_price as $child ) {
 				$child_price = get_post_meta( $child, '_price', true );
-				update_post_meta( $this->get_parent(), '_price', $child_price );
+				update_post_meta( $this->get_parent_id(), '_price', $child_price );
 			}
 		}
 
