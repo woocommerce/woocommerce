@@ -1314,6 +1314,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 		$this->read_meta_data();
 		$this->read_attributes();
+		$this->set_stored_data();
 	}
 
 	/**
@@ -1423,6 +1424,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Version is set to current WC version to track data changes.
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
 		wc_delete_product_transients( $this->get_id() );
+		$this->set_stored_data();
 	}
 
 	/**
@@ -1442,6 +1444,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta() {
+		$current_state = $this->get_stored_data();
+		$new_state     = $this->get_data();
+		$changes       = array_diff( $new_state, $current_state );
+		var_dump( $changes );
+		exit;
+
 		$id       = $this->get_id();
 		$triggers = array();
 		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );

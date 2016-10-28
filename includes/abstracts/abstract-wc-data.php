@@ -405,6 +405,19 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Store data as the current state so changes can be compared.
+	 */
+	protected function set_stored_data() {
+		$this->stored_data = $this->data;
+	}
+	/**
+	 * Store data as the current state so changes can be compared.
+	 */
+	protected function get_stored_data() {
+		return $this->stored_data;
+	}
+
+	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.

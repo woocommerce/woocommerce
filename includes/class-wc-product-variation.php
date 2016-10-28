@@ -86,12 +86,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	|--------------------------------------------------------------------------
 	*/
 
-	/**
+	/*
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 2.7.0
 	 * @param int $id Product ID.
-	 */
+	 *
 	public function read( $id ) {
 		$this->set_defaults();
 
@@ -160,6 +160,71 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		$this->read_meta_data();
 	}
+
+
+	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 *
+	 * @since 2.7.0
+
+	protected function update_post_meta() {
+		$id       = $this->get_id();
+		$triggers = array();
+		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
+		update_post_meta( $id, '_sku', $this->get_sku() );
+		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
+		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
+		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
+		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
+		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
+		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
+		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
+		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
+		update_post_meta( $id, '_backorders', $this->get_backorders() );
+		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
+		update_post_meta( $id, '_weight', $this->get_weight() );
+		update_post_meta( $id, '_length', $this->get_length() );
+		update_post_meta( $id, '_width', $this->get_width() );
+		update_post_meta( $id, '_height', $this->get_height() );
+		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
+		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
+		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
+		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
+		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
+		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
+		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
+		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
+		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
+		update_post_meta( $id, '_download_type', $this->get_download_type() );
+
+		if ( ! empty( $this->get_thumbnail_id() ) ) {
+			set_post_thumbnail( $id, $this->get_thumbnail_id() );
+		} else {
+			delete_post_meta( $id, '_thumbnail_id' );
+		}
+
+		if ( $this->is_on_sale() ) {
+			update_post_meta( $id, '_price', $this->get_sale_price() );
+		} else {
+			update_post_meta( $id, '_price', $this->get_regular_price() );
+		}
+
+		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
+			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
+			$triggers['woocommerce_process_product_file_download_paths'] = array( $id, 0, $this->get_downloads() );
+		}
+
+		if ( update_post_meta( $id, '_stock', $this->get_stock_quantity() ) ) {
+			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' ] = array( $this );
+		}
+
+		if ( update_post_meta( $id, '_stock_status', $this->get_stock_status() ) ) {
+			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' ] = array( $this->get_id(), $this->get_stock_status() );
+		}
+
+		foreach ( $triggers as $action => $args ) {
+			do_action_ref_array( $action, $args );
+		}
+	} */
 
 	/*
 	|--------------------------------------------------------------------------
