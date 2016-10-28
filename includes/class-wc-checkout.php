@@ -730,7 +730,7 @@ class WC_Checkout {
 				}
 			}
 		} catch ( Exception $e ) {
-			if ( ! empty( $e ) ) {
+			if ( ! empty( $e->getMessage() ) ) {
 				wc_add_notice( $e->getMessage(), 'error' );
 			}
 		}
