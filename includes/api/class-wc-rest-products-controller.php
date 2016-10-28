@@ -498,7 +498,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'downloads'             => $this->get_downloads( $product ),
 			'download_limit'        => $product->get_download_limit(),
 			'download_expiry'       => $product->get_download_expiry(),
-			'download_type'         => $product->get_download_type(),
+			'download_type'         => 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'tax_status'            => $product->get_tax_status(),
@@ -1377,11 +1377,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $request['download_expiry'] ) ) {
 				$product->set_download_expiry( $request['download_expiry'] );
 			}
-
-			// Download type.
-			if ( isset( $request['download_type'] ) ) {
-				$product->set_download_type( $request['download_type'] );
-			}
 		}
 
 		// Product url and button text for external products.
@@ -2137,8 +2132,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Download type, this controls the schema on the front-end.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'standard',
-					'enum'        => array( 'standard', 'application', 'music' ),
-					'context'     => array( 'view', 'edit' ),
+					'enum'        => array( 'standard' ),
+					'context'     => array( 'view' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
