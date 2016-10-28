@@ -800,7 +800,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
  * @return array
  */
 function wc_get_product_term_ids( $product_id, $taxonomy ) {
-	return wp_list_pluck( get_the_terms( $product_id, $taxonomy ), 'term_id' );
+	$terms = get_the_terms( $product_id, $taxonomy );
+	return ! empty( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : array();
 }
 
 /**

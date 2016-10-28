@@ -325,13 +325,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'post' :
 				$value = get_post( $this->get_id() );
 				break;
-
 			case 'product_type' :  // @todo What do we do with 3rd party use of product_type now it's hardcoded?
 				$value = $this->get_type();
 				break;
-
-
-
+			case 'product_image_gallery' :
+				$value = $this->get_gallery_attachment_ids();
+				break;
 			default :
 				$value = get_post_meta( $this->id, '_' . $key, true );
 
@@ -360,7 +359,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return WP_Post
 	 */
 	public function get_post_data() {
-		return $this->post;
+		return get_post( $this->get_id() );
 	}
 
 	/**
@@ -370,7 +369,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->post ? $this->post->post_title : '', $this );
+		return apply_filters( 'woocommerce_product_title', $this->get_post_data() ? $this->get_post_data()->post_title : '', $this );
 	}
 
 	/**
@@ -381,7 +380,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_parent() {
 		_deprecated_function( 'WC_Product::get_parent', '2.7', 'WC_Product::get_parent_id' );
-		return apply_filters( 'woocommerce_product_parent', absint( $this->post->post_parent ), $this );
+		return apply_filters( 'woocommerce_product_parent', absint( $this->get_post_data()->post_parent ), $this );
 	}
 
 	/**
