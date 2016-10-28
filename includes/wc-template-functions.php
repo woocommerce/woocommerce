@@ -606,7 +606,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_search() ) {
 			return;
 		}
-		
+
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
@@ -700,24 +700,14 @@ if ( ! function_exists( 'woocommerce_get_product_schema' ) ) {
 	function woocommerce_get_product_schema() {
 		global $product;
 
-		$schema = "Product";
+		$schema = 'Product';
 
 		// Downloadable product schema handling
-		if ( $product->is_downloadable() ) {
-			switch ( $product->download_type ) {
-				case 'application' :
-					$schema = "SoftwareApplication";
-				break;
-				case 'music' :
-					$schema = "MusicAlbum";
-				break;
-				default :
-					$schema = "Product";
-				break;
-			}
+		if ( $product->is_downloadable() && !empty($product->download_type) ) {
+			$schema = $product->download_type;
 		}
 
-		return 'http://schema.org/' . $schema;
+		return 'http://schema.org/' . apply_filters( 'woocommerce_product_schema', $schema, $product );
 	}
 }
 
