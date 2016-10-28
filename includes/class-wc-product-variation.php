@@ -117,6 +117,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'name'                   => get_the_title( $post_object ),
 			'slug'                   => $post_object->post_name,
 			'permalink'              => get_permalink( $post_object ), // @todo Needed? Not used in getters and setters
+			'status'                 => $post_object->post_status,
 			'date_created'           => $post_object->post_date,
 			'date_modified'          => $post_object->post_modified,
 			'description'            => get_post_meta( $id, '_variation_description', true ),
