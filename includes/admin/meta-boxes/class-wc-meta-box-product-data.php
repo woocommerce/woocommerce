@@ -217,12 +217,13 @@ class WC_Meta_Box_Product_Data {
 						'min'	=> '0'
 					) ) );
 
-					 // Download Type
-					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' => array(
+					// Download Type
+					$download_types = array(
 						''            => __( 'Standard Product', 'woocommerce' ),
-						'application' => __( 'Application/Software', 'woocommerce' ),
-						'music'       => __( 'Music', 'woocommerce' ),
-					) ) );
+						'SoftwareApplication' => __( 'Application/Software', 'woocommerce' ),
+						'MusicAlbum'       => __( 'Music', 'woocommerce' ),
+					);
+					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' =>  apply_filters( 'woocommerce_download_types', $download_types ) ) );
 
 					do_action( 'woocommerce_product_options_downloads' );
 
