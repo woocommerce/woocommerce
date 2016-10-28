@@ -179,7 +179,9 @@ jQuery( function( $ ) {
 		/**
 		 * Initialise photoswipe.
 		 */
-		trigger_photoswipe: function() {
+		trigger_photoswipe: function( e ) {
+			e.preventDefault();
+
 			var pswpElement = $( '.pswp' )[0];
 
 			// Build items array.
