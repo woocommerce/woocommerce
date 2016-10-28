@@ -32,33 +32,6 @@ function wc_get_product( $the_product = false, $args = array() ) {
 }
 
 /**
- * Update a product's stock amount.
- *
- * @param  int $product_id
- * @param  int $new_stock_level
- */
-function wc_update_product_stock( $product_id, $new_stock_level ) {
-	$product = wc_get_product( $product_id );
-
-	if ( ! metadata_exists( 'post', $product_id, '_stock' ) || $product->get_stock_quantity() !== $new_stock_level ) {
-		$product->set_stock( $new_stock_level );
-	}
-}
-
-/**
- * Update a product's stock status.
- *
- * @param  int $product_id
- * @param  int $status
- */
-function wc_update_product_stock_status( $product_id, $status ) {
-	$product = wc_get_product( $product_id );
-	if ( $product ) {
-		$product->set_stock_status( $status );
-	}
-}
-
-/**
  * Returns whether or not SKUS are enabled.
  * @return bool
  */

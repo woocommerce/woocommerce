@@ -615,7 +615,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get thumbnail ID.
+	 * Get thumbnail ID. @todo ensure read handles parent like get_image_id used to?
 	 *
 	 * @since 2.7.0
 	 * @return string
@@ -867,15 +867,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
 
-		// Sanity check.
 		if ( $this->managing_stock() ) {
 			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$status = 'outofstock';
 			}
-		}
-
-		if ( update_post_meta( $this->get_id(), '_stock_status', $status ) ) {
-			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $status );
 		}
 
 		$this->data['stock_status'] = $status;
@@ -1267,7 +1262,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_props( array(
 			'name'                   => get_the_title( $post_object ),
 			'slug'                   => $post_object->post_name,
-			'permalink'              => get_permalink( $post_object ),
+			'permalink'              => get_permalink( $post_object ), // @todo Needed? Not used in getters and setters
 			'date_created'           => $post_object->post_date,
 			'date_modified'          => $post_object->post_modified,
 			'type'                   => '',
@@ -1307,7 +1302,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'downloadable'           => get_post_meta( $id, '_downloadable', true ),
 			'downloads'              => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-			'download_limit'         =>  get_post_meta( $id, '_download_limit', true ),
+			'download_limit'         => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
 			'download_type'          => get_post_meta( $id, '_download_type', true ),
 			'thumbnail_id'           => get_post_thumbnail_id( $id ),
@@ -1447,7 +1442,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta() {
-		$id = $this->get_id();
+		$id       = $this->get_id();
+		$triggers = array();
 		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
 		update_post_meta( $id, '_sku', $this->get_sku() );
 		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
@@ -1458,8 +1454,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
 		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
 		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
-		update_post_meta( $id, '_stock', $this->get_stock_quantity() );
-		update_post_meta( $id, '_stock_status', $this->get_stock_status() );
 		update_post_meta( $id, '_backorders', $this->get_backorders() );
 		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
 		update_post_meta( $id, '_weight', $this->get_weight() );
@@ -1495,7 +1489,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
 			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
-			do_action( 'woocommerce_process_product_file_download_paths', $id, 0, $this->get_downloads() );
+			$triggers['woocommerce_process_product_file_download_paths'] = array( $id, 0, $this->get_downloads() );
+		}
+
+		if ( update_post_meta( $id, '_stock', $this->get_stock_quantity() ) ) {
+			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' ] = array( $this );
+		}
+
+		if ( update_post_meta( $id, '_stock_status', $this->get_stock_status() ) ) {
+			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' ] = array( $this->get_id(), $this->get_stock_status() );
+		}
+
+		foreach ( $triggers as $action => $args ) {
+			do_action_ref_array( $action, $args );
 		}
 	}
 
@@ -1765,7 +1771,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
 	}
 
 	/**
@@ -1886,22 +1892,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Gets the main product image ID.
-	 *
-	 * @return int
-	 */
-	public function get_image_id() {
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image_id = get_post_thumbnail_id( $this->get_id() );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image_id = get_post_thumbnail_id( $parent_id );
-		} else {
-			$image_id = 0;
-		}
-		return $image_id;
-	}
-
-	/**
 	 * Returns the main product image.
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
@@ -1957,116 +1947,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| @todo stock functions
-	|--------------------------------------------------------------------------
-	*/
 
-	/**
-	 * Get total stock - This is the stock of parent and children combined.
-	 *
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			if ( sizeof( $this->get_children() ) > 0 ) {
-				$this->total_stock = max( 0, $this->get_stock_quantity() );
-
-				foreach ( $this->get_children() as $child_id ) {
-					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-					}
-				}
-			} else {
-				$this->total_stock = $this->get_stock_quantity();
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
-	}
-
-	/**
-	 * Check if the stock status needs changing.
-	 */
-	public function check_stock_status() {
-		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( 'outofstock' !== $this->stock_status ) {
-				$this->set_stock_status( 'outofstock' );
-			}
-		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( 'instock' !== $this->stock_status ) {
-				$this->set_stock_status( 'instock' );
-			}
-		}
-	}
-
-	/**
-	 * Set stock level of the product. @todo '' stock if not managing it.
-	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
-	 * We cannot rely on the original loaded value in case another order was made since then.
-	 *
-	 * @param int $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
-	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
-		global $wpdb;
-
-		if ( ! is_null( $amount ) && $this->managing_stock() ) {
-
-			// Ensure key exists
-			add_post_meta( $this->get_id(), '_stock', 0, true );
-
-			// Update stock in DB directly
-			switch ( $mode ) {
-				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-			}
-
-			// Clear caches
-			wp_cache_delete( $this->get_id(), 'post_meta' );
-			delete_transient( 'wc_low_stock_count' );
-			delete_transient( 'wc_outofstock_count' );
-			unset( $this->stock );
-
-			// Stock status
-			$this->check_stock_status();
-
-			// Trigger action
-			do_action( 'woocommerce_product_set_stock', $this );
-		}
-
-		return $this->get_stock_quantity();
-	}
-
-	/**
-	 * Reduce stock level of the product.
-	 *
-	 * @param int $amount Amount to reduce by. Default: 1
-	 * @return int new stock level
-	 */
-	public function reduce_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'subtract' );
-	}
-
-	/**
-	 * Increase stock level of the product.
-	 *
-	 * @param int $amount Amount to increase by. Default 1.
-	 * @return int new stock level
-	 */
-	public function increase_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'add' );
-	}
 
 	/*
 	|--------------------------------------------------------------------------

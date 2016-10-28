@@ -6,6 +6,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Product Variation Class.
  *
+ *
+ *
+ * @todo removed filters
+ *       woocommerce_variation_is_in_stock
+ *
+ *
+ *
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation
@@ -14,16 +21,61 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category    Class
  * @author      WooThemes
  */
-class WC_Product_Variation extends WC_Product {
+class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * Stores product data.
 	 *
 	 * @var array
 	 */
-	protected $extra_data = array(
-		'variation_id' => '',
-	);
+	 protected $data = array(
+ 		'name'                   => '',
+ 		'slug'                   => '',
+ 		'date_created'           => '',
+ 		'date_modified'          => '',
+ 		'status'                 => false,
+ 		'featured'               => false,
+ 		'catalog_visibility'     => 'hidden',
+ 		'description'            => '',
+ 		'short_description'      => '',
+ 		'sku'                    => '',
+ 		'price'                  => '',
+ 		'regular_price'          => '',
+ 		'sale_price'             => '',
+ 		'date_on_sale_from'      => '',
+ 		'date_on_sale_to'        => '',
+ 		'total_sales'            => '0',
+ 		'tax_status'             => 'taxable',
+ 		'tax_class'              => '',
+ 		'manage_stock'           => false,
+ 		'stock_quantity'         => null,
+ 		'stock_status'           => '',
+ 		'backorders'             => 'no',
+ 		'sold_individually'      => false,
+ 		'weight'                 => '',
+ 		'length'                 => '',
+ 		'width'                  => '',
+ 		'height'                 => '',
+ 		'upsell_ids'             => array(),
+ 		'cross_sell_ids'         => array(),
+ 		'parent_id'              => 0,
+ 		'reviews_allowed'        => true,
+ 		'purchase_note'          => '',
+ 		'attributes'             => array(),
+ 		'default_attributes'     => array(),
+ 		'menu_order'             => 0,
+ 		'virtual'                => false,
+ 		'downloadable'           => false,
+ 		'category_ids'           => array(),
+ 		'tag_ids'                => array(),
+ 		'shipping_class_id'      => 0,
+ 		'downloads'              => array(),
+ 		'thumbnail_id'           => '',
+ 		'gallery_attachment_ids' => array(),
+ 		'download_limit'         => -1,
+ 		'download_expiry'        => -1,
+ 		'download_type'          => 'standard',
+ 	);
 
 	/**
 	 * Merges external product data into the parent object.
@@ -34,6 +86,40 @@ class WC_Product_Variation extends WC_Product {
 		parent::__construct( $product );
 	}
 
+/*
+id	integer	Variation ID. READ-ONLY
+date_created	date-time	The date the variation was created, in the site’s timezone. READ-ONLY
+date_modified	date-time	The date the variation was last modified, in the site’s timezone. READ-ONLY
+permalink	string	Variation URL. READ-ONLY
+sku	string	Unique identifier.
+price	string	Current variation price. This is setted from regular_price and sale_price. READ-ONLY
+regular_price	string	Variation regular price.
+sale_price	string	Variation sale price.
+date_on_sale_from	string	Start date of sale price. Date in the YYYY-MM-DD format.
+date_on_sale_to	string	Start date of sale price. Date in the YYYY-MM-DD format.
+on_sale	boolean	Shows if the variation is on sale. READ-ONLY
+purchasable	boolean	Shows if the variation can be bought. READ-ONLY
+virtual	boolean	If the variation is virtual. Virtual variations are intangible and aren’t shipped. Default is false.
+downloadable	boolean	If the variation is downloadable. Downloadable variations give access to a file upon purchase. Default is false.
+downloads	array	List of downloadable files. See Downloads properties.
+download_limit	integer	Amount of times the variation can be downloaded, the -1 values means unlimited re-downloads. Default is -1.
+download_expiry	integer	Number of days that the customer has up to be able to download the variation, the -1 means that downloads never expires. Default is -1.
+tax_status	string	Tax status. Default is taxable. Options: taxable, shipping (Shipping only) and none.
+tax_class	string	Tax class.
+manage_stock	boolean	Stock management at variation level. Default is false.
+stock_quantity	integer	Stock quantity. If is a variable variation this value will be used to control stock for all variations, unless you define stock at variation level.
+in_stock	boolean	Controls whether or not the variation is listed as “in stock” or “out of stock” on the frontend. Default is true.
+backorders	string	If managing stock, this controls if backorders are allowed. If enabled, stock quantity can go below 0. Default is no. Options are: no (Do not allow), notify (Allow, but notify customer), and yes (Allow).
+backorders_allowed	boolean	Shows if backorders are allowed.“ READ-ONLY
+backordered	boolean	Shows if a variation is on backorder (if the variation have the stock_quantity negative). READ-ONLY
+weight	string	Variation weight in decimal format.
+dimensions	object	Variation dimensions. See Dimensions properties.
+shipping_class	string	Shipping class slug. Shipping classes are used by certain shipping methods to group similar products.
+shipping_class_id	integer	Shipping class ID. READ-ONLY
+image	array	Variation featured image. Only position 0 will be used. See Images properties.
+attributes
+*/
+ */
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -51,64 +137,22 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Since variations are part of another product, they have their own ID.
-	 * get_id() still returns the ID of the parent product.
-	 * @return int
-	 */
-	public function get_variation_id() {
-		return $this->data['variation_id'];
-	}
-	/**
-	 * Return the variation ID
-	 *
-	 * @since 2.5.0
-	 * @return int variation (post) ID
-	 */
-	public function get_id() {
-		return $this->variation_id;
-	}
-	/**
-	 * Get variation ID.
-	 *
-	 * @return int
-	 */
-	public function get_variation_id() {
-		return absint( $this->variation_id );
-	}
-
-	/**
 	 * Get product name with SKU or ID. Used within admin.
 	 *
 	 * @return string Formatted product name
 	 */
 	public function get_formatted_name() {
-		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
-		} else {
-			$identifier = '#' . $this->get_id();
-		}
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
-
-		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
-		} else {
-			$identifier = '#' . $this->variation_id;
-		}
-
 		$formatted_attributes = $this->get_formatted_variation_attributes( true );
-		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
-
-		return sprintf( __( '%1$s &ndash; %2$s%3$s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+		return parent::get_formatted_name() . ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
 	}
 
-
 	/**
-	 * Get product variation description.
+	 * Get variation attribute values.
 	 *
-	 * @return string
+	 * @return array of attributes and their values for this variation
 	 */
-	public function get_variation_description() {
-		return wpautop( do_shortcode( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) ) );
+	public function get_variation_attributes() {
+		return $this->variation_data;
 	}
 
 	/*
@@ -120,161 +164,6 @@ class WC_Product_Variation extends WC_Product {
 	| database itself and should only change what is stored in the class
 	| object.
 	*/
-
-	/**
-	 * Since variations are part of another product, they have their own ID.
-	 * @param $id int
-	 */
-	public function set_variation_id( $id ) {
-		$this->data['variation_id'] = absint( $id );
-	}
-
-	/**
-	 * Set variation description. Variations have a separate dedicated field for
-	 * this separate from product description.
-	 *
-	 * @since 2.7.0
-	 * @param string $description Description.
-	 */
-	public function set_description( $description ) {
-		$this->data['description'] = $description;
-	}
-
-
-
-	/** @public int ID of the variation itself. */
-	public $variation_id;
-
-	/** @public object Parent Variable product object. */
-	public $parent;
-
-	/** @public string Stores the shipping class of the variation. */
-	public $variation_shipping_class         = '';
-
-	/** @public int Stores the shipping class ID of the variation. */
-	public $variation_shipping_class_id      = 0;
-
-	/** @public unused vars @deprecated in 2.2 */
-	public $variation_has_sku                = true;
-	public $variation_has_length             = true;
-	public $variation_has_width              = true;
-	public $variation_has_height             = true;
-	public $variation_has_weight             = true;
-	public $variation_has_tax_class          = true;
-	public $variation_has_downloadable_files = true;
-
-	/** @private array Data which is only at variation level - no inheritance plus their default values if left blank. */
-	protected $variation_level_meta_data = array(
-		'downloadable'          => 'no',
-		'virtual'               => 'no',
-		'manage_stock'          => 'no',
-		'sale_price_dates_from' => '',
-		'sale_price_dates_to'   => '',
-		'price'                 => '',
-		'regular_price'         => '',
-		'sale_price'            => '',
-		'stock'                 => 0,
-		'stock_status'          => 'instock',
-		'downloadable_files'    => array(),
-	);
-
-	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
-	protected $variation_inherited_meta_data = array(
-		'tax_class'  => '',
-		'backorders' => 'no',
-		'sku'        => '',
-		'weight'     => '',
-		'length'     => '',
-		'width'      => '',
-		'height'     => '',
-	);
-
-	/**
-	 * Loads required variation data.
-	 *
-	 * @param int $variation ID of the variation to load
-	 * @param array $args Array of the arguments containing parent product data
-	 */
-	public function __construct( $variation, $args = array() ) {
-		if ( is_object( $variation ) ) {
-			$this->variation_id = absint( $variation->ID );
-		} else {
-			$this->variation_id = absint( $variation );
-		}
-
-		/* Get main product data from parent (args) */
-		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
-
-		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
-		if ( empty( $this->id ) ) {
-			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->variation_id ), 422 );
-		}
-
-		$this->parent       = ! empty( $args['parent'] ) ? $args['parent'] : wc_get_product( $this->id );
-		$this->post         = ! empty( $this->parent->post ) ? $this->parent->post : array();
-
-		// The post parent is not a valid variable product so we should prevent this being created.
-		if ( ! is_a( $this->parent, 'WC_Product' ) ) {
-			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->variation_id ), 422 );
-		}
-	}
-
-
-	/**
-	 * __isset function.
-	 *
-	 * @param mixed $key
-	 * @return bool
-	 */
-	public function __isset( $key ) {
-		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
-			return metadata_exists( 'post', $this->variation_id, '_' . $key );
-		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
-			return metadata_exists( 'post', $this->variation_id, '_' . $key ) || metadata_exists( 'post', $this->id, '_' . $key );
-		} else {
-			return metadata_exists( 'post', $this->id, '_' . $key );
-		}
-	}
-
-	/**
-	 * Get method returns variation meta data if set, otherwise in most cases the data from the parent.
-	 *
-	 * @param string $key
-	 * @return mixed
-	 */
-	public function __get( $key ) {
-		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
-
-			$value = get_post_meta( $this->variation_id, '_' . $key, true );
-
-			if ( '' === $value ) {
-				$value = $this->variation_level_meta_data[ $key ];
-			}
-		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
-
-			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
-
-			// Handle meta data keys which can be empty at variation level to cause inheritance
-			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'width', 'height' ) ) ) {
-				$value = get_post_meta( $this->id, '_' . $key, true );
-			}
-
-			if ( '' === $value ) {
-				$value = $this->variation_inherited_meta_data[ $key ];
-			}
-		} elseif ( 'variation_data' === $key ) {
-			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
-
-		} elseif ( 'variation_has_stock' === $key ) {
-			return $this->managing_stock();
-
-		} else {
-			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : parent::__get( $key );
-		}
-
-		return $value;
-	}
-
 
 
 
@@ -310,17 +199,6 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text.
-	 *
-	 * @return string
-	 */
-	public function add_to_cart_text() {
-		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read more', 'woocommerce' );
-
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
-	}
-
-	/**
 	 * Checks if this particular variation is visible. Invisible variations are enabled and can be selected, but no price / stock info is displayed.
 	 * Instead, a suitable 'unavailable' message is displayed.
 	 * Invisible by default: Disabled variations and variations with an empty price.
@@ -345,73 +223,10 @@ class WC_Product_Variation extends WC_Product {
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id, $this );
 	}
 
-	/**
-	 * Controls whether this particular variation will appear greyed-out (inactive) or not (active).
-	 * Used by extensions to make incompatible variations appear greyed-out, etc.
-	 * Other possible uses: prevent out-of-stock variations from being selected.
-	 *
-	 * @return bool
-	 */
-	public function variation_is_active() {
-		return apply_filters( 'woocommerce_variation_is_active', true, $this );
-	}
-
-	/**
-	 * Returns false if the product cannot be bought.
-	 * Override abstract method so that: i) Disabled variations are not be purchasable by admins. ii) Enabled variations are not purchasable if the parent product is not purchasable.
-	 *
-	 * @return bool
-	 */
-	public function is_purchasable() {
-		// Published == enabled checkbox
-		if ( get_post_status( $this->variation_id ) != 'publish' ) {
-			$purchasable = false;
-		} else {
-			$purchasable = parent::is_purchasable();
-		}
-		return apply_filters( 'woocommerce_variation_is_purchasable', $purchasable, $this );
-	}
-
-	/**
-	 * Returns whether or not the variations parent is visible.
-	 *
-	 * @return bool
-	 */
-	public function parent_is_visible() {
-		return $this->is_visible();
-	}
 
 
 
-	/**
-	 * Get variation attribute values.
-	 *
-	 * @return array of attributes and their values for this variation
-	 */
-	public function get_variation_attributes() {
-		return $this->variation_data;
-	}
 
-	/**
-	 * Check if all variation's attributes are set.
-	 *
-	 * @return boolean
-	 */
-	public function has_all_attributes_set() {
-
-		$set = true;
-
-		// undefined attributes have null strings as array values
-		foreach ( $this->get_variation_attributes() as $att ) {
-			if ( ! $att ) {
-				$set = false;
-				break;
-			}
-		}
-
-		return $set;
-
-	}
 
 	/**
 	 * Get variation price HTML. Prices are not inherited from parents.
@@ -437,46 +252,6 @@ class WC_Product_Variation extends WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_get_variation_price_html', $price, $this );
-	}
-
-	/**
-	 * Gets the main product image ID.
-	 *
-	 * @return int
-	 */
-	public function get_image_id() {
-		if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
-			$image_id = get_post_thumbnail_id( $this->variation_id );
-		} elseif ( has_post_thumbnail( $this->id ) ) {
-			$image_id = get_post_thumbnail_id( $this->id );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image_id = get_post_thumbnail_id( $parent_id );
-		} else {
-			$image_id = 0;
-		}
-		return $image_id;
-	}
-
-	/**
-	 * Gets the main product image.
-	 *
-	 * @param string $size (default: 'shop_thumbnail')
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
-	 * @return string
-	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
-		if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
-			$image = get_the_post_thumbnail( $this->variation_id, $size, $attr );
-		} elseif ( has_post_thumbnail( $this->id ) ) {
-			$image = get_the_post_thumbnail( $this->id, $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size , $attr );
-		} elseif ( $placeholder ) {
-			$image = wc_placeholder_img( $size );
-		} else {
-			$image = '';
-		}
-		return $image;
 	}
 
 	/**
@@ -507,86 +282,6 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get total stock - This is the stock of parent and children combined.
-	 *
-	 * @return int
-	 */
-	public function get_total_stock() {
-		return $this->get_stock_quantity();
-	}
-
-	/**
-	 * Returns the tax status. Always use parent data.
-	 *
-	 * @return string
-	 */
-	public function get_tax_status() {
-		return $this->parent->get_tax_status();
-	}
-
-	/**
-	 * Returns whether or not the product is in stock.
-	 *
-	 * @return bool
-	 */
-	public function is_in_stock() {
-		return apply_filters( 'woocommerce_variation_is_in_stock', 'instock' === $this->stock_status, $this );
-	}
-
-	/**
-	 * Set stock level of the product variation.
-	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
-	 * We cannot rely on the original loaded value in case another order was made since then.
-	 *
-	 * @param int $amount
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
-	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
-		global $wpdb;
-
-		if ( ! is_null( $amount ) && true === $this->managing_stock() ) {
-
-			// Ensure key exists
-			add_post_meta( $this->variation_id, '_stock', 0, true );
-
-			// Update stock in DB directly
-			switch ( $mode ) {
-				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
-				break;
-				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
-				break;
-				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
-				break;
-			}
-
-			// Clear caches
-			wp_cache_delete( $this->variation_id, 'post_meta' );
-
-			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' ) );
-
-			// Stock status
-			$this->check_stock_status();
-
-			// Sync the parent
-			WC_Product_Variable::sync( $this->id );
-
-			// Trigger action
-			do_action( 'woocommerce_variation_set_stock', $this );
-
-		} elseif ( ! is_null( $amount ) ) {
-			return $this->parent->set_stock( $amount, $mode );
-		}
-
-		return $this->get_stock_quantity();
-	}
-
-	/**
 	 * Set stock status.
 	 *
 	 * @param string $status
@@ -609,34 +304,6 @@ class WC_Product_Variation extends WC_Product {
 			do_action( 'woocommerce_variation_set_stock_status', $this->variation_id, $status );
 
 			WC_Product_Variable::sync_stock_status( $this->id );
-		}
-	}
-
-	/**
-	 * Reduce stock level of the product.
-	 *
-	 * @param int $amount (default: 1) Amount to reduce by
-	 * @return int stock level
-	 */
-	public function reduce_stock( $amount = 1 ) {
-		if ( true === $this->managing_stock() ) {
-			return $this->set_stock( $amount, 'subtract' );
-		} else {
-			return $this->parent->reduce_stock( $amount );
-		}
-	}
-
-	/**
-	 * Increase stock level of the product.
-	 *
-	 * @param int $amount (default: 1) Amount to increase by
-	 * @return int stock level
-	 */
-	public function increase_stock( $amount = 1 ) {
-		if ( true === $this->managing_stock() ) {
-			return $this->set_stock( $amount, 'add' );
-		} else {
-			return $this->parent->increase_stock( $amount );
 		}
 	}
 
@@ -681,85 +348,111 @@ class WC_Product_Variation extends WC_Product {
 		}
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| CRUD methods
+	|--------------------------------------------------------------------------
+	*/
+
+	/** @private array Data which is only at variation level - no inheritance plus their default values if left blank. */
+	protected $variation_level_meta_data = array(
+		'downloadable'          => 'no',
+		'virtual'               => 'no',
+		'manage_stock'          => 'no',
+		'sale_price_dates_from' => '',
+		'sale_price_dates_to'   => '',
+		'price'                 => '',
+		'regular_price'         => '',
+		'sale_price'            => '',
+		'stock'                 => 0,
+		'stock_status'          => 'instock',
+		'downloadable_files'    => array(),
+	);
+
+	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
+	protected $variation_inherited_meta_data = array(
+		'tax_class'  => '',
+		'backorders' => 'no',
+		'sku'        => '',
+		'weight'     => '',
+		'length'     => '',
+		'width'      => '',
+		'height'     => '',
+	);
+
 	/**
-	 * Get formatted variation data with WC < 2.4 back compat and proper formatting of text-based attribute names.
+	 * Reads a product from the database and sets its data to the class.
 	 *
-	 * @return string
+	 * @since 2.7.0
+	 * @param int $id Product ID.
 	 */
-	public function get_formatted_variation_attributes( $flat = false ) {
-		$variation_data = $this->get_variation_attributes();
-		$attributes     = $this->parent->get_attributes();
-		$description    = array();
-		$return         = '';
+	public function read( $id ) {
+		$this->set_defaults();
 
-		if ( is_array( $variation_data ) ) {
+		/**
+		 * 		if ( is_object( $variation ) ) {
+		 			$this->variation_id = absint( $variation->ID );
+		 		} else {
+		 			$this->variation_id = absint( $variation );
+		 		}
 
-			if ( ! $flat ) {
-				$return = '<dl class="variation">';
-			}
+		 		/* Get main product data from parent (args) */
+		 		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
-			foreach ( $attributes as $attribute ) {
+		 		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
+		 		if ( empty( $this->id ) ) {
+		 			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->variation_id ), 422 );
+		 		}
 
-				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] ) {
-					continue;
-				}
+		 		$this->parent       = ! empty( $args['parent'] ) ? $args['parent'] : wc_get_product( $this->id );
+		 		$this->post         = ! empty( $this->parent->post ) ? $this->parent->post : array();
 
-				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
-				$description_name         = esc_html( wc_attribute_label( $attribute['name'] ) );
-				$description_value        = __( 'Any', 'woocommerce' );
+		 		// The post parent is not a valid variable product so we should prevent this being created.
+		 		if ( ! is_a( $this->parent, 'WC_Product' ) ) {
+		 			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->variation_id ), 422 );
+		 		}
 
-				// Get terms for attribute taxonomy or value if its a custom attribute
-				if ( $attribute['is_taxonomy'] ) {
+		 */
 
-					$post_terms = get_the_terms( $this->id, $attribute['name'] );
-
-					foreach ( $post_terms as $term ) {
-						if ( $variation_selected_value === $term->slug ) {
-							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
-						}
-					}
-				} else {
-
-					$options = wc_get_text_attributes( $attribute['value'] );
-
-					foreach ( $options as $option ) {
-
-						if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
-							if ( sanitize_title( $option ) !== $variation_selected_value ) {
-								continue;
-							}
-						} else {
-							if ( $variation_selected_value !== $option ) {
-								continue;
-							}
-						}
-
-						$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) );
-					}
-				}
-
-				if ( $flat ) {
-					$description[] = $description_name . ': ' . rawurldecode( $description_value );
-				} else {
-					$description[] = '<dt>' . $description_name . ':</dt><dd>' . rawurldecode( $description_value ) . '</dd>';
-				}
-			}
-
-			if ( $flat ) {
-				$return .= implode( ', ', $description );
-			} else {
-				$return .= implode( '', $description );
-			}
-
-			if ( ! $flat ) {
-				$return .= '</dl>';
-			}
+		if ( ! $id || ! ( $post_object = get_post( $id ) ) ) {
+			return;
 		}
 
-		return $return;
+		$this->set_id( $id );
+		$this->set_props( array(
+		) );
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Conditionals
+	|--------------------------------------------------------------------------
+	*/
 
+	/**
+	 * Returns false if the product cannot be bought.
+	 * Override abstract method so that: i) Disabled variations are not be purchasable by admins. ii) Enabled variations are not purchasable if the parent product is not purchasable.
+	 *
+	 * @return bool
+	 */
+	public function is_purchasable() {
+		// Published == enabled checkbox
+		if ( get_post_status( $this->variation_id ) != 'publish' ) {
+			$purchasable = false;
+		} else {
+			$purchasable = parent::is_purchasable();
+		}
+		return apply_filters( 'woocommerce_variation_is_purchasable', $purchasable, $this );
+	}
 
+	/**
+	 * Controls whether this particular variation will appear greyed-out (inactive) or not (active).
+	 * Used by extensions to make incompatible variations appear greyed-out, etc.
+	 * Other possible uses: prevent out-of-stock variations from being selected.
+	 *
+	 * @return bool
+	 */
+	public function variation_is_active() {
+		return apply_filters( 'woocommerce_variation_is_active', true, $this );
+	}
 }
