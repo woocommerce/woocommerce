@@ -49,7 +49,7 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 						'item_id'		     => $item_id,
 						'item'			     => $item,
 						'show_purchase_note' => $show_purchase_note,
-						'purchase_note'	     => $product ? get_post_meta( $product->id, '_purchase_note', true ) : '',
+						'purchase_note'	     => $product ? get_post_meta( $product->get_id(), '_purchase_note', true ) : '',
 						'product'	         => $product,
 					) );
 				}

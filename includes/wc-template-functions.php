@@ -45,7 +45,7 @@ function wc_template_redirect() {
 		$product = wc_get_product( $wp_query->post );
 
 		if ( $product && $product->is_visible() ) {
-			wp_safe_redirect( get_permalink( $product->id ), 302 );
+			wp_safe_redirect( get_permalink( $product->get_id() ), 302 );
 			exit;
 		}
 	} elseif ( is_add_payment_method_page() ) {
@@ -2171,7 +2171,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( ! empty( $options ) ) {
 			if ( $product && taxonomy_exists( $attribute ) ) {
 				// Get terms if this is a taxonomy - ordered. We need the names too.
-				$terms = wc_get_product_terms( $product->id, $attribute, array( 'fields' => 'all' ) );
+				$terms = wc_get_product_terms( $product->get_id(), $attribute, array( 'fields' => 'all' ) );
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {

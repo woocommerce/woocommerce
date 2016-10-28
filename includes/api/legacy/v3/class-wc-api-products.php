@@ -1119,7 +1119,7 @@ class WC_API_Products extends WC_API_Resource {
 	private function get_product_data( $product ) {
 		return array(
 			'title'              => $product->get_title(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
+			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
 			'created_at'         => $this->server->format_datetime( $product->get_post_data()->post_date_gmt ),
 			'updated_at'         => $this->server->format_datetime( $product->get_post_data()->post_modified_gmt ),
 			'type'               => $product->product_type,
@@ -1168,17 +1168,17 @@ class WC_API_Products extends WC_API_Resource {
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
 			'parent_id'          => $product->is_type( 'variation' ) ? $product->parent->id : $product->post->post_parent,
-			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
-			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
+			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
+			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
 			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
 			'purchase_note'      => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
-			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
+			'total_sales'        => metadata_exists( 'post', $product->get_id(), 'total_sales' ) ? (int) get_post_meta( $product->get_id(), 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
 			'grouped_products'   => array(),
@@ -2202,16 +2202,16 @@ class WC_API_Products extends WC_API_Resource {
 				// Add variation image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
 
-			} elseif ( has_post_thumbnail( $product->id ) ) {
+			} elseif ( has_post_thumbnail( $product->get_id() ) ) {
 
 				// Otherwise use the parent product featured image if set
-				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
 			}
 		} else {
 
 			// Add featured image
-			if ( has_post_thumbnail( $product->id ) ) {
-				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+			if ( has_post_thumbnail( $product->get_id() ) ) {
+				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
 			}
 
 			// Add gallery images
@@ -2534,7 +2534,7 @@ class WC_API_Products extends WC_API_Resource {
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
-					'options'   => $this->get_attribute_options( $product->id, $attribute ),
+					'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
 				);
 			}
 		}

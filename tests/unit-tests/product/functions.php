@@ -17,12 +17,12 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product_copy = wc_get_product( $product->id );
+		$product_copy = wc_get_product( $product->get_id() );
 
-		$this->assertEquals( $product->id, $product_copy->id );
+		$this->assertEquals( $product->get_id(), $product_copy->id );
 
 		// Delete Product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -34,13 +34,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		update_post_meta( $product->id, '_manage_stock', 'yes' );
+		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
 
-		wc_update_product_stock( $product->id, 5 );
+		wc_update_product_stock( $product->get_id(), 5 );
 		$this->assertEquals( 5, $product->stock );
 
 		// Delete Product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -52,10 +52,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
-		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->id, '_featured', 'yes' );
+		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->get_id(), '_featured', 'yes' );
 
 		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
 		wc_get_featured_product_ids(); // Creates the transient for featured products
@@ -65,7 +65,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
 		$this->assertFalse( get_transient( 'wc_featured_products' ) );
 
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -81,14 +81,14 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
-		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
 
-		$this->assertEquals( array( $product->id ), wc_get_product_ids_on_sale() );
+		$this->assertEquals( array( $product->get_id() ), wc_get_product_ids_on_sale() );
 
 		// Delete Product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -104,12 +104,12 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		update_post_meta( $product->id, '_featured', 'yes' );
+		update_post_meta( $product->get_id(), '_featured', 'yes' );
 
-		$this->assertEquals( array( $product->id ), wc_get_featured_product_ids() );
+		$this->assertEquals( array( $product->get_id() ), wc_get_featured_product_ids() );
 
 		// Delete Product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -178,9 +178,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( $product->id, wc_get_product_id_by_sku( $product->sku ) );
+		$this->assertEquals( $product->get_id(), wc_get_product_id_by_sku( $product->sku ) );
 
 		// Delete Product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }
