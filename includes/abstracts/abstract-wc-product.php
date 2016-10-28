@@ -72,7 +72,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'gallery_attachment_ids' => array(),
 		'download_limit'         => -1,
 		'download_expiry'        => -1,
-		'download_type'          => 'standard',
 	);
 
 	/**
@@ -546,32 +545,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get downloadable.
-	 *
-	 * @since 2.7.0
-	 * @return bool
-	 */
-	public function get_downloadable() {
-		return $this->data['downloadable'];
-	}
-
-	/**
 	 * Returns the gallery attachment ids.
 	 *
 	 * @return array
 	 */
 	public function get_gallery_attachment_ids() {
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( $this->data['gallery_attachment_ids'] ), 'wp_attachment_is_image' ), $this );
-	}
-
-	/**
-	 * Get download limit.
-	 *
-	 * @since 2.7.0
-	 * @return int
-	 */
-	public function get_download_limit() {
-		return $this->data['download_limit'];
 	}
 
 	/**
@@ -605,13 +584,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get download type.
+	 * Get downloadable.
 	 *
 	 * @since 2.7.0
-	 * @return string
+	 * @return bool
 	 */
-	public function get_download_type() {
-		return $this->data['download_type'];
+	public function get_downloadable() {
+		return $this->data['downloadable'];
+	}
+
+	/**
+	 * Get download limit.
+	 *
+	 * @since 2.7.0
+	 * @return int
+	 */
+	public function get_download_limit() {
+		return $this->data['download_limit'];
 	}
 
 	/**
@@ -1069,16 +1058,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set if the product is downloadable.
-	 *
-	 * @since 2.7.0
-	 * @param bool|string
-	 */
-	public function set_downloadable( $downloadable ) {
-		$this->data['downloadable'] = wc_string_to_bool( $downloadable );
-	}
-
-	/**
 	 * Set shipping class ID.
 	 *
 	 * @since 2.7.0
@@ -1086,6 +1065,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_shipping_class_id( $id ) {
 		$this->data['shipping_class_id'] = absint( $id );
+	}
+
+	/**
+	 * Set if the product is downloadable.
+	 *
+	 * @since 2.7.0
+	 * @param bool|string
+	 */
+	public function set_downloadable( $downloadable ) {
+		$this->data['downloadable'] = wc_string_to_bool( $downloadable );
 	}
 
 	/**
@@ -1154,16 +1143,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set gallery attachment ids.
-	 *
-	 * @since 2.7.0
-	 * @param array $gallery_ids
-	 */
-	public function set_gallery_attachment_ids( $gallery_ids ) {
-		$this->data['gallery_attachment_ids'] = $gallery_ids;
-	}
-
-	/**
 	 * Set download limit.
 	 *
 	 * @since 2.7.0
@@ -1184,13 +1163,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set download type.
+	 * Set gallery attachment ids.
 	 *
 	 * @since 2.7.0
-	 * @param string $download_type
+	 * @param array $gallery_ids
 	 */
-	public function set_download_type( $download_type ) {
-		$this->data['download_type'] = $download_type;
+	public function set_gallery_attachment_ids( $gallery_ids ) {
+		$this->data['gallery_attachment_ids'] = $gallery_ids;
 	}
 
 	/**
@@ -1309,7 +1288,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'         =>  get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
-			'download_type'          => get_post_meta( $id, '_download_type', true ),
 			'thumbnail_id'           => get_post_thumbnail_id( $id ),
 		) );
 		if ( $this->is_on_sale() ) {
@@ -1475,7 +1453,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
 		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
 		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
-		update_post_meta( $id, '_download_type', $this->get_download_type() );
 
 		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
 			delete_transient( 'wc_featured_products' );
@@ -1661,14 +1638,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		if ( ! empty( $this->get_sale_price() ) && $this->get_regular_price() > $this->get_sale_price() ) {
+		if ( '' !== (string) $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
 			$onsale = true;
 
-			if ( ! empty( $this->get_date_on_sale_from() ) && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== (string) $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				$onsale = false;
 			}
 
-			if ( ! empty( $this->get_date_on_sale_to() ) && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== (string) $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				$onsale = false;
 			}
 		} else {
