@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -10,12 +9,138 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation
- * @version     2.2.0
+ * @version     2.7.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
  */
 class WC_Product_Variation extends WC_Product {
+
+	/**
+	 * Stores product data.
+	 *
+	 * @var array
+	 */
+	protected $extra_data = array(
+		'variation_id' => '',
+	);
+
+	/**
+	 * Merges external product data into the parent object.
+	 * @param int|WC_Product|object $product Product to init.
+	 */
+	public function __construct( $product = 0 ) {
+		$this->data = array_merge( $this->data, $this->extra_data );
+		parent::__construct( $product );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the product object.
+	*/
+
+	/**
+	 * Get internal type.
+	 * @return string
+	 */
+	public function get_type() {
+		return 'variation';
+	}
+
+	/**
+	 * Since variations are part of another product, they have their own ID.
+	 * get_id() still returns the ID of the parent product.
+	 * @return int
+	 */
+	public function get_variation_id() {
+		return $this->data['variation_id'];
+	}
+	/**
+	 * Return the variation ID
+	 *
+	 * @since 2.5.0
+	 * @return int variation (post) ID
+	 */
+	public function get_id() {
+		return $this->variation_id;
+	}
+	/**
+	 * Get variation ID.
+	 *
+	 * @return int
+	 */
+	public function get_variation_id() {
+		return absint( $this->variation_id );
+	}
+
+	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @return string Formatted product name
+	 */
+	public function get_formatted_name() {
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->get_id();
+		}
+		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
+
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->variation_id;
+		}
+
+		$formatted_attributes = $this->get_formatted_variation_attributes( true );
+		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
+
+		return sprintf( __( '%1$s &ndash; %2$s%3$s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+	}
+
+
+	/**
+	 * Get product variation description.
+	 *
+	 * @return string
+	 */
+	public function get_variation_description() {
+		return wpautop( do_shortcode( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	|
+	| Functions for setting product data. These should not update anything in the
+	| database itself and should only change what is stored in the class
+	| object.
+	*/
+
+	/**
+	 * Since variations are part of another product, they have their own ID.
+	 * @param $id int
+	 */
+	public function set_variation_id( $id ) {
+		$this->data['variation_id'] = absint( $id );
+	}
+
+	/**
+	 * Set variation description. Variations have a separate dedicated field for
+	 * this separate from product description.
+	 *
+	 * @since 2.7.0
+	 * @param string $description Description.
+	 */
+	public function set_description( $description ) {
+		$this->data['description'] = $description;
+	}
+
+
 
 	/** @public int ID of the variation itself. */
 	public $variation_id;
@@ -94,13 +219,6 @@ class WC_Product_Variation extends WC_Product {
 		}
 	}
 
-	/**
-	 * Get internal type.
-	 * @return string
-	 */
-	public function get_type() {
-		return 'variation';
-	}
 
 	/**
 	 * __isset function.
@@ -157,24 +275,8 @@ class WC_Product_Variation extends WC_Product {
 		return $value;
 	}
 
-	/**
-	 * Return the variation ID
-	 *
-	 * @since 2.5.0
-	 * @return int variation (post) ID
-	 */
-	public function get_id() {
-		return $this->variation_id;
-	}
 
-	/**
-	 * Returns whether or not the product post exists.
-	 *
-	 * @return bool
-	 */
-	public function exists() {
-		return ! empty( $this->id );
-	}
+
 
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
@@ -279,14 +381,7 @@ class WC_Product_Variation extends WC_Product {
 		return $this->is_visible();
 	}
 
-	/**
-	 * Get variation ID.
-	 *
-	 * @return int
-	 */
-	public function get_variation_id() {
-		return absint( $this->variation_id );
-	}
+
 
 	/**
 	 * Get variation attribute values.
@@ -587,42 +682,6 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get the shipping class, and if not set, get the shipping class of the parent.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_class() {
-		if ( ! $this->variation_shipping_class ) {
-			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->variation_shipping_class = current( $classes )->slug;
-			} else {
-				$this->variation_shipping_class = parent::get_shipping_class();
-			}
-		}
-		return $this->variation_shipping_class;
-	}
-
-	/**
-	 * Returns the product shipping class ID.
-	 *
-	 * @return int
-	 */
-	public function get_shipping_class_id() {
-		if ( ! $this->variation_shipping_class_id ) {
-			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->variation_shipping_class_id = current( $classes )->term_id;
-			} else {
-				$this->variation_shipping_class_id = parent::get_shipping_class_id();
-			}
-		}
-		return absint( $this->variation_shipping_class_id );
-	}
-
-	/**
 	 * Get formatted variation data with WC < 2.4 back compat and proper formatting of text-based attribute names.
 	 *
 	 * @return string
@@ -701,30 +760,6 @@ class WC_Product_Variation extends WC_Product {
 		return $return;
 	}
 
-	/**
-	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
-	 *
-	 * @return string Formatted product name, including attributes and price
-	 */
-	public function get_formatted_name() {
-		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
-		} else {
-			$identifier = '#' . $this->variation_id;
-		}
 
-		$formatted_attributes = $this->get_formatted_variation_attributes( true );
-		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
 
-		return sprintf( __( '%1$s &ndash; %2$s%3$s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
-	}
-
-	/**
-	 * Get product variation description.
-	 *
-	 * @return string
-	 */
-	public function get_variation_description() {
-		return wpautop( do_shortcode( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) ) );
-	}
 }

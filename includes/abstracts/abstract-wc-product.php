@@ -1,4 +1,14 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Legacy product contains all deprecated methods for this class and can be
+ * removed in the future.
+ */
+include_once( 'abstract-wc-legacy-product.php' );
+
 /**
  * Abstract Product Class
  *
@@ -8,16 +18,6 @@
  * @package  WooCommerce/Abstracts
  * @category Abstract Class
  * @author   WooThemes
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-include_once( 'abstract-wc-legacy-product.php' );
-
-/**
- * Product Class.
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
 
