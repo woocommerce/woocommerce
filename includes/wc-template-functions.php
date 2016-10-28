@@ -303,7 +303,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 
 	if ( $product ) {
 		$classes[] = wc_get_loop_class();
-		$classes[] = $product->stock_status;
+		$classes[] = $product->get_stock_status();
 
 		if ( $product->is_on_sale() ) {
 			$classes[] = 'sale';
@@ -979,7 +979,7 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
-		do_action( 'woocommerce_' . $product->product_type . '_add_to_cart' );
+		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 	}
 }
 if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
@@ -1030,7 +1030,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		wc_get_template( 'single-product/add-to-cart/variable.php', array(
 			'available_variations' => $get_variations ? $product->get_available_variations() : false,
 			'attributes'           => $product->get_variation_attributes(),
-			'selected_attributes'  => $product->get_variation_default_attributes(),
+			'selected_attributes'  => $product->get_default_attributes(),
 		) );
 	}
 }
