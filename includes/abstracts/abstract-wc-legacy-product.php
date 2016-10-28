@@ -424,12 +424,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
 	}
 
-	/**
-	 * The product's type (simple, variable etc).
-	 *
-	 * @var string
-	 */
-	public $product_type = null;
 
 	/**
 	 * Product shipping class.

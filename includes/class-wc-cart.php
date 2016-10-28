@@ -890,7 +890,7 @@ class WC_Cart {
 			$variation_id = absint( $variation_id );
 
 			// Ensure we don't add a variation to the cart directly by variation ID
-			if ( 'product_variation' == get_post_type( $product_id ) ) {
+			if ( 'product_variation' === get_post_type( $product_id ) ) {
 				$variation_id = $product_id;
 				$product_id   = wp_get_post_parent_id( $variation_id );
 			}
