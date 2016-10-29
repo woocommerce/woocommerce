@@ -177,7 +177,11 @@ class WC_Meta_Box_Order_Data {
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
-						printf( __( 'Payment via %s', 'woocommerce' ), ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) );
+						/* translators: %s: payment method */
+						printf(
+							__( 'Payment via %s', 'woocommerce' ),
+							( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) )
+						);
 
 						if ( $transaction_id = $order->get_transaction_id() ) {
 								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
@@ -196,6 +200,7 @@ class WC_Meta_Box_Order_Data {
 					}
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
+						/* translators: %s: IP address */
 						printf(
 							__( 'Customer IP: %s', 'woocommerce' ),
 							'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
@@ -248,6 +253,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() ) {
 								$user_id     = absint( $order->get_user_id() );
 								$user        = get_user_by( 'id', $user_id );
+								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
 									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 									$user->display_name,

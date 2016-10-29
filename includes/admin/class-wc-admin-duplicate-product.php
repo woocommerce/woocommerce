@@ -103,6 +103,7 @@ class WC_Admin_Duplicate_Product {
 			wp_redirect( admin_url( 'post.php?action=edit&post=' . $new_id ) );
 			exit;
 		} else {
+			/* translators: %s: product id */
 			wp_die( sprintf( __( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $id ) );
 		}
 	}

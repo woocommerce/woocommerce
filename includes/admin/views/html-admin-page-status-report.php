@@ -361,7 +361,11 @@ $pages          = $system_status->get_pages();
 				<tr>
 					<td><?php echo $plugin_name; ?></td>
 					<td class="help">&nbsp;</td>
-					<td><?php echo sprintf( _x( 'by %s', 'by author', 'woocommerce' ), $plugin['author_name'] ) . ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string; ?></td>
+					<td><?php
+						/* translators: %s: plugin author */
+						printf( __( 'by %s' 'woocommerce' ), $plugin['author_name'] );
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+					?></td>
 				</tr>
 				<?php
 			}

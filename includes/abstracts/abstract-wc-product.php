@@ -694,6 +694,7 @@ class WC_Product {
 				break;
 				case 'low_amount' :
 					if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+						/* translators: %s: total items in stock */
 						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
 
 						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
@@ -704,6 +705,7 @@ class WC_Product {
 					}
 				break;
 				default :
+					/* translators: %s: total items in stock */
 					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
 
 					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
@@ -1187,8 +1189,10 @@ class WC_Product {
 
 		if ( $rating > 0 ) {
 
+			/* translators: %s: rating */
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 
+			/* translators: %s: rating */
 			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . $rating . '</strong>' ) . '</span>';
 
 			$rating_html .= '</div>';
