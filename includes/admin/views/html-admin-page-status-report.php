@@ -494,6 +494,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['version'] );
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
+					/* translators: %s: theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['version_latest'] ) ) . '</strong>';
 				}
 			?></td>
@@ -524,6 +525,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['parent_version'] );
 				if ( version_compare( $theme['parent_version'], $theme['parent_version_latest'], '<' ) ) {
+					/* translators: %s: parant theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['parent_version_latest'] ) ) . '</strong>';
 				}
 			?></td>
