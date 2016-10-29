@@ -395,9 +395,9 @@ class WC_Emails {
 	 */
 	public function low_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
-		/* translators: %s: product name %d: items in stock */
+		/* translators: 1: product name 2: items in stock */
 		$message = sprintf(
-			__( '%s is low in stock. There are %d left', 'woocommerce' ),
+			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
 			html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			html_entity_decode( strip_tags( $product->get_total_stock() ) )
 		);
