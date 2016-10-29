@@ -1185,6 +1185,7 @@ class WC_Meta_Box_Product_Data {
 							$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
 							if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+								/* translators: 1: file url 2: allowed file types */
 								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
 								continue;
 							}
@@ -1309,6 +1310,7 @@ class WC_Meta_Box_Product_Data {
 				$manage_stock    = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
 
 				// Generate a useful post title
+				/* translators: 1: variation id 2: product name */
 				$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
 
 				// Update or Add post
@@ -1452,6 +1454,7 @@ class WC_Meta_Box_Product_Data {
 								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
 								if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+									/* translators: 1: variation id 2: file url 3: allowed file types */
 									WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%1$s &ndash; The downloadable file %2$s cannot be used as it does not have an allowed file type. Allowed types include: %3$s', 'woocommerce' ), $variation_id, '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
 									continue;
 								}
@@ -1459,6 +1462,7 @@ class WC_Meta_Box_Product_Data {
 
 							// Validate the file exists
 							if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
+								/* translators: 1: variation id 2: file url */
 								WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%1$s &ndash; The downloadable file %2$s cannot be used as it does not exist on the server.', 'woocommerce' ), $variation_id, '<code>' . $file_url . '</code>' ) );
 								continue;
 							}
