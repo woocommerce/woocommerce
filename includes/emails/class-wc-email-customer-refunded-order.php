@@ -202,6 +202,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'subject_full' => array(
 				'title'       => __( 'Full refund subject', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_full . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->subject_full,
@@ -210,6 +211,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'subject_partial' => array(
 				'title'       => __( 'Partial refund subject', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_partial . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->subject_partial,
@@ -218,6 +220,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'heading_full' => array(
 				'title'       => __( 'Full refund email heading', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_full . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->heading_full,
@@ -226,6 +229,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'heading_partial' => array(
 				'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_partial . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->heading_partial,

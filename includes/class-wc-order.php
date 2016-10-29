@@ -474,11 +474,13 @@ class WC_Order extends WC_Abstract_Order {
 	protected function status_transition() {
 		if ( $this->status_transition ) {
 			if ( ! empty( $this->status_transition['from'] ) ) {
+				/* translators: 1: old order status 2: new order status */
 				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['from'] ), wc_get_order_status_name( $this->status_transition['to'] ) );
 
 				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id() );
 				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'] );
 			} else {
+				/* translators: %s: new order status */
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );
 			}
 
@@ -822,6 +824,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_billing_full_name() {
+		/* translators: 1: first name 2: last name */
 		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $this->get_billing_first_name(), $this->get_billing_last_name() );
 	}
 
@@ -830,6 +833,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_full_name() {
+		/* translators: 1: first name 2: last name */
 		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $this->get_shipping_first_name(), $this->get_shipping_last_name() );
 	}
 

@@ -29,6 +29,7 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
 					echo esc_html( $item->get_variation_id() );
 				} else {
+					/* translators: %s: variation id */
 					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 				}
 				echo '</div>';

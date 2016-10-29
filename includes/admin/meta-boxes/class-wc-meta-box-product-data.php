@@ -1362,6 +1362,7 @@ class WC_Meta_Box_Product_Data {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 
 						if ( ! $unique_sku ) {
+							/* translators: %s: variation id */
 							WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%s &ndash; Variation SKU must be unique.', 'woocommerce' ), $variation_id ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );

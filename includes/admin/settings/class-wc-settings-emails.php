@@ -111,6 +111,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'         => 'width:300px; height: 75px;',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',
+				/* translators: %s: site name */
 				'default'     => sprintf( __( '%s - Powered by WooCommerce', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
 				'autoload'    => false,
 				'desc_tip'    => true,
@@ -118,6 +119,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Base colour', 'woocommerce' ),
+				/* translators: %s: default color */
 				'desc'     => sprintf( __( 'The base colour for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
 				'id'       => 'woocommerce_email_base_color',
 				'type'     => 'color',
@@ -129,6 +131,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Background colour', 'woocommerce' ),
+				/* translators: %s: default color */
 				'desc'     => sprintf( __( 'The background colour for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#f7f7f7</code>' ),
 				'id'       => 'woocommerce_email_background_color',
 				'type'     => 'color',
@@ -140,6 +143,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Body background colour', 'woocommerce' ),
+				/* translators: %s: default color */
 				'desc'     => sprintf( __( 'The main body background colour. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
 				'id'       => 'woocommerce_email_body_background_color',
 				'type'     => 'color',
@@ -151,6 +155,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Body text colour', 'woocommerce' ),
+				/* translators: %s: default color */
 				'desc'     => sprintf( __( 'The main body text colour. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
 				'id'       => 'woocommerce_email_text_color',
 				'type'     => 'color',

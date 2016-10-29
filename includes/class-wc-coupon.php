@@ -1290,18 +1290,22 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = __( 'Coupon is not valid.', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_NOT_EXIST:
+				/* translators: %s: coupon code */
 				$err = sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $this->get_code() );
 			break;
 			case self::E_WC_COUPON_INVALID_REMOVED:
+				/* translators: %s: coupon code */
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $this->get_code() );
 			break;
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
+				/* translators: %s: coupon code */
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $this->get_code() );
 			break;
 			case self::E_WC_COUPON_ALREADY_APPLIED:
 				$err = __( 'Coupon code already applied!', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY:
+				/* translators: %s: coupon code */
 				$err = sprintf( __( 'Sorry, coupon "%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), $this->get_code() );
 			break;
 			case self::E_WC_COUPON_USAGE_LIMIT_REACHED:
@@ -1311,9 +1315,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = __( 'This coupon has expired.', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
+				/* translators: %s: coupon minimum amount */
 				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->get_minimum_amount() ) );
 			break;
 			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
+				/* translators: %s: coupon maximum amount */
 				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->get_maximum_amount() ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
@@ -1330,6 +1336,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 					}
 				}
 
+				/* translators: %s: products list */
 				$err = sprintf( __( 'Sorry, this coupon is not applicable to the products: %s.', 'woocommerce' ), implode( ', ', $products ) );
 				break;
 			case self::E_WC_COUPON_EXCLUDED_CATEGORIES:
@@ -1349,6 +1356,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 					}
 				}
 
+				/* translators: %s: categories list */
 				$err = sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', array_unique( $categories ) ) );
 				break;
 			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:

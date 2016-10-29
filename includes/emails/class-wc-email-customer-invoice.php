@@ -157,6 +157,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'subject' => array(
 				'title'         => __( 'Email subject', 'woocommerce' ),
 				'type'          => 'text',
+				/* translators: %s: default subject */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
@@ -165,6 +166,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
+				/* translators: %s: default heading */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
@@ -173,6 +175,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'subject_paid' => array(
 				'title'         => __( 'Email subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
+				/* translators: %s: default subject */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_paid . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
@@ -181,6 +184,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			'heading_paid' => array(
 				'title'         => __( 'Email heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
+				/* translators: %s: default heading */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_paid . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
