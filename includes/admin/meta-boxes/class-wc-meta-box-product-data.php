@@ -414,7 +414,6 @@ class WC_Meta_Box_Product_Data {
 			'attributes'        => self::prepare_attributes(),
 			'download_limit'    => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'   => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
-			'download_type'     => wc_clean( $_POST['_download_type'] ),
 			'downloads'         => self::prepare_downloads(),
 			'product_url'       => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'       => wc_clean( $_POST['_button_text'] ),
