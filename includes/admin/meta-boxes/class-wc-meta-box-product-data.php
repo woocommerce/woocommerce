@@ -336,23 +336,17 @@ class WC_Meta_Box_Product_Data {
 
 			for ( $i = 0; $i <= $max_loop; $i ++ ) {
 
-				if ( ! isset( $variable_post_id[ $i ] ) ) {
+				if ( ! isset( $_POST['variable_post_id'][ $i ] ) ) {
 					continue;
 				}
 
-				$variation_id = absint( $variable_post_id[ $i ] );
+				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
 				$variation    = new WC_Product_Variation( $variation_id );
 				$errors       = $variation->set_props( array(
 					'status'               => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
 					'menu_order'           => wc_clean( $_POST['variation_menu_order'][ $i ] ),
-					'sku'                  => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] ) : null,
 					'regular_price'        => wc_clean( $_POST['variable_regular_price'][ $i ] ),
 					'sale_price'           => wc_clean( $_POST['variable_sale_price'][ $i ] ),
-					'weight'               => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
-					'length'               => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
-					'width'                => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] )   : '',
-					'height'               => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
-					'shipping_class_id'    => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
 					'virtual'              => isset( $_POST['variable_is_virtual'][ $i ] ),
 					'downloadable'         => isset( $_POST['variable_is_downloadable'][ $i ] ),
 					'date_on_sale_from'    => wc_clean( $_POST['variable_sale_price_dates_from'][ $i ] ),
@@ -365,9 +359,15 @@ class WC_Meta_Box_Product_Data {
 					'stock_quantity'       => wc_clean( $_POST['variable_stock'][ $i ] ),
 					'backorders'           => wc_clean( $_POST['variable_backorders'][ $i ] ),
 					'stock_status'         => wc_clean( $_POST['variable_stock_status'][ $i ] ),
-					'tax_class'            => wc_clean( $_POST['variable_tax_class'][ $i ] ), // @todo remove parent option from UI? If so, handle bw compat if metadata does not exist.
 					'thumbnail_id'         => wc_clean( $_POST['upload_image_id'][ $i ] ),
 					'variation_attributes' => self::prepare_variation_attributes( $parent->get_attributes(), $variation_id, $i ),
+					'sku'                  => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] ) : '',
+					'weight'               => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
+					'length'               => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
+					'width'                => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] )   : '',
+					'height'               => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
+					'shipping_class_id'    => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
+					'tax_class'            => wc_clean( $_POST['variable_tax_class'][ $i ] ),
 				) );
 
 				if ( is_wp_error( $errors ) ) {

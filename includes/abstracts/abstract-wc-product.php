@@ -22,6 +22,12 @@ include_once( 'abstract-wc-legacy-product.php' );
 class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
+	 * Post type.
+	 * @var string
+	 */
+	protected $post_type = 'product';
+
+	/**
 	 * Stores product data.
 	 *
 	 * @var array
@@ -152,14 +158,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_type() {
 		return 'simple';
-	}
-
-	/**
-	 * Product permalink.
-	 * @return string
-	 */
-	public function get_permalink() {
-		return get_permalink( $this->get_id() );
 	}
 
 	/**
@@ -328,11 +326,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the tax class.
-	 *
+	 * @param bool $raw Get unfiltered value.
 	 * @return string
 	 */
-	public function get_tax_class() {
-		return apply_filters( 'woocommerce_product_tax_class', $this->data['tax_class'], $this );
+	public function get_tax_class( $raw = false ) {
+		if ( $raw ) {
+			 return $this->data['tax_class'];
+		} else {
+			return apply_filters( 'woocommerce_product_tax_class', $this->data['tax_class'], $this );
+		}
 	}
 
 	/**
@@ -351,7 +353,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return int|null
 	 */
 	public function get_stock_quantity() {
-		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? wc_stock_amount( $this->data['stock_quantity'] ) : null, $this );
+		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? $this->data['stock_quantity'] : null, $this );
 	}
 
 	/**
@@ -856,7 +858,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float|null $quantity Stock quantity.
 	 */
 	public function set_stock_quantity( $quantity ) {
-		$this->data['stock_quantity'] = $quantity;
+		$this->data['stock_quantity'] = '' !== $quantity ? wc_stock_amount( $quantity ) : null;
 	}
 
 	/**
@@ -1262,7 +1264,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_props( array(
 			'name'                   => get_the_title( $post_object ),
 			'slug'                   => $post_object->post_name,
-			'permalink'              => get_permalink( $post_object ), // @todo Needed? Not used in getters and setters
 			'date_created'           => $post_object->post_date,
 			'date_modified'          => $post_object->post_modified,
 			'type'                   => '',
@@ -1358,7 +1359,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_date_created( current_time( 'timestamp' ) );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
-			'post_type'      => 'product',
+			'post_type'      => $this->post_type,
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $this->get_name() ? $this->get_name() : __( 'Product', 'woocommerce' ),
@@ -1378,7 +1379,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->update_terms();
 			$this->update_attributes();
 			$this->save_meta_data();
-			do_action( 'woocommerce_new_product', $id );
+			do_action( 'woocommerce_new_' . $this->post_type, $id );
 		}
 	}
 
@@ -1403,7 +1404,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->update_terms();
 		$this->update_attributes();
 		$this->save_meta_data();
-		do_action( 'woocommerce_update_product', $this->get_id() );
+		do_action( 'woocommerce_update_' . $this->post_type, $this->get_id() );
 	}
 
 	/**
@@ -1434,7 +1435,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function delete() {
 		wp_delete_post( $this->get_id() );
-		do_action( 'woocommerce_delete_product', $this->get_id() );
+		do_action( 'woocommerce_delete_' . $this->post_type, $this->get_id() );
 		$this->set_id( 0 );
 	}
 
@@ -1444,72 +1445,91 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta() {
-		$current_state = $this->get_stored_data();
-		$new_state     = $this->get_data();
-		$changes       = array_diff( $new_state, $current_state );
-		var_dump( $changes );
-		exit;
+		$stored_data       = $this->get_stored_data();
+		$updated_props     = array();
+		$meta_key_to_props = array(
+			'_visibility'            => 'catalog_visibility',
+			'_sku'                   => 'sku',
+			'_regular_price'         => 'regular_price',
+			'_sale_price'            => 'sale_price',
+			'_sale_price_dates_from' => 'date_on_sale_from',
+			'_sale_price_dates_to'   => 'date_on_sale_to',
+			'total_sales'            => 'total_sales',
+			'_tax_status'            => 'tax_status',
+			'_tax_class'             => 'tax_class',
+			'_manage_stock'          => 'manage_stock',
+			'_backorders'            => 'backorders',
+			'_sold_individually'     => 'sold_individually',
+			'_weight'                => 'weight',
+			'_length'                => 'length',
+			'_width'                 => 'width',
+			'_height'                => 'height',
+			'_upsell_ids'            => 'upsell_ids',
+			'_crosssell_ids'         => 'cross_sell_ids',
+			'_purchase_note'         => 'purchase_note',
+			'_default_attributes'    => 'default_attributes',
+			'_virtual'               => 'virtual',
+			'_downloadable'          => 'downloadable',
+			'_product_image_gallery' => 'gallery_attachment_ids',
+			'_download_limit'        => 'download_limit',
+			'_download_expiry'       => 'download_expiry',
+			'_featured'              => 'featured',
+			'_thumbnail_id'          => 'thumbnail_id',
+			'_downloadable_files'    => 'downloads',
+			'_stock'                 => 'stock_quantity',
+			'_stock_status'          => 'stock_status',
+		);
 
-		$id       = $this->get_id();
-		$triggers = array();
-		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
-		update_post_meta( $id, '_sku', $this->get_sku() );
-		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
-		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
-		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
-		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
-		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
-		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
-		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
-		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
-		update_post_meta( $id, '_backorders', $this->get_backorders() );
-		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
-		update_post_meta( $id, '_weight', $this->get_weight() );
-		update_post_meta( $id, '_length', $this->get_length() );
-		update_post_meta( $id, '_width', $this->get_width() );
-		update_post_meta( $id, '_height', $this->get_height() );
-		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
-		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
-		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
-		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
-		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
-		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
-		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
-		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
-		update_post_meta( $id, '_download_type', $this->get_download_type() );
-
-		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
-			delete_transient( 'wc_featured_products' );
-		}
-
-		if ( ! empty( $this->get_thumbnail_id() ) ) {
-			set_post_thumbnail( $id, $this->get_thumbnail_id() );
-		} else {
-			delete_post_meta( $id, '_thumbnail_id' );
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			$value = $this->data[ $prop ];
+			if ( $value !== $stored_data[ $prop ] ) {
+				switch ( $prop ) {
+					case 'virtual' :
+					case 'downloadable' :
+						$updated = update_post_meta( $this->get_id(), $meta_key, $value ? 'yes' : 'no' );
+						break;
+					case 'gallery_attachment_ids' :
+						$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );
+						break;
+					case 'thumbnail_id' :
+						if ( ! empty( $this->get_thumbnail_id() ) ) {
+							set_post_thumbnail( $this->get_id(), $value );
+						} else {
+							delete_post_meta( $this->get_id(), '_thumbnail_id' );
+						}
+						$updated = true;
+						break;
+					default :
+						$updated = update_post_meta( $this->get_id(), $meta_key, $value );
+						break;
+				}
+				if ( $updated ) {
+					$updated_props[] = $prop;
+				}
+			}
 		}
 
 		if ( $this->is_on_sale() ) {
-			update_post_meta( $id, '_price', $this->get_sale_price() );
+			update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
 		} else {
-			update_post_meta( $id, '_price', $this->get_regular_price() );
+			update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
 		}
 
-		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
-			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
-			$triggers['woocommerce_process_product_file_download_paths'] = array( $id, 0, $this->get_downloads() );
+		if ( in_array( 'featured', $updated_props ) ) {
+			delete_transient( 'wc_featured_products' );
 		}
 
-		if ( update_post_meta( $id, '_stock', $this->get_stock_quantity() ) ) {
-			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' ] = array( $this );
+		if ( in_array( 'downloads', $updated_props ) ) {
+			// grant permission to any newly added files on any existing orders for this product prior to saving.
+			do_action( 'woocommerce_process_product_file_download_paths', $this->get_id(), 0, $this->get_downloads() );
 		}
 
-		if ( update_post_meta( $id, '_stock_status', $this->get_stock_status() ) ) {
-			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' ] = array( $this->get_id(), $this->get_stock_status() );
+		if ( in_array( 'stock_quantity', $updated_props ) ) {
+			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $this );
 		}
 
-		foreach ( $triggers as $action => $args ) {
-			do_action_ref_array( $action, $args );
+		if ( in_array( 'stock_status', $updated_props ) ) {
+			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $this->get_id(), $this->get_stock_status() );
 		}
 	}
 
@@ -1829,6 +1849,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	| Non-CRUD Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Product permalink.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return get_permalink( $this->get_id() );
+	}
 
 	/**
 	 * Returns the children IDs if applicable. Overridden by child classes.

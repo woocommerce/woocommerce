@@ -24,6 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
+	 * Post type.
+	 * @var string
+	 */
+	protected $post_type = 'product_variation';
+
+	/**
 	 * Get internal type.
 	 * @return string
 	 */
@@ -37,12 +43,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string Formatted product name
 	 */
 	public function get_formatted_name() {
-		$formatted_attributes = wc_get_formatted_variation( $this->get_variation_attributes(), true );
-		return parent::get_formatted_name() . ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
+		$formatted_attributes = wc_get_formatted_variation( $this->get_attributes(), true );
+		return parent::get_formatted_name() . ' &ndash; ' . $formatted_attributes; // @todo should be parent post title.
 	}
 
 	/**
-	 * Get variation attribute values.
+	 * Get variation attribute values. @todo needed?
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
@@ -62,9 +68,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
 			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
 			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
-			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
+			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_attributes() );
 		} else {
-			$data = $this->get_variation_attributes();
+			$data = $this->get_attributes();
 		}
 		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), get_permalink( $this->get_id() ) );
 	}
@@ -75,7 +81,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		$variation_data = array_map( 'urlencode', $this->get_variation_attributes() );
+		$variation_data = array_map( 'urlencode', $this->get_attributes() );
 		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
@@ -86,12 +92,29 @@ class WC_Product_Variation extends WC_Product_Simple {
 	|--------------------------------------------------------------------------
 	*/
 
-	/*
+	/**
+	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
+	 * specific attributes using name value pairs.
+	 * @param array
+	 */
+	public function set_attributes( $attributes ) {
+		$this->data['attributes'] = (array) $attributes;
+	}
+
+	/**
+	 * Returns array of attribute name value pairs.
+	 * @return array
+	 */
+	public function get_attributes() {
+		return $this->data['attributes'];
+	}
+
+	/**
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 2.7.0
-	 * @param int $id Product ID.
-	 *
+	 * @param int $id Variation ID.
+	 */
 	public function read( $id ) {
 		$this->set_defaults();
 
@@ -116,7 +139,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$this->set_props( array(
 			'name'                   => get_the_title( $post_object ),
 			'slug'                   => $post_object->post_name,
-			'permalink'              => get_permalink( $post_object ), // @todo Needed? Not used in getters and setters
 			'status'                 => $post_object->post_status,
 			'date_created'           => $post_object->post_date,
 			'date_modified'          => $post_object->post_modified,
@@ -137,20 +159,29 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'         => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
-			'download_type'          => get_post_meta( $id, '_download_type', true ),
 			'thumbnail_id'           => get_post_thumbnail_id( $id ),
+			'backorders'             => get_post_meta( $this->get_id(), '_backorders', true ),
 		) );
 
-		// Inherited data.
-		$this->set_props( array(
-			'tax_class'  => metadata_exists( 'post', $this->get_id(), '_tax_class' ) ? get_post_meta( $this->get_id(), '_tax_class', true ) : get_post_meta( $this->get_parent_id(), '_tax_class', true ),
-			'backorders' => metadata_exists( 'post', $this->get_id(), '_backorders' ) ? get_post_meta( $this->get_id(), '_tax_class', true ) : get_post_meta( $this->get_parent_id(), '_tax_class', true ),
-			'sku'        => metadata_exists( 'post', $this->get_id(), '_sku' ) ? get_post_meta( $this->get_id(), '_sku', true ) : get_post_meta( $this->get_parent_id(), '_sku', true ),
-			'weight'     => metadata_exists( 'post', $this->get_id(), '_weight' ) ? get_post_meta( $this->get_id(), '_weight', true ) : get_post_meta( $this->get_parent_id(), '_weight', true ),
-			'length'     => metadata_exists( 'post', $this->get_id(), '_length' ) ? get_post_meta( $this->get_id(), '_length', true ) : get_post_meta( $this->get_parent_id(), '_length', true ),
-			'width'      => metadata_exists( 'post', $this->get_id(), '_width' ) ? get_post_meta( $this->get_id(), '_width', true ) : get_post_meta( $this->get_parent_id(), '_width', true ),
-			'height'     => metadata_exists( 'post', $this->get_id(), '_height' ) ? get_post_meta( $this->get_id(), '_height', true ) : get_post_meta( $this->get_parent_id(), '_height', true ),
-		) );
+		// Data that can be inherited from the parent product.
+		$inherit_on_empty = array( 'sku', 'weight', 'length', 'width', 'height' );
+
+		foreach ( $inherit_on_empty as $prop ) {
+			$value = get_post_meta( $this->get_id(), '_' . $prop, true );
+			if ( '' !== $value ) {
+				$this->{"set_$prop"}( $value );
+			} else {
+				$this->{"set_$prop"}( get_post_meta( $this->get_parent_id(), '_' . $prop, true ) );
+			}
+		}
+
+		$tax_class = get_post_meta( $this->get_id(), '_tax_class', true );
+
+		if ( 'parent' === $tax_class || ! metadata_exists( 'post', $this->get_id(), '_tax_class' ) ) {
+			$this->set_tax_class( get_post_meta( $this->get_parent_id(), '_tax_class', true ) );
+		} else {
+			$this->set_tax_class( $tax_class );
+		}
 
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -159,72 +190,127 @@ class WC_Product_Variation extends WC_Product_Simple {
 		}
 
 		$this->read_meta_data();
+		$this->read_attributes();
+		$this->set_stored_data();
 	}
 
+	/**
+	 * Create a new product.
+	 *
+	 * @since 2.7.0
+	 */
+	public function create() {
+		$this->set_date_created( current_time( 'timestamp' ) );
 
+		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
+			'post_type'      => $this->post_type,
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
+			'post_author'    => get_current_user_id(),
+			'post_title'     => $this->get_formatted_name(),
+			'post_content'   => '',
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => 'closed',
+			'ping_status'    => 'closed',
+			'menu_order'     => $this->get_menu_order(),
+			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+		) ), true );
+
+		if ( $id && ! is_wp_error( $id ) ) {
+			$this->set_id( $id );
+			$this->update_post_meta();
+			$this->update_terms();
+			$this->update_attributes();
+			$this->save_meta_data();
+			do_action( 'woocommerce_create_' . $this->post_type, $id );
+		}
+	}
+
+	/**
+	 * Updates an existing product.
+	 *
+	 * @since 2.7.0
+	 */
+	public function update() {
+		$post_data = array(
+			'ID'             => $this->get_id(),
+			'post_title'     => $this->get_formatted_name(),
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => 'closed',
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
+			'menu_order'     => $this->get_menu_order(),
+		);
+		wp_update_post( $post_data );
+		$this->update_post_meta();
+		$this->update_terms();
+		$this->update_attributes();
+		$this->save_meta_data();
+		do_action( 'woocommerce_update_' . $this->post_type, $this->get_id() );
+	}
+
+	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @since 2.7.0
+	 */
+	public function update_post_meta() {
+		update_post_meta( $this->get_id(), '_variation_description', $this->get_description() );
+		parent::update_post_meta();
+	}
 
-	protected function update_post_meta() {
-		$id       = $this->get_id();
-		$triggers = array();
-		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
-		update_post_meta( $id, '_sku', $this->get_sku() );
-		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
-		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
-		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
-		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
-		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
-		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
-		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
-		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
-		update_post_meta( $id, '_backorders', $this->get_backorders() );
-		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
-		update_post_meta( $id, '_weight', $this->get_weight() );
-		update_post_meta( $id, '_length', $this->get_length() );
-		update_post_meta( $id, '_width', $this->get_width() );
-		update_post_meta( $id, '_height', $this->get_height() );
-		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
-		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
-		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
-		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
-		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
-		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
-		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
-		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
-		update_post_meta( $id, '_download_type', $this->get_download_type() );
-
-		if ( ! empty( $this->get_thumbnail_id() ) ) {
-			set_post_thumbnail( $id, $this->get_thumbnail_id() );
+	/**
+	 * Save data (either create or update depending on if we are working on an existing product).
+	 *
+	 * @since 2.7.0
+	 */
+	public function save() {
+		if ( $this->get_id() ) {
+			$this->update();
 		} else {
-			delete_post_meta( $id, '_thumbnail_id' );
+			$this->create();
+		}
+		WC_Product_Variable::sync( $this->get_parent_id() );
+		$this->set_stored_data();
+	}
+
+	/**
+	 * For all stored terms in all taxonomies, save them to the DB.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function update_terms() {
+		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
+	}
+
+	/**
+	 * Read attributes from post meta.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_attributes() {
+		$this->set_attributes( wc_get_product_variation_attributes( $this->get_id() ) );
+	}
+
+	/**
+	 * Update attribute meta values.
+	 * @since 2.7.0
+	 */
+	protected function update_attributes() {
+		global $wpdb;
+		$attributes             = $this->get_attributes();
+		$updated_attribute_keys = array();
+		foreach ( $attributes as $key => $value ) {
+			update_post_meta( $this->get_id(), 'attribute_' . $key, $value );
+			$updated_attribute_keys[] = 'attribute_' . $key;
 		}
 
-		if ( $this->is_on_sale() ) {
-			update_post_meta( $id, '_price', $this->get_sale_price() );
-		} else {
-			update_post_meta( $id, '_price', $this->get_regular_price() );
-		}
+		// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
+		$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d;", $this->get_id() ) );
 
-		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
-			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
-			$triggers['woocommerce_process_product_file_download_paths'] = array( $id, 0, $this->get_downloads() );
+		foreach ( $delete_attribute_keys as $key ) {
+			delete_post_meta( $this->get_id(), $key );
 		}
-
-		if ( update_post_meta( $id, '_stock', $this->get_stock_quantity() ) ) {
-			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' ] = array( $this );
-		}
-
-		if ( update_post_meta( $id, '_stock_status', $this->get_stock_status() ) ) {
-			$triggers[ $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' ] = array( $this->get_id(), $this->get_stock_status() );
-		}
-
-		foreach ( $triggers as $action => $args ) {
-			do_action_ref_array( $action, $args );
-		}
-	} */
+	}
 
 	/*
 	|--------------------------------------------------------------------------
