@@ -304,7 +304,6 @@ class WC_Meta_Box_Product_Data {
 			'stock_quantity'     => wc_stock_amount( $_POST['_stock'] ),
 			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
-			'download_type'      => wc_clean( $_POST['_download_type'] ),
 			'downloads'          => self::prepare_downloads( isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array(), isset( $_POST['_wc_file_urls'] ) ? $_POST['_wc_file_urls'] : array() ),
 			'product_url'        => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'        => wc_clean( $_POST['_button_text'] ),

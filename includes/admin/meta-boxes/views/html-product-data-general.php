@@ -91,7 +91,8 @@
 		</div>
 		<?php
 			woocommerce_wp_text_input( array(
-				'id'                => '_download_limit', // @todo
+				'id'                => '_download_limit',
+				'value'             => -1 === $product_object->get_download_limit() ? '' : $product_object->get_download_limit(),
 				'label'             => __( 'Download limit', 'woocommerce' ),
 				'placeholder'       => __( 'Unlimited', 'woocommerce' ),
 				'description'       => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ),
@@ -103,7 +104,8 @@
 			) );
 
 			woocommerce_wp_text_input( array(
-				'id'                => '_download_expiry', // @todo
+				'id'                => '_download_expiry',
+				'value'             => -1 === $product_object->get_download_expiry() ? '' : $product_object->get_download_expiry(),
 				'label'             => __( 'Download expiry', 'woocommerce' ),
 				'placeholder'       => __( 'Never', 'woocommerce' ),
 				'description'       => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ),
@@ -111,17 +113,6 @@
 				'custom_attributes' => array(
 					'step' 	=> '1',
 					'min'	=> '0',
-				),
-			) );
-
-			woocommerce_wp_select( array(
-				'id'          => '_download_type', // @todo
-				'label'       => __( 'Download type', 'woocommerce' ),
-				'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ),
-				'options'     => array(
-					''            => __( 'Standard Product', 'woocommerce' ),
-					'application' => __( 'Application/Software', 'woocommerce' ),
-					'music'       => __( 'Music', 'woocommerce' ),
 				),
 			) );
 
