@@ -93,6 +93,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	*/
 
 	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool false if excluded.
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() ) && 0 !== stripos( $meta->meta_key, 'attribute_' );
+	}
+
+	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name value pairs.
 	 * @param array
@@ -194,7 +204,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		$this->read_meta_data();
 		$this->read_attributes();
-		$this->set_stored_data();
 	}
 
 	/**
@@ -273,7 +282,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$this->create();
 		}
 		WC_Product_Variable::sync( $this->get_parent_id() );
-		$this->set_stored_data();
 		return $this->get_id();
 	}
 

@@ -34,12 +34,6 @@ abstract class WC_Data {
 	protected $default_data = array();
 
 	/**
-	 * Track stored data.
-	 * @var array
-	 */
-	protected $stored_data = array();
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -408,19 +402,6 @@ abstract class WC_Data {
 	 */
 	protected function set_defaults() {
 		$this->data = $this->default_data;
-	}
-
-	/**
-	 * Store data as the current state so changes can be compared.
-	 */
-	protected function set_stored_data() {
-		$this->stored_data = $this->data;
-	}
-	/**
-	 * Store data as the current state so changes can be compared.
-	 */
-	protected function get_stored_data() {
-		return $this->stored_data;
 	}
 
 	/**

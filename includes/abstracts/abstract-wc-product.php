@@ -1299,7 +1299,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 		$this->read_meta_data();
 		$this->read_attributes();
-		$this->set_stored_data();
 	}
 
 	/**
@@ -1409,7 +1408,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Version is set to current WC version to track data changes.
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
 		wc_delete_product_transients( $this->get_id() );
-		$this->set_stored_data();
 		return $this->get_id();
 	}
 
@@ -1430,7 +1428,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta() {
-		$stored_data       = $this->get_stored_data();
 		$updated_props     = array();
 		$meta_key_to_props = array(
 			'_visibility'            => 'catalog_visibility',
@@ -1467,30 +1464,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			$value = $this->data[ $prop ];
-			if ( ! isset( $stored_data[ $prop ] ) || $value !== $stored_data[ $prop ] ) {
-				switch ( $prop ) {
-					case 'virtual' :
-					case 'downloadable' :
-						$updated = update_post_meta( $this->get_id(), $meta_key, $value ? 'yes' : 'no' );
-						break;
-					case 'gallery_attachment_ids' :
-						$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );
-						break;
-					case 'thumbnail_id' :
-						if ( ! empty( $this->get_thumbnail_id() ) ) {
-							set_post_thumbnail( $this->get_id(), $value );
-						} else {
-							delete_post_meta( $this->get_id(), '_thumbnail_id' );
-						}
-						$updated = true;
-						break;
-					default :
-						$updated = update_post_meta( $this->get_id(), $meta_key, $value );
-						break;
-				}
-				if ( $updated ) {
-					$updated_props[] = $prop;
-				}
+			// @todo this is where state should be checked?
+			switch ( $prop ) {
+				case 'virtual' :
+				case 'downloadable' :
+					$updated = update_post_meta( $this->get_id(), $meta_key, $value ? 'yes' : 'no' );
+					break;
+				case 'gallery_attachment_ids' :
+					$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );
+					break;
+				case 'thumbnail_id' :
+					if ( ! empty( $this->get_thumbnail_id() ) ) {
+						set_post_thumbnail( $this->get_id(), $value );
+					} else {
+						delete_post_meta( $this->get_id(), '_thumbnail_id' );
+					}
+					$updated = true;
+					break;
+				default :
+					$updated = update_post_meta( $this->get_id(), $meta_key, $value );
+					break;
+			}
+			if ( $updated ) {
+				$updated_props[] = $prop;
 			}
 		}
 
