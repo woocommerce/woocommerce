@@ -30,21 +30,21 @@ class WC_Product_Variation extends WC_Product_Simple {
 	protected $post_type = 'product_variation';
 
 	/**
+	 * Initialize simple product.
+	 *
+	 * @param mixed $product
+	 */
+	public function __construct( $product = 0 ) {
+		$this->internal_meta_keys[] = '_variation_description';
+		parent::__construct( $product );
+	}
+
+	/**
 	 * Get internal type.
 	 * @return string
 	 */
 	public function get_type() {
 		return 'variation';
-	}
-
-	/**
-	 * Get product name with SKU or ID. Used within admin.
-	 *
-	 * @return string Formatted product name
-	 */
-	public function get_formatted_name() {
-		$formatted_attributes = wc_get_formatted_variation( $this->get_attributes(), true );
-		return parent::get_formatted_name() . ' &ndash; ' . $formatted_attributes; // @todo should be parent post title.
 	}
 
 	/**
@@ -165,23 +165,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Data that can be inherited from the parent product.
 		$inherit_on_empty = array( 'sku', 'weight', 'length', 'width', 'height' );
+		$parent_props     = array();
 
 		foreach ( $inherit_on_empty as $prop ) {
 			$value = get_post_meta( $this->get_id(), '_' . $prop, true );
 			if ( '' !== $value ) {
-				$this->{"set_$prop"}( $value );
+				$inherit_props[ $prop ] = $value;
 			} else {
-				$this->{"set_$prop"}( get_post_meta( $this->get_parent_id(), '_' . $prop, true ) );
+				$inherit_props[ $prop ] = get_post_meta( $this->get_parent_id(), '_' . $prop, true );
 			}
 		}
 
 		$tax_class = get_post_meta( $this->get_id(), '_tax_class', true );
 
 		if ( 'parent' === $tax_class || ! metadata_exists( 'post', $this->get_id(), '_tax_class' ) ) {
-			$this->set_tax_class( get_post_meta( $this->get_parent_id(), '_tax_class', true ) );
+			$inherit_props['tax_class'] = get_post_meta( $this->get_parent_id(), '_tax_class', true );
 		} else {
-			$this->set_tax_class( $tax_class );
+			$inherit_props['tax_class'] = $tax_class;
 		}
+
+		$this->set_props( $inherit_props );
 
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -206,7 +209,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'post_type'      => $this->post_type,
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->get_formatted_name(),
+			'post_title'     => get_the_title( $this->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $this->get_attributes(), true ),
 			'post_content'   => '',
 			'post_parent'    => $this->get_parent_id(),
 			'comment_status' => 'closed',
@@ -234,7 +237,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	public function update() {
 		$post_data = array(
 			'ID'             => $this->get_id(),
-			'post_title'     => $this->get_formatted_name(),
+			'post_title'     => get_the_title( $this->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $this->get_attributes(), true ),
 			'post_parent'    => $this->get_parent_id(),
 			'comment_status' => 'closed',
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
@@ -271,6 +274,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		}
 		WC_Product_Variable::sync( $this->get_parent_id() );
 		$this->set_stored_data();
+		return $this->get_id();
 	}
 
 	/**

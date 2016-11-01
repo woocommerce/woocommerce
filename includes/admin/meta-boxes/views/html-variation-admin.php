@@ -19,11 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<strong>#<?php echo esc_html( $variation_id ); ?> </strong>
 		<?php
 			$attribute_values = $variation_object->get_attributes();
+
 			foreach ( $product_object->get_attributes() as $attribute ) {
 				if ( ! $attribute->get_variation() ) {
 					continue;
 				}
-				$selected_value = isset( $attribute_values[ sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ sanitize_title( $attribute->get_name() ) ] : '';
+				$selected_value = isset( $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] : '';
 				?>
 				<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
 					<option value=""><?php echo esc_html( __( 'Any', 'woocommerce' ) . ' ' . wc_attribute_label( $attribute->get_name() ) ); ?>&hellip;</option>
@@ -211,7 +212,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 							<?php echo wc_help_tip( __( 'LxWxH in decimal form', 'woocommerce' ) ); ?>
 							<span class="wrap">
-								<input id="product_length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="ariable_length[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_length() ) ); ?>" />
+								<input id="product_length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_length() ) ); ?>" />
 								<input placeholder="<?php esc_attr_e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_width() ) ); ?>" />
 								<input placeholder="<?php esc_attr_e( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_height() ) ); ?>" />
 							</span>
@@ -331,11 +332,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					woocommerce_wp_text_input( array(
 						'id'                => "variable_download_limit{$loop}",
 						'name'              => "variable_download_limit[{$loop}]",
-						'value'             => $variation_object->get_download_limit(),
+						'value'             => $variation_object->get_download_limit() < 0 ? '' : $variation_object->get_download_limit(),
 						'label'             => __( 'Download limit', 'woocommerce' ),
 						'placeholder'       => __( 'Unlimited', 'woocommerce' ),
 						'description'       => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ),
 						'type'              => 'number',
+						'desc_tip'          => true,
 						'custom_attributes' => array(
 							'step' 	        => '1',
 							'min'	        => '0',
@@ -346,11 +348,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					woocommerce_wp_text_input( array(
 						'id'                => "variable_download_expiry{$loop}",
 						'name'              => "variable_download_expiry[{$loop}]",
-						'value'             => $variation_object->get_download_expiry(),
+						'value'             => $variation_object->get_download_expiry() < 0 ? '' : $variation_object->get_download_expiry(),
 						'label'             => __( 'Download expiry', 'woocommerce' ),
 						'placeholder'       => __( 'Never', 'woocommerce' ),
 						'description'       => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ),
 						'type'              => 'number',
+						'desc_tip'          => true,
 						'custom_attributes' => array(
 							'step' 	        => '1',
 							'min'	        => '0',

@@ -30,6 +30,6 @@ if ( ! $product->is_in_stock() ) : ?>
 
 <?php elseif ( $product->managing_stock() ) : ?>
 
-	<p class="stock in-stock"><?php echo wp_kses_post( wc_format_stock_for_display( $product->get_stock_amount(), $product->backorders_allowed() && $product->backorders_require_notification() ) ); ?></p>
+	<p class="stock in-stock"><?php echo wp_kses_post( wc_format_stock_for_display( $product->get_stock_quantity(), $product->backorders_allowed() && $product->backorders_require_notification() ) ); ?></p>
 
 <?php endif; ?>

@@ -34,6 +34,12 @@ abstract class WC_Data {
 	protected $default_data = array();
 
 	/**
+	 * Track stored data.
+	 * @var array
+	 */
+	protected $stored_data = array();
+
+	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string

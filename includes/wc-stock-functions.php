@@ -83,10 +83,10 @@ function wc_check_product_stock_status( $product ) {
 		if ( $product->backorders_allowed() && 'instock' !== $product->get_stock_status() ) {
 			$product->set_stock_status( 'instock' );
 
-		} elseif ( $product->get_stock_amount() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		} elseif ( $product->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$product->set_stock_status( 'outofstock' );
 
-		} elseif ( $product->get_stock_amount() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		} elseif ( $product->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$product->set_stock_status( 'instock' );
 		}
 	}

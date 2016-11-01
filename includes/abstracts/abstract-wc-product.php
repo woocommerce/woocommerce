@@ -392,11 +392,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_weight() {
-		// Legacy filter.
-		$weight = apply_filters( 'woocommerce_product_weight', $this->data['weight'], $this ); // @todo standardize these filter names and move BW compat to deprecated class file.
-
-		// New filter.
-		return apply_filters( 'woocommerce_product_get_weight', $weight, $this );
+		return apply_filters( 'woocommerce_product_get_weight', $this->data['weight'], $this );
 	}
 
 	/**
@@ -405,11 +401,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_length() {
-		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_length', $this->data['length'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_length', $length, $this );
+		return apply_filters( 'woocommerce_product_get_length', $this->data['length'], $this );
 	}
 
 	/**
@@ -418,11 +410,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_width() {
-		// Legacy filter.
-		$width = apply_filters( 'woocommerce_product_width', $this->data['width'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_width', $width, $this );
+		return apply_filters( 'woocommerce_product_get_width', $this->data['width'], $this );
 	}
 
 	/**
@@ -431,11 +419,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_height() {
-		// Legacy filter.
-		$height = apply_filters( 'woocommerce_product_height', $this->data['height'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_height', $height, $this );
+		return apply_filters( 'woocommerce_product_get_height', $this->data['height'], $this );
 	}
 
 	/**
@@ -1124,7 +1108,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				}
 			}
 
-			// Validate the file exists
+			// Validate the file exists.
 			if ( 'relative' === $file_is ) {
 				$_file_url = $file_url;
 				if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
@@ -1426,6 +1410,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
 		wc_delete_product_transients( $this->get_id() );
 		$this->set_stored_data();
+		return $this->get_id();
 	}
 
 	/**
@@ -1482,7 +1467,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			$value = $this->data[ $prop ];
-			if ( $value !== $stored_data[ $prop ] ) {
+			if ( ! isset( $stored_data[ $prop ] ) || $value !== $stored_data[ $prop ] ) {
 				switch ( $prop ) {
 					case 'virtual' :
 					case 'downloadable' :
@@ -1521,7 +1506,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		if ( in_array( 'downloads', $updated_props ) ) {
 			// grant permission to any newly added files on any existing orders for this product prior to saving.
-			do_action( 'woocommerce_process_product_file_download_paths', $this->get_id(), 0, $this->get_downloads() );
+			if ( $this->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_process_product_file_download_paths', $this->get_parent_id(), $this->get_id(), $this->get_downloads() );
+			} else {
+				do_action( 'woocommerce_process_product_file_download_paths', $this->get_id(), 0, $this->get_downloads() );
+			}
 		}
 
 		if ( in_array( 'stock_quantity', $updated_props ) ) {
