@@ -22,7 +22,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( __( 'Read more', 'woocommerce' ), $product->add_to_cart_text() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -37,7 +37,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->single_add_to_cart_text() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Dummy Product', $product->get_title() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -64,10 +64,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( get_permalink( $product->id ), $product->get_permalink() );
+		$this->assertEquals( get_permalink( $product->get_id() ), $product->get_permalink() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -82,7 +82,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( $product->sku, $product->get_sku() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $product->get_stock_quantity() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -119,7 +119,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $product->get_total_stock() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -137,7 +137,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, $product->set_stock( 3, 'add' ) );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -154,7 +154,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $product->reduce_stock( 3 ) );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 8, $product->increase_stock( 3 ) );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_type( 'external' ) );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -210,7 +210,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_downloadable() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -231,7 +231,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_virtual() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -250,7 +250,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertTrue( $product->needs_shipping() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -269,7 +269,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_sold_individually() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -291,7 +291,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->backorders_allowed() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -318,6 +318,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->backorders_require_notification() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }

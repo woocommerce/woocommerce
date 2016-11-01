@@ -45,6 +45,7 @@ class WC_Product_Factory {
 			return new $classname( $the_product, $args );
 
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			return false;
 		}
 	}
@@ -99,7 +100,7 @@ class WC_Product_Factory {
 		} elseif ( is_numeric( $the_product ) ) {
 			$the_product = get_post( $the_product );
 		} elseif ( $the_product instanceof WC_Product ) {
-			$the_product = get_post( $the_product->id );
+			$the_product = get_post( $the_product->get_id() );
 		} elseif ( ! ( $the_product instanceof WP_Post ) ) {
 			$the_product = false;
 		}

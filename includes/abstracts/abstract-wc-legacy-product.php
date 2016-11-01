@@ -186,6 +186,168 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * Gets the main product image ID.
+	 *
+	 * @return int
+	 */
+	public function get_image_id() {
+		return $this->get_thumbnail_id();
+	}
+
+
+	/**
+	 * Get variation ID.
+	 * @return int
+	 */
+	public function get_variation_id() {
+		return $this->get_id();
+	}
+
+	/**
+	 * Returns whether or not the variations parent is visible.
+	 *
+	 * @return bool
+	 */
+	public function parent_is_visible() {
+		return $this->is_visible();
+	}
+
+
+		/**
+		 * Get product variation description. @todo replace with regular description getters
+		 *
+		 * @return string
+		 */
+		public function get_variation_description() {
+			return $this->get_description();
+		}
+
+	/**
+	 * Check if all variation's attributes are set. @todo unused
+	 *
+	 * @return boolean
+	 */
+	public function has_all_attributes_set() {
+
+		$set = true;
+
+		// undefined attributes have null strings as array values
+		foreach ( $this->get_variation_attributes() as $att ) {
+			if ( ! $att ) {
+				$set = false;
+				break;
+			}
+		}
+
+		return $set;
+
+	}
+
+	/**
+	 * Get total stock - This is the stock of parent and children combined. @todo I think deprecate as it's quite heavy. Stock displays should reflect current product only. Needs review. Use get_stock_quantity()
+	 * @return int
+	 */
+	public function get_total_stock() {
+		if ( empty( $this->total_stock ) ) {
+			if ( sizeof( $this->get_children() ) > 0 ) {
+				$this->total_stock = max( 0, $this->get_stock_quantity() );
+
+				foreach ( $this->get_children() as $child_id ) {
+					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
+						$stock = get_post_meta( $child_id, '_stock', true );
+						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
+					}
+				}
+			} else {
+				$this->total_stock = $this->get_stock_quantity();
+			}
+		}
+		return wc_stock_amount( $this->total_stock );
+	}
+
+		/**
+		 * Get formatted variation data with WC < 2.4 back compat and proper formatting of text-based attribute names.
+		 *
+		 * @return string
+		 */
+		public function get_formatted_variation_attributes( $flat = false ) {
+			// @todo replace with wc_get_formatted_variation
+
+			$variation_data = $this->get_variation_attributes();
+			$attributes     = $this->parent->get_attributes();
+			$description    = array();
+			$return         = '';
+
+			if ( is_array( $variation_data ) ) {
+
+				if ( ! $flat ) {
+					$return = '<dl class="variation">';
+				}
+
+				foreach ( $attributes as $attribute ) {
+
+					// Only deal with attributes that are variations
+					if ( ! $attribute['is_variation'] ) {
+						continue;
+					}
+
+					$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
+					$description_name         = esc_html( wc_attribute_label( $attribute['name'] ) );
+					$description_value        = __( 'Any', 'woocommerce' );
+
+					// Get terms for attribute taxonomy or value if its a custom attribute
+					if ( $attribute['is_taxonomy'] ) {
+
+						$post_terms = get_the_terms( $this->id, $attribute['name'] );
+
+						foreach ( $post_terms as $term ) {
+							if ( $variation_selected_value === $term->slug ) {
+								$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
+							}
+						}
+					} else {
+
+						$options = wc_get_text_attributes( $attribute['value'] );
+
+						foreach ( $options as $option ) {
+
+							if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
+								if ( sanitize_title( $option ) !== $variation_selected_value ) {
+									continue;
+								}
+							} else {
+								if ( $variation_selected_value !== $option ) {
+									continue;
+								}
+							}
+
+							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) );
+						}
+					}
+
+					if ( $flat ) {
+						$description[] = $description_name . ': ' . rawurldecode( $description_value );
+					} else {
+						$description[] = '<dt>' . $description_name . ':</dt><dd>' . rawurldecode( $description_value ) . '</dd>';
+					}
+				}
+
+				if ( $flat ) {
+					$return .= implode( ', ', $description );
+				} else {
+					$return .= implode( '', $description );
+				}
+
+				if ( ! $flat ) {
+					$return .= '</dl>';
+				}
+			}
+
+			return $return;
+		}
+
+
+	/**
 	 * Returns the availability of the product.
 	 *
 	 * If stock management is enabled at global and product level, a stock message
@@ -262,12 +424,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
 	}
 
-	/**
-	 * The product's type (simple, variable etc).
-	 *
-	 * @var string
-	 */
-	public $product_type = null;
 
 	/**
 	 * Product shipping class.
@@ -286,6 +442,39 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/** @public string The product's total stock, including that of its children. */
 	public $total_stock;
 
+	/**
+	 * Set stock level of the product.
+	 */
+	public function set_stock( $amount = null, $mode = 'set' ) {
+		return wc_update_product_stock( $this, $amount, $mode );
+	}
+
+	/**
+	 * Reduce stock level of the product.
+	 *
+	 * @param int $amount Amount to reduce by. Default: 1
+	 * @return int new stock level
+	 */
+	public function reduce_stock( $amount = 1 ) {
+		wc_update_product_stock( $this, $amount, 'subtract' );
+	}
+
+	/**
+	 * Increase stock level of the product.
+	 *
+	 * @param int $amount Amount to increase by. Default 1.
+	 * @return int new stock level
+	 */
+	public function increase_stock( $amount = 1 ) {
+		wc_update_product_stock( $this, $amount, 'add' );
+	}
+
+	/**
+	 * Check if the stock status needs changing.
+	 */
+	public function check_stock_status() {
+		wc_check_product_stock_status( $this );
+	}
 
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
@@ -295,7 +484,81 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function __isset( $key ) {
 		return metadata_exists( 'post', $this->id, '_' . $key );
+
+		// @todo handle variation meta here too
+		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
+			return metadata_exists( 'post', $this->variation_id, '_' . $key );
+		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
+			return metadata_exists( 'post', $this->variation_id, '_' . $key ) || metadata_exists( 'post', $this->id, '_' . $key );
+		} else {
+			return metadata_exists( 'post', $this->id, '_' . $key );
+		}
 	}
+
+	/*
+	 	protected $variation_level_meta_data = array(
+	 		'downloadable'          => 'no',
+	 		'virtual'               => 'no',
+	 		'manage_stock'          => 'no',
+	 		'sale_price_dates_from' => '',
+	 		'sale_price_dates_to'   => '',
+	 		'price'                 => '',
+	 		'regular_price'         => '',
+	 		'sale_price'            => '',
+	 		'stock'                 => 0,
+	 		'stock_status'          => 'instock',
+	 		'downloadable_files'    => array(),
+	 	);
+	 	protected $variation_inherited_meta_data = array(
+	 		'tax_class'  => '',
+	 		'backorders' => 'no',
+	 		'sku'        => '',
+	 		'weight'     => '',
+	 		'length'     => '',
+	 		'width'      => '',
+	 		'height'     => '',
+	 	);
+
+		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
+
+			$value = get_post_meta( $this->variation_id, '_' . $key, true );
+
+			if ( '' === $value ) {
+				$value = $this->variation_level_meta_data[ $key ];
+			}
+		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
+
+			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
+
+			// Handle meta data keys which can be empty at variation level to cause inheritance
+			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'width', 'height' ) ) ) {
+				$value = get_post_meta( $this->id, '_' . $key, true );
+			}
+
+			if ( '' === $value ) {
+				$value = $this->variation_inherited_meta_data[ $key ];
+			}
+		} elseif ( 'variation_data' === $key ) {
+			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
+
+		} elseif ( 'variation_has_stock' === $key ) {
+			return $this->managing_stock();
+
+		} else {
+			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : parent::__get( $key );
+		}
+
+		return $value;
+
+
+		public $variation_id;
+
+		public $parent;
+
+		public $variation_shipping_class         = '';
+
+		public $variation_shipping_class_id      = 0;
+	 */
 
 	/**
 	 * Magic __get method for backwards compatibility.Maps legacy vars to new getters.

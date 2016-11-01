@@ -3777,6 +3777,7 @@ img.help_tip {
 	}
 
 	textarea {
+		float: left;
 		height: 3.5em;
 		line-height: 1.5em;
 		vertical-align: top;
@@ -4189,8 +4190,8 @@ img.help_tip {
 
 	.upload_image_button {
 		display: block;
-		width: 48px;
-		height: 48px;
+		width: 64px;
+		height: 64px;
 		float: left;
 		margin-right: 20px;
 		position: relative;
@@ -4211,8 +4212,8 @@ img.help_tip {
 			right: 0;
 			bottom: 0;
 			text-align: center;
-			line-height: 48px;
-			font-size: 48px;
+			line-height: 64px;
+			font-size: 64px;
 			font-weight: 400;
 			-webkit-font-smoothing: antialiased;
 		}
@@ -4246,49 +4247,67 @@ img.help_tip {
 		}
 
 		input[type=checkbox] {
-			margin-top: 5px;
-			margin-right: 3px;
+			margin: -3px 0 0 .5em;
+			vertical-align: middle;
 		}
 	}
 }
 
 .form-row {
 	label {
-		display: block;
+		display: inline-block;
+	}
+
+	.woocommerce-help-tip {
+		float: right;
 	}
 
 	input[type=text],
 	input[type=number],
-	select {
+	select,
+	textarea {
 		width: 100%;
+		vertical-align: middle;
+		margin: 2px 0 0;
+		padding: 6px;
+	}
+
+	select {
+		height: 30px;
+		line-height: 30px;
 	}
 
 	&.dimensions_field {
+		.wrap {
+			clear:left;
+			display: block;
+		}
 		input {
-			width: 25%;
+			width: 33%;
 			float: left;
-			margin-right: 1%;
+			vertical-align: middle;
 
 			&:last-of-type {
 				margin-right: 0;
+				width: 34%;
 			}
 		}
 	}
-}
 
-.form-row-first,
-.form-row-last {
-	width: 48%;
-	float: right;
-}
+	&.form-row-first,
+	&.form-row-last {
+		width: 48%;
+		float: right;
+	}
 
-.form-row-first {
-	clear: both;
-	float: left;
-}
+	&.form-row-first {
+		clear: both;
+		float: left;
+	}
 
-.form-row-full {
-	clear: both;
+	&.form-row-full {
+		clear: both;
+	}
 }
 
 /**

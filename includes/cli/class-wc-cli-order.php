@@ -695,7 +695,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 			// Check if the product exists.
 			if ( is_object( $product ) ) {
-				$product_id  = ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id;
+				$product_id  = ( isset( $product->variation_id ) ) ? $product->variation_id : $product->get_id();
 				$product_sku = $product->get_sku();
 			}
 
