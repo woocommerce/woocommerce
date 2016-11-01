@@ -145,21 +145,11 @@
 					'description'    => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' ),
 				) );
 
-				$tax_classes         = WC_Tax::get_tax_classes();
-				$classes_options     = array();
-				$classes_options[''] = __( 'Standard', 'woocommerce' );
-
-				if ( ! empty( $tax_classes ) ) {
-					foreach ( $tax_classes as $class ) {
-						$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-					}
-				}
-
 				woocommerce_wp_select( array(
 					'id'          => '_tax_class',
 					'value'       => $product_object->get_tax_class(),
 					'label'       => __( 'Tax class', 'woocommerce' ),
-					'options'     => $classes_options,
+					'options'     => wc_get_product_tax_class_options(),
 					'desc_tip'    => 'true',
 					'description' => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' ),
 				) );

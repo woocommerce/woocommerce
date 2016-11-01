@@ -726,6 +726,52 @@ function wc_get_product_visibility_options() {
 }
 
 /**
+ * Get product tax class options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_tax_class_options() {
+	$tax_classes           = WC_Tax::get_tax_classes();
+	$tax_class_options     = array();
+	$tax_class_options[''] = __( 'Standard', 'woocommerce' );
+
+	if ( ! empty( $tax_classes ) ) {
+		foreach ( $tax_classes as $class ) {
+			$tax_class_options[ sanitize_title( $class ) ] = $class;
+		}
+	}
+	return $tax_class_options;
+}
+
+/**
+ * Get stock status options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_stock_status_options() {
+	return array(
+		'instock'    => __( 'In stock', 'woocommerce' ),
+		'outofstock' => __( 'Out of stock', 'woocommerce' ),
+	);
+}
+
+/**
+ * Get backorder options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_backorder_options() {
+	return array(
+		'no'     => __( 'Do not allow', 'woocommerce' ),
+		'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+		'yes'    => __( 'Allow', 'woocommerce' ),
+	);
+}
+
+/**
  * Get related products based on product category and tags.
  *
  * @since  2.7.0

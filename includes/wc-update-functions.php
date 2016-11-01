@@ -1018,3 +1018,12 @@ function wc_update_270_grouped_products() {
 		}
 	}
 }
+
+function wc_update_270_settings() {
+	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+	if ( '' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+	} elseif ( 'standard' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', '' );
+	}
+}

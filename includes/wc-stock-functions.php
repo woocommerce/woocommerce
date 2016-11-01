@@ -104,7 +104,7 @@ function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
 	if ( $product ) {
 		$product->set_stock_status( $status );
-		$product->save();
+		//$product->save(); @todo causes timeout in class-wc-post-data.php
 	}
 }
 
