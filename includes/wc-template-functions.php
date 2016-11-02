@@ -621,7 +621,7 @@ function woocommerce_template_loop_category_link_open( $category ) {
 	echo '<a href="' . get_term_link( $category, 'product_cat' ) . '">';
 }
 /**
- * Insert the opening anchor tag for categories in the loop.
+ * Insert the closing anchor tag for categories in the loop.
  */
 function woocommerce_template_loop_category_link_close() {
 	echo '</a>';
