@@ -1447,7 +1447,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			switch ( $prop ) {
 				case 'virtual' :
 				case 'downloadable' :
-					$updated = update_post_meta( $this->get_id(), $meta_key, $value ? 'yes' : 'no' );
+					$updated = update_post_meta( $this->get_id(), $meta_key, wc_bool_to_string( $value ) );
 					break;
 				case 'gallery_image_ids' :
 					$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );

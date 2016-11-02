@@ -516,7 +516,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Check if all variation's attributes are set. @todo unused
+	 * Check if all variation's attributes are set.
 	 *
 	 * @deprecated 2.7.0
 	 * @return boolean
@@ -547,7 +547,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Get total stock - This is the stock of parent and children combined. @todo I think deprecate as it's quite heavy. Stock displays should reflect current product only. Needs review. Use get_stock_quantity()
+	 * Get total stock - This is the stock of parent and children combined.
 	 *
 	 * @deprecated 2.7.0
 	 * @return int
