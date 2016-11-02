@@ -270,18 +270,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( has_post_thumbnail( $product->get_variation_id() ) ) {
 				// Add variation image if set.
 				$variation = wc_get_product( $product->get_variation_id() );
-				$attachment_ids[] = $variation->get_thumbnail_id();
+				$attachment_ids[] = $variation->get_image_id();
 			} elseif ( has_post_thumbnail( $product->get_id() ) ) {
 				// Otherwise use the parent product featured image if set.
-				$attachment_ids[] = $product->get_thumbnail_id();
+				$attachment_ids[] = $product->get_image_id();
 			}
 		} else {
 			// Add featured image.
 			if ( has_post_thumbnail( $product->get_id() ) ) {
-				$attachment_ids[] = $product->get_thumbnail_id();
+				$attachment_ids[] = $product->get_image_id();
 			}
 			// Add gallery images.
-			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_attachment_ids() );
+			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 		}
 
 		// Build image data.
@@ -883,11 +883,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 
 			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_attachment_ids( $gallery );
+				$product->set_gallery_image_ids( $gallery );
 			}
 		} else {
 			$product->set_thumbnail_id( '' );
-			$product->set_gallery_attachment_ids( array() );
+			$product->set_gallery_image_ids( array() );
 		}
 
 		return $product;

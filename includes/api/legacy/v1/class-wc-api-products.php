@@ -425,7 +425,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// add gallery images
-			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_attachment_ids() );
+			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 		}
 
 		// build image data

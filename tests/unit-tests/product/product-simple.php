@@ -105,24 +105,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total_stock().
-	 *
-	 * @since 2.3
-	 */
-	public function test_get_total_stock() {
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
-
-		$this->assertEmpty( $product->get_total_stock() );
-
-		$product->manage_stock = 'yes';
-		$this->assertEquals( 0, $product->get_total_stock() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
-	}
-
-	/**
 	 * Test set_stock().
 	 *
 	 * @since 2.3

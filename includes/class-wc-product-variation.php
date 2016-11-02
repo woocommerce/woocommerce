@@ -147,42 +147,49 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Variation data.
 		$this->set_props( array(
-			'name'                   => get_the_title( $post_object ),
-			'slug'                   => $post_object->post_name,
-			'status'                 => $post_object->post_status,
-			'date_created'           => $post_object->post_date,
-			'date_modified'          => $post_object->post_modified,
-			'description'            => get_post_meta( $id, '_variation_description', true ),
-			'regular_price'          => get_post_meta( $id, '_regular_price', true ),
-			'sale_price'             => get_post_meta( $id, '_sale_price', true ),
-			'date_on_sale_from'      => get_post_meta( $id, '_sale_price_dates_from', true ),
-			'date_on_sale_to'        => get_post_meta( $id, '_sale_price_dates_to', true ),
-			'tax_status'             => get_post_meta( $id, '_tax_status', true ),
-			'manage_stock'           => get_post_meta( $id, '_manage_stock', true ),
-			'stock_quantity'         => get_post_meta( $id, '_stock', true ),
-			'stock_status'           => get_post_meta( $id, '_stock_status', true ),
-			'menu_order'             => $post_object->menu_order,
-			'shipping_class_id'      => current( $this->get_term_ids( 'product_shipping_class' ) ),
-			'virtual'                => get_post_meta( $id, '_virtual', true ),
-			'downloadable'           => get_post_meta( $id, '_downloadable', true ),
-			'downloads'              => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
-			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-			'download_limit'         => get_post_meta( $id, '_download_limit', true ),
-			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
-			'thumbnail_id'           => get_post_thumbnail_id( $id ),
-			'backorders'             => get_post_meta( $this->get_id(), '_backorders', true ),
+			'name'              => get_the_title( $post_object ),
+			'slug'              => $post_object->post_name,
+			'status'            => $post_object->post_status,
+			'date_created'      => $post_object->post_date,
+			'date_modified'     => $post_object->post_modified,
+			'description'       => get_post_meta( $id, '_variation_description', true ),
+			'regular_price'     => get_post_meta( $id, '_regular_price', true ),
+			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
+			'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
+			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
+			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
+			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
+			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
+			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
+			'menu_order'        => $post_object->menu_order,
+			'shipping_class_id' => current( $this->get_term_ids( 'product_shipping_class' ) ),
+			'virtual'           => get_post_meta( $id, '_virtual', true ),
+			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
+			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
+			'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
+			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
+			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
+			'image_id'          => get_post_thumbnail_id( $id ),
+			'backorders'        => get_post_meta( $this->get_id(), '_backorders', true ),
 		) );
 
 		// Data that can be inherited from the parent product.
-		$inherit_on_empty = array( 'sku', 'weight', 'length', 'width', 'height' );
+		$inherit_on_empty = array(
+			'_sku'    => 'sku',
+			'_stock'  => 'stock_quantity',  // @todo test this
+			'_weight' => 'weight',
+			'_length' => 'length',
+			'_width'  => 'width',
+			'_height' => 'height',
+		);
 		$parent_props     = array();
 
-		foreach ( $inherit_on_empty as $prop ) {
-			$value = get_post_meta( $this->get_id(), '_' . $prop, true );
+		foreach ( $inherit_on_empty as $meta_key => $prop ) {
+			$value = get_post_meta( $this->get_id(), $meta_key, true );
 			if ( '' !== $value ) {
 				$inherit_props[ $prop ] = $value;
 			} else {
-				$inherit_props[ $prop ] = get_post_meta( $this->get_parent_id(), '_' . $prop, true );
+				$inherit_props[ $prop ] = get_post_meta( $this->get_parent_id(), $meta_key, true );
 			}
 		}
 

@@ -47,8 +47,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_thumbnail_id() ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_thumbnail_id() ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
-					<img src="<?php echo $variation_object->get_thumbnail_id() ? esc_attr( wp_get_attachment_thumb_url( $variation_object->get_thumbnail_id() ) ) : esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_thumbnail_id() ); ?>" />
+				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id() ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id() ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
+					<img src="<?php echo $variation_object->get_image_id() ? esc_attr( wp_get_attachment_thumb_url( $variation_object->get_image_id() ) ) : esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id() ); ?>" />
 				</a>
 			</p>
 			<?php
