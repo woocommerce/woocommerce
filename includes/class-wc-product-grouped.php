@@ -194,7 +194,9 @@ class WC_Product_Grouped extends WC_Product {
 			$child_prices = array();
 			foreach ( $this->get_children() as $child_id ) {
 				$child = wc_get_product( $child_id );
-				$child_prices[] = $child->get_price();
+				if ( $child ) {
+					$child_prices[] = $child->get_price();
+				}
 			}
 			$child_prices = array_filter( $child_prices );
 			delete_post_meta( $this->get_id(), '_price' );

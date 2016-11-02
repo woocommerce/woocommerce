@@ -207,9 +207,12 @@ class WC_API_Products extends WC_API_Resource {
 			$product_data['grouped_products'] = $this->get_grouped_products_data( $product );
 		}
 
-		if ( $product->is_type( 'simple' ) && ! empty( $product->get_parent_id() ) ) {
-			$_product = wc_get_product( $product->get_parent_id() );
-			$product_data['parent'] = $this->get_product_data( $_product );
+		if ( $product->is_type( 'simple' ) ) {
+			$parent_id = $product->get_parent_id();
+			if ( ! empty( $parent_id ) ) {
+				$_product               = wc_get_product( $parent_id );
+				$product_data['parent'] = $this->get_product_data( $_product );
+			}
 		}
 
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
@@ -319,7 +322,7 @@ class WC_API_Products extends WC_API_Resource {
 			$id = $product->get_id();
 
 			// Checks for an error in the product creation.
-			if ( ! $id > 0 ) {
+			if ( 0 >= $id ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product', $id->get_error_message(), 400 );
 			}
 
@@ -1121,12 +1124,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
-		$post = get_post( $product->get_id() );
 		return array(
-			'title'              => $product->get_title(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
-			'created_at'         => $this->server->format_datetime( $post->post_date_gmt ),
-			'updated_at'         => $this->server->format_datetime( $post->post_modified_gmt ),
+			'title'              => $product->get_name(),
+			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(), // @todo variation
+			'created_at'         => $this->server->format_datetime( $product->get_date_created() ),
+			'updated_at'         => $this->server->format_datetime( $product->get_date_modified() ),
 			'type'               => $product->get_type(),
 			'status'             => $product->get_status(),
 			'downloadable'       => $product->is_downloadable(),
@@ -1166,9 +1168,9 @@ class WC_API_Products extends WC_API_Resource {
 			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
 			'description'        => wpautop( do_shortcode( $product->get_description() ) ),
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
-			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
+			'reviews_allowed'    => $product->get_reviews_allowed(),
 			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
-			'rating_count'       => (int) $product->get_rating_count(),
+			'rating_count'       => $product->get_rating_count(),
 			'related_ids'        => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsell_ids() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sell_ids() ),
@@ -1176,11 +1178,11 @@ class WC_API_Products extends WC_API_Resource {
 			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
+			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
-			'download_limit'     => (int) $product->get_download_limit(),
-			'download_expiry'    => (int) $product->get_download_expiry(),
+			'download_limit'     => $product->get_download_limit(),
+			'download_expiry'    => $product->get_download_expiry(),
 			'download_type'      => 'standard',
 			'purchase_note'      => wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ),
 			'total_sales'        => $product->get_total_sales(),
@@ -1415,7 +1417,7 @@ class WC_API_Products extends WC_API_Resource {
 						$attribute_object->set_id( $attribute_id );
 						$attribute_object->set_name( $taxonomy );
 						$attribute_object->set_options( $values );
-						$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
+						$attribute_object->set_position( isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0 );
 						$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
 						$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 						$attributes[] = $attribute_object;
@@ -1434,7 +1436,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attribute_object = new WC_Product_Attribute();
 					$attribute_object->set_name( $attribute['name'] );
 					$attribute_object->set_options( $values );
-					$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
+					$attribute_object->set_position( isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0 );
 					$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
 					$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 					$attributes[] = $attribute_object;
@@ -1506,7 +1508,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $product->get_parent_id() > 0 || 'grouped' === $product->get_type() ) {
+		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
 			if ( $product->get_parent_id() > 0 ) {
 				$parent = wc_get_product( $product->get_parent_id() );
 				$children = $parent->get_children();
@@ -1554,40 +1556,40 @@ class WC_API_Products extends WC_API_Resource {
 				$backorders = $product->get_backorders();
 			}
 
-			if ( 'grouped' == $product->get_type() ) {
+			if ( $product->is_type( 'grouped' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
-			} elseif ( 'external' == $product->get_type() ) {
+			} elseif ( $product->is_type( 'external' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
 			} elseif ( 'yes' == $managing_stock ) {
 				$product->set_backorders( $backorders );
 
 				// Stock status is always determined by children so sync later.
-				if ( 'variable' !== $product->get_type() ) {
+				if ( ! $product->is_type( 'variable' ) ) {
 					$product->set_stock_status( $stock_status );
 				}
 
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
-					$product->set_stock( wc_stock_amount( $data['stock_quantity'] ) );
+					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
 				} else if ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( $product->get_stock() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-					$product->set_stock( wc_stock_amount( $stock_quantity ) );
+					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				// Don't manage stock.
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( $backorders );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
-		} elseif ( 'variable' !== $product->get_type() ) {
+		} elseif ( ! $product->is_type( 'variable' ) ) {
 			$product->set_stock_status( $stock_status );
 		}
 
@@ -1667,7 +1669,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Product url.
-		if ( 'external' === $product->get_type() ) {
+		if ( $product->is_type( 'external' ) ) {
 			if ( isset( $data['product_url'] ) ) {
 				$product->set_product_url( $data['product_url'] );
 			}
@@ -2162,8 +2164,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_images( $product ) {
-
-		$images = $attachment_ids = array();
+		$images        = $attachment_ids = array();
+		$product_image = $product->get_image_id();
 
 		if ( $product->is_type( 'variation' ) ) {
 			// @todo variation
@@ -2172,15 +2174,15 @@ class WC_API_Products extends WC_API_Resource {
 				// Add variation image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
 
-			} elseif ( ! empty( $product->get_thumbnail_id() ) ) {
+			} elseif ( ! empty( $product_image ) ) {
 				// Otherwise use the parent product featured image if set
-				$attachment_ids[] = $product->get_thumbnail_id();
+				$attachment_ids[] = $product_image;
 			}
 		} else {
 
 			// Add featured image
-			if ( ! empty( $product->get_thumbnail_id() ) ) {
-				$attachment_ids[] = $product->get_thumbnail_id();
+			if ( ! empty( $product_image ) ) {
+				$attachment_ids[] = $product_image;
 			}
 
 			// Add gallery images
@@ -2257,7 +2259,7 @@ class WC_API_Products extends WC_API_Resource {
 						$attachment_id = $this->set_product_image_as_attachment( $upload, $product->get_id() );
 					}
 
-					$product->set_thumbnail_id( $attachment_id );
+					$product->set_image_id( $attachment_id );
 				} else {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
@@ -2286,11 +2288,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_attachment_ids( $gallery );
+				$product->set_gallery_image_ids( $gallery );
 			}
 		} else {
-			$product->set_thumbnail_id( '' );
-			$product->set_gallery_attachment_ids( array() );
+			$product->set_image_id( '' );
+			$product->set_gallery_image_ids( array() );
 		}
 
 		return $product;
