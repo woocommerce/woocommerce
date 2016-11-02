@@ -669,7 +669,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $name Product name.
 	 */
 	public function set_name( $name ) {
-		$this->data['name'] = $name;
+		$this->set_prop( 'name', $name );
 	}
 
 	/**
@@ -679,7 +679,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $slug Product slug.
 	 */
 	public function set_slug( $slug ) {
-		$this->data['slug'] = $slug;
+		$this->set_prop( 'slug', $slug );
 	}
 
 	/**
@@ -689,7 +689,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $timestamp Timestamp.
 	 */
 	public function set_date_created( $timestamp ) {
-		$this->data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
@@ -699,7 +699,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $timestamp Timestamp.
 	 */
 	public function set_date_modified( $timestamp ) {
-		$this->data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
@@ -709,7 +709,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $status Product status.
 	 */
 	public function set_status( $status ) {
-		$this->data['status'] = $status;
+		$this->set_prop( 'status', $status );
 	}
 
 	/**
@@ -719,7 +719,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool|string
 	 */
 	public function set_featured( $featured ) {
-		$this->data['featured'] = wc_string_to_bool( $featured );
+		$this->set_prop( 'featured', wc_string_to_bool( $featured ) );
 	}
 
 	/**
@@ -734,7 +734,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( ! in_array( $visibility, $options, true ) ) {
 			$this->error( 'product_invalid_catalog_visibility', __( 'Invalid catalog visibility option.', 'woocommerce' ) );
 		}
-		$this->data['catalog_visibility'] = $visibility;
+		$this->set_prop( 'catalog_visibility', $visibility );
 	}
 
 	/**
@@ -744,7 +744,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $description Product description.
 	 */
 	public function set_description( $description ) {
-		$this->data['description'] = $description;
+		$this->set_prop( 'description', $description );
 	}
 
 	/**
@@ -754,7 +754,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $short_description Product short description.
 	 */
 	public function set_short_description( $short_description ) {
-		$this->data['short_description'] = $short_description;
+		$this->set_prop( 'short_description', $short_description );
 	}
 
 	/**
@@ -769,7 +769,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
 		}
-		$this->data['sku'] = $sku;
+		$this->set_prop( 'sku', $sku );
 	}
 
 	/**
@@ -778,7 +778,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price Price.
 	 */
 	public function set_price( $price ) {
-		$this->data['price'] = wc_format_decimal( $price );
+		$this->set_prop( 'price', wc_format_decimal( $price ) );
 	}
 
 	/**
@@ -788,7 +788,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price Regular price.
 	 */
 	public function set_regular_price( $price ) {
-		$this->data['regular_price'] = wc_format_decimal( $price );
+		$this->set_prop( 'regular_price', wc_format_decimal( $price ) );
 	}
 
 	/**
@@ -798,7 +798,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price sale price.
 	 */
 	public function set_sale_price( $price ) {
-		$this->data['sale_price'] = wc_format_decimal( $price );
+		$this->set_prop( 'sale_price', wc_format_decimal( $price ) );
 	}
 
 	/**
@@ -808,7 +808,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $timestamp Sale from date.
 	 */
 	public function set_date_on_sale_from( $timestamp ) {
-		$this->data['date_on_sale_from'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_on_sale_from', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
@@ -818,7 +818,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $timestamp Sale to date.
 	 */
 	public function set_date_on_sale_to( $timestamp ) {
-		return $this->data['date_on_sale_to'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_on_sale_to', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
@@ -828,7 +828,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $total Total of sales.
 	 */
 	public function set_total_sales( $total ) {
-		$this->data['total_sales'] = absint( $total );
+		$this->set_prop( 'total_sales', absint( $total ) );
 	}
 
 	/**
@@ -854,7 +854,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->error( 'product_invalid_tax_status', __( 'Invalid product tax status.', 'woocommerce' ) );
 		}
 
-		$this->data['tax_status'] = $status;
+		$this->set_prop( 'tax_status', $status );
 	}
 
 	/**
@@ -864,7 +864,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $class Tax class.
 	 */
 	public function set_tax_class( $class ) {
-		$this->data['tax_class'] = wc_clean( $class );
+		$this->set_prop( 'tax_class', wc_clean( $class ) );
 	}
 
 	/**
@@ -874,7 +874,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool
 	 */
 	public function set_manage_stock( $manage_stock ) {
-		$this->data['manage_stock'] = wc_string_to_bool( $manage_stock );
+		$this->set_prop( 'manage_stock', wc_string_to_bool( $manage_stock ) );
 	}
 
 	/**
@@ -884,7 +884,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float|null $quantity Stock quantity.
 	 */
 	public function set_stock_quantity( $quantity ) {
-		$this->data['stock_quantity'] = '' !== $quantity ? wc_stock_amount( $quantity ) : null;
+		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
 	}
 
 	/**
@@ -901,7 +901,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
-		$this->data['stock_status'] = $status;
+		$this->set_prop( 'stock_status', $status );
 	}
 
 	/**
@@ -911,7 +911,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
 	 */
 	public function set_backorders( $backorders ) {
-		$this->data['backorders'] = $backorders;
+		$this->set_prop( 'backorders', $backorders );
 	}
 
 	/**
@@ -921,7 +921,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool
 	 */
 	public function set_sold_individually( $sold_individually ) {
-		$this->data['sold_individually'] = wc_string_to_bool( $sold_individually );
+		$this->set_prop( 'sold_individually', wc_string_to_bool( $sold_individually ) );
 	}
 
 	/**
@@ -931,7 +931,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_weight( $weight ) {
-		$this->data['weight'] = '' === $weight ? '' : wc_format_decimal( $weight );
+		$this->set_prop( 'weight', '' === $weight ? '' : wc_format_decimal( $weight ) );
 	}
 
 	/**
@@ -941,7 +941,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $weigth Total weigth.
 	 */
 	public function set_length( $length ) {
-		$this->data['length'] = '' === $length ? '' : wc_format_decimal( $length );
+		$this->set_prop( 'length', '' === $length ? '' : wc_format_decimal( $length ) );
 	}
 
 	/**
@@ -951,7 +951,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $width Total width.
 	 */
 	public function set_width( $width ) {
-		$this->data['width'] = '' === $width ? '' : wc_format_decimal( $width );
+		$this->set_prop( 'width', '' === $width ? '' : wc_format_decimal( $width ) );
 	}
 
 	/**
@@ -961,7 +961,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $height Total height.
 	 */
 	public function set_height( $height ) {
-		$this->data['height'] = '' === $height ? '' : wc_format_decimal( $height );
+		$this->set_prop( 'height', '' === $height ? '' : wc_format_decimal( $height ) );
 	}
 
 	/**
@@ -971,7 +971,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $upsell_ids IDs from the up-sell products.
 	 */
 	public function set_upsell_ids( $upsell_ids ) {
-		$this->data['upsell_ids'] = array_filter( (array) $upsell_ids );
+		$this->set_prop( 'upsell_ids', array_filter( (array) $upsell_ids ) );
 	}
 
 	/**
@@ -981,7 +981,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $cross_sell_ids IDs from the cross-sell products.
 	 */
 	public function set_cross_sell_ids( $cross_sell_ids ) {
-		$this->data['cross_sell_ids'] = array_filter( (array) $cross_sell_ids );
+		$this->set_prop( 'cross_sell_ids', array_filter( (array) $cross_sell_ids ) );
 	}
 
 	/**
@@ -991,7 +991,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $parent_id Product parent ID.
 	 */
 	public function set_parent_id( $parent_id ) {
-		$this->data['parent_id'] = absint( $parent_id );
+		$this->set_prop( 'parent_id', absint( $parent_id ) );
 	}
 
 	/**
@@ -1001,7 +1001,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool $reviews_allowed Reviews allowed or not.
 	 */
 	public function set_reviews_allowed( $reviews_allowed ) {
-		$this->data['reviews_allowed'] = wc_string_to_bool( $reviews_allowed );
+		$this->set_prop( 'reviews_allowed', wc_string_to_bool( $reviews_allowed ) );
 	}
 
 	/**
@@ -1011,7 +1011,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $purchase_note Purchase note.
 	 */
 	public function set_purchase_note( $purchase_note ) {
-		$this->data['purchase_note'] = $purchase_note;
+		$this->set_prop( 'purchase_note', $purchase_note );
 	}
 
 	/**
@@ -1038,7 +1038,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
-		$this->data['attributes'] = $attributes;
+		$this->set_prop( 'attributes', $attributes );
 	}
 
 	/**
@@ -1048,7 +1048,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->data['default_attributes'] = $default_attributes;
+		$this->set_prop( 'default_attributes', $default_attributes );
 	}
 
 	/**
@@ -1058,7 +1058,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $menu_order Menu order.
 	 */
 	public function set_menu_order( $menu_order ) {
-		$this->data['menu_order'] = intval( $menu_order );
+		$this->set_prop( 'menu_order', intval( $menu_order ) );
 	}
 
 	/**
@@ -1068,7 +1068,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_category_ids( $term_ids ) {
-		$this->data['category_ids'] = $this->sanitize_term_ids( $term_ids, 'product_cat' );
+		$this->set_prop( 'category_ids', $this->sanitize_term_ids( $term_ids, 'product_cat' ) );
 	}
 
 	/**
@@ -1078,7 +1078,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_tag_ids( $term_ids ) {
-		$this->data['tag_ids'] = $this->sanitize_term_ids( $term_ids, 'product_tag' );
+		$this->set_prop( 'tag_ids', $this->sanitize_term_ids( $term_ids, 'product_tag' ) );
 	}
 
 	/**
@@ -1088,7 +1088,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool|string
 	 */
 	public function set_virtual( $virtual ) {
-		$this->data['virtual'] = wc_string_to_bool( $virtual );
+		$this->set_prop( 'virtual', wc_string_to_bool( $virtual ) );
 	}
 
 	/**
@@ -1098,7 +1098,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int
 	 */
 	public function set_shipping_class_id( $id ) {
-		$this->data['shipping_class_id'] = absint( $id );
+		$this->set_prop( 'shipping_class_id', absint( $id ) );
 	}
 
 	/**
@@ -1108,7 +1108,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool|string
 	 */
 	public function set_downloadable( $downloadable ) {
-		$this->data['downloadable'] = wc_string_to_bool( $downloadable );
+		$this->set_prop( 'downloadable', wc_string_to_bool( $downloadable ) );
 	}
 
 	/**
@@ -1169,7 +1169,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 
-		$this->data['downloads'] = $downloads;
+		$this->set_prop( 'downloads', $downloads );
 
 		if ( $errors ) {
 			$this->error( 'product_invalid_download', $errors[0] );
@@ -1183,7 +1183,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $download_limit
 	 */
 	public function set_download_limit( $download_limit ) {
-		$this->data['download_limit'] = -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit );
+		$this->set_prop( 'download_limit', -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit ) );
 	}
 
 	/**
@@ -1193,17 +1193,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $download_expiry
 	 */
 	public function set_download_expiry( $download_expiry ) {
-		$this->data['download_expiry'] = -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry );
+		$this->set_prop( 'download_expiry', -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry ) );
 	}
 
 	/**
 	 * Set gallery attachment ids.
 	 *
 	 * @since 2.7.0
-	 * @param array $gallery_ids
+	 * @param array $image_ids
 	 */
-	public function set_gallery_image_ids( $gallery_ids ) {
-		$this->data['gallery_image_ids'] = array_filter( array_filter( $gallery_ids ), 'wp_attachment_is_image' )
+	public function set_gallery_image_ids( $image_ids ) {
+		$this->set_prop( 'gallery_image_ids', array_filter( array_filter( $image_ids ), 'wp_attachment_is_image' ) );
 	}
 
 	/**
@@ -1213,7 +1213,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int $image_id
 	 */
 	public function set_image_id( $image_id = '' ) {
-		$this->data['image_id'] = $image_id;
+		$this->set_prop( 'image_id', $image_id );
 	}
 
 	/*
