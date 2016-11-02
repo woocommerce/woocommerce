@@ -28,6 +28,12 @@ abstract class WC_Data {
 	protected $data = array();
 
 	/**
+	 * Core data changes for this object.
+	 * @var array
+	 */
+	protected $changes = array();
+
+	/**
 	 * Set to _data on construct so we can track and reset data if needed.
 	 * @var array
 	 */
@@ -432,6 +438,56 @@ abstract class WC_Data {
 		}
 
 		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
+	 * Sets a prop for a setter method.
+	 *
+	 * This stores changes in a special array so we can track what needs saving
+	 * the the DB later.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param mixed  $value Value of the prop.
+	 */
+	protected function set_prop( $prop, $value ) {
+		if ( in_array( $prop, array_keys( $this->data ) ) ) {
+			$this->changes[ $prop ] = $value;
+		}
+	}
+
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_';
+	}
+
+	/**
+	 * Gets a prop for a getter method.
+	 *
+	 * Gets the value from either current pending changes, or the data itself.
+	 * Context controls what happens to the value before it's returned.
+	 *
+	 * @since  2.7.0
+	 * @param  string $prop Name of prop to get.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return mixed
+	 */
+	public function get_prop( $prop, $context = 'view' ) {
+		$value = null;
+
+		if ( in_array( $prop, array_keys( $this->data ) ) ) {
+			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+		return $value;
 	}
 
 	/**

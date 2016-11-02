@@ -142,13 +142,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	|
-	| Methods for getting data from the product object.
-	*/
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_product_get_';
+	}
 
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
@@ -160,444 +162,494 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->product_type;
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the product object.
+	*/
+
 	/**
 	 * Get product name.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_name() {
-		return apply_filters( 'woocommerce_product_get_name', $this->data['name'], $this );
+	public function get_name( $context = 'view' ) {
+		return $this->get_prop( 'name', $context );
 	}
 
 	/**
 	 * Get product slug.
+	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_slug() {
-		return $this->data['slug'];
+	public function get_slug( $context = 'view' ) {
+		return $this->get_prop( 'slug', $context );
 	}
 
 	/**
 	 * Get product created date.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string Timestamp.
 	 */
-	public function get_date_created() {
-		return $this->data['date_created'];
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
 	}
 
 	/**
 	 * Get product modified date.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string Timestamp.
 	 */
-	public function get_date_modified() {
-		return $this->data['date_modified'];
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
 	}
 
 	/**
 	 * Get product status.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_status() {
-		return $this->data['status'];
+	public function get_status( $context = 'view' ) {
+		return $this->get_prop( 'status', $context );
 	}
 
 	/**
 	 * If the product is featured.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return boolean
 	 */
-	public function get_featured() {
-		return $this->data['featured'];
+	public function get_featured( $context = 'view' ) {
+		return $this->get_prop( 'featured', $context );
 	}
 
 	/**
 	 * Get catalog visibility.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_catalog_visibility() {
-		return $this->data['catalog_visibility'];
+	public function get_catalog_visibility( $context = 'view' ) {
+		return $this->get_prop( 'catalog_visibility', $context );
 	}
 
 	/**
 	 * Get product description.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_description() {
-		return $this->data['description'];
+	public function get_description( $context = 'view' ) {
+		return $this->get_prop( 'description', $context );
 	}
 
 	/**
 	 * Get product short description.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_short_description() {
-		return $this->data['short_description'];
+	public function get_short_description( $context = 'view' ) {
+		return $this->get_prop( 'short_description', $context );
 	}
 
 	/**
 	 * Get SKU (Stock-keeping unit) - product unique ID.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_sku() {
-		return apply_filters( 'woocommerce_get_sku', $this->data['sku'], $this );
+	public function get_sku( $context = 'view' ) {
+		return $this->get_prop( 'sku', $context );
 	}
 
 	/**
 	 * Returns the product's active price.
 	 *
+	 * @param  string $context
 	 * @return string price
 	 */
-	public function get_price() {
-		return apply_filters( 'woocommerce_get_price', $this->data['price'], $this );
+	public function get_price( $context = 'view' ) {
+		return $this->get_prop( 'price', $context );
 	}
 
 	/**
 	 * Returns the product's regular price.
 	 *
+	 * @param  string $context
 	 * @return string price
 	 */
-	public function get_regular_price() {
-		return apply_filters( 'woocommerce_get_regular_price', $this->data['regular_price'], $this );
+	public function get_regular_price( $context = 'view' ) {
+		return $this->get_prop( 'regular_price', $context );
 	}
 
 	/**
 	 * Returns the product's sale price.
 	 *
+	 * @param  string $context
 	 * @return string price
 	 */
-	public function get_sale_price() {
-		return apply_filters( 'woocommerce_get_sale_price', $this->data['sale_price'], $this );
+	public function get_sale_price( $context = 'view' ) {
+		return $this->get_prop( 'sale_price', $context );
 	}
 
 	/**
 	 * Get date on sale from.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_date_on_sale_from() {
-		return $this->data['date_on_sale_from'];
+	public function get_date_on_sale_from( $context = 'view' ) {
+		return $this->get_prop( 'date_on_sale_from', $context );
 	}
 
 	/**
 	 * Get date on sale to.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_date_on_sale_to() {
-		return $this->data['date_on_sale_to'];
+	public function get_date_on_sale_to( $context = 'view' ) {
+		return $this->get_prop( 'date_on_sale_to', $context );
 	}
 
 	/**
 	 * Get number total of sales.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_total_sales() {
-		return $this->data['total_sales'];
+	public function get_total_sales( $context = 'view' ) {
+		return $this->get_prop( 'total_sales', $context );
 	}
 
 	/**
 	 * Returns the tax status.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_tax_status() {
-		return $this->data['tax_status'];
+	public function get_tax_status( $context = 'view' ) {
+		return $this->get_prop( 'tax_status', $context );
 	}
 
 	/**
 	 * Returns the tax class.
-	 * @param bool $raw Get unfiltered value.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_tax_class( $raw = false ) {
-		if ( $raw ) {
-			 return $this->data['tax_class'];
-		} else {
-			return apply_filters( 'woocommerce_product_tax_class', $this->data['tax_class'], $this );
-		}
+	public function get_tax_class( $context = 'view' ) {
+		return $this->get_prop( 'tax_class', $context );
 	}
 
 	/**
 	 * Return if product manage stock.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return boolean
 	 */
-	public function get_manage_stock() {
-		return $this->data['manage_stock'];
+	public function get_manage_stock( $context = 'view' ) {
+		return $this->get_prop( 'manage_stock', $context );
 	}
 
 	/**
 	 * Returns number of items available for sale.
 	 *
+	 * @param  string $context
 	 * @return int|null
 	 */
-	public function get_stock_quantity() {
-		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? $this->data['stock_quantity'] : null, $this );
+	public function get_stock_quantity( $context = 'view' ) {
+		return $this->get_prop( 'stock_quantity', $context );
 	}
 
 	/**
 	 * Return the stock status.
 	 *
+	 * @param  string $context
 	 * @since 2.7.0
 	 * @return string
 	 */
-	public function get_stock_status() {
-		return $this->data['stock_status'];
+	public function get_stock_status( $context = 'view' ) {
+		return $this->get_prop( 'stock_status', $context );
 	}
 
 	/**
 	 * Get backorders.
 	 *
+	 * @param  string $context
 	 * @since 2.7.0
 	 * @return string yes no or notify
 	 */
-	public function get_backorders() {
-		return $this->data['backorders'];
+	public function get_backorders( $context = 'view' ) {
+		return $this->get_prop( 'backorders', $context );
 	}
 
 	/**
 	 * Return if should be sold individually.
 	 *
+	 * @param  string $context
 	 * @since 2.7.0
 	 * @return boolean
 	 */
-	public function get_sold_individually() {
-		return $this->data['sold_individually'];
+	public function get_sold_individually( $context = 'view' ) {
+		return $this->get_prop( 'sold_individually', $context );
 	}
 
 	/**
 	 * Returns the product's weight.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_weight() {
-		return apply_filters( 'woocommerce_product_get_weight', $this->data['weight'], $this );
+	public function get_weight( $context = 'view' ) {
+		return $this->get_prop( 'weight', $context );
 	}
 
 	/**
 	 * Returns the product length.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_length() {
-		return apply_filters( 'woocommerce_product_get_length', $this->data['length'], $this );
+	public function get_length( $context = 'view' ) {
+		return $this->get_prop( 'length', $context );
 	}
 
 	/**
 	 * Returns the product width.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_width() {
-		return apply_filters( 'woocommerce_product_get_width', $this->data['width'], $this );
+	public function get_width( $context = 'view' ) {
+		return $this->get_prop( 'width', $context );
 	}
 
 	/**
 	 * Returns the product height.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_height() {
-		return apply_filters( 'woocommerce_product_get_height', $this->data['height'], $this );
+	public function get_height( $context = 'view' ) {
+		return $this->get_prop( 'height', $context );
 	}
 
 	/**
 	 * Get upsel IDs.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_upsell_ids() {
-		return $this->data['upsell_ids'];
+	public function get_upsell_ids( $context = 'view' ) {
+		return $this->get_prop( 'upsell_ids', $context );
 	}
 
 	/**
 	 * Get cross sell IDs.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_cross_sell_ids() {
-		return $this->data['cross_sell_ids'];
+	public function get_cross_sell_ids( $context = 'view' ) {
+		return $this->get_prop( 'cross_sell_ids', $context );
 	}
 
 	/**
 	 * Get parent ID.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_parent_id() {
-		return $this->data['parent_id'];
+	public function get_parent_id( $context = 'view' ) {
+		return $this->get_prop( 'parent_id', $context );
 	}
 
 	/**
 	 * Return if reviews is allowed.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_reviews_allowed() {
-		return $this->data['reviews_allowed'];
+	public function get_reviews_allowed( $context = 'view' ) {
+		return $this->get_prop( 'reviews_allowed', $context );
 	}
 
 	/**
 	 * Get purchase note.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_purchase_note() {
-		return $this->data['purchase_note'];
+	public function get_purchase_note( $context = 'view' ) {
+		return $this->get_prop( 'purchase_note', $context );
 	}
 
 	/**
 	 * Returns product attributes.
 	 *
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_attributes() {
-		return apply_filters( 'woocommerce_get_product_attributes', $this->data['attributes'] );
+	public function get_attributes( $context = 'view' ) {
+		return $this->get_prop( 'attributes', $context );
 	}
 
 	/**
 	 * Get default attributes.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_default_attributes() {
-		return $this->data['default_attributes'];
+	public function get_default_attributes( $context = 'view' ) {
+		return $this->get_prop( 'default_attributes', $context );
 	}
 
 	/**
 	 * Get menu order.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_menu_order() {
-		return $this->data['menu_order'];
+	public function get_menu_order( $context = 'view' ) {
+		return $this->get_prop( 'menu_order', $context );
 	}
 
 	/**
 	 * Get category ids.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_category_ids() {
-		return $this->data['category_ids'];
+	public function get_category_ids( $context = 'view' ) {
+		return $this->get_prop( 'category_ids', $context );
 	}
 
 	/**
 	 * Get tag ids.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_tag_ids() {
-		return $this->data['tag_ids'];
+	public function get_tag_ids( $context = 'view' ) {
+		return $this->get_prop( 'tag_ids', $context );
 	}
 
 	/**
 	 * Get virtual.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_virtual() {
-		return $this->data['virtual'];
+	public function get_virtual( $context = 'view' ) {
+		return $this->get_prop( 'virtual', $context );
 	}
 
 	/**
 	 * Returns the gallery attachment ids.
 	 *
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_gallery_image_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( $this->data['gallery_image_ids'] ), 'wp_attachment_is_image' ), $this );
+	public function get_gallery_image_ids( $context = 'view' ) {
+		return $this->get_prop( 'gallery_image_ids', $context );
 	}
 
 	/**
 	 * Get shipping class ID.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_shipping_class_id() {
-		return $this->data['shipping_class_id'];
+	public function get_shipping_class_id( $context = 'view' ) {
+		return $this->get_prop( 'shipping_class_id', $context );
 	}
 
 	/**
 	 * Get downloads.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_downloads() {
-		return $this->data['downloads'];
+	public function get_downloads( $context = 'view' ) {
+		return $this->get_prop( 'downloads', $context );
 	}
 
 	/**
 	 * Get download expiry.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_download_expiry() {
-		return $this->data['download_expiry'];
+	public function get_download_expiry( $context = 'view' ) {
+		return $this->get_prop( 'download_expiry', $context );
 	}
 
 	/**
 	 * Get downloadable.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_downloadable() {
-		return $this->data['downloadable'];
+	public function get_downloadable( $context = 'view' ) {
+		return $this->get_prop( 'downloadable', $context );
 	}
 
 	/**
 	 * Get download limit.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_download_limit() {
-		return $this->data['download_limit'];
+	public function get_download_limit( $context = 'view' ) {
+		return $this->get_prop( 'download_limit', $context );
 	}
 
 	/**
 	 * Get main image ID. @todo ensure read handles parent like get_image_id used to?
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_image_id() {
-		return $this->data['image_id'];
+	public function get_image_id( $context = 'view' ) {
+		return $this->get_prop( 'image_id', $context );
 	}
 
 	/*
@@ -1151,7 +1203,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $gallery_ids
 	 */
 	public function set_gallery_image_ids( $gallery_ids ) {
-		$this->data['gallery_image_ids'] = $gallery_ids;
+		$this->data['gallery_image_ids'] = array_filter( array_filter( $gallery_ids ), 'wp_attachment_is_image' )
 	}
 
 	/**
@@ -1442,7 +1494,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$value = $this->data[ $prop ];
+			$value = $this->get_prop(  $prop , $context );
 			// @todo this is where state should be checked?
 			switch ( $prop ) {
 				case 'virtual' :
