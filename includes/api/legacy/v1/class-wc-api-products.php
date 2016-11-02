@@ -8,7 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
- * @version     2.1
+ * @version     2.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -113,14 +113,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		// add variations to variable products
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
-
 			$product_data['variations'] = $this->get_variation_data( $product );
 		}
 
 		// add the parent product data to an individual variation
 		if ( $product->is_type( 'variation' ) ) {
-
-			$product_data['parent'] = $this->get_product_data( $product->parent );
+			$product_data['parent'] = $this->get_product_data( $product->get_parent_id() );
 		}
 
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
@@ -268,14 +266,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_product_data( $product ) {
-
+		$post = get_post( $product->get_id() );
 		return array(
 			'title'              => $product->get_title(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
-			'created_at'         => $this->server->format_datetime( $product->get_post_data()->post_date_gmt ),
-			'updated_at'         => $this->server->format_datetime( $product->get_post_data()->post_modified_gmt ),
-			'type'               => $product->product_type,
-			'status'             => $product->get_post_data()->post_status,
+			'created_at'         => $this->server->format_datetime( $post->post_date_gmt ),
+			'updated_at'         => $this->server->format_datetime( $post->post_modified_gmt ),
+			'type'               => $product->get_type(),
+			'status'             => $product->get_status(),
 			'downloadable'       => $product->is_downloadable(),
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
@@ -296,37 +294,37 @@ class WC_API_Products extends WC_API_Resource {
 			'purchaseable'       => $product->is_purchasable(),
 			'featured'           => $product->is_featured(),
 			'visible'            => $product->is_visible(),
-			'catalog_visibility' => $product->visibility,
+			'catalog_visibility' => $product->get_catalog_visibility(),
 			'on_sale'            => $product->is_on_sale(),
 			'weight'             => $product->get_weight() ? wc_format_decimal( $product->get_weight(), 2 ) : null,
 			'dimensions'         => array(
-				'length' => $product->length,
-				'width'  => $product->width,
-				'height' => $product->height,
+				'length' => $product->get_length(),
+				'width'  => $product->get_width(),
+				'height' => $product->get_height(),
 				'unit'   => get_option( 'woocommerce_dimension_unit' ),
 			),
 			'shipping_required'  => $product->needs_shipping(),
 			'shipping_taxable'   => $product->is_shipping_taxable(),
 			'shipping_class'     => $product->get_shipping_class(),
 			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
-			'description'        => apply_filters( 'the_content', $product->get_post_data()->post_content ),
-			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
-			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
+			'description'        => apply_filters( 'the_content', $product->get_description() ),
+			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
+			'reviews_allowed'    => $product->get_reviews_allowed(),
 			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
 			'rating_count'       => (int) $product->get_rating_count(),
-			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
-			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
-			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
+			'related_ids'        => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
+			'upsell_ids'         => array_map( 'absint', $product->get_upsell_ids() ),
+			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sell_ids() ),
 			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
-			'download_limit'     => (int) $product->download_limit,
-			'download_expiry'    => (int) $product->download_expiry,
-			'download_type'      => $product->download_type,
-			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
+			'download_limit'     => (int) $product->get_download_limit(),
+			'download_expiry'    => (int) $product->get_download_expiry(),
+			'download_type'      => 'standard',
+			'purchase_note'      => apply_filters( 'the_content', $product->get_purchase_note() ),
 			'total_sales'        => metadata_exists( 'post', $product->get_id(), 'total_sales' ) ? (int) get_post_meta( $product->get_id(), 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
@@ -335,6 +333,7 @@ class WC_API_Products extends WC_API_Resource {
 
 	/**
 	 * Get an individual variation's data
+	 * @todo after variations CRUD is done
 	 *
 	 * @since 2.1
 	 * @param WC_Product $product
@@ -346,7 +345,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		foreach ( $product->get_children() as $child_id ) {
 
-			$variation = $product->get_child( $child_id );
+			$variation = wc_get_product( $child_id );
 
 			if ( ! $variation->exists() ) {
 				continue;
@@ -376,9 +375,9 @@ class WC_API_Products extends WC_API_Resource {
 				'on_sale'           => $variation->is_on_sale(),
 				'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
 				'dimensions'        => array(
-					'length' => $variation->length,
-					'width'  => $variation->width,
-					'height' => $variation->height,
+					'length' => $variation->get_length(),
+					'width'  => $variation->get_width(),
+					'height' => $variation->get_height(),
 					'unit'   => get_option( 'woocommerce_dimension_unit' ),
 				),
 				'shipping_class'    => $variation->get_shipping_class(),
@@ -386,8 +385,8 @@ class WC_API_Products extends WC_API_Resource {
 				'image'             => $this->get_images( $variation ),
 				'attributes'        => $this->get_attributes( $variation ),
 				'downloads'         => $this->get_downloads( $variation ),
-				'download_limit'    => (int) $product->download_limit,
-				'download_expiry'   => (int) $product->download_expiry,
+				'download_limit'    => (int) $product->get_download_limit(),
+				'download_expiry'   => (int) $product->get_download_expiry(),
 			);
 		}
 
@@ -406,22 +405,22 @@ class WC_API_Products extends WC_API_Resource {
 		$images = $attachment_ids = array();
 
 		if ( $product->is_type( 'variation' ) ) {
-
+			// @todo variation
 			if ( has_post_thumbnail( $product->get_variation_id() ) ) {
 
 				// add variation image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
 
-			} elseif ( has_post_thumbnail( $product->get_id() ) ) {
+			} elseif ( ! empty( $product->get_thumbnail_id() ) ) {
 
 				// otherwise use the parent product featured image if set
-				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
+				$attachment_ids[] = $product->get_thumbnail_id();
 			}
 		} else {
 
-			// add featured image
-			if ( has_post_thumbnail( $product->get_id() ) ) {
-				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
+			// Add featured image
+			if ( ! empty( $product->get_thumbnail_id() ) ) {
+				$attachment_ids[] = $product->get_thumbnail_id();
 			}
 
 			// add gallery images

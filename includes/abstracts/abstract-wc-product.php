@@ -1973,9 +1973,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_files() {
-
-		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
-
+		$downloadable_files = array_filter( ! empty( $this->get_downloads() ) ? (array) maybe_unserialize( $this->get_downloads() ) : array() );
 		if ( ! empty( $downloadable_files ) ) {
 
 			foreach ( $downloadable_files as $key => $file ) {

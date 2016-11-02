@@ -16,6 +16,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
 		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
 		$test_tag_2 = wp_insert_term( 'Tag 2', 'product_tag' );
+		$term_cat_1 = get_term_by( 'id', $test_cat_1['term_id'], 'product_cat' );
+		$term_tag_1 = get_term_by( 'id', $test_tag_1['term_id'], 'product_tag' );
+		$term_tag_2 = get_term_by( 'id', $test_tag_2['term_id'], 'product_tag' );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_tag_ids( array( $test_tag_1['term_id'] ) );
@@ -68,17 +71,17 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertContains( $external->get_id(), $products );
 
 		// test categories
-		$products = wc_get_products( array( 'return' => 'ids', 'category' => array( $test_cat_1['term_id'] ) ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'category' => array( $term_cat_1->slug ) ) );
 		$this->assertEquals( 3, count( $products ) );
 
 		// test tags
-		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $test_tag_1['term_id'] ) ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $term_tag_1->slug ) ) );
 		$this->assertEquals( 2, count( $products ) );
 
-		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $test_tag_2['term_id'] ) ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $term_tag_2->slug ) ) );
 		$this->assertEquals( 1, count( $products ) );
 
-		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $test_tag_1['term_id'], $test_tag_2['term_id'] ) ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'tag' => array( $term_tag_1->slug, $term_tag_2->slug ) ) );
 		$this->assertEquals( 3, count( $products ) );
 
 		// test limit
