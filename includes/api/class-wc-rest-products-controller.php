@@ -977,8 +977,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Grant permission to any newly added files on any existing orders for this product prior to saving.
 		do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), $variation_id, $files );
 
-		$id = ( 0 === $variation_id ) ? $product->get_id() : $variation_id;
-
 		$product->set_downloads( $files );
 
 		return $product;
@@ -1015,9 +1013,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function save_product_meta( $product, $request ) {
 		global $wpdb;
-
-		// Default total sales.
-		$product->set_total_sales( 0 ); // @todo check this
 
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
@@ -1114,7 +1109,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						$attribute_object = new WC_Product_Attribute();
 						$attribute_object->set_id( $attribute_id );
 						$attribute_object->set_name( $attribute_name );
-						$attribute_object->set_options( array() );
+						$attribute_object->set_options( $values );
 						$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
 						$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
 						$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
@@ -1129,7 +1124,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 					$attribute_object = new WC_Product_Attribute();
 					$attribute_object->set_name( $attribute_name );
-					$attribute_object->set_options( $values);
+					$attribute_object->set_options( $values );
 					$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
 					$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
 					$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
@@ -1169,15 +1164,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $request['date_on_sale_from'] ) ) {
 				$date_from = $request['date_on_sale_from'];
 			} else {
-				$date_from = $product->get_date_on_sale_from();
-				$date_from = ( '' === (string) $date_from ) ? '' : date( 'Y-m-d', $date_from );
+				$date_from = ( $product->get_date_on_sale_from() ) ? date( 'Y-m-d', $date_from ) : '';
 			}
 
 			if ( isset( $request['date_on_sale_to'] ) ) {
 				$date_to = $request['date_on_sale_to'];
 			} else {
-				$date_to = $product->get_date_on_sale_to();
-				$date_to = ( '' === (string) $date_to ) ? '' : date( 'Y-m-d', $date_to );
+				$date_to = ( $product->get_date_on_sale_to() ) ? date( 'Y-m-d', $date_to ) : '';
 			}
 
 			if ( $date_to && ! $date_from ) {
@@ -1194,18 +1187,21 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Product parent ID for groups.
-		$parent_id = 0;
 		if ( isset( $request['parent_id'] ) ) {
 			$product->set_parent_id( absint( $request['parent_id'] ) );
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $parent_id > 0 || 'grouped' === $product->get_type() ) {
+		if ( $product->get_parent_id() > 0 || 'grouped' === $product->get_type() ) {
 
 			$clear_parent_ids = array();
 
-			if ( $parent_id > 0 ) {
-				$clear_parent_ids[] = $parent_id;
+			if ( $product->get_parent_id() > 0 ) {
+				$clear_parent_ids[] = $product->get_parent_id();
+				$parent = wc_get_product( $product->get_parent_id() );
+				$children = $parent->get_children();
+				$parent->set_children( array_filter( array_merge( $children, array( $product->get_id() ) ) ) );
+				$parent->save();
 			}
 
 			if ( 'grouped' === $product->get_type() ) {
@@ -1773,7 +1769,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Save variations.
 			if ( isset( $request['type'] ) && 'variable' === $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-				$product = $this->save_variations_data( $product, $request );
+				$this->save_variations_data( $product, $request );
 			}
 
 			return true;
@@ -1805,7 +1801,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Save variations.
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-					$product = $this->save_variations_data( $product, $request );
+					$this->save_variations_data( $product, $request );
 				} else {
 					// Just sync variations.
 					WC_Product_Variable::sync( $product->get_id() );
@@ -1887,7 +1883,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
@@ -1901,9 +1896,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 			}
 
-			$result = wp_delete_post( $id, true );
 			$product->delete();
-			$result = $product->get_id() > 0 ? fase : true;
+			$result = $product->get_id() > 0 ? false : true;
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {

@@ -1947,8 +1947,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
-
-
 	/*
 	|--------------------------------------------------------------------------
 	| @todo download functions
@@ -1975,9 +1973,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_files() {
-
-		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
-
+		$downloadable_files = array_filter( ! empty( $this->get_downloads() ) ? (array) maybe_unserialize( $this->get_downloads() ) : array() );
 		if ( ! empty( $downloadable_files ) ) {
 
 			foreach ( $downloadable_files as $key => $file ) {
