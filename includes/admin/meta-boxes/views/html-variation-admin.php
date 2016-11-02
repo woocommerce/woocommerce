@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
 				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id() ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id() ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
-					<img src="<?php echo $variation_object->get_image_id() ? esc_attr( wp_get_attachment_thumb_url( $variation_object->get_image_id() ) ) : esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id() ); ?>" />
+					<img src="<?php echo $variation_object->get_image_id() ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id() ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id() ); ?>" />
 				</a>
 			</p>
 			<?php
@@ -210,7 +210,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					if ( wc_product_dimensions_enabled() ) {
 						?><p class="form-field form-row dimensions_field hide_if_variation_virtual form-row-last">
 							<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
-							<?php echo wc_help_tip( __( 'LxWxH in decimal form', 'woocommerce' ) ); ?>
+							<?php echo wc_help_tip( __( 'Length x width x height in decimal form', 'woocommerce' ) ); ?>
 							<span class="wrap">
 								<input id="product_length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_length() ) ); ?>" />
 								<input placeholder="<?php esc_attr_e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_width() ) ); ?>" />

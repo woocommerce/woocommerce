@@ -218,44 +218,26 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
-	 * Prepare default attributes.
+	 * Prepare attributes for a specific variation or defaults.
 	 * @param  array $all_attributes
+	 * @param  string $key_prefix
+	 * @param  int $index
 	 * @return array
 	 */
-	public static function prepare_default_attributes( $all_attributes ) {
+	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {
 		$attributes = array();
 
 		if ( $all_attributes ) {
 			foreach ( $all_attributes as $attribute ) {
 				if ( $attribute->get_variation() ) {
-					$attribute_key                = sanitize_title( $attribute->get_name() );
-					$post_key                     = 'default_attribute_' . $attribute_key;
-					$value                        = isset( $_POST[ $post_key ] ) ? stripslashes( $_POST[ $post_key ] ) : '';
-					$value                        = $attribute->is_taxonomy() ? sanitize_title( $value ) : wc_clean( $value ); // Don't use wc_clean as it destroys sanitized characters in terms.
-					$attributes[ $attribute_key ] = $value;
-				}
-			}
-		}
+					$attribute_key = sanitize_title( $attribute->get_name() );
 
-		return $attributes;
-	}
+					if ( ! is_null( $index ) ) {
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $i ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ][ $i ] ) : '';
+					} else {
+						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ] ) : '';
+					}
 
-	/**
-	 * Prepare attributes for a specific variation.
-	 * @param  array $all_attributes
-	 * @param  int $variation_id
-	 * @param  int $i
-	 * @return array
-	 */
-	private static function prepare_variation_attributes( $all_attributes, $variation_id, $i ) {
-		$attributes = array();
-
-		if ( $all_attributes ) {
-			foreach ( $all_attributes as $attribute ) {
-				if ( $attribute->get_variation() ) {
-					$attribute_key                = sanitize_title( $attribute->get_name() );
-					$post_key                     = 'attribute_' . $attribute_key;
-					$value                        = isset( $_POST[ $post_key ][ $i ] ) ? stripslashes( $_POST[ $post_key ][ $i ] ) : '';
 					$value                        = $attribute->is_taxonomy() ? sanitize_title( $value ) : wc_clean( $value ); // Don't use wc_clean as it destroys sanitized characters in terms.
 					$attributes[ $attribute_key ] = $value;
 				}
@@ -310,7 +292,7 @@ class WC_Meta_Box_Product_Data {
 			'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
 			'reviews_allowed'    => ! empty( $_POST['_reviews_allowed'] ),
 			'attributes'         => $attributes,
-			'default_attributes' => self::prepare_default_attributes( $attributes ),
+			'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
 		) );
 
 		if ( is_wp_error( $errors ) ) {
@@ -359,7 +341,7 @@ class WC_Meta_Box_Product_Data {
 					'backorders'        => wc_clean( $_POST['variable_backorders'][ $i ] ),
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
-					'attributes'        => self::prepare_variation_attributes( $parent->get_attributes(), $variation_id, $i ),
+					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i )
 					'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] )       : '',
 					'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
 					'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',

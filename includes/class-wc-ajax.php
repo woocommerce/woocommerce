@@ -614,7 +614,7 @@ class WC_AJAX {
 		global $post; // Set $post global so its available, like within the admin screens
 
 		$product_id       = intval( $_POST['post_id'] );
-		$post             = get_post( $product_id ); // Set $post global so its available like within the admin screens
+		$post             = get_post( $product_id );
 		$loop             = intval( $_POST['loop'] );
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
