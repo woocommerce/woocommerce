@@ -1,4 +1,14 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Legacy product contains all deprecated methods for this class and can be
+ * removed in the future.
+ */
+include_once( 'abstract-wc-legacy-product.php' );
+
 /**
  * Abstract Product Class
  *
@@ -9,17 +19,13 @@
  * @category Abstract Class
  * @author   WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-include_once( 'abstract-wc-legacy-product.php' );
-
-/**
- * Product Class.
- */
 class WC_Product extends WC_Abstract_Legacy_Product {
+
+	/**
+	 * Post type.
+	 * @var string
+	 */
+	protected $post_type = 'product';
 
 	/**
 	 * Stores product data.
@@ -27,51 +33,51 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @var array
 	 */
 	protected $data = array(
-		'name'                   => '',
-		'slug'                   => '',
-		'date_created'           => '',
-		'date_modified'          => '',
-		'status'                 => false,
-		'featured'               => false,
-		'catalog_visibility'     => 'hidden',
-		'description'            => '',
-		'short_description'      => '',
-		'sku'                    => '',
-		'price'                  => '',
-		'regular_price'          => '',
-		'sale_price'             => '',
-		'date_on_sale_from'      => '',
-		'date_on_sale_to'        => '',
-		'total_sales'            => '0',
-		'tax_status'             => 'taxable',
-		'tax_class'              => '',
-		'manage_stock'           => false,
-		'stock_quantity'         => null,
-		'stock_status'           => '',
-		'backorders'             => 'no',
-		'sold_individually'      => false,
-		'weight'                 => '',
-		'length'                 => '',
-		'width'                  => '',
-		'height'                 => '',
-		'upsell_ids'             => array(),
-		'cross_sell_ids'         => array(),
-		'parent_id'              => 0,
-		'reviews_allowed'        => true,
-		'purchase_note'          => '',
-		'attributes'             => array(),
-		'default_attributes'     => array(),
-		'menu_order'             => 0,
-		'virtual'                => false,
-		'downloadable'           => false,
-		'category_ids'           => array(),
-		'tag_ids'                => array(),
-		'shipping_class_id'      => 0,
-		'downloads'              => array(),
-		'thumbnail_id'           => '',
-		'gallery_attachment_ids' => array(),
-		'download_limit'         => -1,
-		'download_expiry'        => -1,
+		'name'               => '',
+		'slug'               => '',
+		'date_created'       => '',
+		'date_modified'      => '',
+		'status'             => false,
+		'featured'           => false,
+		'catalog_visibility' => 'hidden',
+		'description'        => '',
+		'short_description'  => '',
+		'sku'                => '',
+		'price'              => '',
+		'regular_price'      => '',
+		'sale_price'         => '',
+		'date_on_sale_from'  => '',
+		'date_on_sale_to'    => '',
+		'total_sales'        => '0',
+		'tax_status'         => 'taxable',
+		'tax_class'          => '',
+		'manage_stock'       => false,
+		'stock_quantity'     => null,
+		'stock_status'       => '',
+		'backorders'         => 'no',
+		'sold_individually'  => false,
+		'weight'             => '',
+		'length'             => '',
+		'width'              => '',
+		'height'             => '',
+		'upsell_ids'         => array(),
+		'cross_sell_ids'     => array(),
+		'parent_id'          => 0,
+		'reviews_allowed'    => true,
+		'purchase_note'      => '',
+		'attributes'         => array(),
+		'default_attributes' => array(),
+		'menu_order'         => 0,
+		'virtual'            => false,
+		'downloadable'       => false,
+		'category_ids'       => array(),
+		'tag_ids'            => array(),
+		'shipping_class_id'  => 0,
+		'downloads'          => array(),
+		'image_id'           => '',
+		'gallery_image_ids'  => array(),
+		'download_limit'     => -1,
+		'download_expiry'    => -1,
 	);
 
 	/**
@@ -145,20 +151,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
-	 * Get internal type.
+	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 * @since 2.7.0
 	 * @return string
 	 */
 	public function get_type() {
-		return 'simple';
-	}
-
-	/**
-	 * Product permalink.
-	 * @return string
-	 */
-	public function get_permalink() {
-		return get_permalink( $this->get_id() );
+		// product_type is @deprecated but here for BW compat with child classes.
+		return $this->product_type;
 	}
 
 	/**
@@ -327,11 +326,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the tax class.
-	 *
+	 * @param bool $raw Get unfiltered value.
 	 * @return string
 	 */
-	public function get_tax_class() {
-		return apply_filters( 'woocommerce_product_tax_class', $this->data['tax_class'], $this );
+	public function get_tax_class( $raw = false ) {
+		if ( $raw ) {
+			 return $this->data['tax_class'];
+		} else {
+			return apply_filters( 'woocommerce_product_tax_class', $this->data['tax_class'], $this );
+		}
 	}
 
 	/**
@@ -350,7 +353,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return int|null
 	 */
 	public function get_stock_quantity() {
-		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? wc_stock_amount( $this->data['stock_quantity'] ) : null, $this );
+		return apply_filters( 'woocommerce_get_stock_quantity', $this->get_manage_stock() ? $this->data['stock_quantity'] : null, $this );
 	}
 
 	/**
@@ -389,11 +392,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_weight() {
-		// Legacy filter.
-		$weight = apply_filters( 'woocommerce_product_weight', $this->data['weight'], $this ); // @todo standardize these filter names and move BW compat to deprecated class file.
-
-		// New filter.
-		return apply_filters( 'woocommerce_product_get_weight', $weight, $this );
+		return apply_filters( 'woocommerce_product_get_weight', $this->data['weight'], $this );
 	}
 
 	/**
@@ -402,11 +401,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_length() {
-		// Legacy filter.
-		$length = apply_filters( 'woocommerce_product_length', $this->data['length'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_length', $length, $this );
+		return apply_filters( 'woocommerce_product_get_length', $this->data['length'], $this );
 	}
 
 	/**
@@ -415,11 +410,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_width() {
-		// Legacy filter.
-		$width = apply_filters( 'woocommerce_product_width', $this->data['width'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_width', $width, $this );
+		return apply_filters( 'woocommerce_product_get_width', $this->data['width'], $this );
 	}
 
 	/**
@@ -428,11 +419,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_height() {
-		// Legacy filter.
-		$height = apply_filters( 'woocommerce_product_height', $this->data['height'], $this );
-
-		// New filter since 2.7.
-		return apply_filters( 'woocommerce_product_get_height', $height, $this );
+		return apply_filters( 'woocommerce_product_get_height', $this->data['height'], $this );
 	}
 
 	/**
@@ -549,8 +536,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @return array
 	 */
-	public function get_gallery_attachment_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( $this->data['gallery_attachment_ids'] ), 'wp_attachment_is_image' ), $this );
+	public function get_gallery_image_ids() {
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( $this->data['gallery_image_ids'] ), 'wp_attachment_is_image' ), $this );
 	}
 
 	/**
@@ -604,13 +591,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get thumbnail ID.
+	 * Get main image ID. @todo ensure read handles parent like get_image_id used to?
 	 *
 	 * @since 2.7.0
 	 * @return string
 	 */
-	public function get_thumbnail_id() {
-		return $this->data['thumbnail_id'];
+	public function get_image_id() {
+		return $this->data['image_id'];
 	}
 
 	/*
@@ -845,7 +832,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float|null $quantity Stock quantity.
 	 */
 	public function set_stock_quantity( $quantity ) {
-		$this->data['stock_quantity'] = $quantity;
+		$this->data['stock_quantity'] = '' !== $quantity ? wc_stock_amount( $quantity ) : null;
 	}
 
 	/**
@@ -856,15 +843,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
 
-		// Sanity check.
 		if ( $this->managing_stock() ) {
 			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$status = 'outofstock';
 			}
-		}
-
-		if ( update_post_meta( $this->get_id(), '_stock_status', $status ) ) {
-			do_action( 'woocommerce_product_set_stock_status', $this->get_id(), $status );
 		}
 
 		$this->data['stock_status'] = $status;
@@ -1116,7 +1098,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				}
 			}
 
-			// Validate the file exists
+			// Validate the file exists.
 			if ( 'relative' === $file_is ) {
 				$_file_url = $file_url;
 				if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
@@ -1168,18 +1150,18 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @param array $gallery_ids
 	 */
-	public function set_gallery_attachment_ids( $gallery_ids ) {
-		$this->data['gallery_attachment_ids'] = $gallery_ids;
+	public function set_gallery_image_ids( $gallery_ids ) {
+		$this->data['gallery_image_ids'] = $gallery_ids;
 	}
 
 	/**
-	 * Set thumbnail ID.
+	 * Set main image ID.
 	 *
 	 * @since 2.7.0
-	 * @param int $thumbnail_id
+	 * @param int $image_id
 	 */
-	public function set_thumbnail_id( $thumbnail_id = '' ) {
-		$this->data['thumbnail_id'] = $thumbnail_id;
+	public function set_image_id( $image_id = '' ) {
+		$this->data['image_id'] = $image_id;
 	}
 
 	/*
@@ -1244,51 +1226,50 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$this->set_id( $id );
 		$this->set_props( array(
-			'name'                   => get_the_title( $post_object ),
-			'slug'                   => $post_object->post_name,
-			'permalink'              => get_permalink( $post_object ),
-			'date_created'           => $post_object->post_date,
-			'date_modified'          => $post_object->post_modified,
-			'type'                   => '',
-			'status'                 => $post_object->post_status,
-			'featured'               => get_post_meta( $id, '_featured', true ),
-			'catalog_visibility'     => get_post_meta( $id, '_visibility', true ),
-			'description'            => $post_object->post_content,
-			'short_description'      => $post_object->post_excerpt,
-			'sku'                    => get_post_meta( $id, '_sku', true ),
-			'regular_price'          => get_post_meta( $id, '_regular_price', true ),
-			'sale_price'             => get_post_meta( $id, '_sale_price', true ),
-			'date_on_sale_from'      => get_post_meta( $id, '_sale_price_dates_from', true ),
-			'date_on_sale_to'        => get_post_meta( $id, '_sale_price_dates_to', true ),
-			'total_sales'            => get_post_meta( $id, 'total_sales', true ),
-			'tax_status'             => get_post_meta( $id, '_tax_status', true ),
-			'tax_class'              => get_post_meta( $id, '_tax_class', true ),
-			'manage_stock'           => get_post_meta( $id, '_manage_stock', true ),
-			'stock_quantity'         => get_post_meta( $id, '_stock', true ),
-			'stock_status'           => get_post_meta( $id, '_stock_status', true ),
-			'backorders'             => get_post_meta( $id, '_backorders', true ),
-			'sold_individually'      => get_post_meta( $id, '_sold_individually', true ),
-			'weight'                 => get_post_meta( $id, '_weight', true ),
-			'length'                 => get_post_meta( $id, '_length', true ),
-			'width'                  => get_post_meta( $id, '_width', true ),
-			'height'                 => get_post_meta( $id, '_height', true ),
-			'upsell_ids'             => get_post_meta( $id, '_upsell_ids', true ),
-			'cross_sell_ids'         => get_post_meta( $id, '_crosssell_ids', true ),
-			'parent_id'              => $post_object->post_parent,
-			'reviews_allowed'        => 'open' === $post_object->comment_status,
-			'purchase_note'          => get_post_meta( $id, '_purchase_note', true ),
-			'default_attributes'     => get_post_meta( $id, '_default_attributes', true ),
-			'menu_order'             => $post_object->menu_order,
-			'category_ids'           => $this->get_term_ids( 'product_cat' ),
-			'tag_ids'                => $this->get_term_ids( 'product_tag' ),
-			'shipping_class_id'      => current( $this->get_term_ids( 'product_shipping_class' ) ),
-			'virtual'                => get_post_meta( $id, '_virtual', true ),
-			'downloadable'           => get_post_meta( $id, '_downloadable', true ),
-			'downloads'              => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
-			'gallery_attachment_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-			'download_limit'         =>  get_post_meta( $id, '_download_limit', true ),
-			'download_expiry'        => get_post_meta( $id, '_download_expiry', true ),
-			'thumbnail_id'           => get_post_thumbnail_id( $id ),
+			'name'               => get_the_title( $post_object ),
+			'slug'               => $post_object->post_name,
+			'date_created'       => $post_object->post_date,
+			'date_modified'      => $post_object->post_modified,
+			'type'               => '',
+			'status'             => $post_object->post_status,
+			'featured'           => get_post_meta( $id, '_featured', true ),
+			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
+			'description'        => $post_object->post_content,
+			'short_description'  => $post_object->post_excerpt,
+			'sku'                => get_post_meta( $id, '_sku', true ),
+			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
+			'sale_price'         => get_post_meta( $id, '_sale_price', true ),
+			'date_on_sale_from'  => get_post_meta( $id, '_sale_price_dates_from', true ),
+			'date_on_sale_to'    => get_post_meta( $id, '_sale_price_dates_to', true ),
+			'total_sales'        => get_post_meta( $id, 'total_sales', true ),
+			'tax_status'         => get_post_meta( $id, '_tax_status', true ),
+			'tax_class'          => get_post_meta( $id, '_tax_class', true ),
+			'manage_stock'       => get_post_meta( $id, '_manage_stock', true ),
+			'stock_quantity'     => get_post_meta( $id, '_stock', true ),
+			'stock_status'       => get_post_meta( $id, '_stock_status', true ),
+			'backorders'         => get_post_meta( $id, '_backorders', true ),
+			'sold_individually'  => get_post_meta( $id, '_sold_individually', true ),
+			'weight'             => get_post_meta( $id, '_weight', true ),
+			'length'             => get_post_meta( $id, '_length', true ),
+			'width'              => get_post_meta( $id, '_width', true ),
+			'height'             => get_post_meta( $id, '_height', true ),
+			'upsell_ids'         => get_post_meta( $id, '_upsell_ids', true ),
+			'cross_sell_ids'     => get_post_meta( $id, '_crosssell_ids', true ),
+			'parent_id'          => $post_object->post_parent,
+			'reviews_allowed'    => 'open' === $post_object->comment_status,
+			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
+			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
+			'menu_order'         => $post_object->menu_order,
+			'category_ids'       => $this->get_term_ids( 'product_cat' ),
+			'tag_ids'            => $this->get_term_ids( 'product_tag' ),
+			'shipping_class_id'  => current( $this->get_term_ids( 'product_shipping_class' ) ),
+			'virtual'            => get_post_meta( $id, '_virtual', true ),
+			'downloadable'       => get_post_meta( $id, '_downloadable', true ),
+			'downloads'          => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
+			'gallery_image_ids'  => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
+			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
+			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
+			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
@@ -1340,7 +1321,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_date_created( current_time( 'timestamp' ) );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
-			'post_type'      => 'product',
+			'post_type'      => $this->post_type,
 			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $this->get_name() ? $this->get_name() : __( 'Product', 'woocommerce' ),
@@ -1360,7 +1341,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->update_terms();
 			$this->update_attributes();
 			$this->save_meta_data();
-			do_action( 'woocommerce_new_product', $id );
+			do_action( 'woocommerce_new_' . $this->post_type, $id );
 		}
 	}
 
@@ -1385,7 +1366,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->update_terms();
 		$this->update_attributes();
 		$this->save_meta_data();
-		do_action( 'woocommerce_update_product', $this->get_id() );
+		do_action( 'woocommerce_update_' . $this->post_type, $this->get_id() );
 	}
 
 	/**
@@ -1406,6 +1387,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Version is set to current WC version to track data changes.
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
 		wc_delete_product_transients( $this->get_id() );
+		return $this->get_id();
 	}
 
 	/**
@@ -1415,7 +1397,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function delete() {
 		wp_delete_post( $this->get_id() );
-		do_action( 'woocommerce_delete_product', $this->get_id() );
+		do_action( 'woocommerce_delete_' . $this->post_type, $this->get_id() );
 		$this->set_id( 0 );
 	}
 
@@ -1425,54 +1407,93 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta() {
-		$id = $this->get_id();
-		update_post_meta( $id, '_visibility', $this->get_catalog_visibility() );
-		update_post_meta( $id, '_sku', $this->get_sku() );
-		update_post_meta( $id, '_regular_price', $this->get_regular_price() );
-		update_post_meta( $id, '_sale_price', $this->get_sale_price() );
-		update_post_meta( $id, '_sale_price_dates_from', $this->get_date_on_sale_from() );
-		update_post_meta( $id, '_sale_price_dates_to', $this->get_date_on_sale_to() );
-		update_post_meta( $id, 'total_sales', $this->get_total_sales() );
-		update_post_meta( $id, '_tax_status', $this->get_tax_status() );
-		update_post_meta( $id, '_tax_class', $this->get_tax_class() );
-		update_post_meta( $id, '_manage_stock', $this->get_manage_stock() );
-		update_post_meta( $id, '_stock', $this->get_stock_quantity() );
-		update_post_meta( $id, '_stock_status', $this->get_stock_status() );
-		update_post_meta( $id, '_backorders', $this->get_backorders() );
-		update_post_meta( $id, '_sold_individually', $this->get_sold_individually() );
-		update_post_meta( $id, '_weight', $this->get_weight() );
-		update_post_meta( $id, '_length', $this->get_length() );
-		update_post_meta( $id, '_width', $this->get_width() );
-		update_post_meta( $id, '_height', $this->get_height() );
-		update_post_meta( $id, '_upsell_ids', $this->get_upsell_ids() );
-		update_post_meta( $id, '_crosssell_ids', $this->get_cross_sell_ids() );
-		update_post_meta( $id, '_purchase_note', $this->get_purchase_note() );
-		update_post_meta( $id, '_default_attributes', $this->get_default_attributes() );
-		update_post_meta( $id, '_virtual', $this->get_virtual() ? 'yes' : 'no' );
-		update_post_meta( $id, '_downloadable', $this->get_downloadable() ? 'yes' : 'no' );
-		update_post_meta( $id, '_product_image_gallery', implode( ',', $this->get_gallery_attachment_ids() ) );
-		update_post_meta( $id, '_download_limit', $this->get_download_limit() );
-		update_post_meta( $id, '_download_expiry', $this->get_download_expiry() );
+		$updated_props     = array();
+		$meta_key_to_props = array(
+			'_visibility'            => 'catalog_visibility',
+			'_sku'                   => 'sku',
+			'_regular_price'         => 'regular_price',
+			'_sale_price'            => 'sale_price',
+			'_sale_price_dates_from' => 'date_on_sale_from',
+			'_sale_price_dates_to'   => 'date_on_sale_to',
+			'total_sales'            => 'total_sales',
+			'_tax_status'            => 'tax_status',
+			'_tax_class'             => 'tax_class',
+			'_manage_stock'          => 'manage_stock',
+			'_backorders'            => 'backorders',
+			'_sold_individually'     => 'sold_individually',
+			'_weight'                => 'weight',
+			'_length'                => 'length',
+			'_width'                 => 'width',
+			'_height'                => 'height',
+			'_upsell_ids'            => 'upsell_ids',
+			'_crosssell_ids'         => 'cross_sell_ids',
+			'_purchase_note'         => 'purchase_note',
+			'_default_attributes'    => 'default_attributes',
+			'_virtual'               => 'virtual',
+			'_downloadable'          => 'downloadable',
+			'_product_image_gallery' => 'gallery_image_ids',
+			'_download_limit'        => 'download_limit',
+			'_download_expiry'       => 'download_expiry',
+			'_featured'              => 'featured',
+			'_thumbnail_id'          => 'image_id',
+			'_downloadable_files'    => 'downloads',
+			'_stock'                 => 'stock_quantity',
+			'_stock_status'          => 'stock_status',
+		);
 
-		if ( update_post_meta( $id, '_featured', $this->get_featured() ) ) {
-			delete_transient( 'wc_featured_products' );
-		}
-
-		if ( ! empty( $this->get_thumbnail_id() ) ) {
-			set_post_thumbnail( $id, $this->get_thumbnail_id() );
-		} else {
-			delete_post_meta( $id, '_thumbnail_id' );
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			$value = $this->data[ $prop ];
+			// @todo this is where state should be checked?
+			switch ( $prop ) {
+				case 'virtual' :
+				case 'downloadable' :
+					$updated = update_post_meta( $this->get_id(), $meta_key, wc_bool_to_string( $value ) );
+					break;
+				case 'gallery_image_ids' :
+					$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );
+					break;
+				case 'image_id' :
+					if ( ! empty( $value ) ) {
+						set_post_thumbnail( $this->get_id(), $value );
+					} else {
+						delete_post_meta( $this->get_id(), '_thumbnail_id' );
+					}
+					$updated = true;
+					break;
+				default :
+					$updated = update_post_meta( $this->get_id(), $meta_key, $value );
+					break;
+			}
+			if ( $updated ) {
+				$updated_props[] = $prop;
+			}
 		}
 
 		if ( $this->is_on_sale() ) {
-			update_post_meta( $id, '_price', $this->get_sale_price() );
+			update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
 		} else {
-			update_post_meta( $id, '_price', $this->get_regular_price() );
+			update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
 		}
 
-		if ( update_post_meta( $id, '_downloadable_files', $this->get_downloads() ) ) {
-			// grant permission to any newly added files on any existing orders for this product prior to saving @todo hook for variations?
-			do_action( 'woocommerce_process_product_file_download_paths', $id, 0, $this->get_downloads() );
+		if ( in_array( 'featured', $updated_props ) ) {
+			delete_transient( 'wc_featured_products' );
+		}
+
+		if ( in_array( 'downloads', $updated_props ) ) {
+			// grant permission to any newly added files on any existing orders for this product prior to saving.
+			if ( $this->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_process_product_file_download_paths', $this->get_parent_id(), $this->get_id(), $this->get_downloads() );
+			} else {
+				do_action( 'woocommerce_process_product_file_download_paths', $this->get_id(), 0, $this->get_downloads() );
+			}
+		}
+
+		if ( in_array( 'stock_quantity', $updated_props ) ) {
+			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $this );
+		}
+
+		if ( in_array( 'stock_status', $updated_props ) ) {
+			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $this->get_id(), $this->get_stock_status() );
 		}
 	}
 
@@ -1629,7 +1650,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_purchasable() {
-		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && $this->is_in_stock() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
 	}
 
 	/**
@@ -1742,7 +1763,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
 	}
 
 	/**
@@ -1794,6 +1815,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
+	 * Product permalink.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return get_permalink( $this->get_id() );
+	}
+
+	/**
 	 * Returns the children IDs if applicable. Overridden by child classes.
 	 *
 	 * @return array of IDs
@@ -1841,7 +1870,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->get_id() ), $this );
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $this->get_permalink(), $this );
 	}
 
 	/**
@@ -1860,22 +1889,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Read more', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Gets the main product image ID.
-	 *
-	 * @return int
-	 */
-	public function get_image_id() {
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image_id = get_post_thumbnail_id( $this->get_id() );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image_id = get_post_thumbnail_id( $parent_id );
-		} else {
-			$image_id = 0;
-		}
-		return $image_id;
 	}
 
 	/**
@@ -1934,116 +1947,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| @todo stock functions
-	|--------------------------------------------------------------------------
-	*/
 
-	/**
-	 * Get total stock - This is the stock of parent and children combined.
-	 *
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			if ( sizeof( $this->get_children() ) > 0 ) {
-				$this->total_stock = max( 0, $this->get_stock_quantity() );
-
-				foreach ( $this->get_children() as $child_id ) {
-					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-					}
-				}
-			} else {
-				$this->total_stock = $this->get_stock_quantity();
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
-	}
-
-	/**
-	 * Check if the stock status needs changing.
-	 */
-	public function check_stock_status() {
-		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( 'outofstock' !== $this->stock_status ) {
-				$this->set_stock_status( 'outofstock' );
-			}
-		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( 'instock' !== $this->stock_status ) {
-				$this->set_stock_status( 'instock' );
-			}
-		}
-	}
-
-	/**
-	 * Set stock level of the product. @todo '' stock if not managing it.
-	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
-	 * We cannot rely on the original loaded value in case another order was made since then.
-	 *
-	 * @param int $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
-	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
-		global $wpdb;
-
-		if ( ! is_null( $amount ) && $this->managing_stock() ) {
-
-			// Ensure key exists
-			add_post_meta( $this->get_id(), '_stock', 0, true );
-
-			// Update stock in DB directly
-			switch ( $mode ) {
-				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->get_id() ) );
-				break;
-			}
-
-			// Clear caches
-			wp_cache_delete( $this->get_id(), 'post_meta' );
-			delete_transient( 'wc_low_stock_count' );
-			delete_transient( 'wc_outofstock_count' );
-			unset( $this->stock );
-
-			// Stock status
-			$this->check_stock_status();
-
-			// Trigger action
-			do_action( 'woocommerce_product_set_stock', $this );
-		}
-
-		return $this->get_stock_quantity();
-	}
-
-	/**
-	 * Reduce stock level of the product.
-	 *
-	 * @param int $amount Amount to reduce by. Default: 1
-	 * @return int new stock level
-	 */
-	public function reduce_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'subtract' );
-	}
-
-	/**
-	 * Increase stock level of the product.
-	 *
-	 * @param int $amount Amount to increase by. Default 1.
-	 * @return int new stock level
-	 */
-	public function increase_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'add' );
-	}
 
 	/*
 	|--------------------------------------------------------------------------

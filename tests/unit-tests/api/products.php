@@ -186,7 +186,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->get_id() );
 		$request->set_body_params( array(
 			'attributes'  => array(
 				array( 'id' => 0, 'name' => 'pa_color', 'options' => array( 'red', 'yellow' ), 'visible' => false, 'variation' => 1 ),

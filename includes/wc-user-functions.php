@@ -420,7 +420,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$product_id = intval( $result->product_id );
 
-			if ( ! $_product || $_product->id != $product_id ) {
+			if ( ! $_product || $_product->get_id() != $product_id ) {
 				// new product
 				$file_number = 0;
 				$_product    = wc_get_product( $product_id );
@@ -453,7 +453,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					home_url( '/' )
 				),
 				'download_id'           => $result->download_id,
-				'product_id'            => $_product->id,
+				'product_id'            => $_product->get_id(),
 				'product_name'          => $_product->get_title(),
 				'download_name'         => $download_name,
 				'order_id'              => $order->get_id(),

@@ -282,7 +282,7 @@ class WC_Product_Variable extends WC_Product {
 		$available_variations = array();
 
 		foreach ( $this->get_children() as $child_id ) {
-			$variation = $this->get_child( $child_id );
+			$variation = wc_get_product( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
 			if ( empty( $variation->get_variation_id() ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
@@ -308,7 +308,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_available_variation( $variation ) {
 		if ( is_numeric( $variation ) ) {
-			$variation = $this->get_child( $variation );
+			$variation = wc_get_product( $variation );
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
@@ -336,8 +336,8 @@ class WC_Product_Variable extends WC_Product {
 			'variation_is_visible'   => $variation->variation_is_visible(),
 			'variation_is_active'    => $variation->variation_is_active(),
 			'is_purchasable'         => $variation->is_purchasable(),
-			'display_price'          => $variation->get_display_price(),
-			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
+			'display_price'          => wc_get_price_to_display( $variation ),
+			'display_regular_price'  => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 			'attributes'             => $variation->get_variation_attributes(),
 			'image_src'              => $image,
 			'image_link'             => $image_link,
@@ -358,7 +358,7 @@ class WC_Product_Variable extends WC_Product {
 			'is_downloadable'        => $variation->is_downloadable(),
 			'is_virtual'             => $variation->is_virtual(),
 			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description'  => $variation->get_variation_description(),
+			'variation_description'  => $variation->get_description(),
 		), $this, $variation );
 	}
 
@@ -443,7 +443,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync variable product stock status with children.
+	 * Sync variable product stock status with children. @todo code here needs to be called or ran when woocommerce_variation_set_stock_status action fires. I have rmeoved the call from the variation class here.
 	 * @param  int $product_id
 	 */
 	public static function sync_stock_status( $product_id ) {
@@ -517,7 +517,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Does a child have a weight set?
+	 * Does a child have a weight set? @todo
 	 * @since 2.7.0
 	 * @return boolean
 	 */
@@ -526,7 +526,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Does a child have dimensions set?
+	 * Does a child have dimensions set? @todo
 	 * @since 2.7.0
 	 * @return boolean
 	 */

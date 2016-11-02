@@ -83,21 +83,23 @@ function wc_get_products( $args ) {
 	 * Generate WP_Query args.
 	 */
 	$wp_query_args = array(
-		'post_type'      => array( 'product', 'product_variation' ),
+		'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
 		'post_status'    => $args['status'],
 		'posts_per_page' => $args['limit'],
 		'meta_query'     => array(),
 		'fields'         => 'ids',
 		'orderby'        => $args['orderby'],
 		'order'          => $args['order'],
-		'tax_query'      => array(
-			array(
-				'taxonomy' => 'product_type',
-				'field'    => 'slug',
-				'terms'    => $args['type'],
-			)
-		)
+		'tax_query'      => array(),
 	);
+
+	if ( 'variation' !== $args['type'] ) {
+		$wp_query_args['tax_query'][] = array(
+			'taxonomy' => 'product_type',
+			'field'    => 'slug',
+			'terms'    => $args['type'],
+		);
+	}
 
 	if ( ! empty( $args['sku'] ) ) {
 		$wp_query_args['meta_query'][] = array(
@@ -176,33 +178,6 @@ function wc_get_product( $the_product = false, $args = array() ) {
 		return false;
 	}
 	return WC()->product_factory->get_product( $the_product, $args );
-}
-
-/**
- * Update a product's stock amount.
- *
- * @param  int $product_id
- * @param  int $new_stock_level
- */
-function wc_update_product_stock( $product_id, $new_stock_level ) {
-	$product = wc_get_product( $product_id );
-
-	if ( ! metadata_exists( 'post', $product_id, '_stock' ) || $product->get_stock_quantity() !== $new_stock_level ) {
-		$product->set_stock( $new_stock_level );
-	}
-}
-
-/**
- * Update a product's stock status.
- *
- * @param  int $product_id
- * @param  int $status
- */
-function wc_update_product_stock_status( $product_id, $status ) {
-	$product = wc_get_product( $product_id );
-	if ( $product ) {
-		$product->set_stock_status( $status );
-	}
 }
 
 /**
@@ -900,6 +875,52 @@ function wc_get_product_visibility_options() {
 }
 
 /**
+ * Get product tax class options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_tax_class_options() {
+	$tax_classes           = WC_Tax::get_tax_classes();
+	$tax_class_options     = array();
+	$tax_class_options[''] = __( 'Standard', 'woocommerce' );
+
+	if ( ! empty( $tax_classes ) ) {
+		foreach ( $tax_classes as $class ) {
+			$tax_class_options[ sanitize_title( $class ) ] = $class;
+		}
+	}
+	return $tax_class_options;
+}
+
+/**
+ * Get stock status options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_stock_status_options() {
+	return array(
+		'instock'    => __( 'In stock', 'woocommerce' ),
+		'outofstock' => __( 'Out of stock', 'woocommerce' ),
+	);
+}
+
+/**
+ * Get backorder options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_backorder_options() {
+	return array(
+		'no'     => __( 'Do not allow', 'woocommerce' ),
+		'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+		'yes'    => __( 'Allow', 'woocommerce' ),
+	);
+}
+
+/**
  * Get related products based on product category and tags.
  *
  * @since  2.7.0
@@ -1038,7 +1059,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		$price      = round( $price * $qty + $tax_amount, wc_get_price_decimals() );
 	} else {
 		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
-		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->tax_class );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
 
 		if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
 			$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
@@ -1079,7 +1100,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$qty   = $args['qty'];
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$tax_rates  = WC_Tax::get_base_tax_rates( $product->tax_class );
+		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 		$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 	} else {

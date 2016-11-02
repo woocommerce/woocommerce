@@ -45,11 +45,7 @@
 					'id'          => '_backorders',
 					'value'       => $product_object->get_backorders(),
 					'label'       => __( 'Allow backorders?', 'woocommerce' ),
-					'options'     => array(
-						'no'      => __( 'Do not allow', 'woocommerce' ),
-						'notify'  => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'     => __( 'Allow', 'woocommerce' ),
-					),
+					'options'     => wc_get_product_backorder_options(),
 					'desc_tip'    => true,
 					'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
 				) );
@@ -64,10 +60,7 @@
 				'value'          => $product_object->get_stock_status(),
 				'wrapper_class'  => 'hide_if_variable hide_if_external',
 				'label'          => __( 'Stock status', 'woocommerce' ),
-				'options'        => array(
-					'instock'    => __( 'In stock', 'woocommerce' ),
-					'outofstock' => __( 'Out of stock', 'woocommerce' ),
-				),
+				'options'        => wc_get_product_stock_status_options(),
 				'desc_tip'       => true,
 				'description'    => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 			) );
@@ -83,7 +76,7 @@
 				'value'         => $product_object->get_sold_individually() ? 'yes' : 'no',
 				'wrapper_class' => 'show_if_simple show_if_variable',
 				'label'         => __( 'Sold individually', 'woocommerce' ),
-				'description'   => __( 'Enable this to only allow one of this item to be bought in a single order', 'woocommerce' )
+				'description'   => __( 'Enable this to only allow one of this item to be bought in a single order', 'woocommerce' ),
 			) );
 
 			do_action( 'woocommerce_product_options_sold_individually' );

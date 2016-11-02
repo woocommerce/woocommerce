@@ -506,7 +506,7 @@ class WC_Emails {
 	 */
 	public function low_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
-		$message = sprintf( __( '%s is low in stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ) . ' ' . sprintf( __( 'There are %d left', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_total_stock() ) ) );
+		$message = sprintf( __( '%s is low in stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ) . ' ' . sprintf( __( 'There are %d left', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_stock_quantity() ) ) );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product ),

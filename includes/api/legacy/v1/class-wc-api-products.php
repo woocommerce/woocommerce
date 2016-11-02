@@ -271,7 +271,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		return array(
 			'title'              => $product->get_title(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
+			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
 			'created_at'         => $this->server->format_datetime( $product->get_post_data()->post_date_gmt ),
 			'updated_at'         => $this->server->format_datetime( $product->get_post_data()->post_modified_gmt ),
 			'type'               => $product->product_type,
@@ -317,17 +317,17 @@ class WC_API_Products extends WC_API_Resource {
 			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
-			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
-			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
+			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
+			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
 			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
 			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
-			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
+			'total_sales'        => metadata_exists( 'post', $product->get_id(), 'total_sales' ) ? (int) get_post_meta( $product->get_id(), 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
 		);
@@ -412,20 +412,20 @@ class WC_API_Products extends WC_API_Resource {
 				// add variation image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
 
-			} elseif ( has_post_thumbnail( $product->id ) ) {
+			} elseif ( has_post_thumbnail( $product->get_id() ) ) {
 
 				// otherwise use the parent product featured image if set
-				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
 			}
 		} else {
 
 			// add featured image
-			if ( has_post_thumbnail( $product->id ) ) {
-				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+			if ( has_post_thumbnail( $product->get_id() ) ) {
+				$attachment_ids[] = get_post_thumbnail_id( $product->get_id() );
 			}
 
 			// add gallery images
-			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_attachment_ids() );
+			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 		}
 
 		// build image data
@@ -516,7 +516,7 @@ class WC_API_Products extends WC_API_Resource {
 					'position'  => $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
-					'options'   => $this->get_attribute_options( $product->id, $attribute ),
+					'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
 				);
 			}
 		}

@@ -1163,7 +1163,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
 			// Inherit tax class from items
-			if ( '' === $shipping_tax_class ) {
+			if ( 'inherit' === $shipping_tax_class ) {
 				$tax_rates         = array();
 				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 				$found_tax_classes = $this->get_items_tax_classes();
@@ -1187,7 +1187,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					'state'     => $args['state'],
 					'postcode'  => $args['postcode'],
 					'city'      => $args['city'],
-					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
+					'tax_class' => $shipping_tax_class,
 				) );
 			}
 
