@@ -45,7 +45,6 @@ class WC_Product_Factory {
 			return new $classname( $the_product, $args );
 
 		} catch ( Exception $e ) {
-			error_log( $e->getMessage() );
 			return false;
 		}
 	}

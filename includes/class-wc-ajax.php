@@ -1890,31 +1890,23 @@ class WC_AJAX {
 		$product_object = wc_get_product( $product_id );
 		$per_page       = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
 		$page           = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-		$variations     = get_posts(
-			apply_filters( 'woocommerce_ajax_admin_get_variations_args',
-				array(
-					'post_type'      => 'product_variation',
-					'post_status'    => array(
-						'private',
-						'publish',
-					),
-					'posts_per_page' => $per_page,
-					'paged'          => $page,
-					'orderby'        => array(
-						'menu_order' => 'ASC',
-						'ID'         => 'DESC',
-					),
-					'post_parent'    => $product_id,
-				),
-				$product_id
-			)
-		);
+		$variations     = wc_get_products( array(
+			'status'         => array( 'private', 'publish' ),
+			'type'           => 'variation',
+			'parent'         => $product_id,
+			'limit'          => $per_page,
+			'page'           => $page,
+			'orderby'        => array(
+				'menu_order' => 'ASC',
+				'ID'         => 'DESC',
+			),
+			'return'         => 'objects',
+		) );
 
 		if ( $variations ) {
-			foreach ( $variations as $variation ) {
-				$variation_id     = absint( $variation->ID );
-				$variation_object = wc_get_product( $variation_id );
-				$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
+			foreach ( $variations as $variation_object ) {
+				$variation_id   = $variation_object->get_id();
+				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 				$loop++;
 			}

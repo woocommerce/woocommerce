@@ -341,7 +341,7 @@ class WC_Meta_Box_Product_Data {
 					'backorders'        => wc_clean( $_POST['variable_backorders'][ $i ] ),
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
-					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i )
+					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
 					'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] )       : '',
 					'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
 					'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
