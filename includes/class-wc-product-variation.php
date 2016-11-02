@@ -72,7 +72,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} else {
 			$data = $this->get_attributes();
 		}
-		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), get_permalink( $this->get_id() ) );
+		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $this->get_permalink() );
 	}
 
 	/**

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since  2.7.0 this supports set, increase and decrease.
  * @param  int|WC_Product $product
- * @param  int|WP_Error $new_stock_level or an error if stock could not be set.
+ * @param  int|null $stock_quantity
  * @param  string $operation set, add, or subtract
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {

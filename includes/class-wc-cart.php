@@ -1123,7 +1123,7 @@ class WC_Cart {
 		 * Calculate subtotals for items. This is done first so that discount logic can use the values.
 		 */
 		foreach ( $cart as $cart_item_key => $values ) {
-			$product          = $values['data'];
+			$product           = $values['data'];
 			$line_price        = $product->get_price() * $values['quantity'];
 			$line_subtotal     = 0;
 			$line_subtotal_tax = 0;

@@ -1081,8 +1081,9 @@ function wc_cancel_unpaid_orders() {
 
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
 
-	if ( $held_duration < 1 || get_option( 'woocommerce_manage_stock' ) != 'yes' )
+	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
 		return;
+	}
 
 	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
 

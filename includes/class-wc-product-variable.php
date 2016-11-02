@@ -517,7 +517,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Does a child have a weight set?
+	 * Does a child have a weight set? @todo
 	 * @since 2.7.0
 	 * @return boolean
 	 */
@@ -526,7 +526,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Does a child have dimensions set?
+	 * Does a child have dimensions set? @todo
 	 * @since 2.7.0
 	 * @return boolean
 	 */

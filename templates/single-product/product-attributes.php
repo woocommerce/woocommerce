@@ -40,7 +40,7 @@ ob_start();
 			</tr>
 		<?php endif; ?>
 
-		<?php if ( $product->has_dimensions() || get_post_meta( $product->get_id(), '_child_has_dimensions', true ) ) : $has_row = true; ?>
+		<?php if ( $product->has_dimensions() || $product->child_has_dimensions() ) : $has_row = true; ?>
 			<tr class="<?php if ( ( $alt = $alt * -1 ) === 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Dimensions', 'woocommerce' ) ?></th>
 				<td class="product_dimensions"><?php echo $product->get_dimensions() ? $product->get_dimensions() : __( 'N/A', 'woocommerce' ); ?></td>
