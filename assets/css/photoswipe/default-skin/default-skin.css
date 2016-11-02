@@ -52,8 +52,7 @@
 .pswp__button,
 .pswp__button--arrow--left:before,
 .pswp__button--arrow--right:before {
-  background-image: url(default-skin.png) !important;
-  background-repeat: no-repeat;
+  background: url(default-skin.png) 0 0 no-repeat;
   background-size: 264px 88px;
   width: 44px;
   height: 44px; }
