@@ -675,44 +675,6 @@ function wc_get_order_item_meta( $item_id, $key, $single = true ) {
 }
 
 /**
- * Cancel all unpaid orders after held duration to prevent stock lock for those products.
- *
- * @access public
- */
-function wc_cancel_unpaid_orders() {
-	global $wpdb;
-
-	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
-
-	if ( $held_duration < 1 || get_option( 'woocommerce_manage_stock' ) != 'yes' )
-		return;
-
-	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
-
-	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
-		SELECT posts.ID
-		FROM {$wpdb->posts} AS posts
-		WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-		AND     posts.post_status = 'wc-pending'
-		AND     posts.post_modified < %s
-	", $date ) );
-
-	if ( $unpaid_orders ) {
-		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = wc_get_order( $unpaid_order );
-
-			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === get_post_meta( $unpaid_order, '_created_via', true ), $order ) ) {
-				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
-			}
-		}
-	}
-
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-}
-add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
-
-/**
  * Return the count of processing orders.
  *
  * @access public
@@ -1120,47 +1082,40 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' 
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
 
 /**
- * When a payment is complete, we can reduce stock levels for items within an order.
- * @since 2.7.0
- * @param int $order_id
+ * Cancel all unpaid orders after held duration to prevent stock lock for those products.
+ *
+ * @access public
  */
-function wc_maybe_reduce_stock_levels( $order_id ) {
-	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $order_id, '_order_stock_reduced', true ), $order_id ) ) {
-		wc_reduce_stock_levels( $order_id );
-		add_post_meta( $order_id, '_order_stock_reduced', '1', true );
+function wc_cancel_unpaid_orders() {
+	global $wpdb;
+
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+
+	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
 	}
-}
-add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 
-/**
- * Reduce stock levels for items within an order.
- * @since 2.7.0
- * @param int $order_id
- */
-function wc_reduce_stock_levels( $order_id ) {
-	$order = wc_get_order( $order_id );
+	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
 
-	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
-			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
-				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
-				$new_stock = $product->reduce_stock( $qty );
-				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
+	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
+		SELECT posts.ID
+		FROM {$wpdb->posts} AS posts
+		WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
+		AND     posts.post_status = 'wc-pending'
+		AND     posts.post_modified < %s
+	", $date ) );
 
-				if ( ! empty( $item['variation_id'] ) ) {
-					/* translators: 1: item name 2: variation id 3: old stock quantity 4: new stock quantity */
-					$order->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
-				} else {
-					/* translators: 1: item name 2: old stock quantity 3: new stock quantity */
-					$order->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
-				}
+	if ( $unpaid_orders ) {
+		foreach ( $unpaid_orders as $unpaid_order ) {
+			$order = wc_get_order( $unpaid_order );
 
-				if ( $new_stock < 0 ) {
-					do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
-				}
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === get_post_meta( $unpaid_order, '_created_via', true ), $order ) ) {
+				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
-
-		do_action( 'woocommerce_reduce_order_stock', $order );
 	}
+
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
+add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );

@@ -319,7 +319,7 @@ class WC_Admin_Post_Types {
 	public function render_product_columns( $column ) {
 		global $post, $the_product;
 
-		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
+		if ( empty( $the_product ) || $the_product->get_id() != $post->ID ) {
 			$the_product = wc_get_product( $post );
 		}
 
@@ -434,9 +434,8 @@ class WC_Admin_Post_Types {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
-				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
-				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
-					$stock_html .= ' (' . $the_product->get_total_stock() . ')';
+				if ( $the_product->managing_stock() ) {
+					$stock_html .= ' (' . $the_product->get_stock_quantity() . ')';
 				}
 
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );

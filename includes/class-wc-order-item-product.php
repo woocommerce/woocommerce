@@ -221,7 +221,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_backorder_meta() {
 		if ( $this->get_product()->backorders_require_notification() && $this->get_product()->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $this->get_product()->get_total_stock() ), true );
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $this->get_product()->get_stock_quantity() ), true );
 		}
 	}
 
@@ -364,11 +364,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
-		$this->set_product_id( $product->get_id() );
+		if ( $product->is_type( 'variation' ) ) {
+			$this->set_product_id( $product->get_parent_id() );
+			$this->set_variation_id( $product->get_id() );
+			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+		} else {
+			$this->set_product_id( $product->get_id() );
+		}
 		$this->set_name( $product->get_title() );
 		$this->set_tax_class( $product->get_tax_class() );
-		$this->set_variation_id( is_callable( array( $product, 'get_variation_id' ) ) ? $product->get_variation_id() : 0 );
-		$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 	}
 
 	/*

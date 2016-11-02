@@ -134,8 +134,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
 
 		wc_update_product_stock( $product->get_id(), 5 );
-
-		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 
 		// Delete Product

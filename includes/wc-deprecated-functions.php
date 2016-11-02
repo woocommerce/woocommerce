@@ -511,6 +511,10 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
 	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect',
 	'woocommerce_structured_data_order' => 'woocommerce_email_order_schema_markup',
+	'woocommerce_product_get_width'     => 'woocommerce_product_width',
+	'woocommerce_product_get_height'    => 'woocommerce_product_height',
+	'woocommerce_product_get_length'    => 'woocommerce_product_length',
+	'woocommerce_product_get_weight'    => 'woocommerce_product_weight',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

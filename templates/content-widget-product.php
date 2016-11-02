@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product; ?>
 
 <li>
-	<a href="<?php echo esc_url( get_permalink( $product->id ) ); ?>">
+	<a href="<?php echo esc_url( $product->get_permalink() ); ?>">
 		<?php echo $product->get_image(); ?>
 		<span class="product-title"><?php echo $product->get_title(); ?></span>
 	</a>

@@ -74,7 +74,7 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately).
+	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately). @todo should this be here?
 	 */
 	public function grouped_product_sync() {
 		if ( ! $this->get_parent_id() ) return;

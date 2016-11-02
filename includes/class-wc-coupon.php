@@ -1060,8 +1060,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		$valid        = false;
-		$product_cats = wc_get_product_cat_ids( $product->id );
-		$product_ids  = array( $product->id, ( isset( $product->variation_id ) ? $product->variation_id : 0 ), $product->get_parent() );
+		$product_cats = wc_get_product_cat_ids( $product->get_id() );
+		$product_ids  = array( $product->get_id(), ( isset( $product->variation_id ) ? $product->variation_id : 0 ), $product->get_parent() );
 
 		// Specific products get the discount
 		if ( sizeof( $this->get_product_ids() ) && sizeof( array_intersect( $product_ids, $this->get_product_ids() ) ) ) {
@@ -1096,7 +1096,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				if ( in_array( $product->variation_id, $product_ids_on_sale, true ) ) {
 					$valid = false;
 				}
-			} elseif ( in_array( $product->id, $product_ids_on_sale, true ) ) {
+			} elseif ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
 				$valid = false;
 			}
 		}

@@ -15,17 +15,9 @@ $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
 if ( wc_tax_enabled() ) {
-	$order_taxes         = $order->get_taxes();
-	$tax_classes         = WC_Tax::get_tax_classes();
-	$classes_options     = array();
-	$classes_options[''] = __( 'Standard', 'woocommerce' );
-
-	if ( ! empty( $tax_classes ) ) {
-		foreach ( $tax_classes as $class ) {
-			$classes_options[ sanitize_title( $class ) ] = $class;
-		}
-	}
-
+	$order_taxes      = $order->get_taxes();
+	$tax_classes      = WC_Tax::get_tax_classes();
+	$classes_options  = wc_get_product_tax_class_options();
 	$show_tax_columns = sizeof( $order_taxes ) === 1;
 }
 ?>

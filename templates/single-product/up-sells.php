@@ -33,7 +33,7 @@ $args = array(
 	'posts_per_page'      => $posts_per_page,
 	'orderby'             => $orderby,
 	'post__in'            => $upsells,
-	'post__not_in'        => array( $product->id ),
+	'post__not_in'        => array( $product->get_id() ),
 	'meta_query'          => WC()->query->get_meta_query(),
 );
 
