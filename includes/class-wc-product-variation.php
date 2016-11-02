@@ -13,6 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *       woocommerce_variation_free_price_html
  *       woocommerce_get_variation_price_html
  *
+ * @todo removed filters need to be mapped via add_action to the product actions of similar naming.
+ *       woocommerce_variation_is_in_stock
+ *       woocommerce_variation_sale_price_html
+ *       woocommerce_variation_price_html
+ *       woocommerce_variation_free_price_html
+ *       woocommerce_get_variation_price_html
+ *
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation

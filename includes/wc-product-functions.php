@@ -97,7 +97,7 @@ function wc_get_products( $args ) {
 		$wp_query_args['tax_query'][] = array(
 			'taxonomy' => 'product_type',
 			'field'    => 'slug',
-			'terms'    => $$args['type'],
+			'terms'    => $args['type'],
 		);
 	}
 

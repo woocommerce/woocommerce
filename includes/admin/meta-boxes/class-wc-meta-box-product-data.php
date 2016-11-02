@@ -233,7 +233,7 @@ class WC_Meta_Box_Product_Data {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 
 					if ( ! is_null( $index ) ) {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $i ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ][ $i ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
 					} else {
 						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ] ) : '';
 					}
