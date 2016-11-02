@@ -469,20 +469,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	protected function get_product_data( $product ) {
-		$post = get_post( $product->get_id() );
 		$data = array(
 			'id'                    => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
-			'name'                  => $product->get_title(),
-			'slug'                  => $post->post_name,
+			'name'                  => $product->get_name(),
+			'slug'                  => $product->get_slug(),
 			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $post->post_date_gmt ),
-			'date_modified'         => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created() ),
+			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified() ),
 			'type'                  => $product->get_type(),
-			'status'                => $post->post_status,
+			'status'                => $product->get_status(),
 			'featured'              => $product->is_featured(),
 			'catalog_visibility'    => $product->get_catalog_visibility(),
-			'description'           => wpautop( do_shortcode( $post->post_content ) ),
-			'short_description'     => apply_filters( 'woocommerce_short_description', $post->post_excerpt ),
+			'description'           => wpautop( do_shortcode( $product->get_description() ) ),
+			'short_description'     => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
 			'sku'                   => $product->get_sku(),
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
@@ -520,13 +519,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'shipping_taxable'      => $product->is_shipping_taxable(),
 			'shipping_class'        => $product->get_shipping_class(),
 			'shipping_class_id'     => (int) $product->get_shipping_class_id(),
-			'reviews_allowed'       => ( 'open' === $post->comment_status ),
+			'reviews_allowed'       => $product->get_reviews_allowed(),
 			'average_rating'        => wc_format_decimal( $product->get_average_rating(), 2 ),
 			'rating_count'          => (int) $product->get_rating_count(),
 			'related_ids'           => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
 			'upsell_ids'            => array_map( 'absint', $product->get_upsell_ids() ),
 			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sell_ids() ),
-			'parent_id'             => $product->is_type( 'variation' ) ? $product->parent->id : $post->post_parent,
+			'parent_id'             => $product->get_parent_id(),
 			'purchase_note'         => wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ),
 			'categories'            => $this->get_taxonomy_terms( $product ),
 			'tags'                  => $this->get_taxonomy_terms( $product, 'tag' ),
@@ -866,7 +865,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 
 				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
-					$product->set_thumbnail_id( $attachment_id );
+					$product->set_image_id( $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
 				}
@@ -886,7 +885,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$product->set_gallery_image_ids( $gallery );
 			}
 		} else {
-			$product->set_thumbnail_id( '' );
+			$product->set_image_id( '' );
 			$product->set_gallery_image_ids( array() );
 		}
 
@@ -1192,7 +1191,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $product->get_parent_id() > 0 || 'grouped' === $product->get_type() ) {
+		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
 
 			$clear_parent_ids = array();
 
@@ -1204,7 +1203,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$parent->save();
 			}
 
-			if ( 'grouped' === $product->get_type() ) {
+			if ( $product->is_type( 'grouped' ) ) {
 				$clear_parent_ids[] = $product->get_id();
 			}
 
@@ -1265,40 +1264,40 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$backorders = $product->get_backorders();
 			}
 
-			if ( 'grouped' === $product->get_type() ) {
+			if ( $product->is_type( 'grouped' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $status );
-			} elseif ( 'external' === $product->get_type() ) {
+			} elseif ( $product->is_type( 'external' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
 			} elseif ( 'yes' === $manage_stock ) {
 				$product->set_backorders( $backorders );
 
 				// Stock status is always determined by children so sync later.
-				if ( 'variable' !== $product->get_type() ) {
+				if ( ! $product->is_type( 'variable' ) ) {
 					$product->set_stock_status( $stock_status );
 				}
 
 				// Stock quantity.
 				if ( isset( $request['stock_quantity'] ) ) {
-					$product->set_stock( wc_stock_amount( $request['stock_quantity'] ) );
+					$product->set_stock_quantity( wc_stock_amount( $request['stock_quantity'] ) );
 				} elseif ( isset( $request['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( $product->get_stock() );
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
-					$product->set_stock( wc_stock_amount( $stock_quantity ) );
+					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				// Don't manage stock.
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( $backorders );
-				$product->set_stock( '' );
+				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
-		} elseif ( 'variable' !== $product->get_type() ) {
+		} elseif ( ! $product->is_type( 'variable' ) ) {
 			$product->set_stock_status( $stock_status );
 		}
 
@@ -1376,7 +1375,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Product url and button text for external products.
-		if ( 'external' === $product->get_type() ) {
+		if ( $product->is_type( 'external' ) ) {
 			if ( isset( $request['external_url'] ) ) {
 				$product->set_product_url( $request['external_url'] );
 			}

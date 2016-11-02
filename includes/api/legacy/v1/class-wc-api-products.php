@@ -266,12 +266,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_product_data( $product ) {
-		$post = get_post( $product->get_id() );
 		return array(
-			'title'              => $product->get_title(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
-			'created_at'         => $this->server->format_datetime( $post->post_date_gmt ),
-			'updated_at'         => $this->server->format_datetime( $post->post_modified_gmt ),
+			'title'              => $product->get_name(),
+			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(), // @todo variation
+			'created_at'         => $this->server->format_datetime( $product->get_date_created() ),
+			'updated_at'         => $this->server->format_datetime( $product->get_date_modified() ),
 			'type'               => $product->get_type(),
 			'status'             => $product->get_status(),
 			'downloadable'       => $product->is_downloadable(),
@@ -286,7 +285,7 @@ class WC_API_Products extends WC_API_Resource {
 			'tax_status'         => $product->get_tax_status(),
 			'tax_class'          => $product->get_tax_class(),
 			'managing_stock'     => $product->managing_stock(),
-			'stock_quantity'     => (int) $product->get_stock_quantity(),
+			'stock_quantity'     => $product->get_stock_quantity(),
 			'in_stock'           => $product->is_in_stock(),
 			'backorders_allowed' => $product->backorders_allowed(),
 			'backordered'        => $product->is_on_backorder(),
@@ -311,7 +310,7 @@ class WC_API_Products extends WC_API_Resource {
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
 			'reviews_allowed'    => $product->get_reviews_allowed(),
 			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
-			'rating_count'       => (int) $product->get_rating_count(),
+			'rating_count'       => $product->get_rating_count(),
 			'related_ids'        => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsell_ids() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sell_ids() ),
@@ -321,11 +320,11 @@ class WC_API_Products extends WC_API_Resource {
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
-			'download_limit'     => (int) $product->get_download_limit(),
-			'download_expiry'    => (int) $product->get_download_expiry(),
+			'download_limit'     => $product->get_download_limit(),
+			'download_expiry'    => $product->get_download_expiry(),
 			'download_type'      => 'standard',
 			'purchase_note'      => apply_filters( 'the_content', $product->get_purchase_note() ),
-			'total_sales'        => metadata_exists( 'post', $product->get_id(), 'total_sales' ) ? (int) get_post_meta( $product->get_id(), 'total_sales', true ) : 0,
+			'total_sales'        => $product->get_total_sales(),
 			'variations'         => array(),
 			'parent'             => array(),
 		);
@@ -401,8 +400,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_images( $product ) {
-
-		$images = $attachment_ids = array();
+		$images            = $attachment_ids = array();
+		$product_image     = $product->get_image_id();
 
 		if ( $product->is_type( 'variation' ) ) {
 			// @todo variation
@@ -411,16 +410,16 @@ class WC_API_Products extends WC_API_Resource {
 				// add variation image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
 
-			} elseif ( ! empty( $product->get_thumbnail_id() ) ) {
+			} elseif ( ! empty( $product_image ) ) {
 
 				// otherwise use the parent product featured image if set
-				$attachment_ids[] = $product->get_thumbnail_id();
+				$attachment_ids[] = $product_image;
 			}
 		} else {
 
 			// Add featured image
-			if ( ! empty( $product->get_thumbnail_id() ) ) {
-				$attachment_ids[] = $product->get_thumbnail_id();
+			if ( ! empty( $product_image ) ) {
+				$attachment_ids[] = $product_image;
 			}
 
 			// add gallery images
