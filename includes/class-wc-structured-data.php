@@ -191,7 +191,7 @@ class WC_Structured_Data {
 		$markup_offers = array();
 		foreach ( $products as $_product ) {
 			$markup_offers[] = apply_filters(
-				'woocommerce_structured_data_offer',
+				'woocommerce_structured_data_product_offer',
 				array(
 					'@type'         => 'Offer',
 					'priceCurrency' => get_woocommerce_currency(),
