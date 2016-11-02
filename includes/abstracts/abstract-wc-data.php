@@ -34,6 +34,12 @@ abstract class WC_Data {
 	protected $changes = array();
 
 	/**
+	 * This is false until the object is read from the DB.
+	 * @var bool
+	 */
+	protected $object_read = false;
+
+	/**
 	 * Set to _data on construct so we can track and reset data if needed.
 	 * @var array
 	 */
@@ -112,8 +118,18 @@ abstract class WC_Data {
 
 	/**
 	 * Save should create or update based on object existance.
+	 *
+	 * @return int
 	 */
-	public function save() {}
+	public function save() {
+		if ( $this->get_id() ) {
+			$this->update();
+		} else {
+			$this->create();
+		}
+		$this->apply_changes();
+		return $this->get_id();
+	}
 
 	/**
 	 * Change data to JSON format.
@@ -407,7 +423,9 @@ abstract class WC_Data {
 	 * Set all props to default values.
 	 */
 	protected function set_defaults() {
-		$this->data = $this->default_data;
+		$this->data        = $this->default_data;
+		$this->changes     = array();
+		$this->object_read = false;
 	}
 
 	/**
@@ -416,7 +434,7 @@ abstract class WC_Data {
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
-	public function set_props( $props ) {
+	public function set_props( $props, $context = 'set' ) {
 		$errors = new WP_Error();
 
 		foreach ( $props as $prop => $value ) {
@@ -452,8 +470,32 @@ abstract class WC_Data {
 	 */
 	protected function set_prop( $prop, $value ) {
 		if ( in_array( $prop, array_keys( $this->data ) ) ) {
-			$this->changes[ $prop ] = $value;
+			if ( true === $this->object_read ) {
+				$this->changes[ $prop ] = $value;
+			} else {
+				$this->data[ $prop ] = $value;
+			}
 		}
+	}
+
+	/**
+	 * Return data changes only.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	protected function get_changes() {
+		return $this->changes;
+	}
+
+	/**
+	 * Merge changes with data and clear.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function apply_changes() {
+		$this->data = array_merge( $this->data, $this->changes );
+		$this->changes = array();
 	}
 
 	/**

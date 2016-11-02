@@ -1278,16 +1278,35 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$this->set_id( $id );
 		$this->set_props( array(
-			'name'               => get_the_title( $post_object ),
-			'slug'               => $post_object->post_name,
-			'date_created'       => $post_object->post_date,
-			'date_modified'      => $post_object->post_modified,
-			'type'               => '',
-			'status'             => $post_object->post_status,
+			'name'              => get_the_title( $post_object ),
+			'slug'              => $post_object->post_name,
+			'date_created'      => $post_object->post_date,
+			'date_modified'     => $post_object->post_modified,
+			'status'            => $post_object->post_status,
+			'description'       => $post_object->post_content,
+			'short_description' => $post_object->post_excerpt,
+			'parent_id'         => $post_object->post_parent,
+			'menu_order'        => $post_object->menu_order,
+			'reviews_allowed'   => 'open' === $post_object->comment_status,
+		) );
+		$this->read_product_data();
+		$this->read_meta_data();
+		$this->read_attributes();
+
+		// Set object_read true once all data is read.
+		$this->object_read = true;
+	}
+
+	/**
+	 * Read post data. Can be overridden by child classes to load other props.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_product_data() {
+		$id = $this->get_id();
+		$this->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
-			'description'        => $post_object->post_content,
-			'short_description'  => $post_object->post_excerpt,
 			'sku'                => get_post_meta( $id, '_sku', true ),
 			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
 			'sale_price'         => get_post_meta( $id, '_sale_price', true ),
@@ -1307,11 +1326,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'height'             => get_post_meta( $id, '_height', true ),
 			'upsell_ids'         => get_post_meta( $id, '_upsell_ids', true ),
 			'cross_sell_ids'     => get_post_meta( $id, '_crosssell_ids', true ),
-			'parent_id'          => $post_object->post_parent,
-			'reviews_allowed'    => 'open' === $post_object->comment_status,
 			'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
 			'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
-			'menu_order'         => $post_object->menu_order,
 			'category_ids'       => $this->get_term_ids( 'product_cat' ),
 			'tag_ids'            => $this->get_term_ids( 'product_tag' ),
 			'shipping_class_id'  => current( $this->get_term_ids( 'product_shipping_class' ) ),
@@ -1323,13 +1339,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
+
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
 		} else {
 			$this->set_price( $this->get_regular_price() );
 		}
-		$this->read_meta_data();
-		$this->read_attributes();
 	}
 
 	/**
@@ -1427,11 +1442,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	public function save() {
-		if ( $this->get_id() ) {
-			$this->update();
-		} else {
-			$this->create();
-		}
+		parent::save();
+
 		// Make sure we store the product type.
 		$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
 		wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
@@ -1439,6 +1451,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Version is set to current WC version to track data changes.
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
 		wc_delete_product_transients( $this->get_id() );
+
 		return $this->get_id();
 	}
 
@@ -1460,6 +1473,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	protected function update_post_meta() {
 		$updated_props     = array();
+		$changed_props     = array_keys( $this->get_changes() );
 		$meta_key_to_props = array(
 			'_visibility'            => 'catalog_visibility',
 			'_sku'                   => 'sku',
@@ -1494,8 +1508,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$value = $this->get_prop(  $prop , $context );
-			// @todo this is where state should be checked?
+			if ( ! in_array( $prop, $changed_props ) ) {
+				continue;
+			}
+			$value = $this->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'virtual' :
 				case 'downloadable' :

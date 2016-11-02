@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product Variation Class.
+ * Product Variation Class. @todo needs new getters/setters/changes code
  *
  * @todo removed filters need to be mapped via add_action to the product actions of similar naming.
  *       woocommerce_variation_is_in_stock
