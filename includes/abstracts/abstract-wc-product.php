@@ -1294,7 +1294,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->read_attributes();
 
 		// Set object_read true once all data is read.
-		$this->object_read = true;
+		$this->set_object_read( true );
 	}
 
 	/**

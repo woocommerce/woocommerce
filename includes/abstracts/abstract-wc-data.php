@@ -425,7 +425,15 @@ abstract class WC_Data {
 	protected function set_defaults() {
 		$this->data        = $this->default_data;
 		$this->changes     = array();
-		$this->object_read = false;
+		$this->set_object_read( false );
+	}
+
+	/**
+	 * Set object read property.
+	 * @param boolean $read
+	 */
+	public function set_object_read( $read = true ) {
+		$this->object_read = (bool) $read;
 	}
 
 	/**
