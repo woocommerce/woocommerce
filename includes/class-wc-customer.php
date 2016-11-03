@@ -285,14 +285,15 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( '' === $spent ) {
 			global $wpdb;
 
-			$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
+			$spent    = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
 				WHERE   meta.meta_key       = '_customer_user'
 				AND     meta.meta_value     = '" . esc_sql( $this->get_id() ) . "'
 				AND     posts.post_type     = 'shop_order'
-				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
+				AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
 				AND     meta2.meta_key      = '_order_total'
 			" );
 

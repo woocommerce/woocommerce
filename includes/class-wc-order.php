@@ -1226,7 +1226,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_paid() {
-		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
+		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( wc_get_is_paid_statuses() ), $this );
 	}
 
 	/**

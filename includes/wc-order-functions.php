@@ -211,6 +211,15 @@ function wc_is_order_status( $maybe_status ) {
 }
 
 /**
+ * Get list of statuses which are consider 'paid'.
+ * @since  2.7.0
+ * @return array
+ */
+function wc_get_is_paid_statuses() {
+	return apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) );
+}
+
+/**
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @since  2.2
