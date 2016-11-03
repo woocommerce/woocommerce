@@ -325,25 +325,25 @@ class WC_Admin_Post_Types {
 				/* Custom inline data for woocommerce. */
 				echo '
 					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
-						<div class="menu_order">' . $post->menu_order . '</div>
-						<div class="sku">' . $the_product->sku . '</div>
-						<div class="regular_price">' . $the_product->regular_price . '</div>
-						<div class="sale_price">' . $the_product->sale_price . '</div>
-						<div class="weight">' . $the_product->weight . '</div>
-						<div class="length">' . $the_product->length . '</div>
-						<div class="width">' . $the_product->width . '</div>
-						<div class="height">' . $the_product->height . '</div>
+						<div class="menu_order">' . $the_product->get_menu_order() . '</div>
+						<div class="sku">' . $the_product->get_sku() . '</div>
+						<div class="regular_price">' . $the_product->get_regular_price() . '</div>
+						<div class="sale_price">' . $the_product->get_sale_price() . '</div>
+						<div class="weight">' . $the_product->get_weight() . '</div>
+						<div class="length">' . $the_product->get_length() . '</div>
+						<div class="width">' . $the_product->get_width() . '</div>
+						<div class="height">' . $the_product->get_height() . '</div>
 						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
-						<div class="visibility">' . $the_product->visibility . '</div>
-						<div class="stock_status">' . $the_product->stock_status . '</div>
-						<div class="stock">' . $the_product->stock . '</div>
-						<div class="manage_stock">' . $the_product->manage_stock . '</div>
-						<div class="featured">' . $the_product->featured . '</div>
-						<div class="product_type">' . $the_product->product_type . '</div>
-						<div class="product_is_virtual">' . $the_product->virtual . '</div>
-						<div class="tax_status">' . $the_product->tax_status . '</div>
-						<div class="tax_class">' . $the_product->tax_class . '</div>
-						<div class="backorders">' . $the_product->backorders . '</div>
+						<div class="visibility">' . $the_product->get_catalog_visibility() . '</div>
+						<div class="stock_status">' . $the_product->get_stock_status() . '</div>
+						<div class="stock">' . $the_product->get_stock_quantity() . '</div>
+						<div class="manage_stock">' . $the_product->get_manage_stock() . '</div>
+						<div class="featured">' . $the_product->get_featured() . '</div>
+						<div class="product_type">' . $the_product->get_type() . '</div>
+						<div class="product_is_virtual">' . $the_product->get_virtual() . '</div>
+						<div class="tax_status">' . $the_product->get_tax_status() . '</div>
+						<div class="tax_class">' . $the_product->get_tax_class() . '</div>
+						<div class="backorders">' . $the_product->get_backorders() . '</div>
 					</div>
 				';
 
@@ -352,11 +352,11 @@ class WC_Admin_Post_Types {
 				echo $the_product->get_sku() ? $the_product->get_sku() : '<span class="na">&ndash;</span>';
 				break;
 			case 'product_type' :
-				if ( 'grouped' == $the_product->product_type ) {
+				if ( 'grouped' == $the_product->get_type() ) {
 					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
-				} elseif ( 'external' == $the_product->product_type ) {
+				} elseif ( 'external' == $the_product->get_type() ) {
 					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-				} elseif ( 'simple' == $the_product->product_type ) {
+				} elseif ( 'simple' == $the_product->get_type() ) {
 
 					if ( $the_product->is_virtual() ) {
 						echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
@@ -365,11 +365,11 @@ class WC_Admin_Post_Types {
 					} else {
 						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
 					}
-				} elseif ( 'variable' == $the_product->product_type ) {
+				} elseif ( 'variable' == $the_product->get_type() ) {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
+					echo '<span class="product-type tips ' . $the_product->get_type() . '" data-tip="' . ucfirst( $the_product->get_type() ) . '"></span>';
 				}
 				break;
 			case 'price' :
