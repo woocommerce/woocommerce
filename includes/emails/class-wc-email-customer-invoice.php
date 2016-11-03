@@ -96,7 +96,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	public function get_subject() {
-		if ( $this->object->has_status( array( 'processing', 'completed' ) ) ) {
+		if ( $this->object->has_status( wc_get_is_paid_statuses() ) ) {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $this->subject_paid ), $this->object );
 		} else {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $this->subject ), $this->object );
