@@ -1148,8 +1148,10 @@ function wc_reduce_stock_levels( $order_id ) {
 				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
 
 				if ( ! empty( $item['variation_id'] ) ) {
+					/* translators: 1: item name 2: variation id 3: old stock quantity 4: new stock quantity */
 					$order->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
 				} else {
+					/* translators: 1: item name 2: old stock quantity 3: new stock quantity */
 					$order->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
 				}
 

@@ -1529,6 +1529,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
 			// Generate a useful post title
+			/* translators: 1: variation id 2: product name */
 			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post

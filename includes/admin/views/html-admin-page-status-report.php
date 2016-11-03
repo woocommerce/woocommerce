@@ -361,7 +361,11 @@ $pages          = $system_status->get_pages();
 				<tr>
 					<td><?php echo $plugin_name; ?></td>
 					<td class="help">&nbsp;</td>
-					<td><?php echo sprintf( _x( 'by %s', 'by author', 'woocommerce' ), $plugin['author_name'] ) . ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string; ?></td>
+					<td><?php
+						/* translators: %s: plugin author */
+						printf( __( 'by %s', 'woocommerce' ), $plugin['author_name'] );
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+					?></td>
 				</tr>
 				<?php
 			}
@@ -490,6 +494,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['version'] );
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
+					/* translators: %s: theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['version_latest'] ) ) . '</strong>';
 				}
 			?></td>
@@ -520,6 +525,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['parent_version'] );
 				if ( version_compare( $theme['parent_version'], $theme['parent_version_latest'], '<' ) ) {
+					/* translators: %s: parant theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['parent_version_latest'] ) ) . '</strong>';
 				}
 			?></td>

@@ -93,6 +93,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 
 			$legend[] = array(
+				/* translators: 1: total items sold 2: category name */
 				'title'            => sprintf( __( '%1$s sales in %2$s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
 				'highlight_series' => $index,

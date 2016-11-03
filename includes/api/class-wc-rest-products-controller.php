@@ -1354,6 +1354,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
 			// Generate a useful post title.
+			/* translators: 1: variation id 2: product name */
 			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $product->id ) ) );
 
 			// Update or Add post.
@@ -1811,6 +1812,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -1842,11 +1844,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
+				/* translators: %s: post type */
 				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( 'trash' === $post->post_status ) {
+				/* translators: %s: post type */
 				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
 			}
 
@@ -1856,6 +1860,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( ! $result ) {
+			/* translators: %s: post type */
 			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
@@ -2136,6 +2141,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'weight' => array(
+					/* translators: %s: weight unit */
 					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -2146,16 +2152,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
+							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width' => array(
+							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
+							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -2562,6 +2571,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'weight' => array(
+							/* translators: %s: weight unit */
 							'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -2572,16 +2582,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'length' => array(
+									/* translators: %s: dimension unit */
 									'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
 								'width' => array(
+									/* translators: %s: dimension unit */
 									'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
 								'height' => array(
+									/* translators: %s: dimension unit */
 									'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),

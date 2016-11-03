@@ -480,8 +480,10 @@ class WC_Admin_Report {
 		}
 
 		if ( 'sales' === $type ) {
+			/* translators: 1: total income 2: days */
 			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
+			/* translators: 1: total items sold 2: days */
 			$tooltip = sprintf( _n( 'Sold 1 item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
 		}
 

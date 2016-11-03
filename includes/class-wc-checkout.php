@@ -502,6 +502,7 @@ class WC_Checkout {
 										$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
 										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) ) {
+											/* translators: %s: phone number */
 											wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 										}
 										break;
@@ -509,6 +510,7 @@ class WC_Checkout {
 										$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
 										if ( ! is_email( $this->posted[ $key ] ) ) {
+											/* translators: %s: email address */
 											wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 										}
 										break;
@@ -528,6 +530,7 @@ class WC_Checkout {
 										// Only validate if the country has specific state options
 										if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
 											if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) ) {
+												/* translators: 1: state field 2: valid states */
 												wc_add_notice( sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>', implode( ', ', $valid_states ) ), 'error' );
 											}
 										}

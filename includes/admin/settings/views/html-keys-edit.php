@@ -30,6 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$curent_user_id = get_current_user_id();
 						$user_id        = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $curent_user_id;
 						$user           = get_user_by( 'id', $user_id );
+						/* translators: 1: user display name 2: user ID 3: user email */
 						$user_string    = sprintf(
 							esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 							$user->display_name,

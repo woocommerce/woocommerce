@@ -119,6 +119,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$order = $this->create_base_order( $default_order_args, $data );
 
 			if ( is_wp_error( $order ) ) {
+				/* translators: %s: error messages */
 				throw new WC_CLI_Exception( 'woocommerce_cli_cannot_create_order', sprintf( __( 'Cannot create order: %s', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ) );
 			}
 

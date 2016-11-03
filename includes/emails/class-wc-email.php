@@ -491,6 +491,7 @@ class WC_Email extends WC_Settings_API {
 			'subject'         => array(
 				'title'       => __( 'Email subject', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
@@ -499,6 +500,7 @@ class WC_Email extends WC_Settings_API {
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
+				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',

@@ -52,7 +52,12 @@
 									// Text attributes should list terms pipe separated
 									echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', wp_get_post_terms( $thepostid, $taxonomy, array( 'fields' => 'names' ) ) ) );
 
-								?>" placeholder="<?php echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) ); ?>" />
+								?>" placeholder="<?php
+
+									/* translators: %s: WC_DELIMITER */
+									echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) );
+
+								?>" />
 
 							<?php endif; ?>
 

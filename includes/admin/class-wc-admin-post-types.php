@@ -132,12 +132,17 @@ class WC_Admin_Post_Types {
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Product updated.', 'woocommerce' ),
+			/* translators: %s: revision title */
 			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			/* translators: %s: product url */
 			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
 			7 => __( 'Product saved.', 'woocommerce' ),
+			/* translators: %s: product url */
 			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			/* translators: 1: date 2: product url */
 			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			/* translators: %s: product url */
 			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
@@ -147,10 +152,12 @@ class WC_Admin_Post_Types {
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Order updated.', 'woocommerce' ),
+			/* translators: %s: revision title */
 			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
 			6 => __( 'Order updated.', 'woocommerce' ),
 			7 => __( 'Order saved.', 'woocommerce' ),
 			8 => __( 'Order submitted.', 'woocommerce' ),
+			/* translators: %s: date */
 			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
@@ -163,10 +170,12 @@ class WC_Admin_Post_Types {
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Coupon updated.', 'woocommerce' ),
+			/* translators: %s: revision title */
 			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
 			6 => __( 'Coupon updated.', 'woocommerce' ),
 			7 => __( 'Coupon saved.', 'woocommerce' ),
 			8 => __( 'Coupon submitted.', 'woocommerce' ),
+			/* translators: %s: date */
 			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Coupon draft updated.', 'woocommerce' ),
@@ -184,26 +193,41 @@ class WC_Admin_Post_Types {
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
 
 		$bulk_messages['product'] = array(
+			/* translators: %s: product count */
 			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'], 'woocommerce' ),
+			/* translators: %s: product count */
 			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			/* translators: %s: product count */
 			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			/* translators: %s: product count */
 			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			/* translators: %s: product count */
 			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
 		$bulk_messages['shop_order'] = array(
+			/* translators: %s: order count */
 			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'], 'woocommerce' ),
+			/* translators: %s: order count */
 			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			/* translators: %s: order count */
 			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			/* translators: %s: order count */
 			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			/* translators: %s: order count */
 			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
 		$bulk_messages['shop_coupon'] = array(
+			/* translators: %s: coupon count */
 			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'], 'woocommerce' ),
+			/* translators: %s: coupon count */
 			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			/* translators: %s: coupon count */
 			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			/* translators: %s: coupon count */
 			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			/* translators: %s: coupon count */
 			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
@@ -462,9 +486,12 @@ class WC_Admin_Post_Types {
 		}
 		if ( $post_type_object->public ) {
 			if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
-				if ( $can_edit_post )
+				if ( $can_edit_post ) {
+					/* translators: %s: product title */
 					$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
+				}
 			} elseif ( 'trash' != $post->post_status ) {
+				/* translators: %s: product title */
 				$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
 			}
 		}
@@ -647,6 +674,7 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_items' :
 
+				/* translators: %d: order items count */
 				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
 
 				if ( sizeof( $the_order->get_items() ) > 0 ) {
@@ -722,8 +750,10 @@ class WC_Admin_Post_Types {
 					if ( isset( $latest_note->comment_content ) && 1 == $post->comment_count ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
+						/* translators: %d: notes count */
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} else {
+						/* translators: %d: notes count */
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					}
 				} else {
@@ -749,6 +779,7 @@ class WC_Admin_Post_Types {
 					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
 					if ( $user_info->first_name || $user_info->last_name ) {
+						/* translators: 1: first name 2: last name */
 						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
 					} else {
 						$username .= esc_html( ucfirst( $user_info->display_name ) );
@@ -758,6 +789,7 @@ class WC_Admin_Post_Types {
 
 				} else {
 					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
+						/* translators: 1: first name 2: last name */
 						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
 					} elseif ( $the_order->get_billing_company() ) {
 						$username = trim( $the_order->get_billing_company() );
@@ -1516,6 +1548,7 @@ class WC_Admin_Post_Types {
 			if ( isset( $_REQUEST[ 'marked_' . str_replace( 'wc-', '', $slug ) ] ) ) {
 
 				$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+				/* translators: %s: orders count */
 				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
 
@@ -1703,6 +1736,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_GET['_customer_user'] ) ) {
 			$user_id     = absint( $_GET['_customer_user'] );
 			$user        = get_user_by( 'id', $user_id );
+			/* translators: 1: user display name 2: user ID 3: user email */
 			$user_string = sprintf(
 				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 				$user->display_name,

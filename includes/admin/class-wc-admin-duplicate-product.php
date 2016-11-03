@@ -103,6 +103,7 @@ class WC_Admin_Duplicate_Product {
 			wp_redirect( admin_url( 'post.php?action=edit&post=' . $new_id ) );
 			exit;
 		} else {
+			/* translators: %s: product id */
 			wp_die( sprintf( __( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $id ) );
 		}
 	}
@@ -164,6 +165,7 @@ class WC_Admin_Duplicate_Product {
 
 		// Set title for variations
 		if ( 'product_variation' === $post->post_type ) {
+			/* translators: 1: variation id 2: product name */
 			$post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), absint( $new_post_id ), esc_html( get_the_title( $post_parent ) ) );
 			$wpdb->update(
 				$wpdb->posts,

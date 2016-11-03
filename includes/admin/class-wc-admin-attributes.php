@@ -95,8 +95,10 @@ class WC_Admin_Attributes {
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
 		if ( strlen( $attribute_name ) >= 28 ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		}
 
@@ -118,6 +120,7 @@ class WC_Admin_Attributes {
 		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
 			return $valid_attribute_name;
 		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
 		}
 
@@ -151,6 +154,7 @@ class WC_Admin_Attributes {
 		$taxonomy_exists    = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) );
 		$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
 		if ( $old_attribute_name != $attribute['attribute_name'] && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute['attribute_name'] && $taxonomy_exists ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
 		}
 

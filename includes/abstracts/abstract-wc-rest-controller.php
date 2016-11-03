@@ -93,6 +93,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		}
 
 		if ( $total > $limit ) {
+			/* translators: %s: items limit */
 			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
 		}
 

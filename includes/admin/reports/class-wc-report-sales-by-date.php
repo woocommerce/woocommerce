@@ -358,18 +358,38 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		switch ( $this->chart_groupby ) {
 			case 'day' :
-				$average_total_sales_title = sprintf( __( '%s average gross daily sales', 'woocommerce' ), '<strong>' . wc_price( $data->average_total_sales ) . '</strong>' );
-				$average_sales_title       = sprintf( __( '%s average net daily sales', 'woocommerce' ), '<strong>' . wc_price( $data->average_sales ) . '</strong>' );
+				/* translators: %s: average total sales */
+				$average_total_sales_title = sprintf(
+					__( '%s average gross daily sales', 'woocommerce' ),
+					'<strong>' . wc_price( $data->average_total_sales ) . '</strong>'
+				);
+				/* translators: %s: average sales */
+				$average_sales_title = sprintf(
+					__( '%s average net daily sales', 'woocommerce' ),
+					'<strong>' . wc_price( $data->average_sales ) . '</strong>'
+				);
 			break;
 			case 'month' :
 			default :
-				$average_total_sales_title = sprintf( __( '%s average gross monthly sales', 'woocommerce' ), '<strong>' . wc_price( $data->average_total_sales ) . '</strong>' );
-				$average_sales_title       = sprintf( __( '%s average net monthly sales', 'woocommerce' ), '<strong>' . wc_price( $data->average_sales ) . '</strong>' );
+				/* translators: %s: average total sales */
+				$average_total_sales_title = sprintf(
+					__( '%s average gross monthly sales', 'woocommerce' ),
+					'<strong>' . wc_price( $data->average_total_sales ) . '</strong>'
+				);
+				/* translators: %s: average sales */
+				$average_sales_title = sprintf(
+					__( '%s average net monthly sales', 'woocommerce' ),
+					'<strong>' . wc_price( $data->average_sales ) . '</strong>'
+				);
 			break;
 		}
 
 		$legend[] = array(
-			'title'            => sprintf( __( '%s gross sales in this period', 'woocommerce' ), '<strong>' . wc_price( $data->total_sales ) . '</strong>' ),
+			/* translators: %s: total sales */
+			'title' => sprintf(
+				__( '%s gross sales in this period', 'woocommerce' ),
+				'<strong>' . wc_price( $data->total_sales ) . '</strong>'
+			),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and including shipping and taxes.', 'woocommerce' ),
 			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 6,
@@ -383,7 +403,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		$legend[] = array(
-			'title'            => sprintf( __( '%s net sales in this period', 'woocommerce' ), '<strong>' . wc_price( $data->net_sales ) . '</strong>' ),
+			/* translators: %s: net sales */
+			'title' => sprintf(
+				__( '%s net sales in this period', 'woocommerce' ),
+				'<strong>' . wc_price( $data->net_sales ) . '</strong>'
+			),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and excluding shipping and taxes.', 'woocommerce' ),
 			'color'            => $this->chart_colours['net_sales_amount'],
 			'highlight_series' => 7,
@@ -397,13 +421,21 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s orders placed', 'woocommerce' ), '<strong>' . $data->total_orders . '</strong>' ),
+			/* translators: %s: total orders */
+			'title' => sprintf(
+				__( '%s orders placed', 'woocommerce' ),
+				'<strong>' . $data->total_orders . '</strong>'
+			),
 			'color' => $this->chart_colours['order_count'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s items purchased', 'woocommerce' ), '<strong>' . $data->total_items . '</strong>' ),
+			/* translators: %s: total items */
+			'title' => sprintf(
+				__( '%s items purchased', 'woocommerce' ),
+				'<strong>' . $data->total_items . '</strong>'
+			),
 			'color' => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
 		);
@@ -419,12 +451,20 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 8,
 		);
 		$legend[] = array(
-			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $data->total_shipping ) . '</strong>' ),
+			/* translators: %s: total shipping */
+			'title' => sprintf(
+				__( '%s charged for shipping', 'woocommerce' ),
+				'<strong>' . wc_price( $data->total_shipping ) . '</strong>'
+			),
 			'color' => $this->chart_colours['shipping_amount'],
 			'highlight_series' => 5,
 		);
 		$legend[] = array(
-			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . wc_price( $data->total_coupons ) . '</strong>' ),
+			/* translators: %s: total coupons */
+			'title' => sprintf(
+				__( '%s worth of coupons used', 'woocommerce' ),
+				'<strong>' . wc_price( $data->total_coupons ) . '</strong>'
+			),
 			'color' => $this->chart_colours['coupon_amount'],
 			'highlight_series' => 4,
 		);
