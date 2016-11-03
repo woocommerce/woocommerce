@@ -142,6 +142,8 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				if ( ! empty( $request['image']['title'] ) ) {
 					wp_update_post( array( 'ID' => $image_id, 'post_title' => wc_clean( $request['image']['title'] ) ) );
 				}
+			} else {
+				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
 			}
 		}
 
