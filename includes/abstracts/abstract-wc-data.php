@@ -469,7 +469,7 @@ abstract class WC_Data {
 	 * @param mixed  $value Value of the prop.
 	 */
 	protected function set_prop( $prop, $value ) {
-		if ( in_array( $prop, array_keys( $this->data ) ) ) {
+		if ( array_key_exists( $prop, $this->data ) ) {
 			if ( true === $this->object_read ) {
 				$this->changes[ $prop ] = $value;
 			} else {
@@ -522,7 +522,7 @@ abstract class WC_Data {
 	public function get_prop( $prop, $context = 'view' ) {
 		$value = null;
 
-		if ( in_array( $prop, array_keys( $this->data ) ) ) {
+		if ( array_key_exists( $prop, $this->data ) ) {
 			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
