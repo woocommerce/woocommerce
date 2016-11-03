@@ -415,7 +415,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 *    wp wc order update 123 --status=completed
 	 *
-	 * @todo  gedex
 	 * @since 2.5.0
 	 */
 	public function update( $args, $assoc_args ) {

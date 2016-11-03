@@ -115,15 +115,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param array
 	 */
 	public function set_attributes( $attributes ) {
-		$this->data['attributes'] = (array) $attributes;
+		$this->set_prop( 'attributes', (array) $attributes );
 	}
 
 	/**
 	 * Returns array of attribute name value pairs.
+	 *
+	 * @param  string $context
 	 * @return array
 	 */
-	public function get_attributes() {
-		return $this->data['attributes'];
+	public function get_attributes( $context = 'view' ) {
+		return $this->get_prop( 'attributes', $context );
 	}
 
 	/**
@@ -152,13 +154,31 @@ class WC_Product_Variation extends WC_Product_Simple {
 			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->get_id() ), 422 );
 		}
 
-		// Variation data.
 		$this->set_props( array(
 			'name'              => get_the_title( $post_object ),
 			'slug'              => $post_object->post_name,
-			'status'            => $post_object->post_status,
 			'date_created'      => $post_object->post_date,
 			'date_modified'     => $post_object->post_modified,
+			'status'            => $post_object->post_status,
+			'menu_order'        => $post_object->menu_order,
+			'reviews_allowed'   => 'open' === $post_object->comment_status,
+		) );
+		$this->read_product_data();
+		$this->read_meta_data();
+		$this->read_attributes();
+
+		// Set object_read true once all data is read.
+		$this->set_object_read( true );
+	}
+
+	/**
+	 * Read post data. Can be overridden by child classes to load other props.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_product_data() {
+		$id = $this->get_id();
+		$this->set_props( array(
 			'description'       => get_post_meta( $id, '_variation_description', true ),
 			'regular_price'     => get_post_meta( $id, '_regular_price', true ),
 			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
@@ -168,7 +188,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
 			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
-			'menu_order'        => $post_object->menu_order,
 			'shipping_class_id' => current( $this->get_term_ids( 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
 			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
@@ -215,9 +234,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} else {
 			$this->set_price( $this->get_regular_price() );
 		}
-
-		$this->read_meta_data();
-		$this->read_attributes();
 	}
 
 	/**
@@ -305,7 +321,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @since 2.7.0
 	 */
 	protected function update_terms() {
-		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
+		wp_set_post_terms( $this->get_id(), array( $this->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 	}
 
 	/**

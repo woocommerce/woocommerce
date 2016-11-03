@@ -176,7 +176,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Create a coupon
 	 *
-	 * @TODO implement in 2.2
 	 * @param array $data
 	 * @return array
 	 */
@@ -188,7 +187,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Edit a coupon
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the coupon ID
 	 * @param array $data
 	 * @return array
@@ -206,7 +204,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Delete a coupon
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
 	 * @return array

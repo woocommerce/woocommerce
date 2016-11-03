@@ -1030,7 +1030,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
 	 */
 	public function set_attributes( $raw_attributes ) {
-		$attributes = array_fill_keys( array_keys( $this->data['attributes'] ), null );
+		$attributes = array_fill_keys( array_keys( $this->get_attributes( 'edit' ) ), null );
 		foreach ( $raw_attributes as $attribute ) {
 			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
@@ -1571,9 +1571,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_terms() {
-		wp_set_post_terms( $this->get_id(), $this->data['category_ids'], 'product_cat', false );
-		wp_set_post_terms( $this->get_id(), $this->data['tag_ids'], 'product_tag', false );
-		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
+		wp_set_post_terms( $this->get_id(), $this->get_category_ids( 'edit' ), 'product_cat', false );
+		wp_set_post_terms( $this->get_id(), $this->get_tag_ids( 'edit' ), 'product_tag', false );
+		wp_set_post_terms( $this->get_id(), array( $this->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 	}
 
 	/**
@@ -1663,7 +1663,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_downloadable() {
-		return apply_filters( 'woocommerce_is_downloadable', true === $this->data['downloadable'] , $this );
+		return apply_filters( 'woocommerce_is_downloadable', true === $this->get_downloadable(), $this );
 	}
 
 	/**
@@ -1672,7 +1672,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', true === $this->data['virtual'], $this );
+		return apply_filters( 'woocommerce_is_virtual', true === $this->get_virtual(), $this );
 	}
 
 	/**

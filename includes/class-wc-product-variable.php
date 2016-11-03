@@ -22,10 +22,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @var array
 	 */
 	protected $extra_data = array(
-		'children'                          => array(),
-		'variation_prices'                  => array(),
-		'variation_prices_including_taxes'  => array(),
-		'variation_attributes'              => array(),
+		'children'                         => array(),
+		'variation_prices'                 => array(),
+		'variation_prices_including_taxes' => array(),
+		'variation_attributes'             => array(),
 	);
 
 	/**
@@ -62,25 +62,53 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return a products child ids.
 	 *
-	 * @param  boolean $deprecated
+	 * @param  string $context
 	 * @return array Children ids
 	 */
-	public function get_children( $deprecated = false ) {
-		if ( $deprecated ) {
+	public function get_children( $context = 'view' ) {
+		if ( is_bool( $context ) ) {
 			_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
 			return $this->get_visible_children();
 		}
-		return apply_filters( 'woocommerce_get_children', $this->data['children'], $this, false );
+		if ( has_filter( 'woocommerce_get_children' ) ) {
+			_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+		}
+		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'children', $context ), $this, false );
 	}
 
 	/**
 	 * Return a products child ids - visible only.
 	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return array Children ids
 	 */
-	public function get_visible_children() {
-		return apply_filters( 'woocommerce_get_children', $this->data['visible_children'], $this, false );
+	public function get_visible_children( $context = 'view' ) {
+		if ( has_filter( 'woocommerce_get_children' ) ) {
+			_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+		}
+		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'visible_children', $context ), $this, true );
+	}
+
+	/**
+	 * Get an array of all sale and regular prices from all variations, includes taxes.
+	 *
+	 * @since  2.7.0
+	 * @param  string $context
+	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
+	 */
+	public function get_variation_prices_including_taxes( $context = 'view' ) {
+		return $this->get_prop( 'variation_prices_including_taxes', $context );
+	}
+
+	/**
+	 * Return an array of attributes used for variations, as well as their possible values.
+	 *
+	 * @param  string $context
+	 * @return array Attributes and their available values
+	 */
+	public function get_variation_attributes( $context = 'view' ) {
+		return $this->get_prop( 'variation_attributes', $context );
 	}
 
 	/**
@@ -134,16 +162,6 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Get an array of all sale and regular prices from all variations, includes taxes.
-	 *
-	 * @since 2.7.0
-	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
-	 */
-	public function get_variation_prices_including_taxes() {
-		return $this->data['variation_prices_including_taxes'];
-	}
-
-	/**
 	 * Returns the price in html format.
 	 *
 	 * @param string $price (default: '')
@@ -173,25 +191,6 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
-	}
-
-	/**
-	 * Return an array of attributes used for variations, as well as their possible values.
-	 *
-	 * @return array Attributes and their available values
-	 */
-	public function get_variation_attributes() {
-		return $this->data['variation_attributes'];
-	}
-
-	/**
-	 * If set, get the default attributes for a variable product.
-	 *
-	 * @return array
-	 */
-	public function get_variation_default_attributes() {
-		_deprecated_function( 'WC_Product_Variable::get_variation_default_attributes', '2.7', 'WC_Product::get_default_attributes' );
-		return apply_filters( 'woocommerce_product_default_attributes', array_filter( (array) maybe_unserialize( $this->get_default_attributes() ) ), $this );
 	}
 
 	/**

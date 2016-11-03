@@ -201,7 +201,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Create a customer
 	 *
-	 * @TODO implement in 2.2 with woocommerce_create_new_customer()
 	 * @param array $data
 	 * @return array
 	 */
@@ -216,7 +215,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Edit a customer
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
 	 * @return array
@@ -234,7 +232,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Delete a customer
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the customer ID
 	 * @return array
 	 */

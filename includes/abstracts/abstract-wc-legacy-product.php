@@ -133,6 +133,17 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
+	 * If set, get the default attributes for a variable product.
+	 *
+	 * @deprecated 2.7.0
+	 * @return array
+	 */
+	public function get_variation_default_attributes() {
+		_deprecated_function( 'WC_Product_Variable::get_variation_default_attributes', '2.7', 'WC_Product::get_default_attributes' );
+		return apply_filters( 'woocommerce_product_default_attributes', array_filter( (array) maybe_unserialize( $this->get_default_attributes() ) ), $this );
+	}
+
+	/**
 	 * Returns the gallery attachment ids.
 	 *
 	 * @deprecated 2.7.0
