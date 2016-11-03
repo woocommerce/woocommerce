@@ -178,11 +178,17 @@ class WC_Product_Grouped extends WC_Product {
 			$child_prices = array();
 			foreach ( $this->get_children() as $child_id ) {
 				$child = wc_get_product( $child_id );
-				$child_prices[] = $child->get_price();
+				if ( $child ) {
+					$child_prices[] = $child->get_price();
+				}
 			}
+			$child_prices = array_filter( $child_prices );
 			delete_post_meta( $this->get_id(), '_price' );
-			add_post_meta( $this->get_id(), '_price', min( $child_prices ) );
-			add_post_meta( $this->get_id(), '_price', max( $child_prices ) );
+
+			if ( ! empty( $child_prices ) ) {
+				add_post_meta( $this->get_id(), '_price', min( $child_prices ) );
+				add_post_meta( $this->get_id(), '_price', max( $child_prices ) );
+			}
 		}
 		parent::update_post_meta();
 	}

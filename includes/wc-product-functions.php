@@ -48,20 +48,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_products( $args ) {
 	$args = wp_parse_args( $args, array(
-		'status'   => array( 'draft', 'pending', 'private', 'publish' ),
-		'type'     => array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ),
-		'parent'   => null,
-		'sku'      => '',
-		'category' => array(),
-		'tag'      => array(),
-		'limit'    => get_option( 'posts_per_page' ),
-		'offset'   => null,
-		'page'     => 1,
-		'exclude'  => array(),
-		'orderby'  => 'date',
-		'order'    => 'DESC',
-		'return'   => 'objects',
-		'paginate' => false,
+		'status'         => array( 'draft', 'pending', 'private', 'publish' ),
+		'type'           => array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ),
+		'parent'         => null,
+		'sku'            => '',
+		'category'       => array(),
+		'tag'            => array(),
+		'limit'          => get_option( 'posts_per_page' ),
+		'offset'         => null,
+		'page'           => 1,
+		'exclude'        => array(),
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+		'return'         => 'objects',
+		'paginate'       => false,
+		'shipping_class' => array(),
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
@@ -112,7 +113,7 @@ function wc_get_products( $args ) {
 	if ( ! empty( $args['category'] ) ) {
 		$wp_query_args['tax_query'][] = array(
 			'taxonomy' => 'product_cat',
-			'field'    => 'term_id',
+			'field'    => 'slug',
 			'terms'   => $args['category'],
 		);
 	}
@@ -120,8 +121,16 @@ function wc_get_products( $args ) {
 	if ( ! empty( $args['tag'] ) ) {
 		$wp_query_args['tax_query'][] = array(
 			'taxonomy' => 'product_tag',
-			'field'    => 'term_id',
+			'field'    => 'slug',
 			'terms'   => $args['tag'],
+		);
+	}
+
+	if ( ! empty( $args['shipping_class'] ) ) {
+		$wp_query_args['tax_query'][] = array(
+			'taxonomy' => 'product_shipping_class',
+			'field'    => 'slug',
+			'terms'   => $args['shipping_class'],
 		);
 	}
 
@@ -156,7 +165,7 @@ function wc_get_products( $args ) {
 		return (object) array(
 			'products'      => $return,
 			'total'         => $products->found_posts,
-			'max_num_pages' => $procuts->max_num_pages,
+			'max_num_pages' => $products->max_num_pages,
 		);
 	} else {
 		return $return;
@@ -1017,7 +1026,7 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
 
 		if ( $cats_array ) {
 			$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
-			if ( $relate_by_tag ) {
+			if ( $tags_array ) {
 				$query['where'] .= ' OR ';
 			}
 		}
