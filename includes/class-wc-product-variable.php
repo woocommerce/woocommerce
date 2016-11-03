@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Variable Product Class.
+ * Variable Product Class. @todo needs new getters/setters/changes code
  *
  * The WooCommerce product class handles individual product data.
  *

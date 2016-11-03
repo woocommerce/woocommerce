@@ -35,6 +35,14 @@ class WC_Product_External extends WC_Product {
 		parent::__construct( $product );
 	}
 
+	/**
+	 * Get internal type.
+	 * @return string
+	 */
+	public function get_type() {
+		return 'external';
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -44,29 +52,23 @@ class WC_Product_External extends WC_Product {
 	*/
 
 	/**
-	 * Get internal type.
-	 * @return string
-	 */
-	public function get_type() {
-		return 'external';
-	}
-
-	/**
 	 * Get product url.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_product_url() {
-		return esc_url( $this->data['product_url'] );
+	public function get_product_url( $context = 'view' ) {
+		return esc_url( $this->get_prop( 'product_url', $context ) );
 	}
 
 	/**
 	 * Get button text.
 	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_button_text() {
-		return $this->data['button_text'] ? $this->data['button_text'] : __( 'Buy product', 'woocommerce' );
+	public function get_button_text( $context = 'view' ) {
+		return $this->get_prop( 'button_text', $context );
 	}
 
 	/*
@@ -86,7 +88,7 @@ class WC_Product_External extends WC_Product {
 	 * @param string $product_url Product URL.
 	 */
 	public function set_product_url( $product_url ) {
-		$this->data['product_url'] = $product_url;
+		$this->set_prop( 'product_url', $product_url );
 	}
 
 	/**
@@ -96,7 +98,7 @@ class WC_Product_External extends WC_Product {
 	 * @param string $button_text Button text.
 	 */
 	public function set_button_text( $button_text ) {
-		$this->data['button_text'] = $button_text;
+		$this->set_prop( 'button_text', $button_text );
 	}
 
 	/**
@@ -106,7 +108,7 @@ class WC_Product_External extends WC_Product {
 	 * @param bool
 	 */
 	public function set_manage_stock( $manage_stock ) {
-		$this->data['manage_stock'] = false;
+		$this->set_prop( 'manage_stock', false );
 
 		if ( true === $manage_stock ) {
 			$this->error( 'product_external_invalid_manage_stock', __( 'External products cannot be stock managed.', 'woocommerce' ) );
@@ -120,7 +122,7 @@ class WC_Product_External extends WC_Product {
 	 * @param bool
 	 */
 	public function set_stock_status( $stock_status ) {
-		$this->data['stock_status'] = 'instock';
+		$this->set_prop( 'stock_status', 'instock' );
 
 		if ( 'instock' !== $stock_status ) {
 			$this->error( 'product_external_invalid_stock_status', __( 'External products cannot be stock managed.', 'woocommerce' ) );
@@ -134,7 +136,7 @@ class WC_Product_External extends WC_Product {
 	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
 	 */
 	public function set_backorders( $backorders ) {
-		$this->data['backorders'] = 'no';
+		$this->set_prop( 'backorders', 'no' );
 
 		if ( 'no' !== $backorders ) {
 			$this->error( 'product_external_invalid_backorders', __( 'External products cannot be backordered.', 'woocommerce' ) );
@@ -194,19 +196,17 @@ class WC_Product_External extends WC_Product {
 	*/
 
 	/**
-	 * Reads a product from the database and sets its data to the class.
+	 * Read post data.
 	 *
 	 * @since 2.7.0
-	 * @param int $id Product ID.
 	 */
-	public function read( $id ) {
-		parent::read( $id );
+	protected function read_product_data() {
+		parent::read_product_data();
+
 		$this->set_props( array(
-			'product_url' => get_post_meta( $id, '_product_url', true ),
-			'button_text' => get_post_meta( $id, '_button_text', true ),
+			'product_url' => get_post_meta( $this->get_id(), '_product_url', true ),
+			'button_text' => get_post_meta( $this->get_id(), '_button_text', true ) ? get_post_meta( $this->get_id(), '_button_text', true ) : __( 'Buy product', 'woocommerce' ),
 		) );
-		do_action( 'woocommerce_product_loaded', $this );
-		do_action( 'woocommerce_product_' . $this->get_type() . '_loaded', $this );
 	}
 
 	/**
