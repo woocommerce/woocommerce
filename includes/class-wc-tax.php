@@ -100,7 +100,8 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
-		return self::calc_exclusive_tax( $price, $rates );
+		$taxes = self::calc_exclusive_tax( $price, $rates );
+		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
 	/**
