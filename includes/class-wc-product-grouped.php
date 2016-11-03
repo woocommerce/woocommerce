@@ -34,29 +34,12 @@ class WC_Product_Grouped extends WC_Product {
 		parent::__construct( $product );
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	|
-	| Methods for getting data from the product object.
-	*/
-
 	/**
 	 * Get internal type.
 	 * @return string
 	 */
 	public function get_type() {
 		return 'grouped';
-	}
-
-	/**
-	 * Return the children of this product.
-	 *
-	 * @return array
-	 */
-	public function get_children() {
-		return $this->data['children'];
 	}
 
 	/**
@@ -133,6 +116,24 @@ class WC_Product_Grouped extends WC_Product {
 
 	/*
 	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the product object.
+	*/
+
+	/**
+	 * Return the children of this product.
+	 *
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_children( $context = 'view' ) {
+		return $this->get_prop( 'children', $context );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
 	| Setters
 	|--------------------------------------------------------------------------
 	|
@@ -145,7 +146,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param array $children
 	 */
 	public function set_children( $children ) {
-		$this->data['children'] = array_filter( wp_parse_id_list( (array) $children ) );
+		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
 	}
 
 	/*
@@ -155,19 +156,16 @@ class WC_Product_Grouped extends WC_Product {
 	*/
 
 	/**
-	 * Reads a product from the database and sets its data to the class.
+	 * Read post data.
 	 *
 	 * @since 2.7.0
-	 * @param int $id Product ID.
 	 */
-	public function read( $id ) {
-		parent::read( $id );
+	protected function read_product_data() {
+		parent::read_product_data();
 
 		$this->set_props( array(
-			'children' => wp_parse_id_list( get_post_meta( $id, '_children', true ) ),
+			'children' => wp_parse_id_list( get_post_meta( $this->get_id(), '_children', true ) ),
 		) );
-		do_action( 'woocommerce_product_loaded', $this );
-		do_action( 'woocommerce_product_' . $this->get_type() . '_loaded', $this );
 	}
 
 	/**

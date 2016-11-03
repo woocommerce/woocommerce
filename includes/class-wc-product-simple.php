@@ -57,7 +57,7 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Get the title of the post.
+	 * Get the title of the post. @todo should this be deprecated or not? It's in deprecated class and needs review.
 	 *
 	 * @return string
 	 */
