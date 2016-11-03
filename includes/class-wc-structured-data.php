@@ -190,19 +190,23 @@ class WC_Structured_Data {
 
 		$markup_offers = array();
 		foreach ( $products as $_product ) {
-			$markup_offers[] = array(
-				'@type'         => 'Offer',
-				'priceCurrency' => get_woocommerce_currency(),
-				'price'         => $_product->get_price(),
-				'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'sku'           => $_product->get_sku(),
-				'image'         => wp_get_attachment_url( $_product->get_image_id() ),
-				'description'   => $is_variable ? $_product->get_variation_description() : '',
-				'seller'        => array(
-					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-					'url'   => get_bloginfo( 'url' ),
+			$markup_offers[] = apply_filters(
+				'woocommerce_structured_data_product_offer',
+				array(
+					'@type'         => 'Offer',
+					'priceCurrency' => get_woocommerce_currency(),
+					'price'         => $_product->get_price(),
+					'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+					'sku'           => $_product->get_sku(),
+					'image'         => wp_get_attachment_url( $_product->get_image_id() ),
+					'description'   => $is_variable ? $_product->get_variation_description() : '',
+					'seller'        => array(
+						'@type' => 'Organization',
+						'name'  => get_bloginfo( 'name' ),
+						'url'   => get_bloginfo( 'url' ),
+					),
 				),
+				$_product
 			);
 		}
 
