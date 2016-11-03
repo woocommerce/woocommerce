@@ -792,7 +792,10 @@ class WC_Countries {
 				'IE' => array(
 					'postcode' => array(
 						'required' => false,
-						'label'    => __( 'Postcode', 'woocommerce' ),
+						'label'    => __( 'Eircode', 'woocommerce' ),
+					),
+					'state' => array(
+						'label'       => __( 'County', 'woocommerce' ),
 					),
 				),
 				'IS' => array(
