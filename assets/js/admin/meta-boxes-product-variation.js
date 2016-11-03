@@ -31,6 +31,7 @@ jQuery( function( $ ) {
 		 */
 		reload: function() {
 			wc_meta_boxes_product_variations_ajax.load_variations( 1 );
+			wc_meta_boxes_product_variations_pagenav.set_paginav( 0 );
 		},
 
 		/**
