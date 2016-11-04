@@ -28,7 +28,7 @@ class WC_Product_Data_Store_Posts extends WC_Data_Store_Posts implements WC_Obje
 		$product->set_defaults();
 
 		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
-			$product = null;
+			// @todo throw an error? set to empty object? null?
 			return;
 		}
 

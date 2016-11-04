@@ -25,8 +25,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	function test_product_store_read_simple() {
 		$simple        = WC_Helper_Product::create_simple_product();
 		$product       = new WC_Product_Simple( $simple->get_id() );
-		$product_store = WC_Data_Store::load( 'product' );
-		$product_store->read( $product );
 
 		$this->assertEquals( 'Dummy Product', $product->get_name() );
 		$this->assertEquals( '10', $product->get_regular_price() );
@@ -40,8 +38,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	function test_product_store_read_external() {
 		$external      = WC_Helper_Product::create_external_product();
 		$product       = new WC_Product_External( $external->get_id() );
-		$product_store = WC_Data_Store::load( 'product' );
-		$product_store->read( $product );
 
 		$this->assertEquals( 'Dummy External Product', $product->get_name() );
 		$this->assertEquals( '10', $product->get_regular_price() );
@@ -49,17 +45,5 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Buy external product', $product->get_button_text() );
 	}
 
-	/**
-	 * Test that product store returns a null product for an invalid read.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_store_invalid_product_returns_null() {
-		$simple        = WC_Helper_Product::create_simple_product();
-		$product       = new WC_Product_Simple( 500000 );
-		$product_store = WC_Data_Store::load( 'product' );
-		$product_store->read( $product );
-		$this->assertNull( $product );
-	}
 
 }

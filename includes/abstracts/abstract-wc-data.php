@@ -151,7 +151,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Returns dan array of expected data keys for this object.
+	 * Returns array of expected data keys for this object.
 	 *
 	 * @since 2.7.0
 	 * @return array

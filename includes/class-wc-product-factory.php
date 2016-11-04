@@ -45,11 +45,7 @@ class WC_Product_Factory {
 			$classname = 'WC_Product_Simple';
 		}
 
-		$data_object = new $classname( $product_id );
-		$data_store  = WC_Data_Store::load( 'product_' . $product_type );
-
-		$read = $data_store->read( $data_object );
-		error_log( print_r ( $read, 1 ) );
+		return new $classname( $product_id );
 	}
 
 	/**

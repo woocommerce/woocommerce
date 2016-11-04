@@ -140,6 +140,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( ! empty( $product->ID ) ) {
 			$this->set_id( absint( $product->ID ) );
 		}
+
+		$data_store = WC_Data_Store::load( 'product_' . $this->get_type() );
+		$data_store->read( $this );
 	}
 
 	/**

@@ -42,7 +42,7 @@ class WC_Data_Store {
 	public function __construct( $object_type ) {
 		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
-		// If this objec type can't be found, check to see if we can load one
+		// If this object type can't be found, check to see if we can load one
 		// level up (so if product_type isn't found, we try product).
 		if ( ! array_key_exists( $object_type, $this->stores ) ) {
 			$pieces = explode( '_', $object_type );
