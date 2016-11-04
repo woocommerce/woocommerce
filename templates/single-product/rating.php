@@ -33,7 +33,7 @@ $average      = $product->get_average_rating();
 if ( $rating_count > 0 ) : ?>
 
 	<div class="woocommerce-product-rating">
-		<div class="star-rating" title="<?php printf( __( 'Rated %s out of 5', 'woocommerce' ), $average ); ?>">
+		<div class="star-rating">
 			<span style="width:<?php echo ( ( $average / 5 ) * 100 ); ?>%">
 				<?php
 				/* translators: 1: average rating 2: max rating (i.e. 5) */
