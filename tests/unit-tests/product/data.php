@@ -24,18 +24,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	 }
 
 	/**
-	 * Test reading a product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_read() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product = new WC_Product( $product->get_id() );
-
-		$this->assertEquals( '10', $product->get_regular_price() );
-	}
-
-	/**
 	 * Test updating a product.
 	 *
 	 * @since 2.7.0
