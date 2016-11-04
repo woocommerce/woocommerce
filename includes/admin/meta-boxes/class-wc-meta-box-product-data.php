@@ -744,19 +744,19 @@ class WC_Meta_Box_Product_Data {
 							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
 						</span>
 						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<a class="first-page disabled" aria-label="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" aria-label="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
 								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
+								<select class="page-selector" id="current-page-selector-1" aria-label="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
 									<?php endfor; ?>
 								</select>
 								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
 							</span>
-							<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+							<a class="next-page" aria-label="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" aria-label="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
 						</span>
 					</div>
 					<div class="clear"></div>
@@ -778,19 +778,19 @@ class WC_Meta_Box_Product_Data {
 							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
 						</span>
 						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<a class="first-page disabled" aria-label="<?php esc_attr_e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" aria-label="<?php esc_attr_e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
 							<span class="paging-select">
 								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
+								<select class="page-selector" id="current-page-selector-1" aria-label="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
 									<?php endfor; ?>
 								</select>
 								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
 							</span>
-							<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+							<a class="next-page" aria-label="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" aria-label="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
 						</span>
 					</div>
 

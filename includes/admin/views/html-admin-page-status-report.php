@@ -342,7 +342,7 @@ $pages          = $system_status->get_pages();
 				// Link the plugin name to the plugin url if available.
 				$plugin_name = esc_html( $plugin['name'] );
 				if ( ! empty( $plugin['url'] ) ) {
-					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" title="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
 				$version_string = '';
@@ -441,7 +441,7 @@ $pages          = $system_status->get_pages();
 				$error   = false;
 
 				if ( $page['page_id'] ) {
-					$page_name = '<a href="' . get_edit_post_link( $page['page_id'] ) . '" title="' . sprintf( __( 'Edit %s page', 'woocommerce' ), esc_html( $page['page_name'] ) ) . '">' . esc_html( $page['page_name'] ) . '</a>';
+					$page_name = '<a href="' . get_edit_post_link( $page['page_id'] ) . '" aria-label="' . sprintf( __( 'Edit %s page', 'woocommerce' ), esc_html( $page['page_name'] ) ) . '">' . esc_html( $page['page_name'] ) . '</a>';
 				} else {
 					$page_name = esc_html( $page['page_name'] );
 				}
