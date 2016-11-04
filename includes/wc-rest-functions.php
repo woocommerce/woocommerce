@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
  *
- * Requered WP 4.4 or later.
+ * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since 2.6.0
@@ -31,7 +31,7 @@ function wc_rest_prepare_date_response( $date ) {
 	}
 
 	// Return null if $date is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date ) {
+	if ( '0000-00-00 00:00:00' === $date || empty( $date ) ) {
 		return null;
 	}
 
@@ -311,6 +311,7 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 		'system_status'    => 'manage_woocommerce',
 		'attributes'       => 'manage_product_terms',
 		'shipping_methods' => 'manage_woocommerce',
+		'payment_gateways' => 'manage_woocommerce',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );

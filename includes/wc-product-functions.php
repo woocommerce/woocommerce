@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
+ * @since 2.2.0
+ *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
@@ -215,7 +217,7 @@ function wc_get_featured_product_ids() {
  */
 function wc_product_post_type_link( $permalink, $post ) {
 	// Abort if post is not a product.
-	if ( $post->post_type !== 'product' ) {
+	if ( 'product' !== $post->post_type ) {
 		return $permalink;
 	}
 
@@ -296,7 +298,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -432,6 +434,9 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
+                // Clear prices transient for variable products.
+				delete_transient( 'wc_var_prices_' . $parent );
+
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {
@@ -594,9 +599,9 @@ function wc_get_product_id_by_sku( $sku ) {
  * @param string $date_to
  */
 function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
-	$product_id  = absint( $product_id );
+	$product_id    = absint( $product_id );
 	$regular_price = wc_format_decimal( $regular_price );
-	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
+	$sale_price    = '' === $sale_price ? '' : wc_format_decimal( $sale_price );
 	$date_from     = wc_clean( $date_from );
 	$date_to       = wc_clean( $date_to );
 
@@ -608,7 +613,8 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 	update_post_meta( $product_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
 
 	if ( $date_to && ! $date_from ) {
-		update_post_meta( $product_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+		$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+		update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 	}
 
 	// Update price if on sale
@@ -667,7 +673,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
 		 */
 		if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $parent_id, '_product_version', true ), '2.4.0', '<' ) ) {
 			foreach ( $parent_attributes as $attribute ) {
-				if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+				if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
 					continue;
 				}
 				$text_attributes = wc_get_text_attributes( $attribute['value'] );
@@ -729,4 +735,56 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		$props['alt']     = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
 	}
 	return $props;
+}
+
+/**
+ * Get product visibility options.
+ *
+ * @since 2.7.0
+ * @return array
+ */
+function wc_get_product_visibility_options() {
+	return apply_filters( 'woocommerce_product_visibility_options', array(
+		'visible' => __( 'Catalog/search', 'woocommerce' ),
+		'catalog' => __( 'Catalog', 'woocommerce' ),
+		'search'  => __( 'Search', 'woocommerce' ),
+		'hidden'  => __( 'Hidden', 'woocommerce' ),
+	) );
+}
+
+/**
+ * Get min/max price meta query args.
+ *
+ * @since 2.7.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	$min = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$max = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
+
+	/**
+	 * Adjust if the store taxes are not displayed how they are stored.
+	 * Max is left alone because the filter was already increased.
+	 * Kicks in when prices excluding tax are displayed including tax.
+	 */
+	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+		$class_min   = $min;
+
+		foreach ( $tax_classes as $tax_class ) {
+			if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
+				$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+			}
+		}
+
+		$min = $class_min;
+	}
+
+	return array(
+		'key'     => '_price',
+		'value'   => array( $min, $max ),
+		'compare' => 'BETWEEN',
+		'type'    => 'DECIMAL',
+	);
 }

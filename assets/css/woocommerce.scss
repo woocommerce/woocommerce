@@ -16,8 +16,9 @@
 /**
  * Global styles
  */
-p.demo_store {
-	position: fixed;
+p.demo_store,
+.woocommerce-store-notice {
+	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
@@ -30,8 +31,11 @@ p.demo_store {
 	color: $primarytext;
 	z-index: 99998;
 	box-shadow: 0 1px 1em rgba(0, 0, 0, 0.2);
+	display: none;
+
 	a {
 		color: $primarytext;
+		text-decoration: underline;
 	}
 }
 
@@ -162,6 +166,80 @@ p.demo_store {
 
 			div.thumbnails {
 				padding-top: 1em;
+			}
+
+			&.woocommerce-product-gallery {
+				position: relative;
+			}
+
+			.woocommerce-product-gallery__wrapper {
+				transition: all cubic-bezier(0.795, -0.035, 0.000, 1.000) .5s;
+			}
+
+			.woocommerce-product-gallery__trigger {
+				position: absolute;
+				top: .5em;
+				right: .5em;
+				font-size: 2em;
+				z-index: 9;
+				width: 36px;
+				height: 36px;
+				background: #fff;
+				text-indent: -9999px;
+				border-radius: 100%;
+				box-sizing: content-box;
+
+				&:before {
+					content: "";
+					display: block;
+					width: 10px;
+					height: 10px;
+					border: 2px solid #000;
+					border-radius: 100%;
+					position: absolute;
+					top: 9px;
+					left: 9px;
+					box-sizing: content-box;
+				}
+
+				&:after {
+					content: "";
+					display: block;
+					width: 2px;
+					height: 8px;
+					background: #000;
+					border-radius: 6px;
+					position: absolute;
+					top: 19px;
+					left: 22px;
+					@include transform(rotate(-45deg));
+					box-sizing: content-box;
+				}
+			}
+
+			.flex-control-thumbs {
+				overflow: hidden;
+				zoom: 1;
+				margin: 0;
+				padding: 0;
+
+				li {
+					width: 25%;
+					float: left;
+					margin: 0;
+					list-style: none;
+
+					img {
+						cursor: pointer;
+						opacity: .5;
+						margin: 0;
+
+						&.flex-active,
+						&:hover {
+							opacity: 1;
+						}
+					}
+				}
 			}
 		}
 
@@ -400,6 +478,7 @@ p.demo_store {
 		color: $highlightext;
 		font-size: 0.857em;
 		-webkit-font-smoothing: antialiased;
+		z-index: 9;
 	}
 
 	/**
@@ -1013,6 +1092,27 @@ p.demo_store {
 		}
 	}
 
+	table.woocommerce-MyAccount-downloads {
+		td,
+		th {
+			vertical-align: top;
+			text-align: center;
+
+			&:first-child {
+				text-align: left;
+			}
+			&:last-child {
+				text-align: left;
+			}
+			.woocommerce-MyAccount-downloads-file {
+				&::before {
+					content: '\2193';
+					display: inline-block;
+				}
+			}
+		}
+	}
+
 	td.product-name {
 		dl.variation {
 			margin: 0.25em 0;
@@ -1495,6 +1595,47 @@ p.demo_store {
 	}
 }
 
+/**
+ * Photoswipe
+ * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
+ * 2. For zooming on mobile.
+ */
+.pswp {
+	z-index: 999999;
+}
+
+.woocommerce img.pswp__img,
+.woocommerce-page img.pswp__img {
+	max-width: none; /* 2 */
+}
+
+button.pswp__button {
+	box-shadow: none !important;
+	background-image: url('photoswipe/default-skin/default-skin.png') !important;
+}
+
+button.pswp__button,
+button.pswp__button:hover,
+button.pswp__button--arrow--left::before,
+button.pswp__button--arrow--right::before {
+	background-color: transparent !important; /* 1 */
+}
+
+button.pswp__button--arrow--left,
+button.pswp__button--arrow--right,
+button.pswp__button--arrow--left:hover,
+button.pswp__button--arrow--right:hover {
+	background-image: none !important; /* 1 */
+}
+
+button.pswp__button--close:hover {
+	background-position: 0 -44px;
+}
+
+button.pswp__button--zoom:hover {
+	background-position: -88px 0;
+}
+
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
@@ -1526,6 +1667,23 @@ p.demo_store {
 		list-style: none outside !important; // Required for default theme compatibility
 		padding-left: 0 !important; // Required for default theme compatibility
 		margin-left: 0 !important; // Required for default theme compatibility
+	}
+}
+
+/**
+ * Right to left styles
+ */
+.rtl {
+	&.woocommerce {
+		div.product {
+			div.images {
+				.flex-control-thumbs {
+					li {
+						float: right;
+					}
+				}
+			}
+		}
 	}
 }
 

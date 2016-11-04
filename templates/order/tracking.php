@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <p class="order-info"><?php
+	/* translators: 1: order number 2: order date 3: order status */
 	echo wp_kses_post( apply_filters( 'woocommerce_order_tracking_status', sprintf(
 		__( 'Order #%1$s was placed on %2$s and is currently %3$s.', 'woocommerce' ),
 		'<mark class="order-number">' . $order->get_order_number() . '</mark>',
@@ -31,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?></p>
 
 <?php if ( $notes = $order->get_customer_order_notes() ) : ?>
-	<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Order updates', 'woocommerce' ); ?></h2>
 	<ol class="commentlist notes">
 		<?php foreach ( $notes as $note ) : ?>
 		<li class="comment note">

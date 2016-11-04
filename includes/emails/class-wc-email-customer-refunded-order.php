@@ -65,12 +65,11 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 		if ( $partial_refund ) {
 			$this->id             = 'customer_partially_refunded_order';
-			$this->title          = __( 'Partially Refunded order', 'woocommerce' );
+			$this->title          = __( 'Partially refunded order', 'woocommerce' );
 			$this->description    = __( 'Order partially refunded emails are sent to customers when their orders are partially refunded.', 'woocommerce' );
 			$this->heading        = $this->heading_partial;
 			$this->subject        = $this->subject_partial;
-		}
-		else {
+		} else {
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
 			$this->description    = __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );
@@ -201,33 +200,37 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'default' => 'yes',
 			),
 			'subject_full' => array(
-				'title'       => __( 'Full Refund Subject', 'woocommerce' ),
+				'title'       => __( 'Full refund subject', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_full ),
+				/* translators: %s: default subject */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_full . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->subject_full,
 				'desc_tip'    => true,
 			),
 			'subject_partial' => array(
-				'title'       => __( 'Partial Refund Subject', 'woocommerce' ),
+				'title'       => __( 'Partial refund subject', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_partial ),
+				/* translators: %s: default subject */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_partial . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->subject_partial,
 				'desc_tip'    => true,
 			),
 			'heading_full' => array(
-				'title'       => __( 'Full Refund Email Heading', 'woocommerce' ),
+				'title'       => __( 'Full refund email heading', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_full ),
+				/* translators: %s: default heading */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_full . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->heading_full,
 				'desc_tip'    => true,
 			),
 			'heading_partial' => array(
-				'title'       => __( 'Partial Refund Email Heading', 'woocommerce' ),
+				'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_partial ),
+				/* translators: %s: default heading */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_partial . '</code>' ),
 				'placeholder' => '',
 				'default'     => $this->heading_partial,
 				'desc_tip'    => true,

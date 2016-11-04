@@ -22,11 +22,11 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_recent_reviews';
 		$this->widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_recent_reviews';
-		$this->widget_name        = __( 'WooCommerce Recent Reviews', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce recent reviews', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Recent Reviews', 'woocommerce' ),
+				'std'   => __( 'Recent reviews', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
@@ -83,7 +83,8 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo $rating_html;
 
-				printf( '<span class="reviewer">' . _x( 'by %1$s', 'by comment author', 'woocommerce' ) . '</span>', get_comment_author() );
+				/* translators: %s: review author */
+				echo '<span class="reviewer">' . sprintf( __( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>';
 
 				echo '</li>';
 			}

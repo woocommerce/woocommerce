@@ -23,7 +23,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 			'id',
 			'country',
 			'state',
-			'postcode' ,
+			'postcode',
 			'city',
 			'address_1',
 			'address',

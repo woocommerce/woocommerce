@@ -19,7 +19,7 @@ class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_
 
 		// set defaults
 		$this->default_generation_definitions = array(
-			'comment_author'       => __( 'WooCommerce', 'woocommerce' ),
+			'comment_author'       => 'WooCommerce',
 			'comment_author_email' => 'woocommerce@noreply.com',
 			'comment_agent'        => 'WooCommerce Hookshot',
 			'comment_type'         => 'webhook_delivery',

@@ -344,8 +344,7 @@ class WC_API_Server {
 				if ( $supported & self::ACCEPT_DATA ) {
 					$data = $this->handler->parse_body( $this->get_raw_data() );
 					$args = array_merge( $args, array( 'data' => $data ) );
-				}
-				elseif ( $supported & self::ACCEPT_RAW_DATA ) {
+				} elseif ( $supported & self::ACCEPT_RAW_DATA ) {
 					$data = $this->get_raw_data();
 					$args = array_merge( $args, array( 'data' => $data ) );
 				}
@@ -397,14 +396,11 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
-
 				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
-			}
-			elseif ( $param->isDefaultValueAvailable() ) {
+			} elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional
 				$ordered_parameters[] = $param->getDefaultValue();
-			}
-			else {
+			} else {
 				// We don't have this parameter and it wasn't optional, abort!
 				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param->getName() ), array( 'status' => 400 ) );
 			}
@@ -440,7 +436,7 @@ class WC_API_Server {
 					'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
 					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 					'links'          	 => array(
-						'help' => 'https://woothemes.github.io/woocommerce/rest-api/',
+						'help' => 'https://woocommerce.github.io/woocommerce/rest-api/',
 					),
 				),
 			),
@@ -710,8 +706,7 @@ class WC_API_Server {
 		foreach ( $server as $key => $value ) {
 			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
-			}
-			elseif ( isset( $additional[ $key ] ) ) {
+			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;
 			}
 		}

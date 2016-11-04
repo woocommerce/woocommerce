@@ -56,7 +56,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			self::$last_error = null;
 			$expr = trim( $expr );
 			if ( substr( $expr, -1, 1 ) == ';' ) $expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
-			//===============
+			// ===============
 			// is it a variable assignment?
 			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', $expr, $matches ) ) {
 				if ( in_array( $matches[1], self::$vb ) ) { // make sure we're not assigning to a constant
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				if ( ( $tmp = self::pfx( self::nfx( $matches[2] ) ) ) === false ) return false; // get the result and make sure it's good
 				self::$v[ $matches[1] ] = $tmp; // if so, stick it in the variable array
 				return self::$v[ $matches[1] ]; // and return the resulting value
-				//===============
+				// ===============
 				// is it a function assignment?
 			} elseif ( preg_match( '/^\s*([a-z]\w*)\s*\(\s*([a-z]\w*(?:\s*,\s*[a-z]\w*)*)\s*\)\s*=\s*(.+)$/', $expr, $matches ) ) {
 				$fnn = $matches[1]; // get the function name
@@ -87,7 +87,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 				self::$f[ $fnn ] = array( 'args' => $args, 'func' => $stack );
 				return true;
-				//===============
+				// ===============
 			} else {
 				return self::pfx( self::nfx( $expr ) ); // straight up evaluation, woo
 			}
@@ -112,7 +112,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
-
 			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", $expr, $matches ) ) { // make sure the characters are all good
 				return self::trigger( "illegal character '{$matches[0]}'" );
 			}
@@ -121,16 +120,17 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				$op = substr( $expr, $index, 1 ); // get the first character at the current index
 				// find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
 				$ex = preg_match( '/^([A-Za-z]\w*\(?|\d+(?:\.\d*)?|\.\d+|\()/', substr( $expr, $index ), $match );
-				//===============
-				if ( $op == '-' and ! $expecting_op ) { // is it a negation instead of a minus?
+				// ===============
+				if ( '-' === $op and ! $expecting_op ) { // is it a negation instead of a minus?
 					$stack->push( '_' ); // put a negation on the stack
 					$index++;
-				} elseif ( $op == '_' ) { // we have to explicitly deny this, because it's legal on the stack
+				} elseif ( '_' === $op ) { // we have to explicitly deny this, because it's legal on the stack
 					return self::trigger( "illegal character '_'" ); // but not in the input expression
-					//===============
+					// ===============
 				} elseif ( ( in_array( $op, $ops ) or $ex ) and $expecting_op ) { // are we putting an operator on the stack?
 					if ( $ex ) { // are we expecting an operator but have a number/variable/function/opening parethesis?
-						$op = '*'; $index--; // it's an implicit multiplication
+						$op = '*';
+						$index--; // it's an implicit multiplication
 					}
 					// heart of the algorithm:
 					while ( $stack->count > 0 and ( $o2 = $stack->last() ) and in_array( $o2, $ops ) and ( $ops_r[ $op ] ? $ops_p[ $op ] < $ops_p[ $o2 ] : $ops_p[ $op ] <= $ops_p[ $o2 ] ) ) {
@@ -140,11 +140,14 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					$stack->push( $op ); // finally put OUR operator onto the stack
 					$index++;
 					$expecting_op = false;
-					//===============
-				} elseif ( $op == ')' and $expecting_op ) { // ready to close a parenthesis?
+					// ===============
+				} elseif ( ')' === $op && $expecting_op ) { // ready to close a parenthesis?
 					while ( ( $o2 = $stack->pop() ) != '(' ) { // pop off the stack back to the last (
-						if ( is_null( $o2 ) ) return self::trigger( "unexpected ')'" );
-						else $output[] = $o2;
+						if ( is_null( $o2 ) ) {
+							return self::trigger( "unexpected ')'" );
+						} else {
+							$output[] = $o2;
+						}
 					}
 					if ( preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) { // did we just close a function?
 						$fnn = $matches[1]; // get the function name
@@ -154,18 +157,21 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 							if ( $arg_count > 1 )
 								return self::trigger( "too many arguments ($arg_count given, 1 expected)" );
 						} elseif ( array_key_exists( $fnn, self::$f ) ) {
-							if ( $arg_count != count( self::$f[ $fnn ]['args'] ) )
+							if ( count( self::$f[ $fnn ]['args'] ) != $arg_count )
 								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[ $fnn ]['args'] ) . " expected)" );
 						} else { // did we somehow push a non-function on the stack? this should never happen
 							return self::trigger( "internal error" );
 						}
 					}
 					$index++;
-					//===============
-				} elseif ( $op == ',' and $expecting_op ) { // did we just finish a function argument?
+					// ===============
+				} elseif ( ',' === $op and $expecting_op ) { // did we just finish a function argument?
 					while ( ( $o2 = $stack->pop() ) != '(' ) {
-						if ( is_null( $o2 ) ) return self::trigger( "unexpected ','" ); // oops, never had a (
-						else $output[] = $o2; // pop the argument expression stuff and push onto the output
+						if ( is_null( $o2 ) ) {
+							return self::trigger( "unexpected ','" ); // oops, never had a (
+						} else {
+							$output[] = $o2; // pop the argument expression stuff and push onto the output
+						}
 					}
 					// make sure there was a function
 					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) )
@@ -174,11 +180,11 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 					$stack->push( '(' ); // put the ( back on, we'll need to pop back to it again
 					$index++;
 					$expecting_op = false;
-					//===============
-				} elseif ( $op == '(' and ! $expecting_op ) {
+					// ===============
+				} elseif ( '(' === $op and ! $expecting_op ) {
 					$stack->push( '(' ); // that was easy
 					$index++;
-					//===============
+					// ===============
 				} elseif ( $ex and ! $expecting_op ) { // do we now have a function/variable/number?
 					$expecting_op = true;
 					$val = $match[1];
@@ -196,15 +202,15 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 						$output[] = $val;
 					}
 					$index += strlen( $val );
-					//===============
-				} elseif ( $op == ')' ) { // miscellaneous error checking
+					// ===============
+				} elseif ( ')' === $op ) { // miscellaneous error checking
 					return self::trigger( "unexpected ')'" );
 				} elseif ( in_array( $op, $ops ) and ! $expecting_op ) {
 					return self::trigger( "unexpected operator '$op'" );
 				} else { // I don't even want to know what you did to get here
 					return self::trigger( "an unexpected error occured" );
 				}
-				if ( $index == strlen( $expr ) ) {
+				if ( strlen( $expr ) == $index ) {
 					if ( in_array( $op, $ops ) ) { // did we end with an operator? bad.
 						return self::trigger( "operator '$op' lacks operand" );
 					} else {
@@ -216,7 +222,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 			}
 			while ( ! is_null( $op = $stack->pop() ) ) { // pop everything off the stack and push onto output
-				if ( $op == '(' ) return self::trigger( "expecting ')'" ); // if there are (s on the stack, ()s were unbalanced
+				if ( '(' === $op ) {
+					return self::trigger( "expecting ')'" ); // if there are (s on the stack, ()s were unbalanced
+				}
 				$output[] = $op;
 			}
 			return $output;
@@ -231,7 +239,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 		 * @return mixed
 		 */
 		private static function pfx( $tokens, $vars = array() ) {
-			if ( $tokens == false ) return false;
+			if ( false == $tokens ) {
+				return false;
+			}
 			$stack = new WC_Eval_Math_Stack;
 
 			foreach ( $tokens as $token ) { // nice and easy
@@ -250,7 +260,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 							$stack->push( $op1 * $op2 );
 							break;
 						case '/':
-							if ( $op2 == 0 ) return self::trigger( "division by zero" );
+							if ( 0 == $op2 ) {
+								return self::trigger( 'division by zero' );
+							}
 							$stack->push( $op1 / $op2 );
 							break;
 						case '^':
@@ -258,7 +270,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 							break;
 					}
 					// if the token is a unary operator, pop one value off the stack, do the operation, and push it back on
-				} elseif ( $token == "_" ) {
+				} elseif ( '_' === $token ) {
 					$stack->push( -1 * $stack->pop() );
 					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
 				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
@@ -274,7 +286,9 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 			}
 			// when we're out of tokens, the stack should have a single element, the final result
-			if ( $stack->count != 1 ) return self::trigger( "internal error" );
+			if ( 1 != $stack->count ) {
+				return self::trigger( "internal error" );
+			}
 			return $stack->pop();
 		}
 

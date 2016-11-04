@@ -1363,7 +1363,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $product_id, $new_sku );
 					if ( ! $unique_sku ) {
-						throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), 400 );
+						throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
 					} else {
 						update_post_meta( $product_id, '_sku', $new_sku );
 					}
@@ -1506,7 +1506,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
 		$_product = wc_get_product( $product_id );
-		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
+		if ( $_product->post->post_parent > 0 || 'grouped' === $product_type ) {
 
 			$clear_parent_ids = array();
 
@@ -1514,7 +1514,7 @@ class WC_API_Products extends WC_API_Resource {
 				$clear_parent_ids[] = $_product->post->post_parent;
 			}
 
-			if ( $product_type == 'grouped' ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $product_id;
 			}
 
@@ -1706,7 +1706,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Product url.
-		if ( $product_type == 'external' ) {
+		if ( 'external' === $product_type ) {
 			if ( isset( $data['product_url'] ) ) {
 				update_post_meta( $product_id, '_product_url', wc_clean( $data['product_url'] ) );
 			}
@@ -1753,7 +1753,8 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Generate a useful post title
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
+			/* translators: 1: variation id 2: product name */
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post
 			if ( ! $variation_id ) {
@@ -1800,7 +1801,7 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), 400 );
+							throw new WC_API_Exception( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1814,7 +1815,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+					if ( isset( $image['position'] ) && 0 == $image['position'] ) {
 						if ( isset( $image['src'] ) ) {
 							$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
@@ -1893,7 +1894,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				}  else if ( isset( $data['inventory_delta'] ) ) {
+				} else if ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 
@@ -1936,7 +1937,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Tax class
 			if ( isset( $variation['tax_class'] ) ) {
-				if ( $variation['tax_class'] !== 'parent' ) {
+				if ( 'parent' !== $variation['tax_class'] ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variation['tax_class'] ) );
 				} else {
 					delete_post_meta( $variation_id, '_tax_class' );
@@ -2093,7 +2094,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length
@@ -2274,7 +2275,7 @@ class WC_API_Products extends WC_API_Resource {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
-				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+				if ( isset( $image['position'] ) && 0 == $image['position'] ) {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
@@ -2362,7 +2363,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check parsed URL.
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure url is valid.
@@ -2414,12 +2415,12 @@ class WC_API_Products extends WC_API_Resource {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), 400 );
 		}
 
 		unset( $response );
 
-		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for  );
+		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for );
 
 		return $upload;
 	}
@@ -2759,7 +2760,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_product_attribute', $id, $data );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			$this->server->send_status( 201 );
@@ -2843,7 +2844,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return $this->get_product_attribute( $id );
@@ -2903,7 +2904,7 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
 
 			// Clear transients.
-			flush_rewrite_rules();
+			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
@@ -3224,7 +3225,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_products_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_products_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$products = array();
@@ -3243,8 +3244,9 @@ class WC_API_Products extends WC_API_Resource {
 					$product_id  = wc_get_product_id_by_sku( $product_sku );
 				}
 
-				// Product exists / edit product
 				if ( $product_id ) {
+
+					// Product exists / edit product
 					$edit = $this->edit_product( $product_id, array( 'product' => $_product ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -3256,10 +3258,9 @@ class WC_API_Products extends WC_API_Resource {
 					} else {
 						$products[] = $edit['product'];
 					}
-				}
+				} else {
 
-				// Product don't exists / create product
-				else {
+					// Product don't exists / create product
 					$new = $this->create_product( array( 'product' => $_product ) );
 
 					if ( is_wp_error( $new ) ) {

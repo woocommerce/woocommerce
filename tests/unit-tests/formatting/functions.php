@@ -615,8 +615,11 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_format_postcode() {
 
-		// generic postcode
+		// Generic postcode
 		$this->assertEquals( '02111', wc_format_postcode( ' 02111	', 'US' ) );
+
+		// US 9-digit postcode
+		$this->assertEquals( '02111-9999', wc_format_postcode( ' 021119999	', 'US' ) );
 
 		// UK postcode
 		$this->assertEquals( 'PCRN 1ZZ', wc_format_postcode( 'pcrn1zz', 'GB' ) );

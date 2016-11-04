@@ -95,8 +95,10 @@ class WC_Admin_Attributes {
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
 		if ( strlen( $attribute_name ) >= 28 ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		}
 
@@ -118,6 +120,7 @@ class WC_Admin_Attributes {
 		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
 			return $valid_attribute_name;
 		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
 		}
 
@@ -125,7 +128,7 @@ class WC_Admin_Attributes {
 
 		do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
 
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return true;
@@ -151,6 +154,7 @@ class WC_Admin_Attributes {
 		$taxonomy_exists    = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) );
 		$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
 		if ( $old_attribute_name != $attribute['attribute_name'] && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute['attribute_name'] && $taxonomy_exists ) {
+			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
 		}
 
@@ -200,7 +204,7 @@ class WC_Admin_Attributes {
 
 		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
 
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return true;
@@ -252,8 +256,7 @@ class WC_Admin_Attributes {
 
 		?>
 		<div class="wrap woocommerce">
-			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
+			<h1><?php _e( 'Edit attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
@@ -292,7 +295,7 @@ class WC_Admin_Attributes {
 							</tr>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
-									<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+									<label for="attribute_public"><?php _e( 'Enable archives?', 'woocommerce' ); ?></label>
 								</th>
 								<td>
 									<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
@@ -354,8 +357,8 @@ class WC_Admin_Attributes {
 	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
-			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
+			<h1><?php echo get_admin_page_title(); ?></h1>
+
 			<br class="clear" />
 			<div id="col-container">
 				<div id="col-right">
@@ -381,7 +384,7 @@ class WC_Admin_Attributes {
 													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
 												</td>
 												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? '(' . __( 'Public', 'woocommerce' ) . ')' : ''; ?></td>
+												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? __( '(Public)', 'woocommerce' ) : ''; ?></td>
 												<td><?php
 													switch ( $tax->attribute_orderby ) {
 														case 'name' :
@@ -438,7 +441,7 @@ class WC_Admin_Attributes {
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
+							<h2><?php _e( 'Add new attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
@@ -494,7 +497,7 @@ class WC_Admin_Attributes {
 
 								<?php do_action( 'woocommerce_after_add_attribute_fields' ) ?>
 
-								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
+								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 							</form>
 						</div>

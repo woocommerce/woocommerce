@@ -19,7 +19,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	return array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) );
+	return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
+}
+
+/**
+ * See if an attribute is actually valid.
+ * @since  2.7.0
+ * @param  string $value
+ * @return bool
+ */
+function wc_get_text_attributes_filter_callback( $value ) {
+	return '' !== $value;
 }
 
 /**
@@ -115,7 +125,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		// Attempt to get label from product, as entered by the user
 		$label = $attributes[ sanitize_title( $name ) ]['name'];
 	} else {
-		$label = str_replace( '-', ' ', $name );
+		$label = $name;
 	}
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );

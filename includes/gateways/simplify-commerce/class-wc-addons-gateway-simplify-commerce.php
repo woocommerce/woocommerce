@@ -294,7 +294,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 		if ( ! $customer_id ) {
-			return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+			return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 		}
 
 		try {
@@ -302,7 +302,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$payment = Simplify_Payment::createPayment( array(
 				'amount'              => $amount * 100, // In cents.
 				'customer'            => $customer_id,
-				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
+				'description'         => sprintf( __( '%1$s - Order #%2$s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
 				'reference'           => $order->get_id(),
 			) );
@@ -318,7 +318,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				}
 			}
 
-			$order->add_order_note( sprintf( __( 'Simplify payment error: %s', 'woocommerce' ), $error_message ) );
+			$order->add_order_note( sprintf( __( 'Simplify payment error: %s.', 'woocommerce' ), $error_message ) );
 
 			return new WP_Error( 'simplify_payment_declined', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -328,7 +328,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$order->payment_complete( $payment->id );
 
 			// Add order note
-			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
+			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %1$s, Auth Code: %2$s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
 
 			return true;
 		} else {
@@ -426,12 +426,18 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		try {
 			$order_items    = $order->get_items();
 			$order_item     = array_shift( $order_items );
-			$pre_order_name = sprintf( __( '%s - Pre-order for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
+			/* translators: 1: site name 2: product name 3: order number */
+			$pre_order_name = sprintf(
+				__( '%1$s - Pre-order for "%2$s" (Order #%3$s)', 'woocommerce' ),
+				esc_html( get_bloginfo( 'name', 'display' ) ),
+				$order_item['name'],
+				$order->get_order_number()
+			);
 
 			$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 			if ( ! $customer_id ) {
-				return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+				return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 			}
 
 			// Charge the customer
@@ -448,7 +454,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				$order->payment_complete( $payment->id );
 
 				// Add order note
-				$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
+				$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %1$s, Auth Code: %2$s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
 			} else {
 				return new WP_Error( 'simplify_payment_declined', __( 'Payment was declined - the customer need to try another card.', 'woocommerce' ) );
 			}

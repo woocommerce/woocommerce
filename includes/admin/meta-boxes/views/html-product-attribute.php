@@ -1,7 +1,7 @@
 <div data-taxonomy="<?php echo esc_attr( $taxonomy ); ?>" class="woocommerce_attribute wc-metabox closed <?php echo esc_attr( implode( ' ', $metabox_class ) ); ?>" rel="<?php echo $position; ?>">
 	<h3>
 		<a href="#" class="remove_row delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
-		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
+		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong class="attribute_name"><?php echo esc_html( $attribute_label ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content">
@@ -52,7 +52,12 @@
 									// Text attributes should list terms pipe separated
 									echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', wp_get_post_terms( $thepostid, $taxonomy, array( 'fields' => 'names' ) ) ) );
 
-								?>" placeholder="<?php echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) ); ?>" />
+								?>" placeholder="<?php
+
+									/* translators: %s: WC_DELIMITER */
+									echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) );
+
+								?>" />
 
 							<?php endif; ?>
 
@@ -77,6 +82,7 @@
 						</div>
 					</td>
 				</tr>
+				<?php do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i ); ?>
 			</tbody>
 		</table>
 	</div>

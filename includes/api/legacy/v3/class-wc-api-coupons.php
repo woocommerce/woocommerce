@@ -512,7 +512,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_coupons_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_coupons_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$coupons = array();
@@ -525,8 +525,9 @@ class WC_API_Coupons extends WC_API_Resource {
 					$coupon_id = intval( $_coupon['id'] );
 				}
 
-				// Coupon exists / edit coupon
 				if ( $coupon_id ) {
+
+					// Coupon exists / edit coupon
 					$edit = $this->edit_coupon( $coupon_id, array( 'coupon' => $_coupon ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -537,10 +538,9 @@ class WC_API_Coupons extends WC_API_Resource {
 					} else {
 						$coupons[] = $edit['coupon'];
 					}
-				}
+				} else {
 
-				// Coupon don't exists / create coupon
-				else {
+					// Coupon don't exists / create coupon
 					$new = $this->create_coupon( array( 'coupon' => $_coupon ) );
 
 					if ( is_wp_error( $new ) ) {

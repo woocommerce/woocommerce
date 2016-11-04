@@ -431,7 +431,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 		// Add standard class
 		$items[] = array(
 			'slug' => 'standard',
-			'name' => __( 'Standard Rate', 'woocommerce' ),
+			'name' => __( 'Standard rate', 'woocommerce' ),
 		);
 
 		$classes = WC_Tax::get_tax_classes();

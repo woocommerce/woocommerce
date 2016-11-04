@@ -5,7 +5,7 @@
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
  * Version: 2.7.0-dev
  * Author: WooThemes
- * Author URI: https://woothemes.com
+ * Author URI: https://woocommerce.com
  * Requires at least: 4.4
  * Tested up to: 4.6
  *
@@ -100,6 +100,13 @@ final class WooCommerce {
 	 * @var WC_Order_Factory
 	 */
 	public $order_factory = null;
+
+	/**
+	 * Structured data instance.
+	 *
+	 * @var WC_Structured_Data
+	 */
+	public $structured_data = null;
 
 	/**
 	 * Main WooCommerce Instance.
@@ -302,6 +309,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );                          // Embeds
+		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );                // Structured Data class
 	}
 
 	/**
@@ -335,8 +343,9 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
-			$this->customer = new WC_Customer( get_current_user_id(), true );   // Customer class, handles data such as customer location
+			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents
+			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
+			$this->structured_data = new WC_Structured_Data();                       // Structured Data class, generates and handles structured data
 		}
 
 		$this->load_webhooks();

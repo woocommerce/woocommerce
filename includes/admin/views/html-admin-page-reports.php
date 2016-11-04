@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		$report = $reports[ $current_tab ]['reports'][ $current_report ];
 
-		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true ) {
+		if ( ! isset( $report['hide_title'] ) || true != $report['hide_title'] ) {
 			echo '<h1>' . esc_html( $report['title'] ) . '</h1>';
 		} else {
 			echo '<h1 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h1>';

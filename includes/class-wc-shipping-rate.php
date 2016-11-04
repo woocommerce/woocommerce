@@ -71,7 +71,7 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_label() {
-		return apply_filters( 'woocommerce_shipping_rate_label', $this->label );
+		return apply_filters( 'woocommerce_shipping_rate_label', $this->label, $this );
 	}
 
 	/**

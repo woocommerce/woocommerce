@@ -100,7 +100,8 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
-		return self::calc_exclusive_tax( $price, $rates );
+		$taxes = self::calc_exclusive_tax( $price, $rates );
+		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
 	/**
@@ -148,11 +149,13 @@ class WC_Tax {
 
 		$regular_tax_rates = $compound_tax_rates = 0;
 
-		foreach ( $rates as $key => $rate )
-			if ( $rate['compound'] == 'yes' )
+		foreach ( $rates as $key => $rate ) {
+			if ( 'yes' === $rate['compound'] ) {
 				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
-			else
+			} else {
 				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
+			}
+		}
 
 		$regular_tax_rate 	= 1 + ( $regular_tax_rates / 100 );
 		$compound_tax_rate 	= 1 + ( $compound_tax_rates / 100 );
@@ -164,7 +167,7 @@ class WC_Tax {
 
 			$the_rate      = $rate['rate'] / 100;
 
-			if ( $rate['compound'] == 'yes' ) {
+			if ( 'yes' === $rate['compound'] ) {
 				$the_price = $price;
 				$the_rate  = $the_rate / $compound_tax_rate;
 			} else {
@@ -194,8 +197,9 @@ class WC_Tax {
 			// Multiple taxes
 			foreach ( $rates as $key => $rate ) {
 
-				if ( $rate['compound'] == 'yes' )
+				if ( 'yes' === $rate['compound'] ) {
 					continue;
+				}
 
 				$tax_amount = $price * ( $rate['rate'] / 100 );
 
@@ -214,8 +218,9 @@ class WC_Tax {
 			// Compound taxes
 			foreach ( $rates as $key => $rate ) {
 
-				if ( $rate['compound'] == 'no' )
+				if ( 'no' === $rate['compound'] ) {
 					continue;
+				}
 
 				$the_price_inc_tax = $price + ( $pre_compound_total );
 
@@ -225,10 +230,11 @@ class WC_Tax {
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
 
 				// Add rate
-				if ( ! isset( $taxes[ $key ] ) )
+				if ( ! isset( $taxes[ $key ] ) ) {
 					$taxes[ $key ] = $tax_amount;
-				else
+				} else {
 					$taxes[ $key ] += $tax_amount;
+				}
 			}
 		}
 
@@ -706,7 +712,7 @@ class WC_Tax {
 	 */
 	private static function format_tax_rate_state( $state ) {
 		$state = strtoupper( $state );
-		return $state === '*' ? '' : $state;
+		return ( '*' === $state ) ? '' : $state;
 	}
 
 	/**
@@ -716,7 +722,7 @@ class WC_Tax {
 	 */
 	private static function format_tax_rate_country( $country ) {
 		$country = strtoupper( $country );
-		return $country === '*' ? '' : $country;
+		return ( '*' === $country ) ? '' : $country;
 	}
 
 	/**
@@ -757,7 +763,7 @@ class WC_Tax {
 		if ( ! in_array( $class, $sanitized_classes ) ) {
 			$class = '';
 		}
-		return $class === 'standard' ? '' : $class;
+		return ( 'standard' === $class ) ? '' : $class;
 	}
 
 	/**

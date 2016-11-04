@@ -160,7 +160,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'shipping_lines' => array(
 				array(
 					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat Rate',
+					'method_title' => 'Flat rate',
 					'total'        => 10,
 				),
 			),
@@ -244,7 +244,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'shipping_lines' => array(
 				array(
 					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat Rate',
+					'method_title' => 'Flat rate',
 					'total'        => 10,
 				),
 			),

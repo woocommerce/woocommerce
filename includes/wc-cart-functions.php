@@ -111,9 +111,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue Shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
-		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
 	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
@@ -136,9 +136,9 @@ function wc_format_list_of_items( $items ) {
 	foreach ( $items as $key => $item ) {
 		$item_string .= $item;
 
-		if ( $key + 2 === sizeof( $items ) ) {
+		if ( sizeof( $items ) === $key + 2 ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
-		} elseif ( $key + 1 !== sizeof( $items ) ) {
+		} elseif ( sizeof( $items ) !== $key + 1 ) {
 			$item_string .= ', ';
 		}
 	}
@@ -214,7 +214,9 @@ function wc_cart_totals_shipping_html() {
 			'available_methods'    => $package['rates'],
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
+			// @codingStandardsIgnoreStart
 			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			// @codingStandardsIgnoreEnd
 			'index'                => $i,
 			'chosen_method'        => $chosen_method,
 		) );
@@ -242,7 +244,7 @@ function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
-	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
+	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', sprintf( esc_html__( 'Coupon: %s', 'woocommerce' ), $coupon->get_code() ), $coupon );
 
 	if ( $echo ) {
 		echo $label;

@@ -462,7 +462,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_taxes_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_taxes_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$taxes = array();
@@ -475,8 +475,9 @@ class WC_API_Taxes extends WC_API_Resource {
 					$tax_id = intval( $_tax['id'] );
 				}
 
-				// Tax rate exists / edit tax rate
 				if ( $tax_id ) {
+
+					// Tax rate exists / edit tax rate
 					$edit = $this->edit_tax( $tax_id, array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $edit ) ) {
@@ -487,10 +488,9 @@ class WC_API_Taxes extends WC_API_Resource {
 					} else {
 						$taxes[] = $edit['tax'];
 					}
-				}
+				} else {
 
-				// Tax rate don't exists / create tax rate
-				else {
+					// Tax rate don't exists / create tax rate
 					$new = $this->create_tax( array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $new ) ) {
@@ -531,7 +531,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			// Add standard class
 			$tax_classes[] = array(
 				'slug' => 'standard',
-				'name' => __( 'Standard Rate', 'woocommerce' ),
+				'name' => __( 'Standard rate', 'woocommerce' ),
 			);
 
 			$classes = WC_Tax::get_tax_classes();

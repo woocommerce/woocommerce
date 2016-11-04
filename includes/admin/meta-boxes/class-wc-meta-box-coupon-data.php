@@ -45,12 +45,12 @@ class WC_Meta_Box_Coupon_Data {
 							'class'  => 'general_coupon_data',
 						),
 						'usage_restriction' => array(
-							'label'  => __( 'Usage Restriction', 'woocommerce' ),
+							'label'  => __( 'Usage restriction', 'woocommerce' ),
 							'target' => 'usage_restriction_coupon_data',
 							'class'  => '',
 						),
 						'usage_limit' => array(
-							'label'  => __( 'Usage Limits', 'woocommerce' ),
+							'label'  => __( 'Usage limits', 'woocommerce' ),
 							'target' => 'usage_limit_coupon_data',
 							'class'  => '',
 						),
@@ -75,7 +75,8 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ) ) );
 
 				// Expiry date
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => date( 'Y-m-d', $coupon->get_date_expires() ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
+				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => esc_attr__( 'YYYY-MM-DD', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 				do_action( 'woocommerce_coupon_options' );
 
@@ -174,7 +175,7 @@ class WC_Meta_Box_Coupon_Data {
 					'label'             => __( 'Email restrictions', 'woocommerce' ),
 					'placeholder'       => __( 'No restrictions', 'woocommerce' ),
 					'description'       => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
-					'value'             => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
+					'value'             => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
 					'desc_tip'          => true,
 					'type'              => 'email',
 					'class'             => '',
@@ -196,7 +197,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array(
 					'id'                => 'usage_limit',
 					'label'             => __( 'Usage limit per coupon', 'woocommerce' ),
-					'placeholder'       => _x('Unlimited usage', 'placeholder', 'woocommerce'),
+					'placeholder'       => esc_attr__( 'Unlimited usage', 'woocommerce' ),
 					'description'       => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ),
 					'type'              => 'number',
 					'desc_tip'          => true,
@@ -212,7 +213,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array(
 					'id'                => 'limit_usage_to_x_items',
 					'label'             => __( 'Limit usage to X items', 'woocommerce' ),
-					'placeholder'       => _x( 'Apply to all qualifying items in cart', 'placeholder', 'woocommerce' ),
+					'placeholder'       => esc_attr__( 'Apply to all qualifying items in cart', 'woocommerce' ),
 					'description'       => __( 'The maximum number of individual items this coupon can apply to when using product discounts. Leave blank to apply to all qualifying items in cart.', 'woocommerce' ),
 					'desc_tip'          => true,
 					'class'             => 'short',
@@ -228,7 +229,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_text_input( array(
 					'id'                => 'usage_limit_per_user',
 					'label'             => __( 'Usage limit per user', 'woocommerce' ),
-					'placeholder'       => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ),
+					'placeholder'       => esc_attr__( 'Unlimited usage', 'woocommerce' ),
 					'description'       => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ),
 					'desc_tip'          => true,
 					'class'             => 'short',

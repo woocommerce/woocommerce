@@ -125,11 +125,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $sizes as $size => $values ) {
-			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
+			$img = '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
 			$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img( $size ) );
 		}
 
-		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
+		$img = '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
 		$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img() );
 	}
 
@@ -140,10 +140,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_product_types() {
 		$product_types = (array) apply_filters( 'product_type_selector', array(
-			'simple'   => __( 'Simple product', 'woocommerce' ),
-			'grouped'  => __( 'Grouped product', 'woocommerce' ),
-			'external' => __( 'External/Affiliate product', 'woocommerce' ),
-			'variable' => __( 'Variable product', 'woocommerce' ),
+			'simple'   => 'Simple product',
+			'grouped'  => 'Grouped product',
+			'external' => 'External/Affiliate product',
+			'variable' => 'Variable product',
 		) );
 
 		$this->assertEquals( $product_types, wc_get_product_types() );
@@ -182,5 +182,21 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		// Delete Product
 		WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_get_min_max_price_meta_query()
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_wc_get_min_max_price_meta_query() {
+		$meta_query = wc_get_min_max_price_meta_query( array( 'min_price' => 10, 'max_price' => 100 ) );
+
+		$this->assertEquals( array(
+			'key'     => '_price',
+			'value'   => array( 10, 100 ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL',
+		), $meta_query );
 	}
 }

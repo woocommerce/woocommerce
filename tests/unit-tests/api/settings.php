@@ -8,14 +8,12 @@
 
 class Settings extends WC_REST_Unit_Test_Case {
 
-	protected $server;
-
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_Rest_Settings_Options_Controller();
+		$this->endpoint = new WC_REST_Settings_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
@@ -49,7 +47,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 
 		$this->assertContains( array(
 			'id'          => 'test',
-			'label'       => 'Test Extension',
+			'label'       => 'Test extension',
 			'parent_id'   => '',
 			'description' => 'My awesome test settings.',
 			'sub_groups'  => array( 'sub-test' ),
@@ -176,7 +174,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
     		'id' => 'woocommerce_demo_store',
-			'label' => 'Store Notice',
+			'label' => 'Store notice',
 			'description' => 'Enable site-wide store notice text',
 			'type' => 'checkbox',
 			'default' => 'no',
@@ -198,11 +196,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 		// test getting a valid group with settings attached to it
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test' ) );
 		$data = $response->get_data();
-		$this->assertEquals( 2, count( $data ) );
+		$this->assertEquals( 1, count( $data ) );
 		$this->assertEquals( 'woocommerce_shop_page_display', $data[0]['id'] );
 		$this->assertEmpty( $data[0]['value'] );
-		$this->assertEquals( 'woocommerce_enable_lightbox', $data[1]['id'] );
-		$this->assertEquals( 'yes', $data[1]['value'] );
 	}
 
 	/**
@@ -229,10 +225,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_shop_page_display' ) );
 		$data = $response->get_data();
 		$this->assertEquals( '', $data['value'] );
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_enable_lightbox' ) );
-		$data = $response->get_data();
-		$this->assertEquals( 'yes', $data['value'] );
 
 		// test updating shop display setting
 		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'test', 'woocommerce_shop_page_display' ) );
@@ -264,27 +256,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( '', $data['value'] );
 		$this->assertEquals( '', get_option( 'woocommerce_shop_page_display' ) );
-
-		// test updating ligtbox
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'test', 'woocommerce_enable_lightbox' ) );
-		$request->set_body_params( array(
-			'value' => 'no',
-		) );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-
-		$this->assertEquals( 'no', $data['value'] );
-		$this->assertEquals( 'no', get_option( 'woocommerce_enable_lightbox' ) );
-
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'test', 'woocommerce_enable_lightbox' ) );
-		$request->set_body_params( array(
-			'value' => 'yes',
-		) );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-
-		$this->assertEquals( 'yes', $data['value'] );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_enable_lightbox' ) );
 	}
 
 	/**
@@ -299,7 +270,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test' ) );
 		$data = $response->get_data();
 		$this->assertEquals( '', $data[0]['value'] );
-		$this->assertEquals( 'yes', $data[1]['value'] );
 
 		// test setting both at once
 		$request = new WP_REST_Request( 'POST', '/wc/v1/settings/test/batch' );
@@ -309,18 +279,12 @@ class Settings extends WC_REST_Unit_Test_Case {
 				'id'    => 'woocommerce_shop_page_display',
 				'value' => 'both',
 				),
-				array(
-					'id'    => 'woocommerce_enable_lightbox',
-					'value' => 'no',
-				),
 			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$this->assertEquals( 'both', $data['update'][0]['value'] );
 		$this->assertEquals( 'both', get_option( 'woocommerce_shop_page_display' ) );
-		$this->assertEquals( 'no', $data['update'][1]['value'] );
-		$this->assertEquals( 'no', get_option( 'woocommerce_enable_lightbox' ) );
 
 		// test updating one, but making sure the other value stays the same
 		$request = new WP_REST_Request( 'POST', '/wc/v1/settings/test/batch' );
@@ -336,11 +300,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertEquals( 'subcategories', $data['update'][0]['value'] );
 		$this->assertEquals( 'subcategories', get_option( 'woocommerce_shop_page_display' ) );
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test' ) );
-		$data = $response->get_data();
-		$this->assertEquals( 'no', $data[1]['value'] );
-		$this->assertEquals( 'no', get_option( 'woocommerce_enable_lightbox' ) );
 	}
 
 	/**
@@ -352,7 +311,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		// test getting an invalid setting from a group that does not exist
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/not-real/woocommerce_enable_lightbox' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/not-real/woocommerce_shop_page_display' ) );
 		$data = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
@@ -362,17 +321,16 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting a valid setting
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_enable_lightbox' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_shop_page_display' ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->assertEquals( 'woocommerce_enable_lightbox', $data['id'] );
-		$this->assertEquals( 'Product Image Gallery', $data['label'] );
-		$this->assertEquals( 'yes', $data['default'] );
-		$this->assertEquals( 'Product gallery images will open in a lightbox.', $data['tip'] );
-		$this->assertEquals( 'checkbox', $data['type'] );
-		$this->assertEquals( 'yes', $data['value'] );
+		$this->assertEquals( 'woocommerce_shop_page_display', $data['id'] );
+		$this->assertEquals( 'Shop page display', $data['label'] );
+		$this->assertEquals( '', $data['default'] );
+		$this->assertEquals( 'select', $data['type'] );
+		$this->assertEquals( '', $data['value'] );
 	}
 
 	/**
@@ -383,7 +341,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	public function test_get_setting_without_permission() {
 		wp_set_current_user( 0 );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_enable_lightbox' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/test/woocommerce_shop_page_display' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -427,7 +385,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 			->method( 'is_setting_type_valid' )
 			->will( $this->returnValue( false ) );
 
-		$result = $controller->get_setting( 'test', 'woocommerce_enable_lightbox' );
+		$result = $controller->get_setting( 'test', 'woocommerce_shop_page_display' );
 
 		$this->assertIsWPError( $result );
 	}
@@ -440,9 +398,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 	public function test_update_setting_without_permission() {
 		wp_set_current_user( 0 );
 
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'test', 'woocommerce_enable_lightbox' ) );
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'test', 'woocommerce_shop_page_display' ) );
 		$request->set_body_params( array(
-			'value' => 'yes',
+			'value' => 'subcategories',
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
@@ -488,10 +446,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	* Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
-	*
-	* @since  2.7.0
-	*/
+	 * Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
+	 *
+	 * @since  2.7.0
+	 */
 	public function test_classic_settings() {
 		wp_set_current_user( $this->user );
 
@@ -501,7 +459,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( is_array( $data ) );
 		$this->assertContains( array(
 			'id'          => 'woocommerce_downloads_require_login',
-			'label'       => 'Access Restriction',
+			'label'       => 'Access restriction',
 			'description' => 'Downloads require login',
 			'type'        => 'checkbox',
 			'default'     => 'no',
@@ -519,7 +477,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-		), $data );
+	), $data );
 
 		// test get single
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/products/woocommerce_dimension_unit' ) );
@@ -536,6 +494,245 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'yd', $data['value'] );
-		$this->assertEquals( 'yd', get_option(' woocommerce_dimension_unit' ) );
+		$this->assertEquals( 'yd', get_option( 'woocommerce_dimension_unit' ) );
 	}
+
+	/**
+	 * Tests our email etting registration to make sure settings added for WP-Admin are available over the API.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_email_settings() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order' ) );
+		$settings = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertContains( array(
+			'id'          => 'recipient',
+			'label'       => 'Recipient(s)',
+			'description' => 'Enter recipients (comma separated) for this email. Defaults to <code>admin@example.org</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'Enter recipients (comma separated) for this email. Defaults to <code>admin@example.org</code>.',
+			'value'       => '',
+			'_links'      => array(
+				'self' => array(
+					array(
+						'href' => rest_url( '/wc/v1/settings/email_new_order/recipient' ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/settings/email_new_order' ),
+					),
+				),
+			),
+		), $settings );
+
+		// test get single
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order/subject' ) );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( array(
+			'id'          => 'subject',
+			'label'       => 'Subject',
+			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'value'       => '',
+		), $setting );
+
+		// test update
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_new_order', 'subject' ) );
+		$request->set_body_params( array(
+			'value' => 'This is my subject',
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( array(
+			'id'          => 'subject',
+			'label'       => 'Subject',
+			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'type'        => 'text',
+			'default'     => '',
+			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'value'       => 'This is my subject',
+		), $setting );
+
+		// test updating another subject and making sure it works with a "similar" id
+		$request = new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'email_customer_new_account', 'subject' ) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEmpty( $setting['value'] );
+
+		// test update
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_customer_new_account', 'subject' ) );
+		$request->set_body_params( array(
+			'value' => 'This is my new subject',
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( 'This is my new subject', $setting['value'] );
+
+		// make sure the other is what we left it
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/email_new_order/subject' ) );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( 'This is my subject', $setting['value'] );
+	}
+
+	/**
+	 * Test validation of checkbox settings.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_checkbox() {
+		wp_set_current_user( $this->user );
+
+		// test bogus value
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'not_yes_or_no',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// test yes
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'yes',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		// test no
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
+		$request->set_body_params( array(
+			'value' => 'no',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test validation of radio settings.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_radio() {
+		wp_set_current_user( $this->user );
+
+		// not a valid option
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'shipping', 'woocommerce_ship_to_destination' ) );
+		$request->set_body_params( array(
+			'value' => 'billing2',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// valid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'shipping', 'woocommerce_ship_to_destination' ) );
+		$request->set_body_params( array(
+			'value' => 'billing',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test validation of multiselect.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_multiselect() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'general', 'woocommerce_specific_allowed_countries' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEmpty( $setting['value'] );
+
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'general', 'woocommerce_specific_allowed_countries' ) );
+		$request->set_body_params( array(
+			'value' => array( 'AX', 'DZ', 'MMM' ),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'AX', 'DZ' ), $setting['value'] );
+	}
+
+	/**
+	 * Test validation of select.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_select() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'kg', $setting['value'] );
+
+		// invalid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) );
+		$request->set_body_params( array(
+			'value' => 'pounds', // invalid, should be lbs
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// valid
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) );
+		$request->set_body_params( array(
+			'value' => 'lbs', // invalid, should be lbs
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'lbs', $setting['value'] );
+	}
+
+	/**
+	 * Test validation of image_width.
+	 *
+	 * @since  2.7.0
+	 */
+	public function test_validation_image_width() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 180, 'height' => 180, 'crop' => true ), $setting['value'] );
+
+		// test bogus
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
+		$request->set_body_params( array(
+			'value' => array(
+				'width'  => 400,
+				'height' => 200,
+				'crop'   => 'asdasdasd',
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 400, 'height' => 200, 'crop' => true ), $setting['value'] );
+
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
+		$request->set_body_params( array(
+			'value' => array(
+				'width'  => 200,
+				'height' => 100,
+				'crop'   => false,
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( array( 'width' => 200, 'height' => 100, 'crop' => false ), $setting['value'] );
+	}
+
 }

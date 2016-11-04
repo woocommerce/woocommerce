@@ -556,13 +556,14 @@ class WC_CLI_Customer extends WC_CLI_Command {
 
 		if ( is_numeric( $id_email_or_login ) ) {
 			$user = get_user_by( 'id', $id_email_or_login );
-		} else if ( is_email( $id_email_or_login ) ) {
+		} elseif ( is_email( $id_email_or_login ) ) {
 			$user = get_user_by( 'email', $id_email_or_login );
 		} else {
 			$user = get_user_by( 'login', $id_email_or_login );
 		}
 
 		if ( ! $user ) {
+			/* translators: %s: id email or login */
 			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer', sprintf( __( 'Invalid customer "%s"', 'woocommerce' ), $id_email_or_login ) );
 		}
 

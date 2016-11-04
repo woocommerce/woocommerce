@@ -272,7 +272,7 @@ class WC_Product_Variable extends WC_Product {
 			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
 			// If the product version has changed since the transient was last saved, reset the transient cache.
-			if ( empty( $transient_cached_prices_array['version'] ) || $transient_cached_prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+			if ( empty( $transient_cached_prices_array['version'] ) || WC_Cache_Helper::get_transient_version( 'product' ) !== $transient_cached_prices_array['version'] ) {
 				$transient_cached_prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
@@ -356,7 +356,7 @@ class WC_Product_Variable extends WC_Product {
 			$min_price = current( $prices['price'] );
 			$max_price = end( $prices['price'] );
 			$price     = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
-			$is_free   = $min_price == 0 && $max_price == 0;
+			$is_free   = 0 == $min_price && 0 == $max_price;
 
 			if ( $this->is_on_sale() ) {
 				$min_regular_price = current( $prices['regular_price'] );
@@ -397,7 +397,7 @@ class WC_Product_Variable extends WC_Product {
 				) ) );
 
 				// empty value indicates that all options for given attribute are available
-				if ( in_array( '', $values ) ) {
+				if ( in_array( '', $values ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
 				// Get custom attributes (non taxonomy) as defined
@@ -528,7 +528,7 @@ class WC_Product_Variable extends WC_Product {
 		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
 		 */
 	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-			return $match_attributes === array_map( 'sanitize_title', $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
 
 		} else {
 			return 0;
@@ -573,23 +573,25 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id     = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment        = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
-			$full_attachment   = wp_get_attachment_image_src( $attachment_id, 'full' );
-			$attachment_object = get_post( $attachment_id );
-			$image             = $attachment ? current( $attachment ) : '';
-			$image_link        = $full_attachment ? current( $full_attachment ) : '';
-			$image_title       = get_the_title( $attachment_id );
-			$image_alt         = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-			$image_caption     = $attachment_object->post_excerpt;
-			$image_srcset      = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-			$image_sizes       = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+			$attachment_id       = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment          = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$attachment_thumb    = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+			$full_attachment     = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment_object   = get_post( $attachment_id );
+			$image               = $attachment ? current( $attachment ) : '';
+			$image_thumbnail_src = $attachment_thumb ? current( $attachment_thumb ) : '';
+			$image_link          = $full_attachment ? current( $full_attachment ) : '';
+			$image_title         = get_the_title( $attachment_id );
+			$image_alt           = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+			$image_caption       = $attachment_object->post_excerpt;
+			$image_srcset        = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes         = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 
 			if ( empty( $image_alt ) ) {
 				$image_alt = $image_title;
 			}
 		} else {
-			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = $attachment = $image_thumbnail_src = $full_attachment = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -605,7 +607,12 @@ class WC_Product_Variable extends WC_Product {
 			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
 			'attributes'             => $variation->get_variation_attributes(),
 			'image_src'              => $image,
+			'image_h'                => $attachment ? $attachment[1] : '',
+			'image_w'                => $attachment ? $attachment[2] : '',
+			'image_thumbnail_src'    => $image_thumbnail_src,
 			'image_link'             => $image_link,
+			'image_link_h'           => $full_attachment ? $full_attachment[1] : '',
+			'image_link_w'           => $full_attachment ? $full_attachment[2] : '',
 			'image_title'            => $image_title,
 			'image_alt'              => $image_alt,
 			'image_caption'          => $image_caption,
@@ -614,7 +621,7 @@ class WC_Product_Variable extends WC_Product {
 			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'      => $availability_html,
 			'sku'                    => $variation->get_sku(),
-			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ) : '',
+			'weight'                 => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : '',
 			'dimensions'             => $variation->get_dimensions(),
 			'min_qty'                => 1,
 			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
@@ -710,7 +717,7 @@ class WC_Product_Variable extends WC_Product {
 					}
 					if ( sanitize_title( $value[0] ) === $value[0] ) {
 						foreach ( $parent_attributes as $attribute ) {
-							if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+							if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
 								continue;
 							}
 							$text_attributes = wc_get_text_attributes( $attribute['value'] );
@@ -819,14 +826,14 @@ class WC_Product_Variable extends WC_Product {
 					$child_price = get_post_meta( $child_id, '_' . $price_type, true );
 
 					// Skip non-priced variations
-					if ( $child_price === '' ) {
+					if ( '' === $child_price ) {
 						continue;
 					}
 
 					// Skip hidden variations
 					if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 						$stock = get_post_meta( $child_id, '_stock', true );
-						if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						if ( '' !== $stock && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 							continue;
 						}
 					}

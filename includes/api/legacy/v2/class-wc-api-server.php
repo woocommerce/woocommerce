@@ -154,14 +154,16 @@ class WC_API_Server {
 		// allow plugins to remove default authentication or add their own authentication
 		$user = apply_filters( 'woocommerce_api_check_authentication', null, $this );
 
-		// API requests run under the context of the authenticated user
 		if ( is_a( $user, 'WP_User' ) ) {
-			wp_set_current_user( $user->ID );
-		}
 
-		// WP_Errors are handled in serve_request()
-		elseif ( ! is_wp_error( $user ) ) {
+			// API requests run under the context of the authenticated user
+			wp_set_current_user( $user->ID );
+
+		} elseif ( ! is_wp_error( $user ) ) {
+
+			// WP_Errors are handled in serve_request()
 			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => 500 ) );
+
 		}
 
 		return $user;
@@ -464,7 +466,7 @@ class WC_API_Server {
 					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 					'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
 					'links'              => array(
-						'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
+						'help' => 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
 					),
 				),
 			),

@@ -166,7 +166,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $post ) );
+		$response->add_links( $this->prepare_links( $post, $request ) );
 
 		/**
 		 * Filter the data for a response.
@@ -275,6 +275,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
@@ -315,7 +316,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		try {
 			$post_id = (int) $request['id'];
 
-			if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
+			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
 				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
