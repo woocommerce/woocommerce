@@ -160,6 +160,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	private function get_status_label( $status_name, $status ) {
 		switch ( $status_name ) {
 			case 'publish' :
+				/* translators: %s: count */
 				$label = array(
 					'singular' => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
 					'plural'   => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
@@ -168,6 +169,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				);
 				break;
 			case 'draft' :
+				/* translators: %s: count */
 				$label = array(
 					'singular' => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
 					'plural'   => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
@@ -176,6 +178,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				);
 				break;
 			case 'pending' :
+				/* translators: %s: count */
 				$label = array(
 					'singular' => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
 					'plural'   => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
@@ -209,6 +212,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		}
 
 		$class = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : '';
+		/* translators: %s: count */
 		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts', 'woocommerce' ), number_format_i18n( $total_posts ) ) . '</a>';
 
 		foreach ( get_post_stati( array( 'show_in_admin_status_list' => true ), 'objects' ) as $status ) {

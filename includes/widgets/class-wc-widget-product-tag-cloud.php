@@ -82,7 +82,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 * @return string
 	 */
 	public function _topic_count_text( $count ) {
-		/* translators: %s for product quantity, e.g. 1 product and 2 products */
+		/* translators: %s: product count */
 		return sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) );
 	}
 }

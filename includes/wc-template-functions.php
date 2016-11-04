@@ -621,7 +621,7 @@ function woocommerce_template_loop_category_link_open( $category ) {
 	echo '<a href="' . get_term_link( $category, 'product_cat' ) . '">';
 }
 /**
- * Insert the opening anchor tag for categories in the loop.
+ * Insert the closing anchor tag for categories in the loop.
  */
 function woocommerce_template_loop_category_link_close() {
 	echo '</a>';
@@ -1688,7 +1688,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			'pad_counts'   => 1,
 		) ) );
 
-		if ( ! apply_filters( 'woocommerce_product_subcategories_hide_empty', false ) ) {
+		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
 			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
 		}
 
@@ -2017,7 +2017,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
 			}
 
-			$container_class = 'form-row ' . esc_attr( implode( ' ', $args['class'] ) );
+			$container_class = esc_attr( implode( ' ', $args['class'] ) );
 			$container_id = esc_attr( $args['id'] ) . '_field';
 
 			$after = ! empty( $args['clear'] ) ? '<div class="clear"></div>' : '';

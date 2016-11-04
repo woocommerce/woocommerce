@@ -78,6 +78,7 @@ if ( ! empty( $shipping_classes ) ) {
 			continue;
 		}
 		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
+			/* translators: %s: shipping class name */
 			'title'       => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'        => 'text',
 			'placeholder' => __( 'N/A', 'woocommerce' ),

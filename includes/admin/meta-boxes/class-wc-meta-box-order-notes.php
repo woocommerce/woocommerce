@@ -56,9 +56,12 @@ class WC_Meta_Box_Order_Notes {
 					</div>
 					<p class="meta">
 						<abbr class="exact-date" title="<?php echo $note->comment_date; ?>"><?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $note->comment_date ) ), date_i18n( wc_time_format(), strtotime( $note->comment_date ) ) ); ?></abbr>
-						<?php if ( __( 'WooCommerce', 'woocommerce' ) !== $note->comment_author ) : ?>
-							<?php printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author ); ?>
-						<?php endif; ?>
+						<?php
+						if ( __( 'WooCommerce', 'woocommerce' ) !== $note->comment_author ) :
+							/* translators: %s: note author */
+							printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author );
+						endif;
+						?>
 						<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 					</p>
 				</li>

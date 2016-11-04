@@ -166,6 +166,9 @@ class WC_Structured_Data {
 			global $product;
 		}
 
+		$shop_name       = get_bloginfo( 'name' );
+		$shop_url        = home_url();
+		$currency        = get_woocommerce_currency();
 		$markup          = array();
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
@@ -190,19 +193,23 @@ class WC_Structured_Data {
 
 		$markup_offers = array();
 		foreach ( $products as $_product ) {
-			$markup_offers[] = array(
-				'@type'         => 'Offer',
-				'priceCurrency' => get_woocommerce_currency(),
-				'price'         => $_product->get_price(),
-				'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'sku'           => $_product->get_sku(),
-				'image'         => wp_get_attachment_url( $_product->get_image_id() ),
-				'description'   => $is_variable ? $_product->get_variation_description() : '',
-				'seller'        => array(
-					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-					'url'   => get_bloginfo( 'url' ),
+			$markup_offers[] = apply_filters(
+				'woocommerce_structured_data_product_offer',
+				array(
+					'@type'         => 'Offer',
+					'priceCurrency' => $currency,
+					'price'         => $_product->get_price(),
+					'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+					'sku'           => $_product->get_sku(),
+					'image'         => wp_get_attachment_url( $_product->get_image_id() ),
+					'description'   => $is_variable ? $_product->get_variation_description() : '',
+					'seller'        => array(
+						'@type' => 'Organization',
+						'name'  => $shop_name,
+						'url'   => $shop_url,
+					),
 				),
+				$_product
 			);
 		}
 
@@ -290,10 +297,10 @@ class WC_Structured_Data {
 		$markup                    = array();
 		$markup['@type']           = 'WebSite';
 		$markup['name']            = get_bloginfo( 'name' );
-		$markup['url']             = get_bloginfo( 'url' );
+		$markup['url']             = home_url();
 		$markup['potentialAction'] = array(
 			'@type'       => 'SearchAction',
-			'target'      => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
+			'target'      => home_url( '?s={search_term_string}&post_type=product' ),
 			'query-input' => 'required name=search_term_string',
 		);
 
@@ -314,6 +321,8 @@ class WC_Structured_Data {
 			return;
 		}
 
+		$shop_name      = get_bloginfo( 'name' );
+		$shop_url       = home_url();
 		$order_statuses = array(
 			'pending'    => 'http://schema.org/OrderPaymentDue',
 			'processing' => 'http://schema.org/OrderProcessing',
@@ -356,8 +365,8 @@ class WC_Structured_Data {
 				),
 				'seller'             => array(
 					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-					'url'   => get_bloginfo( 'url' ),
+					'name'  => $shop_name,
+					'url'   => $shop_url,
 				),
 			);
 		}
@@ -395,8 +404,8 @@ class WC_Structured_Data {
 		);
 		$markup['merchant']           = array(
 			'@type' => 'Organization',
-			'name'  => get_bloginfo( 'name' ),
-			'url'   => get_bloginfo( 'url' ),
+			'name'  => $shop_name,
+			'url'   => $shop_url,
 		);
 		$markup['potentialAction']    = array(
 			'@type'  => 'ViewAction',

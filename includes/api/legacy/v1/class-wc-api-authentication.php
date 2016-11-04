@@ -145,6 +145,7 @@ class WC_API_Authentication {
 		foreach ( $param_names as $param_name ) {
 
 			if ( empty( $params[ $param_name ] ) ) {
+				/* translators: %s: parameter name */
 				throw new Exception( sprintf( __( '%s parameter is missing', 'woocommerce' ), $param_name ), 404 );
 			}
 		}

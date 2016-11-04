@@ -95,6 +95,7 @@ class WC_Query {
 			break;
 			case 'orders' :
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					/* translators: %s: page */
 					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
 				} else {
 					$title = __( 'Orders', 'woocommerce' );
@@ -102,6 +103,7 @@ class WC_Query {
 			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
+				/* translators: %s: order number */
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
 			break;
 			case 'downloads' :

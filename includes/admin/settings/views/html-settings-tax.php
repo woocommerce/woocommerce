@@ -10,7 +10,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div id="rates-pagination"></div>
 
-<h3><?php printf( __( '"%s" tax rates', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
+<h3><?php
+	/* translators: %s: tax rate */
+	printf(
+		__( '"%s" tax rates', 'woocommerce' ),
+		$current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' )
+	);
+?></h3>
 
 <table class="wc_tax_rates wc_input_table widefat">
 	<thead>

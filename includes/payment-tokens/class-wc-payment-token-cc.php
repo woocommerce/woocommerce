@@ -68,6 +68,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string
 	 */
 	public function get_display_name() {
+		/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
 		$display = sprintf(
 			__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce' ),
 			wc_get_credit_card_type_label( $this->get_card_type() ),

@@ -235,6 +235,7 @@ class WC_Cart {
 
 						// Flag to indicate the stored cart should be update
 						$update_cart_session = true;
+						/* translators: %s: product name */
 						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $_product->get_title() ), 'error' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
@@ -480,6 +481,7 @@ class WC_Cart {
 			 * Check stock based on stock-status.
 			 */
 			if ( ! $_product->is_in_stock() ) {
+				/* translators: %s: product name */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title() ) );
 				return $error;
 			}
@@ -494,6 +496,7 @@ class WC_Cart {
 			 * Check stock based on all items in the cart.
 			 */
 			if ( ! $_product->has_enough_stock( $check_qty ) ) {
+				/* translators: 1: product name 2: quantity in stock */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->get_stock_quantity() ) );
 				return $error;
 			}
@@ -529,6 +532,7 @@ class WC_Cart {
 					$not_enough_stock = true;
 				}
 				if ( $not_enough_stock ) {
+					/* translators: 1: product name 2: minutes */
 					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 					return $error;
 				}
@@ -922,7 +926,8 @@ class WC_Cart {
 				$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
 
 				if ( $in_cart_quantity > 0 ) {
-					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
+					/* translators: %s: product name */
+					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
 				}
 			}
 
@@ -937,6 +942,7 @@ class WC_Cart {
 			}
 
 			if ( ! $product_data->has_enough_stock( $quantity ) ) {
+				/* translators: 1: product name 2: quantity in stock */
 				throw new Exception( sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ) );
 			}
 
