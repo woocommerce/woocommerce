@@ -64,7 +64,7 @@ class WC_Meta_Box_Order_Actions {
 					<?php } ?>
 				</select>
 
-				<button class="button wc-reload" title="<?php esc_attr_e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
+				<button class="button wc-reload"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
 			<li class="wide">

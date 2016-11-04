@@ -1189,8 +1189,7 @@ class WC_Product {
 
 		if ( $rating > 0 ) {
 
-			/* translators: %s: rating */
-			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+			$rating_html  = '<div class="star-rating">';
 
 			/* translators: %s: rating */
 			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . $rating . '</strong>' ) . '</span>';
