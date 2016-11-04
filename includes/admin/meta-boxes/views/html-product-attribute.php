@@ -1,7 +1,7 @@
 <div data-taxonomy="<?php echo esc_attr( $taxonomy ); ?>" class="woocommerce_attribute wc-metabox closed <?php echo esc_attr( implode( ' ', $metabox_class ) ); ?>" rel="<?php echo $position; ?>">
 	<h3>
 		<a href="#" class="remove_row delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
-		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
+		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong class="attribute_name"><?php echo esc_html( $attribute_label ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content">
