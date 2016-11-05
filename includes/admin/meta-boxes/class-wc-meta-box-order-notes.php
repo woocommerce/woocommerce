@@ -62,7 +62,7 @@ class WC_Meta_Box_Order_Notes {
 							printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author );
 						endif;
 						?>
-						<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
+						<a href="#" class="delete_note" role="button"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 					</p>
 				</li>
 				<?php
@@ -74,16 +74,17 @@ class WC_Meta_Box_Order_Notes {
 		echo '</ul>';
 		?>
 		<div class="add_note">
-			<h4><?php _e( 'Add note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></h4>
 			<p>
+				<label for="add_order_note"><?php _e( 'Add note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></label>
 				<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
 			</p>
 			<p>
+				<label for="order_note_type" class="screen-reader-text"><?php _e( 'Note type', 'woocommerce' ); ?></label>
 				<select name="order_note_type" id="order_note_type">
 					<option value=""><?php _e( 'Private note', 'woocommerce' ); ?></option>
 					<option value="customer"><?php _e( 'Note to customer', 'woocommerce' ); ?></option>
 				</select>
-				<a href="#" class="add_note button"><?php _e( 'Add', 'woocommerce' ); ?></a>
+				<button type="button" class="add_note button"><?php _e( 'Add', 'woocommerce' ); ?></button>
 			</p>
 		</div>
 		<?php
