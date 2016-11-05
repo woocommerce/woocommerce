@@ -23,13 +23,13 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_rating_filter';
 		$this->widget_description = __( 'Filter products by rating when viewing product archives and categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_rating_filter';
-		$this->widget_name        = __( 'WooCommerce Average Rating Filter', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce average rating filter', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Average Rating', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'std'   => __( 'Average rating', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 		parent::__construct();
 	}
@@ -41,10 +41,10 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	protected function get_page_base_url() {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id('shop') ) ) {
+		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
 			$link = get_post_type_archive_link( 'product' );
 		} else {
-			$link = get_term_link( get_query_var('term'), get_query_var('taxonomy') );
+			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
 		}
 
 		// Min/Max
@@ -114,7 +114,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			'value'         => $rating,
 			'compare'       => '>=',
 			'type'          => 'DECIMAL',
-			'rating_filter' => true
+			'rating_filter' => true,
 		);
 
 		$meta_query = new WP_Meta_Query( $meta_query );
@@ -170,12 +170,12 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link  = $this->get_page_base_url();
 			$link  = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
 
-			echo '<li class="wc-layered-nav-rating ' . ( ! empty( $_GET['min_rating'] ) && $rating === absint( $_GET['min_rating'] ) ? 'chosen' : '' ) . '">';
+			echo '<li class="wc-layered-nav-rating ' . ( ( ! empty( $_GET['min_rating'] ) && absint( $_GET['min_rating'] ) === $rating ) ? 'chosen' : '' ) . '">';
 
 			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
 
-			echo '<span class="star-rating" title="' . esc_attr( sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) ). '">
-					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce'), $rating ) . '</span>
+			echo '<span class="star-rating">
+					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) . '</span>
 				</span> (' . esc_html( $count ) . ')';
 
 			echo '</a>';

@@ -187,7 +187,7 @@ class WC_Install {
 		self::update_wc_version();
 
 		// Flush rules after install
-		flush_rewrite_rules();
+		do_action( 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
@@ -256,7 +256,7 @@ class WC_Install {
 	public static function cron_schedules( $schedules ) {
 		$schedules['monthly'] = array(
 			'interval' => 2635200,
-			'display'  => __( 'Monthly', 'woocommerce' )
+			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
 		return $schedules;
 	}
@@ -277,7 +277,7 @@ class WC_Install {
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-		if ( $held_duration != '' ) {
+		if ( '' != $held_duration ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
@@ -296,23 +296,23 @@ class WC_Install {
 			'shop' => array(
 				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
-				'content' => ''
+				'content' => '',
 			),
 			'cart' => array(
 				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 			),
 			'checkout' => array(
 				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
-			)
+				'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+			),
 		) );
 
 		foreach ( $pages as $key => $page ) {
@@ -359,8 +359,8 @@ class WC_Install {
 				'simple',
 				'grouped',
 				'variable',
-				'external'
-			)
+				'external',
+			),
 		);
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
@@ -415,7 +415,7 @@ class WC_Install {
 
 	/**
 	 * Get Table schema.
-	 * https://github.com/woothemes/woocommerce/wiki/Database-Description/
+	 * https://github.com/woocommerce/woocommerce/wiki/Database-Description/
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -443,8 +443,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry bigint(20) NOT NULL,
-  UNIQUE KEY session_id (session_id),
-  PRIMARY KEY  (session_key)
+  PRIMARY KEY  (session_key),
+  UNIQUE KEY session_id (session_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id bigint(20) NOT NULL auto_increment,
@@ -609,11 +609,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 					=> true
+			'read' 					=> true,
 		) );
 
 		// Shop manager role
-		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
+		add_role( 'shop_manager', __( 'Shop manager', 'woocommerce' ), array(
 			'level_9'                => true,
 			'level_8'                => true,
 			'level_7'                => true,
@@ -653,7 +653,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'upload_files'           => true,
 			'export'                 => true,
 			'import'                 => true,
-			'list_users'             => true
+			'list_users'             => true,
 		) );
 
 		$capabilities = self::get_core_capabilities();
@@ -676,7 +676,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$capabilities['core'] = array(
 			'manage_woocommerce',
-			'view_woocommerce_reports'
+			'view_woocommerce_reports',
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
@@ -703,7 +703,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				"manage_{$capability_type}_terms",
 				"edit_{$capability_type}_terms",
 				"delete_{$capability_type}_terms",
-				"assign_{$capability_type}_terms"
+				"assign_{$capability_type}_terms",
 			);
 		}
 
@@ -749,25 +749,25 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
-				'content' 	=> ''
+				'content' 	=> '',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			),
 			array(
 				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
-				'content' 	=> ''
-			)
+				'content' 	=> '',
+			),
 		);
 
 		if ( 'redirect' !== $download_method ) {
 			$files[] = array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
+				'content' 	=> 'deny from all',
 			);
 		}
 
@@ -814,7 +814,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
 			$version = trim( $matches[1] );
-			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 			// Check the latest stable version and ignore trunk.
 			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
@@ -840,7 +840,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" aria-label="' . esc_attr( __( 'View WooCommerce settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );
@@ -854,11 +854,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @return	array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( $file == WC_PLUGIN_BASENAME ) {
+		if ( WC_PLUGIN_BASENAME == $file ) {
 			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr( __( 'View WooCommerce documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr( __( 'View WooCommerce API docs', 'woocommerce' ) ) . '">' . __( 'API docs', 'woocommerce' ) . '</a>',
+				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr( __( 'Visit premium customer support', 'woocommerce' ) ) . '">' . __( 'Premium support', 'woocommerce' ) . '</a>',
 			);
 
 			return array_merge( $links, $row_meta );
@@ -884,6 +884,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
 		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$tables[] = $wpdb->prefix . 'woocommerce_payment_tokens';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zones';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_locations';
+		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_methods';
 
 		return $tables;
 	}
@@ -993,11 +997,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%1$s could not be installed (%2$s). %3$sPlease install it manually by clicking here.%4$s', 'woocommerce' ),
+							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							'<a href="' . esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) ) . '">',
-							'</a>'
+							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) )
 						)
 					);
 				}
@@ -1016,15 +1019,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
 					}
-
 				} catch ( Exception $e ) {
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%1$s was installed but could not be activated. %2$sPlease activate it manually by clicking here.%3$s', 'woocommerce' ),
+							__( '%1$s was installed but could not be activated. <a href="%2$s">Please activate it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
-							'<a href="' . admin_url( 'plugins.php' ) . '">',
-							'</a>'
+							admin_url( 'plugins.php' )
 						)
 					);
 				}

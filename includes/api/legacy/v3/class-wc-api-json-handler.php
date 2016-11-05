@@ -75,5 +75,4 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 
 		return json_encode( $data );
 	}
-
 }

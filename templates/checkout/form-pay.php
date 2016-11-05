@@ -45,7 +45,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 								echo apply_filters( 'woocommerce_order_item_name', esc_html( $item->get_name() ), $item, false );
 
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
-								$order->display_item_meta( $item );
+
+								wc_display_item_meta( $item );
+
 								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 							?>
 						</td>

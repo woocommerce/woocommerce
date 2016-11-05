@@ -225,7 +225,6 @@ class WC_CLI_Command extends WP_CLI_Command {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 			$date = new DateTime( '@0' );
 		}

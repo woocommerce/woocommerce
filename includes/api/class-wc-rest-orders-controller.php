@@ -188,7 +188,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$this->request     = $request;
 		$statuses          = wc_get_order_statuses();
 		$order             = wc_get_order( $post );
-		$data              = $order->get_data();
+		$data              = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
@@ -224,7 +224,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $order ) );
+		$response->add_links( $this->prepare_links( $order, $request ) );
 
 		/**
 		 * Filter the data for a response.
@@ -243,9 +243,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Order $order Order object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given order.
 	 */
-	protected function prepare_links( $order ) {
+	protected function prepare_links( $order, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ),
@@ -317,7 +318,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			if ( ! empty( $order_ids ) ) {
 				unset( $args['s'] );
-				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
+				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
 			}
 		}
 
@@ -365,7 +366,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					case 'meta_data' :
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], $meta['meta_id'] );
+								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
 							}
 						}
 						break;
@@ -458,7 +459,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request[ 'billing' ], $request[ 'shipping' ], $request[ 'line_items' ], $request[ 'shipping' ], $request[ 'fee' ], $request[ 'coupon' ] ) ) {
+			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping'], $request['fee'], $request['coupon'] ) ) {
 				$order->calculate_totals();
 			}
 
@@ -486,6 +487,48 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Gets the product ID from the SKU or posted ID.
+	 * @param array $posted Request data
+	 * @return int
+	 */
+	protected function get_product_id( $posted ) {
+		if ( ! empty( $posted['sku'] ) ) {
+			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
+		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
+			$product_id = (int) $posted['product_id'];
+		} elseif ( ! empty( $posted['variation_id'] ) ) {
+			$product_id = (int) $posted['variation_id'];
+		} else {
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+		}
+		return $product_id;
+	}
+
+	/**
+	 * Maybe set an item prop if the value was posted.
+	 * @param WC_Order_Item $item
+	 * @param string $prop
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_prop( $item, $prop, $posted ) {
+		if ( isset( $posted[ $prop ] ) ) {
+			$item->{"set_$prop"}( $posted[ $prop ] );
+		}
+	}
+
+	/**
+	 * Maybe set item props if the values were posted.
+	 * @param WC_Order_Item $item
+	 * @param string[] $props
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_props( $item, $props, $posted ) {
+		foreach ( $props as $prop ) {
+			$this->maybe_set_item_prop( $item, $prop, $posted );
+		}
+	}
+
+	/**
 	 * Create or update a line item.
 	 *
 	 * @param array $posted Line item data.
@@ -493,52 +536,20 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
-		// Product is always required.
-		if ( empty( $posted['product_id'] ) && empty( $posted['sku'] ) && empty( $posted['variation_id'] ) ) {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
-		}
-
-		// Get product from ID or sku
-		if ( ! empty( $posted['sku'] ) ) {
-			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
-		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['product_id'];
-		} elseif ( ! empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['variation_id'];
-		}
-
 		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-		$product = wc_get_product( $product_id );
+		$product = wc_get_product( $this->get_product_id( $posted ) );
 
 		if ( $product !== $item->get_product() ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$qty = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$item->set_total( $product->get_price() * $qty );
-				$item->set_subtotal( $product->get_price() * $qty );
+				$total = $product->get_price() * ( isset( $posted['quantity'] ) ? $posted['quantity'] : 1 );
+				$item->set_total( $total );
+				$item->set_subtotal( $total );
 			}
 		}
 
-		if ( isset( $posted['name'] ) ) {
-			$item->set_name( $posted['name'] );
-		}
-
-		if ( isset( $posted['quantity'] ) ) {
-			$item->set_quantity( $posted['quantity'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
-
-		if ( isset( $posted['subtotal'] ) ) {
-			$item->set_subtotal( floatval( $posted['subtotal'] ) );
-		}
-
-		if ( isset( $posted['tax_class'] ) ) {
-			$item->set_tax_class( $posted['tax_class'] );
-		}
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 
 		return $item;
 	}
@@ -559,17 +570,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['method_id'] ) ) {
-			$item->set_method_id( $posted['method_id'] );
-		}
-
-		if ( isset( $posted['method_title'] ) ) {
-			$item->set_method_title( $posted['method_title'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
 
 		return $item;
 	}
@@ -590,21 +591,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['name'] ) ) {
-			$item->set_name( $posted['name'] );
-		}
-
-		if ( isset( $posted['tax_class'] ) ) {
-			$item->set_tax_class( $posted['tax_class'] );
-		}
-
-		if ( isset( $posted['tax_status'] ) ) {
-			$item->set_tax_status( $posted['tax_status'] );
-		}
-
-		if ( isset( $posted['total'] ) ) {
-			$item->set_total( floatval( $posted['total'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
 
 		return $item;
 	}
@@ -625,13 +612,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $posted['code'] ) ) {
-			$item->set_code( $posted['code'] );
-		}
-
-		if ( isset( $posted['discount'] ) ) {
-			$item->set_discount( floatval( $posted['discount'] ) );
-		}
+		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
 
 		return $item;
 	}
@@ -688,7 +669,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @return bool True if the item resource ID is null, false otherwise.
 	 */
 	protected function item_is_null( $item ) {
-		$keys = array( 'product_id', 'method_id', 'title', 'code' );
+		$keys = array( 'product_id', 'method_id', 'method_title', 'name', 'code' );
 
 		foreach ( $keys as $key ) {
 			if ( array_key_exists( $key, $item ) && is_null( $item[ $key ] ) ) {
@@ -707,6 +688,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
@@ -745,7 +727,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		try {
 			$post_id = (int) $request['id'];
 
-			if ( empty( $post_id ) || $this->post_type !== get_post_type( $post_id ) ) {
+			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
 				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
@@ -922,12 +904,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -985,12 +967,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1081,6 +1063,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Meta ID.', 'woocommerce' ),
+							'type'        => 'int',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'key' => array(
 							'description' => __( 'Meta key.', 'woocommerce' ),
 							'type'        => 'string',
@@ -1090,12 +1078,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Meta value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-						),
-						'meta_id' => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'int',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 					),
 				),
@@ -1185,6 +1167,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1194,12 +1182,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'meta_id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1296,6 +1278,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1305,12 +1293,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'meta_id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1373,6 +1355,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1382,12 +1370,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'meta_id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1462,6 +1444,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1471,12 +1459,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'meta_id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),
@@ -1514,6 +1496,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'int',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'key' => array(
 									'description' => __( 'Meta key.', 'woocommerce' ),
 									'type'        => 'string',
@@ -1523,12 +1511,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Meta value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-								),
-								'meta_id' => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'int',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 							),
 						),

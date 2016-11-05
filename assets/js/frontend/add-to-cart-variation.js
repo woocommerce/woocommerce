@@ -332,18 +332,20 @@
 			// Loop through selects and disable/enable options based on selections
 			$form.find( '.variations select' ).each( function( index, el ) {
 
-				var current_attr_name, current_attr_select = $( el );
+				var current_attr_name, current_attr_select = $( el ),
+					show_option_none                       = $( el ).data( 'show_option_none' ),
+					option_gt_filter                       = 'no' === show_option_none ? '' : ':gt(0)';
 
 				// Reset options
 				if ( ! current_attr_select.data( 'attribute_options' ) ) {
-					current_attr_select.data( 'attribute_options', current_attr_select.find( 'option:gt(0)' ).get() );
+					current_attr_select.data( 'attribute_options', current_attr_select.find( 'option' + option_gt_filter ).get() );
 				}
 
-				current_attr_select.find( 'option:gt(0)' ).remove();
+				current_attr_select.find( 'option' + option_gt_filter ).remove();
 				current_attr_select.append( current_attr_select.data( 'attribute_options' ) );
-				current_attr_select.find( 'option:gt(0)' ).removeClass( 'attached' );
-				current_attr_select.find( 'option:gt(0)' ).removeClass( 'enabled' );
-				current_attr_select.find( 'option:gt(0)' ).removeAttr( 'disabled' );
+				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'attached' );
+				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'enabled' );
+				current_attr_select.find( 'option' + option_gt_filter ).removeAttr( 'disabled' );
 
 				// Get name from data-attribute_name, or from input name if it doesn't exist
 				if ( typeof( current_attr_select.data( 'attribute_name' ) ) !== 'undefined' ) {
@@ -385,7 +387,7 @@
 
 									} else {
 
-										current_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
+										current_attr_select.find( 'option' + option_gt_filter ).addClass( 'attached ' + variation_active );
 
 									}
 								}
@@ -395,10 +397,10 @@
 				}
 
 				// Detach unattached
-				current_attr_select.find( 'option:gt(0):not(.attached)' ).remove();
+				current_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
 
 				// Grey out disabled
-				current_attr_select.find( 'option:gt(0):not(.enabled)' ).attr( 'disabled', 'disabled' );
+				current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).attr( 'disabled', 'disabled' );
 
 			});
 
@@ -486,26 +488,48 @@
 	$.fn.wc_variations_image_update = function( variation ) {
 		var $form             = this,
 			$product          = $form.closest('.product'),
-			$product_img      = $product.find( 'div.images img:eq(0)' ),
-			$product_link     = $product.find( 'div.images a.zoom:eq(0)' );
+			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
+			$product_img_wrap = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0)' ),
+			$product_img      = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' );
 
 		if ( variation && variation.image_src && variation.image_src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image_src );
-			$product_img.wc_set_variation_attr( 'title', variation.image_title );
-			$product_img.wc_set_variation_attr( 'alt', variation.image_alt );
+			$product_img.wc_set_variation_attr( 'height', variation.image_h );
+			$product_img.wc_set_variation_attr( 'width', variation.image_w );
 			$product_img.wc_set_variation_attr( 'srcset', variation.image_srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image_sizes );
-			$product_link.wc_set_variation_attr( 'href', variation.image_link );
-			$product_link.wc_set_variation_attr( 'title', variation.image_caption );
+			$product_img.wc_set_variation_attr( 'title', variation.image_title );
+			$product_img.wc_set_variation_attr( 'alt', variation.image_alt );
+			$gallery_img.wc_set_variation_attr( 'src', variation.image_src );
+			$product_img.wc_set_variation_attr( 'data-large-image', variation.image_link );
+			$product_img.wc_set_variation_attr( 'data-large-image-width', variation.image_link_h );
+			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image_link_w );
+			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image_thumbnail_src );
+
+			window.setTimeout( function() {
+				$( window ).trigger( 'resize' );
+				$gallery_img.click();
+			}, 10 );
 		} else {
+			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
+			$product_img.wc_reset_variation_attr( 'large-image' );
 			$product_img.wc_reset_variation_attr( 'src' );
-			$product_img.wc_reset_variation_attr( 'title' );
-			$product_img.wc_reset_variation_attr( 'alt' );
+			$product_img.wc_reset_variation_attr( 'width' );
+			$product_img.wc_reset_variation_attr( 'height' );
 			$product_img.wc_reset_variation_attr( 'srcset' );
 			$product_img.wc_reset_variation_attr( 'sizes' );
-			$product_link.wc_reset_variation_attr( 'href' );
-			$product_link.wc_reset_variation_attr( 'title' );
+			$product_img.wc_reset_variation_attr( 'title' );
+			$product_img.wc_reset_variation_attr( 'alt' );
+			$gallery_img.wc_reset_variation_attr( 'src' );
+			$product_img.wc_reset_variation_attr( 'data-large-image' );
+			$product_img.wc_reset_variation_attr( 'data-large-image-width' );
+			$product_img.wc_reset_variation_attr( 'data-large-image-height' );
+
+			window.setTimeout( function() {
+				$( window ).trigger( 'resize' );
+			}, 10 );
 		}
+		$('body').trigger( 'woocommerce_init_gallery' );
 	};
 
 	$( function() {

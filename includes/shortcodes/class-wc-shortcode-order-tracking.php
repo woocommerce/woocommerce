@@ -33,15 +33,14 @@ class WC_Shortcode_Order_Tracking {
 			return;
 		}
 
-		extract(shortcode_atts(array(
-		), $atts));
+		extract( shortcode_atts( array(), $atts ) );
 
 		global $post;
 
 		if ( ! empty( $_REQUEST['orderid'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-order_tracking' ) ) {
 
 			$order_id 		= empty( $_REQUEST['orderid'] ) ? 0 : esc_attr( $_REQUEST['orderid'] );
-			$order_email	= empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email']) ;
+			$order_email	= empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email'] );
 
 			if ( ! $order_id ) {
 
@@ -60,20 +59,17 @@ class WC_Shortcode_Order_Tracking {
 					if ( strtolower( $order->get_billing_email() ) == strtolower( $order_email ) ) {
 						do_action( 'woocommerce_track_order', $order->get_id() );
 						wc_get_template( 'order/tracking.php', array(
-							'order' => $order
+							'order' => $order,
 						) );
 
 						return;
 					}
-
 				} else {
 
-					echo '<p class="woocommerce-error">' . sprintf( __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
+					echo '<p class="woocommerce-error">' . __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ) . '</p>';
 
 				}
-
 			}
-
 		}
 
 		wc_get_template( 'order/form-tracking.php' );

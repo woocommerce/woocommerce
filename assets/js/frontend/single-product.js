@@ -1,4 +1,4 @@
-/*global wc_single_product_params */
+/*global wc_single_product_params, flexslider_options, PhotoSwipe, PhotoSwipeUI_Default */
 jQuery( function( $ ) {
 
 	// wc_single_product_params is required to continue, ensure the object exists
@@ -65,8 +65,143 @@ jQuery( function( $ ) {
 
 				return false;
 			}
+		})
+		.on( 'woocommerce_init_gallery', function() {
+			if ( $.isFunction( $.fn.zoom ) ) {
+				wc_product_gallery.init_zoom();
+			}
 		});
-	
-	//Init Tabs and Star Ratings	
+
+	//Init Tabs and Star Ratings
 	$( '.wc-tabs-wrapper, .woocommerce-tabs, #rating' ).trigger( 'init' );
+
+	/**
+	 * Product gallery class.
+	 */
+	var wc_product_gallery = {
+
+		/**
+		 * Initialize gallery actions and events.
+		 */
+		init: function() {
+			// Init FlexSlider if present.
+			if ( $.isFunction( $.fn.flexslider ) ) {
+				this.init_flexslider();
+			}
+
+			// Init Zoom if present.
+			if ( $.isFunction( $.fn.zoom ) ) {
+				this.init_zoom();
+			}
+
+			// Init PhotoSwipe if present.
+			if ( typeof PhotoSwipe !== 'undefined' ) {
+				this.init_photoswipe();
+
+				// Trigger photoswipe.
+				$( document ).on( 'click', '.woocommerce-product-gallery__trigger', this.trigger_photoswipe );
+			}
+		},
+
+		/**
+		 * Detect if the visitor is using a touch device.
+		 *
+		 * @return bool
+		 */
+		is_touch_device: function() {
+			return 'ontouchstart' in window || navigator.maxTouchPoints;
+		},
+
+		/**
+		 * Initialize flexSlider.
+		 */
+		init_flexslider: function() {
+			$( '.woocommerce-product-gallery' ).flexslider({
+				selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
+				animation:      flexslider_options.animation,
+				smoothHeight:   flexslider_options.smoothHeight,
+				directionNav:   flexslider_options.directionNav,
+				controlNav:     flexslider_options.controlNav,
+				slideshow:      flexslider_options.slideshow,
+				animationSpeed: flexslider_options.animationSpeed,
+				animationLoop:  false // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
+			});
+		},
+
+		/**
+		 * Init zoom.
+		 */
+		init_zoom: function() {
+			// But only zoom if the img is larger than its container and the visitor is not on a touch device.
+			if ( ( $( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) && ( ! wc_product_gallery.is_touch_device() ) ) {
+				$( '.woocommerce-product-gallery__image' ).trigger('zoom.destroy');
+				$( '.woocommerce-product-gallery__image' ).zoom();
+			}
+		},
+
+		/**
+		 * Get product gallery image items.
+		 */
+		get_gallery_items: function() {
+			var $slides = $( '.woocommerce-product-gallery__wrapper' ).children(),
+				items   = [],
+				index   = $slides.filter( '.' + 'flex-active-slide' ).index();
+
+			if ( $slides.length > 0 ) {
+				$slides.each( function( i, el ) {
+					var img = $( el ).find( 'img' ),
+						large_image_src = img.attr( 'data-large-image' ),
+						large_image_w   = img.attr( 'data-large-image-width' ),
+						large_image_h   = img.attr( 'data-large-image-height' ),
+						item            = {
+							src: large_image_src,
+							w:   large_image_w,
+							h:   large_image_h,
+							title: img.attr( 'title' )
+						};
+					items.push( item );
+				});
+			}
+
+			return {
+				index: index,
+				items: items
+			};
+		},
+
+		/**
+		 * Init PhotoSwipe.
+		 */
+		init_photoswipe: function() {
+			$( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+		},
+
+		/**
+		 * Initialise photoswipe.
+		 */
+		trigger_photoswipe: function( e ) {
+			e.preventDefault();
+
+			var pswpElement = $( '.pswp' )[0];
+
+			// Build items array.
+			var items = wc_product_gallery.get_gallery_items();
+
+			// Define options.
+			var options = {
+				index:                 items.index,
+				shareEl:               false,
+				closeOnScroll:         false,
+				history:               false,
+				hideAnimationDuration: 0,
+				showAnimationDuration: 0
+			};
+
+			// Initializes and opens PhotoSwipe.
+			var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items.items, options );
+			gallery.init();
+		}
+	};
+
+	wc_product_gallery.init();
 });

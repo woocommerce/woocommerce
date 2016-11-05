@@ -38,7 +38,7 @@ class WC_Helper_Product {
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -55,7 +55,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy simple product.
+	 * Create a dummy variation product.
 	 *
 	 * @since 2.3
 	 *
@@ -71,7 +71,7 @@ class WC_Helper_Product {
 		$product_id = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Set it as variable.
@@ -102,15 +102,15 @@ class WC_Helper_Product {
 				'position'     => '1',
 				'is_visible'   => 0,
 				'is_variation' => 1,
-				'is_taxonomy'  => 1
-			)
+				'is_taxonomy'  => 1,
+			),
 		) );
 
 		// Link the product to the attribute
 		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
 			'object_id'        => $product_id,
 			'term_taxonomy_id' => $attribute_data['term_taxonomy_id'],
-			'term_order'       => 0
+			'term_order'       => 0,
 		) );
 		$return['term_taxonomy_id'] = $wpdb->insert_id;
 
@@ -119,7 +119,7 @@ class WC_Helper_Product {
 			'post_title'  => 'Variation #' . ( $product_id + 1 ) . ' of Dummy Product',
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Price related meta
@@ -141,7 +141,7 @@ class WC_Helper_Product {
 			'post_title'  => 'Variation #' . ( $product_id + 2 ) . ' of Dummy Product',
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
-			'post_status' => 'publish'
+			'post_status' => 'publish',
 		) );
 
 		// Price related meta
@@ -159,7 +159,6 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, 'attribute_pa_size', 'large' );
 
 		// Add the variation meta to the main product
-
 		update_post_meta( $product_id, '_max_price_variation_id', $variation_id );
 
 		return new WC_Product_Variable( $product_id );
@@ -177,7 +176,7 @@ class WC_Helper_Product {
 
 		$return = array();
 
-		$attribute_name = 'dummyattribute';
+		$attribute_name = 'size';
 
 		// Create attribute
 		$attribute = array(
@@ -198,26 +197,33 @@ class WC_Helper_Product {
 		$wpdb->insert( $wpdb->prefix . 'terms', array(
 			'name'       => 'small',
 			'slug'       => 'small',
-			'term_group' => 0
+			'term_group' => 0,
 		), array(
 			'%s',
 			'%s',
-			'%d'
+			'%d',
 		) );
 		$return['term_id'] = $wpdb->insert_id;
 
 		// Add the term_taxonomy
 		$wpdb->insert( $wpdb->prefix . 'term_taxonomy', array(
 			'term_id'     => $return['term_id'],
-			'taxonomy'    => 'pa_dummyattribute',
+			'taxonomy'    => 'pa_size',
 			'description' => '',
 			'parent'      => 0,
-			'count'       => 1
+			'count'       => 1,
 		) );
 		$return['term_taxonomy_id'] = $wpdb->insert_id;
 
 		// Delete transient
 		delete_transient( 'wc_attribute_taxonomies' );
+
+		$taxonomy_data = array(
+			'labels' => array(
+				'name' => 'size',
+			),
+		);
+		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
 
 		return $return;
 	}
@@ -261,5 +267,4 @@ class WC_Helper_Product {
 
 		return wp_insert_comment( $data );
 	}
-
 }

@@ -40,7 +40,7 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		# GET /orders/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -79,7 +79,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$orders = array();
 
-		foreach( $query->posts as $order_id ) {
+		foreach ( $query->posts as $order_id ) {
 
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
@@ -125,7 +125,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
+			'total_shipping'            => wc_format_decimal( $order->get_shipping_total(), 2 ),
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
@@ -174,7 +174,7 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		// add line items
-		foreach( $order->get_items() as $item_id => $item ) {
+		foreach ( $order->get_items() as $item_id => $item ) {
 			$product                    = $item->get_product();
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,
@@ -315,7 +315,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$args = array(
 			'post_id' => $id,
 			'approve' => 'approve',
-			'type'    => 'order_note'
+			'type'    => 'order_note',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
@@ -352,7 +352,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_order',
-			'post_status' => array_keys( wc_get_order_statuses() )
+			'post_status' => array_keys( wc_get_order_statuses() ),
 		);
 
 		// add status argument
@@ -388,5 +388,4 @@ class WC_API_Orders extends WC_API_Resource {
 
 		return $subtotal;
 	}
-
 }

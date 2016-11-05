@@ -114,7 +114,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array(
-			'id'           => $product_review_id ,
+			'id'           => $product_review_id,
 			'date_created' => '2016-01-01T11:11:11',
 			'review'       => 'Review content here',
 			'rating'       => 0,
@@ -419,5 +419,4 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'email', $properties );
 		$this->assertArrayHasKey( 'verified', $properties );
 	}
-
 }

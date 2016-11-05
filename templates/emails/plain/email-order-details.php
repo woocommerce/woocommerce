@@ -29,7 +29,7 @@ echo "\n" . wc_get_email_order_items( $order, array(
 	'show_image'    => false,
 	'image_size'    => array( 32, 32 ),
 	'plain_text'    => true,
-	'sent_to_admin' => $sent_to_admin
+	'sent_to_admin' => $sent_to_admin,
 ) );
 
 echo "==========\n\n";
@@ -41,7 +41,7 @@ if ( $totals = $order->get_order_item_totals() ) {
 }
 
 if ( $sent_to_admin ) {
-	echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . "\n";
+	echo "\n" . sprintf( __( 'View order: %s', 'woocommerce' ), admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . "\n";
 }
 
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );

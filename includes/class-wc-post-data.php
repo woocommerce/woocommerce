@@ -174,7 +174,7 @@ class WC_Post_Data {
 	 * @param  mixed $_meta_value
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) ) {
 			$product = wc_get_product( $object_id );
 			$product->check_stock_status();
 		}
@@ -191,12 +191,10 @@ class WC_Post_Data {
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {
-				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		}
-
-		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
 			$product_type = stripslashes( $_POST['product-type'] );
 			switch ( $product_type ) {
 				case 'grouped' :
@@ -215,15 +213,17 @@ class WC_Post_Data {
 	 * @param int $post_id
 	 */
 	public static function pre_post_update( $post_id ) {
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
 
-		if ( isset( $_POST['_visibility'] ) ) {
-			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
-				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+			if ( isset( $_POST['_visibility'] ) ) {
+				if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
+					do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+				}
 			}
-		}
-		if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
+				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			}
 		}
 	}
 }

@@ -32,7 +32,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		// clean existing install first
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
-			update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
+			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 
 		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
@@ -86,7 +86,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		// Clean existing install first
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
-			update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
+			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
 
@@ -115,5 +115,4 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$result = ob_get_clean();
 		$this->assertTrue( is_string( $result ) );
 	}
-
 }

@@ -58,23 +58,26 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								<?php echo wc_get_order_status_name( $order->get_status() ); ?>
 
 							<?php elseif ( 'order-total' === $column_id ) : ?>
-								<?php echo sprintf( _n( '%s for %s item', '%s for %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
+								<?php
+								/* translators: 1: formatted order total 2: total order items */
+								printf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count );
+								?>
 
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
 									$actions = array(
 										'pay'    => array(
 											'url'  => $order->get_checkout_payment_url(),
-											'name' => __( 'Pay', 'woocommerce' )
+											'name' => __( 'Pay', 'woocommerce' ),
 										),
 										'view'   => array(
 											'url'  => $order->get_view_order_url(),
-											'name' => __( 'View', 'woocommerce' )
+											'name' => __( 'View', 'woocommerce' ),
 										),
 										'cancel' => array(
 											'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-											'name' => __( 'Cancel', 'woocommerce' )
-										)
+											'name' => __( 'Cancel', 'woocommerce' ),
+										),
 									);
 
 									if ( ! $order->needs_payment() ) {
@@ -107,7 +110,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				<a class="woocommerce-Button woocommerce-Button--previous button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 
-			<?php if ( $current_page !== intval( $customer_orders->max_num_pages ) ) : ?>
+			<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
 				<a class="woocommerce-Button woocommerce-Button--next button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</div>
@@ -116,7 +119,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 <?php else : ?>
 	<div class="woocommerce-Message woocommerce-Message--info woocommerce-info">
 		<a class="woocommerce-Button button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>">
-			<?php _e( 'Go Shop', 'woocommerce' ) ?>
+			<?php _e( 'Go shop', 'woocommerce' ) ?>
 		</a>
 		<?php _e( 'No order has been made yet.', 'woocommerce' ); ?>
 	</div>

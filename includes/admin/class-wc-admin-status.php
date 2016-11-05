@@ -88,7 +88,7 @@ class WC_Admin_Status {
 
 		$handle = ! empty( $viewed_log ) ? self::get_log_file_handle( $viewed_log ) : '';
 
-		if ( ! empty( $_REQUEST[ 'handle' ] ) ) {
+		if ( ! empty( $_REQUEST['handle'] ) ) {
 			self::remove_log();
 		}
 
@@ -151,7 +151,7 @@ class WC_Admin_Status {
 
 			foreach ( $files as $key => $value ) {
 
-				if ( ! in_array( $value, array( ".",".." ) ) ) {
+				if ( ! in_array( $value, array( ".", ".." ) ) ) {
 
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
 						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
@@ -185,7 +185,6 @@ class WC_Admin_Status {
 					}
 				}
 			}
-
 		}
 
 		return $result;
@@ -202,7 +201,7 @@ class WC_Admin_Status {
 			'fields'   => array(
 				'sections' => false,
 				'tags'     => false,
-			)
+			),
 		) );
 
 		$update_theme_version = 0;
@@ -244,13 +243,13 @@ class WC_Admin_Status {
 	 * Remove/delete the chosen file.
 	 */
 	public static function remove_log() {
-		if ( empty( $_REQUEST[ '_wpnonce' ] ) || ! wp_verify_nonce( $_REQUEST[ '_wpnonce' ], 'remove_log' ) ) {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'remove_log' ) ) {
 			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		if ( ! empty( $_REQUEST[ 'handle' ] ) ) {
+		if ( ! empty( $_REQUEST['handle'] ) ) {
 			$logger = wc_get_logger();
-			$logger->remove( $_REQUEST[ 'handle' ] );
+			$logger->remove( $_REQUEST['handle'] );
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );

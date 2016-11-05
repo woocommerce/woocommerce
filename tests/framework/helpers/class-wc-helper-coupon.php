@@ -18,7 +18,7 @@ class WC_Helper_Coupon {
 			'post_title'   => $coupon_code,
 			'post_type'    => 'shop_coupon',
 			'post_status'  => 'publish',
-			'post_excerpt' => 'This is a dummy coupon'
+			'post_excerpt' => 'This is a dummy coupon',
 		) );
 
 		// Update meta
@@ -54,5 +54,4 @@ class WC_Helper_Coupon {
 		wp_delete_post( $coupon_id, true );
 		return true;
 	}
-
 }

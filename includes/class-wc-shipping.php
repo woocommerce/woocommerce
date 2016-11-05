@@ -132,12 +132,12 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
-			$status_options         = get_option( 'woocommerce_status_options', array() );
+			$debug_mode             = 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' );
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 
 			// Debug output
-			if ( ! empty( $status_options['shipping_debug_mode'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
+			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
 				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
 			}
 		} else {
@@ -288,7 +288,7 @@ class WC_Shipping {
 			if ( sizeof( $package['rates'] ) > 0 ) {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
-				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
+				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || sizeof( $package['rates'] ) !== $method_count ) {
 					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], false ), $package['rates'], $chosen_method );
 					$chosen_methods[ $i ] = $chosen_method;
 					$method_counts[ $i ]  = sizeof( $package['rates'] );
@@ -296,7 +296,7 @@ class WC_Shipping {
 				}
 
 				// Store total costs
-				if ( $chosen_method ) {
+				if ( $chosen_method && isset( $package['rates'][ $chosen_method ] ) ) {
 					$rate = $package['rates'][ $chosen_method ];
 
 					// Merge cost and taxes - label and ID will be the same
@@ -304,7 +304,7 @@ class WC_Shipping {
 
 					if ( ! empty( $rate->taxes ) && is_array( $rate->taxes ) ) {
 						foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
-							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[ $key ] ) ? $rate->taxes[ $key ] : 0 ) + ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 );
 						}
 					}
 				}
@@ -348,12 +348,11 @@ class WC_Shipping {
 			unset( $package_to_hash['contents'][ $item_id ]['data'] );
 		}
 
-		$package_hash   = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		$session_key    = 'shipping_for_package_' . $package_key;
-		$stored_rates   = WC()->session->get( $session_key );
+		$package_hash = 'wc_ship_' . md5( json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+		$session_key  = 'shipping_for_package_' . $package_key;
+		$stored_rates = WC()->session->get( $session_key );
 
-		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || ! empty( $status_options['shipping_debug_mode'] ) ) {
+		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			// Calculate shipping method rates
 			$package['rates'] = array();
 
@@ -370,7 +369,7 @@ class WC_Shipping {
 			// Store in session to avoid recalculation
 			WC()->session->set( $session_key, array(
 				'package_hash' => $package_hash,
-				'rates'        => $package['rates']
+				'rates'        => $package['rates'],
 			) );
 		} else {
 			$package['rates'] = $stored_rates['rates'];

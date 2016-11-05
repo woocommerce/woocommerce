@@ -13,10 +13,11 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 
 	<td class="name">
 		<?php
-			echo esc_attr__( 'Refund', 'woocommerce' ) . ' #' . $refund->get_id() . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), $refund->get_date_created() ) );
+			/* translators: 1: refund id 2: date */
+			printf( __( 'Refund #%1$s - %2$s', 'woocommerce' ), $refund->get_id(), date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), $refund->get_date_created() ) );
 
 			if ( $who_refunded->exists() ) {
-				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
+				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
 			}
 		?>
 		<?php if ( $refund->get_reason() ) : ?>
@@ -36,9 +37,11 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 		</div>
 	</td>
 
-	<?php if ( wc_tax_enabled() ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
-		<td class="line_tax" width="1%"></td>
-	<?php endfor; endif; ?>
+	<?php if ( wc_tax_enabled() ) : $total_taxes = count( $order_taxes ); ?>
+		<?php for ( $i = 0;  $i < $total_taxes; $i++ ) : ?>
+			<td class="line_tax" width="1%"></td>
+		<?php endfor; ?>
+	<?php endif; ?>
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">

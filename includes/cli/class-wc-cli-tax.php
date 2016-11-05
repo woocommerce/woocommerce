@@ -431,7 +431,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 		// Add standard class
 		$items[] = array(
 			'slug' => 'standard',
-			'name' => __( 'Standard Rate', 'woocommerce' )
+			'name' => __( 'Standard rate', 'woocommerce' ),
 		);
 
 		$classes = WC_Tax::get_tax_classes();
@@ -439,7 +439,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 		foreach ( $classes as $class ) {
 			$items[] = apply_filters( 'woocommerce_cli_tax_class_response', array(
 				'slug' => sanitize_title( $class ),
-				'name' => $class
+				'name' => $class,
 			), $class, $assoc_args, $this );
 		}
 
@@ -508,7 +508,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 				'tax_rate_compound',
 				'tax_rate_shipping',
 				'tax_rate_order',
-				'tax_rate_class'
+				'tax_rate_class',
 			);
 
 			foreach ( $data as $key => $value ) {
@@ -661,7 +661,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 				'compound' => (bool) $tax['tax_rate_compound'],
 				'shipping' => (bool) $tax['tax_rate_shipping'],
 				'order'    => (int) $tax['tax_rate_order'],
-				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard'
+				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard',
 			);
 
 			// Get locales from a tax rate

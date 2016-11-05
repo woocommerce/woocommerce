@@ -54,7 +54,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- * @return WC_Order
+ * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -67,40 +67,44 @@ function wc_create_order( $args = array() ) {
 		'order_id'      => 0,
 	);
 
-	$args  = wp_parse_args( $args, $default_args );
-	$order = new WC_Order( $args['order_id'] );
+	try {
+		$args  = wp_parse_args( $args, $default_args );
+		$order = new WC_Order( $args['order_id'] );
 
-	// Update props that were set (not null)
-	if ( ! is_null( $args['parent'] ) ) {
-		$order->set_parent_id( absint( $args['parent'] ) );
+		// Update props that were set (not null)
+		if ( ! is_null( $args['parent'] ) ) {
+			$order->set_parent_id( absint( $args['parent'] ) );
+		}
+
+		if ( ! is_null( $args['status'] ) ) {
+			$order->set_status( $args['status'] );
+		}
+
+		if ( ! is_null( $args['customer_note'] ) ) {
+			$order->set_customer_note( $args['customer_note'] );
+		}
+
+		if ( ! is_null( $args['customer_id'] ) ) {
+			$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
+		}
+
+		if ( ! is_null( $args['created_via'] ) ) {
+			$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
+		}
+
+		if ( ! is_null( $args['cart_hash'] ) ) {
+			$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
+		}
+
+		// Update other order props set automatically
+		$order->set_currency( get_woocommerce_currency() );
+		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+		$order->set_customer_user_agent( wc_get_user_agent() );
+		$order->save();
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
 	}
-
-	if ( ! is_null( $args['status'] ) ) {
-		$order->set_status( $args['status'] );
-	}
-
-	if ( ! is_null( $args['customer_note'] ) ) {
-		$order->set_customer_note( $args['customer_note'] );
-	}
-
-	if ( ! is_null( $args['customer_id'] ) ) {
-		$order->set_customer_id( is_numeric( $args['customer_id'] ) ? absint( $args['customer_id'] ) : 0 );
-	}
-
-	if ( ! is_null( $args['created_via'] ) ) {
-		$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
-	}
-
-	if ( ! is_null( $args['cart_hash'] ) ) {
-		$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
-	}
-
-	// Update other order props set automatically
-	$order->set_currency( get_woocommerce_currency() );
-	$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-	$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-	$order->set_customer_user_agent( wc_get_user_agent() );
-	$order->save();
 
 	return $order;
 }
@@ -113,7 +117,7 @@ function wc_create_order( $args = array() ) {
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
-		return new WP_Error( __( 'Invalid order ID', 'woocommerce' ) );
+		return new WP_Error( __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
 }
@@ -170,7 +174,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	if ( ! file_exists( $located ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( '<code>%s</code> does not exist.', $located ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
 		return;
 	}
 
@@ -224,7 +228,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	$template = locate_template(
 		array(
 			trailingslashit( $template_path ) . $template_name,
-			$template_name
+			$template_name,
 		)
 	);
 
@@ -243,7 +247,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @return string
  */
 function get_woocommerce_currency() {
-	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
 /**
@@ -499,13 +503,13 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'INR' => '&#8377;',
 		'IQD' => '&#x639;.&#x62f;',
 		'IRR' => '&#xfdfc;',
-		'ISK' => 'Kr.',
+		'ISK' => 'kr.',
 		'JEP' => '&pound;',
 		'JMD' => '&#36;',
 		'JOD' => '&#x62f;.&#x627;',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'KGS' => '&#x43b;&#x432;',
+		'KGS' => '&#x441;&#x43e;&#x43c;',
 		'KHR' => '&#x17db;',
 		'KMF' => 'Fr',
 		'KPW' => '&#x20a9;',
@@ -633,7 +637,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => $width,
 			'height' => $height,
-			'crop'   => $crop
+			'crop'   => $crop,
 		);
 
 		$image_size = $width . '_' . $height;
@@ -648,7 +652,7 @@ function wc_get_image_size( $image_size ) {
 		$size = array(
 			'width'  => '300',
 			'height' => '300',
-			'crop'   => 1
+			'crop'   => 1,
 		);
 	}
 
@@ -772,7 +776,7 @@ function wc_get_page_children( $page_id ) {
 function flush_rewrite_rules_on_shop_page_save( $post_id ) {
 	$shop_page_id = wc_get_page_id( 'shop' );
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
-		flush_rewrite_rules();
+		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
 add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
@@ -894,21 +898,6 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
- * Enables template debug mode.
- */
-function wc_template_debug_mode() {
-	if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
-			define( 'WC_TEMPLATE_DEBUG_MODE', true );
-		} else {
-			define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		}
-	}
-}
-add_action( 'after_setup_theme', 'wc_template_debug_mode', 20 );
-
-/**
  * Formats a string in the format COUNTRY:STATE into an array.
  *
  * @since 2.3.0
@@ -924,7 +913,7 @@ function wc_format_country_state_string( $country_string ) {
 	}
 	return array(
 		'country' => $country,
-		'state'   => $state
+		'state'   => $state,
 	);
 }
 
@@ -1006,7 +995,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 	 */
 	function hash_equals( $a, $b ) {
 		$a_length = strlen( $a );
-		if ( $a_length !== strlen( $b ) ) {
+		if ( strlen( $b ) !== $a_length ) {
 			return false;
 		}
 		$result = 0;
@@ -1016,7 +1005,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
 		}
 
-		return $result === 0;
+		return 0 === $result;
 	}
 endif;
 
@@ -1226,7 +1215,7 @@ function wc_get_credit_card_type_label( $type ) {
  * @param string $url   URL of the page to return to.
  */
 function wc_back_link( $label, $url ) {
-	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x2934;</a></small>';
+	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;</a></small>';
 }
 
 /**
@@ -1256,13 +1245,16 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
-	$postcodes       = array( $postcode );
-	$postcode        = wc_format_postcode( $postcode, $country );
-	$postcodes[]     = $postcode;
-	$postcode_length = strlen( $postcode );
+	$formatted_postcode = wc_format_postcode( $postcode, $country );
+	$length             = strlen( $formatted_postcode );
+	$postcodes          = array(
+		$postcode,
+		$formatted_postcode,
+		$formatted_postcode . '*',
+	);
 
-	for ( $i = 0; $i < $postcode_length; $i ++ ) {
-		$postcodes[] = substr( $postcode, 0, ( $i + 1 ) * -1 ) . '*';
+	for ( $i = 0; $i < $length; $i ++ ) {
+		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
 	}
 
 	return $postcodes;
@@ -1431,3 +1423,16 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
 		do_action_ref_array( $action, $args );
 	}
 }
+
+/**
+ * Store user agents. Used for tracker.
+ * @since 2.7.0
+ */
+function wc_maybe_store_user_agent( $user_login, $user ) {
+	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
+		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+		$admin_user_agents[] = wc_get_user_agent();
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+	}
+}
+add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );

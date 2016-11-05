@@ -56,19 +56,19 @@ class WC_Frontend_Scripts {
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => 'all'
+				'media'   => 'all',
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
 				'deps'    => 'woocommerce-layout',
 				'version' => WC_VERSION,
-				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
+				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')',
 			),
 			'woocommerce-general' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => 'all'
+				'media'   => 'all',
 			),
 		) );
 	}
@@ -152,7 +152,6 @@ class WC_Frontend_Scripts {
 		}
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		$lightbox_en          = 'yes' === get_option( 'woocommerce_enable_lightbox' );
 		$ajax_cart_en         = 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' );
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
@@ -195,14 +194,31 @@ class WC_Frontend_Scripts {
 		if ( is_lost_password_page() ) {
 			self::enqueue_script( 'wc-lost-password', $frontend_script_path . 'lost-password' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
 		}
-		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
-			self::enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
-			self::enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery','prettyPhoto' ) );
-			self::enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
-		}
-		if ( is_product() ) {
+
+		self::register_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
+		self::register_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
+		self::register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
+
+		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+			self::enqueue_script( 'flexslider', $assets_path . 'js/flexslider/jquery.flexslider' . $suffix . '.js', array( 'jquery' ), '2.7.0', true );
+			self::enqueue_script( 'photoswipe', $assets_path . 'js/photoswipe/photoswipe' . $suffix . '.js', '4.1.1', true );
+			self::enqueue_script( 'photoswipe-ui-default', $assets_path . 'js/photoswipe/photoswipe-ui-default' . $suffix . '.js', array( 'photoswipe' ), '4.1.1', true );
+			self::enqueue_style( 'photoswipe', $assets_path . 'css/photoswipe/photoswipe.css' );
+			self::enqueue_style( 'photoswipe-default-skin', $assets_path . 'css/photoswipe/default-skin/default-skin.css' );
+			self::enqueue_script( 'zoom', $assets_path . 'js/zoom/jquery.zoom' . $suffix . '.js', array( 'jquery' ), '1.7.15', true );
 			self::enqueue_script( 'wc-single-product' );
+
+			wp_localize_script( 'wc-single-product', 'flexslider_options', apply_filters( 'woocommerce_single_product_carousel_options', array(
+				'rtl'            => is_rtl(),
+				'animation'      => 'slide',
+				'smoothHeight'   => true,
+				'directionNav'   => false,
+				'controlNav'     => 'thumbnails',
+				'slideshow'      => false,
+				'animationSpeed' => 500,
+			) ) );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			// Exclude common bots from geolocation by user agent.
 			$ua = wc_get_user_agent();
@@ -251,7 +267,7 @@ class WC_Frontend_Scripts {
 			case 'woocommerce' :
 				return array(
 					'ajax_url'    => WC()->ajax_url(),
-					'wc_ajax_url' => WC_AJAX::get_endpoint( "%%endpoint%%" )
+					'wc_ajax_url' => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 				);
 			break;
 			case 'wc-geolocation' :
@@ -259,7 +275,7 @@ class WC_Frontend_Scripts {
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'home_url'     => home_url(),
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
-					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
+					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '',
 				);
 			break;
 			case 'wc-single-product' :
@@ -278,7 +294,7 @@ class WC_Frontend_Scripts {
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 					'checkout_url'              => WC_AJAX::get_endpoint( "checkout" ),
 					'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-					'debug_mode'                => defined('WP_DEBUG') && WP_DEBUG,
+					'debug_mode'                => defined( 'WP_DEBUG' ) && WP_DEBUG,
 					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please try again.', 'woocommerce' ),
 				);
 			break;
@@ -302,17 +318,17 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' ),
 				);
 			break;
 			case 'wc-add-to-cart' :
 				return array(
 					'ajax_url'                => WC()->ajax_url(),
 					'wc_ajax_url'             => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
+					'i18n_view_cart'          => esc_attr__( 'View cart', 'woocommerce' ),
 					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', wc_get_cart_url() ),
 					'is_cart'                 => is_cart(),
-					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
+					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
 				);
 			break;
 			case 'wc-add-to-cart-variation' :
@@ -323,7 +339,7 @@ class WC_Frontend_Scripts {
 					'wc_ajax_url'                      => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
 					'i18n_make_a_selection_text'       => esc_attr__( 'Please select some product options before adding this product to your cart.', 'woocommerce' ),
-					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' )
+					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
 				);
 			break;
 			case 'wc-country-select' :
@@ -348,7 +364,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
-					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' )
+					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' ),
 				);
 			break;
 		}

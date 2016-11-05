@@ -96,7 +96,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'minimum_amount'               => '',
 				'maximum_amount'               => '',
 				'customer_emails'              => array(),
-				'description'                  => ''
+				'description'                  => '',
 			);
 
 			$coupon_data = wp_parse_args( $assoc_args, $defaults );
@@ -112,7 +112,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
-				'post_excerpt' => $coupon_data['description']
+				'post_excerpt' => $coupon_data['description'],
 	 		);
 
 			$id = wp_insert_post( $new_coupon, $wp_error = false );
@@ -242,6 +242,9 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 			}
 
 			$coupon_post = get_post( $coupon->get_id() );
+			$coupon_usage_limit = $coupon->get_usage_limit();
+			$coupon_usage_limit_per_user = $coupon->get_usage_limit_per_user();
+			$coupon_date_expires = $coupon->get_date_expires();
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
@@ -252,11 +255,11 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'individual_use'               => $coupon->get_individual_use(),
 				'product_ids'                  => implode( ', ', $coupon->get_product_ids() ),
 				'exclude_product_ids'          => implode( ', ', $coupon->get_excluded_product_ids() ),
-				'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
-				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'usage_limit'                  => ( ! empty( $coupon_usage_limit ) ) ? $coupon_usage_limit : null,
+				'usage_limit_per_user'         => ( ! empty( $coupon_usage_limit_per_user ) ) ? $coupon_usage_limit_per_user : null,
 				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 				'usage_count'                  => (int) $coupon->get_usage_count(),
-				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->format_datetime( $coupon->get_expiry_date() ) : null,
+				'expiry_date'                  => ( ! empty( $coupon_date_expires ) ) ? $this->format_datetime( $coupon_date_expires ) : null,
 				'enable_free_shipping'         => $coupon->get_free_shipping(),
 				'product_category_ids'         => implode( ', ', $coupon->get_product_categories() ),
 				'exclude_product_category_ids' => implode( ', ', $coupon->get_excluded_product_categories() ),
@@ -577,6 +580,9 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 		foreach ( $posts as $post ) {
 			$coupon = new WC_Coupon;
 			$coupon->read( $post->ID );
+			$coupon_usage_limit = $coupon->get_usage_limit();
+			$coupon_usage_limit_per_user = $coupon->get_usage_limit_per_user();
+			$coupon_date_expires = $coupon->get_date_expires();
 			$items[] = array(
 				'id'                           => $post->ID,
 				'code'                         => $post->post_title,
@@ -587,11 +593,11 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				'individual_use'               => $coupon->get_individual_use(),
 				'product_ids'                  => implode( ', ', is_array( $coupon->get_product_ids() ) ? $coupon->get_product_ids() : array() ),
 				'exclude_product_ids'          => implode( ', ', is_array( $coupon->get_excluded_product_ids() ) ? $coupon->get_excluded_product_ids() : array() ),
-				'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
-				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'usage_limit'                  => ( ! empty( $coupon_usage_limit ) ) ? $coupon_usage_limit : null,
+				'usage_limit_per_user'         => ( ! empty( $coupon_usage_limit_per_user ) ) ? $coupon_usage_limit_per_user : null,
 				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 				'usage_count'                  => (int) $coupon->get_usage_count(),
-				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->format_datetime( $coupon->get_expiry_date() ) : null,
+				'expiry_date'                  => ( ! empty( $coupon_date_expires ) ) ? $this->format_datetime( $coupon_date_expires ) : null,
 				'free_shipping'                => $coupon->get_free_shipping(),
 				'product_category_ids'         => implode( ', ', is_array( $coupon->get_product_categories() ) ? $coupon->get_product_categories() : array() ),
 				'exclude_product_category_ids' => implode( ', ', is_array( $coupon->get_excluded_product_categories() ) ? $coupon->get_excluded_product_categories() : array() ),

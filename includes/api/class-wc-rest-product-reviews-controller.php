@@ -269,7 +269,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$product_review_id = wp_insert_comment( $prepared_review );
 		if ( ! $product_review_id ) {
-			return new WP_Error( 'rest_product_review_failed_create', __( 'Creating product review failed.' ), array( 'status' => 500 ) );
+			return new WP_Error( 'rest_product_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
@@ -320,7 +320,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$updated = wp_update_comment( $prepared_review );
 		if ( 0 === $updated ) {
-			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.' ), array( 'status' => 500 ) );
+			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		if ( ! empty( $request['rating'] ) ) {
@@ -377,18 +377,18 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			$result = wp_delete_comment( $product_review_id, true );
 		} else {
 			if ( ! $supports_trash ) {
-				return new WP_Error( 'rest_trash_not_supported', __( 'The product review does not support trashing.' ), array( 'status' => 501 ) );
+				return new WP_Error( 'rest_trash_not_supported', __( 'The product review does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 			}
 
 			if ( 'trash' === $product_review->comment_approved ) {
-				return new WP_Error( 'rest_already_trashed', __( 'The comment has already been trashed.' ), array( 'status' => 410 ) );
+				return new WP_Error( 'rest_already_trashed', __( 'The comment has already been trashed.', 'woocommerce' ), array( 'status' => 410 ) );
 			}
 
 			$result = wp_trash_comment( $product_review->comment_ID );
 		}
 
 		if ( ! $result ) {
-			return new WP_Error( 'rest_cannot_delete', __( 'The product review cannot be deleted.' ), array( 'status' => 500 ) );
+			return new WP_Error( 'rest_cannot_delete', __( 'The product review cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**

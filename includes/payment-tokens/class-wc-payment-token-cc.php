@@ -68,9 +68,14 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string
 	 */
 	public function get_display_name() {
-		$display = wc_get_credit_card_type_label( $this->get_card_type() );
-		$display .= '&nbsp;' . sprintf( __( 'ending in %s', 'woocommerce' ), $this->get_last4() );
-		$display .= ' ' . sprintf( __( '(expires %s)', 'woocommerce' ), $this->get_expiry_month() . '/' . substr( $this->get_expiry_year(), 2 ) );
+		/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
+		$display = sprintf(
+			__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce' ),
+			wc_get_credit_card_type_label( $this->get_card_type() ),
+			$this->get_last4(),
+			$this->get_expiry_month(),
+			substr( $this->get_expiry_year(), 2 )
+		);
 		return $display;
 	}
 
@@ -145,5 +150,4 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	public function set_last4( $last4 ) {
 		$this->add_meta_data( 'last4', $last4, true );
 	}
-
 }

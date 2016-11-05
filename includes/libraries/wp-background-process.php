@@ -159,6 +159,9 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * the process is not already running.
 		 */
 		public function maybe_handle() {
+			// Don't lock up other requests while processing
+			session_write_close();
+
 			if ( $this->is_process_running() ) {
 				// Background process already running.
 				wp_die();
@@ -417,7 +420,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 			// Adds every 5 minutes to the existing schedules.
 			$schedules[ $this->identifier . '_cron_interval' ] = array(
 				'interval' => MINUTE_IN_SECONDS * $interval,
-				'display'  => sprintf( __( 'Every %d Minutes', 'woocommerce' ), $interval ),
+				'display'  => sprintf( __( 'Every %d minutes', 'woocommerce' ), $interval ),
 			);
 
 			return $schedules;

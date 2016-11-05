@@ -258,7 +258,7 @@ class WC_Webhook {
 			WC()->api->includes();
 			WC()->api->register_resources( new WC_API_Server( '/' ) );
 
-			switch( $resource ) {
+			switch ( $resource ) {
 
 				case 'coupon':
 					$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
@@ -557,7 +557,7 @@ class WC_Webhook {
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
-				'woocommerce_api_create_customer'
+				'woocommerce_api_create_customer',
 			),
 			'customer.updated' => array(
 				'profile_update',
@@ -576,7 +576,7 @@ class WC_Webhook {
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_api_edit_order',
 				'woocommerce_order_edit_status',
-				'woocommerce_order_status_changed'
+				'woocommerce_order_status_changed',
 			),
 			'order.deleted' => array(
 				'wp_trash_post',
@@ -828,5 +828,4 @@ class WC_Webhook {
 	public function get_post_data() {
 		return $this->post_data;
 	}
-
 }

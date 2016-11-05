@@ -4,78 +4,20 @@
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
-class WC_Tests_API_Coupons extends WC_API_Unit_Test_Case {
+class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
-	/** @var WC_API_Coupons instance */
 	protected $endpoint;
 
 	/**
 	 * Setup test coupon data.
-	 * @see WC_API_UnitTestCase::setup()
 	 * @since 2.7.0
 	 */
-	public function setUp() {
+	 public function setUp() {
 		parent::setUp();
-		$this->endpoint = WC()->api->WC_API_Coupons;
-		$this->coupon   = WC_Helper_Coupon::create_coupon();
-	}
-
-	/**
-	 * Ensure valid coupon data response.
-	 * @since 2.7.0
-	 * @param array $response
-	 * @param WC_Coupon $coupon
-	 */
-	protected function check_get_coupon_response( $response, $coupon ) {
-		$this->assertEquals( (int) $coupon->get_id(), $response['id'] );
-		$this->assertEquals( $coupon->get_code(), $response['code'] );
-		$this->assertEquals( $coupon->get_discount_type(), $response['type'] );
-		$this->assertEquals( $coupon->get_amount(), $response['amount'] );
-		$this->assertEquals( $coupon->get_individual_use(), $response['individual_use'] );
-		$this->assertEquals( $coupon->get_product_ids(), $response['product_ids'] );
-		$this->assertEquals( $coupon->get_excluded_product_ids(), $response['exclude_product_ids'] );
-		$this->assertEquals( (int) $coupon->get_usage_limit(), $response['usage_limit'] );
-		$this->assertEquals( (int) $coupon->get_usage_limit_per_user(), $response['usage_limit_per_user'] );
-		$this->assertEquals( (int) $coupon->get_limit_usage_to_x_items(), $response['limit_usage_to_x_items'] );
-		$this->assertEquals( (int) $coupon->get_usage_count(), $response['usage_count'] );
-		$this->assertEquals( $coupon->get_expiry_date(), $response['expiry_date'] );
-		$this->assertEquals( $coupon->get_free_shipping(), $response['enable_free_shipping'] );
-		$this->assertEquals( $coupon->get_product_categories(), $response['product_category_ids'] );
-		$this->assertEquals( $coupon->get_excluded_product_categories(), $response['exclude_product_category_ids'] );
-		$this->assertEquals( $coupon->get_exclude_sale_items(), $response['exclude_sale_items'] );
-		$this->assertEquals( wc_format_decimal( $coupon->get_minimum_amount(), 2 ), $response['minimum_amount'] );
-		$this->assertEquals( wc_format_decimal( $coupon->get_maximum_amount(), 2 ), $response['maximum_amount'] );
-		$this->assertEquals( $coupon->get_email_restrictions(), $response['customer_emails'] );
-		$this->assertEquals( $coupon->get_description(), $response['description'] );
-		$this->assertArrayHasKey( 'created_at', $response );
-		$this->assertArrayHasKey( 'updated_at', $response );
-	}
-
-	/**
-	 * Get default arguments for creating/editing a coupon.
-	 * @since  2.7.0
-	 * @param  array $args
-	 * @return array
-	 */
-	protected function get_defaults( $args = array() ) {
-		$defaults = array(
-			'code'        => 'api-dummycoupon',
-			'description' => 'Test API Coupon',
-			'amount'      => '5',
-			'type'        => 'percent',
-		);
-		return array( 'coupon' => wp_parse_args( $args, $defaults ) );
-	}
-
-	/**
-	 * Clears out the post title from our post data before inserting the coupon into the database.
-	 * @since 2.7.0
-	 * @param  array $data
-	 * @return array
-	 */
-	public function clear_code_from_post_data( $data ) {
-		$data['post_title'] = '';
-		return $data;
+		$this->endpoint = new WC_REST_Coupons_Controller();
+		$this->user = $this->factory->user->create( array(
+			'role' => 'administrator',
+		) );
 	}
 
 	/**
@@ -83,239 +25,410 @@ class WC_Tests_API_Coupons extends WC_API_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_register_routes() {
-		$routes = $this->endpoint->register_routes( array() );
-		$this->assertArrayHasKey( '/coupons', $routes );
-		$this->assertArrayHasKey( '/coupons/count', $routes );
-		$this->assertArrayHasKey( '/coupons/(?P<id>\d+)', $routes );
-		$this->assertArrayHasKey( '/coupons/code/(?P<code>\w[\w\s\-]*)', $routes );
-		$this->assertArrayHasKey( '/coupons/bulk', $routes );
+		$routes = $this->server->get_routes();
+		$this->assertArrayHasKey( '/wc/v1/coupons', $routes );
+		$this->assertArrayHasKey( '/wc/v1/coupons/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v1/coupons/batch', $routes );
 	}
 
 	/**
-	 * Test GET /coupons/{id}.
-	 * @since 2.7.0
-	 */
-	public function test_get_coupon() {
-		// invalid ID
-		$response = $this->endpoint->get_coupon( 0 );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_id', 404, $response );
-
-		// valid request
-		$response = $this->endpoint->get_coupon( $this->coupon->get_id() );
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], $this->coupon );
-	}
-
-	/**
-	 * Test GET /coupons/{id} without valid permissions.
-	 * @since 2.7.0
-	 */
-	public function test_get_coupon_without_permission() {
-		$this->disable_capability( 'read_private_shop_coupons' );
-		$response = $this->endpoint->get_coupon( $this->coupon->get_id() );
-		$this->assertHasAPIError( 'woocommerce_api_user_cannot_read_coupon', 401, $response );
-	}
-
-	/**
-	 * Test GET /coupons/code/{code}.
-	 * @since 2.7.0
-	 */
-	public function test_get_get_coupon_by_code() {
-		// invalid ID
-		$response = $this->endpoint->get_coupon_by_code( 'bogus' );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_code', 404, $response );
-
-		// valid request
-		$response = $this->endpoint->get_coupon_by_code( 'dummycoupon' );
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], $this->coupon );
-	}
-
-	/**
-	 * Test GET /coupons/code/{code} without valid permissions.
-	 * @since 2.7.0
-	 */
-	public function test_get_coupon_by_code_without_permission() {
-		$this->disable_capability( 'read_private_shop_coupons' );
-		$response = $this->endpoint->get_coupon( $this->coupon->get_id() );
-		$this->assertHasAPIError( 'woocommerce_api_user_cannot_read_coupon', 401, $response );
-	}
-
-	/**
-	 * Test GET /coupons.
+	 * Test getting coupons.
 	 * @since 2.7.0
 	 */
 	public function test_get_coupons() {
-		$response = $this->endpoint->get_coupons();
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupons', $response );
-		$this->assertCount( 1, $response['coupons'] );
-		$this->check_get_coupon_response( $response['coupons'][0], $this->coupon );
+		wp_set_current_user( $this->user );
+
+		$coupon_1 = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post_1   = get_post( $coupon_1->get_id() );
+		$coupon_2 = WC_Helper_Coupon::create_coupon( 'dummycoupon-2' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons' ) );
+		$coupons = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $coupons ) );
+		$this->assertContains( array(
+			'id'             => $coupon_1->get_id(),
+			'code'           => 'dummycoupon-1',
+			'amount'         => '1.00',
+			'date_created'   => wc_rest_prepare_date_response( $post_1->post_date_gmt ),
+			'date_modified'  => wc_rest_prepare_date_response( $post_1->post_modified_gmt ),
+			'discount_type'  => 'fixed_cart',
+			'description'    => 'This is a dummy coupon',
+			'date_expires'    => '',
+			'usage_count'    => 0,
+			'individual_use' => false,
+			'product_ids'    => array(),
+			'excluded_product_ids' => array(),
+			'usage_limit'    => '',
+			'usage_limit_per_user' => '',
+			'limit_usage_to_x_items' => 0,
+			'free_shipping' => false,
+			'product_categories' => array(),
+			'excluded_product_categories' => array(),
+			'exclude_sale_items' => false,
+			'minimum_amount' => '0.00',
+			'maximum_amount' => '0.00',
+			'email_restrictions' => array(),
+			'used_by' => array(),
+			'meta_data' => array(),
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/coupons/' . $coupon_1->get_id() ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/coupons' ),
+					),
+				),
+			),
+		), $coupons );
 	}
 
 	/**
-	 * Test GET /coupons without valid permissions.
+	 * Test getting coupons without valid permissions.
 	 * @since 2.7.0
 	 */
 	public function test_get_coupons_without_permission() {
-		$this->disable_capability( 'read_private_shop_coupons' );
-		$response = $this->endpoint->get_coupons();
-		$this->assertArrayHasKey( 'coupons', $response );
-		$this->assertEmpty( $response['coupons'] );
+		wp_set_current_user( 0 );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons' ) );
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test GET /coupons/count.
+	 * Test getting a single coupon.
 	 * @since 2.7.0
 	 */
-	public function test_get_coupons_count() {
-		$response = $this->endpoint->get_coupons_count();
-		$this->assertArrayHasKey( 'count', $response );
-		$this->assertEquals( 1, $response['count'] );
+	public function test_get_coupon() {
+		wp_set_current_user( $this->user );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post     = get_post( $coupon->get_id() );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons/' . $coupon->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(
+			'id'             => $coupon->get_id(),
+			'code'           => 'dummycoupon-1',
+			'amount'         => '1.00',
+			'date_created'   => wc_rest_prepare_date_response( $post->post_date_gmt ),
+			'date_modified'  => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+			'discount_type'  => 'fixed_cart',
+			'description'    => 'This is a dummy coupon',
+			'date_expires'    => null,
+			'usage_count'    => 0,
+			'individual_use' => false,
+			'product_ids'    => array(),
+			'excluded_product_ids' => array(),
+			'usage_limit'    => null,
+			'usage_limit_per_user' => null,
+			'limit_usage_to_x_items' => 0,
+			'free_shipping' => false,
+			'product_categories' => array(),
+			'excluded_product_categories' => array(),
+			'exclude_sale_items' => false,
+			'minimum_amount' => '0.00',
+			'maximum_amount' => '0.00',
+			'email_restrictions' => array(),
+			'used_by' => array(),
+			'meta_data' => array(),
+		), $data );
 	}
 
 	/**
-	 * Test GET /coupons/count without valid permissions.
+	 * Test getting a single coupon with an invalid ID.
 	 * @since 2.7.0
 	 */
-	public function test_get_coupons_count_without_permission() {
-		$this->disable_capability( 'read_private_shop_coupons' );
-		$response = $this->endpoint->get_coupons_count();
-		$this->assertHasAPIError( 'woocommerce_api_user_cannot_read_coupons_count', 401, $response );
+	public function test_get_coupon_invalid_id() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons/0' ) );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
-	 * Test POST /coupons.
+	 * Test getting a single coupon without valid permissions.
+	 * @since 2.7.0
+	 */
+	public function test_get_coupon_without_permission() {
+		wp_set_current_user( 0 );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons/' . $coupon->get_id() ) );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test creating a single coupon.
 	 * @since 2.7.0
 	 */
 	public function test_create_coupon() {
-		$response = $this->endpoint->create_coupon( $this->get_defaults() );
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], new WC_Coupon( $response['coupon']['code'] ) );
+		wp_set_current_user( $this->user );
+		$request = new WP_REST_Request( 'POST', '/wc/v1/coupons' );
+		$request->set_body_params( array(
+			'code'          => 'test',
+			'amount'        => '5.00',
+			'discount_type' => 'fixed_product',
+			'description'   => 'Test',
+			'usage_limit'   => 10,
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( array(
+			'id'             => $data['id'],
+			'code'           => 'test',
+			'amount'         => '5.00',
+			'date_created'   => $data['date_created'],
+			'date_modified'  => $data['date_modified'],
+			'discount_type'  => 'fixed_product',
+			'description'    => 'Test',
+			'date_expires'    => null,
+			'usage_count'    => 0,
+			'individual_use' => false,
+			'product_ids'    => array(),
+			'excluded_product_ids' => array(),
+			'usage_limit'    => 10,
+			'usage_limit_per_user' => null,
+			'limit_usage_to_x_items' => 0,
+			'free_shipping' => false,
+			'product_categories' => array(),
+			'excluded_product_categories' => array(),
+			'exclude_sale_items' => false,
+			'minimum_amount' => '0.00',
+			'maximum_amount' => '0.00',
+			'email_restrictions' => array(),
+			'used_by' => array(),
+			'meta_data' => array(),
+		), $data );
 	}
 
 	/**
-	 * Test POST /coupons without valid permissions.
+	 * Test creating a single coupon with invalid fields.
+	 * @since 2.7.0
+	 */
+	public function test_create_coupon_invalid_fields() {
+		wp_set_current_user( $this->user );
+
+		// test no code...
+		$request = new WP_REST_Request( 'POST', '/wc/v1/coupons' );
+		$request->set_body_params( array(
+			'amount'        => '5.00',
+			'discount_type' => 'fixed_product',
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test creating a single coupon without valid permissions.
 	 * @since 2.7.0
 	 */
 	public function test_create_coupon_without_permission() {
-		$this->disable_capability( 'publish_shop_coupons' );
-		$response = $this->endpoint->create_coupon( $this->get_defaults() );
-		$this->assertHasAPIError( 'woocommerce_api_user_cannot_create_coupon', 401, $response );
+		wp_set_current_user( 0 );
+
+		// test no code...
+		$request = new WP_REST_Request( 'POST', '/wc/v1/coupons' );
+		$request->set_body_params( array(
+			'code'          => 'fail',
+			'amount'        => '5.00',
+			'discount_type' => 'fixed_product',
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test an empty coupon code for POST /coupons.
+	 * Test updating a single coupon.
 	 * @since 2.7.0
 	 */
-	public function test_create_coupon_empty_code() {
-		$response = $this->endpoint->create_coupon( $this->get_defaults( array( 'code' => null ) ) );
-		$this->assertHasAPIError( 'woocommerce_api_missing_coupon_code', 400, $response );
+	public function test_update_coupon() {
+		wp_set_current_user( $this->user );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post     = get_post( $coupon->get_id() );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/coupons/' . $coupon->get_id() ) );
+		$data     = $response->get_data();
+		$this->assertEquals( 'This is a dummy coupon', $data['description'] );
+		$this->assertEquals( 'fixed_cart', $data['discount_type'] );
+		$this->assertEquals( '1.00', $data['amount'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/coupons/' . $coupon->get_id() );
+		$request->set_body_params( array(
+			'amount' => '10.00',
+			'description' => 'New description',
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( '10.00', $data['amount'] );
+		$this->assertEquals( 'New description', $data['description'] );
+		$this->assertEquals( 'fixed_cart', $data['discount_type'] );
 	}
 
 	/**
-	 * Test an empty or invalid discount type for POST /coupons.
+	 * Test updating a single coupon with an invalid ID.
 	 * @since 2.7.0
 	 */
-	public function test_create_coupon_invalid_discount_type() {
-		// empty
-		$response = $this->endpoint->create_coupon( $this->get_defaults( array( 'type' => null ) ) );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_type', 400, $response );
-		// invalid
-		$response = $this->endpoint->create_coupon( $this->get_defaults( array( 'type' => 'bogus' ) ) );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_type', 400, $response );
+	public function test_update_coupon_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/coupons/0' );
+		$request->set_body_params( array(
+			'code'   => 'tester',
+			'amount' => '10.00',
+			'description' => 'New description',
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
 	}
 
 	/**
-	 * Test wp_insert_post() failure for POST /coupons.
+	 * Test updating a single coupon without valid permissions.
 	 * @since 2.7.0
 	 */
-	public function test_create_coupon_insert_post_failure() {
-		add_filter( 'wp_insert_post_empty_content', '__return_true' );
-		add_filter( 'wp_insert_post_data', array( $this, 'clear_code_from_post_data' ) );
-		$response = $this->endpoint->create_coupon( $this->get_defaults( array( 'description' => null, 'code' => '' ) ) );
-		$this->assertHasAPIError( 'woocommerce_api_cannot_create_coupon', 400, $response );
+	public function test_update_coupon_without_permission() {
+		wp_set_current_user( 0 );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post     = get_post( $coupon->get_id() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/coupons/' . $coupon->get_id() );
+		$request->set_body_params( array(
+			'amount' => '10.00',
+			'description' => 'New description',
+		) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test PUT /coupons/{id}.
+	 * Test deleting a single coupon.
 	 * @since 2.7.0
-	 */
-	public function test_edit_coupon() {
-		// invalid ID
-		$response = $this->endpoint->edit_coupon( 0, $this->get_defaults() );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_id', 404, $response );
-
-		$args = array(
-			'description' => rand_str(),
-			'code'        => rand_str(),
-		);
-
-		// valid request
-		$response = $this->endpoint->edit_coupon( $this->coupon->get_id(), $this->get_defaults( $args ) );
-
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupon', $response );
-		$this->check_get_coupon_response( $response['coupon'], new WC_Coupon( $response['coupon']['code'] ) );
-	}
-
-	/**
-	 * Test PUT /coupons/{id} without valid permissions.
-	 *
-	 * @since 2.2
-	 */
-	public function test_edit_coupon_without_permission() {
-		$this->disable_capability( 'edit_published_shop_coupons' );
-		$response = $this->endpoint->edit_coupon( $this->coupon->get_id(), $this->get_defaults() );
-		$this->assertHasAPIError( 'woocommerce_api_user_cannot_edit_coupon', 401, $response );
-	}
-
-	/**
-	 * Test DELETE /coupons/{id}.
-	 *
-	 * @since 2.2
 	 */
 	public function test_delete_coupon() {
-		$response = $this->endpoint->delete_coupon( 0 );
-		$this->assertHasAPIError( 'woocommerce_api_invalid_coupon_id', 404, $response );
-
-		$response = $this->endpoint->delete_coupon( $this->coupon->get_id() );
-		$this->assertArrayHasKey( 'message', $response );
-		$this->assertEquals( 'Deleted coupon', $response['message'] );
+		wp_set_current_user( $this->user );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/coupons/' . $coupon->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
 	}
 
 	/**
-	 * Test POST /coupons/bulk.
+	 * Test deleting a single coupon with an invalid ID.
 	 * @since 2.7.0
 	 */
-	public function test_create_coupon_bulk() {
-		$test_coupon_data = $this->get_defaults();
-		$test_coupon_data_2 = $this->get_defaults( array( 'code' => time() ) );
-		$coupons = array( 'coupons' => array( $test_coupon_data['coupon'], $test_coupon_data_2['coupon'] ) );
-		$response = $this->endpoint->bulk( $coupons );
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupons', $response );
-		$this->assertCount( 2, $response['coupons'] );
-		$this->check_get_coupon_response( $response['coupons'][0], new WC_Coupon( $response['coupons'][0]['code'] ) );
-		$this->check_get_coupon_response( $response['coupons'][1], new WC_Coupon( $response['coupons'][1]['code'] ) );
+	public function test_delete_coupon_invalid_id() {
+		wp_set_current_user( $this->user );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/coupons/0' );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
-	 * Test PUT /coupons/bulk.
+	 * Test deleting a single coupon without valid permissions.
 	 * @since 2.7.0
 	 */
-	public function test_edit_coupon_bulk() {
-		$coupon_1 = WC_Helper_Coupon::create_coupon( 'dummycoupon-1-' . time() );
-		$test_coupon_data = $this->get_defaults( array( 'description' => rand_str() ) );
-		$test_coupon_data['coupon']['id'] = $coupon_1->get_id();
-		$coupons = array( 'coupons' => array( $test_coupon_data['coupon'] ) );
-		$response = $this->endpoint->bulk( $coupons );
-		$this->assertNotWPError( $response );
-		$this->assertArrayHasKey( 'coupons', $response );
-		$this->check_get_coupon_response( $response['coupons'][0], new WC_Coupon( $response['coupons'][0]['code'] ) );
+	public function test_delete_coupon_without_permission() {
+		wp_set_current_user( 0 );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/coupons/' . $coupon->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
+	/**
+	 * Test batch operations on coupons.
+	 * @since 2.7.0
+	 */
+	public function test_batch_coupon() {
+		wp_set_current_user( $this->user );
+
+		$coupon_1   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$coupon_2   = WC_Helper_Coupon::create_coupon( 'dummycoupon-2' );
+		$coupon_3   = WC_Helper_Coupon::create_coupon( 'dummycoupon-3' );
+		$coupon_4   = WC_Helper_Coupon::create_coupon( 'dummycoupon-4' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/coupons/batch' );
+		$request->set_body_params( array(
+			'update' => array(
+				array(
+					'id'     => $coupon_1->get_id(),
+					'amount' => '5.15',
+				),
+			),
+			'delete' => array(
+				$coupon_2->get_id(),
+				$coupon_3->get_id(),
+			),
+			'create' => array(
+				array(
+					'code'   => 'new-coupon',
+					'amount' => '11.00',
+				),
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( '5.15', $data['update'][0]['amount'] );
+		$this->assertEquals( '11.00', $data['create'][0]['amount'] );
+		$this->assertEquals( 'new-coupon', $data['create'][0]['code'] );
+		$this->assertEquals( $coupon_2->get_id(), $data['delete'][0]['id'] );
+		$this->assertEquals( $coupon_3->get_id(), $data['delete'][1]['id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v1/coupons' );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 3, count( $data ) );
+	}
+
+	/**
+	 * Test coupon schema.
+	 * @since 2.7.0
+	 */
+	public function test_coupon_schema() {
+		wp_set_current_user( $this->user );
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/coupons' );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+		$properties = $data['schema']['properties'];
+
+		$this->assertEquals( 24, count( $properties ) );
+		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertArrayHasKey( 'code', $properties );
+		$this->assertArrayHasKey( 'date_created', $properties );
+		$this->assertArrayHasKey( 'date_modified', $properties );
+		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'discount_type', $properties );
+		$this->assertArrayHasKey( 'amount', $properties );
+		$this->assertArrayHasKey( 'date_expires', $properties );
+		$this->assertArrayHasKey( 'usage_count', $properties );
+		$this->assertArrayHasKey( 'individual_use', $properties );
+		$this->assertArrayHasKey( 'product_ids', $properties );
+		$this->assertArrayHasKey( 'excluded_product_ids', $properties );
+		$this->assertArrayHasKey( 'usage_limit', $properties );
+		$this->assertArrayHasKey( 'usage_limit_per_user', $properties );
+		$this->assertArrayHasKey( 'limit_usage_to_x_items', $properties );
+		$this->assertArrayHasKey( 'free_shipping', $properties );
+		$this->assertArrayHasKey( 'product_categories', $properties );
+		$this->assertArrayHasKey( 'excluded_product_categories', $properties );
+		$this->assertArrayHasKey( 'exclude_sale_items', $properties );
+		$this->assertArrayHasKey( 'minimum_amount', $properties );
+		$this->assertArrayHasKey( 'maximum_amount', $properties );
+		$this->assertArrayHasKey( 'email_restrictions', $properties );
+		$this->assertArrayHasKey( 'used_by', $properties );
+	}
 }

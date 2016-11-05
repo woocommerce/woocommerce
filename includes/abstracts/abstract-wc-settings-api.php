@@ -307,7 +307,7 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
-		if ( $data['desc_tip'] === true ) {
+		if ( true === $data['desc_tip'] ) {
 			$tip = $data['description'];
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$tip = $data['desc_tip'];
@@ -325,7 +325,7 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
-		if ( $data['desc_tip'] === true ) {
+		if ( true === $data['desc_tip'] ) {
 			$description = '';
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$description = $data['description'];
@@ -797,7 +797,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_price_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
+		return ( '' === $value ) ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -811,7 +811,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_decimal_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
+		return ( '' === $value ) ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -838,7 +838,7 @@ abstract class WC_Settings_API {
 		return wp_kses( trim( stripslashes( $value ) ),
 			array_merge(
 				array(
-					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true ),
 				),
 				wp_kses_allowed_html( 'post' )
 			)

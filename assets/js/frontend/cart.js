@@ -70,9 +70,10 @@ jQuery( function( $ ) {
 		// Error message collection
 		var $error = $( '.woocommerce-error', $html );
 		var $message = $( '.woocommerce-message', $html );
+		var $info = $( '.woocommerce-info', $html );
 
 		// Remove errors
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
+		$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 
 		if ( $new_form.length === 0 ) {
 			// If the checkout is also displayed on this page, trigger reload instead.
@@ -88,8 +89,12 @@ jQuery( function( $ ) {
 			// Display errors
 			if ( $error.length > 0 ) {
 				show_notice( $error, $( '.cart-empty' ).closest( '.woocommerce' ) );
-			} else if ( $message.length > 0 ) {
+			}
+			if ( $message.length > 0 ) {
 				show_notice( $message, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			}
+			if ( $info.length > 0 ) {
+				show_notice( $info, $( '.cart-empty' ).closest( '.woocommerce' ) );
 			}
 		} else {
 			// If the checkout is also displayed on this page, trigger update event.
@@ -102,8 +107,12 @@ jQuery( function( $ ) {
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
-			} else if ( $message.length > 0 ) {
+			}
+			if ( $message.length > 0 ) {
 				show_notice( $message );
+			}
+			if ( $info.length > 0 ) {
+				show_notice( $info );
 			}
 
 			update_cart_totals_div( $new_totals );
@@ -131,7 +140,6 @@ jQuery( function( $ ) {
 		if ( ! $target ) {
 			$target = $( '.shop_table.cart' ).closest( 'form' );
 		}
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
 		$target.before( html_element );
 	};
 
@@ -258,6 +266,7 @@ jQuery( function( $ ) {
 		 */
 		init: function() {
 			this.update_cart_totals    = this.update_cart_totals.bind( this );
+			this.input_keypress        = this.input_keypress.bind( this );
 			this.cart_submit           = this.cart_submit.bind( this );
 			this.submit_click          = this.submit_click.bind( this );
 			this.apply_coupon          = this.apply_coupon.bind( this );
@@ -273,6 +282,10 @@ jQuery( function( $ ) {
 				'click',
 				'div.woocommerce > form input[type=submit]',
 				this.submit_click );
+			$( document ).on(
+				'keypress',
+				'div.woocommerce > form input[type=number]',
+				this.input_keypress );
 			$( document ).on(
 				'submit',
 				'div.woocommerce:not(.widget_product_search) > form',
@@ -344,14 +357,39 @@ jQuery( function( $ ) {
 		},
 
 		/**
+		 * Handle the <ENTER> key for quantity fields.
+		 *
+		 * @param {Object} evt The JQuery event
+		 *
+		 * For IE, if you hit enter on a quantity field, it makes the
+		 * document.activeElement the first submit button it finds.
+		 * For us, that is the Apply Coupon button. This is required
+		 * to catch the event before that happens.
+		 */
+		input_keypress: function( evt ) {
+
+			// Catch the enter key and don't let it submit the form.
+			if ( 13 === evt.keyCode ) {
+				evt.preventDefault();
+				this.cart_submit( evt );
+			}
+		},
+
+		/**
 		 * Handle cart form submit and route to correct logic.
 		 *
 		 * @param {Object} evt The JQuery event
 		 */
 		cart_submit: function( evt ) {
-			var $form = $( evt.currentTarget );
 			var $submit = $( document.activeElement );
 			var $clicked = $( 'input[type=submit][clicked=true]' );
+			var $form = $( evt.currentTarget );
+
+			// For submit events, currentTarget is form.
+			// For keypress events, currentTarget is input.
+			if ( ! $form.is( 'form' ) ) {
+				$form = $( evt.currentTarget ).parents( 'form' );
+			}
 
 			if ( 0 === $form.find( '.shop_table.cart' ).length ) {
 				return;
@@ -404,6 +442,7 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
+					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'applied_coupon' );
 				},
@@ -440,6 +479,7 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
+					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon' );
 					unblock( $tr.parents( 'table' ) );

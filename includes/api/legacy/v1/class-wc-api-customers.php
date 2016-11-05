@@ -64,7 +64,7 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		# GET /customers/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
@@ -98,7 +98,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$customers = array();
 
-		foreach( $query->get_results() as $user_id ) {
+		foreach ( $query->get_results() as $user_id ) {
 
 			if ( ! $this->is_readable( $user_id ) )
 				continue;
@@ -500,5 +500,4 @@ class WC_API_Customers extends WC_API_Resource {
 
 		return current_user_can( 'list_users' );
 	}
-
 }

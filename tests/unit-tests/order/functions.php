@@ -15,9 +15,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_order_statuses() {
 
 		$order_statuses = apply_filters( 'wc_order_statuses', array(
-			'wc-pending'    => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
+			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-			'wc-on-hold'    => _x( 'On Hold', 'Order status', 'woocommerce' ),
+			'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
 			'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
 			'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 			'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
@@ -45,8 +45,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_status_name() {
 
-		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
-		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
+		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
+		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
 	}
 
 	/**
@@ -152,5 +152,4 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}
-
 }

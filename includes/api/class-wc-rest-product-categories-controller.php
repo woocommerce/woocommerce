@@ -116,7 +116,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 		update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
 		update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
 
-		if ( ! empty( $request['image'] ) ) {
+		if ( isset( $request['image'] ) ) {
 			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
 				$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image']['src'] ) );
 
@@ -126,7 +126,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 
 				$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
 			} else {
-				$image_id = absint( $request['image']['id'] );
+				$image_id = isset( $request['image']['id'] ) ? absint( $request['image']['id'] ) : 0;
 			}
 
 			// Check if image_id is a valid image attachment before updating the term meta.
@@ -142,6 +142,8 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				if ( ! empty( $request['image']['title'] ) ) {
 					wp_update_post( array( 'ID' => $image_id, 'post_title' => wc_clean( $request['image']['title'] ) ) );
 				}
+			} else {
+				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
 			}
 		}
 

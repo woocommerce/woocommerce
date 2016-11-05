@@ -264,7 +264,6 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				// Default custom range to today.
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			$filter['period'] = empty( $filter['period'] ) ? 'week' : $filter['period'];
@@ -377,6 +376,7 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'date_min' => array(
+				/* translators: %s: date format */
 				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
 				'type'              => 'string',
 				'format'            => 'date',
@@ -384,6 +384,7 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'date_max' => array(
+				/* translators: %s: date format */
 				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
 				'type'              => 'string',
 				'format'            => 'date',

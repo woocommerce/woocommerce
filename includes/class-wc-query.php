@@ -36,8 +36,8 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
-			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -88,13 +88,14 @@ class WC_Query {
 
 		switch ( $endpoint ) {
 			case 'order-pay' :
-				$title = __( 'Pay for Order', 'woocommerce' );
+				$title = __( 'Pay for order', 'woocommerce' );
 			break;
 			case 'order-received' :
-				$title = __( 'Order Received', 'woocommerce' );
+				$title = __( 'Order received', 'woocommerce' );
 			break;
 			case 'orders' :
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					/* translators: %s: page */
 					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
 				} else {
 					$title = __( 'Orders', 'woocommerce' );
@@ -102,25 +103,26 @@ class WC_Query {
 			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
+				/* translators: %s: order number */
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
 			break;
 			case 'downloads' :
 				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
-				$title = __( 'Account Details', 'woocommerce' );
+				$title = __( 'Account details', 'woocommerce' );
 			break;
 			case 'edit-address' :
 				$title = __( 'Addresses', 'woocommerce' );
 			break;
 			case 'payment-methods' :
-				$title = __( 'Payment Methods', 'woocommerce' );
+				$title = __( 'Payment methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
-				$title = __( 'Add Payment Method', 'woocommerce' );
+				$title = __( 'Add payment method', 'woocommerce' );
 			break;
 			case 'lost-password' :
-				$title = __( 'Lost Password', 'woocommerce' );
+				$title = __( 'Lost password', 'woocommerce' );
 			break;
 			default :
 				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
@@ -211,9 +213,7 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
-			}
-
-			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
@@ -394,7 +394,7 @@ class WC_Query {
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
-		$q->set( 'post__in', array_unique( apply_filters( 'loop_shop_post_in', array() ) ) );
+		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -445,39 +445,39 @@ class WC_Query {
 
 		// default - menu_order
 		$args['orderby']  = 'menu_order title';
-		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+		$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 		$args['meta_key'] = '';
 
 		switch ( $orderby ) {
 			case 'rand' :
 				$args['orderby']  = 'rand';
-			break;
+				break;
 			case 'date' :
 				$args['orderby']  = 'date ID';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
-			break;
+				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+				break;
 			case 'price' :
 				$args['orderby']  = "meta_value_num ID";
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+				$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
-			break;
+				break;
 			case 'popularity' :
 				$args['meta_key'] = 'total_sales';
 
 				// Sorting handled later though a hook
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
-			break;
+				break;
 			case 'rating' :
 				$args['meta_key'] = '_wc_average_rating';
 				$args['orderby']  = array(
 					'meta_value_num' => 'DESC',
 					'ID'             => 'ASC',
 				);
-			break;
+				break;
 			case 'title' :
-				$args['orderby']  = 'title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-			break;
+				$args['orderby'] = 'title';
+				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+				break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
@@ -547,35 +547,12 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
-			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
+			$meta_query = wc_get_min_max_price_meta_query( $_GET );
+			$meta_query['price_filter'] = true;
 
-			/**
-			 * Adjust if the store taxes are not displayed how they are stored.
-			 * Max is left alone because the filter was already increased.
-			 * Kicks in when prices excluding tax are displayed including tax.
-			 */
-			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-				$class_min   = $min;
-
-				foreach ( $tax_classes as $tax_class ) {
-					if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-						$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-					}
-				}
-
-				$min = $class_min;
-			}
-
-			return array(
-				'key'          => '_price',
-				'value'        => array( $min, $max ),
-				'compare'      => 'BETWEEN',
-				'type'         => 'DECIMAL',
-				'price_filter' => true,
-			);
+			return $meta_query;
 		}
+
 		return array();
 	}
 
@@ -666,7 +643,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query[ 'product_cat' ] = array(
+			$tax_query['product_cat'] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array( $args['product_cat'] ),
 				'field'    => 'slug',
@@ -674,7 +651,7 @@ class WC_Query {
 		}
 
 		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query[ 'product_tag' ] = array(
+			$tax_query['product_tag'] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array( $args['product_tag'] ),
 				'field'    => 'slug',

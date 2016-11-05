@@ -51,7 +51,7 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Get the title of the post.
+	 * Get the title of the product.
 	 *
 	 * @return string
 	 */
@@ -60,7 +60,8 @@ class WC_Product_Simple extends WC_Product {
 		$title = $this->post->post_title;
 
 		if ( $this->get_parent() > 0 ) {
-			$title = get_the_title( $this->get_parent() ) . ' &rarr; ' . $title;
+			/* translators: 1: parent product title 2: product title */
+			$title = sprintf( __( '%1$s &rarr; %2$s' , 'woocommerce' ), get_the_title( $this->get_parent() ), $title );
 		}
 
 		return apply_filters( 'woocommerce_product_title', $title, $this );
@@ -79,7 +80,7 @@ class WC_Product_Simple extends WC_Product {
 			'meta_key'       => '_price',
 			'posts_per_page' => 1,
 			'post_type'      => 'product',
-			'fields'         => 'ids'
+			'fields'         => 'ids',
 		));
 		if ( $children_by_price ) {
 			foreach ( $children_by_price as $child ) {

@@ -75,7 +75,7 @@ class WC_Email_Failed_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -90,7 +90,7 @@ class WC_Email_Failed_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -103,31 +103,31 @@ class WC_Email_Failed_Order extends WC_Email {
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),
 				'type'          => 'checkbox',
 				'label'         => __( 'Enable this email notification', 'woocommerce' ),
-				'default'       => 'yes'
+				'default'       => 'yes',
 			),
 			'recipient' => array(
 				'title'         => __( 'Recipient(s)', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
+				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'woocommerce' ), '<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
+				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
+				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
+				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),
@@ -136,8 +136,8 @@ class WC_Email_Failed_Order extends WC_Email {
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
 				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true
-			)
+				'desc_tip'      => true,
+			),
 		);
 	}
 }

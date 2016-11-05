@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! $messages ){
+if ( ! $messages ) {
 	return;
 }
 

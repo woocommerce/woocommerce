@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 $product      = $item->get_product();
-$product_link = $product ? admin_url( 'post.php?post=' . $product->get_id() . '&action=edit' ) : '';
+$product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 ?>
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item, $order ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
@@ -18,7 +18,7 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item->get_name() ); ?>">
 		<?php
-			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' .  esc_html( $item->get_name() ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item->get_name() ) . '</div>';
+			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . esc_html( $item->get_name() ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item->get_name() ) . '</div>';
 
 			if ( $product && $product->get_sku() ) {
 				echo '<div class="wc-order-item-sku"><strong>' . __( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $product->get_sku() ) . '</div>';
@@ -29,7 +29,8 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
 					echo esc_html( $item->get_variation_id() );
 				} else {
-					echo esc_html( $item->get_variation_id() ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
+					/* translators: %s: variation id */
+					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 				}
 				echo '</div>';
 			}

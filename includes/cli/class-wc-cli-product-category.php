@@ -121,6 +121,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		$term    = get_term( $term_id, 'product_cat' );
 
 		if ( is_wp_error( $term ) || is_null( $term ) ) {
+			/* translators: %s: product category ID */
 			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_category_id', sprintf( __( 'Invalid product category ID "%s"', 'woocommerce' ), $term_id ) );
 		}
 
@@ -143,7 +144,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			'description' => $term->description,
 			'display'     => $display_type ? $display_type : 'default',
 			'image'       => $image ? esc_url( $image ) : '',
-			'count'       => intval( $term->count )
+			'count'       => intval( $term->count ),
 		);
 	}
 

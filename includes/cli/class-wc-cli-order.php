@@ -111,7 +111,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 			// make sure customer exists
 			if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
-				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ) );
 			}
 			$default_order_args['customer_id'] = $data['customer_id'];
 
@@ -119,6 +119,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$order = $this->create_base_order( $default_order_args, $data );
 
 			if ( is_wp_error( $order ) ) {
+				/* translators: %s: error messages */
 				throw new WC_CLI_Exception( 'woocommerce_cli_cannot_create_order', sprintf( __( 'Cannot create order: %s', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ) );
 			}
 
@@ -163,7 +164,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			// Set order currency.
 			if ( isset( $data['currency'] ) ) {
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce') );
+					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid.', 'woocommerce' ) );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -447,7 +448,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 				// make sure customer exists
 				if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ) );
+					throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ) );
 				}
 
 				update_post_meta( $order->get_id(), '_customer_user', $data['customer_id'] );
@@ -518,7 +519,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( isset( $data['currency'] ) ) {
 
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ) );
+					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid.', 'woocommerce' ) );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -579,8 +580,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 				array(
 					'key'   => '_customer_user',
 					'value' => (int) $args['customer_id'],
-					'compare' => '='
-				)
+					'compare' => '=',
+				),
 			);
 		}
 
@@ -640,7 +641,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), $dp ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'total_shipping'            => wc_format_decimal( $order->get_shipping_total(), $dp ),
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), $dp ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
@@ -855,7 +856,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		foreach ( $order_meta as $meta_key => $meta_value ) {
 
-			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+			if ( is_string( $meta_key ) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
 				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
@@ -888,7 +889,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			) );
 
 			if ( is_null( $result ) ) {
-				throw new WC_CLI_Exception( 'woocommerce_invalid_item_id', __( 'Order item ID provided is not associated with order', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ) );
 			}
 		}
 
@@ -946,17 +947,17 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product', __( 'Product is invalid', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product', __( 'Product is invalid.', 'woocommerce' ) );
 		}
 
 		// quantity must be positive float
 		if ( isset( $item['quantity'] ) && floatval( $item['quantity'] ) <= 0 ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_quantity', __( 'Product quantity must be a positive float', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_quantity', __( 'Product quantity must be a positive float.', 'woocommerce' ) );
 		}
 
 		// quantity is required when creating
 		if ( $creating && ! isset( $item['quantity'] ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_quantity', __( 'Product quantity is required', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_quantity', __( 'Product quantity is required.', 'woocommerce' ) );
 		}
 
 		$item_args = array();
@@ -993,15 +994,14 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$item_id = $order->add_product( $product, $item_args['qty'], $item_args );
 
 			if ( ! $item_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$item_id = $order->update_product( $item['id'], $product, $item_args );
 
 			if ( ! $item_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1075,14 +1075,14 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		// total must be a positive float
 		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 ) {
-			throw new WC_CLI_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount.', 'woocommerce' ) );
 		}
 
 		if ( 'create' === $action ) {
 
 			// method ID is required
 			if ( ! isset( $shipping['method_id'] ) ) {
-				throw new WC_CLI_Exception( 'woocommerce_invalid_shipping_item', __( 'Shipping method ID is required', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ) );
 			}
 
 			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
@@ -1090,9 +1090,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$shipping_id = $order->add_shipping( $rate );
 
 			if ( ! $shipping_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again.', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$shipping_args = array();
@@ -1112,7 +1111,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$shipping_id = $order->update_shipping( $shipping['id'], $shipping_args );
 
 			if ( ! $shipping_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1148,7 +1147,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			if ( isset( $fee['taxable'] ) && $fee['taxable'] ) {
 
 				if ( ! isset( $fee['tax_class'] ) ) {
-					throw new WC_CLI_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable', 'woocommerce' ) );
+					throw new WC_CLI_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable.', 'woocommerce' ) );
 				}
 
 				$order_fee->taxable   = true;
@@ -1167,9 +1166,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$fee_id = $order->add_fee( $order_fee );
 
 			if ( ! $fee_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again.', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$fee_args = array();
@@ -1193,7 +1191,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$fee_id = $order->update_fee( $fee['id'], $fee_args );
 
 			if ( ! $fee_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1211,22 +1209,21 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 		// coupon amount must be positive float.
 		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 ) {
-			throw new WC_CLI_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount.', 'woocommerce' ) );
 		}
 
 		if ( 'create' === $action ) {
 
 			// coupon code is required
 			if ( empty( $coupon['code'] ) ) {
-				throw new WC_CLI_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ) );
 			}
 
 			$coupon_id = $order->add_coupon( $coupon['code'], isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0 );
 
 			if ( ! $coupon_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again.', 'woocommerce' ) );
 			}
-
 		} else {
 
 			$coupon_args = array();
@@ -1242,7 +1239,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$coupon_id = $order->update_coupon( $coupon['id'], $coupon_args );
 
 			if ( ! $coupon_id ) {
-				throw new WC_CLI_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again', 'woocommerce' ) );
+				throw new WC_CLI_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again.', 'woocommerce' ) );
 			}
 		}
 	}

@@ -110,8 +110,6 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests backwards compat / legacy handling.
-	 * @expectedDeprecated WC_Customer::is_vat_exempt
-	 * @expectedDeprecated WC_Customer::has_calculated_shipping
 	 * @expectedDeprecated WC_Customer::get_default_country
 	 * @expectedDeprecated WC_Customer::get_default_state
 	 * @expectedDeprecated WC_Customer::is_paying_customer
@@ -123,10 +121,23 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
-			'id', 'country', 'state', 'postcode', 'city', 'address', 'address_1', 'address_2',
-			'shipping_country', 'shipping_state', 'shipping_postcode', 'shipping_city',
-			'shipping_address', 'shipping_address_1', 'shipping_address_2',
-			'is_vat_exempt', 'calculated_shipping',
+			'id',
+			'country',
+			'state',
+			'postcode',
+			'city',
+			'address',
+			'address_1',
+			'address_2',
+			'shipping_country',
+			'shipping_state',
+			'shipping_postcode',
+			'shipping_city',
+			'shipping_address',
+			'shipping_address_1',
+			'shipping_address_2',
+			'is_vat_exempt',
+			'calculated_shipping',
 		);
 
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
@@ -149,17 +160,17 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( $customer->get_shipping_address(), $customer->shipping_address_1 );
 		$this->assertEquals( $customer->get_shipping_address_2(), $customer->shipping_address_2 );
 		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt );
-		$this->assertEquals( $customer->get_calculated_shipping(), $customer->calculated_shipping );
+		$this->assertEquals( $customer->has_calculated_shipping(), $customer->calculated_shipping );
 
 		// Functions
 		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt() );
-		$this->assertEquals( $customer->get_calculated_shipping(), $customer->has_calculated_shipping() );
+		$this->assertEquals( $customer->has_calculated_shipping(), $customer->has_calculated_shipping() );
 		$default = wc_get_customer_default_location();
 		$this->assertEquals( $default['country'], $customer->get_default_country() );
 		$this->assertEquals( $default['state'], $customer->get_default_state() );
-		$this->assertFalse( $customer->get_calculated_shipping() );
+		$this->assertFalse( $customer->has_calculated_shipping() );
 		$customer->calculated_shipping( true );
-		$this->assertTrue( $customer->get_calculated_shipping() );
+		$this->assertTrue( $customer->has_calculated_shipping() );
 		$this->assertEquals( $customer->get_is_paying_customer(), $customer->is_paying_customer() );
 	}
 
@@ -170,13 +181,29 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	public function test_customer_setters_and_getters() {
 		$time = time();
 		$standard_getters_and_setters = array(
-			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
-			'role' => 'customer', 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
-			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
-			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
-			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
-			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
-			'is_paying_customer' => true
+			'username' => 'test',
+			'email' => 'test@woo.local',
+			'first_name' => 'Bob',
+			'last_name' => 'tester',
+			'role' => 'customer',
+			'date_created' => $time,
+			'date_modified' => $time,
+			'billing_postcode' => 11010,
+			'billing_city' => 'New York',
+			'billing_address' => '123 Main St.',
+			'billing_address_1' => '123 Main St.',
+			'billing_address_2' => 'Apt 2',
+			'billing_state' => 'NY',
+			'billing_country' => 'US',
+			'shipping_state' => 'NY',
+			'shipping_postcode' => 11011,
+			'shipping_city' => 'New York',
+			'shipping_address' => '123 Main St.',
+			'shipping_address_1' => '123 Main St.',
+			'shipping_address_2' => 'Apt 2',
+			'is_vat_exempt' => true,
+			'calculated_shipping' => true,
+			'is_paying_customer' => true,
 		);
 
 		$customer = new WC_Customer;
@@ -260,7 +287,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$last = get_user_meta( $customer_id, 'last_update', true );
-		sleep(1);
+		sleep( 1 );
 		$this->assertEquals( $last, $customer->get_date_modified() );
 		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();
@@ -437,7 +464,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		add_user_meta( $customer_id, 'test_field', $meta_value, true );
 		$customer->read( $customer_id );
 		$fields = $customer->get_meta_data();
-		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field') );
+		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field' ) );
 	}
 
 	/**
@@ -453,5 +480,4 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->read( $customer_id );
 		$this->assertEquals( $meta_value, $customer->get_meta( 'my-field' ) );
 	}
-
 }

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     2.6.0
+ * @version     2.7.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
@@ -253,7 +253,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$taxes      = $args['taxes'];
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
-		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
+		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
 			$taxes = 'per_item' === $args['calc_tax'] ? $this->get_taxes_per_item( $args['cost'] ) : WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
 		}
 

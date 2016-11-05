@@ -193,6 +193,11 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_default_product_tabs' );
 add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 
 /**
+ * Photoswipe.
+ */
+add_action( 'wp_footer', 'woocommerce_photoswipe' );
+
+/**
  * Checkout.
  *
  * @see woocommerce_checkout_login_form()

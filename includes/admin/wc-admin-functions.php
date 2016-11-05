@@ -36,7 +36,7 @@ function wc_get_screen_ids() {
 		'edit-product_cat',
 		'edit-product_tag',
 		'profile',
-		'user-edit'
+		'user-edit',
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
@@ -111,7 +111,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'post_title'     => $page_title,
 			'post_content'   => $page_content,
 			'post_parent'    => $post_parent,
-			'comment_status' => 'closed'
+			'comment_status' => 'closed',
 		);
 		$page_id = wp_insert_post( $page_data );
 	}
@@ -185,61 +185,107 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Line items and fees
 	if ( isset( $items['order_item_id'] ) ) {
+		$data_keys = array(
+			'line_tax'             => array(),
+			'line_subtotal_tax'    => array(),
+			'order_item_name'      => null,
+			'order_item_qty'       => null,
+			'order_item_tax_class' => null,
+			'line_total'           => null,
+			'line_subtotal'        => null,
+		);
 		foreach ( $items['order_item_id'] as $item_id ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
-			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
-				$item->set_name( wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) );
+			$item_data = array();
+
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
-			if ( isset( $items['order_item_qty'][ $item_id ] ) && is_callable( array( $item, 'set_quantity' ) ) ) {
-				$item->set_quantity( $items['order_item_qty'][ $item_id ] );
+			if ( '0' === $item_data['order_item_qty'] ) {
+				$item->delete();
+				continue;
 			}
 
-			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
-				$item->set_tax_class( wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
-			}
+			$item->set_props( array(
+				'name'         => $item_data['order_item_name'],
+				'quantity'     => $item_data['order_item_qty'],
+				'tax_class'    => $item_data['order_item_tax_class'],
+				'total'        => $item_data['line_total'],
+				'subtotal'     => $item_data['line_subtotal'],
+				'taxes'        => array(
+					'total'    => $item_data['line_tax'],
+					'subtotal' => $item_data['line_subtotal_tax'],
+				),
+			) );
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
 
-					if ( strstr( $meta_id, 'new-' ) ) {
-						if ( $meta_key === '' && $meta_value === '' ) {
-							continue;
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
 						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
 						$item->add_meta_data( $meta_key, $meta_value, false );
-					} elseif ( $meta_key === '' && $meta_value === '' ) {
-						$item->delete_meta_data_by_mid( $meta_id );
 					} else {
 						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
 					}
 				}
 			}
 
-			$line_tax          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ]: array();
-			$line_subtotal_tax = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ]: $line_tax;
-			$item->set_total( isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0 );
-			$item->set_subtotal( isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $item->get_total() );
-			$item->set_total_tax( array_sum( $line_tax ) );
-			$item->set_subtotal_tax( array_sum( $line_subtotal_tax ) );
-			$item->set_taxes( array( 'total' => $line_tax, 'subtotal' => $line_subtotal_tax ) );
 			$item->save();
 		}
 	}
 
 	// Shipping Rows
 	if ( isset( $items['shipping_method_id'] ) ) {
+		$data_keys = array(
+			'shipping_method'       => null,
+			'shipping_method_title' => null,
+			'shipping_cost'         => 0,
+			'shipping_taxes'        => array(),
+		);
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
 			}
-			$item->set_method_id( isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '' );
-			$item->set_method_title( isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '' );
-			$item->set_total( isset( $items['shipping_cost'][ $item_id ] ) ? $items['shipping_cost'][ $item_id ] : '' );
-			$item->set_taxes( isset( $items['shipping_taxes'][ $item_id ] ) ? $items['shipping_taxes'][ $item_id ] : array() );
+
+			$item_data = array();
+
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? $items[ $key ][ $item_id ] : $default;
+			}
+
+			$item->set_props( array(
+				'method_id'    => $item_data['shipping_method'],
+				'method_title' => $item_data['shipping_method_title'],
+				'total'        => $item_data['shipping_cost'],
+				'taxes'        => array(
+					'total'    => $item_data['shipping_taxes'],
+				),
+			) );
+
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
+						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
+
 			$item->save();
 		}
 	}

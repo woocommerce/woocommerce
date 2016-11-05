@@ -128,6 +128,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
@@ -311,6 +312,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$result = wp_delete_post( $id, true );
 
 		if ( ! $result ) {
+			/* translators: %s: post type */
 			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
@@ -347,7 +349,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
+			// @codingStandardsIgnoreStart
 			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+			// @codingStandardsIgnoreEnd
 
 			// Post author.
 			$data->post_author = get_current_user_id();
@@ -414,7 +418,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $post ) );
+		$response->add_links( $this->prepare_links( $post, $request ) );
 
 		/**
 		 * Filter webhook object returned from the REST API.

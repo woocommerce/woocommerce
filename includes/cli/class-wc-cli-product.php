@@ -712,7 +712,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $args['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
 		}
 
@@ -872,7 +872,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 				// Otherwise use the parent product featured image if set
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-
 		} else {
 
 			// Add featured image
@@ -950,7 +949,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'option' => $attribute,
 				);
 			}
-
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
@@ -1130,7 +1128,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $product_id, $new_sku );
 					if ( ! $unique_sku ) {
-						throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ) );
+						throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ) );
 					} else {
 						update_post_meta( $product_id, '_sku', $new_sku );
 					}
@@ -1192,10 +1190,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => $is_taxonomy,
 						);
 					}
-
 				} elseif ( isset( $attribute['options'] ) ) {
 					// Array based
 					if ( is_array( $attribute['options'] ) ) {
@@ -1213,7 +1210,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => $is_taxonomy,
 					);
 				}
 			}
@@ -1297,7 +1294,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
 		$_product = wc_get_product( $product_id );
-		if ( $_product && $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
+		if ( $_product && $_product->post->post_parent > 0 || 'grouped' === $product_type ) {
 
 			$clear_parent_ids = array();
 
@@ -1305,7 +1302,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 				$clear_parent_ids[] = $_product->post->post_parent;
 			}
 
-			if ( $product_type == 'grouped' ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $product_id;
 			}
 
@@ -1319,7 +1316,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 						'meta_key'       => '_price',
 						'posts_per_page' => 1,
 						'post_type'      => 'product',
-						'fields'         => 'ids'
+						'fields'         => 'ids',
 					) );
 
 					if ( $children_by_price ) {
@@ -1405,7 +1402,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
-
 		} else {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
@@ -1491,7 +1487,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 		}
 
 		// Product url
-		if ( $product_type == 'external' ) {
+		if ( 'external' === $product_type ) {
 			if ( isset( $data['product_url'] ) ) {
 				update_post_meta( $product_id, '_product_url', wc_clean( $data['product_url'] ) );
 			}
@@ -1533,7 +1529,8 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
 			// Generate a useful post title
-			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
+			/* translators: 1: variation id 2: product name */
+			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
 			// Update or Add post
 			if ( ! $variation_id ) {
@@ -1546,7 +1543,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'post_author'  => get_current_user_id(),
 					'post_parent'  => $id,
 					'post_type'    => 'product_variation',
-					'menu_order'   => $menu_order
+					'menu_order'   => $menu_order,
 				);
 
 				$variation_id = wp_insert_post( $new_variation );
@@ -1580,7 +1577,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ) );
+							throw new WC_CLI_Exception( 'woocommerce_cli_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1594,7 +1591,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
+					if ( isset( $image['position'] ) && isset( $image['src'] ) && 0 == $image['position'] ) {
 						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 						if ( is_wp_error( $upload ) ) {
 							throw new WC_CLI_Exception( 'woocommerce_cli_cannot_upload_product_image', $upload->get_error_message() );
@@ -1714,7 +1711,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			// Tax class
 			if ( isset( $variation['tax_class'] ) ) {
-				if ( $variation['tax_class'] !== 'parent' ) {
+				if ( 'parent' !== $variation['tax_class'] ) {
 					update_post_meta( $variation_id, '_tax_class', wc_clean( $variation['tax_class'] ) );
 				} else {
 					delete_post_meta( $variation_id, '_tax_class' );
@@ -1840,7 +1837,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
-				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+				if ( isset( $image['position'] ) && 0 == $image['position'] ) {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
@@ -1901,7 +1898,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			// Width
 			if ( isset( $data['dimensions']['width'] ) ) {
-				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+				update_post_meta( $id, '_width', ( '' === $data['dimensions']['width'] ) ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length
@@ -1959,7 +1956,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
-				'file' => $file_url
+				'file' => $file_url,
 			);
 		}
 
@@ -2022,7 +2019,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_image', sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ) );
 		}
 
 		// Ensure url is valid
@@ -2030,7 +2027,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Get the file
 		$response = wp_safe_remote_get( $image_url, array(
-			'timeout' => 10
+			'timeout' => 10,
 		) );
 
 		if ( is_wp_error( $response ) ) {
@@ -2074,7 +2071,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_CLI_Exception( 'woocommerce_cli_product_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_product_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ) );
 		}
 
 		unset( $response );
@@ -2109,7 +2106,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			'guid'           => $upload['url'],
 			'post_parent'    => $id,
 			'post_title'     => $title,
-			'post_content'   => $content
+			'post_content'   => $content,
 		);
 
 		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );

@@ -64,7 +64,7 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		# GET /customers/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
@@ -548,7 +548,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Limit number of users returned
 		if ( ! empty( $args['limit'] ) ) {
-			if ( $args['limit'] == -1 ) {
+			if ( -1 == $args['limit'] ) {
 				unset( $query_args['number'] );
 			} else {
 				$query_args['number'] = absint( $args['limit'] );
@@ -595,7 +595,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$query = new WP_User_Query( $query_args );
 
 		// Helper members for pagination headers
-		$query->total_pages = ( $args['limit'] == -1 ) ? 1 : ceil( $query->get_total() / $users_per_page );
+		$query->total_pages = ( -1 == $args['limit'] ) ? 1 : ceil( $query->get_total() / $users_per_page );
 		$query->page = $page;
 
 		return $query;
@@ -785,7 +785,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_customers_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_customers_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$customers = array();
@@ -798,28 +798,28 @@ class WC_API_Customers extends WC_API_Resource {
 					$customer_id = intval( $_customer['id'] );
 				}
 
-				// Customer exists / edit customer
 				if ( $customer_id ) {
+
+					// Customer exists / edit customer
 					$edit = $this->edit_customer( $customer_id, array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $edit ) ) {
 						$customers[] = array(
 							'id'    => $customer_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$customers[] = $edit['customer'];
 					}
-				}
+				} else {
 
-				// Customer don't exists / create customer
-				else {
+					// Customer don't exists / create customer
 					$new = $this->create_customer( array( 'customer' => $_customer ) );
 
 					if ( is_wp_error( $new ) ) {
 						$customers[] = array(
 							'id'    => $customer_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$customers[] = $new['customer'];
