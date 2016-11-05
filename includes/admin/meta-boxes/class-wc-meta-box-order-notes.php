@@ -62,7 +62,7 @@ class WC_Meta_Box_Order_Notes {
 							printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author );
 						endif;
 						?>
-						<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
+						<a href="#" class="delete_note" role="button"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 					</p>
 				</li>
 				<?php
