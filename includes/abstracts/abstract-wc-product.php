@@ -1454,11 +1454,27 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		parent::save();
 
 		// Make sure we store the product type.
-		$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
-		wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
+		if ( 'product' === $this->post_type ) {
+			$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
+			wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
+		}
 
 		// Version is set to current WC version to track data changes.
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
+
+		// Count terms. These are done at this point so all product props are set in advance.
+		if ( ! wp_defer_term_counting() ) {
+			global $wc_allow_term_recount;
+
+			$wc_allow_term_recount = true;
+
+			// Update counts for the post's terms.
+			foreach ( (array) get_object_taxonomies( $this->post_type ) as $taxonomy ) {
+				$tt_ids = wp_get_object_terms( $this->get_id(), $taxonomy, array( 'fields' => 'tt_ids' ) );
+				wp_update_term_count( $tt_ids, $taxonomy );
+			}
+		}
+
 		wc_delete_product_transients( $this->get_id() );
 
 		return $this->get_id();
@@ -1556,6 +1572,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		if ( in_array( 'featured', $updated_props ) ) {
 			delete_transient( 'wc_featured_products' );
+		}
+
+		if ( in_array( 'catalog_visibility', $updated_props ) ) {
+			do_action( 'woocommerce_product_set_visibility',  $this->get_id(), $this->get_catalog_visibility() );
 		}
 
 		if ( in_array( 'downloads', $updated_props ) ) {

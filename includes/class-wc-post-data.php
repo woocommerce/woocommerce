@@ -39,7 +39,6 @@ class WC_Post_Data {
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
-		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
 		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
 	}
 
@@ -204,24 +203,6 @@ class WC_Post_Data {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
-	 *
-	 * @param int $post_id
-	 */
-	public static function pre_post_update( $post_id ) {
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-
-		if ( isset( $_POST['_visibility'] ) ) {
-			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
-				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
-			}
-		}
-		if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
-		}
 	}
 }
 

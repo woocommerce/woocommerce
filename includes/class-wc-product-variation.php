@@ -460,12 +460,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @since 2.7.0
 	 */
 	public function save() {
-		if ( $this->get_id() ) {
-			$this->update();
-		} else {
-			$this->create();
-		}
-		wc_delete_product_transients( $this->get_id() );
+		parent::save();
+
 		wc_delete_product_transients( $this->get_parent_id() );
 
 		return $this->get_id();

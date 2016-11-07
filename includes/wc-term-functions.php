@@ -480,14 +480,19 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
- *
+ * @todo   Look at performance of this function without losing functionality.
  * @param  array $terms
  * @param  string $taxonomy
  * @param  bool $callback
  * @param  bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
-	global $wpdb;
+	global $wpdb, $wc_allow_term_recount;
+
+	// Don't recount unless CRUD is calling this.
+	if ( empty( $wc_allow_term_recount ) ) {
+		return;
+	}
 
 	// Standard callback
 	if ( $callback ) {
@@ -495,7 +500,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	}
 
 	// Stock query
-	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
 		$stock_query = "
 		AND meta_stock.meta_key = '_stock_status'
