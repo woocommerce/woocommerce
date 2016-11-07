@@ -1324,6 +1324,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'sku'                => get_post_meta( $id, '_sku', true ),
 			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
 			'sale_price'         => get_post_meta( $id, '_sale_price', true ),
+			'price'              => get_post_meta( $id, '_price', true ),
 			'date_on_sale_from'  => get_post_meta( $id, '_sale_price_dates_from', true ),
 			'date_on_sale_to'    => get_post_meta( $id, '_sale_price_dates_to', true ),
 			'total_sales'        => get_post_meta( $id, 'total_sales', true ),
@@ -1353,12 +1354,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
-
-		if ( $this->is_on_sale() ) {
-			$this->set_price( $this->get_sale_price() );
-		} else {
-			$this->set_price( $this->get_regular_price() );
-		}
 	}
 
 	/**
@@ -1551,10 +1546,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
-		if ( $this->is_on_sale() ) { // @todo
-			//update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
-		} else {
-	//		update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
+		if ( in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
+			if ( $this->is_on_sale() ) {
+				update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
+			} else {
+				update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
+			}
 		}
 
 		if ( in_array( 'featured', $updated_props ) ) {
