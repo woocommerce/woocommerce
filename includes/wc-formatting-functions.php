@@ -395,8 +395,8 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	$separator = stripslashes( get_option( 'woocommerce_price_thousand_sep' ) );
-	return $separator;
+	$separator = apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ) );
+	return stripslashes( $separator );
 }
 
 /**
@@ -405,8 +405,8 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = stripslashes( get_option( 'woocommerce_price_decimal_sep' ) );
-	return $separator ? $separator : '.';
+	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ) );
+	return $separator ? stripslashes( $separator ) : '.';
 }
 
 /**
@@ -415,7 +415,8 @@ function wc_get_price_decimal_separator() {
  * @return int
  */
 function wc_get_price_decimals() {
-	return absint( get_option( 'woocommerce_price_num_decimals', 2 ) );
+	$decimals = apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ) );
+	return absint( $decimals );
 }
 
 /**
