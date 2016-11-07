@@ -1033,7 +1033,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick edit.
+	 * Quick edit. @todo CRUDIFY
 	 *
 	 * @param integer $post_id
 	 * @param WC_Product $product

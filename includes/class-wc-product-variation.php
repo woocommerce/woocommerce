@@ -28,6 +28,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	protected $parent_data = array(
 		'sku'            => '',
+		'manage_stock'   => '',
 		'stock_quantity' => '',
 		'weight'         => '',
 		'length'         => '',
@@ -121,6 +122,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Return if product manage stock.
+	 *
+	 * @since 2.7.0
+	 * @param  string $context
+	 * @return boolean
+	 */
+	public function get_manage_stock( $context = 'view' ) {
+		$value = $this->get_prop( 'manage_stock', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && false === $value ) {
+			$value = wc_string_to_bool( $this->parent_data['manage_stock'] );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Returns number of items available for sale.
 	 *
 	 * @param  string $context
@@ -130,8 +149,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$value = $this->get_prop( 'stock_quantity', $context );
 
 		// Inherit value from parent.
-		if ( 'view' === $context && empty( $value ) ) {
+		if ( 'view' === $context && false === $this->get_manage_stock( 'edit' ) && true === $this->get_manage_stock( 'view' ) ) {
 			$value = $this->parent_data['stock_quantity'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get backorders.
+	 *
+	 * @param  string $context
+	 * @since 2.7.0
+	 * @return string yes no or notify
+	 */
+	public function get_backorders( $context = 'view' ) {
+		$value = $this->get_prop( 'backorders', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && false === $this->get_manage_stock( 'edit' ) && true === $this->get_manage_stock( 'view' ) ) {
+			$value = $this->parent_data['backorders'];
 		}
 
 		return $value;
@@ -324,7 +361,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'          => get_post_thumbnail_id( $id ),
-			'backorders'        => get_post_meta( $this->get_id(), '_backorders', true ),
+			'backorders'        => get_post_meta( $id, '_backorders', true ),
 			'sku'               => get_post_meta( $id, '_sku', true ),
 			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
 			'weight'            => get_post_meta( $id, '_weight', true ),
@@ -341,13 +378,15 @@ class WC_Product_Variation extends WC_Product_Simple {
 		}
 
 		$this->parent_data = array(
-			'sku'               => get_post_meta( $this->get_parent_id(), '_sku', true ),
-			'stock_quantity'    => get_post_meta( $this->get_parent_id(), '_stock', true ),
-			'weight'            => get_post_meta( $this->get_parent_id(), '_weight', true ),
-			'length'            => get_post_meta( $this->get_parent_id(), '_length', true ),
-			'width'             => get_post_meta( $this->get_parent_id(), '_width', true ),
-			'height'            => get_post_meta( $this->get_parent_id(), '_height', true ),
-			'tax_class'         => get_post_meta( $this->get_parent_id(), '_tax_class', true ),
+			'sku'            => get_post_meta( $this->get_parent_id(), '_sku', true ),
+			'manage_stock'   => get_post_meta( $this->get_parent_id(), '_manage_stock', true ),
+			'backorders'     => get_post_meta( $this->get_parent_id(), '_backorders', true ),
+			'stock_quantity' => get_post_meta( $this->get_parent_id(), '_stock', true ),
+			'weight'         => get_post_meta( $this->get_parent_id(), '_weight', true ),
+			'length'         => get_post_meta( $this->get_parent_id(), '_length', true ),
+			'width'          => get_post_meta( $this->get_parent_id(), '_width', true ),
+			'height'         => get_post_meta( $this->get_parent_id(), '_height', true ),
+			'tax_class'      => get_post_meta( $this->get_parent_id(), '_tax_class', true ),
 		);
 	}
 
@@ -484,9 +523,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
+		// Check at variation level.
 		if ( $this->managing_stock() ) {
 			return $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
-		} else {
+
+		// Check at parent level.
+		} elseif ( 'yes' === $this->parent_data['manage_stock'] ) {
 			$parent = wc_get_product( $this->get_parent_id() );
 			return $parent->has_enough_stock( $quantity ); // @todo
 		}

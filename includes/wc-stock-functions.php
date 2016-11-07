@@ -28,11 +28,11 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		// Find product that needs a stock reduction.
 		$product = wc_get_product( $product );
 
-		if ( ! $product->managing_stock() && $product->get_parent_id() ) {
-			$product = wc_get_product( $product->get_parent_id() );
+		if ( ! $product->managing_stock( 'edit' ) && $product->get_parent_id( 'edit' ) ) {
+			$product = wc_get_product( $product->get_parent_id( 'edit' ) );
 		}
 
-		if ( ! $product->managing_stock() ) {
+		if ( ! $product->managing_stock( 'edit' ) ) {
 			return new WP_Error( 'error', __( 'Product is not stock managed', 'woocommerce' ) );
 		}
 
@@ -48,7 +48,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product->get_id() ) );
 			break;
 			default :
-				if ( $product->get_stock_quantity() !== $stock_quantity ) {
+				if ( $product->get_stock_quantity( 'edit' ) !== $stock_quantity ) {
 					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product->get_id() ) );
 				}
 			break;
@@ -68,7 +68,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock', $product );
 	}
 
-	return $product->get_stock_quantity();
+	return $product->get_stock_quantity( 'edit' );
 }
 
 /**
@@ -79,14 +79,14 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 function wc_check_product_stock_status( $product ) {
 	$product = wc_get_product( $product );
 
-	if ( $product->managing_stock() ) {
-		if ( $product->backorders_allowed() && 'instock' !== $product->get_stock_status() ) {
+	if ( $product->managing_stock( 'edit' ) ) {
+		if ( $product->backorders_allowed( 'edit' ) && 'instock' !== $product->get_stock_status( 'edit' ) ) {
 			$product->set_stock_status( 'instock' );
 
-		} elseif ( $product->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		} elseif ( $product->get_stock_quantity( 'edit' ) <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$product->set_stock_status( 'outofstock' );
 
-		} elseif ( $product->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		} elseif ( $product->get_stock_quantity( 'edit' ) > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$product->set_stock_status( 'instock' );
 		}
 	}
@@ -104,7 +104,7 @@ function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
 	if ( $product ) {
 		$product->set_stock_status( $status );
-		//$product->save(); @todo causes timeout in class-wc-post-data.php
+		$product->save();
 	}
 }
 

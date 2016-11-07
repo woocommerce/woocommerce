@@ -171,13 +171,12 @@ class WC_Post_Data {
 	 * @param  int $meta_id
 	 * @param  int $object_id
 	 * @param  string $meta_key
-	 * @param  mixed $_meta_value
+	 * @param  mixed $meta_value
 	 */
-	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		/*if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) && $_meta_value !== get_post_meta( $object_id, $meta_key, true ) ) {
-			$product = wc_get_product( $object_id );
-			$product->check_stock_status(); @todo check_stock_status does save() which can cause redirect loop. Needed?
-		}*/
+	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {
+		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) && get_post_meta( $object_id, $meta_key, true ) !== $meta_value ) {
+			wc_check_product_stock_status( $object_id );
+		}
 	}
 
 	/**
