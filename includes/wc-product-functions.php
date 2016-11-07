@@ -863,7 +863,7 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
 		// Image source.
-		$props['src']    = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+		$props['src']    = current( wp_get_attachment_image_src( $attachment_id, 'shop_single' ) );
 		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
 		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 
