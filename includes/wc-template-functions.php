@@ -1029,7 +1029,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		// Load the template
 		wc_get_template( 'single-product/add-to-cart/variable.php', array(
 			'available_variations' => $get_variations ? $product->get_available_variations() : false,
-			'attributes'           => $product->get_attributes(),
+			'attributes'           => $product->get_variation_attributes(),
 			'selected_attributes'  => $product->get_default_attributes(),
 		) );
 	}
@@ -2172,7 +2172,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$class     = $args['class'];
 
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
-			$attributes = $product->get_attributes();
+			$attributes = $product->get_variation_attributes();
 			$options    = $attributes[ $attribute ];
 		}
 

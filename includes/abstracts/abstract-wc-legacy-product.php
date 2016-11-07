@@ -537,7 +537,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		$set = true;
 
 		// undefined attributes have null strings as array values
-		foreach ( $this->get_attributes() as $att ) {
+		foreach ( $this->get_variation_attributes() as $att ) {
 			if ( ! $att ) {
 				$set = false;
 				break;
@@ -588,7 +588,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_formatted_variation_attributes( $flat = false ) {
 		_deprecated_function( 'WC_Product::get_formatted_variation_attributes', '2.7', 'wc_get_formatted_variation' );
-		return wc_get_formatted_variation( $this->get_attributes(), $flat );
+		return wc_get_formatted_variation( $this->get_variation_attributes(), $flat );
 	}
 
 	/**
