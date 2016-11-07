@@ -31,7 +31,7 @@ module.exports = function( grunt ) {
 		// Sass linting with Stylelint.
 		stylelint: {
 			options: {
-				stylelintrc: '.stylelintrc'
+				configFile: '.stylelintrc'
 			},
 			all: [
 				'<%= dirs.css %>/*.scss',
