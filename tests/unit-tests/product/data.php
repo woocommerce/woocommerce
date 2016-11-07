@@ -7,17 +7,6 @@
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
-	 * Test deleting a product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_delete() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->delete();
-		$this->assertEquals( 0, $product->get_id() );
-	}
-
-	/**
 	 * Test product setters and getters
 	 * @todo needs tests for attributes
 	 * @since 2.7.0

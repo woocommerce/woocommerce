@@ -62,7 +62,6 @@ abstract class WC_Data {
 	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
-	 * @todo totally remove from WC_Data after all classes switch to factories.
 	 * @var string
 	 */
 	protected $cache_group = '';
@@ -111,9 +110,13 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Deletes an object from he database.
+	 * Deletes an object from the database.
+	 *
+	 * @param bool $force_delete True to permently delete, false to trash.
 	 */
-	public function delete() { }
+	public function delete( $force_delete = false ) {
+		$this->data_store->delete( $this, $force_delete );
+	}
 
 	/**
 	 * Save should create or update based on object existance.
@@ -325,7 +328,6 @@ abstract class WC_Data {
 
 	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
-	 * @todo totally remove from WC_Data after all classes switch to factories.
 	 * @since 2.6.0
 	 */
 	protected function read_meta_data() {
@@ -398,7 +400,6 @@ abstract class WC_Data {
 
 	/**
 	 * Table structure is slightly different between meta types, this function will return what we need to know.
-	 * @todo totally remove from WC_Data after all classes switch to factories.
 	 * @since 2.6.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */

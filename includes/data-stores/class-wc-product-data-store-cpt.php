@@ -48,7 +48,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
 			$this->update_version_and_type( $product );
-			//$this->save_meta_data(); @todo ?
+			$product->save_meta_data();
 			do_action( 'woocommerce_new_' . $post_type, $id );
 		}
 	}
@@ -181,7 +181,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
-		//$this->save_meta_data(); @todo ?
+		$product->save_meta_data();
 
 		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 		do_action( 'woocommerce_update_' . $post_type, $product->get_id() );
@@ -376,7 +376,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product Object
 	 * @param bool $force_delete True to permently delete, false to trash.
 	 */
-	public function delete( $data, $force_delete = false ) {
+	public function delete( &$product, $force_delete = false ) {
+		$id        = $product->get_id();
+		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 
+		if ( $force_delete ) {
+			wp_delete_post( $product->get_id() );
+			$product->set_id( 0 );
+		} else {
+			wp_trash_post( $product->get_id() );
+			$product->set_status( 'trash' );
+		}
+		do_action( 'woocommerce_delete_' . $post_type, $id );
 	}
 }

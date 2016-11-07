@@ -163,4 +163,27 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( '15', $product->get_regular_price() );
 	}
 
+	/**
+	 * Test deleting a product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_product_delete() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->delete( true );
+		$this->assertEquals( 0, $product->get_id() );
+	}
+
+	/**
+	 * Test deleting a product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_product_trash() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->delete();
+		$this->assertNotEquals( 0, $product->get_id() );
+		$this->assertEquals( 'trash', $product->get_status() );
+	}
+
 }

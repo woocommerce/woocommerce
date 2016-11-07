@@ -97,14 +97,23 @@ class WC_Data_Store {
 	 * Create an object in the data store.
 	 */
 	public function create( &$data ) {
-		return $this->instance->create( $data );
+		$this->instance->create( $data );
 	}
 
 	/**
 	 * Update an object in the data store.
 	 */
 	public function update( &$data ) {
-		return $this->instance->update( $data );
+		$this->instance->update( $data );
+	}
+
+	/**
+	 * Delete an object from the data store.
+	 *
+	 * @param bool $force_delete True to permently delete, false to trash.
+	 */
+	public function delete( &$data, $force_delete = false ) {
+		$this->instance->delete( $data, $force_delete );
 	}
 
 }

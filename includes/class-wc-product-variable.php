@@ -702,15 +702,6 @@ class WC_Product_Variable extends WC_Product {
 		return parent::set_stock( $amount, $mode );
 	}
 
-	/**
-	 * Set the children of this product.
-	 *
-	 * @param array $children
-	 */
-	public function set_children( $children ) {
-		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
