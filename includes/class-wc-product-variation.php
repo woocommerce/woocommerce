@@ -23,6 +23,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 	protected $post_type = 'product_variation';
 
 	/**
+	 * Parent data.
+	 * @var array
+	 */
+	protected $parent_data = array(
+		'sku'            => '',
+		'stock_quantity' => '',
+		'weight'         => '',
+		'length'         => '',
+		'width'          => '',
+		'height'         => '',
+		'tax_class'      => '',
+	);
+
+	/**
 	 * Initialize simple product.
 	 *
 	 * @param mixed $product
@@ -56,7 +70,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return array of attributes and their values for this variation
 	 */
 	public function get_variation_attributes() {
-		return wc_get_product_variation_attributes( $this->get_id() );
+		return $this->get_attributes();
 	}
 
 	/**
@@ -87,6 +101,125 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$variation_data = array_map( 'urlencode', $this->get_attributes() );
 		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
+	}
+
+	/**
+	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_sku( $context = 'view' ) {
+		$value = $this->get_prop( 'sku', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['sku'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns number of items available for sale.
+	 *
+	 * @param  string $context
+	 * @return int|null
+	 */
+	public function get_stock_quantity( $context = 'view' ) {
+		$value = $this->get_prop( 'stock_quantity', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['stock_quantity'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the product's weight.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_weight( $context = 'view' ) {
+		$value = $this->get_prop( 'weight', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['weight'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the product length.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_length( $context = 'view' ) {
+		$value = $this->get_prop( 'length', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['length'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the product width.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_width( $context = 'view' ) {
+		$value = $this->get_prop( 'width', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['width'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the product height.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_height( $context = 'view' ) {
+		$value = $this->get_prop( 'height', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['height'];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class( $context = 'view' ) {
+		$value = $this->get_prop( 'tax_class', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = $this->parent_data['tax_class'];
+		}
+
+		return $value;
 	}
 
 	/*
@@ -182,7 +315,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
 			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
-			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
 			'shipping_class_id' => current( $this->get_term_ids( 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
@@ -193,43 +325,30 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'          => get_post_thumbnail_id( $id ),
 			'backorders'        => get_post_meta( $this->get_id(), '_backorders', true ),
+			'sku'               => get_post_meta( $id, '_sku', true ),
+			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
+			'weight'            => get_post_meta( $id, '_weight', true ),
+			'length'            => get_post_meta( $id, '_length', true ),
+			'width'             => get_post_meta( $id, '_width', true ),
+			'height'            => get_post_meta( $id, '_height', true ),
+			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
 		) );
-
-		// Data that can be inherited from the parent product.
-		$inherit_on_empty = array(
-			'_sku'    => 'sku',
-			'_stock'  => 'stock_quantity',  // @todo test this
-			'_weight' => 'weight',
-			'_length' => 'length',
-			'_width'  => 'width',
-			'_height' => 'height',
-		);
-		$parent_props     = array();
-
-		foreach ( $inherit_on_empty as $meta_key => $prop ) {
-			$value = get_post_meta( $this->get_id(), $meta_key, true );
-			if ( '' !== $value ) {
-				$inherit_props[ $prop ] = $value;
-			} else {
-				$inherit_props[ $prop ] = get_post_meta( $this->get_parent_id(), $meta_key, true );
-			}
-		}
-
-		$tax_class = get_post_meta( $this->get_id(), '_tax_class', true );
-
-		if ( 'parent' === $tax_class || ! metadata_exists( 'post', $this->get_id(), '_tax_class' ) ) {
-			$inherit_props['tax_class'] = get_post_meta( $this->get_parent_id(), '_tax_class', true );
-		} else {
-			$inherit_props['tax_class'] = $tax_class;
-		}
-
-		$this->set_props( $inherit_props );
 
 		if ( $this->is_on_sale() ) {
 			$this->set_price( $this->get_sale_price() );
 		} else {
 			$this->set_price( $this->get_regular_price() );
 		}
+
+		$this->parent_data = array(
+			'sku'               => get_post_meta( $this->get_parent_id(), '_sku', true ),
+			'stock_quantity'    => get_post_meta( $this->get_parent_id(), '_stock', true ),
+			'weight'            => get_post_meta( $this->get_parent_id(), '_weight', true ),
+			'length'            => get_post_meta( $this->get_parent_id(), '_length', true ),
+			'width'             => get_post_meta( $this->get_parent_id(), '_width', true ),
+			'height'            => get_post_meta( $this->get_parent_id(), '_height', true ),
+			'tax_class'         => get_post_meta( $this->get_parent_id(), '_tax_class', true ),
+		);
 	}
 
 	/**
@@ -369,7 +488,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			return $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
 		} else {
 			$parent = wc_get_product( $this->get_parent_id() );
-			return $parent->has_enough_stock( $quantity );
+			return $parent->has_enough_stock( $quantity ); // @todo
 		}
 	}
 

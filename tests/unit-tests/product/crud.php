@@ -313,7 +313,7 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
 
 		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
-		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
+		$this->assertEquals( $expected_attributes, $product->get_attributes() );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( $variation_id, $children[0] );
 
 		$expected_attributes = array( 'pa_size' => array( 'small' ) );
-		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
+		$this->assertEquals( $expected_attributes, $product->get_attributes() );
 
 		$product->set_name( 'Renamed Variable Product' );
 		$product->update();

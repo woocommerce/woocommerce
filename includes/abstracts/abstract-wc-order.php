@@ -981,7 +981,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'tax_class'    => $product->get_tax_class(),
 				'product_id'   => $product->get_id(),
 				'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
-				'variation'    => isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
+				'variation'    => isset( $product->variation_id ) ? $product->get_attributes() : array(),
 				'subtotal'     => $product->get_price_excluding_tax( $qty ),
 				'total'        => $product->get_price_excluding_tax( $qty ),
 				'quantity'     => $qty,

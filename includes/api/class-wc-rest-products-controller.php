@@ -394,7 +394,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variation' ) ) {
 			// Variation attributes.
-			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+			foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 				$name = str_replace( 'attribute_', '', $attribute_name );
 
 				if ( ! $attribute ) {

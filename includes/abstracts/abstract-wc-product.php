@@ -1551,7 +1551,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
-		if ( $this->is_on_sale() ) {
+		if ( $this->is_on_sale() ) { // @todo
 			//update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
 		} else {
 	//		update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );

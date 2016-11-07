@@ -681,7 +681,7 @@ class WC_AJAX {
 			$child = $product->get_child( $child_id );
 
 			if ( ! empty( $child->variation_id ) ) {
-				$available_variations[] = $child->get_variation_attributes();
+				$available_variations[] = $child->get_attributes();
 			}
 		}
 

@@ -92,7 +92,7 @@ class WC_Report_Stock extends WP_List_Table {
 				// Get variation data
 				if ( $product->is_type( 'variation' ) ) {
 					$list_attributes = array();
-					$attributes = $product->get_variation_attributes();
+					$attributes = $product->get_attributes();
 
 					foreach ( $attributes as $name => $attribute ) {
 						$list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';

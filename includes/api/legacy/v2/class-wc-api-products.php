@@ -1904,7 +1904,7 @@ class WC_API_Products extends WC_API_Resource {
 		if ( $product->is_type( 'variation' ) ) {
 
 			// variation attributes
-			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+			foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 
 				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
 				$attributes[] = array(

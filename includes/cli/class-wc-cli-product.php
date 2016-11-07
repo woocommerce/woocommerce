@@ -940,7 +940,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 		if ( $product->is_type( 'variation' ) ) {
 
 			// variation attributes
-			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+			foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 
 				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
 				$attributes[] = array(
