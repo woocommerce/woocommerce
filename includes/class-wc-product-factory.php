@@ -22,7 +22,7 @@ class WC_Product_Factory {
 	 *
 	 * @param mixed $product_id (default: false)
 	 * @param array $deprecated
-	 * @return WC_Product|bool false if the product cannot be loaded
+	 * @return WC_Product|null Product object or null if the product cannot be loaded.
 	 */
 	public function get_product( $product_id = false, $deprecated = array() ) {
 		$product_id = $this->get_product_id( $product_id );
@@ -38,14 +38,18 @@ class WC_Product_Factory {
 		$classname = apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
 
 		if ( ! $classname ) {
-			return false;
+			return null;
 		}
 
 		if ( ! class_exists( $classname ) ) {
 			$classname = 'WC_Product_Simple';
 		}
 
-		return new $classname( $product_id );
+		try {
+			return new $classname( $product_id );
+		} catch ( Exception $e ) {
+			return null;
+		}
 	}
 
 	/**

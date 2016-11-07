@@ -16,7 +16,7 @@ interface WC_Object_Data_Store {
 	 * @param WC_Data
 	 * @return int|WP_Error New object ID or error on failure.
 	 */
-	public function create( $data );
+	public function create( &$data );
 
 	/**
 	 * Method to read a record. Creates a new WC_Data based object.
@@ -30,7 +30,7 @@ interface WC_Object_Data_Store {
 	 * @param WC_Data
 	 * @return true|WP_Error True on update or error on failure.
 	 */
-	public function update( $data );
+	public function update( &$data );
 
 	/**
 	 * Deletes a record from the database.

@@ -178,15 +178,15 @@ function wc_get_products( $args ) {
  * @since 2.2.0
  *
  * @param mixed $the_product Post object or post ID of the product.
- * @param array $args (default: array()) Contains all arguments to be used to get this product.
- * @return WC_Product
+ * @param array $deprecated
+ * @return WC_Product|null
  */
-function wc_get_product( $the_product = false, $args = array() ) {
+function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
 		return false;
 	}
-	return WC()->product_factory->get_product( $the_product, $args );
+	return WC()->product_factory->get_product( $the_product );
 }
 
 /**

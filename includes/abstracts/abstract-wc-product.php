@@ -139,10 +139,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_id( absint( $product->get_id() ) );
 		} elseif ( ! empty( $product->ID ) ) {
 			$this->set_id( absint( $product->ID ) );
+		} else {
+			$this->set_object_read( true );
 		}
 
-		$data_store = WC_Data_Store::load( 'product_' . $this->get_type() );
-		$data_store->read( $this );
+		$this->data_store = WC_Data_Store::load( 'product_' . $this->get_type() );
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
+		}
 	}
 
 	/**
@@ -1256,82 +1260,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Create a new product.
-	 *
-	 * @since 2.7.0
-	 */
-	public function create() {
-		$this->set_date_created( current_time( 'timestamp' ) );
-
-		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
-			'post_type'      => $this->post_type,
-			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
-			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->get_name() ? $this->get_name() : __( 'Product', 'woocommerce' ),
-			'post_content'   => $this->get_description(),
-			'post_excerpt'   => $this->get_short_description(),
-			'post_parent'    => $this->get_parent_id(),
-			'comment_status' => $this->get_reviews_allowed() ? 'open' : 'closed',
-			'ping_status'    => 'closed',
-			'menu_order'     => $this->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-		) ), true );
-
-		if ( $id && ! is_wp_error( $id ) ) {
-			$this->set_id( $id );
-			$this->update_post_meta();
-			$this->update_terms();
-			$this->update_attributes();
-			$this->save_meta_data();
-			do_action( 'woocommerce_new_' . $this->post_type, $id );
-		}
-	}
-
-	/**
-	 * Updates an existing product.
-	 *
-	 * @since 2.7.0
-	 */
-	public function update() {
-		$post_data = array(
-			'ID'             => $this->get_id(),
-			'post_content'   => $this->get_description(),
-			'post_excerpt'   => $this->get_short_description(),
-			'post_title'     => $this->get_name(),
-			'post_parent'    => $this->get_parent_id(),
-			'comment_status' => $this->get_reviews_allowed() ? 'open' : 'closed',
-			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
-			'menu_order'     => $this->get_menu_order(),
-		);
-		wp_update_post( $post_data );
-		$this->update_post_meta();
-		$this->update_terms();
-		$this->update_attributes();
-		$this->save_meta_data();
-		do_action( 'woocommerce_update_' . $this->post_type, $this->get_id() );
-	}
-
-	/**
-	 * Save data (either create or update depending on if we are working on an existing product).
-	 *
-	 * @since 2.7.0
-	 */
-	public function save() {
-		parent::save();
-
-		// Make sure we store the product type.
-		$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
-		wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
-
-		// Version is set to current WC version to track data changes.
-		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
-		wc_delete_product_transients( $this->get_id() );
-
-		return $this->get_id();
-	}
-
-	/**
 	 * Delete product from the database.
 	 *
 	 * @since 2.7.0
@@ -1340,157 +1268,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		wp_delete_post( $this->get_id() );
 		do_action( 'woocommerce_delete_' . $this->post_type, $this->get_id() );
 		$this->set_id( 0 );
-	}
-
-	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function update_post_meta() {
-		$updated_props     = array();
-		$changed_props     = array_keys( $this->get_changes() );
-		$meta_key_to_props = array(
-			'_visibility'            => 'catalog_visibility',
-			'_sku'                   => 'sku',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'total_sales'            => 'total_sales',
-			'_tax_status'            => 'tax_status',
-			'_tax_class'             => 'tax_class',
-			'_manage_stock'          => 'manage_stock',
-			'_backorders'            => 'backorders',
-			'_sold_individually'     => 'sold_individually',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_upsell_ids'            => 'upsell_ids',
-			'_crosssell_ids'         => 'cross_sell_ids',
-			'_purchase_note'         => 'purchase_note',
-			'_default_attributes'    => 'default_attributes',
-			'_virtual'               => 'virtual',
-			'_downloadable'          => 'downloadable',
-			'_product_image_gallery' => 'gallery_image_ids',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_featured'              => 'featured',
-			'_thumbnail_id'          => 'image_id',
-			'_downloadable_files'    => 'downloads',
-			'_stock'                 => 'stock_quantity',
-			'_stock_status'          => 'stock_status',
-		);
-
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) ) {
-				continue;
-			}
-			$value = $this->{"get_$prop"}( 'edit' );
-			switch ( $prop ) {
-				case 'virtual' :
-				case 'downloadable' :
-					$updated = update_post_meta( $this->get_id(), $meta_key, wc_bool_to_string( $value ) );
-					break;
-				case 'gallery_image_ids' :
-					$updated = update_post_meta( $this->get_id(), $meta_key, implode( ',', $value ) );
-					break;
-				case 'image_id' :
-					if ( ! empty( $value ) ) {
-						set_post_thumbnail( $this->get_id(), $value );
-					} else {
-						delete_post_meta( $this->get_id(), '_thumbnail_id' );
-					}
-					$updated = true;
-					break;
-				default :
-					$updated = update_post_meta( $this->get_id(), $meta_key, $value );
-					break;
-			}
-			if ( $updated ) {
-				$updated_props[] = $prop;
-			}
-		}
-
-		if ( $this->is_on_sale() ) {
-			update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
-		} else {
-			update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
-		}
-
-		if ( in_array( 'featured', $updated_props ) ) {
-			delete_transient( 'wc_featured_products' );
-		}
-
-		if ( in_array( 'downloads', $updated_props ) ) {
-			// grant permission to any newly added files on any existing orders for this product prior to saving.
-			if ( $this->is_type( 'variation' ) ) {
-				do_action( 'woocommerce_process_product_file_download_paths', $this->get_parent_id(), $this->get_id(), $this->get_downloads() );
-			} else {
-				do_action( 'woocommerce_process_product_file_download_paths', $this->get_id(), 0, $this->get_downloads() );
-			}
-		}
-
-		if ( in_array( 'stock_quantity', $updated_props ) ) {
-			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $this );
-		}
-
-		if ( in_array( 'stock_status', $updated_props ) ) {
-			do_action( $this->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $this->get_id(), $this->get_stock_status() );
-		}
-	}
-
-	/**
-	 * For all stored terms in all taxonomies, save them to the DB.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function update_terms() {
-		wp_set_post_terms( $this->get_id(), $this->data['category_ids'], 'product_cat', false );
-		wp_set_post_terms( $this->get_id(), $this->data['tag_ids'], 'product_tag', false );
-		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
-	}
-
-	/**
-	 * Update attributes which are a mix of terms and meta data.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function update_attributes() {
-		$attributes  = $this->get_attributes();
-		$meta_values = array();
-
-		if ( $attributes ) {
-			foreach ( $attributes as $attribute_key => $attribute ) {
-				$value = '';
-
-				if ( is_null( $attribute ) ) {
-					if ( taxonomy_exists( $attribute_key ) ) {
-						// Handle attributes that have been unset.
-						wp_set_object_terms( $this->get_id(), array(), $attribute_key );
-					}
-					continue;
-
-				} elseif ( $attribute->is_taxonomy() ) {
-					wp_set_object_terms( $this->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
-
-				} else {
-					$value = wc_implode_text_attributes( $attribute->get_options() );
-				}
-
-				// Store in format WC uses in meta.
-				$meta_values[ $attribute_key ] = array(
-					'name'         => $attribute->get_name(),
-					'value'        => $value,
-					'position'     => $attribute->get_position(),
-					'is_visible'   => $attribute->get_visible() ? 1 : 0,
-					'is_variation' => $attribute->get_variation() ? 1 : 0,
-					'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
-				);
-			}
-		}
-		update_post_meta( $this->get_id(), '_product_attributes', $meta_values );
 	}
 
 	/*

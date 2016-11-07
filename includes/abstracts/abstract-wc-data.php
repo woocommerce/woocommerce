@@ -54,6 +54,12 @@ abstract class WC_Data {
 	protected $default_data = array();
 
 	/**
+	 * Contains a reference to the data store for this class.
+	 * @var object
+	 */
+	protected $data_store;
+
+	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @todo totally remove from WC_Data after all classes switch to factories.
@@ -105,19 +111,9 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Creates new object in the database.
+	 * Deletes an object from he database.
 	 */
-	public function create() {}
-
-	/**
-	 * Updates object data in the database.
-	 */
-	public function update() {}
-
-	/**
-	 * Updates object data in the database.
-	 */
-	public function delete() {}
+	public function delete() { }
 
 	/**
 	 * Save should create or update based on object existance.
@@ -126,9 +122,9 @@ abstract class WC_Data {
 	 */
 	public function save() {
 		if ( $this->get_id() ) {
-			$this->update();
+			$this->data_store->update( $this );
 		} else {
-			$this->create();
+			$this->data_store->create( $this );
 		}
 		$this->apply_changes();
 		return $this->get_id();
@@ -517,7 +513,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 * @return array
 	 */
-	protected function get_changes() {
+	public function get_changes() {
 		return $this->changes;
 	}
 

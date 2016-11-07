@@ -30,7 +30,8 @@ class WC_Data_Store {
 	 * that type will be looked at, and then fall back to 'product'.
 	 */
 	private $stores = array(
-		'product' => 'WC_Product_Data_Store_Posts',
+		'product'         => 'WC_Product_Data_Store_CPT',
+		'product_grouped' => 'WC_Product_Grouped_Data_Store_CPT',
 	);
 
 	/**
@@ -59,8 +60,6 @@ class WC_Data_Store {
 		} else {
 			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
-
-		return true;
 	}
 
 	/**
@@ -91,7 +90,21 @@ class WC_Data_Store {
 	 * Reads an object from the data store.
 	 */
 	public function read( &$data ) {
-		return $this->instance->read( $data );
+		$this->instance->read( $data );
+	}
+
+	/**
+	 * Create an object in the data store.
+	 */
+	public function create( &$data ) {
+		return $this->instance->create( $data );
+	}
+
+	/**
+	 * Update an object in the data store.
+	 */
+	public function update( &$data ) {
+		return $this->instance->update( $data );
 	}
 
 }

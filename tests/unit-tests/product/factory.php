@@ -31,7 +31,12 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 */
 	function test_get_product() {
 		$test_product = WC_Helper_Product::create_simple_product();
-		error_log( print_r ( WC()->product_factory->get_product( $test_product->get_id ), 1 ) );
+		//error_log( print_r ( WC()->product_factory->get_product( $test_product->get_id ), 1 ) );
+	}
+
+	function test_get_invalid_product_returns_null() {
+		$product = WC()->product_factory->get_product( 50000 );
+		$this->assertNull( $product );
 	}
 
 }

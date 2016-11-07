@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Data_Store_Posts  {
+class WC_Data_Store_CPT  {
 
 	/**
 	 * Get and store terms from a taxonomy.
