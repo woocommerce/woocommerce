@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce product factory creating the right product object.
  *
  * @class 		WC_Product_Factory
- * @version		2.3.0
+ * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -20,32 +20,53 @@ class WC_Product_Factory {
 	/**
 	 * Get a product.
 	 *
-	 * @param bool $the_product (default: false)
-	 * @param array $args (default: array())
-	 * @return WC_Product|bool false if the product cannot be loaded
+	 * @param mixed $product_id (default: false)
+	 * @param array $deprecated
+	 * @return WC_Product|null Product object or null if the product cannot be loaded.
 	 */
-	public function get_product( $the_product = false, $args = array() ) {
-		try {
-			$the_product = $this->get_product_object( $the_product );
-
-			if ( ! $the_product ) {
-				throw new Exception( 'Product object does not exist', 422 );
-			}
-
-			$classname = $this->get_product_class( $the_product, $args );
-
-			if ( ! $classname ) {
-				throw new Exception( 'Missing classname', 422 );
-			}
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			return new $classname( $the_product, $args );
-
-		} catch ( Exception $e ) {
+	public function get_product( $product_id = false, $deprecated = array() ) {
+		$product_id = $this->get_product_id( $product_id );
+		if ( ! $product_id ) {
 			return false;
+		}
+
+		$product_type = $this->get_product_type( $product_id );
+		$classname    = $this->get_classname_from_product_type( $product_type );
+
+		// backwards compat filter
+		$post_type = 'variation' === $product_type ? 'product_variation' : 'product';
+		$classname = apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
+
+		if ( ! $classname ) {
+			return null;
+		}
+
+		if ( ! class_exists( $classname ) ) {
+			$classname = 'WC_Product_Simple';
+		}
+
+		try {
+			return new $classname( $product_id );
+		} catch ( Exception $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get the product type for a product.
+	 *
+	 * @since 2.7.0
+	 * @param  int $product_id
+	 * @return string|false
+	 */
+	public static function get_product_type( $product_id ) {
+		// Allow the overriding of the lookup in this function. Return the product type here.
+		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
+		if ( ! $override ) {
+			$terms = get_the_terms( $product_id, 'product_type' );
+			return ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		} else {
+			return $override;
 		}
 	}
 
@@ -59,51 +80,19 @@ class WC_Product_Factory {
 	}
 
 	/**
-	 * Get the product class name.
-	 * @param  WP_Post $the_product
-	 * @param  array $args (default: array())
-	 * @return string
+	 * Get the product ID depending on what was passed.
+	 *
+	 * @since 2.7.0
+	 * @param  mixed $product
+	 * @return int|bool false on failure
 	 */
-	private function get_product_class( $the_product, $args = array() ) {
-		$product_id = absint( $the_product->ID );
-		$post_type  = $the_product->post_type;
-
-		if ( 'product' === $post_type ) {
-			if ( isset( $args['product_type'] ) ) {
-				$product_type = $args['product_type'];
-			} else {
-				$terms        = get_the_terms( $the_product, 'product_type' );
-				$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
-			}
-		} elseif ( 'product_variation' === $post_type ) {
-			$product_type = 'variation';
+	private function get_product_id( $product ) {
+		if ( is_numeric( $product ) ) {
+			return $product;
+		} elseif ( $product instanceof WC_Product ) {
+			return $product->get_id();
 		} else {
-			$product_type = false;
+			return false;
 		}
-
-		$classname = $this->get_classname_from_product_type( $product_type );
-
-		// Filter classname so that the class can be overridden if extended.
-		return apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
-	}
-
-	/**
-	 * Get the product object.
-	 * @param  mixed $the_product
-	 * @uses   WP_Post
-	 * @return WP_Post|bool false on failure
-	 */
-	private function get_product_object( $the_product ) {
-		if ( false === $the_product ) {
-			$the_product = $GLOBALS['post'];
-		} elseif ( is_numeric( $the_product ) ) {
-			$the_product = get_post( $the_product );
-		} elseif ( $the_product instanceof WC_Product ) {
-			$the_product = get_post( $the_product->get_id() );
-		} elseif ( ! ( $the_product instanceof WP_Post ) ) {
-			$the_product = false;
-		}
-
-		return apply_filters( 'woocommerce_product_object', $the_product );
 	}
 }

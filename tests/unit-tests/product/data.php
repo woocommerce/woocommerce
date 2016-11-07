@@ -1,69 +1,10 @@
 <?php
 /**
- * CRUD Functions.
+ * Data Functions.
  * @package WooCommerce\Tests\Product
  * @since 2.7.0
  */
-class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
-
-	/**
-	 * Test creating a new product.
-	 *
-	 * @since 2.7.0
-	 */
-	 function test_product_create() {
-		 $product = new WC_Product;
-		 $product->set_regular_price( 42 );
-		 $product->set_name( 'My Product' );
-		 $product->create();
-
-		 $read_product = new WC_Product( $product->get_id() );
-
-		 $this->assertEquals( '42', $read_product->get_regular_price() );
-		 $this->assertEquals( 'My Product', $read_product->get_name() );
-	 }
-
-	/**
-	 * Test reading a product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_read() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product = new WC_Product( $product->get_id() );
-
-		$this->assertEquals( '10', $product->get_regular_price() );
-	}
-
-	/**
-	 * Test updating a product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_update() {
-		$product = WC_Helper_Product::create_simple_product();
-
-		$this->assertEquals( '10', $product->get_regular_price() );
-
-		$product->set_regular_price( 15 );
-		$product->save();
-
-		// Reread from database
-		$product = new WC_Product( $product->get_id() );
-
-		$this->assertEquals( '15', $product->get_regular_price() );
-	}
-
-	/**
-	 * Test deleting a product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_product_delete() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->delete();
-		$this->assertEquals( 0, $product->get_id() );
-	}
+class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product setters and getters
@@ -147,53 +88,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test creating a new grouped product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_grouped_product_create() {
-		$simple_product = WC_Helper_Product::create_simple_product();
-		$product = new WC_Product_Grouped;
-		$product->set_children( array( $simple_product->get_id() ) );
-		$product->set_name( 'My Grouped Product' );
-		$product->create();
-		$read_product = new WC_Product_Grouped( $product->get_id() );
-		$this->assertEquals( 'My Grouped Product', $read_product->get_name() );
-		$this->assertEquals( array( $simple_product->get_id() ), $read_product->get_children() );
-	 }
-
-	/**
-	 * Test getting / reading an grouped product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_grouped_product_read() {
-		$product      = WC_Helper_Product::create_grouped_product();
-		$read_product = new WC_Product_Grouped( $product->get_id() );
-		$this->assertEquals( 'Dummy Grouped Product', $read_product->get_name() );
-		$this->assertEquals( 2, count( $read_product->get_children() ) );
-	}
-	/**
-	 * Test updating an grouped product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_grouped_product_update() {
-		$product        = WC_Helper_Product::create_grouped_product();
-		$simple_product = WC_Helper_Product::create_simple_product();
-		$this->assertEquals( 'Dummy Grouped Product', $product->get_name() );
-		$this->assertEquals( 2, count( $product->get_children() ) );
-		$children   = $product->get_children();
-		$children[] = $simple_product->get_id();
-		$product->set_children( $children );
-		$product->set_name( 'Dummy Grouped Product 2' );
-		$product->save();
-		// Reread from database
-		$product = new WC_Product_Grouped( $product->get_id() );
-		$this->assertEquals( 3, count( $product->get_children() ) );
-		$this->assertEquals( 'Dummy Grouped Product 2', $product->get_name() );
-	}
-	/**
 	 * Test grouped product setters and getters
 	 *
 	 * @since 2.7.0
@@ -208,64 +102,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 	 }
-
-	/**
-	 * Test creating a new external product.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_external_product_create() {
-		 $product = new WC_Product_External;
-		 $product->set_regular_price( 42 );
-		 $product->set_button_text( 'Test CRUD' );
-		 $product->set_product_url( 'http://automattic.com' );
-		 $product->set_name( 'My External Product' );
-		 $product->create();
-
-		 $read_product = new WC_Product_External( $product->get_id() );
-
-		 $this->assertEquals( '42', $read_product->get_regular_price() );
-		 $this->assertEquals( 'Test CRUD', $read_product->get_button_text() );
-		 $this->assertEquals( 'http://automattic.com', $read_product->get_product_url() );
-		 $this->assertEquals( 'My External Product', $read_product->get_name() );
-	 }
-
-	/**
-	 * Test getting / reading an external product. Make sure both our external
-	 * product data and the main product data are present.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_external_product_read() {
-		$product = WC_Helper_Product::create_external_product();
-		$product = new WC_Product_External( $product->get_id() );
-
-		$this->assertEquals( 'Buy external product', $product->get_button_text() );
-		$this->assertEquals( '10', $product->get_regular_price() );
-	}
-
-	/**
-	 * Test updating an external product. Make sure both our external
-	 * product data and the main product data are written to and present.
-	 *
-	 * @since 2.7.0
-	 */
-	function test_external_product_update() {
-		$product = WC_Helper_Product::create_external_product();
-
-		$this->assertEquals( 'Buy external product', $product->get_button_text() );
-		$this->assertEquals( '10', $product->get_regular_price() );
-
-		$product->set_button_text( 'Buy my external product' );
-		$product->set_regular_price( 15 );
-		$product->save();
-
-		// Reread from database
-		$product = new WC_Product_External( $product->get_id() );
-
-		$this->assertEquals( 'Buy my external product', $product->get_button_text() );
-		$this->assertEquals( '15', $product->get_regular_price() );
-	}
 
 	/**
 	 * Test external product setters and getters

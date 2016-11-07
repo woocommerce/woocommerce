@@ -28,6 +28,14 @@ abstract class WC_Data {
 	protected $data = array();
 
 	/**
+	 * Extra data for this object. Name value pairs (name + default value).
+	 * Used for sub classes (like product types) to add additional information
+	 * to an inherited class.
+	 * @var array
+	 */
+	protected $extra_data = array();
+
+	/**
 	 * Core data changes for this object.
 	 * @var array
 	 */
@@ -44,6 +52,12 @@ abstract class WC_Data {
 	 * @var array
 	 */
 	protected $default_data = array();
+
+	/**
+	 * Contains a reference to the data store for this class.
+	 * @var object
+	 */
+	protected $data_store;
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -96,25 +110,13 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Creates new object in the database.
+	 * Deletes an object from the database.
+	 *
+	 * @param bool $force_delete True to permently delete, false to trash.
 	 */
-	public function create() {}
-
-	/**
-	 * Read object from the database.
-	 * @param int ID of the object to load.
-	 */
-	public function read( $id ) {}
-
-	/**
-	 * Updates object data in the database.
-	 */
-	public function update() {}
-
-	/**
-	 * Updates object data in the database.
-	 */
-	public function delete() {}
+	public function delete( $force_delete = false ) {
+		$this->data_store->delete( $this, $force_delete );
+	}
 
 	/**
 	 * Save should create or update based on object existance.
@@ -123,9 +125,9 @@ abstract class WC_Data {
 	 */
 	public function save() {
 		if ( $this->get_id() ) {
-			$this->update();
+			$this->data_store->update( $this );
 		} else {
-			$this->create();
+			$this->data_store->create( $this );
 		}
 		$this->apply_changes();
 		return $this->get_id();
@@ -145,6 +147,26 @@ abstract class WC_Data {
 	 */
 	public function get_data() {
 		return array_merge( array( 'id' => $this->get_id() ), $this->data, array( 'meta_data' => $this->get_meta_data() ) );
+	}
+
+	/**
+	 * Returns array of expected data keys for this object.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_data_keys() {
+		return array_keys( $this->data );
+	}
+
+	/**
+	 * Returns all "extra" data keys for an object (for sub objects like product types).
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_extra_data_keys() {
+		return array_keys( $this->extra_data );
 	}
 
 	/**
@@ -422,7 +444,7 @@ abstract class WC_Data {
 	/**
 	 * Set all props to default values.
 	 */
-	protected function set_defaults() {
+	public function set_defaults() {
 		$this->data        = $this->default_data;
 		$this->changes     = array();
 		$this->set_object_read( false );
@@ -492,7 +514,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 * @return array
 	 */
-	protected function get_changes() {
+	public function get_changes() {
 		return $this->changes;
 	}
 
