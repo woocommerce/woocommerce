@@ -23,8 +23,6 @@ class WC_Product_Variable extends WC_Product {
 	protected $extra_data = array(
 		'children'                         => array(),
 		'visible_children'                 => array(),
-		'variation_has_weight'             => false,
-		'variation_has_dimensions'         => false,
 		'variation_prices'                 => array(),
 		'variation_prices_including_taxes' => array(),
 		'variation_attributes'             => array(),
@@ -43,8 +41,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->data               = array_merge( $this->data, $this->extra_data );
-		$this->internal_meta_keys = array_merge( $this->internal_meta_keys, array( '_child_has_weight', '_child_has_dimensions' ) );
+		$this->data = array_merge( $this->data, $this->extra_data );
 		parent::__construct( $product );
 	}
 
@@ -62,26 +59,6 @@ class WC_Product_Variable extends WC_Product {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Get bool for if the variation has weight.
-	 *
-	 * @since 2.7.0
-	 * @param bool $value
-	 */
-	public function get_variation_has_weight( $context = 'view'  ) {
-		$this->get_prop( 'variation_has_weight', $context );
-	}
-
-	/**
-	 * Get bool for if the variation has dimension.
-	 *
-	 * @since 2.7.0
-	 * @param bool $value
-	 */
-	public function get_variation_has_dimensions( $context = 'view'  ) {
-		$this->get_prop( 'variation_has_dimensions', $context );
-	}
 
 	/**
 	 * Return a products child ids.
@@ -284,7 +261,7 @@ class WC_Product_Variable extends WC_Product {
 			'min_qty'               => 1,
 			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'variation_id'          => $variation->get_id(),
-			'variation_is_visible'  => $variation->is_visible(),
+			'variation_is_visible'  => $variation->variation_is_visible(),
 			'variation_is_active'   => $variation->variation_is_active(),
 			'is_purchasable'        => $variation->is_purchasable(),
 			'display_price'         => wc_get_price_to_display( $variation ),
@@ -319,44 +296,24 @@ class WC_Product_Variable extends WC_Product {
 		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
 	}
 
-	/**
-	 * Set stock level of the product.
-	 *
-	 * @param mixed $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int Stock
-	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
-		$this->total_stock = '';
-		delete_transient( 'wc_product_total_stock_' . $this->get_id() . WC_Cache_Helper::get_transient_version( 'product' ) );
-		return parent::set_stock( $amount, $mode );
-	}
-
-	/**
-	 * Set if variation has weight.
-	 *
-	 * @since 2.7.0
-	 * @param bool $value
-	 */
-	public function set_variation_has_weight( $value ) {
-		$this->set_prop( 'variation_has_weight', wc_string_to_bool( $value ) );
-	}
-
-	/**
-	 * Set if variation has dimensions.
-	 *
-	 * @since 2.7.0
-	 * @param bool $value
-	 */
-	public function set_variation_has_dimensions( $value ) {
-		$this->set_prop( 'variation_has_dimensions', wc_string_to_bool( $value ) );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Save data (either create or update depending on if we are working on an existing product).
+	 *
+	 * @since 2.7.0
+	 */
+	public function save() {
+		// Sync prices and stock with children.
+		self::sync( $this, true );
+
+		// Save this product.
+		parent::save();
+	}
 
 	/**
 	 * Read product data.
@@ -373,117 +330,7 @@ class WC_Product_Variable extends WC_Product {
 		$this->data['variation_prices']                 = $this->read_price_data();
 		$this->data['variation_prices_including_taxes'] = $this->read_price_data( true );
 		$this->data['variation_attributes']             = $this->read_variation_attributes();
-
-		$this->set_props( array(
-			'variation_has_weight'     => get_post_meta( $this->get_id(), '_child_has_weight', true ),
-			'variation_has_dimensions' => get_post_meta( $this->get_id(), '_child_has_dimensions', true ),
-		) );
 	}
-
-	/**
-	 * Save data.
-	 *
-	 * @since 2.7.0
-	 */
-	public function save() {
-		parent::save();
-
-		WC_Product_Variable::sync( $this->get_id() );
-
-		return $this->get_id();
-	}
-
-	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function update_post_meta() {
-		parent::update_post_meta();
-		update_post_meta( $this->get_id(), '_child_has_weight', $this->get_variation_has_weight() );
-		update_post_meta( $this->get_id(), '_child_has_dimensions', $this->get_variation_has_dimensions() );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Conditionals
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Returns whether or not the product is on sale.
-	 * @return bool
-	 */
-	public function is_on_sale() {
-		$prices = $this->read_price_data();
-		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
-	}
-
-	/**
-	 * Does a child have a weight set? @todo
-	 * @since 2.7.0
-	 * @return boolean
-	 */
-	public function child_has_weight() {
-		return true === $this->get_variation_has_weight();
-	}
-
-	/**
-	 * Does a child have dimensions set? @todo
-	 * @since 2.7.0
-	 * @return boolean
-	 */
-	public function child_has_dimensions() {
-		return true === $this->get_variation_has_dimensions();
-	}
-
-	/**
-	 * Returns whether or not the product has dimensions set.
-	 *
-	 * @return bool
-	 */
-	public function has_dimensions() {
-		return $this->get_length() || $this->get_height() || $this->get_width();
-	}
-
-	/**
-	 * Returns whether or not the product has weight set.
-	 *
-	 * @return bool
-	 */
-	public function has_weight() {
-		return $this->get_weight() ? true : false;
-	}
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Non-CRUD Getters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Get the add to cart button text.
-	 *
-	 * @return string
-	 */
-	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD helper methods
-	|--------------------------------------------------------------------------
-	*/
 
 	/**
 	 * Loads variation child IDs.
@@ -512,7 +359,7 @@ class WC_Product_Variable extends WC_Product {
 				);
 			}
 			$children['all']     = get_posts( apply_filters( 'woocommerce_variable_children_args', $all_args, $this, false ) );
-			$children['visible'] = get_posts( apply_filters( 'woocommerce_variable_children_args', $visible_only_args, $this, false ) );
+			$children['visible'] = get_posts( apply_filters( 'woocommerce_variable_children_args', $visible_only_args, $this, true ) );
 
 			set_transient( $children_transient_name, $children, DAY_IN_SECONDS * 30 );
 		}
@@ -642,7 +489,6 @@ class WC_Product_Variable extends WC_Product {
 				$variation_ids  = $children['visible'];
 				foreach ( $variation_ids as $variation_id ) {
 					if ( $variation = wc_get_product( $variation_id, array( 'parent_id' => $this->get_id(), 'parent' => $this ) ) ) {
-						// @todo Once WC_Product_Variation is updated, these should be get_price, get_regular_price, etc -- those don't work currently
 						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price(), $variation, $this );
 						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price(), $variation, $this );
 						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price(), $variation, $this );
@@ -697,58 +543,173 @@ class WC_Product_Variable extends WC_Product {
 		}
 	}
 
-
-
-
-
-
+	/*
+	|--------------------------------------------------------------------------
+	| Conditionals
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
-	 * Sync variable product stock status with children. @todo code here needs to be called or ran when woocommerce_variation_set_stock_status action fires. I have rmeoved the call from the variation class here.
-	 * @param  int $product_id
+	 * Returns whether or not the product is on sale.
+	 * @return bool
 	 */
-	public static function sync_stock_status( $product_id ) {
-		global $wpdb;
-
-		$product  = wc_get_product( $product_id );
-		$children = $product->get_children( 'edit' );
-		$in_stock = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
-
-		if ( $in_stock ) {
-			$product->set_stock_status( 'instock' );
-		} else {
-			$product->set_stock_status( 'outofstock' );
-		}
-
-		//$product->save();
+	public function is_on_sale() {
+		$prices = $this->read_price_data();
+		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
 	}
 
 	/**
-	 * Sync the variable product with it's children.
+	 * Is a child in stock?
+	 * @return boolean
 	 */
-	public static function sync( $product_id ) {
+	public function child_is_in_stock() {
 		global $wpdb;
 
-		$product       = wc_get_product( $product_id );
-		$children      = $product->get_visible_children( 'edit' );
-		$prices        = array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) );
-		$has_weight    = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
-		$has_dimension = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+		$transient_name = 'wc_child_is_in_stock_' . $this->get_id();
+		$in_stock       = get_transient( $transient_name );
 
-		update_post_meta( $product_id, '_child_has_weight', $has_weight ? 1 : 0 );
-		update_post_meta( $product_id, '_child_has_dimensions', $has_dimension ? 1 : 0 );
-		delete_post_meta( $product_id, '_price' );
+		if ( false === $in_stock ) {
+			$children = $this->get_visible_children( 'edit' );
+			$in_stock = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
+		}
+		return (bool) $in_stock;
+	}
+
+	/**
+	 * Does a child have a weight set?
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		global $wpdb;
+
+		$transient_name = 'wc_child_has_weight_' . $this->get_id();
+		$has_weight     = get_transient( $transient_name );
+
+		if ( false === $has_weight ) {
+			$children   = $this->get_visible_children( 'edit' );
+			$has_weight = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			set_transient( $transient_name, $has_weight, DAY_IN_SECONDS * 30 );
+		}
+		return (bool) $has_weight;
+	}
+
+	/**
+	 * Does a child have dimensions set?
+	 * @return boolean
+	 */
+	public function child_has_dimensions() {
+		global $wpdb;
+
+		$transient_name = 'wc_child_has_dimensions_' . $this->get_id();
+		$has_dimension  = get_transient( $transient_name );
+
+		if ( false === $has_dimension ) {
+			$children      = $this->get_visible_children( 'edit' );
+			$has_dimension = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			set_transient( $transient_name, $has_dimension, DAY_IN_SECONDS * 30 );
+		}
+		return (bool) $has_dimension;
+	}
+
+	/**
+	 * Returns whether or not the product has dimensions set.
+	 *
+	 * @return bool
+	 */
+	public function has_dimensions() {
+		return $this->get_length() || $this->get_height() || $this->get_width();
+	}
+
+	/**
+	 * Returns whether or not the product has weight set.
+	 *
+	 * @return bool
+	 */
+	public function has_weight() {
+		return $this->get_weight() ? true : false;
+	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get the add to cart button text.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Sync with child variations.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Sync the variable product with it's children.
+	 * @param WC_Product|int $product
+	 * @param bool $saving If this is a sync event during save, this will be true. Avoid calling WC_Product::save() as this will be done for you.
+	 */
+	public static function sync( &$product, $saving = false ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+		self::sync_price( $product );
+		self::sync_stock_status( $product, $saving );
+		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $saving );
+	}
+
+	/**
+	 * Sync variable product prices with children.
+	 * @since 2.7.0
+	 * @param WC_Product|int $product
+	 */
+	protected static function sync_price( &$product ) {
+		global $wpdb;
+
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+		$children = $product->get_visible_children( 'edit' );
+		$prices   = array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) );
+
+		delete_post_meta( $product->get_id(), '_price' );
 
 		if ( $prices ) {
 			sort( $prices );
 			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
 			foreach ( $prices as $price ) {
-				add_post_meta( $product_id, '_price', $price, false );
+				add_post_meta( $product->get_id(), '_price', $price, false );
 			}
 		}
+	}
 
-		self::sync_stock_status( $product_id );
-
-		do_action( 'woocommerce_variable_product_sync', $product_id, $children );
+	/**
+	 * Sync variable product stock status with children.
+	 * @param WC_Product|int $product
+	 */
+	public static function sync_stock_status( &$product, $saving = false ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		if ( ! $saving ) {
+			$product->save();
+		}
 	}
 }

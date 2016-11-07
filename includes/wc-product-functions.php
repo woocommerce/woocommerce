@@ -230,9 +230,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	// Transient names that include an ID
 	$post_transient_names = array(
 		'wc_product_children_',
-		'wc_product_total_stock_',
 		'wc_var_prices_',
 		'wc_related_',
+		'wc_child_has_weight_',
+		'wc_child_has_dimensions_',
+		'wc_child_is_in_stock_',
 	);
 
 	if ( $post_id > 0 ) {

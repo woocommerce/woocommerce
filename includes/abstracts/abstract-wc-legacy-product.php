@@ -565,21 +565,19 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_total_stock() {
 		_deprecated_function( 'WC_Product::get_total_stock', '2.7', 'Use get_stock_quantity on each child. Beware of performance issues in doing so.' );
-		if ( empty( $this->total_stock ) ) {
-			if ( sizeof( $this->get_children() ) > 0 ) {
-				$this->total_stock = max( 0, $this->get_stock_quantity() );
+		if ( sizeof( $this->get_children() ) > 0 ) {
+			$total_stock = max( 0, $this->get_stock_quantity() );
 
-				foreach ( $this->get_children() as $child_id ) {
-					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-					}
+			foreach ( $this->get_children() as $child_id ) {
+				if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
+					$stock = get_post_meta( $child_id, '_stock', true );
+					$total_stock += max( 0, wc_stock_amount( $stock ) );
 				}
-			} else {
-				$this->total_stock = $this->get_stock_quantity();
 			}
+		} else {
+			$total_stock = $this->get_stock_quantity();
 		}
-		return wc_stock_amount( $this->total_stock );
+		return wc_stock_amount( $total_stock );
 	}
 
 	/**

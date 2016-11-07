@@ -468,7 +468,11 @@
 		if ( undefined === this.attr( 'data-o_' + attr ) ) {
 			this.attr( 'data-o_' + attr, ( ! this.attr( attr ) ) ? '' : this.attr( attr ) );
 		}
-		this.attr( attr, value );
+		if ( false === value ) {
+			this.removeAttr( attr );
+		} else {
+			this.attr( attr, value );
+		}
 	};
 
 	/**

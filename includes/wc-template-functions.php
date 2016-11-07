@@ -1857,7 +1857,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
-	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -2493,7 +2492,14 @@ function wc_get_stock_html( $product ) {
 		'product' => $product,
 	) );
 
-	return apply_filters( 'woocommerce_get_stock_html', ob_get_clean(), $product ); // @todo map old woocommerce_stock_html filter to this
+	$html = ob_get_clean();
+
+	if ( has_filter( 'woocommerce_stock_html' ) ) {
+		_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );
+		$html = apply_filters( 'woocommerce_stock_html', $html, $product->get_availability_text(), $product );
+	}
+
+	return apply_filters( 'woocommerce_get_stock_html', $html, $product );
 }
 
 /**

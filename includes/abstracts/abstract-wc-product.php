@@ -1303,9 +1303,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'menu_order'        => $post_object->menu_order,
 			'reviews_allowed'   => 'open' === $post_object->comment_status,
 		) );
-		$this->read_product_data();
 		$this->read_meta_data();
 		$this->read_attributes();
+		$this->read_product_data();
 
 		// Set object_read true once all data is read.
 		$this->set_object_read( true );
@@ -1552,9 +1552,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( $this->is_on_sale() ) {
-			update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
+			//update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
 		} else {
-			update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
+	//		update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
 		}
 
 		if ( in_array( 'featured', $updated_props ) ) {
@@ -1915,7 +1915,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the price in html format.
-	 * @todo Should this be moved out of the classes?
 	 * @return string
 	 */
 	public function get_price_html( $deprecated = '' ) {

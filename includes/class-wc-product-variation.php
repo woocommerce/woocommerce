@@ -4,21 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product Variation Class. @todo needs new getters/setters/changes code
- *
- * @todo removed filters need to be mapped via add_action to the product actions of similar naming.
- *       woocommerce_variation_is_in_stock
- *       woocommerce_variation_sale_price_html
- *       woocommerce_variation_price_html
- *       woocommerce_variation_free_price_html
- *       woocommerce_get_variation_price_html
- *
- * @todo removed filters need to be mapped via add_action to the product actions of similar naming.
- *       woocommerce_variation_is_in_stock
- *       woocommerce_variation_sale_price_html
- *       woocommerce_variation_price_html
- *       woocommerce_variation_free_price_html
- *       woocommerce_get_variation_price_html
+ * Product Variation Class.
  *
  * The WooCommerce product variation class handles product variation data.
  *
@@ -47,6 +33,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_product_variation_get_';
+	}
+
+	/**
 	 * Get internal type.
 	 * @return string
 	 */
@@ -55,7 +51,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get variation attribute values. @todo needed?
+	 * Get variation attribute values.
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
@@ -311,7 +307,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} else {
 			$this->create();
 		}
-		WC_Product_Variable::sync( $this->get_parent_id() );
+		wc_delete_product_transients( $this->get_id() );
+		wc_delete_product_transients( $this->get_parent_id() );
+
 		return $this->get_id();
 	}
 
