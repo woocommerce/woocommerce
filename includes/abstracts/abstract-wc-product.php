@@ -171,6 +171,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
+	 * Get all class data in array format.
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge(
+			$this->data,
+			array(
+				'meta_data' => $this->get_meta_data(),
+			)
+		);
+	}
+
+	/**
 	 * Get product name.
 	 *
 	 * @since 2.7.0
@@ -1298,7 +1312,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Read post data. Can be overridden by child classes to load other props.
+	 * Read product data. Can be overridden by child classes to load other props.
 	 *
 	 * @since 2.7.0
 	 */
@@ -1910,7 +1924,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( $this->is_on_sale() ) {
-			$price = wc_format_price_range( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
 		} else {
 			$price = wc_price( wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
 		}

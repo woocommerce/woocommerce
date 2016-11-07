@@ -565,7 +565,7 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-                // Clear prices transient for variable products.
+				// Clear prices transient for variable products.
 				delete_transient( 'wc_var_prices_' . $parent );
 
 				// Grouped products need syncing via a function
@@ -590,10 +590,9 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
-		$attr['src'] = wc_placeholder_img_src();
+	if ( strstr( $attr['src'][0], 'woocommerce_uploads/' ) ) {
+		$attr['src'][0] = wc_placeholder_img_src();
 	}
-
 	return $attr;
 }
 add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attributes' );
@@ -852,6 +851,9 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		'caption' => '',
 		'url'     => '',
 		'alt'     => '',
+		'src'     => '',
+		'srcset'  => false,
+		'sizes'   => false,
 	);
 	if ( $attachment_id ) {
 		$attachment       = get_post( $attachment_id );
@@ -860,10 +862,15 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		$props['url']     = wp_get_attachment_url( $attachment_id );
 		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
+		// Image source.
+		$props['src']    = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+
 		// Alt text fallbacks
-		$props['alt']     = empty( $props['alt'] ) ? $props['caption'] : $props['alt'];
-		$props['alt']     = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) ) : $props['alt'];
-		$props['alt']     = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) ? $props['caption']                                               : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) )                   : $props['alt'];
+		$props['alt'] = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
 	}
 	return $props;
 }
@@ -1163,3 +1170,269 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 function wc_get_product_tag_list( $product_id, $sep = ', ', $before = '', $after = '' ) {
 	return get_the_term_list( $product_id, 'product_tag', $before, $sep, $after );
 }
+
+/**
+ * Callback for array filter to get visible only.
+ * @since  2.7.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_products_array_filter_visible( $product ) {
+	return $product && is_a( $product, 'WC_Product' ) && $product->is_visible();
+}
+
+/**
+ * Sort an array of products by a value.
+ * @since  2.7.0
+ * @param  array $products
+ * @param  string $orderby
+ * @return array
+ */
+function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc' ) {
+	$orderby = strtolower( $orderby );
+	$order   = strtolower( $order );
+	switch ( $orderby ) {
+		case 'title' :
+		case 'id' :
+		case 'date' :
+		case 'modified' :
+		case 'menu_order' :
+		case 'price' :
+			usort( $products, 'wc_products_array_orderby_' . $orderby );
+			break;
+		default :
+			shuffle( $products );
+			break;
+	}
+	if ( 'desc' === $order ) {
+		$products = array_reverse( $products );
+	}
+	return $products;
+}
+
+/**
+ * Sort by title.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_title( $a, $b ) {
+	return strcasecmp( $a->get_name(), $b->get_name() );
+}
+
+/**
+ * Sort by id.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_id( $a, $b ) {
+	if ( $a->get_id() === $b->get_id() ) {
+		return 0;
+	}
+	return ( $a->get_id() < $b->get_id() ) ? -1 : 1;
+}
+
+/**
+ * Sort by date.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_date( $a, $b ) {
+	if ( $a->get_date_created() === $b->get_date_created() ) {
+		return 0;
+	}
+	return ( $a->get_date_created() < $b->get_date_created() ) ? -1 : 1;
+}
+
+/**
+ * Sort by modified.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_modified( $a, $b ) {
+	if ( $a->get_date_modified() === $b->get_date_modified() ) {
+		return 0;
+	}
+	return ( $a->get_date_modified() < $b->get_date_modified() ) ? -1 : 1;
+}
+
+/**
+ * Sort by menu order.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_menu_order( $a, $b ) {
+	if ( $a->get_menu_order() === $b->get_menu_order() ) {
+		return 0;
+	}
+	return ( $a->get_menu_order() < $b->get_menu_order() ) ? -1 : 1;
+}
+
+/**
+ * Sort by price low to high.
+ * @since  2.7.0
+ * @param  WC_Product object $a
+ * @param  WC_Product object $b
+ * @return int
+ */
+function wc_products_array_orderby_price( $a, $b ) {
+	if ( $a->get_price() === $b->get_price() ) {
+		return 0;
+	}
+	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
+}
+
+
+
+
+
+/*
+ * Match a variation to a given set of attributes using a WP_Query.
+ * @since  2.4.0
+ * @param  $match_attributes
+ * @return int Variation ID which matched, 0 is no match was found
+ *
+public function get_matching_variation( $match_attributes = array() ) {
+	global $wpdb;
+
+	$query_args = array(
+		'post_parent' => $this->get_id(),
+		'post_type'   => 'product_variation',
+		'orderby'     => 'menu_order',
+		'order'       => 'ASC',
+		'fields'      => 'ids',
+		'post_status' => 'publish',
+		'numberposts' => 1,
+		'meta_query'  => array(),
+	);
+
+	foreach ( $this->get_attributes() as $attribute ) {
+		if ( ! $attribute['is_variation'] ) {
+			continue;
+		}
+
+		$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+
+		if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
+			return 0;
+		}
+
+		$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+
+		$query_args['meta_query'][] = array(
+			'relation' => 'OR',
+			array(
+				'key'     => $attribute_field_name,
+				'value'   => array( '', $value ),
+				'compare' => 'IN',
+			),
+			array(
+				'key'     => $attribute_field_name,
+				'compare' => 'NOT EXISTS',
+			)
+		);
+
+	}
+
+	// Allow large queries in case user has many variations
+	$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+
+	$matches = get_posts( $query_args );
+
+	if ( $matches && ! is_wp_error( $matches ) ) {
+		return current( $matches );
+
+	/*
+	 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+	 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
+	 *
+ } elseif ( version_compare( get_post_meta( $this->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+		return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
+
+	} else {
+		return 0;
+	}
+}
+
+
+/*
+ * Sync the variable product's attributes with the variations.
+ *
+public static function sync_attributes( $product_id, $children = false ) {
+	/*
+	 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+	 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
+	 *
+	if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
+		$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
+
+		if ( ! $children ) {
+			$children = get_posts( array(
+				'post_parent' 	 => $product_id,
+				'posts_per_page' => -1,
+				'post_type' 	 => 'product_variation',
+				'fields' 		 => 'ids',
+				'post_status'	 => 'any',
+			) );
+		}
+
+		foreach ( $children as $child_id ) {
+			$all_meta = get_post_meta( $child_id );
+
+			foreach ( $all_meta as $name => $value ) {
+				if ( 0 !== strpos( $name, 'attribute_' ) ) {
+					continue;
+				}
+				if ( sanitize_title( $value[0] ) === $value[0] ) {
+					foreach ( $parent_attributes as $attribute ) {
+						if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
+							continue;
+						}
+						$text_attributes = wc_get_text_attributes( $attribute['value'] );
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( sanitize_title( $text_attribute ) === $value[0] ) {
+								update_post_meta( $child_id, $name, $text_attribute );
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/*
+ * Performed after a stock level change at product level.
+ *
+public function check_stock_status() {
+	$set_child_stock_status = '';
+
+	if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		$set_child_stock_status = 'outofstock';
+	} elseif ( $this->backorders_allowed() || $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		$set_child_stock_status = 'instock';
+	}
+
+	if ( $set_child_stock_status ) {
+		foreach ( $this->get_children() as $child_id ) {
+			if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
+				wc_update_product_stock_status( $child_id, $set_child_stock_status );
+			}
+		}
+
+		// Children statuses changed, so sync self
+		self::sync_stock_status( $this->get_id() );
+	}
+}
+*/

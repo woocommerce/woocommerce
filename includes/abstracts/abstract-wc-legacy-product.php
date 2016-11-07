@@ -325,14 +325,14 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
-	 * @deprecated 2.7.0 Use wc_format_price_range instead.
+	 * @deprecated 2.7.0 Use wc_format_sale_price instead.
 	 * @param  string $from String or float to wrap with 'from' text
 	 * @param  mixed $to String or float to wrap with 'to' text
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_price_range' );
-		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_price_range( $from, $to ), $from, $to, $this );
+		_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_sale_price' );
+		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_sale_price( $from, $to ), $from, $to, $this );
 	}
 
 	/**
@@ -591,5 +591,23 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	public function get_formatted_variation_attributes( $flat = false ) {
 		_deprecated_function( 'WC_Product::get_formatted_variation_attributes', '2.7', 'wc_get_formatted_variation' );
 		return wc_get_formatted_variation( $this->get_variation_attributes(), $flat );
+	}
+
+	/**
+	 * Sync variable product prices with the children lowest/highest prices.
+	 *
+	 * @deprecated 2.7.0 not used in core.
+	 */
+	public function variable_product_sync( $product_id = '' ) {
+		_deprecated_function( 'WC_Product::variable_product_sync', '2.7' );
+		if ( empty( $product_id ) ) {
+			$product_id = $this->get_id();
+		}
+
+		// Sync prices with children
+		self::sync( $product_id );
+
+		// Re-load prices
+		$this->read_product_data();
 	}
 }

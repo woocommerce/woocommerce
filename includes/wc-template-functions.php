@@ -1302,29 +1302,28 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	 * Output the related products.
 	 *
 	 * @param array Provided arguments
-	 * @param bool Columns argument for backwards compat
-	 * @param bool Order by argument for backwards compat
 	 */
-	function woocommerce_related_products( $args = array(), $columns = false, $orderby = false ) {
-		if ( ! is_array( $args ) ) {
-			_deprecated_argument( __FUNCTION__, '2.1', __( 'Use $args argument as an array instead. Deprecated argument will be removed in WC 2.2.', 'woocommerce' ) );
-
-			$argsvalue = $args;
-
-			$args = array(
-				'posts_per_page' => $argsvalue,
-				'columns'        => $columns,
-				'orderby'        => $orderby,
-			);
-		}
+	function woocommerce_related_products( $args = array() ) {
+		global $product, $woocommerce_loop;
 
 		$defaults = array(
 			'posts_per_page' => 2,
 			'columns'        => 2,
 			'orderby'        => 'rand',
+			'order'          => 'desc',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
+
+		// Get visble related products then sort them at random.
+		$args['related_products'] = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
+
+		// Handle orderby.
+		$args['related_products'] = wc_products_array_orderby( $args['related_products'], $args['orderby'], $args['order'] );
+
+		// Set global loop values.
+		$woocommerce_loop['name']    = 'related';
+		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_related_products_columns', $args['columns'] );
 
 		wc_get_template( 'single-product/related.php', $args );
 	}
@@ -1335,18 +1334,34 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	/**
 	 * Output product up sells.
 	 *
-	 * @param int $posts_per_page (default: -1)
+	 * @param int $limit (default: -1)
 	 * @param int $columns (default: 4)
-	 * @param string $orderby (default: 'rand')
+	 * @param string $orderby Supported values - rand, title, ID, date, modified, menu_order, price.
+	 * @param string $order Sort direction.
 	 */
-	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 4, $orderby = 'rand' ) {
-		$args = apply_filters( 'woocommerce_upsell_display_args', array(
-			'posts_per_page'	=> $posts_per_page,
-			'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
-			'columns'			=> $columns,
-		) );
+	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
+		global $product, $woocommerce_loop;
 
-		wc_get_template( 'single-product/up-sells.php', $args );
+		// Get visble upsells then sort them at random.
+		$upsells = array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' );
+
+		// Handle orderby and limit results.
+		$orderby = apply_filters( 'woocommerce_upsells_orderby', $orderby );
+		$upsells = wc_products_array_orderby( $upsells, $orderby, $order );
+		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
+
+		// Set global loop values.
+		$woocommerce_loop['name']    = 'up-sells';
+		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_up_sells_columns', $columns );
+
+		wc_get_template( 'single-product/up-sells.php', apply_filters( 'woocommerce_upsell_display_args', array(
+			'upsells'            => $upsells,
+
+			// Not used now, but used in previous version of up-sells.php.
+			'posts_per_page'	 => $limit,
+			'orderby'			 => $orderby,
+			'columns'			 => $columns,
+		) ) );
 	}
 }
 
