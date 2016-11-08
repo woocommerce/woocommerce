@@ -902,7 +902,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_stock_quantity( $quantity ) {
 		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
-		$this->set_stock_status();
 	}
 
 	/**
@@ -910,24 +909,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $status New status.
 	 */
-	public function set_stock_status( $status = null ) {
-		if ( is_null( $status ) ) {
-			if ( $this->get_manage_stock() ) {
-				if ( $this->backorders_allowed() ) {
-					$status = 'instock';
-
-				} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-					$status = 'outofstock';
-
-				} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-					$status = 'instock';
-				}
-			} else {
-				return;
-			}
-		} elseif ( $this->get_manage_stock() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$status = 'outofstock';
-		}
+	public function set_stock_status( $status ) {
 		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
 	}
 
@@ -1459,23 +1441,69 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Ensure properties are set correctly before save.
+	 * @since 2.7.0
+	 */
+	public function validate_props() {
+		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		if ( ! $this->get_manage_stock() ) {
+			$this->set_stock_quantity( '' );
+			$this->set_backorders( 'no' );
+
+		// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'outofstock' );
+
+		// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			$this->set_stock_status( 'instock' );
+		}
+	}
+
+	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
 	 * @since 2.7.0
 	 */
 	public function save() {
-		parent::save();
+		$this->validate_props();
 
-		// Make sure we store the product type.
+		if ( $this->get_id() ) {
+			$this->update();
+		} else {
+			$this->create();
+		}
+
+		$this->apply_changes();
+		$this->update_product_type();
+		$this->update_product_version();
+		$this->update_term_counts();
+		$this->clear_caches();
+
+		return $this->get_id();
+	}
+
+	/**
+	 * Make sure we store the product type.
+	 */
+	protected function update_product_type() {
 		if ( 'product' === $this->post_type ) {
 			$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
 			wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
 		}
+	}
 
-		// Version is set to current WC version to track data changes.
+	/**
+	 * Version is set to current WC version to track data changes.
+	 */
+	protected function update_product_version() {
 		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
+	}
 
-		// Count terms. These are done at this point so all product props are set in advance.
+	/**
+	 * Count terms. These are done at this point so all product props are set in advance.
+	 */
+	protected function update_term_counts() {
 		if ( ! wp_defer_term_counting() ) {
 			global $wc_allow_term_recount;
 
@@ -1487,10 +1515,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				wp_update_term_count( $tt_ids, $taxonomy );
 			}
 		}
+	}
 
+	/**
+	 * Clear any caches.
+	 */
+	protected function clear_caches() {
 		wc_delete_product_transients( $this->get_id() );
-
-		return $this->get_id();
 	}
 
 	/**

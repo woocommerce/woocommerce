@@ -611,22 +611,20 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Sync the variable product's attributes with the variations.
 	 */
-	public static function sync_attributes( $product_id, $children = false ) {
+	public static function sync_attributes( $product, $children = false ) {
 		/**
 		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 		 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
 		 */
-		if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
-			$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+			if ( ! is_a( $product, 'WC_Product' ) ) {
+				$product = wc_get_product( $product );
+			}
+
+			$parent_attributes = array_filter( (array) get_post_meta( $product->get_id(), '_product_attributes', true ) );
 
 			if ( ! $children ) {
-				$children = get_posts( array(
-					'post_parent' 	 => $product_id,
-					'posts_per_page' => -1,
-					'post_type' 	 => 'product_variation',
-					'fields' 		 => 'ids',
-					'post_status'	 => 'any',
-				) );
+				$children = $product->get_children( 'edit' );
 			}
 
 			foreach ( $children as $child_id ) {

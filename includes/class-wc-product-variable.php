@@ -283,16 +283,51 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
+	 * Ensure properties are set correctly before save.
+	 * @since 2.7.0
+	 */
+	public function validate_props() {
+		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		if ( ! $this->get_manage_stock() ) {
+			$this->set_stock_quantity( '' );
+			$this->set_backorders( 'no' );
+
+		// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'outofstock' );
+
+		// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			$this->set_stock_status( 'instock' );
+
+		// Otherwise revert to status the children have.
+		} else {
+			$this->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		}
+	}
+
+	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
 	 * @since 2.7.0
 	 */
 	public function save() {
-		// Sync prices and stock with children.
-		self::sync( $this, true );
+		$this->validate_props();
 
-		// Save this product.
-		parent::save();
+		if ( $this->get_id() ) {
+			$this->update();
+		} else {
+			$this->create();
+		}
+
+		$this->sync_managed_variation_stock_status();
+		$this->apply_changes();
+		$this->update_product_type();
+		$this->update_product_version();
+		$this->update_term_counts();
+		$this->clear_caches();
+
+		return $this->get_id();
 	}
 
 	/**
@@ -303,8 +338,9 @@ class WC_Product_Variable extends WC_Product {
 	public function read_product_data() {
 		parent::read_product_data();
 
-		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
 		$this->read_children();
+
+		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
 		$this->data['variation_prices']                 = $this->read_price_data();
 		$this->data['variation_prices_including_taxes'] = $this->read_price_data( true );
 		$this->data['variation_attributes']             = $this->read_variation_attributes();
@@ -312,14 +348,14 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Loads variation child IDs.
-	 *
+	 * @param  bool $force_read True to bypass the transient.
 	 * @return array
 	 */
-	public function read_children() {
+	public function read_children( $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $this->get_id();
 		$children                = get_transient( $children_transient_name );
 
-		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) ) {
+		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
 			$all_args = $visible_only_args = array(
 				'post_parent' => $this->get_id(),
 				'post_type'   => 'product_variation',
@@ -640,7 +676,33 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
+	 * Stock managed at the parent level - update children being managed by this product.
+	 *
+	 * This sync function syncs downwards (from parent to child) when the variable product is saved.
+	 */
+	private function sync_managed_variation_stock_status() {
+		global $wpdb;
+
+		if ( $this->get_manage_stock() ) {
+			$status           = $this->get_stock_status();
+			$children         = $this->get_children();
+			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
+			$changed          = false;
+			foreach ( $managed_children as $managed_child ) {
+				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
+					$changed = true;
+				}
+			}
+			if ( $changed ) {
+				$this->read_children( true );
+			}
+		}
+	}
+
+	/**
 	 * Sync the variable product with it's children.
+	 *
+	 * These sync functions sync upwards (from child to parent) when the variation is saved.
 	 * @param WC_Product|int $product
 	 * @param bool $saving If this is a sync event during save, this will be true. Avoid calling WC_Product::save() as this will be done for you.
 	 */
@@ -650,10 +712,8 @@ class WC_Product_Variable extends WC_Product {
 		}
 		self::sync_stock_status( $product, $saving );
 		self::sync_price( $product );
-
-		$children = $product->get_visible_children( 'edit' );
-		self::sync_attributes( $product->get_id(), $children ); // Legacy
-		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $children, $saving );
+		self::sync_attributes( $product );
+		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $saving );
 	}
 
 	/**
@@ -662,11 +722,11 @@ class WC_Product_Variable extends WC_Product {
 	 * @param WC_Product|int $product
 	 */
 	protected static function sync_price( &$product ) {
-		global $wpdb;
-
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
+		global $wpdb;
+
 		$children = $product->get_visible_children( 'edit' );
 		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
 
@@ -682,35 +742,13 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync variable product stock status with children.
+	 * Sync VARIATIONS with the PARENT.
 	 * @param WC_Product|int $product
 	 */
 	public static function sync_stock_status( &$product, $saving = false ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
-		global $wpdb;
-
-		// Stock managed at the parent level - update children being managed by this product.
-		if ( $product->get_manage_stock() ) {
-			$status           = $product->backorders_allowed() || $product->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ? 'instock' : 'outofstock';
-			$children         = $product->get_children();
-			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
-			$changed          = false;
-			foreach ( $managed_children as $managed_child ) {
-				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
-					$changed = true;
-				}
-			}
-			if ( $changed ) {
-				// Some things like price sync rely on visible variations, so clear transients and reload here.
-				delete_transient( 'wc_child_is_in_stock_' . $product->get_id() );
-				delete_transient( 'wc_product_children_' . $product->get_id() );
-				$product->read_children();
-			}
-		}
-
-		// Set own stock status.
 		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
 
 		if ( ! $saving ) {

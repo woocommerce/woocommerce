@@ -477,7 +477,7 @@ abstract class WC_Data {
 	 * @param mixed  $value Value of the prop.
 	 */
 	protected function set_prop( $prop, $value ) {
-		if ( array_key_exists( $prop, $this->data ) ) {
+		if ( array_key_exists( $prop, $this->data ) && $value !== $this->data[ $prop ] ) {
 			if ( true === $this->object_read ) {
 				$this->changes[ $prop ] = $value;
 			} else {
