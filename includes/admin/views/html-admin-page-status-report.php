@@ -330,6 +330,37 @@ $pages          = $system_status->get_pages();
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
+			<th colspan="3" data-export-label="Security"><h2><?php _e( 'Security', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Under HTTPS"><?php _e( 'Under HTTPS', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Are your shop under HTTPS?', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $settings['force_ssl'] || 'https' !== substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ) ) : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your shop is not under HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+				<?php else : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Display errors disabled"><?php _e( 'Display errors disabled', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'Error messages frequently contain sensitive information about your shop environment, and should never be presented to untrusted sources.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 !== intval( ini_get( 'display_errors' ) ) ) : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'All error messages should never be displayed if not in a closed development environment.', 'woocommerce' ); ?></mark>
+				<?php else : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ) ?>)"><h2><?php _e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ) ?>)</h2></th>
 		</tr>
 	</thead>
