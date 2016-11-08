@@ -258,8 +258,6 @@ class WC_Product_Variable extends WC_Product {
 			'dimensions_html'       => $variation->get_dimensions(),
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => wc_get_stock_html( $variation ),
-			'min_qty'               => 1,
-			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'variation_id'          => $variation->get_id(),
 			'variation_is_visible'  => $variation->variation_is_visible(),
 			'variation_is_active'   => $variation->variation_is_active(),
@@ -551,7 +549,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $in_stock ) {
 			$children = $this->get_visible_children( 'edit' );
-			$in_stock = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			$in_stock = $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $in_stock;
@@ -569,7 +567,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_weight ) {
 			$children   = $this->get_visible_children( 'edit' );
-			$has_weight = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			$has_weight = $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 			set_transient( $transient_name, $has_weight, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $has_weight;
@@ -587,7 +585,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_dimension ) {
 			$children      = $this->get_visible_children( 'edit' );
-			$has_dimension = $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+			$has_dimension = $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 			set_transient( $transient_name, $has_dimension, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $has_dimension;
@@ -652,8 +650,10 @@ class WC_Product_Variable extends WC_Product {
 		}
 		self::sync_stock_status( $product, $saving );
 		self::sync_price( $product );
+
+		$children = $product->get_visible_children( 'edit' );
 		self::sync_attributes( $product->get_id(), $children ); // Legacy
-		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $saving );
+		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $children, $saving );
 	}
 
 	/**
@@ -668,7 +668,7 @@ class WC_Product_Variable extends WC_Product {
 			$product = wc_get_product( $product );
 		}
 		$children = $product->get_visible_children( 'edit' );
-		$prices   = array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) );
+		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
 
 		delete_post_meta( $product->get_id(), '_price' );
 
@@ -693,9 +693,9 @@ class WC_Product_Variable extends WC_Product {
 
 		// Stock managed at the parent level - update children being managed by this product.
 		if ( $product->get_manage_stock() ) {
-			$status           = $product->get_stock_status();
+			$status           = $product->backorders_allowed() || $product->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ? 'instock' : 'outofstock';
 			$children         = $product->get_children();
-			$managed_children = array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) );
+			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
 			$changed          = false;
 			foreach ( $managed_children as $managed_child ) {
 				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {

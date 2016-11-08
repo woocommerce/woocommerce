@@ -1906,6 +1906,7 @@ class WC_AJAX {
 		if ( $variations ) {
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
+				$variation      = get_post( $variation_id );
 				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 				$loop++;

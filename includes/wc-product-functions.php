@@ -1061,12 +1061,11 @@ function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, 
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args( $args, array(
-		'qty'   => 1,
-		'price' => $product->get_price(),
+		'qty'   => '',
+		'price' => '',
 	) );
-
-	$price = $args['price'];
-	$qty   = $args['qty'];
+	$price = $args['price'] ? $args['price'] : $product->get_price();
+	$qty   = $args['qty'] ? $args['qty'] : 1;
 
 	if ( ! $product->is_taxable() ) {
 		$price = $price * $qty;
@@ -1110,12 +1109,11 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args( $args, array(
-		'qty'   => 1,
-		'price' => $product->get_price(),
+		'qty'   => '',
+		'price' => '',
 	) );
-
-	$price = $args['price'];
-	$qty   = $args['qty'];
+	$price = $args['price'] ? $args['price'] : $product->get_price();
+	$qty   = $args['qty'] ? $args['qty'] : 1;
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );

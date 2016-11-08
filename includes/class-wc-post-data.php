@@ -28,6 +28,7 @@ class WC_Post_Data {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_deferred_product_sync', array( __CLASS__, 'deferred_product_sync' ), 10, 1 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -39,6 +40,18 @@ class WC_Post_Data {
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+	}
+
+	/**
+	 * Sync a product.
+	 * @param  int $product_id
+	 */
+	public static function deferred_product_sync( $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		if ( is_callable( array( $product, 'sync' ) ) ) {
+			$product->sync( $product );
+		}
 	}
 
 	/**

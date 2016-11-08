@@ -2094,11 +2094,10 @@ class WC_Cart {
 	 */
 	public function get_product_price( $product ) {
 		if ( 'excl' === $this->tax_display_cart ) {
-			$product_price = $product->get_price_excluding_tax();
+			$product_price = wc_get_price_excluding_tax( $product );
 		} else {
-			$product_price = $product->get_price_including_tax();
+			$product_price = wc_get_price_including_tax( $product );
 		}
-
 		return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $product );
 	}
 
@@ -2114,9 +2113,8 @@ class WC_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
-
-		$price 			= $product->get_price();
-		$taxable 		= $product->is_taxable();
+		$price   = $product->get_price();
+		$taxable = $product->is_taxable();
 
 		// Taxable
 		if ( $taxable ) {

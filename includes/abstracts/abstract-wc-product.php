@@ -177,6 +177,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_data() {
 		return array_merge(
+			array(
+				'id' => $this->get_id(),
+			),
 			$this->data,
 			array(
 				'meta_data' => $this->get_meta_data(),
@@ -919,6 +922,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 					$status = 'instock';
 				}
+			} else {
+				return;
 			}
 		} elseif ( $this->get_manage_stock() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$status = 'outofstock';
@@ -1548,6 +1553,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			switch ( $prop ) {
 				case 'virtual' :
 				case 'downloadable' :
+				case 'manage_stock' :
+				case 'featured' :
+				case 'sold_individually' :
 					$updated = update_post_meta( $this->get_id(), $meta_key, wc_bool_to_string( $value ) );
 					break;
 				case 'gallery_image_ids' :
@@ -1757,7 +1765,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_purchasable() {
-		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && $this->is_in_stock() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
 	}
 
 	/**
