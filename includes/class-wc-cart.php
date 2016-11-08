@@ -429,12 +429,7 @@ class WC_Cart {
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
-
-			if ( ! $product->managing_stock() && $product->get_parent_id() ) {
-				$product = wc_get_product( $product->get_parent_id() );
-			}
-
-			$quantities[ $product->get_id() ] = isset( $quantities[ $product->get_id() ] ) ? $quantities[ $product->get_id() ] + $values['quantity'] : $values['quantity'];
+			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
 		}
 
 		return $quantities;
@@ -483,28 +478,22 @@ class WC_Cart {
 				return $error;
 			}
 
-			$product_to_check = $product;
-
-			if ( ! $product_to_check->managing_stock() && $product_to_check->get_parent_id() ) {
-				$product_to_check = wc_get_product( $product_to_check->get_parent_id() );
-			}
-
-			if ( ! $product_to_check->managing_stock() ) {
+			if ( ! $product->managing_stock() ) {
 				continue;
 			}
 
 			/**
 			 * Check stock based on all items in the cart.
 			 */
-			if ( ! $product_to_check->has_enough_stock( $product_qty_in_cart[ $product_to_check->get_id() ] ) ) {
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product_to_check->get_title(), $product_to_check->get_stock_quantity() ) );
+			if ( ! $product->has_enough_stock( $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), $product->get_stock_quantity() ) );
 				return $error;
 			}
 
 			/**
 			 * Finally consider any held stock, from pending orders.
 			 */
-			if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $product_to_check->backorders_allowed() ) {
+			if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $product->backorders_allowed() ) {
 				$order_id   = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
 				$held_stock = $wpdb->get_var(
 					$wpdb->prepare( "
@@ -518,14 +507,14 @@ class WC_Cart {
 						AND 	posts.post_type            IN ( '" . implode( "','", wc_get_order_types() ) . "' )
 						AND 	posts.post_status          = 'wc-pending'
 						AND		posts.ID                   != %d;",
-						$product_to_check->is_type( 'variation' ) ? '_variation_id' : '_product_id',
-						$product_to_check->get_id(),
+						'variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
+						$product->get_stock_managed_by_id(),
 						$order_id
 					)
 				);
 
-				if ( $product_to_check->get_stock_quantity() < ( $held_stock + $product_qty_in_cart[ $product_to_check->get_id() ] ) ) {
-					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product_to_check->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+				if ( $product->get_stock_quantity() < ( $held_stock + $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
+					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 					return $error;
 				}
 			}
@@ -937,21 +926,15 @@ class WC_Cart {
 			}
 
 			// Stock check - this time accounting for whats already in-cart
-			$product_to_check = $product_data;
-
-			if ( ! $product_to_check->managing_stock() && $product_to_check->get_parent_id() ) {
-				$product_to_check = wc_get_product( $product_to_check->get_parent_id() );
-			}
-
-			if ( $product_to_check->managing_stock() ) {
+			if ( $product_data->managing_stock() ) {
 				$products_qty_in_cart = $this->get_cart_item_quantities();
 
-				if ( ! $product_to_check->has_enough_stock( $products_qty_in_cart[ $product_to_check->get_id() ] + $quantity ) ) {
+				if ( ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
 					throw new Exception( sprintf(
 						'<a href="%s" class="button wc-forward">%s</a> %s',
 						wc_get_cart_url(),
 						__( 'View Cart', 'woocommerce' ),
-						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), $product_to_check->get_stock_quantity(), $products_qty_in_cart[ $product_to_check->get_id() ] )
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $products_qty_in_cart[ $product_data->get_id() ] )
 					) );
 				}
 			}

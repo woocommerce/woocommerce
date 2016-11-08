@@ -899,6 +899,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_stock_quantity( $quantity ) {
 		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
+		$this->set_stock_status();
 	}
 
 	/**
@@ -906,16 +907,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $status New status.
 	 */
-	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
+	public function set_stock_status( $status = null ) {
+		if ( is_null( $status ) ) {
+			if ( $this->get_manage_stock() ) {
+				if ( $this->backorders_allowed() ) {
+					$status = 'instock';
 
-		if ( $this->managing_stock() ) {
-			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$status = 'outofstock';
+				} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+					$status = 'outofstock';
+
+				} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+					$status = 'instock';
+				}
 			}
+		} elseif ( $this->get_manage_stock() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$status = 'outofstock';
 		}
-
-		$this->set_prop( 'stock_status', $status );
+		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
 	}
 
 	/**
@@ -1834,7 +1842,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function managing_stock() {
-		return $this->get_manage_stock() && 'yes' === get_option( 'woocommerce_manage_stock' );
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			return $this->get_manage_stock();
+		}
+		return false;
 	}
 
 	/**
@@ -1872,7 +1883,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
 	}
 
 	/**
@@ -1928,6 +1939,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_children() {
 		return array();
+	}
+
+	/**
+	 * If the stock level comes from another product ID, this should be modified.
+	 * @since  2.7.0
+	 * @return int
+	 */
+	public function get_stock_managed_by_id() {
+		return $this->get_id();
 	}
 
 	/**

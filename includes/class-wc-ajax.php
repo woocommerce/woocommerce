@@ -440,7 +440,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = $variable_product->get_matching_variation( wp_unslash( $_POST ) );
+		$variation_id = wc_find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );
@@ -2067,7 +2067,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Bulk action - Set Stock.
+	 * Bulk action - Set Stock. @todo CRUDIFY ALL THESE ACTIONS
 	 * @access private
 	 * @used-by bulk_edit_variations
 	 * @param  array $variations

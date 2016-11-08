@@ -21,77 +21,47 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since  2.7.0 this supports set, increase and decrease.
  * @param  int|WC_Product $product
  * @param  int|null $stock_quantity
- * @param  string $operation set, add, or subtract
+ * @param  string $operation set, increase and decrease.
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	if ( ! is_null( $stock_quantity ) ) {
-		// Find product that needs a stock reduction.
-		$product = wc_get_product( $product );
+	global $wpdb;
 
-		if ( ! $product->managing_stock( 'edit' ) && $product->get_parent_id( 'edit' ) ) {
-			$product = wc_get_product( $product->get_parent_id( 'edit' ) );
-		}
+	$product = wc_get_product( $product );
 
-		if ( ! $product->managing_stock( 'edit' ) ) {
-			return new WP_Error( 'error', __( 'Product is not stock managed', 'woocommerce' ) );
-		}
+	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
+		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
+		$product_id_with_stock = $product->get_stock_managed_by_id();
+		$product_with_stock    = $product->get_id() !== $product_id_with_stock ? wc_get_product( $product_id_with_stock ) : $product;
 
-		// Ensure key exists
-		add_post_meta( $product->get_id(), '_stock', 0, true );
+		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
 		// Update stock in DB directly
 		switch ( $operation ) {
-			case 'add' :
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product->get_id() ) );
-			break;
-			case 'subtract' :
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product->get_id() ) );
-			break;
+			case 'increase' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
+			case 'decrease' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
 			default :
-				if ( $product->get_stock_quantity( 'edit' ) !== $stock_quantity ) {
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product->get_id() ) );
-				}
-			break;
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
 		}
 
-		wp_cache_delete( $product->get_id(), 'post_meta' );
+		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
 
-		// Re-read product data.
-		$product->read( $product->get_id() );
+		// Re-read product data after updating stock, then have stock status calculated and saved.
+		$product_with_stock->read( $product_with_stock->get_id() );
+		$product_with_stock->set_stock_status();
+		$product_with_stock->save();
 
-		// Check stock status.
-		wc_check_product_stock_status( $product );
+		do_action( $product_with_stock->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock', $product_with_stock );
 
-		// Actions
-		do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock', $product );
+		return $product_with_stock->get_stock_quantity();
 	}
-
-	return $product->get_stock_quantity( 'edit' );
-}
-
-/**
- * Check if the stock status needs changing.
- * @since 2.7.0
- * @param int|WC_Product $product
- */
-function wc_check_product_stock_status( $product ) {
-	$product = wc_get_product( $product );
-
-	if ( $product->managing_stock( 'edit' ) ) {
-		if ( $product->backorders_allowed( 'edit' ) && 'instock' !== $product->get_stock_status( 'edit' ) ) {
-			$product->set_stock_status( 'instock' );
-
-		} elseif ( $product->get_stock_quantity( 'edit' ) <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$product->set_stock_status( 'outofstock' );
-
-		} elseif ( $product->get_stock_quantity( 'edit' ) > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$product->set_stock_status( 'instock' );
-		}
-	}
-
-	$product->save();
+	return $product->get_stock_quantity();
 }
 
 /**

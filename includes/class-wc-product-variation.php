@@ -66,6 +66,15 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * If the stock level comes from another product ID.
+	 * @since  2.7.0
+	 * @return int
+	 */
+	public function get_stock_managed_by_id() {
+		return 'parent' === $this->get_manage_stock() ? $this->get_parent_id() : $this->get_id();
+	}
+
+	/**
 	 * Get variation attribute values.
 	 *
 	 * @return array of attributes and their values for this variation
@@ -117,60 +126,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['sku'];
 		}
-
-		return $value;
-	}
-
-	/**
-	 * Return if product manage stock.
-	 *
-	 * @since 2.7.0
-	 * @param  string $context
-	 * @return boolean
-	 */
-	public function get_manage_stock( $context = 'view' ) {
-		$value = $this->get_prop( 'manage_stock', $context );
-
-		// Inherit value from parent.
-		if ( 'view' === $context && false === $value ) {
-			$value = wc_string_to_bool( $this->parent_data['manage_stock'] );
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Returns number of items available for sale.
-	 *
-	 * @param  string $context
-	 * @return int|null
-	 */
-	public function get_stock_quantity( $context = 'view' ) {
-		$value = $this->get_prop( 'stock_quantity', $context );
-
-		// Inherit value from parent.
-		if ( 'view' === $context && false === $this->get_manage_stock( 'edit' ) && true === $this->get_manage_stock( 'view' ) ) {
-			$value = $this->parent_data['stock_quantity'];
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Get backorders.
-	 *
-	 * @param  string $context
-	 * @since 2.7.0
-	 * @return string yes no or notify
-	 */
-	public function get_backorders( $context = 'view' ) {
-		$value = $this->get_prop( 'backorders', $context );
-
-		// Inherit value from parent.
-		if ( 'view' === $context && false === $this->get_manage_stock( 'edit' ) && true === $this->get_manage_stock( 'view' ) ) {
-			$value = $this->parent_data['backorders'];
-		}
-
 		return $value;
 	}
 
@@ -187,7 +142,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['weight'];
 		}
-
 		return $value;
 	}
 
@@ -204,7 +158,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['length'];
 		}
-
 		return $value;
 	}
 
@@ -221,7 +174,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['width'];
 		}
-
 		return $value;
 	}
 
@@ -238,7 +190,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['height'];
 		}
-
 		return $value;
 	}
 
@@ -255,7 +206,56 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = $this->parent_data['tax_class'];
 		}
+		return $value;
+	}
 
+	/**
+	 * Return if product manage stock.
+	 *
+	 * @since 2.7.0
+	 * @param  string $context
+	 * @return boolean|string true, false, or parent.
+	 */
+	public function get_manage_stock( $context = 'view' ) {
+		$value = $this->get_prop( 'manage_stock', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && false === $value && true === wc_string_to_bool( $this->parent_data['manage_stock'] ) ) {
+			$value = 'parent';
+		}
+		return $value;
+	}
+
+	/**
+	 * Returns number of items available for sale.
+	 *
+	 * @param  string $context
+	 * @return int|null
+	 */
+	public function get_stock_quantity( $context = 'view' ) {
+		$value = $this->get_prop( 'stock_quantity', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
+			$value = $this->parent_data['stock_quantity'];
+		}
+		return $value;
+	}
+
+	/**
+	 * Get backorders.
+	 *
+	 * @param  string $context
+	 * @since 2.7.0
+	 * @return string yes no or notify
+	 */
+	public function get_backorders( $context = 'view' ) {
+		$value = $this->get_prop( 'backorders', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
+			$value = $this->parent_data['backorders'];
+		}
 		return $value;
 	}
 
@@ -511,24 +511,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	| Conditionals
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Returns whether or not the product has enough stock for the order.
-	 *
-	 * @param mixed $quantity
-	 * @return bool
-	 */
-	public function has_enough_stock( $quantity ) {
-		// Check at variation level.
-		if ( $this->managing_stock() ) {
-			return $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
-
-		// Check at parent level.
-		} elseif ( 'yes' === $this->parent_data['manage_stock'] ) {
-			$parent = wc_get_product( $this->get_parent_id() );
-			return $parent->has_enough_stock( $quantity ); // @todo
-		}
-	}
 
 	/**
 	 * Returns false if the product cannot be bought.

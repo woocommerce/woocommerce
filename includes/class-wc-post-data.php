@@ -39,7 +39,6 @@ class WC_Post_Data {
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
-		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
 	}
 
 	/**
@@ -171,12 +170,9 @@ class WC_Post_Data {
 	 * @param  int $object_id
 	 * @param  string $meta_key
 	 * @param  mixed $meta_value
+	 * @deprecated
 	 */
-	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {
-		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) && get_post_meta( $object_id, $meta_key, true ) !== $meta_value ) {
-			wc_check_product_stock_status( $object_id );
-		}
-	}
+	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {}
 
 	/**
 	 * Forces the order posts to have a title in a certain format (containing the date).

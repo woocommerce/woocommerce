@@ -173,7 +173,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function reduce_stock( $amount = 1 ) {
 		_deprecated_function( 'WC_Product::reduce_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'subtract' );
+		wc_update_product_stock( $this, $amount, 'decrease' );
 	}
 
 	/**
@@ -185,17 +185,16 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function increase_stock( $amount = 1 ) {
 		_deprecated_function( 'WC_Product::increase_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'add' );
+		wc_update_product_stock( $this, $amount, 'increase' );
 	}
 
 	/**
 	 * Check if the stock status needs changing.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 2.7.0 Sync is done automatically on read/save, so calling this should not be needed any more.
 	 */
 	public function check_stock_status() {
-		_deprecated_function( 'WC_Product::check_stock_status', '2.7', 'wc_check_product_stock_status' );
-		wc_check_product_stock_status( $this );
+		_deprecated_function( 'WC_Product::check_stock_status', '2.7' );
 	}
 
 	/**
@@ -607,5 +606,61 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 		// Re-load prices
 		$this->read_product_data();
+	}
+
+	/**
+	 * Sync the variable product's attributes with the variations.
+	 */
+	public static function sync_attributes( $product_id, $children = false ) {
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
+		 */
+		if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
+			$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
+
+			if ( ! $children ) {
+				$children = get_posts( array(
+					'post_parent' 	 => $product_id,
+					'posts_per_page' => -1,
+					'post_type' 	 => 'product_variation',
+					'fields' 		 => 'ids',
+					'post_status'	 => 'any',
+				) );
+			}
+
+			foreach ( $children as $child_id ) {
+				$all_meta = get_post_meta( $child_id );
+
+				foreach ( $all_meta as $name => $value ) {
+					if ( 0 !== strpos( $name, 'attribute_' ) ) {
+						continue;
+					}
+					if ( sanitize_title( $value[0] ) === $value[0] ) {
+						foreach ( $parent_attributes as $attribute ) {
+							if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
+								continue;
+							}
+							$text_attributes = wc_get_text_attributes( $attribute['value'] );
+							foreach ( $text_attributes as $text_attribute ) {
+								if ( sanitize_title( $text_attribute ) === $value[0] ) {
+									update_post_meta( $child_id, $name, $text_attribute );
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Match a variation to a given set of attributes using a WP_Query.
+	 * @deprecated 2.7.0 in favour of wc_find_matching_product_variation.
+	 */
+	public function get_matching_variation( $match_attributes = array() ) {
+		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'wc_find_matching_product_variation' );
+		return wc_find_matching_product_variation( $this, $match_attributes );
 	}
 }
