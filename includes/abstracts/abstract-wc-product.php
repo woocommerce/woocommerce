@@ -1451,7 +1451,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_backorders( 'no' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
 		// If the stock level is changing and we do now have enough, force in stock status.
