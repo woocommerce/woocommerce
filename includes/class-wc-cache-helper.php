@@ -165,7 +165,6 @@ class WC_Cache_Helper {
 
 	/**
 	 * Prevent caching on dynamic pages.
-	 * @access public
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
@@ -177,7 +176,7 @@ class WC_Cache_Helper {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach ( $wc_page_uris as $uri ) {
-				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
+				if ( stristr( trailingslashit( $_SERVER['REQUEST_URI'] ), $uri ) ) {
 					self::nocache();
 					break;
 				}
