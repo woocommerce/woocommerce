@@ -158,6 +158,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.8 - xx/11/16 =
+* Fix - REQUEST_URI missing trailing slash while comparing for prevent caching.
+* Tweak - New extensions screen.
+
 = 2.6.7 - 26/10/16 =
 * Fix - Use FLOOR and CEIL to get price filter values. Fixes the issue where max price is capped at 99.
 * Fix - Hide "Sales this month" information from Dashboard widget for users that don't have `view_woocommerce_reports` capability.
