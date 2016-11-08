@@ -28,10 +28,36 @@ abstract class WC_Data {
 	protected $data = array();
 
 	/**
+	 * Core data changes for this object.
+	 * @var array
+	 */
+	protected $changes = array();
+
+	/**
+	 * This is false until the object is read from the DB.
+	 * @var bool
+	 */
+	protected $object_read = false;
+
+	/**
+	 * Extra data for this object. Name value pairs (name + default value).
+	 * Used as a standard way for sub classes (like product types) to add
+	 * additional information to an inherited class.
+	 * @var array
+	 */
+	protected $extra_data = array();
+
+	/**
 	 * Set to _data on construct so we can track and reset data if needed.
 	 * @var array
 	 */
 	protected $default_data = array();
+
+	/**
+	 * Contains a reference to the data store for this class.
+	 * @var object
+	 */
+	protected $data_store;
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -84,30 +110,29 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Creates new object in the database.
-	 */
-	public function create() {}
-
-	/**
-	 * Read object from the database.
-	 * @param int ID of the object to load.
-	 */
-	public function read( $id ) {}
-
-	/**
 	 * Updates object data in the database.
 	 */
-	public function update() {}
-
-	/**
-	 * Updates object data in the database.
-	 */
-	public function delete() {}
+	public function delete( $force_delete = false ) {
+		if ( $this->data_store ) {
+			$this->data_store->delete( $this, $force_delete );
+		}
+	}
 
 	/**
 	 * Save should create or update based on object existance.
+	 *
+	 * @return int
 	 */
-	public function save() {}
+	public function save() {
+		if ( $this->data_store ) {
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
+			return $this->get_id();
+		}
+	}
 
 	/**
 	 * Change data to JSON format.
@@ -123,6 +148,26 @@ abstract class WC_Data {
 	 */
 	public function get_data() {
 		return array_merge( array( 'id' => $this->get_id() ), $this->data, array( 'meta_data' => $this->get_meta_data() ) );
+	}
+
+	/**
+	 * Returns array of expected data keys for this object.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_data_keys() {
+		return array_keys( $this->data );
+	}
+
+	/**
+	 * Returns all "extra" data keys for an object (for sub objects like product types).
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_extra_data_keys() {
+		return array_keys( $this->extra_data );
 	}
 
 	/**
@@ -400,12 +445,23 @@ abstract class WC_Data {
 	/**
 	 * Set all props to default values.
 	 */
-	protected function set_defaults() {
-		$this->data = $this->default_data;
+	public function set_defaults() {
+		$this->data        = $this->default_data;
+		$this->changes     = array();
+		$this->set_object_read( false );
+ 	}
+
+	/**
+	 * Set object read property.
+	 * @param boolean $read
+	 */
+	public function set_object_read( $read = true ) {
+		$this->object_read = (bool) $read;
 	}
 
 	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
+	 * Only sets using public methods.
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
@@ -419,7 +475,11 @@ abstract class WC_Data {
 				}
 				$setter = "set_$prop";
 				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
-					$this->{$setter}( $value );
+					$reflection = new ReflectionMethod( $this, $setter );
+
+					if ( $reflection->isPublic() ) {
+						$this->{$setter}( $value );
+					}
 				}
 			} catch ( WC_Data_Exception $e ) {
 				$errors->add( $e->getErrorCode(), $e->getMessage() );
@@ -427,6 +487,80 @@ abstract class WC_Data {
 		}
 
 		return sizeof( $errors->get_error_codes() ) ? $errors : true;
+	}
+
+	/**
+	 * Sets a prop for a setter method.
+	 *
+	 * This stores changes in a special array so we can track what needs saving
+	 * the the DB later.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param mixed  $value Value of the prop.
+	 */
+	protected function set_prop( $prop, $value ) {
+		if ( array_key_exists( $prop, $this->data ) ) {
+			if ( true === $this->object_read ) {
+				$this->changes[ $prop ] = $value;
+			} else {
+				$this->data[ $prop ] = $value;
+			}
+		}
+	}
+
+	/**
+	 * Return data changes only.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	protected function get_changes() {
+		return $this->changes;
+	}
+
+	/**
+	 * Merge changes with data and clear.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function apply_changes() {
+		$this->data = array_merge( $this->data, $this->changes );
+		$this->changes = array();
+	}
+
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_';
+	}
+
+	/**
+	 * Gets a prop for a getter method.
+	 *
+	 * Gets the value from either current pending changes, or the data itself.
+	 * Context controls what happens to the value before it's returned.
+	 *
+	 * @since  2.7.0
+	 * @param  string $prop Name of prop to get.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return mixed
+	 */
+	public function get_prop( $prop, $context = 'view' ) {
+		$value = null;
+
+		if ( array_key_exists( $prop, $this->data ) ) {
+			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+		return $value;
 	}
 
 	/**

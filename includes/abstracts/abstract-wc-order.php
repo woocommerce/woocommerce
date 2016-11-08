@@ -272,7 +272,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Delete data from the database.
 	 * @since 2.7.0
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		wp_delete_post( $this->get_id() );
 	}
 

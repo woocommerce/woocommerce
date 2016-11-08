@@ -164,7 +164,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	/**
 	 * Simple delete.
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		if ( 'user' === $this->meta_type ) {
 			wp_delete_user( $this->get_id() );
 		} else {

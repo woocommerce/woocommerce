@@ -249,7 +249,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * Delete data from the database.
 	 * @since 2.7.0
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		if ( $this->get_id() ) {
 			global $wpdb;
 			do_action( 'woocommerce_before_delete_order_item', $this->get_id() );

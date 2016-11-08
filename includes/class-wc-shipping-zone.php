@@ -107,7 +107,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * Delete a zone.
 	 * @since 2.6.0
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		if ( $this->get_id() ) {
 			global $wpdb;
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'zone_id' => $this->get_id() ) );

@@ -1176,7 +1176,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Delete a customer.
 	 * @since 2.7.0
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		if ( ! $this->get_id() ) {
 			return;
 		}

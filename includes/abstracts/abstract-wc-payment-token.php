@@ -277,7 +277,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * Remove a payment token from the database.
 	 * @since 2.6.0
 	 */
-	public function delete() {
+	public function delete( $force_delete = false ) {
 		global $wpdb;
 		$this->read( $this->get_id() ); // Make sure we have a token to return after deletion
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $this->get_id() ), array( '%d' ) );

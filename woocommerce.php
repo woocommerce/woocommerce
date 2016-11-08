@@ -268,7 +268,6 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class
 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class
 		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
@@ -284,6 +283,10 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations
 		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper
 		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper
+
+		include_once( WC_ABSPATH . 'includes/class-wc-data-store.php' ); // WC_Data_Store for CRUD
+		include_once( WC_ABSPATH . 'includes/data-stores/interface-wc-object-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
