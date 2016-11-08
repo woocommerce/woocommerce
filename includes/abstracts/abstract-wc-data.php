@@ -465,7 +465,7 @@ abstract class WC_Data {
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
-	public function set_props( $props, $context = 'set' ) {
+	public function set_props( $props ) {
 		$errors = new WP_Error();
 
 		foreach ( $props as $prop => $value ) {
