@@ -1293,21 +1293,16 @@ function wc_products_array_orderby_price( $a, $b ) {
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
 }
 
-
-
-
-
-/*
- * Match a variation to a given set of attributes using a WP_Query.
- * @since  2.4.0
- * @param  $match_attributes
- * @return int Variation ID which matched, 0 is no match was found
- *
-public function get_matching_variation( $match_attributes = array() ) {
-	global $wpdb;
-
+/**
+ * Find a matching (enabled) variation within a variable product.
+ * @since  2.7.0
+ * @param  WC_Product $product Variable product.
+ * @param  array $match_attributes Array of attributes we want to try to match.
+ * @return int Matching variation ID or 0.
+ */
+function wc_find_matching_product_variation( $product, $match_attributes = array() ) {
 	$query_args = array(
-		'post_parent' => $this->get_id(),
+		'post_parent' => $product->get_id(),
 		'post_type'   => 'product_variation',
 		'orderby'     => 'menu_order',
 		'order'       => 'ASC',
@@ -1317,12 +1312,15 @@ public function get_matching_variation( $match_attributes = array() ) {
 		'meta_query'  => array(),
 	);
 
-	foreach ( $this->get_attributes() as $attribute ) {
-		if ( ! $attribute['is_variation'] ) {
+	// Allow large queries in case user has many variations or attributes.
+	$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+
+	foreach ( $product->get_attributes() as $attribute ) {
+		if ( ! $attribute->get_variation() ) {
 			continue;
 		}
 
-		$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+		$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
 
 		if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
 			return 0;
@@ -1342,99 +1340,19 @@ public function get_matching_variation( $match_attributes = array() ) {
 				'compare' => 'NOT EXISTS',
 			)
 		);
-
 	}
 
-	// Allow large queries in case user has many variations
-	$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+	$variations = get_posts( $query_args );
 
-	$matches = get_posts( $query_args );
-
-	if ( $matches && ! is_wp_error( $matches ) ) {
-		return current( $matches );
-
-	/*
-	 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-	 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
-	 *
- } elseif ( version_compare( get_post_meta( $this->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
-		return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
-
-	} else {
-		return 0;
+	if ( $variations && ! is_wp_error( $variations ) ) {
+		return current( $variations );
+ 	} elseif ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
+		 */
+		return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : wc_find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
 	}
+
+	return 0;
 }
-
-
-/*
- * Sync the variable product's attributes with the variations.
- *
-public static function sync_attributes( $product_id, $children = false ) {
-	/*
-	 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-	 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
-	 *
-	if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
-		$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
-
-		if ( ! $children ) {
-			$children = get_posts( array(
-				'post_parent' 	 => $product_id,
-				'posts_per_page' => -1,
-				'post_type' 	 => 'product_variation',
-				'fields' 		 => 'ids',
-				'post_status'	 => 'any',
-			) );
-		}
-
-		foreach ( $children as $child_id ) {
-			$all_meta = get_post_meta( $child_id );
-
-			foreach ( $all_meta as $name => $value ) {
-				if ( 0 !== strpos( $name, 'attribute_' ) ) {
-					continue;
-				}
-				if ( sanitize_title( $value[0] ) === $value[0] ) {
-					foreach ( $parent_attributes as $attribute ) {
-						if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
-							continue;
-						}
-						$text_attributes = wc_get_text_attributes( $attribute['value'] );
-						foreach ( $text_attributes as $text_attribute ) {
-							if ( sanitize_title( $text_attribute ) === $value[0] ) {
-								update_post_meta( $child_id, $name, $text_attribute );
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-
-/*
- * Performed after a stock level change at product level.
- *
-public function check_stock_status() {
-	$set_child_stock_status = '';
-
-	if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-		$set_child_stock_status = 'outofstock';
-	} elseif ( $this->backorders_allowed() || $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-		$set_child_stock_status = 'instock';
-	}
-
-	if ( $set_child_stock_status ) {
-		foreach ( $this->get_children() as $child_id ) {
-			if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-				wc_update_product_stock_status( $child_id, $set_child_stock_status );
-			}
-		}
-
-		// Children statuses changed, so sync self
-		self::sync_stock_status( $this->get_id() );
-	}
-}
-*/

@@ -669,9 +669,12 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
+		$children = $product->get_visible_children( 'edit' );
+
 		self::sync_price( $product );
 		self::sync_stock_status( $product, $saving );
-		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $saving );
+		self::sync_attributes( $product->get_id(), $children ); // Legacy
+		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $children, $saving );
 	}
 
 	/**
