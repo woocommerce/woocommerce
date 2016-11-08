@@ -27,8 +27,7 @@ class WC_Data_Store {
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
 	 */
-	private $stores = array(
-	);
+	private $stores = array();
 
 	/**
 	 * Contains the name of the current data store's class name.

@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Data_Store_CPT  {
-
+class WC_Data_Store_CPT {
 
 }

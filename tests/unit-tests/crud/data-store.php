@@ -62,7 +62,7 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'WC_Dummy_Data_Store_CPT', $store->get_current_class_name() );
 	}
 
-	// Helper Functions
+	/* Helper Functions. */
 
 	/**
 	 * Loads two dummy data store classes that can be swapt out for each other. Adds to the `woocommerce_data_stores` filter.
