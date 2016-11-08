@@ -340,9 +340,10 @@ class WC_Admin_Assets {
 			);
 		}
 
-		// System status
+		// System status.
 		if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
-			wp_enqueue_script( 'zeroclipboard' );
+			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'zeroclipboard' ), WC_VERSION );
+			wp_enqueue_script( 'wc-admin-system-status' );
 		}
 
 		if ( in_array( $screen_id, array( 'user-edit', 'profile' ) ) ) {
