@@ -678,11 +678,8 @@ class WC_AJAX {
 		$available_variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
-			$child = $product->get_child( $child_id );
-
-			if ( ! empty( $child->variation_id ) ) {
-				$available_variations[] = $child->get_attributes();
-			}
+			$child                  = wc_get_product( $child_id );
+			$available_variations[] = $child->get_attributes();
 		}
 
 		// Created posts will all have the following data
