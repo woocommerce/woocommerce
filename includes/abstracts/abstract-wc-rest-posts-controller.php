@@ -133,15 +133,6 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get post types.
-	 *
-	 * @return array
-	 */
-	protected function get_post_types() {
-		return array( $this->post_type );
-	}
-
-	/**
 	 * Get a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -151,7 +142,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
 			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -256,7 +247,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
@@ -415,7 +406,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$force = (bool) $request['force'];
 		$post  = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 

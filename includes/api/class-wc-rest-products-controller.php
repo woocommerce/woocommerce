@@ -113,15 +113,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get post types.
-	 *
-	 * @return array
-	 */
-	protected function get_post_types() {
-		return array( 'product', 'product_variation' );
-	}
-
-	/**
 	 * Query args.
 	 *
 	 * @param array $args
@@ -229,7 +220,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Force the post_type argument, since it's not a user input variable.
 		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = $this->get_post_types();
+			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
 		}
@@ -1795,7 +1786,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$force = (bool) $request['force'];
 		$post  = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
