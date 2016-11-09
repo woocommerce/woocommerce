@@ -137,6 +137,10 @@ class WC_Install {
 	public static function install() {
 		global $wpdb;
 
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( ! defined( 'WC_INSTALLING' ) ) {
 			define( 'WC_INSTALLING', true );
 		}
