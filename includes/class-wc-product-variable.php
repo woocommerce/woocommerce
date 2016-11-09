@@ -209,7 +209,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Variable products themselves cammpt be virtual.
+	 * Variable products themselves cannot be virtual.
 	 */
 	public function get_virtual( $context = 'view' ) {
 		return false;

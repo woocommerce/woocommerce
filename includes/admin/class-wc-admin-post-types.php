@@ -352,11 +352,11 @@ class WC_Admin_Post_Types {
 				echo $the_product->get_sku() ? $the_product->get_sku() : '<span class="na">&ndash;</span>';
 				break;
 			case 'product_type' :
-				if ( 'grouped' == $the_product->get_type() ) {
+				if ( $the_product->is_type( 'grouped' ) ) {
 					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
-				} elseif ( 'external' == $the_product->get_type() ) {
+				} elseif ( $the_product->is_type( 'external' ) ) {
 					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-				} elseif ( 'simple' == $the_product->get_type() ) {
+				} elseif ( $the_product->is_type( 'simple' ) ) {
 
 					if ( $the_product->is_virtual() ) {
 						echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
@@ -365,7 +365,7 @@ class WC_Admin_Post_Types {
 					} else {
 						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
 					}
-				} elseif ( 'variable' == $the_product->get_type() ) {
+				} elseif ( $the_product->is_type( 'variable' ) ) {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future

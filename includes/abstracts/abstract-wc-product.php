@@ -1609,7 +1609,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
-		if ( in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
+		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
 			if ( $this->is_on_sale() ) {
 				update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
 			} else {
