@@ -88,11 +88,14 @@ function wc_get_products( $args ) {
 		'post_status'    => $args['status'],
 		'posts_per_page' => $args['limit'],
 		'meta_query'     => array(),
-		'fields'         => 'ids',
 		'orderby'        => $args['orderby'],
 		'order'          => $args['order'],
 		'tax_query'      => array(),
 	);
+	// Do not load unneccessary post data if the user only wants IDs.
+	if ( 'ids' === $args['return'] ) {
+		$wp_query_args['fields'] = 'ids';
+	}
 
 	if ( 'variation' !== $args['type'] ) {
 		$wp_query_args['tax_query'][] = array(
