@@ -171,6 +171,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
+	 * Get all class data in array format.
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge(
+			array(
+				'id' => $this->get_id(),
+			),
+			$this->data,
+			array(
+				'meta_data' => $this->get_meta_data(),
+			)
+		);
+	}
+
+	/**
 	 * Get product name.
 	 *
 	 * @since 2.7.0
@@ -893,15 +910,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $status New status.
 	 */
 	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
-
-		if ( $this->managing_stock() ) {
-			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$status = 'outofstock';
-			}
-		}
-
-		$this->set_prop( 'stock_status', $status );
+		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
 	}
 
 	/**
@@ -1030,7 +1039,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
 	 */
 	public function set_attributes( $raw_attributes ) {
-		$attributes = array_fill_keys( array_keys( $this->data['attributes'] ), null );
+		$attributes = array_fill_keys( array_keys( $this->get_attributes( 'edit' ) ), null );
 		foreach ( $raw_attributes as $attribute ) {
 			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
@@ -1289,16 +1298,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'menu_order'        => $post_object->menu_order,
 			'reviews_allowed'   => 'open' === $post_object->comment_status,
 		) );
-		$this->read_product_data();
 		$this->read_meta_data();
 		$this->read_attributes();
+		$this->read_product_data();
 
 		// Set object_read true once all data is read.
 		$this->set_object_read( true );
 	}
 
 	/**
-	 * Read post data. Can be overridden by child classes to load other props.
+	 * Read product data. Can be overridden by child classes to load other props.
 	 *
 	 * @since 2.7.0
 	 */
@@ -1310,6 +1319,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'sku'                => get_post_meta( $id, '_sku', true ),
 			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
 			'sale_price'         => get_post_meta( $id, '_sale_price', true ),
+			'price'              => get_post_meta( $id, '_price', true ),
 			'date_on_sale_from'  => get_post_meta( $id, '_sale_price_dates_from', true ),
 			'date_on_sale_to'    => get_post_meta( $id, '_sale_price_dates_to', true ),
 			'total_sales'        => get_post_meta( $id, 'total_sales', true ),
@@ -1339,12 +1349,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
-
-		if ( $this->is_on_sale() ) {
-			$this->set_price( $this->get_sale_price() );
-		} else {
-			$this->set_price( $this->get_regular_price() );
-		}
 	}
 
 	/**
@@ -1437,22 +1441,87 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Ensure properties are set correctly before save.
+	 * @since 2.7.0
+	 */
+	public function validate_props() {
+		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		if ( ! $this->get_manage_stock() ) {
+			$this->set_stock_quantity( '' );
+			$this->set_backorders( 'no' );
+
+		// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) && 'no' === $this->get_backorders() ) {
+			$this->set_stock_status( 'outofstock' );
+
+		// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			$this->set_stock_status( 'instock' );
+		}
+	}
+
+	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
 	 * @since 2.7.0
 	 */
 	public function save() {
-		parent::save();
+		$this->validate_props();
 
-		// Make sure we store the product type.
-		$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
-		wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
+		if ( $this->get_id() ) {
+			$this->update();
+		} else {
+			$this->create();
+		}
 
-		// Version is set to current WC version to track data changes.
-		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
-		wc_delete_product_transients( $this->get_id() );
+		$this->apply_changes();
+		$this->update_product_type();
+		$this->update_product_version();
+		$this->update_term_counts();
+		$this->clear_caches();
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Make sure we store the product type.
+	 */
+	protected function update_product_type() {
+		if ( 'product' === $this->post_type ) {
+			$type_term = get_term_by( 'name', $this->get_type(), 'product_type' );
+			wp_set_object_terms( $this->get_id(), absint( $type_term->term_id ), 'product_type' );
+		}
+	}
+
+	/**
+	 * Version is set to current WC version to track data changes.
+	 */
+	protected function update_product_version() {
+		update_post_meta( $this->get_id(), '_product_version', WC_VERSION );
+	}
+
+	/**
+	 * Count terms. These are done at this point so all product props are set in advance.
+	 */
+	protected function update_term_counts() {
+		if ( ! wp_defer_term_counting() ) {
+			global $wc_allow_term_recount;
+
+			$wc_allow_term_recount = true;
+
+			// Update counts for the post's terms.
+			foreach ( (array) get_object_taxonomies( $this->post_type ) as $taxonomy ) {
+				$tt_ids = wp_get_object_terms( $this->get_id(), $taxonomy, array( 'fields' => 'tt_ids' ) );
+				wp_update_term_count( $tt_ids, $taxonomy );
+			}
+		}
+	}
+
+	/**
+	 * Clear any caches.
+	 */
+	protected function clear_caches() {
+		wc_delete_product_transients( $this->get_id() );
 	}
 
 	/**
@@ -1515,6 +1584,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			switch ( $prop ) {
 				case 'virtual' :
 				case 'downloadable' :
+				case 'manage_stock' :
+				case 'featured' :
+				case 'sold_individually' :
 					$updated = update_post_meta( $this->get_id(), $meta_key, wc_bool_to_string( $value ) );
 					break;
 				case 'gallery_image_ids' :
@@ -1537,14 +1609,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
-		if ( $this->is_on_sale() ) {
-			update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
-		} else {
-			update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
+		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
+			if ( $this->is_on_sale() ) {
+				update_post_meta( $this->get_id(), '_price', $this->get_sale_price() );
+			} else {
+				update_post_meta( $this->get_id(), '_price', $this->get_regular_price() );
+			}
 		}
 
 		if ( in_array( 'featured', $updated_props ) ) {
 			delete_transient( 'wc_featured_products' );
+		}
+
+		if ( in_array( 'catalog_visibility', $updated_props ) ) {
+			do_action( 'woocommerce_product_set_visibility',  $this->get_id(), $this->get_catalog_visibility() );
 		}
 
 		if ( in_array( 'downloads', $updated_props ) ) {
@@ -1571,9 +1649,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function update_terms() {
-		wp_set_post_terms( $this->get_id(), $this->data['category_ids'], 'product_cat', false );
-		wp_set_post_terms( $this->get_id(), $this->data['tag_ids'], 'product_tag', false );
-		wp_set_post_terms( $this->get_id(), array( $this->data['shipping_class_id'] ), 'product_shipping_class', false );
+		wp_set_post_terms( $this->get_id(), $this->get_category_ids( 'edit' ), 'product_cat', false );
+		wp_set_post_terms( $this->get_id(), $this->get_tag_ids( 'edit' ), 'product_tag', false );
+		wp_set_post_terms( $this->get_id(), array( $this->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 	}
 
 	/**
@@ -1663,7 +1741,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_downloadable() {
-		return apply_filters( 'woocommerce_is_downloadable', true === $this->data['downloadable'] , $this );
+		return apply_filters( 'woocommerce_is_downloadable', true === $this->get_downloadable(), $this );
 	}
 
 	/**
@@ -1672,7 +1750,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', true === $this->data['virtual'], $this );
+		return apply_filters( 'woocommerce_is_virtual', true === $this->get_virtual(), $this );
 	}
 
 	/**
@@ -1718,7 +1796,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_purchasable() {
-		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && $this->is_in_stock() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
 	}
 
 	/**
@@ -1803,7 +1881,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function managing_stock() {
-		return $this->get_manage_stock() && 'yes' === get_option( 'woocommerce_manage_stock' );
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			return $this->get_manage_stock();
+		}
+		return false;
 	}
 
 	/**
@@ -1841,7 +1922,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
 	}
 
 	/**
@@ -1900,8 +1981,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * If the stock level comes from another product ID, this should be modified.
+	 * @since  2.7.0
+	 * @return int
+	 */
+	public function get_stock_managed_by_id() {
+		return $this->get_id();
+	}
+
+	/**
 	 * Returns the price in html format.
-	 * @todo Should this be moved out of the classes?
 	 * @return string
 	 */
 	public function get_price_html( $deprecated = '' ) {
@@ -1910,7 +1999,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( $this->is_on_sale() ) {
-			$price = wc_format_price_range( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
 		} else {
 			$price = wc_price( wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
 		}

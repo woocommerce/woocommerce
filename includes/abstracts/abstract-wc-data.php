@@ -479,7 +479,9 @@ abstract class WC_Data {
 	protected function set_prop( $prop, $value ) {
 		if ( array_key_exists( $prop, $this->data ) ) {
 			if ( true === $this->object_read ) {
-				$this->changes[ $prop ] = $value;
+				if ( $value !== $this->data[ $prop ] || array_key_exists( $prop, $this->changes ) ) {
+					$this->changes[ $prop ] = $value;
+				}
 			} else {
 				$this->data[ $prop ] = $value;
 			}

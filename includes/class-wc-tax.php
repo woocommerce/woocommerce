@@ -328,7 +328,6 @@ class WC_Tax {
 	 * 		- State code
 	 * @param  array $rates
 	 * @return array
-	 * @todo   remove tax_rate_order column
 	 */
 	private static function sort_rates( $rates ) {
 		uasort( $rates, __CLASS__ . '::sort_rates_callback' );

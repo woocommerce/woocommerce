@@ -148,7 +148,6 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the product ID
 	 * @param array $data
 	 * @return array
@@ -166,7 +165,6 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
@@ -268,7 +266,7 @@ class WC_API_Products extends WC_API_Resource {
 	private function get_product_data( $product ) {
 		return array(
 			'title'              => $product->get_name(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(), // @todo variation
+			'id'                 => $product->get_id(),
 			'created_at'         => $this->server->format_datetime( $product->get_date_created() ),
 			'updated_at'         => $this->server->format_datetime( $product->get_date_modified() ),
 			'type'               => $product->get_type(),

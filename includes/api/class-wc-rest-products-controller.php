@@ -1405,7 +1405,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		} else {
 			$variations = $request['variations'];
 		}
-		$attributes = $product->get_attributes();
+		$attributes = $product->get_variation_attributes();
 
 		foreach ( $variations as $menu_order => $variation ) {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;

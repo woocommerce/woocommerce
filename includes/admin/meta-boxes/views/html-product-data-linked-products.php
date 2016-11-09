@@ -4,7 +4,7 @@
 		<p class="form-field">
 			<label for="upsell_ids"><?php _e( 'Up-sells', 'woocommerce' ); ?></label>
 			<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-				$product_ids = $product_object->get_upsell_ids();
+				$product_ids = $product_object->get_upsell_ids( 'edit' );
 				$json_ids    = array();
 
 				foreach ( $product_ids as $product_id ) {
@@ -21,7 +21,7 @@
 		<p class="form-field">
 			<label for="crosssell_ids"><?php _e( 'Cross-sells', 'woocommerce' ); ?></label>
 			<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-				$product_ids = $product_object->get_cross_sell_ids();
+				$product_ids = $product_object->get_cross_sell_ids( 'edit' );
 				$json_ids    = array();
 
 				foreach ( $product_ids as $product_id ) {
@@ -38,7 +38,7 @@
 		<p class="form-field show_if_grouped">
 			<label for="grouped_products"><?php _e( 'Grouped products', 'woocommerce' ); ?></label>
 			<input type="hidden" class="wc-product-search" style="width: 50%;" id="grouped_products" name="grouped_products" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-exclude="<?php echo intval( $post->ID ); ?>" data-selected="<?php
-			$product_ids = $product_object->get_children();
+			$product_ids = $product_object->get_children( 'edit' );
 			$json_ids    = array();
 
 			foreach ( $product_ids as $product_id ) {

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <script type="text/template" id="tmpl-variation-template">
 	<div class="woocommerce-variation-description">
-		{{{ data.variation.variation_description }}}
+		{{{ data.variation.description }}}
 	</div>
 
 	<div class="woocommerce-variation-price">

@@ -695,7 +695,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
+		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
 		// Variable product handling
 		if ( 'variable' === $add_to_cart_handler ) {
@@ -801,7 +801,7 @@ class WC_Form_Handler {
 
 		// If no variation ID is set, attempt to get a variation ID from posted attributes.
 		if ( empty( $variation_id ) ) {
-			$variation_id = $adding_to_cart->get_matching_variation( wp_unslash( $_POST ) );
+			wc_find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
 		}
 
 		$variation = wc_get_product( $variation_id );
