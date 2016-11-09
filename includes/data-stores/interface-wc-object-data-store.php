@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  */
 interface WC_Object_Data_Store {
+
 	/**
 	 * Method to create a new record of a WC_Data based object.
 	 * @param WC_Data
@@ -34,5 +35,5 @@ interface WC_Object_Data_Store {
 	 * @param WC_Data
 	 * @param bool $force_delete True to permently delete, false to trash.
 	 */
-	public function delete( &$data, $force_delete );
+	public function delete( &$data, $force_delete = false );
 }
