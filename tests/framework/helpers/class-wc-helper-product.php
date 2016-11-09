@@ -75,6 +75,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
 		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
 		update_post_meta( $product, '_button_text', 'Buy external product' );
+		wp_set_object_terms( $product, 'external', 'product_type' );
 
 		return new WC_Product_External( $product );
 	}
@@ -103,6 +104,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
+		wp_set_object_terms( $product, 'grouped', 'product_type' );
 
 		return new WC_Product_Grouped( $product );
 	}
@@ -315,12 +317,12 @@ class WC_Helper_Product {
 	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
-		    'comment_author'       => 'admin',
-		    'comment_author_email' => 'woo@woo.local',
-		    'comment_author_url'   => '',
+			'comment_author'       => 'admin',
+			'comment_author_email' => 'woo@woo.local',
+			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
-		    'comment_content'      => $review_content,
-    		'comment_approved'     => 1,
+			'comment_content'      => $review_content,
+			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
 

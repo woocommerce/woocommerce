@@ -116,6 +116,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					);
 
 					woocommerce_wp_text_input( array(
+						'id'            => "variable_regular_price_{$loop}",
+						'name'          => "variable_regular_price[{$loop}]",
+						'value'         => wc_format_localized_price( $variation_object->get_regular_price( 'edit' ) ),
+						'label'         => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+						'data_type'     => 'price',
+						'wrapper_class' => 'form-row form-row-first',
+					) );
+
+					woocommerce_wp_text_input( array(
 						'id'            => "variable_sale_price{$loop}",
 						'name'          => "variable_sale_price[{$loop}]",
 						'value'         => wc_format_localized_price( $variation_object->get_sale_price( 'edit' ) ),

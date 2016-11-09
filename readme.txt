@@ -189,6 +189,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * CRUD - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
 * CRUD - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
 
+* CRUD - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
+* CRUD - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==

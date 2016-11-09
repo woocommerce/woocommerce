@@ -498,12 +498,16 @@
 
 		if ( variation && variation.image && variation.image.src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image.src );
-			$product_img.wc_set_variation_attr( 'title', variation.image.title );
-			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
+			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
+			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
 			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
-			$product_link.wc_set_variation_attr( 'href', variation.image.url );
-			$product_link.wc_set_variation_attr( 'title', variation.image.caption );
+			$product_img.wc_set_variation_attr( 'title', variation.image.title );
+			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
+			$product_img.wc_set_variation_attr( 'data-large-image', variation.image.full_src );
+			$product_img.wc_set_variation_attr( 'data-large-image-width', variation.image.full_src_w );
+			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image.full_src_h );
+			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
 		} else {
 			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
 			$product_img.wc_reset_variation_attr( 'large-image' );
