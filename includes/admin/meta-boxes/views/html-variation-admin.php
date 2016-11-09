@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
 					<option value=""><?php
 						/* translators: %s: attribute label */
-						echo sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute->get_name() ) ) ) )
+						echo sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute->get_name() ) ) );
 						?>&hellip;</option>
 					<?php if ( $attribute->is_taxonomy() ) : ?>
 						<?php foreach ( $attribute->get_terms() as $option ) : ?>
