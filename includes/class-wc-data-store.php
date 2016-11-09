@@ -27,8 +27,9 @@ class WC_Data_Store {
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
 	 */
-	private $stores = array();
-
+	private $stores = array(
+		'coupon' => 'WC_Coupon_Data_Store_CPT',
+	);
 	/**
 	 * Contains the name of the current data store's class name.
 	 */
@@ -125,6 +126,22 @@ class WC_Data_Store {
 	 */
 	public function delete( &$data, $force_delete = false ) {
 		$this->instance->delete( $data, $force_delete );
+	}
+
+	/**
+	 * Data stores can define additional functions (for example, coupons have
+	 * some helper methods for increasing or decreasing usage). This passes
+	 * through to the instance if that function exists.
+	 *
+	 * @since 2.7.0
+	 * @param $method
+	 * @param $parameters
+	 */
+	public function __call( $method, $parameters ) {
+		if ( is_callable( array( $this->instance, $method ) ) ) {
+			$object = array_shift( $parameters );
+			return call_user_func_array( array( $this->instance, $method ), array_merge( array( &$object ), $parameters ) );
+		}
 	}
 
 }

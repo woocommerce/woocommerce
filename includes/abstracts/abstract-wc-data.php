@@ -331,7 +331,7 @@ abstract class WC_Data {
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * @since 2.6.0
 	 */
-	protected function read_meta_data() {
+	public function read_meta_data() {
 		$this->meta_data = array();
 		$cache_loaded     = false;
 
@@ -379,7 +379,7 @@ abstract class WC_Data {
 	 * Update Meta Data in the database.
 	 * @since 2.6.0
 	 */
-	protected function save_meta_data() {
+	public function save_meta_data() {
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
@@ -515,7 +515,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 * @return array
 	 */
-	protected function get_changes() {
+	public function get_changes() {
 		return $this->changes;
 	}
 

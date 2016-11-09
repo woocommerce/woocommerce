@@ -25,6 +25,19 @@ function wc_string_to_bool( $string ) {
 }
 
 /**
+ * Converts a bool to a string.
+ * @since 2.7.0
+ * @param bool $bool
+ * @return string yes or no
+ */
+function wc_bool_to_string( $bool ) {
+	if ( ! is_bool( $bool ) ) {
+		$bool = wc_string_to_bool( $bool );
+	}
+	return true === $bool ? 'yes' : 'no';
+}
+
+/**
  * Explode a string into an array by $delimiter and remove empty values.
  * @since 2.7.0
  * @param string $string
@@ -295,6 +308,17 @@ function wc_format_localized_price( $value ) {
 function wc_format_localized_decimal( $value ) {
 	$locale = localeconv();
 	return str_replace( '.', $locale['decimal_point'], strval( $value ) );
+}
+
+/**
+ * Format a coupon code.
+ *
+ * @since  2.7.0
+ * @param  string $value
+ * @return string
+ */
+function wc_format_coupon_code( $value ) {
+	return apply_filters( 'woocommerce_coupon_code', $value );
 }
 
 /**
