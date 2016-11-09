@@ -1244,7 +1244,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array of terms
 	 */
 	protected function get_term_ids( $taxonomy ) {
-		return wp_get_post_terms( $this->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
+		$terms = get_the_terms( $this->get_id(), $taxonomy );
+		if ( false === $terms || is_wp_error( $terms ) ) {
+			return array();
+		}
+		return wp_list_pluck( $terms, 'term_id' );
 	}
 
 	/**
