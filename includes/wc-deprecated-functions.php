@@ -738,9 +738,7 @@ function woocommerce_get_product_schema() {
  *
  * This is a private function (internal use ONLY) used until a data manipulation api is built.
  *
- * @since 2.4.0
- * @todo  needed?
- *
+ * @deprecated 2.7.0
  * @param int $product_id
  * @param float $regular_price
  * @param float $sale_price
