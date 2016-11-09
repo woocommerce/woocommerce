@@ -198,6 +198,10 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Gets order total - formatted for display.
+	 *
+	 * @param  string $tax_display     Type of tax display.
+	 * @param  bool  $display_refunded If should include refunded value.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_order_total( $tax_display = '', $display_refunded = true ) {
@@ -206,7 +210,7 @@ class WC_Order extends WC_Abstract_Order {
 		$total_refunded = $this->get_total_refunded();
 		$tax_string     = '';
 
-		// Tax for inclusive prices
+		// Tax for inclusive prices.
 		if ( wc_tax_enabled() && 'incl' == $tax_display ) {
 			$tax_string_array = array();
 
@@ -231,12 +235,12 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		/**
-		 * Filter WooCommerce formatted order total
+		 * Filter WooCommerce formatted order total.
 		 *
-		 * @param string $formatted_total
-		 * @param $order,
-		 * @param string $tax_display,
-		 * @param bool $display_refunded
+		 * @param string   $formatted_total  Total to display.
+		 * @param WC_Order $order            Order data.
+		 * @param string   $tax_display      Type of tax display.
+		 * @param bool     $display_refunded If should include refunded value.
 		 */
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this, $tax_display, $display_refunded );
 	}
