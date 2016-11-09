@@ -230,7 +230,15 @@ class WC_Order extends WC_Abstract_Order {
 			$formatted_total .= $tax_string;
 		}
 
-		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
+		/**
+		 * Filter WooCommerce formatted order total
+		 *
+		 * @param string $formatted_total
+		 * @param $order,
+		 * @param string $tax_display,
+		 * @param bool $display_refunded
+		 */
+		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this, $tax_display, $display_refunded );
 	}
 
 	/*
