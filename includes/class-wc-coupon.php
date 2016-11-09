@@ -444,7 +444,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_code( $code ) {
-		$this->set_prop( 'code', apply_filters( 'woocommerce_coupon_code', $code ) );
+		$this->set_prop( 'code', wc_format_coupon_code( $code ) );
 	}
 
 	/**
@@ -537,7 +537,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_product_ids( $product_ids ) {
-		$this->set_prop( 'product_ids', (array) $product_ids );
+		$this->set_prop( 'product_ids', array_filter( wp_parse_id_list( (array) $product_ids ) ) );
 	}
 
 	/**
@@ -547,7 +547,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_excluded_product_ids( $excluded_product_ids ) {
-		$this->set_prop( 'excluded_product_ids', (array) $excluded_product_ids );
+		$this->set_prop( 'excluded_product_ids', array_filter( wp_parse_id_list( (array) $excluded_product_ids ) ) );
 	}
 
 	/**
@@ -597,7 +597,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_product_categories( $product_categories ) {
-		$this->set_prop( 'product_categories', (array) $product_categories );
+		$this->set_prop( 'product_categories', array_filter( wp_parse_id_list( (array) $product_categories ) ) );
 	}
 
 	/**
@@ -607,7 +607,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_excluded_product_categories( $excluded_product_categories ) {
-		$this->set_prop( 'excluded_product_categories', (array) $excluded_product_categories );
+		$this->set_prop( 'excluded_product_categories', array_filter( wp_parse_id_list( (array) $excluded_product_categories ) ) );
 	}
 
 	/**
@@ -723,10 +723,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function inc_usage_count( $used_by = '' ) {
+	public function increase_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->data_store ) {
 			$this->set_prop( 'usage_count', ( $this->get_usage_count( 'edit' ) + 1 ) );
-			$this->data_store->inc_usage_count( $this, $used_by );
+			$this->data_store->increase_usage_count( $this, $used_by );
 		}
 	}
 
@@ -735,10 +735,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function dcr_usage_count( $used_by = '' ) {
+	public function decrease_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->get_usage_count() > 0 && $this->data_store ) {
 			$this->set_prop( 'usage_count', ( $this->get_usage_count( 'edit' ) - 1 ) );
-			$this->data_store->dcr_usage_count( $this, $used_by );
+			$this->data_store->decrease_usage_count( $this, $used_by );
 		}
 	}
 

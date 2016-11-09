@@ -181,4 +181,22 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 		_deprecated_function( 'exclude_sale_items', '2.7', 'get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
+
+	/**
+	 * Increase usage count for current coupon.
+	 *
+	 * @param string $used_by Either user ID or billing email
+	 */
+	public function inc_usage_count( $used_by = '' ) {
+		$this->increase_usage_count( $used_by );
+	}
+
+	/**
+	 * Decrease usage count for current coupon.
+	 *
+	 * @param string $used_by Either user ID or billing email
+	 */
+	public function dcr_usage_count( $used_by = '' ) {
+		$this->decrease_usage_count( $used_by );
+	}
 }

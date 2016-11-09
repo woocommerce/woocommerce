@@ -175,7 +175,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function inc_usage_count( &$coupon, $used_by = '' ) {
+	public function increase_usage_count( &$coupon, $used_by = '' ) {
 		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count( 'edit' ) );
 		if ( $used_by ) {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
@@ -188,7 +188,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function dcr_usage_count( &$coupon, $used_by = '' ) {
+	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
 		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count() );
 		if ( $used_by ) {

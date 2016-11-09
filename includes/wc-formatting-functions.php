@@ -311,6 +311,17 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
+ * Format a coupon code.
+ *
+ * @since  2.7.0
+ * @param  string $value
+ * @return string
+ */
+function wc_format_coupon_code( $value ) {
+	return apply_filters( 'woocommerce_coupon_code', $value );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  * @param string|array $var

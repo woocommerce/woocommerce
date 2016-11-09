@@ -18,14 +18,14 @@ interface WC_Coupon_Data_Store {
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function inc_usage_count( &$coupon, $used_by = '' );
+	public function increase_usage_count( &$coupon, $used_by = '' );
 
 	/**
 	 *  Decrease usage count for current coupon.
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function dcr_usage_count( &$coupon, $used_by = '' );
+	public function decrease_usage_count( &$coupon, $used_by = '' );
 
 	/**
 	 * Get the number of uses for a coupon by user ID.
