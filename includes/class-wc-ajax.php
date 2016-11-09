@@ -2029,17 +2029,9 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = wc_clean( $data['value'] );
-			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation = wc_get_product( $variation_id );
+			$variation->save_regular_price( wc_clean( $data['value'] ) );
+			$variation->save();
 		}
 	}
 
@@ -2056,17 +2048,9 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$sale_price    = wc_clean( $data['value'] );
-
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation = wc_get_product( $variation_id );
+			$variation->save_sale_price( wc_clean( $data['value'] ) );
+			$variation->save();
 		}
 	}
 
@@ -2187,27 +2171,17 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+			$variation = wc_get_product( $variation_id );
 
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-
-			if ( 'false' === $data['date_from'] ) {
-				$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			} else {
-				$date_from = $data['date_from'];
+			if ( 'false' !== $data['date_from'] ) {
+				$variation->set_date_on_sale_from( wc_clean( $data['date_from']) );
 			}
 
-			if ( 'false' === $data['date_to'] ) {
-				$date_to = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-			} else {
-				$date_to = $data['date_to'];
+			if ( 'false' !== $data['date_to'] ) {
+				$variation->set_date_on_sale_from( wc_clean( $data['date_to']) );
 			}
 
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation->save();
 		}
 	}
 
@@ -2259,28 +2233,25 @@ class WC_AJAX {
 	 * Bulk action - Set Price.
 	 * @access private
 	 * @used-by bulk_edit_variations
-	 * @param  array $variations
+	 * @param array $variations
 	 * @param string $operator + or -
-	 * @param string $field price being adjusted
+	 * @param string $field price being adjusted _regular_price or _sale_price
 	 * @param string $value Price or Percent
 	 */
 	private static function variation_bulk_adjust_price( $variations, $field, $operator, $value ) {
 		foreach ( $variations as $variation_id ) {
-			// Get existing data
-			$_regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$_sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-			$date_from      = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to        = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from      = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to        = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+			$variation   = wc_get_product( $variation_id );
+			$field_value = $variation->{"get$field"}( 'edit' );
 
 			if ( '%' === substr( $value, -1 ) ) {
 				$percent = wc_format_decimal( substr( $value, 0, -1 ) );
-				$$field  += ( ( $$field / 100 ) * $percent ) * "{$operator}1";
+				$field_value += ( ( $field_value / 100 ) * $percent ) * "{$operator}1";
 			} else {
-				$$field  += $value * "{$operator}1";
+				$field_value += $value * "{$operator}1";
 			}
-			_wc_save_product_price( $variation_id, $_regular_price, $_sale_price, $date_from, $date_to );
+
+			$variation->{"set$field"}( $field_value );
+			$variation->save();
 		}
 	}
 
