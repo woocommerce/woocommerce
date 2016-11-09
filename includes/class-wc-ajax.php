@@ -440,7 +440,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = $variable_product->get_matching_variation( wp_unslash( $_POST ) );
+		$variation_id = wc_find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );
@@ -678,11 +678,8 @@ class WC_AJAX {
 		$available_variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
-			$child = $product->get_child( $child_id );
-
-			if ( ! empty( $child->variation_id ) ) {
-				$available_variations[] = $child->get_variation_attributes();
-			}
+			$child                  = wc_get_product( $child_id );
+			$available_variations[] = $child->get_attributes();
 		}
 
 		// Created posts will all have the following data
@@ -1912,6 +1909,7 @@ class WC_AJAX {
 		if ( $variations ) {
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
+				$variation      = get_post( $variation_id );
 				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 				$loop++;
@@ -2073,7 +2071,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Bulk action - Set Stock.
+	 * Bulk action - Set Stock. @todo CRUDIFY ALL THESE ACTIONS
 	 * @access private
 	 * @used-by bulk_edit_variations
 	 * @param  array $variations

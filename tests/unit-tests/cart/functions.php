@@ -118,7 +118,6 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_cart_totals_subtotal_html().
 	 *
-	 * @todo  test with taxes incl./excl.
 	 * @since 2.4
 	 */
 	public function test_wc_cart_totals_subtotal_html() {

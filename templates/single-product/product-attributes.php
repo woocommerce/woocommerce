@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $has_row    = false;
 $alt        = 1;
-$attributes = $product->get_attributes();
+$attributes = $product->get_variation_attributes();
 
 ob_start();
 

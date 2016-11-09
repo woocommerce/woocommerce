@@ -25,7 +25,7 @@
 	<div class="product_attributes wc-metaboxes">
 		<?php
 			// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
-			$attributes = $product_object->get_attributes();
+			$attributes = $product_object->get_attributes( 'edit' );
 			$i          = -1;
 
 			foreach ( $attributes as $attribute ) {

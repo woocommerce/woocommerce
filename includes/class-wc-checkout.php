@@ -245,7 +245,7 @@ class WC_Checkout {
 				) );
 
 				$item->set_backorder_meta();
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_values        = $values;
 				$item->legacy_cart_item_key = $cart_item_key;
 
@@ -264,7 +264,7 @@ class WC_Checkout {
 					),
 				) );
 
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_fee     = $fee;
 				$item->legacy_fee_key = $fee_key;
 
@@ -283,7 +283,7 @@ class WC_Checkout {
 						'meta_data'    => $shipping_rate->get_meta_data(),
 					) );
 
-					// Set this to pass to legacy actions @todo remove in future release
+					// Set this to pass to legacy actions.
 					$item->legacy_package_key = $package_key;
 
 					$order->add_item( $item );

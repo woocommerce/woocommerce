@@ -938,14 +938,24 @@ function wc_format_stock_for_display( $stock_amount, $show_backorder_notificatio
 }
 
 /**
- * Format a price range for display.
+ * Format a sale price for display.
  * @since  2.7.0
+ * @param  string $regular_price
+ * @param  string $sale_price
+ * @return string
+ */
+function wc_format_sale_price( $regular_price, $sale_price ) {
+	$price = '<del>' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
+	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
+}
+
+/**
+ * Format a price range for display.
  * @param  string $from
  * @param  string $to
  * @return string
  */
 function wc_format_price_range( $from, $to ) {
-	$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
-
+	$price = sprintf( _x( '%1$s &ndash; %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
 	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
 }

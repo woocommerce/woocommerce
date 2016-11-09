@@ -681,7 +681,7 @@ class WC_API_Products extends WC_API_Resource {
 		$prices_precision = wc_get_price_decimals();
 		return array(
 			'title'              => $product->get_name(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(), // @todo variation
+			'id'                 => $product->get_id(),
 			'created_at'         => $this->server->format_datetime( $product->get_date_created() ),
 			'updated_at'         => $this->server->format_datetime( $product->get_date_modified() ),
 			'type'               => $product->get_type(),

@@ -73,7 +73,7 @@ class WC_Product_Grouped extends WC_Product {
 	}
 
 	/**
-	 * Returns the price in html format. @todo consider moving to template function
+	 * Returns the price in html format.
 	 *
 	 * @access public
 	 * @param string $price (default: '')
