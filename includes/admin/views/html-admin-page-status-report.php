@@ -335,22 +335,22 @@ $pages          = $system_status->get_pages();
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="Under HTTPS"><?php _e( 'Under HTTPS', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'Are your shop under HTTPS?', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Secure connection (HTTPS)"><?php _e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Is the connection to your store secure?', 'woocommerce' ) ); ?></td>
 			<td>
-				<?php if ( $settings['force_ssl'] || 'https' !== substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ) ) : ?>
-					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your shop is not under HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+				<?php if ( 'https' !== substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ) ) : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
 				<?php else : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
 				<?php endif; ?>
 			</td>
 		</tr>
 		<tr>
-			<td data-export-label="Display errors disabled"><?php _e( 'Display errors disabled', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( __( 'Error messages frequently contain sensitive information about your shop environment, and should never be presented to untrusted sources.', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Hide errors from visitors"><?php _e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 !== intval( ini_get( 'display_errors' ) ) ) : ?>
-					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'All error messages should never be displayed if not in a closed development environment.', 'woocommerce' ); ?></mark>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
 				<?php else : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
 				<?php endif; ?>
