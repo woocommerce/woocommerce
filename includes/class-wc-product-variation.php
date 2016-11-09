@@ -259,6 +259,22 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return $value;
 	}
 
+	/**
+	 * Get main image ID.
+	 *
+	 * @since 2.7.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_image_id( $context = 'view' ) {
+		$value = $this->get_prop( 'image_id', $context );
+
+		if ( 'view' === $context && ! $image_id ) {
+			$value = $this->parent_data['image_id'];
+		}
+		return $value;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -387,6 +403,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			'width'          => get_post_meta( $this->get_parent_id(), '_width', true ),
 			'height'         => get_post_meta( $this->get_parent_id(), '_height', true ),
 			'tax_class'      => get_post_meta( $this->get_parent_id(), '_tax_class', true ),
+			'image_id'       => get_post_thumbnail_id( $this->get_parent_id() ),
 		);
 	}
 

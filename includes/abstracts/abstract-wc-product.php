@@ -659,7 +659,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get main image ID. @todo ensure read handles parent like get_image_id used to?
+	 * Get main image ID.
 	 *
 	 * @since 2.7.0
 	 * @param  string $context
