@@ -81,12 +81,11 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'tag_ids'      => array( 'Tag 1', 'Tag 2' ),
 			'category_ids' => array( $test_cat_1['term_id'], $test_cat_2['term_id'] ),
 		);
-		$product = new WC_Product;
+		$product = new WC_Product_Simple;
 		foreach ( $getters_and_setters as $function => $value ) {
 			$product->{"set_{$function}"}( $value );
 		}
-		$product->create();
-		$product = new WC_Product_Simple( $product->get_id() );
+		$product->save();
 
 		$this->assertEquals( array( $test_cat_1['term_id'], $test_cat_2['term_id'] ), $product->get_category_ids() );
 		$this->assertEquals( array( $test_tag_1['term_id'], $test_tag_2['term_id'] ), $product->get_tag_ids() );

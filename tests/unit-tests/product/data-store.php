@@ -225,16 +225,11 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test creating a new variable product.
-	 *
-	 * @todo - this test can be improved. Once WC_Product_Variation is updated
-	 * with CRUD as well, this test should add a variation to a variable product
-	 * that way, and test things like get_children and attributes.
+	 * Test variable and variations.
 	 *
 	 * @since 2.7.0
 	 */
-
-	function test_variable_create_and_update() {
+	function test_variables_and_variations() {
 		$product = new WC_Product_Variable;
 		$product->set_name( 'Variable Product' );
 
@@ -250,36 +245,72 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'Variable Product', $product->get_name() );
 
-		// Create a variation
-		$variation_id = wp_insert_post( array(
-			'post_title'  => 'Variation #1 of Dummy Variable CRUD Product',
-			'post_type'   => 'product_variation',
-			'post_parent' => $product->get_id(),
-			'post_status' => 'publish',
-		) );
+		$variation = new WC_Product_Variation;
+		$variation->set_name( 'Variation #1 of Dummy Variable CRUD Product' );
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_regular_price( 10 );
+		$variation->set_sku( 'CRUD DUMMY SKU VARIABLE GREEN' );
+		$variation->set_manage_stock( 'no' );
+		$variation->set_downloadable( 'no' );
+		$variation->set_virtual( 'no' );
+		$variation->set_stock_status( 'instock' );
+		$variation->set_attributes( array( 'pa_color' => 'green' ) );
+		$variation->save();
 
-		update_post_meta( $variation_id, '_price', '10' );
-		update_post_meta( $variation_id, '_regular_price', '10' );
-		update_post_meta( $variation_id, '_sku', 'CRUD DUMMY SKU VARIABLE SMALL' );
-		update_post_meta( $variation_id, '_manage_stock', 'no' );
-		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'no' );
-		update_post_meta( $variation_id, '_stock_status', 'instock' );
-		update_post_meta( $variation_id, 'attribute_pa_color', 'green' );
-
-		delete_transient( 'wc_product_children_' . $product->get_id() );
-		delete_transient( 'wc_var_prices_' . $product->get_id() );
+		$this->assertEquals( 'Variation #1 of Dummy Variable CRUD Product', $variation->get_name() );
+		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE GREEN', $variation->get_sku() );
+		$this->assertEquals( 10, $variation->get_price() );
 
 		$product = new WC_Product_Variable( $product->get_id() );
 		$children = $product->get_children();
-		$this->assertEquals( $variation_id, $children[0] );
+		$this->assertEquals( $variation->get_id(), $children[0] );
 
 		$expected_attributes = array( 'pa_color' => array( 'green' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 
+		$variation_2 = new WC_Product_Variation;
+		$variation_2->set_name( 'Variation #2 of Dummy Variable CRUD Product' );
+		$variation_2->set_parent_id( $product->get_id() );
+		$variation_2->set_regular_price( 10 );
+		$variation_2->set_sku( 'CRUD DUMMY SKU VARIABLE RED' );
+		$variation_2->set_manage_stock( 'no' );
+		$variation_2->set_downloadable( 'no' );
+		$variation_2->set_virtual( 'no' );
+		$variation_2->set_stock_status( 'instock' );
+		$variation_2->set_attributes( array( 'pa_color' => 'red' ) );
+		$variation_2->save();
+
+		$this->assertEquals( 'Variation #2 of Dummy Variable CRUD Product', $variation_2->get_name() );
+		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE RED', $variation_2->get_sku() );
+		$this->assertEquals( 10, $variation_2->get_price() );
+
+		$product = new WC_Product_Variable( $product->get_id() );
+		$children = $product->get_children();
+		$this->assertEquals( $variation_2->get_id(), $children[1] );
+		$this->assertEquals( 2, count( $children ) );
+
+		$expected_attributes = array( 'pa_color' => array( 'green', 'red' ) );
+		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
+
+		$variation_2->set_name( 'UPDATED - Variation #2 of Dummy Variable CRUD Product' );
+		$variation_2->set_regular_price( 15 );
+		$variation_2->set_sale_price( 9.99 );
+		$variation_2->set_date_on_sale_to( '32532537600' );
+		$variation_2->save();
+
+		$product = new WC_Product_Variable( $product->get_id() );
+		$expected_prices['price'][ $children[0] ] = 10.00;
+		$expected_prices['price'][ $children[1] ] = 9.99;
+		$expected_prices['regular_price'][ $children[0] ] = 10.00;
+		$expected_prices['regular_price'][ $children[1] ] = 15.00;
+		$expected_prices['sale_price'][ $children[0] ] = 10.00;
+		$expected_prices['sale_price'][ $children[1] ] = 9.99;
+
+		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
+		$this->assertEquals( 'UPDATED - Variation #2 of Dummy Variable CRUD Product', $variation_2->get_name() );
+
 		$product->set_name( 'Renamed Variable Product' );
 		$product->save();
-
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
 	}
 

@@ -47,7 +47,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product );
+			$product = $this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
 			$product->save_meta_data();
@@ -111,7 +111,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		);
 		wp_update_post( $post_data );
 
-		$this->update_post_meta( $product );
+		$product = $this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
 		$product->save_meta_data();
@@ -246,6 +246,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
+	 * @return WC_Product
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta( $product ) {
@@ -320,8 +321,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
 			if ( $product->is_on_sale() ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price() );
+				$product->set_price( $product->get_sale_price() );
 			} else {
 				update_post_meta( $product->get_id(), '_price', $product->get_regular_price() );
+				$product->set_price( $product->get_regular_price() );
 			}
 		}
 
@@ -360,6 +363,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 				}
 			}
 		}
+
+		return $product;
 	}
 
 	/**

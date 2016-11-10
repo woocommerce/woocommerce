@@ -16,6 +16,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * Helper method that updates all the post meta for a grouped product.
 	 *
 	 * @param WC_Product
+	 * @return WC_Product
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta( $product ) {
@@ -38,7 +39,8 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			$this->extra_data_saved = true;
 		}
 
-		parent::update_post_meta( $product );
+		$product = parent::update_post_meta( $product );
+		return $product;
 	}
 
 }

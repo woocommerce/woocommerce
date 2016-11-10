@@ -53,7 +53,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		delete_transient( 'wc_outofstock_count' );
 
 		// Re-read product data after updating stock, then have stock status calculated and saved.
-		$product_with_stock->read( $product_with_stock->get_id() );
+		$product_with_stock = wc_get_product( $product_with_stock->get_id() );
 		$product_with_stock->set_stock_status();
 		$product_with_stock->save();
 
