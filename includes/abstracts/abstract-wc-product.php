@@ -876,7 +876,7 @@ class WC_Product {
 				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
 				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
 				$tax_amount = WC_Tax::get_tax_total( $taxes );
-				$price      = round( $price * $qty + $tax_amount, wc_get_price_decimals() );
+				$price      = WC_Tax::round( $price * $qty + $tax_amount);
 
 			} else {
 
@@ -887,7 +887,7 @@ class WC_Product {
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount    = array_sum( $base_taxes );
-					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
+					$price              = WC_Tax::round( $price * $qty - $base_tax_amount );
 
 				/**
 				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
@@ -898,7 +898,7 @@ class WC_Product {
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
-					$price              = round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
+					$price              = WC_Tax::round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ) );
 
 				} else {
 
