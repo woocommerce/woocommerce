@@ -481,6 +481,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Returns formatted dimensions.
+	 *
+	 * @param  $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @return string|array
+	 */
+	public function get_dimensions( $formatted = true ) {
+		if ( $formatted ) {
+			wc_soft_deprecated_argument( 'WC_Product::get_dimensions', '2.7', '2.8', 'By default, get_dimensions has an argument set to true so that HTML is returned. This is to support the legacy version of the method. To get HTML dimensions, instead use wc_format_dimensions() function. Pass false to this method to return an array of dimensions. This will be the new default behavior in future versions.' );
+			return apply_filters( 'woocommerce_product_dimensions', wc_format_dimensions( $variation->get_dimensions( false ) ), $this );
+		}
+		return array(
+			'length' => $this->get_length(),
+			'width'  => $this->get_width(),
+			'height' => $this->get_height(),
+		);
+	}
+
+	/**
 	 * Get upsel IDs.
 	 *
 	 * @since 2.7.0
@@ -1563,6 +1581,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return 0 < count( $this->get_children() );
 	}
 
+	/**
+	 * Does a child have dimensions?
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function child_has_dimensions() {
+		return false;
+	}
+
+	/**
+	 * Does a child have a weight?
+	 *
+	 * @since 2.7.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1809,42 +1847,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	|--------------------------------------------------------------------------
 	*/
 
-	/**
-	 * Does a child have dimensions set?
-	 *
-	 * @since 2.7.0
-	 * @return bool
-	 */
-	public function child_has_dimensions() {
-		return false;
-	}
-
-	/**
-	 * Does a child have a weight set?
-	 * @since 2.7.0
-	 * @return boolean
-	 */
-	public function child_has_weight() {
-		return false;
-	}
-
-	/**
-	 * Returns formatted dimensions.
-	 * @return string
-	 */
-	public function get_dimensions() {
-		$dimensions = implode( ' x ', array_filter( array(
-			wc_format_localized_decimal( $this->get_length() ),
-			wc_format_localized_decimal( $this->get_width() ),
-			wc_format_localized_decimal( $this->get_height() ),
-		) ) );
-
-		if ( ! empty( $dimensions ) ) {
-			$dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
-		}
-
-		return apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
-	}
 
 	/**
 	 * Get the average rating of product. This is calculated once and stored in postmeta.

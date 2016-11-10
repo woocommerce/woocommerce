@@ -959,3 +959,41 @@ function wc_format_price_range( $from, $to ) {
 	$price = sprintf( _x( '%1$s &ndash; %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
 	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
 }
+
+/**
+ * Format a weight for display.
+ *
+ * @since  2.7.0
+ * @param  float $weight Weight.
+ * @return string
+ */
+function wc_format_weight( $weight ) {
+	$weight_string = wc_format_localized_decimal( $weight );
+
+	if ( ! empty( $weight_string ) ) {
+		$weight_string .= ' ' . get_option( 'woocommerce_weight_unit' );
+	} else {
+		$weight_string = __( 'N/A', 'woocommerce' );
+	}
+
+	return apply_filters( 'woocommerce_format_weight', $weight_string, $weight );
+}
+
+/**
+ * Format dimensions for display.
+ *
+ * @since  2.7.0
+ * @param  array $dimensions Array of dimensions.
+ * @return string
+ */
+function wc_format_dimensions( $dimensions ) {
+	$dimension_string = implode( ' x ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
+
+	if ( ! empty( $dimension_string ) ) {
+		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+	} else {
+		$dimension_string = __( 'N/A', 'woocommerce' );
+	}
+
+	return apply_filters( 'woocommerce_format_dimensions', $dimension_string, $dimensions );
+}
