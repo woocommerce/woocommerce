@@ -443,7 +443,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_dimensions() {
-		return $this->get_length() || $this->get_height() || $this->get_width();
+		return parent::has_dimensions() || $this->child_has_dimensions();
 	}
 
 	/**
@@ -452,16 +452,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_weight() {
-		return $this->get_weight() ? true : false;
-	}
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+		return parent::has_weight() || $this->child_has_weight();
 	}
 
 	/*
