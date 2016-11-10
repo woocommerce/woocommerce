@@ -140,7 +140,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return array
 	 */
 	public function format_array( $array ) {
-		_deprecated_function( 'format_array', '2.7', '' );
+		_deprecated_function( 'format_array', '2.7' );
 		if ( ! is_array( $array ) ) {
 			if ( is_serialized( $array ) ) {
 				$array = maybe_unserialize( $array );
@@ -158,7 +158,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function apply_before_tax() {
-		_deprecated_function( 'apply_before_tax', '2.7', '' );
+		_deprecated_function( 'apply_before_tax', '2.7' );
 		return true;
 	}
 

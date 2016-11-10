@@ -25,25 +25,25 @@ function woocommerce_show_messages() {
  * @deprecated
  */
 function woocommerce_weekend_area_js() {
-	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_weekend_area_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_tooltip_js() {
-	_deprecated_function( 'woocommerce_tooltip_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_tooltip_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_datepicker_js() {
-	_deprecated_function( 'woocommerce_datepicker_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_datepicker_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_admin_scripts() {
-	_deprecated_function( 'woocommerce_admin_scripts', '2.1', '' );
+	_deprecated_function( 'woocommerce_admin_scripts', '2.1' );
 }
 /**
  * @deprecated
