@@ -90,6 +90,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_permalink( $item_object = null ) {
+		$url = get_permalink( $this->get_parent_id() );
+
 		if ( ! empty( $item_object['variation'] ) ) {
 			$data = $item_object['variation'];
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
@@ -99,7 +101,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} else {
 			$data = $this->get_attributes();
 		}
-		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $this->get_permalink() );
+
+		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
 	}
 
 	/**
