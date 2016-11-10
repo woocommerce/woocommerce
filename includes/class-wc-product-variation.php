@@ -273,8 +273,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$vimage_id = $this->parent_data['image_id'];
+			$image_id = $this->parent_data['image_id'];
 		}
+
 		return $image_id;
 	}
 
