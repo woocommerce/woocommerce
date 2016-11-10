@@ -7,6 +7,17 @@
 class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 	/**
+	 * Make sure the default product store loads.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_product_store_loads() {
+		$product_store = new WC_Data_Store( 'product' );
+		$this->assertTrue( is_callable( array( $product_store, 'read' ) ) );
+		$this->assertEquals( 'WC_Product_Data_Store_CPT', $product_store->get_current_class_name() );
+	}
+
+	/**
 	 * Test creating a new product.
 	 *
 	 * @since 2.7.0
@@ -15,7 +26,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		 $product = new WC_Product;
 		 $product->set_regular_price( 42 );
 		 $product->set_name( 'My Product' );
-		 $product->create();
+		 $product->save();
 
 		 $read_product = new WC_Product( $product->get_id() );
 
@@ -55,13 +66,24 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test trashing a product.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_product_trash() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->delete();
+		$this->assertEquals( 'trash', $product->get_status() );
+	}
+
+	/**
 	 * Test deleting a product.
 	 *
 	 * @since 2.7.0
 	 */
 	function test_product_delete() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->delete();
+		$product->delete( true );
 		$this->assertEquals( 0, $product->get_id() );
 	}
 
@@ -75,7 +97,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product = new WC_Product_Grouped;
 		$product->set_children( array( $simple_product->get_id() ) );
 		$product->set_name( 'My Grouped Product' );
-		$product->create();
+		$product->save();
 		$read_product = new WC_Product_Grouped( $product->get_id() );
 		$this->assertEquals( 'My Grouped Product', $read_product->get_name() );
 		$this->assertEquals( array( $simple_product->get_id() ), $read_product->get_children() );
@@ -124,7 +146,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		 $product->set_button_text( 'Test CRUD' );
 		 $product->set_product_url( 'http://automattic.com' );
 		 $product->set_name( 'My External Product' );
-		 $product->create();
+		 $product->save();
 
 		 $read_product = new WC_Product_External( $product->get_id() );
 
@@ -211,6 +233,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.7.0
 	 */
+
 	function test_variable_create_and_update() {
 		$product = new WC_Product_Variable;
 		$product->set_name( 'Variable Product' );
@@ -223,7 +246,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$attribute->set_variation( true );
 
 		$product->set_attributes( array( $attribute ) );
-		$product->create();
+		$product->save();
 
 		$this->assertEquals( 'Variable Product', $product->get_name() );
 
@@ -255,7 +278,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 
 		$product->set_name( 'Renamed Variable Product' );
-		$product->update();
+		$product->save();
 
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
 	}

@@ -526,7 +526,7 @@ abstract class WC_Data {
 	 *
 	 * @since 2.7.0
 	 */
-	protected function apply_changes() {
+	public function apply_changes() {
 		$this->data = array_merge( $this->data, $this->changes );
 		$this->changes = array();
 	}

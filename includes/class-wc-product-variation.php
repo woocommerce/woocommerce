@@ -20,7 +20,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Post type.
 	 * @var string
 	 */
-	protected $post_type = 'product_variation';
+	public $post_type = 'product_variation';
 
 	/**
 	 * Parent data.
