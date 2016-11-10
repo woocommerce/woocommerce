@@ -159,8 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.8 - 10/11/16 =
-* Fix - REQUEST_URI missing trailing slash while comparing for prevent caching.
-* Fix - Stop excluding items without prices from PayPal.
+* Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
+* Fix - Prevent issues when sending empty prices to PayPal.
 * Tweak - New extensions screen.
 
 = 2.6.7 - 26/10/16 =
