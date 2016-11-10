@@ -154,7 +154,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @since 2.7.0
 	 */
 	protected function read_product_data( &$product ) {
-		$id = $product->get_id();
+		$id             = $product->get_id();
+		$review_count   = get_post_meta( $id, '_wc_review_count', true );
+		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
+		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
+
+		if ( '' === $review_count ) {
+			$review_count = WC_Comments::get_review_count_for_product( $this );
+		}
+
+		if ( '' === $rating_counts ) {
+			$rating_counts = WC_Comments::get_rating_counts_for_product( $this );
+		}
+
+		if ( '' === $average_rating ) {
+			$average_rating = WC_Comments::get_average_rating_for_product( $this );
+		}
+
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -190,6 +206,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
+			'average_rating'     => $average_rating,
+			'rating_counts'      => $rating_counts,
+			'review_count'       => $review_count,
 		) );
 
 		// Gets extra data associated with the product.
@@ -275,6 +294,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'_downloadable_files'    => 'downloads',
 			'_stock'                 => 'stock_quantity',
 			'_stock_status'          => 'stock_status',
+			'_wc_average_rating'     => 'average_rating',
+			'_wc_rating_count'       => 'rating_counts',
+			'_wc_review_count'       => 'review_count',
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {

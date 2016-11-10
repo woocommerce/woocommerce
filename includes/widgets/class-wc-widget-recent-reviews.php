@@ -73,7 +73,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-				$rating_html = $_product->get_rating_html( $rating );
+				$rating_html = wc_get_rating_html( $rating );
 
 				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
