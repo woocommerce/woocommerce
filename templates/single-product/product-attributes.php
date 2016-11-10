@@ -19,12 +19,12 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 $has_row    = false;
 $alt        = 1;
-$attributes = $product->get_variation_attributes();
+$attributes = $product->get_attributes();
 
 ob_start();
 
@@ -36,14 +36,14 @@ ob_start();
 		<?php if ( $product->has_weight() || $product->child_has_weight() ) : $has_row = true; ?>
 			<tr class="<?php if ( ( $alt = $alt * -1 ) === 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
-				<td class="product_weight"><?php echo $product->get_weight() ? wc_format_localized_decimal( $product->get_weight() ) . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : __( 'N/A', 'woocommerce' ); ?></td>
+				<td class="product_weight"><?php echo esc_html( wc_format_weight( $product->get_weight() ) ); ?></td>
 			</tr>
 		<?php endif; ?>
 
 		<?php if ( $product->has_dimensions() || $product->child_has_dimensions() ) : $has_row = true; ?>
 			<tr class="<?php if ( ( $alt = $alt * -1 ) === 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Dimensions', 'woocommerce' ) ?></th>
-				<td class="product_dimensions"><?php echo $product->get_dimensions() ? $product->get_dimensions() : __( 'N/A', 'woocommerce' ); ?></td>
+				<td class="product_dimensions"><?php echo esc_html( wc_format_dimensions( $product->get_dimensions( false ) ) ); ?></td>
 			</tr>
 		<?php endif; ?>
 
