@@ -78,6 +78,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'gallery_image_ids'  => array(),
 		'download_limit'     => -1,
 		'download_expiry'    => -1,
+		'rating_counts'      => array(),
+		'average_rating'     => 0,
+		'review_count'       => 0,
 	);
 
 	/**
@@ -687,6 +690,33 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->get_prop( 'image_id', $context );
 	}
 
+	/**
+	 * Get rating count.
+	 * @param  string $context
+	 * @return array of counts
+	 */
+	public function get_rating_counts( $context = 'view' ) {
+		return $this->get_prop( 'rating_counts', $context );
+	}
+
+	/**
+	 * Get average rating.
+	 * @param  string $context
+	 * @return float
+	 */
+	public function get_average_rating( $context = 'view' ) {
+		return $this->get_prop( 'average_rating', $context );
+	}
+
+	/**
+	 * Get review count.
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_review_count( $context = 'view' ) {
+		return $this->get_prop( 'review_count', $context );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -1243,6 +1273,30 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->set_prop( 'image_id', $image_id );
 	}
 
+	/**
+	 * Set rating counts. Read only.
+	 * @param array $counts
+	 */
+	protected function set_rating_counts( $counts ) {
+		$this->set_prop( 'rating_counts', array_filter( array_map( 'absint', (array) $counts ) ) );
+	}
+
+	/**
+	 * Set average rating. Read only.
+	 * @param float $average
+	 */
+	protected function set_average_rating( $average ) {
+		$this->set_prop( 'average_rating', wc_format_decimal( $average ) );
+	}
+
+	/**
+	 * Set review count. Read only.
+	 * @param int $count
+	 */
+	protected function set_review_count( $count ) {
+		$this->set_prop( 'review_count', absint( $count ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -1334,7 +1388,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 */
 	protected function read_product_data() {
-		$id = $this->get_id();
+		$id             = $this->get_id();
+		$review_count   = get_post_meta( $id, '_wc_review_count', true );
+		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
+		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
+
+		if ( '' === $review_count ) {
+			$review_count = WC_Comments::get_review_count_for_product( $this );
+		}
+
+		if ( '' === $rating_counts ) {
+			$rating_counts = WC_Comments::get_rating_counts_for_product( $this );
+		}
+
+		if ( '' === $average_rating ) {
+			$average_rating = WC_Comments::get_average_rating_for_product( $this );
+		}
+
 		$this->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -1370,6 +1440,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
+			'average_rating'     => $average_rating,
+			'rating_counts'      => $rating_counts,
+			'review_count'       => $review_count,
 		) );
 	}
 
@@ -1596,8 +1669,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'_downloadable_files'    => 'downloads',
 			'_stock'                 => 'stock_quantity',
 			'_stock_status'          => 'stock_status',
+			'_wc_average_rating'     => 'average_rating',
+			'_wc_rating_count'       => 'rating_counts',
+			'_wc_review_count'       => 'review_count',
 		);
-
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) ) {
 				continue;
@@ -2137,6 +2212,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
+	/**
+	 * Get the total amount (COUNT) of ratings, or just the count for one rating e.g. number of 5 star ratings.
+	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
+	 * @return int
+	 */
+	public function get_rating_count( $value = null ) {
+		$counts = $this->get_rating_counts();
+
+		if ( is_null( $value ) ) {
+			return array_sum( $counts );
+		} elseif ( isset( $counts[ $value ] ) ) {
+			return absint( $counts[ $value ] );
+		} else {
+			return 0;
+		}
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| @todo download functions
@@ -2228,151 +2320,5 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| @todo misc
-	|--------------------------------------------------------------------------
-	*/
-
-
-	/**
-	 * Get the average rating of product. This is calculated once and stored in postmeta.
-	 * @return string
-	 */
-	public function get_average_rating() {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_average_rating' ) ) {
-			$this->sync_average_rating( $this->get_id() );
-		}
-
-		return (string) floatval( get_post_meta( $this->get_id(), '_wc_average_rating', true ) );
-	}
-
-	/**
-	 * Get the total amount (COUNT) of ratings.
-	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
-	 * @return int
-	 */
-	public function get_rating_count( $value = null ) {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_rating_count' ) ) {
-			$this->sync_rating_count( $this->get_id() );
-		}
-
-		$counts = get_post_meta( $this->get_id(), '_wc_rating_count', true );
-
-		if ( is_null( $value ) ) {
-			return array_sum( $counts );
-		} else {
-			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
-		}
-	}
-
-	/**
-	 * Sync product rating. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_average_rating( $post_id ) {
-		if ( ! metadata_exists( 'post', $post_id, '_wc_rating_count' ) ) {
-			self::sync_rating_count( $post_id );
-		}
-
-		$count = array_sum( (array) get_post_meta( $post_id, '_wc_rating_count', true ) );
-
-		if ( $count ) {
-			global $wpdb;
-
-			$ratings = $wpdb->get_var( $wpdb->prepare("
-				SELECT SUM(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-				AND meta_value > 0
-			", $post_id ) );
-			$average = number_format( $ratings / $count, 2, '.', '' );
-		} else {
-			$average = 0;
-		}
-		update_post_meta( $post_id, '_wc_average_rating', $average );
-	}
-
-	/**
-	 * Sync product rating count. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_rating_count( $post_id ) {
-		global $wpdb;
-
-		$counts     = array();
-		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-			GROUP BY meta_value
-		", $post_id ) );
-
-		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = $count->meta_value_count;
-		}
-
-		update_post_meta( $post_id, '_wc_rating_count', $counts );
-	}
-
-	/**
-	 * Returns the product rating in html format.
-	 *
-	 * @param string $rating (default: '')
-	 *
-	 * @return string
-	 */
-	public function get_rating_html( $rating = null ) {
-		$rating_html = '';
-
-		if ( ! is_numeric( $rating ) ) {
-			$rating = $this->get_average_rating();
-		}
-
-		if ( $rating > 0 ) {
-
-			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
-
-			$rating_html .= '</div>';
-		}
-
-		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
-	}
-
-	/**
-	 * Get the total amount (COUNT) of reviews.
-	 *
-	 * @since 2.3.2
-	 * @return int The total numver of product reviews
-	 */
-	public function get_review_count() {
-		global $wpdb;
-
-		// No meta date? Do the calculation
-		if ( ! metadata_exists( 'post', $this->get_id(), '_wc_review_count' ) ) {
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(*) FROM $wpdb->comments
-				WHERE comment_parent = 0
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->get_id() ) );
-
-			update_post_meta( $this->get_id(), '_wc_review_count', $count );
-		} else {
-			$count = get_post_meta( $this->get_id(), '_wc_review_count', true );
-		}
-
-		return apply_filters( 'woocommerce_product_review_count', $count, $this );
 	}
 }

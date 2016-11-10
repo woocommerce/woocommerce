@@ -2530,3 +2530,21 @@ function wc_get_price_suffix( $product, $price = '', $qty = 1 ) {
 	}
 	return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $product );
 }
+
+/**
+ * Get HTML for ratings.
+ *
+ * @since  2.7.0
+ * @param  float $rating Rating being shown.
+ * @return string
+ */
+function wc_get_rating_html( $rating ) {
+	if ( $rating > 0 ) {
+		$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+		$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+		$rating_html .= '</div>';
+	} else {
+		$rating_html  = '';
+	}
+	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+}

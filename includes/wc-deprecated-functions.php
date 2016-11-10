@@ -571,6 +571,7 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_product_get_stock_quantity'    => 'woocommerce_get_stock_quantity',
 	'woocommerce_product_get_attributes'        => 'woocommerce_get_product_attributes',
 	'woocommerce_product_get_gallery_image_ids' => 'woocommerce_product_gallery_attachment_ids',
+	'woocommerce_product_get_review_count'      => 'woocommerce_product_review_count',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
