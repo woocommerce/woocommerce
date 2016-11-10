@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 2.6.7
+Stable tag: 2.6.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,8 +158,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.8 - xx/11/16 =
+= 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI missing trailing slash while comparing for prevent caching.
+* Fix - Stop excluding items without prices from PayPal.
 * Tweak - New extensions screen.
 
 = 2.6.7 - 26/10/16 =
