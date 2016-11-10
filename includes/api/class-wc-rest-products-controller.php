@@ -571,12 +571,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				continue;
 			}
 
-			$post_data = get_post( $variation->get_variation_id() );
-
 			$variations[] = array(
-				'id'                 => $variation->get_variation_id(),
-				'date_created'       => wc_rest_prepare_date_response( $post_data->post_date_gmt ),
-				'date_modified'      => wc_rest_prepare_date_response( $post_data->post_modified_gmt ),
+				'id'                 => $variation->get_id(),
+				'date_created'       => wc_rest_prepare_date_response( $variation->get_date_created() ),
+				'date_modified'      => wc_rest_prepare_date_response( $variation->get_date_modified() ),
 				'permalink'          => $variation->get_permalink(),
 				'description'        => $variation->get_variation_description(),
 				'sku'                => $variation->get_sku(),
