@@ -714,4 +714,15 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		$counts     = WC_Comments::get_rating_counts_for_product( wc_get_product( $post_id ) );
 		update_post_meta( $post_id, '_wc_rating_count', $counts );
 	}
+
+	/**
+	 * Same as get_downloads in CRUD.
+	 *
+	 * @deprecated 2.7.0
+	 * @return array
+	 */
+	public function get_files() {
+		wc_soft_deprecated_function( 'WC_Product::get_files', '2.7', '2.8', 'WC_Product::get_downloads' );
+		return $this->get_downloads();
+	}
 }

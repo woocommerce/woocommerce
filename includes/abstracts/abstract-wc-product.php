@@ -1179,65 +1179,42 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set downloads.
 	 *
 	 * @since 2.7.0
-	 * @param $raw_downloads array of arrays with download data (name/file)
+	 * @param $downloads_array array of WC_Product_Download objects or arrays.
 	 */
-	public function set_downloads( $raw_downloads ) {
-		$downloads          = array();
-		$errors             = array();
-		$allowed_file_types = apply_filters( 'woocommerce_downloadable_file_allowed_mime_types', get_allowed_mime_types() );
+	public function set_downloads( $downloads_array ) {
+		$downloads = array();
+		$errors    = array();
 
-		foreach ( $raw_downloads as $raw_download ) {
-			$file_name = wc_clean( $raw_download['name'] );
-
-			// Find type and file URL
-			if ( 0 === strpos( $raw_download['file'], 'http' ) ) {
-				$file_is  = 'absolute';
-				$file_url = esc_url_raw( $raw_download['file'] );
-			} elseif ( '[' === substr( $raw_download['file'], 0, 1 ) && ']' === substr( $raw_download['file'], -1 ) ) {
-				$file_is  = 'shortcode';
-				$file_url = wc_clean( $raw_download['file'] );
+		foreach ( $downloads_array as $download ) {
+			if ( is_a( $download, 'WC_Product_Download' ) ) {
+				$download_object = $download;
 			} else {
-				$file_is = 'relative';
-				$file_url = wc_clean( $raw_download['file'] );
+				$download_object = new WC_Product_Download();
+				$download_object->set_id( md5( $download['file'] ) );
+				$download_object->set_name( $download['name'] );
+				$download_object->set_file( $download['file'] );
 			}
 
-			$file_name = wc_clean( $raw_download['name'] );
-
 			// Validate the file extension
-			if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
-				$file_type  = wp_check_filetype( strtok( $file_url, '?' ), $allowed_file_types );
-				$parsed_url = parse_url( $file_url, PHP_URL_PATH );
-				$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
-				if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
-					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' );
-					continue;
-				}
+			if ( ! $download_object->is_allowed_filetype() ) {
+				$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				continue;
 			}
 
 			// Validate the file exists.
-			if ( 'relative' === $file_is ) {
-				$_file_url = $file_url;
-				if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
-					$_file_url = realpath( ABSPATH . $file_url );
-				}
-
-				if ( ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $_file_url ), $file_url ) ) {
-					$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' );
-					continue;
-				}
+			if ( ! $download_object->file_exists() ) {
+				$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				continue;
 			}
 
-			$downloads[ md5( $file_url ) ] = array(
-				'name' => $file_name,
-				'file' => $file_url,
-			);
+			$downloads[ $download_object->get_id() ] = $download_object;
 		}
-
-		$this->set_prop( 'downloads', $downloads );
 
 		if ( $errors ) {
 			$this->error( 'product_invalid_download', $errors[0] );
 		}
+
+		$this->set_prop( 'downloads', $downloads );
 	}
 
 	/**
@@ -1646,6 +1623,18 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return false;
 	}
 
+	/**
+	 * Check if downloadable product has a file attached.
+	 *
+	 * @since 1.6.2
+	 *
+	 * @param string $download_id file identifier
+	 * @return bool Whether downloadable product has a file attached.
+	 */
+	public function has_file( $download_id = '' ) {
+		return $this->is_downloadable() && $this->get_file( $download_id );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1810,58 +1799,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| @todo download functions
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Check if downloadable product has a file attached.
-	 *
-	 * @since 1.6.2
-	 *
-	 * @param string $download_id file identifier
-	 * @return bool Whether downloadable product has a file attached.
-	 */
-	public function has_file( $download_id = '' ) {
-		return ( $this->is_downloadable() && $this->get_file( $download_id ) ) ? true : false;
-	}
-
-	/**
-	 * Gets an array of downloadable files for this product.
-	 *
-	 * @since 2.1.0
-	 *
-	 * @return array
-	 */
-	public function get_files() {
-		$downloads          = $this->get_downloads();
-		$downloadable_files = array_filter( ! empty( $downloads ) ? (array) maybe_unserialize( $downloads ) : array() );
-		if ( ! empty( $downloadable_files ) ) {
-
-			foreach ( $downloadable_files as $key => $file ) {
-
-				if ( ! is_array( $file ) ) {
-					$downloadable_files[ $key ] = array(
-						'file' => $file,
-						'name' => '',
-					);
-				}
-
-				// Set default name
-				if ( empty( $file['name'] ) ) {
-					$downloadable_files[ $key ]['name'] = wc_get_filename_from_url( $file['file'] );
-				}
-
-				// Filter URL
-				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this, $key );
-			}
-		}
-
-		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this );
-	}
-
 	/**
 	 * Get a file by $download_id.
 	 *
@@ -1869,8 +1806,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array|false if not found
 	 */
 	public function get_file( $download_id = '' ) {
-
-		$files = $this->get_files();
+		$files = $this->get_downloads();
 
 		if ( '' === $download_id ) {
 			$file = sizeof( $files ) ? current( $files ) : false;
@@ -1880,7 +1816,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$file = false;
 		}
 
-		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file', $file, $this, $download_id );
 	}
 
@@ -1891,13 +1826,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_file_download_path( $download_id ) {
-		$files = $this->get_files();
-
-		if ( isset( $files[ $download_id ] ) ) {
-			$file_path = $files[ $download_id ]['file'];
-		} else {
-			$file_path = '';
-		}
+		$files     = $this->get_downloads();
+		$file_path = isset( $files[ $download_id ] ) ? $files[ $download_id ]->get_file() : '';
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );

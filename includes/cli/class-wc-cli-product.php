@@ -987,7 +987,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		if ( $product->is_downloadable() ) {
 
-			foreach ( $product->get_files() as $file_id => $file ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
 
 				$downloads[] = array(
 					'id'   => $file_id, // do not cast as int as this is a hash
