@@ -1448,7 +1448,7 @@ class WC_Order extends WC_Abstract_Order {
 			'comment_approved'     => 1,
 		), array( 'order_id' => $this->get_id(), 'is_customer_note' => $is_customer_note ) );
 
-		$comment_id = wp_insert_comment( $commentdata );
+		$comment_id = wp_insert_comment( apply_filters( 'woocommerce_new_comment_data', $commentdata, array( 'order_id' => $this->id, 'customer_note' => $note, 'is_customer_note' => $is_customer_note ) ) );
 
 		if ( $is_customer_note ) {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
