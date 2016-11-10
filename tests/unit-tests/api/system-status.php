@@ -54,6 +54,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertArrayHasKey( 'active_plugins', $data );
         $this->assertArrayHasKey( 'theme', $data );
         $this->assertArrayHasKey( 'settings', $data );
+        $this->assertArrayHasKey( 'security', $data );
         $this->assertArrayHasKey( 'pages', $data );
     }
 
@@ -156,6 +157,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $this->assertEquals( $term_response, $settings['taxonomies'] );
     }
 
+	/**
+	 * Test to make sure security response is correct.
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_get_system_status_info_security() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/system_status' ) );
+		$data     = $response->get_data();
+		$settings = $data['security'];
+
+		$this->assertEquals( 2, count( $settings ) );
+		$this->assertEquals( 'https' === substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ), $settings['secure_connection'] );
+		$this->assertEquals( ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ), $settings['hide_errors'] );
+	}
+
     /**
      * Test to make sure pages response is correct.
      *
@@ -179,12 +197,13 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
         $response = $this->server->dispatch( $request );
         $data = $response->get_data();
         $properties = $data['schema']['properties'];
-        $this->assertEquals( 6, count( $properties ) );
+        $this->assertEquals( 7, count( $properties ) );
         $this->assertArrayHasKey( 'environment', $properties );
         $this->assertArrayHasKey( 'database', $properties );
         $this->assertArrayHasKey( 'active_plugins', $properties );
         $this->assertArrayHasKey( 'theme', $properties );
         $this->assertArrayHasKey( 'settings', $properties );
+        $this->assertArrayHasKey( 'security', $properties );
         $this->assertArrayHasKey( 'pages', $properties );
     }
 
