@@ -84,7 +84,7 @@ function wc_get_products( $args ) {
 	 * Generate WP_Query args.
 	 */
 	$wp_query_args = array(
-		'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
+		'post_type'      => array( 'product', 'product_variation' ),
 		'post_status'    => $args['status'],
 		'posts_per_page' => $args['limit'],
 		'meta_query'     => array(),
@@ -97,13 +97,11 @@ function wc_get_products( $args ) {
 		$wp_query_args['fields'] = 'ids';
 	}
 
-	if ( 'variation' !== $args['type'] ) {
-		$wp_query_args['tax_query'][] = array(
-			'taxonomy' => 'product_type',
-			'field'    => 'slug',
-			'terms'    => $args['type'],
-		);
-	}
+	$wp_query_args['tax_query'][] = array(
+		'taxonomy' => 'product_type',
+		'field'    => 'slug',
+		'terms'    => $args['type'],
+	);
 
 	if ( ! empty( $args['sku'] ) ) {
 		$wp_query_args['meta_query'][] = array(

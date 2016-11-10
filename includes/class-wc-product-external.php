@@ -121,7 +121,7 @@ class WC_Product_External extends WC_Product {
 	 * @since 2.7.0
 	 * @param bool
 	 */
-	public function set_stock_status( $stock_status ) {
+	public function set_stock_status( $stock_status = '' ) {
 		$this->set_prop( 'stock_status', 'instock' );
 
 		if ( 'instock' !== $stock_status ) {

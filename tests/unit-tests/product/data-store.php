@@ -1,10 +1,10 @@
 <?php
 /**
- * CRUD Functions.
+ * Data Store Tests: Tests WC_Products's WC_Data_Store.
  * @package WooCommerce\Tests\Product
  * @since 2.7.0
  */
-class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
+class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test creating a new product.
@@ -66,87 +66,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test product setters and getters
-	 * @todo needs tests for attributes
-	 * @since 2.7.0
-	 */
-	public function test_product_getters_and_setters() {
-		$getters_and_setters = array(
-			'name'               => 'Test',
-			'slug'               => 'test',
-			'status'             => 'publish',
-			'catalog_visibility' => 'search',
-			'featured'           => false,
-			'description'        => 'Hello world',
-			'short_description'  => 'hello',
-			'sku'                => 'TEST SKU',
-			'regular_price'      => 15.00,
-			'sale_price'         => 10.00,
-			'date_on_sale_from'  => '1475798400',
-			'date_on_sale_to'    => '1477267200',
-			'total_sales'        => 20,
-			'tax_status'         => 'none',
-			'tax_class'          => '',
-			'manage_stock'       => true,
-			'stock_quantity'     => 10,
-			'stock_status'       => 'instock',
-			'backorders'         => 'notify',
-			'sold_individually'  => false,
-			'weight'             => 100,
-			'length'             => 10,
-			'width'              => 10,
-			'height'             => 10,
-			'upsell_ids'         => array( 2, 3 ),
-			'cross_sell_ids'     => array( 4, 5 ),
-			'parent_id'          => 0,
-			'reviews_allowed'    => true,
-			'default_attributes' => array(),
-			'purchase_note'      => 'A note',
-			'menu_order'         => 2,
-			'gallery_image_ids'  => array(),
-			'download_type'      => 'standard',
-			'download_expiry'    => -1,
-			'download_limit'     => 5,
-			'image_id'           => 2,
-		 );
-		$product = new WC_Product;
-		foreach ( $getters_and_setters as $function => $value ) {
-			$product->{"set_{$function}"}( $value );
-		}
-		$product->create();
-		$product = new WC_Product_Simple( $product->get_id() );
-		foreach ( $getters_and_setters as $function => $value ) {
-			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
-		}
-	 }
-
-	/**
-	 * Test product term setters and getters
-	 * @since 2.7.0
-	 */
-	public function test_product_term_getters_and_setters() {
-		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
-		$test_cat_2 = wp_insert_term( 'Testing 2', 'product_cat' );
-
-		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
-		$test_tag_2 = wp_insert_term( 'Tag 2', 'product_tag' );
-
-		$getters_and_setters = array(
-			'tag_ids'      => array( 'Tag 1', 'Tag 2' ),
-			'category_ids' => array( $test_cat_1['term_id'], $test_cat_2['term_id'] ),
-		);
-		$product = new WC_Product;
-		foreach ( $getters_and_setters as $function => $value ) {
-			$product->{"set_{$function}"}( $value );
-		}
-		$product->create();
-		$product = new WC_Product_Simple( $product->get_id() );
-
-		$this->assertEquals( array( $test_cat_1['term_id'], $test_cat_2['term_id'] ), $product->get_category_ids() );
-		$this->assertEquals( array( $test_tag_1['term_id'], $test_tag_2['term_id'] ), $product->get_tag_ids() );
-	}
-
-	/**
 	 * Test creating a new grouped product.
 	 *
 	 * @since 2.7.0
@@ -168,7 +87,7 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_grouped_product_read() {
-		$product      = WC_Helper_Product::create_grouped_product();
+		$product	  = WC_Helper_Product::create_grouped_product();
 		$read_product = new WC_Product_Grouped( $product->get_id() );
 		$this->assertEquals( 'Dummy Grouped Product', $read_product->get_name() );
 		$this->assertEquals( 2, count( $read_product->get_children() ) );
@@ -179,7 +98,7 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_grouped_product_update() {
-		$product        = WC_Helper_Product::create_grouped_product();
+		$product		= WC_Helper_Product::create_grouped_product();
 		$simple_product = WC_Helper_Product::create_simple_product();
 		$this->assertEquals( 'Dummy Grouped Product', $product->get_name() );
 		$this->assertEquals( 2, count( $product->get_children() ) );
@@ -193,21 +112,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( 3, count( $product->get_children() ) );
 		$this->assertEquals( 'Dummy Grouped Product 2', $product->get_name() );
 	}
-	/**
-	 * Test grouped product setters and getters
-	 *
-	 * @since 2.7.0
-	 */
-	 public function test_grouped_product_getters_and_setters() {
-		$getters_and_setters = array(
-			'children' => array( 1, 2, 3 ),
-		);
-		$product = new WC_Product_Grouped;
-		foreach ( $getters_and_setters as $function => $value ) {
-			$product->{"set_{$function}"}( $value );
-			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
-		}
-	 }
 
 	/**
 	 * Test creating a new external product.
@@ -268,24 +172,6 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test external product setters and getters
-	 *
-	 * @since 2.7.0
-	 */
-	 public function test_external_product_getters_and_setters() {
-		 $time = time();
-		 $getters_and_setters = array(
-			 'button_text' => 'Test Button Text',
-			 'product_url' => 'http://wordpress.org',
-		 );
-		 $product = new WC_Product_External;
-		  foreach ( $getters_and_setters as $function => $value ) {
-			 $product->{"set_{$function}"}( $value );
-			 $this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
-		 }
-	 }
-
-	 /**
 	 * Test reading a variable product.
 	 *
 	 * @since 2.7.0
@@ -328,14 +214,15 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 	function test_variable_create_and_update() {
 		$product = new WC_Product_Variable;
 		$product->set_name( 'Variable Product' );
-		$product->set_attributes( array( array(
-			'name'         => 'pa_size',
-			'value'        => 'small | large',
-			'position'     => '1',
-			'is_visible'   => 0,
-			'is_variation' => 1,
-			'is_taxonomy'  => 0,
-		) ) );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'pa_color' );
+		$attribute->set_options( explode( WC_DELIMITER, 'green | red' ) );
+		$attribute->set_visible( false );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
 		$product->create();
 
 		$this->assertEquals( 'Variable Product', $product->get_name() );
@@ -355,7 +242,7 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		update_post_meta( $variation_id, '_downloadable', 'no' );
 		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
-		update_post_meta( $variation_id, 'attribute_pa_size', 'small' );
+		update_post_meta( $variation_id, 'attribute_pa_color', 'green' );
 
 		delete_transient( 'wc_product_children_' . $product->get_id() );
 		delete_transient( 'wc_var_prices_' . $product->get_id() );
@@ -364,13 +251,13 @@ class WC_Tests_Product_CRUD extends WC_Unit_Test_Case {
 		$children = $product->get_children();
 		$this->assertEquals( $variation_id, $children[0] );
 
-		$expected_attributes = array( 'pa_size' => array( 'small' ) );
+		$expected_attributes = array( 'pa_color' => array( 'green' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 
 		$product->set_name( 'Renamed Variable Product' );
 		$product->update();
 
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
-	 }
+	}
 
 }

@@ -56,9 +56,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $draft->get_id() ), $products );
 
 		// test type
-		$products = wc_get_products( array( 'return' => 'ids', 'type' => array( 'variable', 'variation' ) ) );
-		$this->assertEquals( 3, count( $products ) );
-		$this->assertContains( $variation->get_id(), $products );
+		$products = wc_get_products( array( 'return' => 'ids', 'type' => array( 'variation' ) ) );
+		$this->assertEquals( 2, count( $products ) );
 
 		// test parent
 		$products = wc_get_products( array( 'return' => 'ids', 'parent' => $variation->get_id() ) );
@@ -135,8 +134,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
-
 		wc_update_product_stock( $product->get_id(), 5 );
+
+		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 
 		// Delete Product

@@ -139,6 +139,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->read( absint( $product->get_id() ) );
 		} elseif ( ! empty( $product->ID ) ) {
 			$this->read( absint( $product->ID ) );
+		} else {
+			$this->set_object_read( true );
 		}
 	}
 
@@ -909,7 +911,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $status New status.
 	 */
-	public function set_stock_status( $status ) {
+	public function set_stock_status( $status = '' ) {
 		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
 	}
 
@@ -977,7 +979,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set upsell IDs.
 	 *
 	 * @since 2.7.0
-	 * @param string $upsell_ids IDs from the up-sell products.
+	 * @param array $upsell_ids IDs from the up-sell products.
 	 */
 	public function set_upsell_ids( $upsell_ids ) {
 		$this->set_prop( 'upsell_ids', array_filter( (array) $upsell_ids ) );
@@ -987,7 +989,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set crosssell IDs.
 	 *
 	 * @since 2.7.0
-	 * @param string $cross_sell_ids IDs from the cross-sell products.
+	 * @param array $cross_sell_ids IDs from the cross-sell products.
 	 */
 	public function set_cross_sell_ids( $cross_sell_ids ) {
 		$this->set_prop( 'cross_sell_ids', array_filter( (array) $cross_sell_ids ) );
@@ -1057,7 +1059,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes', $default_attributes );
+		$this->set_prop( 'default_attributes', array_filter( (array) $default_attributes ) );
 	}
 
 	/**
