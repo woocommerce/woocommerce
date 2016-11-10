@@ -544,6 +544,10 @@ class WC_Product_Variable extends WC_Product {
 
 		foreach ( $this->get_children() as $child_id ) {
 			$variation = $this->get_child( $child_id );
+			
+			if ( ! $variation->variation_is_visible() )
+				continue; // Disabled or hidden			
+			
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
 			if ( empty( $variation->variation_id ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
