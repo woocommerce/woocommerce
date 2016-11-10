@@ -1405,6 +1405,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$average_rating = WC_Comments::get_average_rating_for_product( $this );
 		}
 
+		$this->set_average_rating( $average_rating );
+		$this->set_rating_counts( $rating_counts );
+		$this->set_review_count( $review_count );
 		$this->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -1440,9 +1443,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
-			'average_rating'     => $average_rating,
-			'rating_counts'      => $rating_counts,
-			'review_count'       => $review_count,
 		) );
 	}
 

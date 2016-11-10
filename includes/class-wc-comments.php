@@ -238,10 +238,10 @@ class WC_Comments {
 	public static function clear_transients( $post_id ) {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
-			delete_post_meta( $post_id, '_wc_average_rating' );
-			delete_post_meta( $post_id, '_wc_rating_count' );
-			delete_post_meta( $post_id, '_wc_review_count' );
-			WC_Product::sync_average_rating( $post_id );
+			$product = wc_get_product( $post_id );
+			update_post_meta( $post_id, '_wc_rating_count', self::get_rating_counts_for_product( $product ) );
+			update_post_meta( $post_id, '_wc_average_rating', self::get_average_rating_for_product( $product ) );
+			update_post_meta( $post_id, '_wc_review_count', self::get_review_count_for_product( $product ) );
 		}
 	}
 
