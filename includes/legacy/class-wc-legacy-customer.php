@@ -152,7 +152,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set default data for a customer.
 	 */
 	public function set_default_data() {
-		_deprecated_function( 'WC_Customer::set_default_data', '2.7', '' );
+		_deprecated_function( 'WC_Customer::set_default_data', '2.7' );
 	}
 
 	/**

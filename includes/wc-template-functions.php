@@ -1108,7 +1108,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_product_reviews_tab() {
-		_deprecated_function( 'woocommerce_product_reviews_tab', '2.4', '' );
+		_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
 	}
 }
 
