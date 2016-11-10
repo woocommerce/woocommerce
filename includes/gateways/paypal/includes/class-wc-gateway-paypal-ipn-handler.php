@@ -159,8 +159,24 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param string $receiver_email
 	 */
 	protected function validate_receiver_email( $order, $receiver_email ) {
-		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) != 0 ) {
-			WC_Gateway_Paypal::log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
+
+		$configured_receiver_emails = explode( ' ', $this->receiver_email );
+
+		$found = false;
+		foreach ( $configured_receiver_emails as $configured_receiver_email ) {
+
+			if ( empty ($configured_receiver_email ) ) {
+				continue;
+			}
+
+			if ( strcasecmp( trim( $receiver_email ), trim( $configured_receiver_email ) ) == 0 ) {
+				$found = true;
+				break;
+			}
+		}
+
+		if (! $found ) {
+			WC_Gateway_Paypal::log( "IPN Response is for another account: {$receiver_email}. Your email is ". join ( ', ', $configured_receiver_emails ) );
 
 			// Put this order on-hold for manual checking.
 			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $receiver_email ) );
