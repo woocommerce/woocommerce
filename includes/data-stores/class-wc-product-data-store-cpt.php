@@ -171,6 +171,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			$average_rating = WC_Comments::get_average_rating_for_product( $this );
 		}
 
+		$this->set_average_rating( $average_rating );
+		$this->set_rating_counts( $rating_counts );
+		$this->set_review_count( $review_count );
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -206,9 +209,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
-			'average_rating'     => $average_rating,
-			'rating_counts'      => $rating_counts,
-			'review_count'       => $review_count,
 		) );
 
 		// Gets extra data associated with the product.
