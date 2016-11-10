@@ -1849,7 +1849,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_dimensions() {
-		return $this->get_length() || $this->get_height() || $this->get_width();
+		return ( $this->get_length() || $this->get_height() || $this->get_width() ) && ! $this->get_virtual();
 	}
 
 	/**
@@ -1858,7 +1858,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_weight() {
-		return $this->get_weight() ? true : false;
+		return $this->get_weight() && ! $this->get_virtual();
 	}
 
 	/**
@@ -1945,15 +1945,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function has_enough_stock( $quantity ) {
 		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
-	}
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', ! $this->get_virtual() ) && ( $this->has_dimensions() || $this->has_weight() );
 	}
 
 	/**

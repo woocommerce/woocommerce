@@ -1133,7 +1133,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		}
 
 		// Additional information tab - shows attributes
-		if ( $product && ( $product->has_attributes() || $product->enable_dimensions_display() ) ) {
+		if ( $product && ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional information', 'woocommerce' ),
 				'priority' => 20,
@@ -2466,13 +2466,15 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 }
 
 /**
- * Outputs a list of product attributes.
+ * Outputs a list of product attributes for a product.
  * @since  2.7.0
  * @param  WC_Product $product
  */
 function wc_display_product_attributes( $product ) {
 	wc_get_template( 'single-product/product-attributes.php', array(
-		'product' => $product,
+		'product'            => $product,
+		'attributes'         => array_filter( $product->get_attributes(), 'wc_attributes_array_filter_visible' ),
+		'display_dimensions' => apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ),
 	) );
 }
 

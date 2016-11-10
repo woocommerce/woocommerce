@@ -661,4 +661,14 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'wc_find_matching_product_variation' );
 		return wc_find_matching_product_variation( $this, $match_attributes );
 	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 *  @deprecated 2.7.0 Unused.
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		_deprecated_function( 'WC_Product::enable_dimensions_display', '2.7' );
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
 }
