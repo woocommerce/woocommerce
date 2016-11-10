@@ -69,7 +69,7 @@ class WC_Product_Grouped extends WC_Product {
 				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 			}
 		}
-		return (array) $this->children;
+		return apply_filters('woocommerce_get_grouped_children', (array) $this->children, $this);
 	}
 
 	/**
