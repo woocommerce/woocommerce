@@ -1245,6 +1245,11 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_reviews_allowed( $data['reviews_allowed'] );
 		}
 
+		// Save default attributes for variable products.
+		if ( $product->is_type( 'variable' ) ) {
+			$product = $this->save_default_attributes( $product, $data );
+		}
+
 		// Do action for product type
 		do_action( 'woocommerce_api_process_product_meta_' . $product->get_type(), $product->get_id(), $data );
 
