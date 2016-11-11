@@ -516,8 +516,6 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-		LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 		$stock_join
 		WHERE 	post_status = 'publish'
 		AND 	post_type 	= 'product'
