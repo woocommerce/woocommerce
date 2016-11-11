@@ -24,7 +24,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since 2.7.0
 	 */
-	public function read_product_data( &$product ) {
+	protected function read_product_data( &$product ) {
 		parent::read_product_data( $product );
 		$this->read_children( $product );
 
