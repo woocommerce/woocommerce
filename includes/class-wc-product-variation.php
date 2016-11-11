@@ -267,12 +267,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_image_id( $context = 'view' ) {
-		$value = $this->get_prop( 'image_id', $context );
+		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$value = $this->parent_data['image_id'];
+			$vimage_id = $this->parent_data['image_id'];
 		}
-		return $value;
+		return $image_id;
 	}
 
 	/*

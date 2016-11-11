@@ -217,6 +217,7 @@ class WC_Product_Variable extends WC_Product {
 		$available_variations = array();
 
 		foreach ( $this->get_children() as $child_id ) {
+			error_log( print_r ( $child_id, 1 ) );
 			$variation = wc_get_product( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
@@ -357,7 +358,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		$prices = $this->read_price_data();
+		$data_store = WC_Data_Store::load( 'product_variable' );
+		$prices = $data_store->read_price_data( $this );
 		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
 	}
 
@@ -370,7 +372,7 @@ class WC_Product_Variable extends WC_Product {
 		$in_stock       = get_transient( $transient_name );
 
 		if ( false === $in_stock ) {
-			$in_stock = $this->data_store->child_is_in_stock( $product );
+			$in_stock = $this->data_store->child_is_in_stock( $this );
 			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $in_stock;
@@ -385,7 +387,7 @@ class WC_Product_Variable extends WC_Product {
 		$has_weight     = get_transient( $transient_name );
 
 		if ( false === $has_weight ) {
-			$has_weight = $this->data_store->child_has_weight( $product );
+			$has_weight = $this->data_store->child_has_weight( $this );
 			set_transient( $transient_name, $has_weight, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $has_weight;
@@ -400,7 +402,7 @@ class WC_Product_Variable extends WC_Product {
 		$has_dimension  = get_transient( $transient_name );
 
 		if ( false === $has_dimension ) {
-			$has_dimension = $this->data_store->child_has_dimensions( $product );
+			$has_dimension = $this->data_store->child_has_dimensions( $this );
 			set_transient( $transient_name, $has_dimension, DAY_IN_SECONDS * 30 );
 		}
 		return (bool) $has_dimension;

@@ -296,11 +296,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Builds the related posts query.
-	 * @deprecated 2.7.0 Use wc_get_related_products_query instead.
+	 * @deprecated 2.7.0 Use Product Data Store get_related_products_query instead.
 	 */
 	protected function build_related_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
-		_deprecated_function( 'WC_Product::build_related_query', '2.7', 'wc_get_related_products_query' );
-		return wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
+		_deprecated_function( 'WC_Product::build_related_query', '2.7', 'Product Data Store get_related_products_query' );
+		$data_store = WC_Data_Store::load( 'product' );
+		return $data_store->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
 	}
 
 	/**

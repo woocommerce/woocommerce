@@ -465,4 +465,323 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		wc_delete_product_transients( $product->get_id() );
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| wc-product-functions.php methods
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * <Description>
+	 *
+	 * @since 2.7.0
+	 */
+
+	/**
+	 * Returns an array of on sale products, as an array of objects with an
+	 * ID and parent_id present. Example: $return[0]->id, $return[0]->parent_id.
+	 *
+	 * @return array
+	 * @since 2.7.0
+	 */
+	public function get_on_sale_products() {
+		global $wpdb;
+		return $wpdb->get_results( "
+			SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
+			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
+			LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
+			WHERE post.post_type IN ( 'product', 'product_variation' )
+				AND post.post_status = 'publish'
+				AND meta.meta_key = '_sale_price'
+				AND meta2.meta_key = '_price'
+				AND CAST( meta.meta_value AS DECIMAL ) >= 0
+				AND CAST( meta.meta_value AS CHAR ) != ''
+				AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
+			GROUP BY post.ID;
+		" );
+	}
+
+	/**
+	 * Returns a list of product IDs ( id as key => parent as value) that are
+	 * featured. Uses get_posts instead of wc_get_products since we want
+	 * some extra meta queries and ALL products (posts_per_page = -1).
+	 *
+	 * @return array
+	 * @since 2.7.0
+	 */
+	public function get_featured_product_ids() {
+		return get_posts( array(
+			'post_type'      => array( 'product', 'product_variation' ),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'meta_query'     => array(
+				array(
+					'key' 		=> '_visibility',
+					'value' 	=> array( 'catalog', 'visible' ),
+					'compare' 	=> 'IN',
+				),
+				array(
+					'key' 	=> '_featured',
+					'value' => 'yes',
+				),
+			),
+			'fields' => 'id=>parent',
+		) );
+	}
+
+	/**
+	 * Check if product sku is found for any other product IDs.
+	 *
+	 * @since 2.7.0
+	 * @param int $product_id
+	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
+	 * @return bool
+	 */
+	public function sku_found( $product_id, $sku ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "
+			SELECT $wpdb->posts.ID
+			FROM $wpdb->posts
+			LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
+			WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
+			AND $wpdb->posts.post_status = 'publish'
+			AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+			AND $wpdb->postmeta.post_id <> %d LIMIT 1
+		 ", wp_slash( $sku ), $product_id ) );
+	}
+
+	/**
+	 * Return product ID based on SKU.
+	 *
+	 * @since 2.7.0
+	 * @param string $sku
+	 * @return int
+	 */
+	public function get_product_id_by_sku( $sku ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "
+			SELECT posts.ID
+			FROM $wpdb->posts AS posts
+			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
+			WHERE posts.post_type IN ( 'product', 'product_variation' )
+			AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
+			LIMIT 1
+		 ", $sku ) );
+	}
+
+	/**
+	 * Returns an array of IDs of products that have sales starting soon.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_starting_sales() {
+		global $wpdb;
+		return $wpdb->get_col( $wpdb->prepare( "
+			SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+			LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+			LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+			WHERE postmeta.meta_key = '_sale_price_dates_from'
+			AND postmeta_2.meta_key = '_price'
+			AND postmeta_3.meta_key = '_sale_price'
+			AND postmeta.meta_value > 0
+			AND postmeta.meta_value < %s
+			AND postmeta_2.meta_value != postmeta_3.meta_value
+		", current_time( 'timestamp' ) ) );
+	}
+
+	/**
+	 * Returns an array of IDs of products that have sales which are due to end.
+	 *
+	 * @since 2.7.0
+	 * @return array
+	 */
+	public function get_ending_sales() {
+		global $wpdb;
+		return $wpdb->get_col( $wpdb->prepare( "
+			SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+			LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+			LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+			WHERE postmeta.meta_key = '_sale_price_dates_to'
+			AND postmeta_2.meta_key = '_price'
+			AND postmeta_3.meta_key = '_regular_price'
+			AND postmeta.meta_value > 0
+			AND postmeta.meta_value < %s
+			AND postmeta_2.meta_value != postmeta_3.meta_value
+		", current_time( 'timestamp' ) ) );
+	}
+
+	/**
+	 * Find a matching (enabled) variation within a variable product.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Product $product Variable product.
+	 * @param  array $match_attributes Array of attributes we want to try to match.
+	 * @return int Matching variation ID or 0.
+	 */
+	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+		$query_args = array(
+			'post_parent' => $product->get_id(),
+			'post_type'   => 'product_variation',
+			'orderby'     => 'menu_order',
+			'order'       => 'ASC',
+			'fields'      => 'ids',
+			'post_status' => 'publish',
+			'numberposts' => 1,
+			'meta_query'  => array(),
+		);
+
+		// Allow large queries in case user has many variations or attributes.
+		$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_variation() ) {
+				continue;
+			}
+
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
+
+			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
+				return 0;
+			}
+
+			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+
+			$query_args['meta_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => $attribute_field_name,
+					'value'   => array( '', $value ),
+					'compare' => 'IN',
+				),
+				array(
+					'key'     => $attribute_field_name,
+					'compare' => 'NOT EXISTS',
+				)
+			);
+		}
+
+		$variations = get_posts( $query_args );
+
+		if ( $variations && ! is_wp_error( $variations ) ) {
+			return current( $variations );
+	 	} elseif ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
+			 */
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : wc_find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Return a list of related products (using data like categories and IDs).
+	 *
+	 * @since 2.7.0
+	 * @param array $cats_array  List of categories IDs.
+	 * @param array $tags_array  List of tags IDs.
+	 * @param array $exclude_ids Excluded IDs.
+	 * @param int   $limit       Limit of results.
+	 * @param int   $product_id
+	 * @return array
+	 */
+	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
+		global $wpdb;
+		return $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id ) ) );
+	}
+
+	/**
+	 * Builds the related posts query.
+	 *
+	 * @since 2.7.0
+	 * @param array $cats_array  List of categories IDs.
+	 * @param array $tags_array  List of tags IDs.
+	 * @param array $exclude_ids Excluded IDs.
+	 * @param int   $limit       Limit of results.
+	 * @return string
+	 */
+	function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
+		global $wpdb;
+
+		// Arrays to string.
+		$exclude_ids = implode( ',', array_map( 'absint', $exclude_ids ) );
+		$cats_array  = implode( ',', array_map( 'absint', $cats_array ) );
+		$tags_array  = implode( ',', array_map( 'absint', $tags_array ) );
+
+		$limit           = absint( $limit );
+		$query           = array();
+		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
+		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
+		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
+		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
+		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
+
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
+		}
+
+		$query['where']  = ' WHERE 1=1';
+		$query['where'] .= " AND p.post_status = 'publish'";
+		$query['where'] .= " AND p.post_type = 'product'";
+		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
+		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
+
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query['where'] .= " AND pm2.meta_value = 'instock'";
+		}
+
+		if ( $cats_array || $tags_array ) {
+			$query['where'] .= ' AND (';
+
+			if ( $cats_array ) {
+				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
+				if ( $tags_array ) {
+					$query['where'] .= ' OR ';
+				}
+			}
+
+			if ( $tags_array ) {
+				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( {$tags_array} ) ) ";
+			}
+
+			$query['where'] .= ')';
+		}
+
+		$query['limits'] = " LIMIT {$limit} ";
+
+		return $query;
+	}
+
+	/**
+	 * Update a product's stock amount directly.
+	 *
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
+	 *
+	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @param  int
+	 * @param  int|null $stock_quantity
+	 * @param  string $operation set, increase and decrease.
+	 */
+	function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
+		global $wpdb;
+		add_post_meta( $product_id_with_stock, '_stock', 0, true );
+
+		// Update stock in DB directly
+		switch ( $operation ) {
+			case 'increase' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
+			case 'decrease' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
+			default :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				break;
+		}
+
+		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+	}
+
 }

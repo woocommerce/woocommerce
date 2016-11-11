@@ -24,8 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param  string $operation set, increase and decrease.
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	global $wpdb;
-
 	$product = wc_get_product( $product );
 
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
@@ -33,22 +31,8 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$product_id_with_stock = $product->get_stock_managed_by_id();
 		$product_with_stock    = $product->get_id() !== $product_id_with_stock ? wc_get_product( $product_id_with_stock ) : $product;
 
-		add_post_meta( $product_id_with_stock, '_stock', 0, true );
-
-		// Update stock in DB directly
-		switch ( $operation ) {
-			case 'increase' :
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
-				break;
-			case 'decrease' :
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
-				break;
-			default :
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
-				break;
-		}
-
-		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
 
