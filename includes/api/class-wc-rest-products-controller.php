@@ -1583,11 +1583,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Tax class.
 			if ( isset( $data['tax_class'] ) ) {
-				if ( 'parent' !== $data['tax_class'] ) {
-					$variation->set_tax_class( $data['tax_class'] );
-				} else {
-					$variation->set_tax_class( '' );
-				}
+				$variation->set_tax_class( $data['tax_class'] );
 			}
 
 			// Description.
