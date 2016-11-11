@@ -7,25 +7,40 @@
 class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 
 	/**
-	 * <Description>
+	 * Test getting product type.
 	 *
 	 * @since 2.7.0
 	 */
 	function test_get_product_type() {
+		$simple = WC_Helper_Product::create_simple_product();
+		$external = WC_Helper_Product::create_external_product();
+		$grouped = WC_Helper_Product::create_grouped_product();
+		$variable = WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$child_id = $children[0];
 
+		$this->assertEquals( 'simple', WC()->product_factory->get_product_type( $simple->get_id() ) );
+		$this->assertEquals( 'external', WC()->product_factory->get_product_type( $external->get_id() ) );
+		$this->assertEquals( 'grouped', WC()->product_factory->get_product_type( $grouped->get_id() ) );
+		$this->assertEquals( 'variable', WC()->product_factory->get_product_type( $variable->get_id() ) );
+		$this->assertEquals( 'variation', WC()->product_factory->get_product_type( $child_id ) );
 	}
 
 	/**
-	 * <Description>
+	 * Test the helper method that returns a class name for a specific product type.
 	 *
 	 * @since 2.7.0
 	 */
 	function test_get_classname_from_product_type() {
-
+		$this->assertEquals( 'WC_Product_Grouped', WC()->product_factory->get_classname_from_product_type( 'grouped' ) );
+		$this->assertEquals( 'WC_Product_Simple', WC()->product_factory->get_classname_from_product_type( 'simple' ) );
+		$this->assertEquals( 'WC_Product_Variable', WC()->product_factory->get_classname_from_product_type( 'variable' ) );
+		$this->assertEquals( 'WC_Product_Variation', WC()->product_factory->get_classname_from_product_type( 'variation' ) );
+		$this->assertEquals( 'WC_Product_External', WC()->product_factory->get_classname_from_product_type( 'external' ) );
 	}
 
 	/**
-	 * <Description>
+	 * Tests getting a product using the factory.
 	 *
 	 * @since 2.7.0
 	 */
@@ -36,7 +51,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * <Description>
+	 * Tests that an incorrect product returns null.
 	 *
 	 * @since 2.7.0
 	 */
