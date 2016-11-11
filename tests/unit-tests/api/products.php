@@ -217,9 +217,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Test API Update', $data['button_text'] );
 		$this->assertEquals( 'http://automattic.com', $data['external_url'] );
-
-		// test grouped product
-		// the `grouped_products` field is read-only. @todo make it so that can be written, and add a test below.
 	}
 
 	/**
@@ -331,9 +328,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products' ) );
 		$products = $response->get_data();
 		$this->assertEquals( 3, count( $products ) );
-
-		// test grouped product
-		// the `grouped_products` field is read-only. @todo make it so that can be written, and add a test below.
 	}
 
 	/**
