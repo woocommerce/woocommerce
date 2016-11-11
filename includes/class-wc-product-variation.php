@@ -203,7 +203,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$value = $this->get_prop( 'tax_class', $context );
 
 		// Inherit value from parent.
-		if ( 'view' === $context && empty( $value ) ) {
+		if ( 'view' === $context && 'parent' === $value ) {
 			$value = $this->parent_data['tax_class'];
 		}
 		return $value;
