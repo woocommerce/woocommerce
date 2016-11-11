@@ -1858,7 +1858,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Delete product.
 		$product = wc_get_product( $post->ID );
-		$product->delete();
+		$product->delete( true );
 	}
 
 	/**
@@ -1904,7 +1904,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete();
+					$child->delete( true );
 				}
 			} elseif ( $product->is_type( 'grouped' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
@@ -1914,7 +1914,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 			}
 
-			$product->delete();
+			$product->delete( true );
 			$result = $product->get_id() > 0 ? false : true;
 		} else {
 			// If we don't support trashing for this type, error out.
@@ -1931,7 +1931,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// (Note that internally this falls through to `wp_delete_post` if
 			// the trash is disabled.)
-			$result = wp_trash_post( $id );
+			$product->delete();
+			$result = 'trash' === $product->get_status();
 		}
 
 		if ( ! $result ) {

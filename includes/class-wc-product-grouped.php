@@ -148,46 +148,4 @@ class WC_Product_Grouped extends WC_Product {
 	public function set_children( $children ) {
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
 	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD methods
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Read post data.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function read_product_data() {
-		parent::read_product_data();
-
-		$this->set_props( array(
-			'children' => wp_parse_id_list( get_post_meta( $this->get_id(), '_children', true ) ),
-		) );
-	}
-
-	/**
-	 * Helper method that updates all the post meta for a grouped product.
-	 */
-	protected function update_post_meta() {
-		if ( update_post_meta( $this->get_id(), '_children', $this->get_children() ) ) {
-			$child_prices = array();
-			foreach ( $this->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( $child ) {
-					$child_prices[] = $child->get_price();
-				}
-			}
-			$child_prices = array_filter( $child_prices );
-			delete_post_meta( $this->get_id(), '_price' );
-
-			if ( ! empty( $child_prices ) ) {
-				add_post_meta( $this->get_id(), '_price', min( $child_prices ) );
-				add_post_meta( $this->get_id(), '_price', max( $child_prices ) );
-			}
-		}
-		parent::update_post_meta();
-	}
 }

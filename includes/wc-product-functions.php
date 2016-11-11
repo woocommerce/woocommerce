@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WooCommerce Product Functions
  *
@@ -7,12 +11,8 @@
  * @author   WooThemes
  * @category Core
  * @package  WooCommerce/Functions
- * @version  2.3.0
+ * @version  2.7.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
 
 /**
  * Products wrapper for get_posts.
@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_get_products( $args ) {
 	$args = wp_parse_args( $args, array(
 		'status'         => array( 'draft', 'pending', 'private', 'publish' ),
-		'type'           => array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ),
+		'type'           => array_merge( array_keys( wc_get_product_types() ) ),
 		'parent'         => null,
 		'sku'            => '',
 		'category'       => array(),
@@ -181,15 +181,15 @@ function wc_get_products( $args ) {
  * @since 2.2.0
  *
  * @param mixed $the_product Post object or post ID of the product.
- * @param array $args (default: array()) Contains all arguments to be used to get this product.
- * @return WC_Product
+ * @param array $deprecated
+ * @return WC_Product|null
  */
-function wc_get_product( $the_product = false, $args = array() ) {
+function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
 		return false;
 	}
-	return WC()->product_factory->get_product( $the_product, $args );
+	return WC()->product_factory->get_product( $the_product );
 }
 
 /**
@@ -246,8 +246,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 
 		// Does this product have a parent?
-		if ( $parent_id = wp_get_post_parent_id( $post_id ) ) {
-			wc_delete_product_transients( $parent_id );
+		$product = wc_get_product( $post_id );
+		if ( $product->get_parent_id() > 0 ) {
+			wc_delete_product_transients( $product->get_parent_id() );
 		}
 	}
 
@@ -266,12 +267,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * Function that returns an array containing the IDs of the products that are on sale.
  *
  * @since 2.0
- * @access public
  * @return array
  */
 function wc_get_product_ids_on_sale() {
-	global $wpdb;
-
 	// Load from cache
 	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
 
@@ -280,21 +278,9 @@ function wc_get_product_ids_on_sale() {
 		return $product_ids_on_sale;
 	}
 
-	$on_sale_posts = $wpdb->get_results( "
-		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
-		LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
-		LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
-		WHERE post.post_type IN ( 'product', 'product_variation' )
-			AND post.post_status = 'publish'
-			AND meta.meta_key = '_sale_price'
-			AND meta2.meta_key = '_price'
-			AND CAST( meta.meta_value AS DECIMAL ) >= 0
-			AND CAST( meta.meta_value AS CHAR ) != ''
-			AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
-		GROUP BY post.ID;
-	" );
-
-	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), array_diff( wp_list_pluck( $on_sale_posts, 'post_parent' ), array( 0 ) ) ) ) );
+	$data_store          = WC_Data_Store::load( 'product' );
+	$on_sale_products    = $data_store->get_on_sale_products();
+	$product_ids_on_sale = wp_parse_id_list( array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale, DAY_IN_SECONDS * 30 );
 
@@ -305,11 +291,9 @@ function wc_get_product_ids_on_sale() {
  * Function that returns an array containing the IDs of the featured products.
  *
  * @since 2.1
- * @access public
  * @return array
  */
 function wc_get_featured_product_ids() {
-
 	// Load from cache
 	$featured_product_ids = get_transient( 'wc_featured_products' );
 
@@ -317,24 +301,8 @@ function wc_get_featured_product_ids() {
 	if ( false !== $featured_product_ids )
 		return $featured_product_ids;
 
-	$featured = get_posts( array(
-		'post_type'      => array( 'product', 'product_variation' ),
-		'posts_per_page' => -1,
-		'post_status'    => 'publish',
-		'meta_query'     => array(
-			array(
-				'key' 		=> '_visibility',
-				'value' 	=> array( 'catalog', 'visible' ),
-				'compare' 	=> 'IN',
-			),
-			array(
-				'key' 	=> '_featured',
-				'value' => 'yes',
-			),
-		),
-		'fields' => 'id=>parent',
-	) );
-
+	$data_store           = WC_Data_Store::load( 'product' );
+	$featured             = $data_store->get_featured_product_ids();
 	$product_ids          = array_keys( $featured );
 	$parent_ids           = array_values( array_filter( $featured ) );
 	$featured_product_ids = array_unique( array_merge( $product_ids, $parent_ids ) );
@@ -442,7 +410,6 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  *
  * Gets a formatted version of variation data or item meta.
  *
- * @access public
  * @param string $variation
  * @param bool $flat (default: false)
  * @return string
@@ -494,49 +461,35 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 
 /**
  * Function which handles the start and end of scheduled sales via cron.
- *
- * @access public
  */
 function wc_scheduled_sales() {
-	global $wpdb;
+	$data_store = WC_Data_Store::load( 'product' );
 
 	// Sales which are due to start
-	$product_ids = $wpdb->get_col( $wpdb->prepare( "
-		SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
-		LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
-		LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
-		WHERE postmeta.meta_key = '_sale_price_dates_from'
-		AND postmeta_2.meta_key = '_price'
-		AND postmeta_3.meta_key = '_sale_price'
-		AND postmeta.meta_value > 0
-		AND postmeta.meta_value < %s
-		AND postmeta_2.meta_value != postmeta_3.meta_value
-	", current_time( 'timestamp' ) ) );
-
+	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
 		foreach ( $product_ids as $product_id ) {
-			$sale_price = get_post_meta( $product_id, '_sale_price', true );
+			$product = wc_get_product( $product_id );
+			$sale_price = $product->get_sale_price();
 
 			if ( $sale_price ) {
-				update_post_meta( $product_id, '_price', $sale_price );
+				$product->set_price( $sale_price );
 			} else {
-				// No sale price!
-				update_post_meta( $product_id, '_sale_price_dates_from', '' );
-				update_post_meta( $product_id, '_sale_price_dates_to', '' );
+				$product->set_date_on_sale_to( '' );
+				$product->set_date_on_sale_from( '' );
 			}
 
-			$parent = wp_get_post_parent_id( $product_id );
+			$product->save();
 
+			$parent = $product->get_parent_id();
 			// Sync parent
 			if ( $parent ) {
 				// Clear prices transient for variable products.
 				delete_transient( 'wc_var_prices_' . $parent );
 
 				// Grouped products need syncing via a function
-				$this_product = wc_get_product( $product_id );
-
-				if ( $this_product->is_type( 'simple' ) ) {
-					$this_product->grouped_product_sync();
+				if ( $product->is_type( 'simple' ) ) {
+					$product->grouped_product_sync();
 				}
 			}
 		}
@@ -545,28 +498,18 @@ function wc_scheduled_sales() {
 	}
 
 	// Sales which are due to end
-	$product_ids = $wpdb->get_col( $wpdb->prepare( "
-		SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
-		LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
-		LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
-		WHERE postmeta.meta_key = '_sale_price_dates_to'
-		AND postmeta_2.meta_key = '_price'
-		AND postmeta_3.meta_key = '_regular_price'
-		AND postmeta.meta_value > 0
-		AND postmeta.meta_value < %s
-		AND postmeta_2.meta_value != postmeta_3.meta_value
-	", current_time( 'timestamp' ) ) );
-
+	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
 		foreach ( $product_ids as $product_id ) {
-			$regular_price = get_post_meta( $product_id, '_regular_price', true );
+			$product       = wc_get_product( $product_id );
+			$regular_price = $product->get_regular_price();
+			$product->set_price( $regular_price );
+			$product->set_sale_price( '' );
+			$product->set_date_on_sale_to( '' );
+			$product->set_date_on_sale_from( '' );
+			$product->save();
 
-			update_post_meta( $product_id, '_price', $regular_price );
-			update_post_meta( $product_id, '_sale_price', '' );
-			update_post_meta( $product_id, '_sale_price_dates_from', '' );
-			update_post_meta( $product_id, '_sale_price_dates_to', '' );
-
-			$parent = wp_get_post_parent_id( $product_id );
+			$parent = $product->get_parent_id();
 
 			// Sync parent
 			if ( $parent ) {
@@ -574,9 +517,8 @@ function wc_scheduled_sales() {
 				delete_transient( 'wc_var_prices_' . $parent );
 
 				// Grouped products need syncing via a function
-				$this_product = wc_get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) ) {
-					$this_product->grouped_product_sync();
+				if ( $product->is_type( 'simple' ) ) {
+					$product->grouped_product_sync();
 				}
 			}
 		}
@@ -674,21 +616,14 @@ function wc_get_product_types() {
  *
  * @since 2.2
  * @param int $product_id
- * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
+ * @param string $sku
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
 	global $wpdb;
 
-	$sku_found = $wpdb->get_var( $wpdb->prepare( "
-		SELECT $wpdb->posts.ID
-		FROM $wpdb->posts
-		LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
-		WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-		AND $wpdb->posts.post_status = 'publish'
-		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-		AND $wpdb->postmeta.post_id <> %d LIMIT 1
-	 ", wp_slash( $sku ), $product_id ) );
+	$data_store = WC_Data_Store::load( 'product' );
+	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -707,20 +642,15 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 function wc_get_product_id_by_sku( $sku ) {
 	global $wpdb;
 
-	$product_id = $wpdb->get_var( $wpdb->prepare( "
-		SELECT posts.ID
-		FROM $wpdb->posts AS posts
-		LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
-		WHERE posts.post_type IN ( 'product', 'product_variation' )
-		AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
-		LIMIT 1
-	 ", $sku ) );
+	$data_store = WC_Data_Store::load( 'product' );
+	$product_id = $data_store->get_product_id_by_sku( $sku );
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }
 
 /**
  * Get attibutes/data for an individual variation from the database and maintain it's integrity.
+ * @param revisit?
  * @since  2.4.0
  * @param  int $variation_id
  * @return array
@@ -963,8 +893,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
 			$related_posts = array();
 		} else {
-			// Generate query - but query an extra 10 results to give the appearance of random results when later shuffled.
-			$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id ) ) );
+			$data_store    = WC_Data_Store::load( 'product' );
+			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
 		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
@@ -986,68 +916,6 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 function wc_get_product_term_ids( $product_id, $taxonomy ) {
 	$terms = get_the_terms( $product_id, $taxonomy );
 	return ! empty( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : array();
-}
-
-/**
- * Builds the related posts query.
- *
- * @since 2.7.0
- * @param array $cats_array  List of categories IDs.
- * @param array $tags_array  List of tags IDs.
- * @param array $exclude_ids Excluded IDs.
- * @param int   $limit       Limit of results.
- * @return string
- */
-function wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
-	global $wpdb;
-
-	// Arrays to string.
-	$exclude_ids = implode( ',', array_map( 'absint', $exclude_ids ) );
-	$cats_array  = implode( ',', array_map( 'absint', $cats_array ) );
-	$tags_array  = implode( ',', array_map( 'absint', $tags_array ) );
-
-	$limit           = absint( $limit );
-	$query           = array();
-	$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-	$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
-	$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
-	$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
-	$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-
-	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-		$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
-	}
-
-	$query['where']  = ' WHERE 1=1';
-	$query['where'] .= " AND p.post_status = 'publish'";
-	$query['where'] .= " AND p.post_type = 'product'";
-	$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
-	$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
-
-	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-		$query['where'] .= " AND pm2.meta_value = 'instock'";
-	}
-
-	if ( $cats_array || $tags_array ) {
-		$query['where'] .= ' AND (';
-
-		if ( $cats_array ) {
-			$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
-			if ( $tags_array ) {
-				$query['where'] .= ' OR ';
-			}
-		}
-
-		if ( $tags_array ) {
-			$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( {$tags_array} ) ) ";
-		}
-
-		$query['where'] .= ')';
-	}
-
-	$query['limits'] = " LIMIT {$limit} ";
-
-	return $query;
 }
 
 /**
@@ -1287,68 +1155,4 @@ function wc_products_array_orderby_price( $a, $b ) {
 		return 0;
 	}
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
-}
-
-/**
- * Find a matching (enabled) variation within a variable product.
- * @since  2.7.0
- * @param  WC_Product $product Variable product.
- * @param  array $match_attributes Array of attributes we want to try to match.
- * @return int Matching variation ID or 0.
- */
-function wc_find_matching_product_variation( $product, $match_attributes = array() ) {
-	$query_args = array(
-		'post_parent' => $product->get_id(),
-		'post_type'   => 'product_variation',
-		'orderby'     => 'menu_order',
-		'order'       => 'ASC',
-		'fields'      => 'ids',
-		'post_status' => 'publish',
-		'numberposts' => 1,
-		'meta_query'  => array(),
-	);
-
-	// Allow large queries in case user has many variations or attributes.
-	$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
-
-	foreach ( $product->get_attributes() as $attribute ) {
-		if ( ! $attribute->get_variation() ) {
-			continue;
-		}
-
-		$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
-
-		if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
-			return 0;
-		}
-
-		$value = wc_clean( $match_attributes[ $attribute_field_name ] );
-
-		$query_args['meta_query'][] = array(
-			'relation' => 'OR',
-			array(
-				'key'     => $attribute_field_name,
-				'value'   => array( '', $value ),
-				'compare' => 'IN',
-			),
-			array(
-				'key'     => $attribute_field_name,
-				'compare' => 'NOT EXISTS',
-			)
-		);
-	}
-
-	$variations = get_posts( $query_args );
-
-	if ( $variations && ! is_wp_error( $variations ) ) {
-		return current( $variations );
- 	} elseif ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
-		/**
-		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
-		 */
-		return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : wc_find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
-	}
-
-	return 0;
 }

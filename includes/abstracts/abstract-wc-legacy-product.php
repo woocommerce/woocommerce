@@ -59,6 +59,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+
+		if ( 'post_type' === $key ) {
+			return $this->post_type;
+		}
+
 		_doing_it_wrong( $key, __( 'Product properties should not be accessed directly.', 'woocommerce' ), '2.7' );
 
 		switch ( $key ) {
@@ -291,11 +296,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Builds the related posts query.
-	 * @deprecated 2.7.0 Use wc_get_related_products_query instead.
+	 * @deprecated 2.7.0 Use Product Data Store get_related_products_query instead.
 	 */
 	protected function build_related_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
-		_deprecated_function( 'WC_Product::build_related_query', '2.7', 'wc_get_related_products_query' );
-		return wc_get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
+		_deprecated_function( 'WC_Product::build_related_query', '2.7', 'Product Data Store get_related_products_query' );
+		$data_store = WC_Data_Store::load( 'product' );
+		return $data_store->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit );
 	}
 
 	/**
@@ -655,10 +661,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Match a variation to a given set of attributes using a WP_Query.
-	 * @deprecated 2.7.0 in favour of wc_find_matching_product_variation.
+	 * @deprecated 2.7.0 in favour of Product data store's find_matching_product_variation.
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
-		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'wc_find_matching_product_variation' );
-		return wc_find_matching_product_variation( $this, $match_attributes );
+		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'Product data store find_matching_product_variation' );
+		$data_store = WC_Data_Store::load( 'product' );
+		return $data_store->find_matching_product_variation( $this, $match_attributes );
 	}
 }

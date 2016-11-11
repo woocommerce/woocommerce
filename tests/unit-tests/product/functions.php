@@ -49,19 +49,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$draft->set_status( 'draft' );
 		$draft->save();
 
-		$this->assertEquals( 10, count( wc_get_products( array( 'return' => 'ids' ) ) ) );
+		$this->assertEquals( 9, count( wc_get_products( array( 'return' => 'ids' ) ) ) );
 
 		// test status
 		$products = wc_get_products( array( 'return' => 'ids', 'status' => 'draft' ) );
 		$this->assertEquals( array( $draft->get_id() ), $products );
 
 		// test type
-		$products = wc_get_products( array( 'return' => 'ids', 'type' => array( 'variable', 'variation' ) ) );
-		$this->assertEquals( 3, count( $products ) );
-		$this->assertContains( $variation->get_id(), $products );
+		$products = wc_get_products( array( 'return' => 'ids', 'type' => 'variation' ) );
+		$this->assertEquals( 2, count( $products ) );
 
 		// test parent
-		$products = wc_get_products( array( 'return' => 'ids', 'parent' => $variation->get_id() ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'type' => 'variation', 'parent' => $variation->get_id() ) );
 		$this->assertEquals( 2, count( $products ) );
 
 		// test skus
@@ -89,17 +88,17 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, count( $products ) );
 
 		// test offset
-		$products = wc_get_products( array( 'return' => 'ids', 'limit' => 5 ) );
-		$products_offset = wc_get_products( array( 'return' => 'ids', 'limit' => 5, 'offset' => 5 ) );
-		$this->assertEquals( 5, count( $products ) );
-		$this->assertEquals( 5, count( $products_offset ) );
+		$products = wc_get_products( array( 'return' => 'ids', 'limit' => 2 ) );
+		$products_offset = wc_get_products( array( 'return' => 'ids', 'limit' => 2, 'offset' => 2 ) );
+		$this->assertEquals( 2, count( $products ) );
+		$this->assertEquals( 2, count( $products_offset ) );
 		$this->assertNotEquals( $products, $products_offset );
 
 		// test page
-		$products_page_1 = wc_get_products( array( 'return' => 'ids', 'limit' => 5 ) );
-		$products_page_2 = wc_get_products( array( 'return' => 'ids', 'limit' => 5, 'page' => 2 ) );
-		$this->assertEquals( 5, count( $products_page_1 ) );
-		$this->assertEquals( 5, count( $products_page_2 ) );
+		$products_page_1 = wc_get_products( array( 'return' => 'ids', 'limit' => 2 ) );
+		$products_page_2 = wc_get_products( array( 'return' => 'ids', 'limit' => 2, 'page' => 2 ) );
+		$this->assertEquals( 2, count( $products_page_1 ) );
+		$this->assertEquals( 2, count( $products_page_2 ) );
 		$this->assertNotEquals( $products_page_1, $products_page_2 );
 
 		// test exclude
@@ -135,8 +134,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
-
 		wc_update_product_stock( $product->get_id(), 5 );
+
+		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 
 		// Delete Product

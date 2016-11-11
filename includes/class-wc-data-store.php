@@ -28,8 +28,13 @@ class WC_Data_Store {
 	 * Ran through `woocommerce_data_stores`.
 	 */
 	private $stores = array(
-		'coupon' => 'WC_Coupon_Data_Store_CPT',
+		'coupon'            => 'WC_Coupon_Data_Store_CPT',
+		'product'           => 'WC_Product_Data_Store_CPT',
+		'product_grouped'   => 'WC_Product_Grouped_Data_Store_CPT',
+		'product_variable'  => 'WC_Product_Variable_Data_Store_CPT',
+		'product_variation' => 'WC_Product_Variation_Data_Store_CPT',
 	);
+
 	/**
 	 * Contains the name of the current data store's class name.
 	 */
