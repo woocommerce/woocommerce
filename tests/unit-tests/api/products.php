@@ -315,7 +315,18 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			'type'           => 'variable',
 			'name'           => 'Test Variable Product',
 			'sku'            => 'DUMMY SKU VARIABLE API',
-			'attributes'  => array( array( 'id' => 0, 'name' => 'pa_size', 'options' => array( 'small', 'medium' ), 'visible' => false, 'variation' => 1 ) )
+			'attributes'     => array(
+				array(
+					'id'        => 0,
+					'name'      => 'pa_size',
+					'options'   => array(
+						'small',
+						'medium',
+					),
+					'visible'   => false,
+					'variation' => 1,
+				),
+			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -378,7 +389,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 					'regular_price'  => '20',
 					'name'           => 'Test Batch Create 2',
 					'type'           => 'simple',
-				)
+				),
 			),
 		) );
 		$response = $this->server->dispatch( $request );

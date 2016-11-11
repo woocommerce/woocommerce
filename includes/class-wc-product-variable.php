@@ -283,7 +283,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param array
 	 */
 	public function set_variation_prices( $variation_prices ) {
-		$this->set_prop( 'variation_prices', $variation_prices  );
+		$this->set_prop( 'variation_prices', $variation_prices );
 	}
 
 	/**
@@ -293,7 +293,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param array
 	 */
 	public function set_variation_prices_including_taxes( $variation_prices_including_taxes ) {
-		$this->set_prop( 'variation_prices_including_taxes', $variation_prices_including_taxes  );
+		$this->set_prop( 'variation_prices_including_taxes', $variation_prices_including_taxes );
 	}
 
 	/**
@@ -303,7 +303,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param array
 	 */
 	public function set_variation_attributes( $variation_attributes ) {
-		$this->set_prop( 'variation_attributes', $variation_attributes  );
+		$this->set_prop( 'variation_attributes', $variation_attributes );
 	}
 
 	/**

@@ -979,7 +979,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( 'cat' === $taxonomy ) {
 			$product->set_category_ids( $term_ids );
-		} elseif( 'tag' === $taxonomy ) {
+		} elseif ( 'tag' === $taxonomy ) {
 			$product->set_tag_ids( $term_ids );
 		}
 

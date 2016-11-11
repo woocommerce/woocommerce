@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  */
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store {
-
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods

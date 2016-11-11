@@ -2175,11 +2175,11 @@ class WC_AJAX {
 			$variation = wc_get_product( $variation_id );
 
 			if ( 'false' !== $data['date_from'] ) {
-				$variation->set_date_on_sale_from( wc_clean( $data['date_from']) );
+				$variation->set_date_on_sale_from( wc_clean( $data['date_from'] ) );
 			}
 
 			if ( 'false' !== $data['date_to'] ) {
-				$variation->set_date_on_sale_from( wc_clean( $data['date_to']) );
+				$variation->set_date_on_sale_from( wc_clean( $data['date_to'] ) );
 			}
 
 			$variation->save();
