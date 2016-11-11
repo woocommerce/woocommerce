@@ -331,7 +331,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$this->set_parent_id( $post_object->post_parent );
 
 		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
-		if ( empty( $this->get_parent_id() ) ) {
+		if ( ! $this->get_parent_id() ) {
 			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->get_id() ), 422 );
 		}
 
