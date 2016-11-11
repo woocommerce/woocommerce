@@ -989,16 +989,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save default attributes.
 	 *
+	 * @since 2.7.0
+	 *
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
 	 * @return WC_Product
 	 */
 	protected function save_default_attributes( $product, $request ) {
-		// Update default attributes options setting.
-		if ( isset( $request['default_attribute'] ) ) {
-			$request['default_attributes'] = $request['default_attribute'];
-		}
-
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
 			$attributes = $product->get_variation_attributes();
 			$default_attributes = array();
