@@ -90,6 +90,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_permalink( $item_object = null ) {
+		$url = get_permalink( $this->get_parent_id() );
+
 		if ( ! empty( $item_object['variation'] ) ) {
 			$data = $item_object['variation'];
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
@@ -99,7 +101,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} else {
 			$data = $this->get_attributes();
 		}
-		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $this->get_permalink() );
+
+		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
 	}
 
 	/**
@@ -270,8 +273,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$vimage_id = $this->parent_data['image_id'];
+			$image_id = $this->parent_data['image_id'];
 		}
+
 		return $image_id;
 	}
 
@@ -318,6 +322,167 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_attributes( $context = 'view' ) {
 		return $this->get_prop( 'attributes', $context );
+	}
+
+	/**
+	 * Reads a product from the database and sets its data to the class.
+	 *
+	 * @since 2.7.0
+	 * @param int $id Variation ID.
+	 */
+	public function read( $id ) {
+		$this->set_defaults();
+
+		if ( ! $id || ! ( $post_object = get_post( $id ) ) ) {
+			return;
+		}
+
+		$this->set_id( $id );
+		$this->set_parent_id( $post_object->post_parent );
+
+		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
+		if ( ! $this->get_parent_id() ) {
+			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->get_id() ), 422 );
+		}
+
+		// The post parent is not a valid variable product so we should prevent this being created.
+		if ( 'product' !== get_post_type( $this->get_parent_id() ) ) {
+			throw new Exception( sprintf( 'Invalid parent for variation #%d', $this->get_id() ), 422 );
+		}
+
+		$this->set_props( array(
+			'name'              => get_the_title( $post_object ),
+			'slug'              => $post_object->post_name,
+			'date_created'      => $post_object->post_date,
+			'date_modified'     => $post_object->post_modified,
+			'status'            => $post_object->post_status,
+			'menu_order'        => $post_object->menu_order,
+			'reviews_allowed'   => 'open' === $post_object->comment_status,
+		) );
+		$this->read_product_data();
+		$this->read_meta_data();
+		$this->read_attributes();
+
+		// Set object_read true once all data is read.
+		$this->set_object_read( true );
+	}
+
+	/**
+	 * Read post data. Can be overridden by child classes to load other props.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function read_product_data() {
+		$id = $this->get_id();
+		$this->set_props( array(
+			'description'       => get_post_meta( $id, '_variation_description', true ),
+			'regular_price'     => get_post_meta( $id, '_regular_price', true ),
+			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
+			'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
+			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
+			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
+			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
+			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
+			'shipping_class_id' => current( $this->get_term_ids( 'product_shipping_class' ) ),
+			'virtual'           => get_post_meta( $id, '_virtual', true ),
+			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
+			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
+			'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
+			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
+			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
+			'image_id'          => get_post_thumbnail_id( $id ),
+			'backorders'        => get_post_meta( $id, '_backorders', true ),
+			'sku'               => get_post_meta( $id, '_sku', true ),
+			'stock_quantity'    => get_post_meta( $id, '_stock', true ),
+			'weight'            => get_post_meta( $id, '_weight', true ),
+			'length'            => get_post_meta( $id, '_length', true ),
+			'width'             => get_post_meta( $id, '_width', true ),
+			'height'            => get_post_meta( $id, '_height', true ),
+			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
+		) );
+
+		if ( $this->is_on_sale() ) {
+			$this->set_price( $this->get_sale_price() );
+		} else {
+			$this->set_price( $this->get_regular_price() );
+		}
+
+		$this->parent_data = array(
+			'sku'            => get_post_meta( $this->get_parent_id(), '_sku', true ),
+			'manage_stock'   => get_post_meta( $this->get_parent_id(), '_manage_stock', true ),
+			'backorders'     => get_post_meta( $this->get_parent_id(), '_backorders', true ),
+			'stock_quantity' => get_post_meta( $this->get_parent_id(), '_stock', true ),
+			'weight'         => get_post_meta( $this->get_parent_id(), '_weight', true ),
+			'length'         => get_post_meta( $this->get_parent_id(), '_length', true ),
+			'width'          => get_post_meta( $this->get_parent_id(), '_width', true ),
+			'height'         => get_post_meta( $this->get_parent_id(), '_height', true ),
+			'tax_class'      => get_post_meta( $this->get_parent_id(), '_tax_class', true ),
+			'image_id'       => get_post_thumbnail_id( $this->get_parent_id() ),
+		);
+	}
+
+	/**
+	 * Create a new product.
+	 *
+	 * @since 2.7.0
+	 */
+	public function create() {
+		$this->set_date_created( current_time( 'timestamp' ) );
+
+		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
+			'post_type'      => $this->post_type,
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
+			'post_author'    => get_current_user_id(),
+			'post_title'     => get_the_title( $this->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $this->get_attributes(), true ),
+			'post_content'   => '',
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => 'closed',
+			'ping_status'    => 'closed',
+			'menu_order'     => $this->get_menu_order(),
+			'post_date'      => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+		) ), true );
+
+		if ( $id && ! is_wp_error( $id ) ) {
+			$this->set_id( $id );
+			$this->update_post_meta();
+			$this->update_terms();
+			$this->update_attributes();
+			$this->save_meta_data();
+			do_action( 'woocommerce_create_' . $this->post_type, $id );
+		}
+	}
+
+	/**
+	 * Updates an existing product.
+	 *
+	 * @since 2.7.0
+	 */
+	public function update() {
+		$post_data = array(
+			'ID'             => $this->get_id(),
+			'post_title'     => get_the_title( $this->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $this->get_attributes(), true ),
+			'post_parent'    => $this->get_parent_id(),
+			'comment_status' => 'closed',
+			'post_status'    => $this->get_status() ? $this->get_status() : 'publish',
+			'menu_order'     => $this->get_menu_order(),
+		);
+		wp_update_post( $post_data );
+		$this->update_post_meta();
+		$this->update_terms();
+		$this->update_attributes();
+		$this->save_meta_data();
+		do_action( 'woocommerce_update_' . $this->post_type, $this->get_id() );
+	}
+
+	/**
+	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 *
+	 * @since 2.7.0
+	 */
+	public function update_post_meta() {
+		update_post_meta( $this->get_id(), '_variation_description', $this->get_description() );
+		parent::update_post_meta();
 	}
 
 	/**
