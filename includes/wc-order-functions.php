@@ -497,7 +497,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 			$_product = $item->get_product();
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
-				$downloads = $_product->get_downloads();
+				$downloads = $_product->get_files();
 
 				foreach ( array_keys( $downloads ) as $download_id ) {
 					wc_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order, $item['qty'] );

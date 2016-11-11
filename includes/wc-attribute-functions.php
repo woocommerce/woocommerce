@@ -279,14 +279,3 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 
 	return in_array( $attribute_name, $reserved_terms );
 }
-
-/**
- * Callback for array filter to get visible only.
- *
- * @since  2.7.0
- * @param  WC_Product $product
- * @return bool
- */
-function wc_attributes_array_filter_visible( $attribute ) {
-	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_visible() && ( ! $attribute->is_taxonomy() || taxonomy_exists( $attribute->get_name() ) );
-}

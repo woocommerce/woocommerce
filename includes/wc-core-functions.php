@@ -1408,6 +1408,21 @@ function wc_get_logger() {
 }
 
 /**
+ * Runs a deprecated action with notice only if used.
+ * @since  2.7.0
+ * @param  string $action
+ * @param  array $args
+ * @param  string $deprecated_in
+ * @param  string $replacement
+ */
+function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
+	if ( has_action( $action ) ) {
+		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		do_action_ref_array( $action, $args );
+	}
+}
+
+/**
  * Store user agents. Used for tracker.
  * @since 2.7.0
  */

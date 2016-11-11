@@ -1024,8 +1024,8 @@ p.demo_store,
 			}
 		}
 
-		tr:nth-child(even) td,
-		tr:nth-child(even) th {
+		.alt td,
+		.alt th {
 			background: rgba(0, 0, 0, 0.025);
 		}
 	}
