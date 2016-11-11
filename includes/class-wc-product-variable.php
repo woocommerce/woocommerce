@@ -217,7 +217,6 @@ class WC_Product_Variable extends WC_Product {
 		$available_variations = array();
 
 		foreach ( $this->get_children() as $child_id ) {
-			error_log( print_r ( $child_id, 1 ) );
 			$variation = wc_get_product( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
