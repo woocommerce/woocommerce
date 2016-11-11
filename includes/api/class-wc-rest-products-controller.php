@@ -281,23 +281,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$images = array();
 		$attachment_ids = array();
 
-		if ( $product->is_type( 'variation' ) ) {
-			if ( has_post_thumbnail( $product->get_variation_id() ) ) {
-				// Add variation image if set.
-				$variation = wc_get_product( $product->get_variation_id() );
-				$attachment_ids[] = $variation->get_image_id();
-			} elseif ( has_post_thumbnail( $product->get_id() ) ) {
-				// Otherwise use the parent product featured image if set.
-				$attachment_ids[] = $product->get_image_id();
-			}
-		} else {
-			// Add featured image.
-			if ( has_post_thumbnail( $product->get_id() ) ) {
-				$attachment_ids[] = $product->get_image_id();
-			}
-			// Add gallery images.
-			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+		// Add featured image.
+		if ( has_post_thumbnail( $product->get_id() ) ) {
+			$attachment_ids[] = $product->get_image_id();
 		}
+		// Add gallery images.
+		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 
 		// Build image data.
 		foreach ( $attachment_ids as $position => $attachment_id ) {
@@ -460,24 +449,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get product menu order.
-	 *
-	 * @param WC_Product $product
-	 * @return int
-	 */
-	protected function get_product_menu_order( $product ) {
-		$post       = get_post( $product->get_id() );
-		$menu_order = $post->menu_order;
-
-		if ( $product->is_type( 'variation' ) ) {
-			$variation  = get_post( $product->get_variation_id() );
-			$menu_order = $variation->menu_order;
-		}
-
-		return $menu_order;
-	}
-
-	/**
 	 * Get product data.
 	 *
 	 * @param WC_Product $product
@@ -485,7 +456,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function get_product_data( $product ) {
 		$data = array(
-			'id'                    => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
+			'id'                    => $product->get_id(),
 			'name'                  => $product->get_name(),
 			'slug'                  => $product->get_slug(),
 			'permalink'             => $product->get_permalink(),
@@ -549,7 +520,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'default_attributes'    => $this->get_default_attributes( $product ),
 			'variations'            => array(),
 			'grouped_products'      => array(),
-			'menu_order'            => $this->get_product_menu_order( $product ),
+			'menu_order'            => $product->get_menu_order(),
 		);
 
 		return $data;
