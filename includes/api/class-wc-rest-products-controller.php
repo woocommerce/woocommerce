@@ -1932,7 +1932,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// (Note that internally this falls through to `wp_delete_post` if
 			// the trash is disabled.)
 			$product->delete();
-			$result = $product->get_id() > 0 ? false : true;
+			$result = 'trash' === $product->get_status();
 		}
 
 		if ( ! $result ) {

@@ -479,7 +479,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete();
+					$child->delete( true );
 				}
 			} elseif ( $product->is_type( 'grouped' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
@@ -489,10 +489,11 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$product->delete();
+			$product->delete( true );
 			$result = $product->get_id() > 0 ? false : true;
 		} else {
-			$result = wp_trash_post( $id );
+			$product->delete();
+			$result = 'trash' === $product->get_status();
 		}
 
 		if ( ! $result ) {
@@ -3175,7 +3176,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Delete product
 		$product = wc_get_product( $product_id );
-		$product->delete();
+		$product->delete( true );
 	}
 
 	/**
