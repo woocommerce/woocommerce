@@ -503,7 +503,9 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
-		$this->data_store->sync_price( $product );
+
+		$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+		$data_store->sync_price( $product );
 	}
 
 	/**

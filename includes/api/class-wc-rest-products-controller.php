@@ -799,7 +799,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$response = $this->prepare_item_for_response( $post, $request );
 			return rest_ensure_response( $response );
 
-		} catch ( Exception $e ) {
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -1702,8 +1704,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$this->save_variations_data( $product, $request );
 				} else {
 					// Just sync variations.
-					WC_Product_Variable::sync( $product->get_id() );
-					WC_Product_Variable::sync_stock_status( $product->get_id() );
+					WC_Product_Variable::sync( $product, true );
 				}
 			}
 
