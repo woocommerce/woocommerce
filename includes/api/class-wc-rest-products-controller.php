@@ -1642,9 +1642,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			do_action( 'woocommerce_rest_save_product_variation', $variation->get_id(), $menu_order, $data );
 		}
 
-		// Update parent if variable so price sorting works and stays in sync with the cheapest child.
-		WC_Product_Variable::sync( $product->get_id() );
-
 		return true;
 	}
 
