@@ -987,6 +987,69 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Save default attributes.
+	 *
+	 * @param WC_Product $product
+	 * @param WP_REST_Request $request
+	 * @return WC_Product
+	 */
+	protected function save_default_attributes( $product, $request ) {
+		// Update default attributes options setting.
+		if ( isset( $request['default_attribute'] ) ) {
+			$request['default_attributes'] = $request['default_attribute'];
+		}
+
+		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
+			$attributes = $product->get_variation_attributes();
+			$default_attributes = array();
+
+			foreach ( $request['default_attributes'] as $attribute ) {
+				$attribute_id   = 0;
+				$attribute_name = '';
+
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = sanitize_title( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
+					continue;
+				}
+
+				if ( isset( $attributes[ $attribute_name ] ) ) {
+					$_attribute = $attributes[ $attribute_name ];
+
+					if ( $_attribute['is_variation'] ) {
+						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+
+						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
+							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+							$term = get_term_by( 'name', $value, $attribute_name );
+
+							if ( $term && ! is_wp_error( $term ) ) {
+								$value = $term->slug;
+							} else {
+								$value = sanitize_title( $value );
+							}
+						}
+
+						if ( $value ) {
+							$default_attributes[ $attribute_name ] = $value;
+						}
+					}
+				}
+			}
+
+			$product->set_default_attributes( $default_attributes );
+		}
+
+		return $product;
+	}
+
+	/**
 	 * Save product meta.
 	 *
 	 * @param WC_Product $product
@@ -1369,6 +1432,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
+		// Save default attributes for variable products.
+		if ( $product->is_type( 'variable' ) ) {
+			$product = $this->save_default_attributes( $product, $request );
+		}
+
 		return $product;
 	}
 
@@ -1516,7 +1584,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Tax class.
 			if ( isset( $data['tax_class'] ) ) {
 				if ( 'parent' !== $data['tax_class'] ) {
-					$variation->set_tax_class( $request['tax_class'] );
+					$variation->set_tax_class( $data['tax_class'] );
 				} else {
 					$variation->set_tax_class( '' );
 				}
@@ -1580,57 +1648,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child.
 		WC_Product_Variable::sync( $product->get_id() );
-
-		// Update default attributes options setting.
-		if ( isset( $request['default_attribute'] ) ) {
-			$request['default_attributes'] = $request['default_attribute'];
-		}
-
-		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$default_attributes = array();
-
-			foreach ( $request['default_attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
-
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
-				}
-
-				if ( isset( $attributes[ $attribute_name ] ) ) {
-					$_attribute = $attributes[ $attribute_name ];
-
-					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
-
-						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
-							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $value, $attribute_name );
-
-							if ( $term && ! is_wp_error( $term ) ) {
-								$value = $term->slug;
-							} else {
-								$value = sanitize_title( $value );
-							}
-						}
-
-						if ( $value ) {
-							$default_attributes[ $attribute_name ] = $value;
-						}
-					}
-				}
-			}
-
-			$product->set_default_attributes( $default_attributes );
-		}
 
 		return true;
 	}
