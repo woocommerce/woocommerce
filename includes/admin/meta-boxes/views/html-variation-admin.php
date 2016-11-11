@@ -287,7 +287,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'name'          => "variable_tax_class[{$loop}]",
 						'value'         => $variation_object->get_tax_class( 'edit' ),
 						'label'         => __( 'Tax class', 'woocommerce' ),
-						'options'       => array_merge( array( 'parent' => __( 'Same as parent', 'woocommerce' ) ), wc_get_product_tax_class_options() ), // @todo rename to inherit - make sure get_tax_class returns this value too.
+						'options'       => array_merge( array( 'parent' => __( 'Same as parent', 'woocommerce' ) ), wc_get_product_tax_class_options() ),
 						'desc_tip'      => 'true',
 						'description'   => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' ),
 						'wrapper_class' => 'form-row form-row-full',
@@ -334,12 +334,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 							if ( $downloads = $variation_object->get_downloads( 'edit' ) ) {
 								foreach ( $downloads as $key => $file ) {
-									if ( ! is_array( $file ) ) {
-										$file = array(
-											'file' => $file,
-											'name' => '',
-										);
-									}
 									include( 'html-product-variation-download.php' );
 								}
 							}
