@@ -1261,7 +1261,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set rating counts. Read only.
 	 * @param array $counts
 	 */
-	protected function set_rating_counts( $counts ) {
+	public function set_rating_counts( $counts ) {
 		$this->set_prop( 'rating_counts', array_filter( array_map( 'absint', (array) $counts ) ) );
 	}
 
@@ -1269,7 +1269,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set average rating. Read only.
 	 * @param float $average
 	 */
-	protected function set_average_rating( $average ) {
+	public function set_average_rating( $average ) {
 		$this->set_prop( 'average_rating', wc_format_decimal( $average ) );
 	}
 
@@ -1277,7 +1277,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set review count. Read only.
 	 * @param int $count
 	 */
-	protected function set_review_count( $count ) {
+	public function set_review_count( $count ) {
 		$this->set_prop( 'review_count', absint( $count ) );
 	}
 

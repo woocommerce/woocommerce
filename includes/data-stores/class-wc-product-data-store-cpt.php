@@ -90,7 +90,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		$product->read_meta_data();
 		$this->read_attributes( $product );
-		$this->read_downloads();
+		$this->read_downloads( $product );
 		$this->read_product_data( $product );
 		$product->set_object_read( true );
 	}
@@ -174,9 +174,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			$average_rating = WC_Comments::get_average_rating_for_product( $this );
 		}
 
-		$this->set_average_rating( $average_rating );
-		$this->set_rating_counts( $rating_counts );
-		$this->set_review_count( $review_count );
+		$product->set_average_rating( $average_rating );
+		$product->set_rating_counts( $rating_counts );
+		$product->set_review_count( $review_count );
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -263,7 +263,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @since 2.7.0
 	 */
 	protected function read_downloads( &$product ) {
-		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $this->get_id(), '_downloadable_files', true ) ) );
+		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $product->get_id(), '_downloadable_files', true ) ) );
 
 		if ( $meta_values ) {
 			$downloads = array();
@@ -271,7 +271,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 				$download    = new WC_Product_Download();
 				$download->set_id( $key );
 				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
-				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $this, $key ) );
+				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $product, $key ) );
 				$downloads[] = $download;
 			}
 			$product->set_downloads( $downloads );
