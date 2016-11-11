@@ -277,7 +277,6 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	/**
 	 * Take tax data from the request and return the updated or newly created rate.
 	 *
-	 * @todo Replace with CRUD in 2.7.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param stdClass|null $current Existing tax object.
 	 * @return stdClass
