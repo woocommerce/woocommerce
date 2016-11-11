@@ -1398,11 +1398,6 @@ class WC_API_Products extends WC_API_Resource {
 				$variation->set_tax_class( $data['tax_class'] );
 			}
 
-			// Description.
-			if ( isset( $data['description'] ) ) {
-				$variation->set_description( wp_kses_post( $data['description'] ) );
-			}
-
 			// Update taxonomies.
 			if ( isset( $variation['attributes'] ) ) {
 				$_attributes = array();
