@@ -782,7 +782,7 @@ class WC_AJAX {
 
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
-			$files   = $product->get_files();
+			$files   = $product->get_downloads();
 
 			if ( ! $order->get_billing_email() ) {
 				die();
@@ -798,8 +798,8 @@ class WC_AJAX {
 						$loop ++;
 						$file_counter ++;
 
-						if ( isset( $file['name'] ) ) {
-							$file_count = $file['name'];
+						if ( $file->get_name() ) {
+							$file_count = $file->get_name();
 						} else {
 							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 						}

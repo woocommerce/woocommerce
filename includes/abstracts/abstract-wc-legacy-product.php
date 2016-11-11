@@ -668,4 +668,61 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		$data_store = WC_Data_Store::load( 'product' );
 		return $data_store->find_matching_product_variation( $this, $match_attributes );
 	}
+
+	/**
+	 * Returns whether or not we are showing dimensions on the product page.
+	 * @deprecated 2.7.0 Unused.
+	 * @return bool
+	 */
+	public function enable_dimensions_display() {
+		_deprecated_function( 'WC_Product::enable_dimensions_display', '2.7' );
+		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+	}
+
+	/**
+	 * Returns the product rating in html format.
+	 *
+	 * @deprecated 2.7.0
+	 * @param string $rating (default: '')
+	 * @return string
+	 */
+	public function get_rating_html( $rating = null ) {
+		_deprecated_function( 'WC_Product::get_rating_html', '2.7', 'wc_get_rating_html' );
+		return wc_get_rating_html( $rating );
+	}
+
+	/**
+	 * Sync product rating. Can be called statically.
+	 *
+	 * @deprecated 2.7.0
+	 * @param  int $post_id
+	 */
+	public static function sync_average_rating( $post_id ) {
+		_deprecated_function( 'WC_Product::sync_average_rating', '2.7', 'WC_Comments::get_average_rating_for_product or leave to CRUD.' );
+		$average = WC_Comments::get_average_rating_for_product( wc_get_product( $post_id ) );
+		update_post_meta( $post_id, '_wc_average_rating', $average );
+	}
+
+	/**
+	 * Sync product rating count. Can be called statically.
+	 *
+	 * @deprecated 2.7.0
+	 * @param  int $post_id
+	 */
+	public static function sync_rating_count( $post_id ) {
+		_deprecated_function( 'WC_Product::sync_rating_count', '2.7', 'WC_Comments::get_rating_counts_for_product or leave to CRUD.' );
+		$counts     = WC_Comments::get_rating_counts_for_product( wc_get_product( $post_id ) );
+		update_post_meta( $post_id, '_wc_rating_count', $counts );
+	}
+
+	/**
+	 * Same as get_downloads in CRUD.
+	 *
+	 * @deprecated 2.7.0
+	 * @return array
+	 */
+	public function get_files() {
+		wc_soft_deprecated_function( 'WC_Product::get_files', '2.7', '2.8', 'WC_Product::get_downloads' );
+		return $this->get_downloads();
+	}
 }

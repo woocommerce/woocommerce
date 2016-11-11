@@ -50,6 +50,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			$this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
+			$this->update_downloads( $product );
 			$product->save_meta_data();
 
 			do_action( 'woocommerce_new_product', $id );
@@ -89,6 +90,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		$product->read_meta_data();
 		$this->read_attributes( $product );
+		$this->read_downloads( $product );
 		$this->read_product_data( $product );
 		$product->set_object_read( true );
 	}
@@ -113,6 +115,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
+		$this->update_downloads( $product );
 		$product->save_meta_data();
 
 		do_action( 'woocommerce_update_product', $product->get_id() );
@@ -154,7 +157,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @since 2.7.0
 	 */
 	protected function read_product_data( &$product ) {
-		$id = $product->get_id();
+		$id             = $product->get_id();
+		$review_count   = get_post_meta( $id, '_wc_review_count', true );
+		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
+		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
+
+		if ( '' === $review_count ) {
+			$review_count = WC_Comments::get_review_count_for_product( $this );
+		}
+
+		if ( '' === $rating_counts ) {
+			$rating_counts = WC_Comments::get_rating_counts_for_product( $this );
+		}
+
+		if ( '' === $average_rating ) {
+			$average_rating = WC_Comments::get_average_rating_for_product( $this );
+		}
+
+		$product->set_average_rating( $average_rating );
+		$product->set_rating_counts( $rating_counts );
+		$product->set_review_count( $review_count );
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -185,7 +207,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'shipping_class_id'  => current( $this->get_term_ids( $product, 'product_shipping_class' ) ),
 			'virtual'            => get_post_meta( $id, '_virtual', true ),
 			'downloadable'       => get_post_meta( $id, '_downloadable', true ),
-			'downloads'          => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 			'gallery_image_ids'  => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'     => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
@@ -236,6 +257,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	}
 
 	/**
+	 * Read downloads from post meta.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function read_downloads( &$product ) {
+		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $product->get_id(), '_downloadable_files', true ) ) );
+
+		if ( $meta_values ) {
+			$downloads = array();
+			foreach ( $meta_values as $key => $value ) {
+				$download    = new WC_Product_Download();
+				$download->set_id( $key );
+				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
+				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $product, $key ) );
+				$downloads[] = $download;
+			}
+			$product->set_downloads( $downloads );
+		}
+	}
+
+	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
@@ -275,6 +318,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'_downloadable_files'    => 'downloads',
 			'_stock'                 => 'stock_quantity',
 			'_stock_status'          => 'stock_status',
+			'_wc_average_rating'     => 'average_rating',
+			'_wc_rating_count'       => 'rating_counts',
+			'_wc_review_count'       => 'review_count',
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
@@ -292,6 +338,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 					break;
 				case 'gallery_image_ids' :
 					$updated = update_post_meta( $product->get_id(), $meta_key, implode( ',', $value ) );
+					break;
+				case 'downloads' :
+					// grant permission to any newly added files on any existing orders for this product prior to saving.
+					if ( $product->is_type( 'variation' ) ) {
+						do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $value );
+					} else {
+						do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $value );
+					}
+					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 					break;
 				case 'image_id' :
 					if ( ! empty( $value ) ) {
@@ -326,15 +381,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		if ( in_array( 'catalog_visibility', $updated_props ) ) {
 			do_action( 'woocommerce_product_set_visibility',  $product->get_id(), $product->get_catalog_visibility() );
-		}
-
-		if ( in_array( 'downloads', $updated_props ) ) {
-			// grant permission to any newly added files on any existing orders for this product prior to saving.
-			if ( $product->is_type( 'variation' ) ) {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $product->get_downloads() );
-			} else {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $product->get_downloads() );
-			}
 		}
 
 		if ( in_array( 'stock_quantity', $updated_props ) ) {
@@ -409,6 +455,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			}
 		}
 		update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
+	}
+
+	/**
+	 * Update downloads.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function update_downloads( &$product ) {
+		$downloads   = $product->get_downloads();
+		$meta_values = array();
+
+		if ( $downloads ) {
+			foreach ( $downloads as $key => $download ) {
+				// Store in format WC uses in meta.
+				$meta_values[ $key ] = $download->get_data();
+			}
+		}
+		update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
 	}
 
 	/**

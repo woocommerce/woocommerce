@@ -238,10 +238,10 @@ class WC_Comments {
 	public static function clear_transients( $post_id ) {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
-			delete_post_meta( $post_id, '_wc_average_rating' );
-			delete_post_meta( $post_id, '_wc_rating_count' );
-			delete_post_meta( $post_id, '_wc_review_count' );
-			WC_Product::sync_average_rating( $post_id );
+			$product = wc_get_product( $post_id );
+			update_post_meta( $post_id, '_wc_rating_count', self::get_rating_counts_for_product( $product ) );
+			update_post_meta( $post_id, '_wc_average_rating', self::get_average_rating_for_product( $product ) );
+			update_post_meta( $post_id, '_wc_review_count', self::get_review_count_for_product( $product ) );
 		}
 	}
 
@@ -327,6 +327,89 @@ class WC_Comments {
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}
 		return $verified;
+	}
+
+	/**
+	 * Get product rating for a product. Please note this is not cached.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 * @return float
+	 */
+	public static function get_average_rating_for_product( $product ) {
+		global $wpdb;
+
+		$count = $product->get_rating_count();
+
+		if ( $count ) {
+			$ratings = $wpdb->get_var( $wpdb->prepare("
+				SELECT SUM(meta_value) FROM $wpdb->commentmeta
+				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+				WHERE meta_key = 'rating'
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+				AND meta_value > 0
+			", $product->get_id() ) );
+			$average = number_format( $ratings / $count, 2, '.', '' );
+		} else {
+			$average = 0;
+		}
+
+		update_post_meta( $product->get_id(), '_wc_average_rating', true );
+
+		return $average;
+	}
+
+	/**
+	 * Get product review count for a product (not replies). Please note this is not cached.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 * @return int
+	 */
+	public static function get_review_count_for_product( $product ) {
+		global $wpdb;
+
+		$count = $wpdb->get_var( $wpdb->prepare("
+			SELECT COUNT(*) FROM $wpdb->comments
+			WHERE comment_parent = 0
+			AND comment_post_ID = %d
+			AND comment_approved = '1'
+		", $product->get_id() ) );
+
+		update_post_meta( $product->get_id(), '_wc_review_count', true );
+
+		return $count;
+	}
+
+	/**
+	 * Get product rating count for a product. Please note this is not cached.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 * @return array of integers
+	 */
+	public static function get_rating_counts_for_product( $product ) {
+		global $wpdb;
+
+		$counts     = array();
+		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
+			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
+			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+			WHERE meta_key = 'rating'
+			AND comment_post_ID = %d
+			AND comment_approved = '1'
+			AND meta_value > 0
+			GROUP BY meta_value
+		", $product->get_id() ) );
+
+		foreach ( $raw_counts as $count ) {
+			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
+		}
+
+		update_post_meta( $product->get_id(), '_wc_rating_count', true );
+
+		return $counts;
 	}
 }
 
