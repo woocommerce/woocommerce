@@ -1345,8 +1345,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Stock handling.
 			$manage_stock = (bool) $variation->get_manage_stock();
-			if ( isset( $data['manage_stock'] ) ) {
-				$manage_stock = $data['manage_stock'];
+			if ( isset( $data['managing_stock'] ) ) {
+				$manage_stock = $data['managing_stock'];
 			}
 			$variation->set_manage_stock( $manage_stock );
 
@@ -1365,10 +1365,6 @@ class WC_API_Products extends WC_API_Resource {
 			if ( $manage_stock ) {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$variation->set_stock_quantity( $data['stock_quantity'] );
-				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $variation->get_stock() );
-					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-					$variation->set_stock_quantity( $stock_quantity );
 				}
 			} else {
 				$variation->set_backorders( 'no' );
@@ -1385,12 +1381,12 @@ class WC_API_Products extends WC_API_Resource {
 				$variation->set_sale_price( $data['sale_price'] );
 			}
 
-			if ( isset( $data['date_on_sale_from'] ) ) {
-				$variation->set_date_on_sale_from( $data['date_on_sale_from'] );
+			if ( isset( $data['sale_price_dates_from'] ) ) {
+				$variation->set_date_on_sale_from( $data['sale_price_dates_from'] );
 			}
 
-			if ( isset( $data['date_on_sale_to'] ) ) {
-				$variation->set_date_on_sale_to( $data['date_on_sale_to'] );
+			if ( isset( $data['sale_price_dates_to'] ) ) {
+				$variation->set_date_on_sale_to( $data['sale_price_dates_to'] );
 			}
 
 			// Tax class.
