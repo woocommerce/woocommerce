@@ -51,14 +51,14 @@ function wc_soft_deprecated_function( $function, $version, $deprecate_in_version
  * until a future version to ease transition for developers.
  *
  * @since  2.7.0
- * @param  string $function
+ * @param  string $argument
  * @param  string $version
  * @param  string $deprecate_in_version
  * @param  string $replacement
  */
-function wc_soft_deprecated_argument( $function, $version, $deprecate_in_version, $message = null ) {
+function wc_soft_deprecated_argument( $argument, $version, $deprecate_in_version, $message = null ) {
 	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
-		_deprecated_argument( $function, $version, $message );
+		_deprecated_argument( $argument, $version, $message );
 	}
 }
 
