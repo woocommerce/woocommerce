@@ -199,26 +199,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$data = new stdClass;
-
-		// ID.
 		if ( isset( $request['id'] ) ) {
-			$data->ID = absint( $request['id'] );
-		}
-
-		// Post content.
-		if ( isset( $request['description'] ) ) {
-			$data->post_content = wp_filter_post_kses( $request['description'] );
-		}
-
-		$data->post_parent = $request['product_id'];
-		$data->post_author = get_current_user_id();
-		$data->post_status = 'publish';
-
-		// Only when creating
-		if ( empty( $request['id'] ) ) {
-			$data->post_type = $this->post_type;
-			$data->ping_status = 'closed';
+			$variation = wc_get_product( absint( $request['id'] ) );
+		} else {
+			$variation = new WC_Product_Variation();
 		}
 
 		/**
@@ -227,11 +211,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for insertion.
 		 *
-		 * @param stdClass        $data An object representing a single item prepared
-		 *                                       for inserting or updating the database.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param WC_Product_Variation $variation An object representing a single item prepared
+		 *                                        for inserting or updating the database.
+		 * @param WP_REST_Request      $request   Request object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $variation, $request );
 	}
 
 	/**
