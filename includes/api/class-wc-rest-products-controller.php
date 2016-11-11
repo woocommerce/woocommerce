@@ -238,7 +238,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$downloads = array();
 
 		if ( $product->is_downloadable() ) {
-			foreach ( $product->get_files() as $file_id => $file ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
 					'id'   => $file_id, // MD5 hash.
 					'name' => $file['name'],

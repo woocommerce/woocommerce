@@ -2247,7 +2247,7 @@ class WC_Admin_Post_Types {
 		}
 
 		$product               = wc_get_product( $product_id );
-		$existing_download_ids = array_keys( (array) $product->get_files() );
+		$existing_download_ids = array_keys( (array) $product->get_downloads() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
 		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );

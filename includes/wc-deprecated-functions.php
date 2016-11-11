@@ -11,7 +11,55 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
+}
+
+/**
+ * Runs a deprecated action with notice only if used.
+ *
+ * @since  2.7.0
+ * @param  string $action
+ * @param  array $args
+ * @param  string $deprecated_in
+ * @param  string $replacement
+ */
+function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
+	if ( has_action( $action ) ) {
+		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		do_action_ref_array( $action, $args );
+	}
+}
+
+/**
+ * Soft deprecate a function so that it's technically deprecated, but not shown
+ * until a future version to ease transition for developers.
+ *
+ * @since  2.7.0
+ * @param  string $function
+ * @param  string $version
+ * @param  string $deprecate_in_version
+ * @param  string $replacement
+ */
+function wc_soft_deprecated_function( $function, $version, $deprecate_in_version, $replacement = null ) {
+	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+		_deprecated_function( $function, $version, $replacement );
+	}
+}
+
+/**
+ * Soft deprecate an argument so that it's technically deprecated, but not shown
+ * until a future version to ease transition for developers.
+ *
+ * @since  2.7.0
+ * @param  string $argument
+ * @param  string $version
+ * @param  string $deprecate_in_version
+ * @param  string $replacement
+ */
+function wc_soft_deprecated_argument( $argument, $version, $deprecate_in_version, $message = null ) {
+	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+		_deprecated_argument( $argument, $version, $message );
+	}
 }
 
 /**
@@ -523,6 +571,8 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_product_get_stock_quantity'    => 'woocommerce_get_stock_quantity',
 	'woocommerce_product_get_attributes'        => 'woocommerce_get_product_attributes',
 	'woocommerce_product_get_gallery_image_ids' => 'woocommerce_product_gallery_attachment_ids',
+	'woocommerce_product_get_review_count'      => 'woocommerce_product_review_count',
+	'woocommerce_product_get_downloads'         => 'woocommerce_product_files',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

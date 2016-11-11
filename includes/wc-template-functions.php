@@ -1133,7 +1133,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		}
 
 		// Additional information tab - shows attributes
-		if ( $product && ( $product->has_attributes() || $product->enable_dimensions_display() ) ) {
+		if ( $product && ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional information', 'woocommerce' ),
 				'priority' => 20,
@@ -2466,13 +2466,15 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 }
 
 /**
- * Outputs a list of product attributes.
+ * Outputs a list of product attributes for a product.
  * @since  2.7.0
  * @param  WC_Product $product
  */
 function wc_display_product_attributes( $product ) {
 	wc_get_template( 'single-product/product-attributes.php', array(
-		'product' => $product,
+		'product'            => $product,
+		'attributes'         => array_filter( $product->get_attributes(), 'wc_attributes_array_filter_visible' ),
+		'display_dimensions' => apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ),
 	) );
 }
 
@@ -2527,4 +2529,22 @@ function wc_get_price_suffix( $product, $price = '', $qty = 1 ) {
 		$price_display_suffix = '';
 	}
 	return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $product );
+}
+
+/**
+ * Get HTML for ratings.
+ *
+ * @since  2.7.0
+ * @param  float $rating Rating being shown.
+ * @return string
+ */
+function wc_get_rating_html( $rating ) {
+	if ( $rating > 0 ) {
+		$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+		$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+		$rating_html .= '</div>';
+	} else {
+		$rating_html  = '';
+	}
+	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
 }

@@ -255,8 +255,8 @@ class WC_Product_Variable extends WC_Product {
 
 		return apply_filters( 'woocommerce_available_variation', array_merge( $variation->get_data(), array(
 			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-			'weight_html'           => $variation->get_weight() ? $variation->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ) : '',
-			'dimensions_html'       => $variation->get_dimensions(),
+			'weight_html'           => wc_format_weight( $variation->get_weight() ),
+			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => wc_get_stock_html( $variation ),
 			'variation_id'          => $variation->get_id(),
@@ -265,7 +265,7 @@ class WC_Product_Variable extends WC_Product {
 			'is_purchasable'        => $variation->is_purchasable(),
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-			'dimensions'            => $variation->get_dimensions(),
+			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'min_qty'               => 1,
 			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 			'backorders_allowed'    => $variation->backorders_allowed(),
@@ -634,7 +634,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_dimensions() {
-		return $this->get_length() || $this->get_height() || $this->get_width();
+		return parent::has_dimensions() || $this->child_has_dimensions();
 	}
 
 	/**
@@ -643,16 +643,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_weight() {
-		return $this->get_weight() ? true : false;
-	}
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
+		return parent::has_weight() || $this->child_has_weight();
 	}
 
 	/*
