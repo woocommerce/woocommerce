@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Coupon Data Store Interface
+ * WC Product Data Store Interface
  *
- * Functions that must be defined by coupon store classes.
+ * Functions that must be defined by product store classes.
  *
  * @version  2.7.0
  * @category Interface

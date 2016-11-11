@@ -276,22 +276,52 @@ class WC_Product_Variable extends WC_Product {
 	|--------------------------------------------------------------------------
 	*/
 
+	/**
+	 * Sets an array of variation prices.
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
 	public function set_variation_prices( $variation_prices ) {
 		$this->set_prop( 'variation_prices', $variation_prices  );
 	}
 
+	/**
+	 * Sets an array of variation prices, including taxes.
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
 	public function set_variation_prices_including_taxes( $variation_prices_including_taxes ) {
 		$this->set_prop( 'variation_prices_including_taxes', $variation_prices_including_taxes  );
 	}
 
+	/**
+	 * Sets an array of variation attributes
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
 	public function set_variation_attributes( $variation_attributes ) {
 		$this->set_prop( 'variation_attributes', $variation_attributes  );
 	}
 
+	/**
+	 * Sets an array of children for the product.
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
 	public function set_children( $children ) {
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
 	}
 
+	/**
+	 * Sets an array of visible children only.
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
 	public function set_visible_children( $visible_children ) {
 		$this->set_prop( 'visible_children', array_filter( wp_parse_id_list( (array) $visible_children ) ) );
 	}
