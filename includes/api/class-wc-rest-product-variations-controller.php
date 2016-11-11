@@ -135,7 +135,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'id'                 => $variation->get_id(),
 			'date_created'       => wc_rest_prepare_date_response( $variation->get_date_created() ),
 			'date_modified'      => wc_rest_prepare_date_response( $variation->get_date_modified() ),
-			'description'        => $variation->get_variation_description(),
+			'description'        => $variation->get_description(),
 			'permalink'          => $variation->get_permalink(),
 			'sku'                => $variation->get_sku(),
 			'price'              => $variation->get_price(),

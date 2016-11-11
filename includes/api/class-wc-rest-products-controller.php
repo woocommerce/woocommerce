@@ -547,7 +547,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'date_created'       => wc_rest_prepare_date_response( $variation->get_date_created() ),
 				'date_modified'      => wc_rest_prepare_date_response( $variation->get_date_modified() ),
 				'permalink'          => $variation->get_permalink(),
-				'description'        => $variation->get_variation_description(),
+				'description'        => $variation->get_description(),
 				'sku'                => $variation->get_sku(),
 				'price'              => $variation->get_price(),
 				'regular_price'      => $variation->get_regular_price(),
