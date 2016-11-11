@@ -671,7 +671,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Returns whether or not we are showing dimensions on the product page.
-	 *  @deprecated 2.7.0 Unused.
+	 * @deprecated 2.7.0 Unused.
 	 * @return bool
 	 */
 	public function enable_dimensions_display() {

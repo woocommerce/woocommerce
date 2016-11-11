@@ -365,7 +365,7 @@ class WC_Comments {
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product $product
-	 * @return float
+	 * @return int
 	 */
 	public static function get_review_count_for_product( $product ) {
 		global $wpdb;
