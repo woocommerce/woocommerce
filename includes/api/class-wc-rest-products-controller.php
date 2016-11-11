@@ -1405,10 +1405,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * Save variations.
 	 * @todo after variations CRUD is done
 	 *
+	 * @throws WC_REST_Exception
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
+	 * @param bool $single_variation
 	 * @return bool
-	 * @throws WC_REST_Exception
 	 */
 	protected function save_variations_data( $product, $request, $single_variation = false ) {
 		global $wpdb;
@@ -1420,239 +1421,146 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 		$attributes = $product->get_variation_attributes();
 
-		foreach ( $variations as $menu_order => $variation ) {
-			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
+		foreach ( $variations as $menu_order => $data ) {
+			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
+			$variation    = new WC_Product_Variation( $variation_id );
 
-			// Generate a useful post title.
-			/* translators: 1: variation id 2: product name */
-			$variation_post_title = sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $product->get_id() ) ) );
-
-			// Update or Add post.
-			if ( ! $variation_id ) {
-				$post_status = ( isset( $variation['visible'] ) && false === $variation['visible'] ) ? 'private' : 'publish';
-
-				$new_variation = array(
-					'post_title'   => $variation_post_title,
-					'post_content' => '',
-					'post_status'  => $post_status,
-					'post_author'  => get_current_user_id(),
-					'post_parent'  => $product->get_id(),
-					'post_type'    => 'product_variation',
-					'menu_order'   => $menu_order,
-				);
-
-				$variation_id = wp_insert_post( $new_variation );
-
-				do_action( 'woocommerce_create_product_variation', $variation_id );
-			} else {
-				$update_variation = array( 'post_title' => $variation_post_title, 'menu_order' => $menu_order );
-				if ( isset( $variation['visible'] ) ) {
-					$post_status = ( false === $variation['visible'] ) ? 'private' : 'publish';
-					$update_variation['post_status'] = $post_status;
-				}
-
-				$wpdb->update( $wpdb->posts, $update_variation, array( 'ID' => $variation_id ) );
-
-				do_action( 'woocommerce_update_product_variation', $variation_id );
+			// Create initial name and status.
+			if ( ! $variation->get_slug() ) {
+				/* translators: 1: variation id 2: product name */
+				$variation->set_name( sprintf( __( 'Variation #%1$s of %2$s', 'woocommerce' ), $variation->get_id(), $product->get_name() ) );
+				$variation->set_status( isset( $data['visible'] ) && false === $data['visible'] ? 'private' : 'publish' );
 			}
 
-			// Stop with we don't have a variation ID.
-			if ( is_wp_error( $variation_id ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_cannot_save_product_variation', $variation_id->get_error_message(), 400 );
-			}
+			// Parent ID.
+			$variation->set_parent_id( $product->get_id() );
 
-			$variation_object = wc_get_product( $variation_id );
+			// Menu order.
+			$variation->set_menu_order( $menu_order );
+
+			// Status.
+			if ( isset( $data['visible'] ) ) {
+				$variation->set_status( false === $data['visible'] ? 'private' : 'publish' );
+			}
 
 			// SKU.
-			if ( isset( $variation['sku'] ) ) {
-				$sku     = get_post_meta( $variation_id, '_sku', true );
-				$new_sku = wc_clean( $variation['sku'] );
-
-				if ( '' === $new_sku ) {
-					update_post_meta( $variation_id, '_sku', '' );
-				} elseif ( $new_sku !== $sku ) {
-					if ( ! empty( $new_sku ) ) {
-						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
-						if ( ! $unique_sku ) {
-							throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
-						} else {
-							update_post_meta( $variation_id, '_sku', $new_sku );
-						}
-					} else {
-						update_post_meta( $variation_id, '_sku', '' );
-					}
-				}
+			if ( isset( $data['sku'] ) ) {
+				$variation->set_sku( wc_clean( $data['sku'] ) );
 			}
 
 			// Thumbnail.
-			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
-				$image = $variation['image'];
-				$image = current( $image );
-				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
-						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-						$skip_image = false;
-
-						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-							$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
-
-							if ( is_wp_error( $upload ) ) {
-								if ( ! apply_filters( 'woocommerce_rest_suppress_variation_image_upload_error', false, $upload, $product ) ) {
-									throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
-								} else {
-									$skip_image = true;
-								}
-							} else {
-								$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
-							}
-						}
-
-						if ( ! $skip_image ) {
-							// Set the image alt if present.
-							if ( ! empty( $image['alt'] ) ) {
-								update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
-							}
-
-							// Set the image name if present.
-							if ( ! empty( $image['name'] ) ) {
-								wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
-							}
-
-							update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
-						}
-					}
-				} else {
-					delete_post_meta( $variation_id, '_thumbnail_id' );
+			if ( isset( $data['image'] ) && is_array( $data['image'] ) ) {
+				$image = current( $data['image'] );
+				if ( is_array( $image ) ) {
+					$image['position'] = 0;
 				}
+
+				$variation = $this->save_product_images( $variation, array( $image ) );
 			}
 
 			// Virtual variation.
-			if ( isset( $variation['virtual'] ) ) {
-				$is_virtual = ( true === $variation['virtual'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_virtual', $is_virtual );
+			if ( isset( $data['virtual'] ) ) {
+				$variation->set_virtual( $data['virtual'] );
 			}
 
 			// Downloadable variation.
-			if ( isset( $variation['downloadable'] ) ) {
-				$is_downloadable = ( true === $variation['downloadable'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_downloadable', $is_downloadable );
+			if ( isset( $data['downloadable'] ) ) {
+				$is_downloadable = $data['downloadable'];
+				$variation->set_downloadable( $is_downloadable );
 			} else {
-				$is_downloadable = get_post_meta( $variation_id, '_downloadable', true );
-			}
-
-			// Shipping data.
-			$variation_object = $this->save_product_shipping_data( $variation_object, $variation );
-
-			// Stock handling.
-			if ( isset( $variation['manage_stock'] ) ) {
-				$manage_stock = ( true === $variation['manage_stock'] ) ? 'yes' : 'no';
-			} else {
-				$manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
-			}
-
-			update_post_meta( $variation_id, '_manage_stock', '' === $manage_stock ? 'no' : $manage_stock );
-
-			if ( isset( $variation['in_stock'] ) ) {
-				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
-			} else {
-				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
-			}
-
-			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
-
-			if ( 'yes' === $manage_stock ) {
-				$backorders = get_post_meta( $variation_id, '_backorders', true );
-
-				if ( isset( $variation['backorders'] ) ) {
-					$backorders = $variation['backorders'];
-				}
-
-				update_post_meta( $variation_id, '_backorders', '' === $backorders ? 'no' : $backorders );
-
-				if ( isset( $variation['stock_quantity'] ) ) {
-					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				} elseif ( isset( $request['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
-					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
-
-					wc_update_product_stock( $variation_id, wc_stock_amount( $stock_quantity ) );
-				}
-			} else {
-				delete_post_meta( $variation_id, '_backorders' );
-				wc_update_product_stock( $variation_id, '' );
-			}
-
-			// Regular Price.
-			if ( isset( $variation['regular_price'] ) ) {
-				$regular_price = ( '' === $variation['regular_price'] ) ? '' : $variation['regular_price'];
-			} else {
-				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			}
-
-			// Sale Price.
-			if ( isset( $variation['sale_price'] ) ) {
-				$sale_price = ( '' === $variation['sale_price'] ) ? '' : $variation['sale_price'];
-			} else {
-				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
-			}
-
-			if ( isset( $variation['date_on_sale_from'] ) ) {
-				$date_from = $variation['date_on_sale_from'];
-			} else {
-				$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
-			}
-
-			if ( isset( $variation['date_on_sale_to'] ) ) {
-				$date_to = $variation['date_on_sale_to'];
-			} else {
-				$date_to = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
-			}
-
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
-
-			// Tax class.
-			if ( isset( $variation['tax_class'] ) ) {
-				if ( 'parent' !== $variation['tax_class'] ) {
-					update_post_meta( $variation_id, '_tax_class', wc_clean( $variation['tax_class'] ) );
-				} else {
-					delete_post_meta( $variation_id, '_tax_class' );
-				}
+				$is_downloadable = $variation->get_downloadable();
 			}
 
 			// Downloads.
-			if ( 'yes' === $is_downloadable ) {
+			if ( $is_downloadable ) {
 				// Downloadable files.
-				if ( isset( $variation['downloads'] ) && is_array( $variation['downloads'] ) ) {
-					$product = $this->save_downloadable_files( $product, $variation['downloads'], $variation_id );
+				if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+					$variation = $this->save_downloadable_files( $variation, $data['downloads'], $variation->get_id() );
 				}
 
 				// Download limit.
-				if ( isset( $variation['download_limit'] ) ) {
-					update_post_meta( $variation_id, '_download_limit', -1 === $variation['download_limit'] ? '' : absint( $variation['download_limit'] ) );
+				if ( isset( $data['download_limit'] ) ) {
+					$variation->set_download_limit( $data['download_limit'] );
 				}
 
 				// Download expiry.
-				if ( isset( $variation['download_expiry'] ) ) {
-					update_post_meta( $variation_id, '_download_expiry', -1 === $variation['download_expiry'] ? '' : absint( $variation['download_expiry'] ) );
+				if ( isset( $data['download_expiry'] ) ) {
+					$variation->set_download_expiry( $data['download_expiry'] );
+				}
+			}
+
+			// Shipping data.
+			$variation = $this->save_product_shipping_data( $variation, $data );
+
+			// Stock handling.
+			$manage_stock = (bool) $variation->get_manage_stock();
+			if ( isset( $data['manage_stock'] ) ) {
+				$manage_stock = $data['manage_stock'];
+			}
+			$variation->set_manage_stock( $manage_stock );
+
+			$stock_status = $variation->get_stock_status();
+			if ( isset( $data['in_stock'] ) ) {
+				$stock_status = true === $data['in_stock'] ? 'instock' : 'outofstock';
+			}
+			$variation->set_stock_status( $stock_status );
+
+			$backorders = $variation->get_backorders();
+			if ( isset( $data['backorders'] ) ) {
+				$backorders = $data['backorders'];
+			}
+			$variation->set_backorders( $backorders );
+
+			if ( $manage_stock ) {
+				if ( isset( $data['stock_quantity'] ) ) {
+					$variation->set_stock_quantity( $data['stock_quantity'] );
+				} elseif ( isset( $data['inventory_delta'] ) ) {
+					$stock_quantity  = wc_stock_amount( $variation->get_stock() );
+					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
+					$variation->set_stock_quantity( $stock_quantity );
 				}
 			} else {
-				update_post_meta( $variation_id, '_download_limit', '' );
-				update_post_meta( $variation_id, '_download_expiry', '' );
-				update_post_meta( $variation_id, '_downloadable_files', '' );
+				$variation->set_backorders( 'no' );
+				$variation->set_stock_quantity( '' );
+			}
+
+			// Regular Price.
+			if ( isset( $data['regular_price'] ) ) {
+				$variation->set_regular_price( $data['regular_price'] );
+			}
+
+			// Sale Price.
+			if ( isset( $data['sale_price'] ) ) {
+				$variation->set_sale_price( $data['sale_price'] );
+			}
+
+			if ( isset( $data['date_on_sale_from'] ) ) {
+				$variation->set_date_on_sale_from( $data['date_on_sale_from'] );
+			}
+
+			if ( isset( $data['date_on_sale_to'] ) ) {
+				$variation->set_date_on_sale_to( $data['date_on_sale_to'] );
+			}
+
+			// Tax class.
+			if ( isset( $data['tax_class'] ) ) {
+				if ( 'parent' !== $data['tax_class'] ) {
+					$variation->set_tax_class( $request['tax_class'] );
+				} else {
+					$variation->set_tax_class( '' );
+				}
 			}
 
 			// Description.
-			if ( isset( $variation['description'] ) ) {
-				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variation['description'] ) );
+			if ( isset( $data['description'] ) ) {
+				$variation->set_description( wp_kses_post( $data['description'] ) );
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
-				$updated_attribute_keys = array();
+			if ( isset( $data['attributes'] ) ) {
+				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute ) {
+				foreach ( $data['attributes'] as $attribute ) {
 					$attribute_id   = 0;
 					$attribute_name = '';
 
@@ -1673,9 +1581,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$_attribute_key           = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$updated_attribute_keys[] = $_attribute_key;
-						$attribute_value          = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						$_attribute_key  = sanitize_title( $_attribute['name'] );
+						$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
@@ -1688,19 +1595,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							}
 						}
 
-						update_post_meta( $variation_id, $_attribute_key, $attribute_value );
+						$_attributes[ $_attribute_key ] = $attribute_value;
 					}
 				}
 
-				// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
-				$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", $updated_attribute_keys ) . "' ) AND post_id = %d;", $variation_id ) );
-
-				foreach ( $delete_attribute_keys as $key ) {
-					delete_post_meta( $variation_id, $key );
-				}
+				$variation->set_attributes( $_attributes );
 			}
 
-			do_action( 'woocommerce_rest_save_product_variation', $variation_id, $menu_order, $variation );
+			$variation->save();
+
+			do_action( 'woocommerce_rest_save_product_variation', $variation->get_id(), $menu_order, $data );
 		}
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child.
@@ -1754,7 +1658,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 			}
 
-			update_post_meta( $product->get_id(), '_default_attributes', $default_attributes );
+			$product->set_default_attributes( $default_attributes );
 		}
 
 		return true;
