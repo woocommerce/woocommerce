@@ -163,15 +163,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
 
 		if ( '' === $review_count ) {
-			$review_count = WC_Comments::get_review_count_for_product( $this );
+			$review_count = WC_Comments::get_review_count_for_product( $product );
 		}
 
 		if ( '' === $rating_counts ) {
-			$rating_counts = WC_Comments::get_rating_counts_for_product( $this );
+			$rating_counts = WC_Comments::get_rating_counts_for_product( $product );
 		}
 
 		if ( '' === $average_rating ) {
-			$average_rating = WC_Comments::get_average_rating_for_product( $this );
+			$average_rating = WC_Comments::get_average_rating_for_product( $product );
 		}
 
 		$product->set_average_rating( $average_rating );
