@@ -202,7 +202,7 @@ class WC_Structured_Data {
 					'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 					'sku'           => $_product->get_sku(),
 					'image'         => wp_get_attachment_url( $_product->get_image_id() ),
-					'description'   => $is_variable ? $_product->get_description() : '',
+					'description'   => $_product->get_description(),
 					'seller'        => array(
 						'@type' => 'Organization',
 						'name'  => $shop_name,

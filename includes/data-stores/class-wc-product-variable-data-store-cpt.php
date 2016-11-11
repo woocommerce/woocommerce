@@ -24,16 +24,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since 2.7.0
 	 */
-	public function read_product_data( $product ) {
-		$product = parent::read_product_data( $product );
-		$product = $this->read_children( $product );
+	public function read_product_data( &$product ) {
+		parent::read_product_data( $product );
+		$this->read_children( $product );
 
 		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
-		$product = $this->read_price_data( $product );
-		$product = $this->read_price_data( $product, true );
-		$product = $this->read_variation_attributes( $product );
-
-		return $product;
+		$this->read_price_data( $product );
+	 	$this->read_price_data( $product, true );
+		$this->read_variation_attributes( $product );
 	}
 
 	/**
@@ -42,7 +40,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param  bool $force_read True to bypass the transient.
 	 * @return WC_Product
 	 */
-	public function read_children( $product, $force_read = false ) {
+	public function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
 
@@ -71,17 +69,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		$product->set_children( wp_parse_id_list( (array) $children['all'] ) );
 		$product->set_visible_children( wp_parse_id_list( (array) $children['visible'] ) );
-
-		return $product;
 	}
 
 	/**
 	 * Loads an array of attributes used for variations, as well as their possible values.
 	 *
 	 * @param WC_Product
-	 * @return WC_Product
 	 */
-	private function read_variation_attributes( $product ) {
+	private function read_variation_attributes( &$product ) {
 		global $wpdb;
 
 		$variation_attributes = array();
@@ -130,8 +125,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		$product->set_variation_attributes( $variation_attributes );
-
-		return $product;
 	}
 
 	/**
@@ -143,9 +136,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since  2.7.0
 	 * @param  WC_Product
 	 * @param  bool $include_taxes If taxes should be calculated or not.
-	 * @return WC_Product
 	 */
-	private function read_price_data( $product, $include_taxes = false ) {
+	private function read_price_data( &$product, $include_taxes = false ) {
 		global $wp_filter;
 
 		/**
@@ -185,9 +177,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			} else {
 				$product->set_variation_prices( $this->prices_array[ $price_hash ] );
 			}
-
-			return $product;
-
 		/**
 		 * No locally cached value? Get the data from the transient or generate it.
 		 */
@@ -265,11 +254,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			} else {
 				$product->set_variation_prices( $this->prices_array[ $price_hash ] );
 			}
-
-			return $product;
 		}
-
-		return $product;
 	}
 
 	/**
@@ -332,7 +317,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				}
 			}
 			if ( $changed ) {
-				$product = $this->read_children( $product, true );
+				$this->read_children( $product, true );
 			}
 		}
 	}

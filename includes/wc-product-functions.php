@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_get_products( $args ) {
 	$args = wp_parse_args( $args, array(
 		'status'         => array( 'draft', 'pending', 'private', 'publish' ),
-		'type'           => array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ),
+		'type'           => array_merge( array_keys( wc_get_product_types() ) ),
 		'parent'         => null,
 		'sku'            => '',
 		'category'       => array(),
@@ -84,7 +84,7 @@ function wc_get_products( $args ) {
 	 * Generate WP_Query args.
 	 */
 	$wp_query_args = array(
-		'post_type'      => array( 'product', 'product_variation' ),
+		'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
 		'post_status'    => $args['status'],
 		'posts_per_page' => $args['limit'],
 		'meta_query'     => array(),
@@ -97,11 +97,13 @@ function wc_get_products( $args ) {
 		$wp_query_args['fields'] = 'ids';
 	}
 
-	$wp_query_args['tax_query'][] = array(
-		'taxonomy' => 'product_type',
-		'field'    => 'slug',
-		'terms'    => $args['type'],
-	);
+	if ( 'variation' !== $args['type'] ) {
+		$wp_query_args['tax_query'][] = array(
+			'taxonomy' => 'product_type',
+			'field'    => 'slug',
+			'terms'    => $args['type'],
+		);
+	}
 
 	if ( ! empty( $args['sku'] ) ) {
 		$wp_query_args['meta_query'][] = array(
@@ -278,7 +280,7 @@ function wc_get_product_ids_on_sale() {
 
 	$data_store          = WC_Data_Store::load( 'product' );
 	$on_sale_products    = $data_store->get_on_sale_products();
-	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) ) );
+	$product_ids_on_sale = wp_parse_id_list( array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale, DAY_IN_SECONDS * 30 );
 
@@ -621,7 +623,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	global $wpdb;
 
 	$data_store = WC_Data_Store::load( 'product' );
-	$sku_found  = $data_store->sku_found( $product_id, $sku );
+	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -1153,16 +1155,4 @@ function wc_products_array_orderby_price( $a, $b ) {
 		return 0;
 	}
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
-}
-
-/**
- * Find a matching (enabled) variation within a variable product.
- * @since  2.7.0
- * @param  WC_Product $product Variable product.
- * @param  array $match_attributes Array of attributes we want to try to match.
- * @return int Matching variation ID or 0.
- */
-function wc_find_matching_product_variation( $product, $match_attributes = array() ) {
-	$data_store = WC_Data_Store::load( 'product' );
-	return $data_store->find_matching_product_variation( $product, $match_attributes );
 }

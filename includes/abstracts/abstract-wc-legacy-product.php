@@ -661,10 +661,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
 	 * Match a variation to a given set of attributes using a WP_Query.
-	 * @deprecated 2.7.0 in favour of wc_find_matching_product_variation.
+	 * @deprecated 2.7.0 in favour of Product data store's find_matching_product_variation.
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
-		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'wc_find_matching_product_variation' );
-		return wc_find_matching_product_variation( $this, $match_attributes );
+		_deprecated_function( 'WC_Product::get_matching_variation', '2.7', 'Product data store find_matching_product_variation' );
+		$data_store = WC_Data_Store::load( 'product' );
+		return $data_store->find_matching_product_variation( $this, $match_attributes );
 	}
 }

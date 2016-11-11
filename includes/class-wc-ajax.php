@@ -440,7 +440,8 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = wc_find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
+		$data_store   = WC_Data_Store::load( 'product' );
+		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );

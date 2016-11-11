@@ -33,9 +33,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$id = $product->get_id();
 		$product->set_parent_id( $post_object->post_parent );
+		$parent_id = $product->get_parent_id();
 
 		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
-		if ( empty( $product->get_parent_id() ) ) {
+		if ( empty( $parent_id ) ) {
 			throw new Exception( sprintf( 'No parent product set for variation #%d', $product->get_id() ), 422 );
 		}
 
@@ -54,7 +55,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'reviews_allowed'   => 'open' === $post_object->comment_status,
 		) );
 
-		$product = $this->read_product_data( $product );
+		$this->read_product_data( $product );
 		$product->read_meta_data();
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
@@ -72,7 +73,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_date_created( current_time( 'timestamp' ) );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
-			'post_type'      => $product->post_type,
+			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
 			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $product->get_attributes(), true ),
@@ -87,12 +88,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$product = $this->update_post_meta( $product );
+			$this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
 			$product->save_meta_data();
 
-			do_action( 'woocommerce_create_' . $product->post_type, $id );
+			do_action( 'woocommerce_create_product_variation', $id );
 
 			$product->apply_changes();
 			$this->update_version_and_type( $product );
@@ -117,12 +118,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'menu_order'     => $product->get_menu_order(),
 		);
 		wp_update_post( $post_data );
-		$product = $this->update_post_meta( $product );
+		$this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
 		$product->save_meta_data();
 
-		do_action( 'woocommerce_update_' . $product->post_type, $product->get_id() );
+		do_action( 'woocommerce_update_product_variation', $product->get_id() );
 
 		$product->apply_changes();
 		$this->update_version_and_type( $product );
@@ -137,13 +138,22 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	*/
 
 	/**
+	 * Make sure we store the product version (to track data changes).
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function update_version_and_type( &$product ) {
+		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+	}
+
+	/**
 	 * Read post data.
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @return WC_Product
 	 */
-	protected function read_product_data( $product ) {
+	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
 		$product->set_props( array(
 			'description'       => get_post_meta( $id, '_variation_description', true ),
@@ -190,8 +200,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'tax_class'      => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
 			'image_id'       => get_post_thumbnail_id( $product->get_parent_id() ),
 		) );
-
-		return $product;
 	}
 
 	/**
@@ -200,7 +208,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @since 2.7.0
 	 * @param WC_Product
 	 */
-	protected function update_terms( $product ) {
+	protected function update_terms( &$product ) {
 		wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 	}
 
@@ -210,7 +218,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @since 2.7.0
 	 * @param WC_Product
 	 */
-	protected function update_attributes( $product ) {
+	protected function update_attributes( &$product ) {
 		global $wpdb;
 		$attributes             = $product->get_attributes();
 		$updated_attribute_keys = array();
@@ -232,12 +240,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @return WC_Product
 	 */
-	public function update_post_meta( $product ) {
+	public function update_post_meta( &$product ) {
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
-		$product = parent::update_post_meta( $product );
-		return $product;
+		parent::update_post_meta( $product );
 	}
 
 	/**
@@ -246,7 +252,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @since 2.7.0
 	 * @param WC_Product
 	 */
-	protected function clear_caches( $product ) {
+	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
 		wc_delete_product_transients( $product->get_parent_id() );
 	}

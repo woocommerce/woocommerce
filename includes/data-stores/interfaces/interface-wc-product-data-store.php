@@ -38,7 +38,7 @@ interface WC_Product_Data_Store {
 	 * @param string $sku
 	 * @return bool
 	 */
-	public function sku_found( $product_id, $sku );
+	public function is_existing_sku( $product_id, $sku );
 
 	/**
 	 * Return product ID based on SKU.

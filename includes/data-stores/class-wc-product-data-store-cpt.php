@@ -31,7 +31,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		$product->set_date_created( current_time( 'timestamp' ) );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
-			'post_type'      => $product->post_type,
+			'post_type'      => 'product',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
@@ -47,12 +47,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$product = $this->update_post_meta( $product );
+			$this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
 			$product->save_meta_data();
 
-			do_action( 'woocommerce_new_' . $product->post_type, $id );
+			do_action( 'woocommerce_new_product', $id );
 
 			$product->apply_changes();
 			$this->update_version_and_type( $product );
@@ -70,7 +70,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
-			return;
 		}
 
 		$id = $product->get_id();
@@ -89,8 +88,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		) );
 
 		$product->read_meta_data();
-		$product = $this->read_attributes( $product );
-		$product = $this->read_product_data( $product );
+		$this->read_attributes( $product );
+		$this->read_product_data( $product );
 		$product->set_object_read( true );
 	}
 
@@ -111,12 +110,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		);
 		wp_update_post( $post_data );
 
-		$product = $this->update_post_meta( $product );
+		$this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
 		$product->save_meta_data();
 
-		do_action( 'woocommerce_update_' . $product->post_type, $product->get_id() );
+		do_action( 'woocommerce_update_product', $product->get_id() );
 
 		$product->apply_changes();
 		$this->update_version_and_type( $product );
@@ -152,10 +151,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * Read product data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Product
-	 * @return WC_Product
 	 * @since 2.7.0
 	 */
-	protected function read_product_data( $product ) {
+	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
@@ -202,18 +200,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 				$product->{$function}( get_post_meta( $product->get_id(), '_' . $key, true ) );
 			}
 		}
-
-		return $product;
 	}
 
 	/**
 	 * Read attributes from post meta.
 	 *
 	 * @param WC_Product
-	 * @return WC_Product
 	 * @since 2.7.0
 	 */
-	protected function read_attributes( $product ) {
+	protected function read_attributes( &$product ) {
 		$meta_values = maybe_unserialize( get_post_meta( $product->get_id(), '_product_attributes', true ) );
 
 		if ( $meta_values ) {
@@ -238,18 +233,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			}
 			$product->set_attributes( $attributes );
 		}
-
-		return $product;
 	}
 
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
-	 * @return WC_Product
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( $product ) {
+	protected function update_post_meta( &$product ) {
 		$updated_props     = array();
 		$changed_props     = array_keys( $product->get_changes() );
 		$meta_key_to_props = array(
@@ -363,8 +355,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 				}
 			}
 		}
-
-		return $product;
 	}
 
 	/**
@@ -373,7 +363,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product
 	 * @since 2.7.0
 	 */
-	protected function update_terms( $product ) {
+	protected function update_terms( &$product ) {
 		wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
 		wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
@@ -385,7 +375,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product
 	 * @since 2.7.0
 	 */
-	protected function update_attributes( $product ) {
+	protected function update_attributes( &$product ) {
 		$attributes  = $product->get_attributes();
 		$meta_values = array();
 
@@ -427,11 +417,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product
 	 * @since 2.7.0
 	 */
-	protected function update_version_and_type( $product ) {
-		if ( 'product' === $product->post_type ) {
-			$type_term = get_term_by( 'name', $product->get_type(), 'product_type' );
-			wp_set_object_terms( $product->get_id(), absint( $type_term->term_id ), 'product_type' );
-		}
+	protected function update_version_and_type( &$product ) {
+		$type_term = get_term_by( 'name', $product->get_type(), 'product_type' );
+		wp_set_object_terms( $product->get_id(), absint( $type_term->term_id ), 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
 	}
 
@@ -441,14 +429,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product
 	 * @since 2.7.0
 	 */
-	protected function update_term_counts( $product ) {
+	protected function update_term_counts( &$product ) {
 		if ( ! wp_defer_term_counting() ) {
 			global $wc_allow_term_recount;
 
 			$wc_allow_term_recount = true;
 
+			$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
+
 			// Update counts for the post's terms.
-			foreach ( (array) get_object_taxonomies( $product->post_type ) as $taxonomy ) {
+			foreach ( (array) get_object_taxonomies( $post_type ) as $taxonomy ) {
 				$tt_ids = wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'tt_ids' ) );
 				wp_update_term_count( $tt_ids, $taxonomy );
 			}
@@ -461,7 +451,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param WC_Product
 	 * @since 2.7.0
 	 */
-	protected function clear_caches( $product ) {
+	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
 	}
 
@@ -470,12 +460,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	| wc-product-functions.php methods
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * <Description>
-	 *
-	 * @since 2.7.0
-	 */
 
 	/**
 	 * Returns an array of on sale products, as an array of objects with an
@@ -537,7 +521,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
 	 * @return bool
 	 */
-	public function sku_found( $product_id, $sku ) {
+	public function is_existing_sku( $product_id, $sku ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "
 			SELECT $wpdb->posts.ID
@@ -670,7 +654,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
 			 */
-			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : wc_find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
 		}
 
 		return 0;
