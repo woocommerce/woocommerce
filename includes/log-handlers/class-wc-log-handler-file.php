@@ -1,7 +1,10 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
+
+if ( ! class_exists( 'WC_Log_Handler' ) ) {
+	include_once( dirname( dirname( __FILE__ ) ) . '/abstracts/abstract-wc-log-handler.php' );
 }
 
 /**
@@ -13,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category       Class
  * @author         WooThemes
  */
-class WC_Log_Handler_File {
+class WC_Log_Handler_File extends WC_Log_Handler {
 
 	/**
 	 * Stores open file handles.
@@ -55,17 +58,48 @@ class WC_Log_Handler_File {
 	 *
 	 * @return bool log entry should bubble to further loggers.
 	 */
-	public function handle( $level, $message, $context ) {
+	public function handle( $level, $timestamp, $message, $context ) {
 
-		if ( isset($context['tag']) && $context['tag'] ) {
+		if ( isset( $context['tag'] ) && $context['tag'] ) {
 			$handle = $context['tag'];
 		} else {
 			$handle = 'log';
 		}
 
-		// Bubble if add is NOT successful
-		return ! $this->add( $level, $message, $handle );
+		$entry = $this->format_entry( $level, $timestamp, $message, $context );
 
+		// Bubble if add is NOT successful
+		return ! $this->add( $entry, $handle );
+
+	}
+
+	/**
+	 * Builds a log entry text from level, timestamp and message.
+	 *
+	 * Attempt to ensure backwords compatibility for legacy WC_Logger::add calls
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int $timestamp
+	 * @param string $message
+	 *
+	 * @return string Formatted log entry
+	 */
+	public function format_entry( $level, $timestamp, $message, $context ) {
+
+		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
+			if ( isset( $context['tag'] ) && true === $context['tag'] ) {
+				$handle = $context['tag'];
+			} else {
+				$handle = 'log';
+			}
+			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
+			$time   = date_i18n( 'm-d-Y @ H:i:s -' );
+			$entry = "{$time} {$message}";
+		} else {
+			$entry = parent::format_entry( $level, $timestamp, $message, $context );
+		}
+
+		return $entry;
 	}
 
 	/**
@@ -121,13 +155,11 @@ class WC_Log_Handler_File {
 	 *
 	 * @return bool
 	 */
-	public function add( $level, $message, $handle ) {
+	public function add( $entry, $handle ) {
 		$result = false;
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
-		    $message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
-			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+			$result = fwrite( $this->_handles[ $handle ], $entry . "\n" );
 		}
 
 		return false !== $result;

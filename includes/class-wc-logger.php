@@ -57,8 +57,8 @@ class WC_Logger {
 	 */
 	public function add( $handle, $message ) {
 		_deprecated_function( 'WC_Logger::add', '2.8', 'WC_Logger::log' );
-		$this->log( self::INFO, $message, array( 'tag' => $handle ) );
-		wc_do_deprecated_action( 'woocommerce_log_add', $handle, $message, '2.8');
+		$this->log( self::INFO, $message, array( 'tag' => $handle, '_legacy' => true ) );
+		wc_do_deprecated_action( 'woocommerce_log_add', $handle, $message, '2.8' );
 		return true;
 	}
 
@@ -73,10 +73,12 @@ class WC_Logger {
 	 *     @type string $tag Optional. May be used by log handlers to sort messages.
 	 * }
 	 */
-	public function log( $level, $message, $context=array() ) {
+	public function log( $level, $message, $context = array() ) {
+
+		$timestamp = current_time( 'timestamp' );
 
 		foreach ( $this->_handlers as $handler ) {
-			$continue = $handler->handle( $level, $message, $context );
+			$continue = $handler->handle( $level, $timestamp, $message, $context );
 
 			if ( false === $continue ) {
 				break;
@@ -91,7 +93,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function emergency( $message, $context=array() ) {
+	public function emergency( $message, $context = array() ) {
 		$this->log( self::EMERGENCY, $message, $context );
 	}
 
@@ -101,7 +103,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function alert( $message, $context=array() ) {
+	public function alert( $message, $context = array() ) {
 		$this->log( self::ALERT, $message, $context );
 	}
 
@@ -111,7 +113,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function critical( $message, $context=array() ) {
+	public function critical( $message, $context = array() ) {
 		$this->log( self::CRITICAL, $message, $context );
 	}
 
@@ -121,7 +123,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function error( $message, $context=array() ) {
+	public function error( $message, $context = array() ) {
 		$this->log( self::ERROR, $message, $context );
 	}
 
@@ -131,7 +133,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function warning( $message, $context=array() ) {
+	public function warning( $message, $context = array() ) {
 		$this->log( self::WARNING, $message, $context );
 	}
 
@@ -141,7 +143,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function notice( $message, $context=array() ) {
+	public function notice( $message, $context = array() ) {
 		$this->log( self::NOTICE, $message, $context );
 	}
 
@@ -151,7 +153,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function info( $message, $context=array() ) {
+	public function info( $message, $context = array() ) {
 		$this->log( self::INFO, $message, $context );
 	}
 
@@ -161,7 +163,7 @@ class WC_Logger {
 	 * @see WC_Logger::log
 	 *
 	 */
-	public function debug( $message, $context=array() ) {
+	public function debug( $message, $context = array() ) {
 		$this->log( self::DEBUG, $message, $context );
 	}
 
