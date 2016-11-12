@@ -1408,6 +1408,24 @@ function wc_get_logger() {
 }
 
 /**
+ * Registers the included file log handler.
+ *
+ * @since 2.8
+ * @param array $handlers
+ * @return array
+ */
+function wc_register_file_log_handler( $handlers ) {
+	if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
+		include_once( dirname( __FILE__ ) . '/log-handlers/class-wc-log-handler-file.php' );
+	}
+
+	array_push( $handlers, new WC_Log_Handler_File() );
+
+	return $handlers;
+}
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_file_log_handler', 0 );
+
+/**
  * Store user agents. Used for tracker.
  * @since 2.7.0
  */
