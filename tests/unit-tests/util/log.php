@@ -14,6 +14,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * Test add().
 	 *
 	 * @since 2.4
+	 *
+	 * @expectedDeprecated WC_Logger::add
 	 */
 	public function test_add() {
 		$log = wc_get_logger();
@@ -28,13 +30,12 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * Test clear().
 	 *
 	 * @since 2.4
+	 *
+	 * @expectedDeprecated WC_Logger::clear
 	 */
 	public function test_clear() {
 		$log = wc_get_logger();
 
-		$log->add( 'unit-tests', 'this is a message' );
-		$log->clear( 'unit-tests' );
-
-		$this->assertEquals( '', $this->read_content( 'unit-tests' ) );
+		$log->clear();
 	}
 }
