@@ -12,6 +12,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$log_files = array(
 			wc_get_log_file_path( 'unit-tests' ),
 			wc_get_log_file_path( 'log' ),
+			wc_get_log_file_path( 'A' ),
 		);
 
 		foreach ( $log_files as $file ) {
