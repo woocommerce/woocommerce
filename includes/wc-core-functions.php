@@ -1424,19 +1424,18 @@ function wc_get_logger() {
 }
 
 /**
- * Registers the included file log handler.
+ * Registers the included file log handler with threshold 'info'.
  *
  * @since 2.8
  * @param array $handlers
- * @param string $threshold Optional. Threshold for log handler. Defaults to 'info'.
  * @return array
  */
-function wc_register_file_log_handler( $handlers, $threshold = 'info' ) {
+function wc_register_file_log_handler( $handlers ) {
 	if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
 		include_once( dirname( __FILE__ ) . '/log-handlers/class-wc-log-handler-file.php' );
 	}
 
-	array_push( $handlers, new WC_Log_Handler_File( array( 'threshold' => $threshold ) ) );
+	array_push( $handlers, new WC_Log_Handler_File( array( 'threshold' => 'info' ) ) );
 
 	return $handlers;
 }
