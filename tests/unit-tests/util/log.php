@@ -132,4 +132,23 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
 	}
+
+	/**
+	 * Test 'tag' context determines log file.
+	 */
+	public function test_log_file_tag() {
+		$log = wc_get_logger();
+		$context_tag_A = array( 'tag' => 'A' );
+
+		$log->info( 'info', $context_tag_A );
+		$log->notice( 'notice', $context_tag_A );
+		$log->warning( 'warning', $context_tag_A );
+		$log->error( 'error', $context_tag_A );
+		$log->critical( 'critical', $context_tag_A );
+		$log->alert( 'alert', $context_tag_A );
+		$log->emergency( 'emergency', $context_tag_A );
+
+		$log_content = $this->read_content( 'A' );
+		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+	}
 }
