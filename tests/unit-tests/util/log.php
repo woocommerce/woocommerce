@@ -83,15 +83,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * Test consumed logs do not bubble.
 	 */
 	public function test_log_entry_is_consumed() {
-		$consumer = $this->createMock( WC_Log_Handler::class );
-		$consumer->method( 'handle' )->willReturn( false );
-
-		$error_thrower = $this->createMock( WC_Log_Handler::class );
-		$error_thrower->method( 'handle' )->will( $this->throwException( new Exception( 'Log was not consumed.' ) ) );
-
-		add_filter( 'woocommerce_register_log_handlers', function() use ( $consumer, $error_thrower ) {
-			return array( $consumer, $error_thrower );
-		} );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_consume_error_handlers' ) );
 
 		$log = wc_get_logger();
 		$log->log( 'emergency', '' );
@@ -101,15 +93,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * Test unconsumed logs bubble.
 	 */
 	public function test_log_entry_bubbles() {
-		$bubbler = $this->createMock( WC_Log_Handler::class );
-		$bubbler->method( 'handle' )->willReturn( true );
-
-		$should_be_reached = $this->createMock( WC_Log_Handler::class );
-		$should_be_reached->expects( $this->once() )->method( 'handle' );
-
-		add_filter( 'woocommerce_register_log_handlers', function() use ( $bubbler, $should_be_reached ) {
-			return array( $bubbler, $should_be_reached );
-		} );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_bubble_required_handlers' ) );
 
 		$log = wc_get_logger();
 		$log->log( 'emergency', '' );
@@ -151,5 +135,25 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'A' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+	}
+
+	public function _return_bubble_required_handlers() {
+		$bubble = $this->createMock( WC_Log_Handler::class );
+		$bubble->method( 'handle' )->willReturn( true );
+
+		$required = $this->createMock( WC_Log_Handler::class );
+		$required->expects( $this->once() )->method( 'handle' );
+
+		return array( $bubble, $required );
+	}
+
+	public function _return_consume_error_handlers() {
+		$consume = $this->createMock( WC_Log_Handler::class );
+		$consume->method( 'handle' )->willReturn( false );
+
+		$error = $this->createMock( WC_Log_Handler::class );
+		$error->method( 'handle' )->will( $this->throwException( new Exception( 'Log was not consumed.' ) ) );
+
+		return array( $consume, $error );
 	}
 }
