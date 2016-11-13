@@ -35,7 +35,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 *     @type string|arr $to Optional. Email or emails to recieve log messages. Default site admin.
 	 * }
 	 */
-	public function __construct( $args ) {
+	public function __construct( $args = array() ) {
 
 		$args = wp_parse_args( $args, array(
 			'threshold' => 'critical',
@@ -61,8 +61,6 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $message
 	 * @param array $context {
 	 *     Optional. Array with additional information
-	 *
-	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
 	 * }
 	 *
 	 * @return bool log entry should bubble to further loggers.
@@ -78,17 +76,41 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 		return true;
 	}
 
+	/**
+	 * Build subject for log email.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $message
+	 * @param array $context {
+	 *     Optional. Array with additional information
+	 * }
+	 *
+	 * @return string subject
+	 */
 	public function get_subject( $level, $timestamp, $message, $context ) {
-		return 'subject';
+		return sprintf( __( '[%s] WooCommerce log message', 'woocommerce' ), $level );
 	}
 
+	/**
+	 * Build body for log email.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $message
+	 * @param array $context {
+	 *     Optional. Array with additional information
+	 * }
+	 *
+	 * @return string body
+	 */
 	public function get_body( $level, $timestamp, $message, $context ) {
 		$entry = $this->format_entry( $level, $timestamp, $message, $context );
-		return $entry;
+		return sprintf( __( "You have recieved the following WooCommerce log message: \n\n%s", 'woocommerce' ), $entry );
 	}
 
 	/**
 	 * Adds an email to the list of recipients.
+	 *
+	 * @param string email Email address to add
 	 */
 	public function add_email( $email ) {
 		array_push( $this->_to, $email );
