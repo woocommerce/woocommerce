@@ -28,8 +28,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 	/**
 	 * Constructor for the logger.
+	 *
+	 * @param $args additional args. @see WC_Log_Handler::__construct
 	 */
-	public function __construct() {
+	public function __construct( $args ) {
+		parent::__construct( $args );
 		$this->_handles = array();
 	}
 
@@ -60,6 +63,10 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function handle( $level, $timestamp, $message, $context ) {
 
+		if ( ! $this->should_handle( $level ) ) {
+			return true;
+		}
+
 		if ( isset( $context['tag'] ) && $context['tag'] ) {
 			$handle = $context['tag'];
 		} else {
@@ -70,13 +77,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		// Bubble if add is NOT successful
 		return ! $this->add( $entry, $handle );
-
 	}
 
 	/**
 	 * Builds a log entry text from level, timestamp and message.
 	 *
-	 * Attempt to ensure backwords compatibility for legacy WC_Logger::add calls
+	 * Attempt to ensure backwards compatibility for legacy WC_Logger::add calls
 	 *
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param int $timestamp
