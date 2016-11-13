@@ -48,7 +48,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 */
 	public function test_clear() {
 		$log = wc_get_logger();
-		$log->clear();
+		$log->clear( 'log' );
 		$this->setExpectedDeprecated( 'WC_Logger::clear' );
 	}
 
