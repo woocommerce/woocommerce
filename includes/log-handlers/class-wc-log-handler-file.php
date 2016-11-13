@@ -99,7 +99,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				$handle = 'log';
 			}
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-			$time   = date_i18n( 'm-d-Y @ H:i:s -' );
+			$time = date_i18n( 'm-d-Y @ H:i:s -' );
 			$entry = "{$time} {$message}";
 		} else {
 			$entry = parent::format_entry( $level, $timestamp, $message, $context );

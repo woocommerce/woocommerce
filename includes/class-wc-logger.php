@@ -86,7 +86,9 @@ class WC_Logger {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! in_array( $level, self::$_valid_levels ) ) {
-			_doing_it_wrong( __FUNCTION__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s"', 'woocommerce' ), $level ), '2.8' );
+			$class = __CLASS__;
+			$method = __FUNCTION__;
+			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
 		}
 
 		$timestamp = current_time( 'timestamp' );

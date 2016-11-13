@@ -128,7 +128,7 @@ abstract class WC_Log_Handler {
 	 */
 	public function format_entry( $level, $timestamp, $message, $context ) {
 		$time_string = $this->format_time( $timestamp );
-		$level_string = to_uppercase( $level );
-		return "[{$time}] {$level_string}: {$message}";
+		$level_string = strtoupper( $level );
+		return "[{$time_string}] {$level_string}: {$message}";
 	}
 }
