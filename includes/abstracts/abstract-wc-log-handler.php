@@ -46,16 +46,17 @@ abstract class WC_Log_Handler {
 	 * Constructor for log handler.
 	 *
 	 * @param arr $args {
-	 *     @type string $threshold Optional. Sets the log severity threshold.
+	 *     @type string $threshold Optional. Default 'emergency'. Sets the log severity threshold.
 	 *         emergency|alert|critical|error|warning|notice|info|debug
 	 * }
 	 */
 	public function __construct( $args = array() ) {
-		if ( isset( $args['threshold'] ) ) {
-			$this->set_threshold( $args['threshold'] );
-		} else {
-			$this->set_threshold( WC_Logger::EMERGENCY );
-		}
+
+		$args = wp_parse_args( $args, array(
+			'threshold' => WC_Logger::EMERGENCY,
+		) );
+
+		$this->set_threshold( $args['threshold'] );
 	}
 
 	/**
