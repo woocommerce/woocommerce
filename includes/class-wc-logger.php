@@ -20,14 +20,14 @@ class WC_Logger {
 	 *
 	 * @see @link {https://tools.ietf.org/html/rfc5424}
 	 */
-	const EMERGENCY = 'emergency';
-	const ALERT     = 'alert';
-	const CRITICAL  = 'critical';
-	const ERROR     = 'error';
-	const WARNING   = 'warning';
-	const NOTICE    = 'notice';
-	const INFO      = 'info';
 	const DEBUG     = 'debug';
+	const INFO      = 'info';
+	const NOTICE    = 'notice';
+	const WARNING   = 'warning';
+	const ERROR     = 'error';
+	const CRITICAL  = 'critical';
+	const ALERT     = 'alert';
+	const EMERGENCY = 'emergency';
 
 	/**
 	 * Stores registered log handlers.
@@ -36,6 +36,17 @@ class WC_Logger {
 	 * @access private
 	 */
 	private $_handlers;
+
+	private static $_valid_levels = array(
+		self::DEBUG,
+		self::INFO,
+		self::NOTICE,
+		self::WARNING,
+		self::ERROR,
+		self::CRITICAL,
+		self::ALERT,
+		self::EMERGENCY,
+	);
 
 	/**
 	 * Constructor for the logger.
@@ -74,6 +85,9 @@ class WC_Logger {
 	 * }
 	 */
 	public function log( $level, $message, $context = array() ) {
+		if ( ! in_array( $level, self::$_valid_levels ) ) {
+			_doing_it_wrong( __FUNCTION__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s"', 'woocommerce' ), $level ), '2.8' );
+		}
 
 		$timestamp = current_time( 'timestamp' );
 
