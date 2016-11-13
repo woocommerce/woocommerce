@@ -138,20 +138,20 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	}
 
 	public function _return_bubble_required_handlers() {
-		$bubble = $this->createMock( 'WC_Log_Handler' );
+		$bubble = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
 		$bubble->method( 'handle' )->willReturn( true );
 
-		$required = $this->createMock( 'WC_Log_Handler' );
+		$required = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
 		$required->expects( $this->once() )->method( 'handle' );
 
 		return array( $bubble, $required );
 	}
 
 	public function _return_consume_error_handlers() {
-		$consume = $this->createMock( 'WC_Log_Handler' );
+		$consume = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
 		$consume->method( 'handle' )->willReturn( false );
 
-		$error = $this->createMock( 'WC_Log_Handler' );
+		$error = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
 		$error->method( 'handle' )->will( $this->throwException( new Exception( 'Log was not consumed.' ) ) );
 
 		return array( $consume, $error );
