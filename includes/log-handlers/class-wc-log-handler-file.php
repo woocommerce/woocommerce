@@ -24,17 +24,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @var array
 	 * @access private
 	 */
-	private $_handles;
-
-	/**
-	 * Constructor for the logger.
-	 *
-	 * @param $args additional args. @see WC_Log_Handler::__construct
-	 */
-	public function __construct( $args ) {
-		parent::__construct( $args );
-		$this->_handles = array();
-	}
+	private $_handles = array();
 
 	/**
 	 * Destructor.
@@ -46,7 +36,6 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			}
 		}
 	}
-
 
 	/**
 	 * Handle a log entry.
