@@ -123,35 +123,35 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 */
 	public function test_log_file_tag() {
 		$log = wc_get_logger();
-		$context_tag_A = array( 'tag' => 'A' );
+		$context_tag = array( 'tag' => 'A' );
 
-		$log->info( 'info', $context_tag_A );
-		$log->notice( 'notice', $context_tag_A );
-		$log->warning( 'warning', $context_tag_A );
-		$log->error( 'error', $context_tag_A );
-		$log->critical( 'critical', $context_tag_A );
-		$log->alert( 'alert', $context_tag_A );
-		$log->emergency( 'emergency', $context_tag_A );
+		$log->info( 'info', $context_tag );
+		$log->notice( 'notice', $context_tag );
+		$log->warning( 'warning', $context_tag );
+		$log->error( 'error', $context_tag );
+		$log->critical( 'critical', $context_tag );
+		$log->alert( 'alert', $context_tag );
+		$log->emergency( 'emergency', $context_tag );
 
 		$log_content = $this->read_content( 'A' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
 	}
 
 	public function _return_bubble_required_handlers() {
-		$bubble = $this->createMock( WC_Log_Handler::class );
+		$bubble = $this->createMock( 'WC_Log_Handler' );
 		$bubble->method( 'handle' )->willReturn( true );
 
-		$required = $this->createMock( WC_Log_Handler::class );
+		$required = $this->createMock( 'WC_Log_Handler' );
 		$required->expects( $this->once() )->method( 'handle' );
 
 		return array( $bubble, $required );
 	}
 
 	public function _return_consume_error_handlers() {
-		$consume = $this->createMock( WC_Log_Handler::class );
+		$consume = $this->createMock( 'WC_Log_Handler' );
 		$consume->method( 'handle' )->willReturn( false );
 
-		$error = $this->createMock( WC_Log_Handler::class );
+		$error = $this->createMock( 'WC_Log_Handler' );
 		$error->method( 'handle' )->will( $this->throwException( new Exception( 'Log was not consumed.' ) ) );
 
 		return array( $consume, $error );
