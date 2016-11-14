@@ -14,6 +14,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Method to create a new coupon in the database.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 */
 	public function create( &$coupon ) {
@@ -40,6 +42,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Method to read a coupon.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 */
 	public function read( &$coupon ) {
@@ -82,6 +86,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Updates a coupon in the database.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 */
 	public function update( &$coupon ) {
@@ -98,6 +104,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Deletes a coupon from the database.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param bool $force_delete True to permently delete, false to trash.
 	 */
@@ -114,6 +122,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
+	 *
 	 * @since 2.7.0
 	 */
 	private function update_post_meta( $coupon ) {
@@ -172,6 +181,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Increase usage count for current coupon.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
@@ -185,6 +196,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Decrease usage count for current coupon.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 */
@@ -206,6 +219,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 
 	/**
 	 * Get the number of uses for a coupon by user ID.
+	 *
+	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param id $user_id
 	 * @return int
@@ -215,4 +230,34 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %d;", $coupon->get_id(), $user_id ) );
 	}
 
+	/**
+	 * Return a coupon code for a specific ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $id
+	 * @return string Coupon Code
+	 */
+	public function get_code_by_id( $id ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "
+			SELECT post_title
+			FROM $wpdb->posts
+			WHERE ID = %d
+			AND post_type = 'shop_coupon'
+			AND post_status = 'publish';
+		", $id ) );
+	}
+
+	/**
+	 * Return an array of IDs for for a specific coupon code.
+	 * Can return multiple to check for existence.
+	 *
+	 * @since 2.7.0
+	 * @param string $code
+	 * @return array Array of IDs.
+	 */
+	public function get_ids_by_code( $code ) {
+		global $wpdb;
+		return $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC;", $code ) );
+	}
 }
