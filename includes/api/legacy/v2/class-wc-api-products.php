@@ -357,20 +357,20 @@ class WC_API_Products extends WC_API_Resource {
 				$product->set_description( $post_content );
 			}
 
-			// Validate the product type
+			// Validate the product type.
 			if ( isset( $data['type'] ) && ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
 			}
 
-			// Check for featured/gallery images, upload it and set it
+			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $data['images'] ) ) {
 				$product = $this->save_product_images( $product, $data['images'] );
 			}
 
-			// Save product meta fields
+			// Save product meta fields.
 			$product = $this->save_product_meta( $product, $data );
 
-			// Save variations
+			// Save variations.
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
 					$this->save_variations( $product, $data );
@@ -384,7 +384,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
 
-			// Clear cache/transients
+			// Clear cache/transients.
 			wc_delete_product_transients( $id );
 
 			return $this->get_product( $id );
