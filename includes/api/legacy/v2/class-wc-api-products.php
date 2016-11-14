@@ -294,10 +294,11 @@ class WC_API_Products extends WC_API_Resource {
 			$this->server->send_status( 201 );
 
 			return $this->get_product( $id );
-		} catch ( WC_API_Exception $e ) {
-			// Remove the product when fails
+		} catch ( WC_Data_Exception $e ) {
 			$this->clear_product( $id );
-
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} catch ( WC_API_Exception $e ) {
+			$this->clear_product( $id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -388,6 +389,8 @@ class WC_API_Products extends WC_API_Resource {
 			wc_delete_product_transients( $id );
 
 			return $this->get_product( $id );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
