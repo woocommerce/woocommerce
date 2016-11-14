@@ -796,8 +796,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return rest_ensure_response( $response );
 		} catch ( WC_Data_Exception $e ) {
+			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
+			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -809,6 +811,34 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$product = $this->prepare_item_for_database( $request );
 		$product->save();
 		return $product->get_id();
+	}
+
+	/**
+	 * Complete remove all product data.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int $id Product ID.
+	 */
+	protected function purge_product( $id ) {
+		if ( ! is_numeric( $id ) || 0 >= $id ) {
+			return;
+		}
+
+		// Delete product attachments.
+		$attachments = get_children( array(
+			'post_parent' => $id,
+			'post_status' => 'any',
+			'post_type'   => 'attachment',
+		) );
+
+		foreach ( (array) $attachments as $attachment ) {
+			wp_delete_attachment( $attachment->ID, true );
+		}
+
+		// Delete product.
+		$product = wc_get_product( $id );
+		$product->delete( true );
 	}
 
 	/**
