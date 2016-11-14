@@ -16,7 +16,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_username( 'testusername-' . time() );
 		$customer->set_password( 'test123' );
 		$customer->set_email( 'test@woo.local' );
-		$customer->create();
+		$customer->save();
 		$wp_user = new WP_User( $customer->get_id() );
 
 		$this->assertEquals( $username, $customer->get_username() );
@@ -36,7 +36,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_email( 'test@wc.local' );
 		$customer->set_first_name( 'Justin' );
 		$customer->set_billing_address_2( 'Apt 5' );
-		$customer->update();
+		$customer->save();
 
 		$customer = new WC_Customer( $customer_id ); // so we can read fresh copies from the DB
 		$this->assertEquals( 'test@wc.local', $customer->get_email() );
@@ -80,7 +80,6 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$this->assertNotEquals( 0, $customer->get_id() );
 		$customer->delete();
-		$customer->read( $customer_id );
 		$this->assertEquals( 0, $customer->get_id() );
 	}
 
@@ -94,16 +93,15 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_username( $username );
 		$customer->set_email( 'test@woo.local' );
 		$customer->set_password( 'hunter2' );
-		$customer->set_first_name( 'Bob' );
+		$customer->set_first_name( 'Billy' );
 		$customer->set_last_name( 'Bob' );
-		$customer->create();
+		$customer->save();
 		$customer_id = $customer->get_id();
-		$customer_read = new WC_Customer();
-		$customer_read->read( $customer_id );
+		$customer_read = new WC_Customer( $customer_id );
 
 		$this->assertEquals( $customer_id, $customer_read->get_id() );
 		$this->assertEquals( 'test@woo.local', $customer_read->get_email() );
-		$this->assertEquals( 'Bob', $customer_read->get_first_name() );
+		$this->assertEquals( 'Billy', $customer_read->get_first_name() );
 		$this->assertEquals( 'Bob', $customer_read->get_last_name() );
 		$this->assertEquals( $username, $customer_read->get_username() );
 	}
@@ -221,7 +219,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$order = WC_Helper_Order::create_order( $customer_id );
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$last_order = $customer->get_last_order();
 		$this->assertEquals( $order->get_id(), $last_order ? $last_order->get_id() : 0 );
 		$this->assertEquals( $order->get_date_created(), $last_order ? $last_order->get_date_created() : 0 );
@@ -238,7 +236,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		WC_Helper_Order::create_order( $customer_id );
 		WC_Helper_Order::create_order( $customer_id );
 		WC_Helper_Order::create_order( $customer_id );
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( 3, $customer->get_order_count() );
 	}
 
@@ -250,10 +248,10 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$order = WC_Helper_Order::create_order( $customer_id );
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( 0, $customer->get_total_spent() );
 		$order->update_status( 'wc-completed' );
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( 40, $customer->get_total_spent() );
 		$order->delete();
 	}
@@ -306,7 +304,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_shipping_postcode( '11111' );
 		$customer->set_shipping_city( 'Test' );
 		$customer->save();
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 
 		update_option( 'woocommerce_tax_based_on', 'shipping' );
 		$taxable = $customer->get_taxable_address();
@@ -437,14 +435,12 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Philadelphia', $session->get_billing_city() );
 
 		$session->set_billing_address( '124 South Street' );
-		$session->save_to_session();
+		$session->save();
 
 		$session = new WC_Customer( 0, true );
-		$session->load_session();
 		$this->assertEquals( '124 South Street', $session->get_billing_address() );
 
 		$session = new WC_Customer( 0, true );
-		$session->load_session();
 		$session->set_billing_postcode( '32191' );
 		$session->save();
 
@@ -462,7 +458,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id  = $customer->get_id();
 		$meta_value = time() . '-custom-value';
 		add_user_meta( $customer_id, 'test_field', $meta_value, true );
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$fields = $customer->get_meta_data();
 		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field' ) );
 	}
@@ -477,7 +473,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$meta_value = time() . '-custom-value';
 		$customer->add_meta_data( 'my-field', $meta_value, true );
 		$customer->save();
-		$customer->read( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( $meta_value, $customer->get_meta( 'my-field' ) );
 	}
 }

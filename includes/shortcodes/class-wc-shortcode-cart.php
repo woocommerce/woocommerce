@@ -38,8 +38,7 @@ class WC_Shortcode_Cart {
 			}
 
 			WC()->customer->set_calculated_shipping( true );
-
-			WC()->customer->save_to_session();
+			WC()->customer->save();
 
 			wc_add_notice( __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 

@@ -287,8 +287,11 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-data-store.php' ); // WC_Data_Store for CRUD
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-object-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-coupon-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-customer-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
@@ -349,8 +352,9 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents
-			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
 			$this->structured_data = new WC_Structured_Data();                       // Structured Data class, generates and handles structured data
+			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );          // Customer should be saved during shutdown.
 		}
 
 		$this->load_webhooks();
