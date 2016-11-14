@@ -370,18 +370,17 @@ class WC_API_Products extends WC_API_Resource {
 			// Save product meta fields
 			$product = $this->save_product_meta( $product, $data );
 
-			$product->save();
-
 			// Save variations
-			$product = get_product( $id );
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
 					$this->save_variations( $product, $data );
 				} else {
 					// Just sync variations.
-					WC_Product_Variable::sync( $product );
+					$product = WC_Product_Variable::sync( $product, false );
 				}
 			}
+
+			$product->save();
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
 
@@ -1064,7 +1063,6 @@ class WC_API_Products extends WC_API_Resource {
 			} else {
 				$product->set_price( $product->get_regular_price() );
 			}
-
 		}
 
 		// Product parent ID for groups

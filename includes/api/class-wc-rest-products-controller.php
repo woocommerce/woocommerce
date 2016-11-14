@@ -1700,7 +1700,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$this->save_variations_data( $product, $request );
 				} else {
 					// Just sync variations.
-					WC_Product_Variable::sync( $product, false );
+					$product = WC_Product_Variable::sync( $product, false );
 				}
 			}
 

@@ -426,22 +426,20 @@ class WC_API_Products extends WC_API_Resource {
 				$product = $this->save_product_images( $product, $data['images'] );
 			}
 
-			// Save product meta fields.
+			// Save product meta fields
 			$product = $this->save_product_meta( $product, $data );
 
-			$product->save();
-
-			// Save variations.
-			$product = get_product( $id );
+			// Save variations
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
 					$this->save_variations( $product, $data );
 				} else {
-					// Just sync variations
-					WC_Product_Variable::sync( $id );
-					WC_Product_Variable::sync_stock_status( $id );
+					// Just sync variations.
+					$product = WC_Product_Variable::sync( $product, false );
 				}
 			}
+
+			$product->save();
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
 
@@ -720,7 +718,7 @@ class WC_API_Products extends WC_API_Resource {
 			$image_id = 0;
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
-			} else if ( ! empty( $image ) ) {
+			} elseif ( ! empty( $image ) ) {
 				$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
@@ -788,7 +786,7 @@ class WC_API_Products extends WC_API_Resource {
 				$image = $data['image'];
 				if ( is_numeric( $image ) ) {
 					$image_id = absint( $image );
-				} else if ( ! empty( $image ) ) {
+				} elseif ( ! empty( $image ) ) {
 					$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
@@ -1627,7 +1625,7 @@ class WC_API_Products extends WC_API_Resource {
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
-				} else if ( isset( $data['inventory_delta'] ) ) {
+				} elseif ( isset( $data['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( $product->get_stock() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
@@ -2536,9 +2534,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( strlen( $slug ) >= 28 ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), 400 );
-		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), 400 );
 		}
 
@@ -3034,7 +3032,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			if ( ! $term ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product_attribute_term' ), 500 );
-			} else if ( is_wp_error( $term ) ) {
+			} elseif ( is_wp_error( $term ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', $term->get_error_message(), 400 );
 			}
 
