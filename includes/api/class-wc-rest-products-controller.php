@@ -736,31 +736,32 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
-		$product_id = $this->save_product( $request );
-		if ( is_wp_error( $product_id ) ) {
-			return $product_id;
+		try {
+			$product_id = $this->save_product( $request );
+			$post       = get_post( $product_id );
+			$this->update_additional_fields_for_object( $post, $request );
+			$this->add_post_meta_fields( $post, $request );
+
+			/**
+			 * Fires after a single item is created or updated via the REST API.
+			 *
+			 * @param WP_Post         $post      Post data.
+			 * @param WP_REST_Request $request   Request object.
+			 * @param boolean         $creating  True when creating item, false when updating.
+			 */
+			do_action( 'woocommerce_rest_insert_product', $post, $request, true );
+			$request->set_param( 'context', 'edit' );
+			$response = $this->prepare_item_for_response( $post, $request );
+			$response = rest_ensure_response( $response );
+			$response->set_status( 201 );
+			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
+
+			return $response;
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-
-		$post = get_post( $product_id );
-		$this->update_additional_fields_for_object( $post, $request );
-
-		$this->add_post_meta_fields( $post, $request );
-
-		/**
-		 * Fires after a single item is created or updated via the REST API.
-		 *
-		 * @param object          $post      Inserted object.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
-		 */
-		do_action( "woocommerce_rest_insert_product", $post, $request, true );
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
-		$response = rest_ensure_response( $response );
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
-
-		return $response;
 	}
 
 	/**
@@ -770,35 +771,30 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
+		$post_id = (int) $request['id'];
+
+		if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		try {
-			$post_id = (int) $request['id'];
-
-			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
-			}
-
 			$product_id = $this->save_product( $request );
-			if ( is_wp_error( $product_id ) ) {
-				return $product_id;
-			}
-
-			$post = get_post( $product_id );
+			$post       = get_post( $product_id );
 			$this->update_additional_fields_for_object( $post, $request );
-
 			$this->update_post_meta_fields( $post, $request );
 
 			/**
 			 * Fires after a single item is created or updated via the REST API.
 			 *
-			 * @param object          $post      Inserted object (not a WP_Post object).
+			 * @param WP_Post         $post      Post data.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
 			 */
-			do_action( "woocommerce_rest_insert_product", $post, $request, false );
+			do_action( 'woocommerce_rest_insert_product', $post, $request, false );
 			$request->set_param( 'context', 'edit' );
 			$response = $this->prepare_item_for_response( $post, $request );
-			return rest_ensure_response( $response );
 
+			return rest_ensure_response( $response );
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
@@ -810,15 +806,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * Saves a product to the database.
 	 */
 	public function save_product( $request ) {
-		try {
-			$product = $this->prepare_item_for_database( $request );
-			$product->save();
-			return $product->get_id();
-		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
+		$product = $this->prepare_item_for_database( $request );
+		$product->save();
+		return $product->get_id();
 	}
 
 	/**
@@ -1571,27 +1561,23 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
-		try {
-			$product = wc_get_product( $post );
+		$product = wc_get_product( $post );
 
-			// Check for featured/gallery images, upload it and set it.
-			if ( isset( $request['images'] ) ) {
-				$product = $this->save_product_images( $product, $request['images'] );
-			}
-
-			// Save product meta fields.
-			$product = $this->save_product_meta( $product, $request );
-			$product->save();
-
-			// Save variations.
-			if ( isset( $request['type'] ) && 'variable' === $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-				$this->save_variations_data( $product, $request );
-			}
-
-			return true;
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		// Check for featured/gallery images, upload it and set it.
+		if ( isset( $request['images'] ) ) {
+			$product = $this->save_product_images( $product, $request['images'] );
 		}
+
+		// Save product meta fields.
+		$product = $this->save_product_meta( $product, $request );
+		$product->save();
+
+		// Save variations.
+		if ( isset( $request['type'] ) && 'variable' === $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
+			$this->save_variations_data( $product, $request );
+		}
+
+		return true;
 	}
 
 	/**
@@ -1602,33 +1588,29 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
-		try {
-			$product = wc_get_product( $post );
+		$product = wc_get_product( $post );
 
-			// Check for featured/gallery images, upload it and set it.
-			if ( isset( $request['images'] ) ) {
-				$product = $this->save_product_images( $product, $request['images'] );
-			}
-
-			// Save product meta fields.
-			$product = $this->save_product_meta( $product, $request );
-
-			// Save variations.
-			if ( $product->is_type( 'variable' ) ) {
-				if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-					$this->save_variations_data( $product, $request );
-				} else {
-					// Just sync variations.
-					$product = WC_Product_Variable::sync( $product, false );
-				}
-			}
-
-			$product->save();
-
-			return true;
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		// Check for featured/gallery images, upload it and set it.
+		if ( isset( $request['images'] ) ) {
+			$product = $this->save_product_images( $product, $request['images'] );
 		}
+
+		// Save product meta fields.
+		$product = $this->save_product_meta( $product, $request );
+
+		// Save variations.
+		if ( $product->is_type( 'variable' ) ) {
+			if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
+				$this->save_variations_data( $product, $request );
+			} else {
+				// Just sync variations.
+				$product = WC_Product_Variable::sync( $product, false );
+			}
+		}
+
+		$product->save();
+
+		return true;
 	}
 
 	/**
