@@ -477,50 +477,51 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Sync the variable product with it's children.
+	 * Sync a variable product with it's children. These sync functions sync
+	 * upwards (from child to parent) when the variation is saved.
 	 *
-	 * These sync functions sync upwards (from child to parent) when the variation is saved.
-	 * @param WC_Product|int $product
-	 * @param bool $saving If this is a sync event during save, this will be true. Avoid calling WC_Product::save() as this will be done for you.
+	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
+	 * @param bool $save If true, the prouduct object will be saved to the DB before returning it.
+	 * @return WC_Product Synced product object.
 	 */
-	public static function sync( &$product, $saving = false ) {
+	public static function sync( $product, $save = true ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
-		self::sync_stock_status( $product, $saving );
-		self::sync_price( $product );
-		self::sync_attributes( $product );
-		do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $saving );
+		if ( is_a( $product, 'WC_Product_Variable' ) ) {
+			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store->sync_price( $product );
+			$data_store->sync_stock_status( $product );
+			self::sync_attributes( $product ); // Legacy update of attributes.
+
+			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $save );
+
+			if ( $save ) {
+				$product->save();
+			}
+		}
+		return $product;
 	}
 
 	/**
-	 * Sync variable product prices with children.
+	 * Sync parent stock status with the status of all children and save.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Product|int $product
+	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
+	 * @param bool $save If true, the prouduct object will be saved to the DB before returning it.
+	 * @return WC_Product Synced product object.
 	 */
-	protected static function sync_price( &$product ) {
+	public static function sync_stock_status( $product, $save = true ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = wc_get_product( $product );
 		}
+		if ( is_a( $product, 'WC_Product_Variable' ) ) {
+			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store->sync_stock_status( $product );
 
-		$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
-		$data_store->sync_price( $product );
-	}
-
-	/**
-	 * Sync VARIATIONS with the PARENT.
-	 *
-	 * @param WC_Product|int $product
-	 */
-	public static function sync_stock_status( &$product, $saving = false ) {
-		if ( ! is_a( $product, 'WC_Product' ) ) {
-			$product = wc_get_product( $product );
+			if ( $save ) {
+				$product->save();
+			}
 		}
-		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
-
-		if ( ! $saving ) {
-			$product->save();
-		}
+		return $product;
 	}
 }

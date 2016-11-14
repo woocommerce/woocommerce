@@ -345,4 +345,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 	}
 
+	/**
+	 * Sync variable product stock status with children.
+	 * Change does not persist unless saved by caller.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product|int $product
+	 */
+	public function sync_stock_status( &$product ) {
+		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+	}
 }
