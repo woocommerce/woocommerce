@@ -758,10 +758,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return $response;
 		} catch ( WC_Data_Exception $e ) {
-			$this->purge_product( $product_id );
+			$this->delete_post( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
-			$this->purge_product( $product_id );
+			$this->delete_post( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -811,34 +811,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$product = $this->prepare_item_for_database( $request );
 		$product->save();
 		return $product->get_id();
-	}
-
-	/**
-	 * Complete remove all product data.
-	 *
-	 * @since 2.7
-	 *
-	 * @param int $id Product ID.
-	 */
-	protected function purge_product( $id ) {
-		if ( ! is_numeric( $id ) || 0 >= $id ) {
-			return;
-		}
-
-		// Delete product attachments.
-		$attachments = get_children( array(
-			'post_parent' => $id,
-			'post_status' => 'any',
-			'post_type'   => 'attachment',
-		) );
-
-		foreach ( (array) $attachments as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
-		}
-
-		// Delete product.
-		$product = wc_get_product( $id );
-		$product->delete( true );
 	}
 
 	/**
@@ -1655,12 +1627,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Delete post.
 	 *
-	 * @param WP_Post $post
+	 * @param int|WP_Post $id
 	 */
-	protected function delete_post( $post ) {
+	protected function delete_post( $id ) {
+		if ( ! empty( $id->ID ) ) {
+			$id = $post->ID;
+		} elseif ( ! is_numeric( $id ) || 0 >= $id ) {
+			return;
+		}
+
 		// Delete product attachments.
-		$attachments = get_children( array(
-			'post_parent' => $post->ID,
+		$attachments = get_posts( array(
+			'post_parent' => $id,
 			'post_status' => 'any',
 			'post_type'   => 'attachment',
 		) );
@@ -1670,7 +1648,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Delete product.
-		$product = wc_get_product( $post->ID );
+		$product = wc_get_product( $id );
 		$product->delete( true );
 	}
 
