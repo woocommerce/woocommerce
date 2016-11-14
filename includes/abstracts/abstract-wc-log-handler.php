@@ -53,7 +53,7 @@ abstract class WC_Log_Handler {
 	public function __construct( $args = array() ) {
 
 		$args = wp_parse_args( $args, array(
-			'threshold' => WC_Logger::EMERGENCY,
+			'threshold' => WC_Logger::DEBUG,
 		) );
 
 		$this->set_threshold( $args['threshold'] );
