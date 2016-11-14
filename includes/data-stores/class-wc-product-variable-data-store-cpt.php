@@ -292,7 +292,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
-		$children = $this->get_visible_children( 'edit' );
+		$children = $product->get_visible_children( 'edit' );
 		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 	}
 
@@ -345,4 +345,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 	}
 
+	/**
+	 * Sync variable product stock status with children.
+	 * Change does not persist unless saved by caller.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product|int $product
+	 */
+	public function sync_stock_status( &$product ) {
+		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+	}
 }

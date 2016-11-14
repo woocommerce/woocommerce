@@ -618,15 +618,15 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Sync the variable product's attributes with the variations.
 	 */
 	public static function sync_attributes( $product, $children = false ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+
 		/**
 		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 		 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
 		 */
 		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
-			if ( ! is_a( $product, 'WC_Product' ) ) {
-				$product = wc_get_product( $product );
-			}
-
 			$parent_attributes = array_filter( (array) get_post_meta( $product->get_id(), '_product_attributes', true ) );
 
 			if ( ! $children ) {
