@@ -189,11 +189,9 @@ class WC_Logger {
 	 *
 	 * @deprecated since 2.0.0
 	 *
-	 * @param string $handle
-	 *
 	 * @return bool
 	 */
-	public function clear( $handle ) {
+	public function clear() {
 		_deprecated_function( 'WC_Logger::clear', '2.8' );
 		return false;
 	}
@@ -203,11 +201,9 @@ class WC_Logger {
 	 *
 	 * @deprecated since 2.0.0
 	 *
-	 * @param string $handle
-	 *
 	 * @return bool
 	 */
-	public function remove( $handle ) {
+	public function remove() {
 		_deprecated_function( 'WC_Logger::remove', '2.8' );
 		return false;
 	}
