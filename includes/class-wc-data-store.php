@@ -28,7 +28,8 @@ class WC_Data_Store {
 	 * Ran through `woocommerce_data_stores`.
 	 */
 	private $stores = array(
-		'coupon' => 'WC_Coupon_Data_Store_CPT',
+		'coupon'        => 'WC_Coupon_Data_Store_CPT',
+		'payment-token' => 'WC_Payment_Token_Data_Store_Table',
 	);
 	/**
 	 * Contains the name of the current data store's class name.
