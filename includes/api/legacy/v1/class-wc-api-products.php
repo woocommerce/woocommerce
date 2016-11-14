@@ -337,23 +337,19 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-
 		$variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
-
 			$variation = wc_get_product( $child_id );
 
 			if ( ! $variation->exists() ) {
 				continue;
 			}
 
-			$post_data = get_post( $variation->get_variation_id() );
-
 			$variations[] = array(
-				'id'                => $variation->get_variation_id(),
-				'created_at'        => $this->server->format_datetime( $post_data->post_date_gmt ),
-				'updated_at'        => $this->server->format_datetime( $post_data->post_modified_gmt ),
+				'id'                => $variation->get_id(),
+				'created_at'        => $this->server->format_datetime( $variation->get_date_created() ),
+				'updated_at'        => $this->server->format_datetime( $variation->get_date_modified() ),
 				'downloadable'      => $variation->is_downloadable(),
 				'virtual'           => $variation->is_virtual(),
 				'permalink'         => $variation->get_permalink(),
@@ -398,44 +394,31 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_images( $product ) {
-		$images            = $attachment_ids = array();
-		$product_image     = $product->get_image_id();
+		$images        = $attachment_ids = array();
+		$product_image = $product->get_image_id();
 
-		if ( $product->is_type( 'variation' ) ) {
-			// @todo variation
-			if ( has_post_thumbnail( $product->get_variation_id() ) ) {
-
-				// add variation image if set
-				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
-
-			} elseif ( ! empty( $product_image ) ) {
-
-				// otherwise use the parent product featured image if set
-				$attachment_ids[] = $product_image;
-			}
-		} else {
-
-			// Add featured image
-			if ( ! empty( $product_image ) ) {
-				$attachment_ids[] = $product_image;
-			}
-
-			// add gallery images
-			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+		// Add featured image.
+		if ( ! empty( $product_image ) ) {
+			$attachment_ids[] = $product_image;
 		}
 
-		// build image data
+		// add gallery images.
+		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+
+		// Build image data.
 		foreach ( $attachment_ids as $position => $attachment_id ) {
 
 			$attachment_post = get_post( $attachment_id );
 
-			if ( is_null( $attachment_post ) )
+			if ( is_null( $attachment_post ) ) {
 				continue;
+			}
 
 			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
 
-			if ( ! is_array( $attachment ) )
+			if ( ! is_array( $attachment ) ) {
 				continue;
+			}
 
 			$images[] = array(
 				'id'         => (int) $attachment_id,
@@ -448,7 +431,7 @@ class WC_API_Products extends WC_API_Resource {
 			);
 		}
 
-		// set a placeholder image if the product has no images set
+		// Set a placeholder image if the product has no images set.
 		if ( empty( $images ) ) {
 
 			$images[] = array(
