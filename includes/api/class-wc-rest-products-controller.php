@@ -260,12 +260,14 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	protected function get_taxonomy_terms( $product, $taxonomy = 'cat' ) {
 		$terms = array();
 
-		foreach ( get_the_terms( $product->get_id(), 'product_' . $taxonomy ) as $term ) {
-			$terms[] = array(
-				'id'   => $term->term_id,
-				'name' => $term->name,
-				'slug' => $term->slug,
-			);
+		if ( $_terms = get_the_terms( $product->get_id(), 'product_' . $taxonomy ) ) {
+			foreach ( $_terms as $term ) {
+				$terms[] = array(
+					'id'   => $term->term_id,
+					'name' => $term->name,
+					'slug' => $term->slug,
+				);
+			}
 		}
 
 		return $terms;
