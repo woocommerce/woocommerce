@@ -45,7 +45,7 @@ abstract class WC_Log_Handler {
 	/**
 	 * Constructor for log handler.
 	 *
-	 * @param arr $args {
+	 * @param array $args {
 	 *     @type string $threshold Optional. Default 'emergency'. Sets the log severity threshold.
 	 *         emergency|alert|critical|error|warning|notice|info|debug
 	 * }

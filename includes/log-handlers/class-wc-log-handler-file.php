@@ -74,8 +74,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * Attempt to ensure backwards compatibility for legacy WC_Logger::add calls
 	 *
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param int $timestamp
-	 * @param string $message
+	 * @param int $timestamp log entry timestamp
+	 * @param string $message provided log message
+	 * @param array $context {
+	 *     Optional. Array with additional information
+	 * }
 	 *
 	 * @return string Formatted log entry
 	 */
