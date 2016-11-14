@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	public function __construct( $token = '' ) {
 		// Set token type (cc, echeck)
 		if ( ! empty( $this->type ) ) {
-			$this->data['type'] = $this->type;
+			$this->set_type( $this->type );
 		}
 
 		if ( is_numeric( $token ) ) {
@@ -169,7 +169,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string Payment Token Type (CC, eCheck)
 	 */
 	public function set_type( $type ) {
-		return $this->get_prop( 'type', $type );
+		return $this->set_prop( 'type', $type );
 	}
 
 	/**
