@@ -288,14 +288,12 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-object-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-coupon-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-customer-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-payment-token-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store-table.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
-
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
-		}
 
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();

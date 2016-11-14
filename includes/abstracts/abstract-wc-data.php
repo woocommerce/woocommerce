@@ -215,12 +215,13 @@ abstract class WC_Data {
 
 	/**
 	 * Get Meta Data by Key.
-	 * @since 2.6.0
+	 * @since  2.6.0
 	 * @param  string $key
 	 * @param  bool $single return first found meta with key, or all with $key
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
-	public function get_meta( $key = '', $single = true ) {
+	public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
 		$value    = '';
 
@@ -229,6 +230,10 @@ abstract class WC_Data {
 				$value = $this->meta_data[ current( $array_keys ) ]->value;
 			} else {
 				$value = array_intersect_key( $this->meta_data, array_flip( $array_keys ) );
+			}
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
 			}
 		}
 
@@ -530,7 +535,7 @@ abstract class WC_Data {
 	 *
 	 * @since 2.7.0
 	 */
-	protected function apply_changes() {
+	public function apply_changes() {
 		$this->data = array_merge( $this->data, $this->changes );
 		$this->changes = array();
 	}

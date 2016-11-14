@@ -81,8 +81,6 @@ class WC_Autoloader {
 			$path = $this->include_path . 'admin/meta-boxes/';
 		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
 			$path = $this->include_path . 'admin/';
-		} elseif ( strpos( $class, 'wc_cli_' ) === 0 ) {
-			$path = $this->include_path . 'cli/';
 		} elseif ( strpos( $class, 'wc_payment_token_' ) === 0 ) {
 			$path = $this->include_path . 'payment-tokens/';
 		}
