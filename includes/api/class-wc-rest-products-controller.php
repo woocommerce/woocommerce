@@ -115,8 +115,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @param array $args
-	 * @param WP_REST_Request $request
+	 * @param array           $args    Request args.
+	 * @param WP_REST_Request $request Request data.
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
@@ -156,7 +156,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
@@ -231,7 +231,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get the downloads for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
 	protected function get_downloads( $product ) {
@@ -253,14 +253,14 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get taxonomy terms.
 	 *
-	 * @param WC_Product $product
-	 * @param string $taxonomy
+	 * @param WC_Product $product  Product instance.
+	 * @param string     $taxonomy Taxonomy slug.
 	 * @return array
 	 */
 	protected function get_taxonomy_terms( $product, $taxonomy = 'cat' ) {
 		$terms = array();
 
-		foreach ( wp_get_post_terms( $product->get_id(), 'product_' . $taxonomy ) as $term ) {
+		foreach ( get_the_terms( $product->get_id(), 'product_' . $taxonomy ) as $term ) {
 			$terms[] = array(
 				'id'   => $term->term_id,
 				'name' => $term->name,
@@ -274,7 +274,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get the images for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
 	protected function get_images( $product ) {
@@ -330,7 +330,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get attribute taxonomy label.
 	 *
-	 * @param  string $name
+	 * @param  string $name Taxonomy name.
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
@@ -343,7 +343,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get default attributes.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product instance.
 	 * @return array
 	 */
 	protected function get_default_attributes( $product ) {
@@ -373,8 +373,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get attribute options.
 	 *
-	 * @param int $product_id
-	 * @param array $attribute
+	 * @param int   $product_id Product ID.
+	 * @param array $attribute  Attribute data.
 	 * @return array
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
@@ -390,7 +390,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get the attributes for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
 	protected function get_attributes( $product ) {
@@ -451,7 +451,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get product data.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product instance.
 	 * @return array
 	 */
 	protected function get_product_data( $product ) {
@@ -528,9 +528,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Get an individual variation's data.
+	 *
 	 * @todo Remove in future version of the API. We have variations endpoints now.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product instance.
 	 * @return array
 	 */
 	protected function get_variation_data( $product ) {
@@ -589,9 +590,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single product output for response.
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param WP_Post         $post    Post object.
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $data
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$product = wc_get_product( $post );
@@ -632,7 +633,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product      $product Product object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given product.
 	 */
@@ -736,6 +737,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
+		$product_id = 0;
+
 		try {
 			$product_id = $this->save_product( $request );
 			$post       = get_post( $product_id );
@@ -806,6 +809,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Saves a product to the database.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return int
 	 */
 	public function save_product( $request ) {
 		$product = $this->prepare_item_for_database( $request );
@@ -816,9 +822,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @param WC_Product $product
-	 * @param array $images
-	 * @throws WC_REST_Exception
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product $product Product instance.
+	 * @param array      $images  Images data.
 	 * @return WC_Product
 	 */
 	protected function save_product_images( $product, $images ) {
@@ -873,8 +879,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product shipping data.
 	 *
-	 * @param  WC_Product $product
-	 * @param array $data
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Shipping data.
 	 * @return WC_Product
 	 */
 	private function save_product_shipping_data( $product, $data ) {
@@ -920,9 +926,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save downloadable files.
 	 *
-	 * @param WC_Product $product
-	 * @param array $downloads
-	 * @param int $deprecated Deprecated since 2.7.
+	 * @param WC_Product $product    Product instance.
+	 * @param array      $downloads  Downloads data.
+	 * @param int        $deprecated Deprecated since 2.7.
 	 * @return WC_Product
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
@@ -950,9 +956,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save taxonomy terms.
 	 *
-	 * @param WC_Product $product
-	 * @param array $terms
-	 * @param string $taxonomy
+	 * @param WC_Product $product  Product instance.
+	 * @param array      $terms    Terms data.
+	 * @param string     $taxonomy Taxonomy name.
 	 * @return WC_Product
 	 */
 	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
@@ -973,8 +979,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param WC_Product $product
-	 * @param WP_REST_Request $request
+	 * @param WC_Product      $product Product instance.
+	 * @param WP_REST_Request $request Request data.
 	 * @return WC_Product
 	 */
 	protected function save_default_attributes( $product, $request ) {
@@ -1031,10 +1037,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product meta.
 	 *
-	 * @param WC_Product $product
-	 * @param WP_REST_Request $request
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product      $product Product instance.
+	 * @param WP_REST_Request $request Request data.
 	 * @return WC_Product
-	 * @throws WC_REST_Exception
 	 */
 	protected function save_product_meta( $product, $request ) {
 		global $wpdb;
@@ -1144,7 +1150,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Sales and prices.
-		if ( in_array( $product->get_type(), array( 'variable', 'grouped' ) ) ) {
+		if ( in_array( $product->get_type(), array( 'variable', 'grouped' ), true ) ) {
 			$product->set_regular_price( '' );
 			$product->set_sale_price( '' );
 			$product->set_date_on_sale_to( '' );
@@ -1363,10 +1369,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save variations.
 	 *
-	 * @throws WC_REST_Exception
-	 * @param WC_Product $product
-	 * @param WP_REST_Request $request
-	 * @param bool $single_variation
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product      $product          Product instance.
+	 * @param WP_REST_Request $request          Request data.
+	 * @param bool            $single_variation True if saving only a single variation.
 	 * @return bool
 	 */
 	protected function save_variations_data( $product, $request, $single_variation = false ) {
@@ -1558,8 +1564,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Add post meta fields.
 	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
+	 * @param WP_Post         $post    Post data.
+	 * @param WP_REST_Request $request Request data.
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
@@ -1585,8 +1591,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Update post meta fields.
 	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
+	 * @param WP_Post         $post    Post data.
+	 * @param WP_REST_Request $request Request data.
 	 * @return bool|WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
@@ -1627,7 +1633,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Delete post.
 	 *
-	 * @param int|WP_Post $id
+	 * @param int|WP_Post $id Post ID or WP_Post instance.
 	 */
 	protected function delete_post( $id ) {
 		if ( ! empty( $id->ID ) ) {
