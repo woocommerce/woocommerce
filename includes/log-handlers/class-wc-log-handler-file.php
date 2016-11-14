@@ -56,7 +56,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			return true;
 		}
 
-		$handle = $this->get_handle( $context );
+		if ( isset( $context['tag'] ) && $context['tag'] ) {
+			$handle = $context['tag'];
+		} else {
+			$handle = 'log';
+		}
 
 		$entry = $this->format_entry( $level, $timestamp, $message, $context );
 
@@ -74,6 +78,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @param string $message provided log message
 	 * @param array $context {
 	 *     Optional. Array with additional information
+	 *
+	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
 	 * }
 	 *
 	 * @return string Formatted log entry
@@ -81,7 +87,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	public function format_entry( $level, $timestamp, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
-			$handle = $this->get_handle( $context );
+			if ( isset( $context['tag'] ) && $context['tag'] ) {
+				$handle = $context['tag'];
+			} else {
+				$handle = 'log';
+			}
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 			$time = date_i18n( 'm-d-Y @ H:i:s -' );
 			$entry = "{$time} {$message}";
@@ -90,26 +100,6 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		}
 
 		return $entry;
-	}
-
-	/**
-	 * Determine which handle to use for a log entry.
-	 *
-	 * @param array $context {
-	 *     Optional.
-	 *     @type string $tag Log message tag
-	 * }
-	 *
-	 * @return string Handle name
-	 */
-	protected function get_handle( $context ) {
-		if ( isset( $context['tag'] ) && true === $context['tag'] ) {
-			$handle = $context['tag'];
-		} else {
-			$handle = 'log';
-		}
-
-		return $handle;
 	}
 
 	/**
