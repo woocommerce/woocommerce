@@ -894,28 +894,29 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product->set_width( '' );
 		} else {
 			if ( isset( $data['weight'] ) ) {
-				$product->set_weight( '' === $data['weight'] ? '' : wc_format_decimal( $data['weight'] ) );
+				$product->set_weight( $data['weight'] );
 			}
 
 			// Height.
 			if ( isset( $data['dimensions']['height'] ) ) {
-				$product->set_height( '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
+				$product->set_height( $data['dimensions']['height'] );
 			}
 
 			// Width.
 			if ( isset( $data['dimensions']['width'] ) ) {
-				$product->set_width( '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
+				$product->set_width( $data['dimensions']['width'] );
 			}
 
 			// Length.
 			if ( isset( $data['dimensions']['length'] ) ) {
-				$product->set_length( '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
+				$product->set_length( $data['dimensions']['length'] );
 			}
 		}
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
 			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
+
 			if ( $shipping_class_term ) {
 				$product->set_shipping_class_id( $shipping_class_term->term_id );
 			}
@@ -933,7 +934,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return WC_Product
 	 */
 	private function save_downloadable_files( $product, $downloads, $variation_id = 0 ) {
-		$files   = array();
+		$files = array();
 
 		// File paths will be stored in an array keyed off md5(file path).
 		foreach ( $downloads as $key => $file ) {
@@ -1061,22 +1062,22 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
-			$product->set_virtual( true === $request['virtual'] ? 'yes' : 'no' );
+			$product->set_virtual( $request['virtual'] );
 		}
 
 		// Tax status.
 		if ( isset( $request['tax_status'] ) ) {
-			$product->set_tax_status( wc_clean( $request['tax_status'] ) );
+			$product->set_tax_status( $request['tax_status'] );
 		}
 
 		// Tax Class.
 		if ( isset( $request['tax_class'] ) ) {
-			$product->set_tax_class( wc_clean( $request['tax_class'] ) );
+			$product->set_tax_class( $request['tax_class'] );
 		}
 
 		// Catalog Visibility.
 		if ( isset( $request['catalog_visibility'] ) ) {
-			$product->set_catalog_visibility( wc_clean( $request['catalog_visibility'] ) );
+			$product->set_catalog_visibility( $request['catalog_visibility'] );
 		}
 
 		// Purchase Note.
@@ -1086,7 +1087,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Featured Product.
 		if ( isset( $request['featured'] ) ) {
-			$product->set_featured( true === $request['featured'] ? 'yes' : 'no' );
+			$product->set_featured( $request['featured'] );
 		}
 
 		// Shipping data.
@@ -1094,23 +1095,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
-			$sku     = $product->get_sku();
-			$new_sku = wc_clean( $request['sku'] );
-
-			if ( '' === $new_sku ) {
-				$product->set_sku( '' );
-			} elseif ( $new_sku !== $sku ) {
-				if ( ! empty( $new_sku ) ) {
-					$unique_sku = wc_product_has_unique_sku( $product->get_id(), $new_sku );
-					if ( ! $unique_sku ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
-					} else {
-						$product->set_sku( $new_sku );
-					}
-				} else {
-					$product->set_sku( '' );
-				}
-			}
+			$product->set_sku( wc_clean( $request['sku'] ) );
 		}
 
 		// Attributes.
@@ -1189,51 +1174,28 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		} else {
 			$date_from = $date_to = '';
 
-			// Regular Price
+			// Regular Price.
 			if ( isset( $request['regular_price'] ) ) {
-				$regular_price = ( '' === $request['regular_price'] ) ? '' : $request['regular_price'];
-			} else {
-				$regular_price = $product->get_regular_price();
+				$product->set_regular_price( $request['regular_price'] );
 			}
 
-			// Sale Price
+			// Sale Price.
 			if ( isset( $request['sale_price'] ) ) {
-				$sale_price = ( '' === $request['sale_price'] ) ? '' : $request['sale_price'];
-			} else {
-				$sale_price = $product->get_sale_price();
+				$product->set_sale_price( $request['sale_price'] );
 			}
-
-			$product->set_regular_price( $regular_price );
-			$product->set_sale_price( $sale_price );
 
 			if ( isset( $request['date_on_sale_from'] ) ) {
-				$date_from = $request['date_on_sale_from'];
-			} else {
-				$date_from = ( $product->get_date_on_sale_from() ) ? date( 'Y-m-d', $date_from ) : '';
+				$product->set_date_on_sale_from( $request['date_on_sale_from'] );
 			}
 
 			if ( isset( $request['date_on_sale_to'] ) ) {
-				$date_to = $request['date_on_sale_to'];
-			} else {
-				$date_to = ( $product->get_date_on_sale_to() ) ? date( 'Y-m-d', $date_to ) : '';
-			}
-
-			if ( $date_to && ! $date_from ) {
-				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
-			}
-
-			$product->set_date_on_sale_to( $date_to );
-			$product->set_date_on_sale_from( $date_from );
-			if ( $product->is_on_sale() ) {
-				$product->set_price( $product->get_sale_price() );
-			} else {
-				$product->set_price( $product->get_regular_price() );
+				$product->set_date_on_sale_to( $request['date_on_sale_to'] );
 			}
 		}
 
 		// Product parent ID for groups.
 		if ( isset( $request['parent_id'] ) ) {
-			$product->set_parent_id( absint( $request['parent_id'] ) );
+			$product->set_parent_id( $request['parent_id'] );
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
@@ -1278,7 +1240,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Sold individually.
 		if ( isset( $request['sold_individually'] ) ) {
-			$product->set_sold_individually( true === $request['sold_individually'] ? 'yes' : '' );
+			$product->set_sold_individually( $request['sold_individually'] );
 		}
 
 		// Stock status.
@@ -1286,28 +1248,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$stock_status = true === $request['in_stock'] ? 'instock' : 'outofstock';
 		} else {
 			$stock_status = $product->get_stock_status();
-
-			if ( '' === $stock_status ) {
-				$stock_status = 'instock';
-			}
 		}
 
 		// Stock data.
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			// Manage stock.
 			if ( isset( $request['manage_stock'] ) ) {
-				$manage_stock = ( true === $request['manage_stock'] ) ? 'yes' : 'no';
-				$product->set_manage_stock( $manage_stock );
-			} else {
-				$manage_stock = $product->get_manage_stock() ? 'yes' : 'no';
+				$product->set_manage_stock( $request['manage_stock'] );
 			}
 
 			// Backorders.
 			if ( isset( $request['backorders'] ) ) {
-				$backorders = $request['backorders'];
-				$product->set_backorders( $backorders );
-			} else {
-				$backorders = $product->get_backorders();
+				$product->set_backorders( $request['backorders'] );
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
@@ -1320,9 +1272,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$product->set_backorders( 'no' );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
-			} elseif ( 'yes' === $manage_stock ) {
-				$product->set_backorders( $backorders );
-
+			} elseif ( 'yes' === $product->get_manage_stock() ) {
 				// Stock status is always determined by children so sync later.
 				if ( ! $product->is_type( 'variable' ) ) {
 					$product->set_stock_status( $stock_status );
@@ -1339,7 +1289,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			} else {
 				// Don't manage stock.
 				$product->set_manage_stock( 'no' );
-				$product->set_backorders( $backorders );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
@@ -1358,11 +1307,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						$upsells[] = $id;
 					}
 				}
-
-				$product->set_upsell_ids( $upsells );
-			} else {
-				$product->set_upsell_ids( array() );
 			}
+
+			$product->set_upsell_ids( $upsells );
 		}
 
 		// Cross sells.
@@ -1376,11 +1323,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						$crosssells[] = $id;
 					}
 				}
-
-				$product->set_cross_sell_ids( $crosssells );
-			} else {
-				$product->set_cross_sell_ids( array() );
 			}
+
+			$product->set_cross_sell_ids( $crosssells );
 		}
 
 		// Product categories.
@@ -1395,14 +1340,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Downloadable.
 		if ( isset( $request['downloadable'] ) ) {
-			$is_downloadable = true === $request['downloadable'] ? 'yes' : 'no';
-			$product->set_downloadable( $is_downloadable );
-		} else {
-			$is_downloadable = $product->get_downloadable() ? 'yes' : 'no';
+			$product->set_downloadable( $request['downloadable'] );
 		}
 
 		// Downloadable options.
-		if ( 'yes' === $is_downloadable ) {
+		if ( $product->get_downloadable() ) {
 
 			// Downloadable files.
 			if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
@@ -1502,14 +1444,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Downloadable variation.
 			if ( isset( $data['downloadable'] ) ) {
-				$is_downloadable = $data['downloadable'];
 				$variation->set_downloadable( $is_downloadable );
-			} else {
-				$is_downloadable = $variation->get_downloadable();
 			}
 
 			// Downloads.
-			if ( $is_downloadable ) {
+			if ( $variation->get_downloadable() ) {
 				// Downloadable files.
 				if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
 					$variation = $this->save_downloadable_files( $variation, $data['downloads'], $variation->get_id() );
@@ -1530,25 +1469,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$variation = $this->save_product_shipping_data( $variation, $data );
 
 			// Stock handling.
-			$manage_stock = (bool) $variation->get_manage_stock();
 			if ( isset( $data['manage_stock'] ) ) {
-				$manage_stock = $data['manage_stock'];
+				$variation->set_manage_stock( $data['manage_stock'] );
 			}
-			$variation->set_manage_stock( $manage_stock );
 
-			$stock_status = $variation->get_stock_status();
 			if ( isset( $data['in_stock'] ) ) {
-				$stock_status = true === $data['in_stock'] ? 'instock' : 'outofstock';
+				$variation->set_stock_status( true === $data['in_stock'] ? 'instock' : 'outofstock' );
 			}
-			$variation->set_stock_status( $stock_status );
 
-			$backorders = $variation->get_backorders();
 			if ( isset( $data['backorders'] ) ) {
-				$backorders = $data['backorders'];
+				$variation->set_backorders( $data['backorders'] );
 			}
-			$variation->set_backorders( $backorders );
 
-			if ( $manage_stock ) {
+			if ( $variation->get_manage_stock() ) {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$variation->set_stock_quantity( $data['stock_quantity'] );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
