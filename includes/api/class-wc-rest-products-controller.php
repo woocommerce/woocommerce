@@ -1441,7 +1441,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Save variations.
-	 * @todo after variations CRUD is done
 	 *
 	 * @throws WC_REST_Exception
 	 * @param WC_Product $product

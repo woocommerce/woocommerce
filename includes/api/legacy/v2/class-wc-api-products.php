@@ -747,7 +747,6 @@ class WC_API_Products extends WC_API_Resource {
 
 	/**
 	 * Get an individual variation's data
-	 * @todo after variations CRUD is done
 	 *
 	 * @since 2.1
 	 * @param WC_Product $product
@@ -1256,7 +1255,6 @@ class WC_API_Products extends WC_API_Resource {
 
 	/**
 	 * Save variations
-	 * @todo after variations CRUD is done
 	 *
 	 * @since  2.2
 	 * @param  WC_Product $product
