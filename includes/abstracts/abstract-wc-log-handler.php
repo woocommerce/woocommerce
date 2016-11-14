@@ -71,7 +71,7 @@ abstract class WC_Log_Handler {
 	 *
 	 * @return bool log entry should bubble to further loggers.
 	 */
-	public abstract function handle( $level, $timestamp, $message, $context );
+	abstract public function handle( $level, $timestamp, $message, $context );
 
 	/**
 	 * Set handler severity threshold.
