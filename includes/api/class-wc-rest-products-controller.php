@@ -758,8 +758,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return $response;
 		} catch ( WC_Data_Exception $e ) {
+			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
+			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -796,10 +798,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return rest_ensure_response( $response );
 		} catch ( WC_Data_Exception $e ) {
-			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( WC_REST_Exception $e ) {
-			$this->purge_product( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
