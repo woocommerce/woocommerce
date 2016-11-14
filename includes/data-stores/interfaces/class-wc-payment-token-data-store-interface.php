@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Payment_Token_Data_Store {
+interface WC_Payment_Token_Data_Store_Interface {
 	/**
 	 * Returns an array of objects (stdObject) matching specific token critera.
 	 * Accepts token_id, user_id, gateway_id, and type.

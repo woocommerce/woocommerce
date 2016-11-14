@@ -29,7 +29,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	}
 
 	/**
-	 * Update a token (deprecated).
+	 * Update a token.
 	 * @deprecated 2.7.0 - Use ::save instead.
 	 */
 	public function update() {
