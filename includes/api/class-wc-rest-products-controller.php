@@ -930,39 +930,26 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param WC_Product $product
 	 * @param array $downloads
-	 * @param int $variation_id
+	 * @param int $deprecated Deprecated since 2.7.
 	 * @return WC_Product
 	 */
-	private function save_downloadable_files( $product, $downloads, $variation_id = 0 ) {
+	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
+		if ( $deprecated ) {
+			_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+		}
+
 		$files = array();
-
-		// File paths will be stored in an array keyed off md5(file path).
 		foreach ( $downloads as $key => $file ) {
-			if ( isset( $file['url'] ) ) {
-				$file['file'] = $file['url'];
-			}
-
-			if ( ! isset( $file['file'] ) ) {
+			if ( empty( $file['file'] ) ) {
 				continue;
 			}
 
-			$file_name = isset( $file['name'] ) ? wc_clean( $file['name'] ) : '';
-
-			if ( 0 === strpos( $file['file'], 'http' ) ) {
-				$file_url = esc_url_raw( $file['file'] );
-			} else {
-				$file_url = wc_clean( $file['file'] );
-			}
-
-			$files[ md5( $file_url ) ] = array(
-				'name' => $file_name,
-				'file' => $file_url,
-			);
+			$download = new WC_Product_Download();
+			$download->set_id( $key );
+			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
+			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
+			$files[]  = $download;
 		}
-
-		// Grant permission to any newly added files on any existing orders for this product prior to saving.
-		do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), $variation_id, $files );
-
 		$product->set_downloads( $files );
 
 		return $product;
@@ -1451,7 +1438,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( $variation->get_downloadable() ) {
 				// Downloadable files.
 				if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
-					$variation = $this->save_downloadable_files( $variation, $data['downloads'], $variation->get_id() );
+					$variation = $this->save_downloadable_files( $variation, $data['downloads'] );
 				}
 
 				// Download limit.
