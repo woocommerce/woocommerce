@@ -1345,7 +1345,7 @@ class WC_AJAX {
 					continue;
 				}
 
-				if ( ! $product || ( $product->is_type( 'variation' ) && empty( $product->parent ) ) ) {
+				if ( ! $product || ( $product->is_type( 'variation' ) && ! $product->get_parent_id() ) ) {
 					continue;
 				}
 

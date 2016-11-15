@@ -247,6 +247,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 		// Does this product have a parent?
 		$product = wc_get_product( $post_id );
+
 		if ( $product->get_parent_id() > 0 ) {
 			wc_delete_product_transients( $product->get_parent_id() );
 		}

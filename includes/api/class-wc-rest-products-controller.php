@@ -650,13 +650,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			),
 		);
 
-		if ( $product->is_type( 'variation' ) && $product->parent ) {
+		if ( $product->get_parent_id() ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->parent->id ) ),
-			);
-		} elseif ( $product->is_type( 'simple' ) && ! empty( $post->post_parent ) ) {
-			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $post->post_parent ) ),
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->get_parent_id() ) ),
 			);
 		}
 
@@ -817,8 +813,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function save_product( $request ) {
 		$product = $this->prepare_item_for_database( $request );
-		$product->save();
-		return $product->get_id();
+		return $product->save();
 	}
 
 	/**
@@ -1431,7 +1426,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Downloadable variation.
 			if ( isset( $data['downloadable'] ) ) {
-				$variation->set_downloadable( $is_downloadable );
+				$variation->set_downloadable( $data['downloadable'] );
 			}
 
 			// Downloads.

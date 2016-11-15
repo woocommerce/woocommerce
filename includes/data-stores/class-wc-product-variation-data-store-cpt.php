@@ -244,16 +244,4 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
 		parent::update_post_meta( $product );
 	}
-
-	/**
-	 * Clear any caches.
-	 *
-	 * @since 2.7.0
-	 * @param WC_Product
-	 */
-	protected function clear_caches( &$product ) {
-		wc_delete_product_transients( $product->get_id() );
-		wc_delete_product_transients( $product->get_parent_id() );
-	}
-
 }
