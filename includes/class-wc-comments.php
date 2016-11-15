@@ -355,7 +355,7 @@ class WC_Comments {
 			$average = 0;
 		}
 
-		update_post_meta( $product->get_id(), '_wc_average_rating', true );
+		update_post_meta( $product->get_id(), '_wc_average_rating', $average );
 
 		return $average;
 	}
@@ -377,7 +377,7 @@ class WC_Comments {
 			AND comment_approved = '1'
 		", $product->get_id() ) );
 
-		update_post_meta( $product->get_id(), '_wc_review_count', true );
+		update_post_meta( $product->get_id(), '_wc_review_count', $count );
 
 		return $count;
 	}
@@ -407,7 +407,7 @@ class WC_Comments {
 			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
 		}
 
-		update_post_meta( $product->get_id(), '_wc_rating_count', true );
+		update_post_meta( $product->get_id(), '_wc_rating_count', $counts );
 
 		return $counts;
 	}
