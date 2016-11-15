@@ -29,6 +29,7 @@ class WC_Data_Store {
 	 */
 	private $stores = array(
 		'coupon'            => 'WC_Coupon_Data_Store_CPT',
+		'payment-token' => 'WC_Payment_Token_Data_Store_Table',
 		'product'           => 'WC_Product_Data_Store_CPT',
 		'product_grouped'   => 'WC_Product_Grouped_Data_Store_CPT',
 		'product_variable'  => 'WC_Product_Variable_Data_Store_CPT',

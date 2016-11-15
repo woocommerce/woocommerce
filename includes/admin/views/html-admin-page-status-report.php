@@ -13,6 +13,7 @@ $environment    = $system_status->get_environment_info();
 $database       = $system_status->get_database_info();
 $active_plugins = $system_status->get_active_plugins();
 $theme          = $system_status->get_theme_info();
+$security       = $system_status->get_security_info();
 $settings       = $system_status->get_settings();
 $pages          = $system_status->get_pages();
 ?>
@@ -325,6 +326,37 @@ $pages          = $system_status->get_pages();
 			<?php
 		}
 		?>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="Security"><h2><?php _e( 'Security', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Secure connection (HTTPS)"><?php _e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Is the connection to your store secure?', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['secure_connection'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Hide errors from visitors"><?php _e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['hide_errors'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">

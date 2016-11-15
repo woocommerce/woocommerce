@@ -508,7 +508,7 @@ class WC_Query {
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
+		_deprecated_function( 'order_by_rating_post_clauses', '2.7' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -738,7 +738,7 @@ class WC_Query {
 	 * @deprecated 2.6.0
 	 */
 	public function layered_nav_init() {
-		_deprecated_function( 'layered_nav_init', '2.6', '' );
+		_deprecated_function( 'layered_nav_init', '2.6' );
 	}
 
 	/**
@@ -746,7 +746,7 @@ class WC_Query {
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {
-		_deprecated_function( 'get_products_in_view', '2.6', '' );
+		_deprecated_function( 'get_products_in_view', '2.6' );
 	}
 
 	/**
@@ -754,6 +754,6 @@ class WC_Query {
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		_deprecated_function( 'layered_nav_query', '2.6', '' );
+		_deprecated_function( 'layered_nav_query', '2.6' );
 	}
 }

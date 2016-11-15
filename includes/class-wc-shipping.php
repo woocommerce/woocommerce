@@ -402,7 +402,7 @@ class WC_Shipping {
 	 * @deprecated 2.6.0 Was previously used to determine sort order of methods, but this is now controlled by zones and thus unused.
 	 */
 	public function sort_shipping_methods() {
-		_deprecated_function( 'sort_shipping_methods', '2.6', '' );
+		_deprecated_function( 'sort_shipping_methods', '2.6' );
 		return $this->shipping_methods;
 	}
 }

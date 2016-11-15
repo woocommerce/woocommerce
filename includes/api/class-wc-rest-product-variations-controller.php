@@ -205,6 +205,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			$variation = new WC_Product_Variation();
 		}
 
+		$variation->set_parent_id( absint( $request['product_id'] ) );
+
 		/**
 		 * Filter the query_vars used in `get_items` for the constructed query.
 		 *
@@ -228,7 +230,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected function update_post_meta_fields( $post, $request ) {
 		try {
 			$variable_product = wc_get_product( $post );
-			$product          = $variable_product->parent;
+			$product          = wc_get_product( $variable_product->get_parent_id() );
 			$this->save_variations_data( $product, $request, true );
 			return true;
 		} catch ( WC_REST_Exception $e ) {
@@ -246,7 +248,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected function add_post_meta_fields( $post, $request ) {
 		try {
 			$variable_product = wc_get_product( $post->ID );
-			$product          = $variable_product->parent;
+			$product          = wc_get_product( $variable_product->get_parent_id() );
 			$request['id']    = $post->ID;
 			$this->save_variations_data( $product, $request, true );
 			return true;

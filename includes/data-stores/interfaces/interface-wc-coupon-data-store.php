@@ -34,4 +34,19 @@ interface WC_Coupon_Data_Store {
 	 * @return int
 	 */
 	public function get_usage_by_user_id( &$coupon, $user_id );
+
+	/**
+	 * Return a coupon code for a specific ID.
+	 * @param int $id
+	 * @return string Coupon Code
+	 */
+	 public function get_code_by_id( $id );
+
+	 /**
+	  * Return an array of IDs for for a specific coupon code.
+	  * Can return multiple to check for existence.
+	  * @param string $code
+	  * @return array Array of IDs.
+	  */
+	 public function get_ids_by_code( $code );
 }
