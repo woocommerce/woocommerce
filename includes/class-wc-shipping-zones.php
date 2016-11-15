@@ -56,15 +56,20 @@ class WC_Shipping_Zones {
 	public static function get_zone_by( $by = 'zone_id', $id = 0 ) {
 		switch ( $by ) {
 			case 'zone_id' :
-				return new WC_Shipping_Zone( $id );
+				$zone_id = $id;
 			break;
 			case 'instance_id' :
 				$data_store = WC_Data_Store::load( 'shipping-zone' );
 				$zone_id    = $data_store->get_zone_id_by_instance_id( $id );
-				if ( false !== $zone_id ) {
-					return new WC_Shipping_Zone( $zone_id );
-				}
 			break;
+		}
+
+		if ( false !== $zone_id ) {
+			try {
+				return new WC_Shipping_Zone( $zone_id );
+			} catch ( Exception $e ) {
+				return false;
+			}
 		}
 
 		return false;

@@ -74,6 +74,8 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 			$zone->read_meta_data();
 			$zone->set_object_read( true );
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
+		} else {
+			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
 	}
 
