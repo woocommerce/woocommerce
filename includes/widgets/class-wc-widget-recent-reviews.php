@@ -79,7 +79,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo $_product->get_image();
 
-				echo $_product->get_title() . '</a>';
+				echo $_product->get_name() . '</a>';
 
 				echo $rating_html;
 

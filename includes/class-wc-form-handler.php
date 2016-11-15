@@ -485,7 +485,7 @@ class WC_Form_Handler {
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
-				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_title() ) : __( 'Item', 'woocommerce' ), $cart_item );
+				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_name() ) : __( 'Item', 'woocommerce' ), $cart_item );
 
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
@@ -542,7 +542,7 @@ class WC_Form_Handler {
 
 					// is_sold_individually
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
-						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ), 'error' );
+						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_name() ), 'error' );
 						$passed_validation = false;
 					}
 

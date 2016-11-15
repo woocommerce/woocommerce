@@ -771,7 +771,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Add data that applies to every product type.
 		$product_data = array(
-			'title'              => $product->get_title(),
+			'title'              => $product->get_name(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
 			'created_at'         => $this->format_datetime( $product->get_post_data()->post_date_gmt ),
 			'updated_at'         => $this->format_datetime( $product->get_post_data()->post_modified_gmt ),

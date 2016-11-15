@@ -236,7 +236,7 @@ class WC_Cart {
 						// Flag to indicate the stored cart should be update
 						$update_cart_session = true;
 						/* translators: %s: product name */
-						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_title() ), 'error' );
+						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 					} else {
@@ -476,7 +476,7 @@ class WC_Cart {
 			 */
 			if ( ! $product->is_in_stock() ) {
 				/* translators: %s: product name */
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title() ) );
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 				return $error;
 			}
 
@@ -489,7 +489,7 @@ class WC_Cart {
 			 */
 			if ( ! $product->has_enough_stock( $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
 				/* translators: 1: product name 2: quantity in stock */
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), $product->get_stock_quantity() ) );
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name(), $product->get_stock_quantity() ) );
 				return $error;
 			}
 
@@ -518,7 +518,7 @@ class WC_Cart {
 
 				if ( $product->get_stock_quantity() < ( $held_stock + $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
 					/* translators: 1: product name 2: minutes */
-					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 					return $error;
 				}
 			}

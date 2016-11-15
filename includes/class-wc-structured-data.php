@@ -173,7 +173,7 @@ class WC_Structured_Data {
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
 		$markup['url']   = $markup['@id'];
-		$markup['name']  = $product->get_title();
+		$markup['name']  = $product->get_name();
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );

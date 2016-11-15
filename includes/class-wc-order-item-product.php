@@ -371,7 +371,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 		}
-		$this->set_name( $product->get_title() );
+		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
 	}
 

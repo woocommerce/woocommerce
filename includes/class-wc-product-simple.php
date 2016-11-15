@@ -57,23 +57,6 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Get the title of the post. @todo should this be deprecated or not? It's in deprecated class and needs review.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		$post  = get_post( $this->get_id() );
-		$title = $post->post_title;
-
-		if ( $this->get_parent_id() > 0 ) {
-			/* translators: 1: parent product title 2: product title */
-			$title = sprintf( __( '%1$s &rarr; %2$s' , 'woocommerce' ), get_the_title( $this->get_parent_id() ), $title );
-		}
-
-		return apply_filters( 'woocommerce_product_title', $title, $this );
-	}
-
-	/**
 	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately). @todo should this be here?
 	 */
 	public function grouped_product_sync() {

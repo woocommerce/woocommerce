@@ -87,7 +87,7 @@ class WC_Report_Stock extends WP_List_Table {
 					echo $sku . ' - ';
 				}
 
-				echo $product->get_title();
+				echo $product->get_name();
 
 				// Get variation data
 				if ( $product->is_type( 'variation' ) ) {
