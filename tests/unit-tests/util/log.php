@@ -137,22 +137,56 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
 	}
 
+	/**
+	 * Helper for log handler comsume test.
+	 *
+	 * Returns an array of 2 mocked log hanlders.
+	 * The first handler always bubbles.
+	 * The second handler expects to recieve exactly 8 messages (1 for each level).
+	 *
+	 * @return WC_Log_Handler[] array of mocked log handlers
+	 */
 	public function _return_bubble_required_handlers() {
-		$bubble = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
+		$bubble = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
 		$bubble->method( 'handle' )->willReturn( true );
 
-		$required = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
-		$required->expects( $this->once() )->method( 'handle' );
+
+		$required = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+
+		$required->expects( $this->exactly( 8 ) )->method( 'handle' );
 
 		return array( $bubble, $required );
 	}
 
+	/**
+	 * Helper for log handler comsume test.
+	 *
+	 * Returns an array of 2 mocked log hanlders.
+	 * The first handler never bubbles.
+	 * The second handler expects to never be called.
+	 *
+	 * @return WC_Log_Handler[] array of mocked log handlers
+	 */
 	public function _return_consume_error_handlers() {
-		$consume = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
+		$consume = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+
 		$consume->method( 'handle' )->willReturn( false );
 
-		$error = $this->getMockBuilder( 'WC_Log_Handler' )->getMock();
-		$error->method( 'handle' )->will( $this->throwException( new Exception( 'Log was not consumed.' ) ) );
+		$error = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+
+		$error->expects( $this->never() )->method( 'handle' );
 
 		return array( $consume, $error );
 	}
