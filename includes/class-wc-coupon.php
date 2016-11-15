@@ -1092,11 +1092,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $this->get_exclude_sale_items() ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
-			if ( isset( $product->variation_id ) ) {
-				if ( in_array( $product->variation_id, $product_ids_on_sale, true ) ) {
-					$valid = false;
-				}
-			} elseif ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
+			if ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
 				$valid = false;
 			}
 		}

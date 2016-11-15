@@ -538,12 +538,13 @@ class WC_Cart {
 		$item_data = array();
 
 		// Variation data
-		if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
+		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
 
 			foreach ( $cart_item['variation'] as $name => $value ) {
 
-				if ( '' === $value )
+				if ( '' === $value ) {
 					continue;
+				}
 
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
