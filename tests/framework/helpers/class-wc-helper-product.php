@@ -200,7 +200,7 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_regular_price', '15' );
 
 		// General meta
-		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
+		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE LARGE' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
 		update_post_meta( $variation_id, '_virtual', 'no' );

@@ -24,6 +24,11 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		$this->assertEquals( 'grouped', WC()->product_factory->get_product_type( $grouped->get_id() ) );
 		$this->assertEquals( 'variable', WC()->product_factory->get_product_type( $variable->get_id() ) );
 		$this->assertEquals( 'variation', WC()->product_factory->get_product_type( $child_id ) );
+
+		$simple->delete( true );
+		$external->delete( true );
+		$grouped->delete( true );
+		$variable->delete( true );
 	}
 
 	/**

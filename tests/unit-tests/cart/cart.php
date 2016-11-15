@@ -232,6 +232,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
+		$product->delete( true );
 	}
 
 	/**

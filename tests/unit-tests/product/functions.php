@@ -104,6 +104,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// test exclude
 		$products = wc_get_products( array( 'return' => 'ids', 'limit' => 200, 'exclude' => array( $product->get_id() ) ) );
 		$this->assertNotContains( $product->get_id(), $products );
+
+		$variation->delete( true );
 	}
 
 	/**

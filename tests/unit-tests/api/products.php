@@ -198,6 +198,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
 		$this->assertEquals( array( 'red', 'yellow' ), $data['attributes'][1]['options'] );
+		$product->delete( true );
 
 		// test external product
 		$product  = WC_Helper_Product::create_external_product();
@@ -217,6 +218,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Test API Update', $data['button_text'] );
 		$this->assertEquals( 'http://automattic.com', $data['external_url'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -233,6 +235,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -249,6 +252,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -408,6 +412,8 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
+		$product->delete( true );
+		$product_2->delete( true );
 	}
 
 	/*
@@ -506,6 +512,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 61, count( $properties ) );
+		$product->delete( true );
 	}
 
 }
