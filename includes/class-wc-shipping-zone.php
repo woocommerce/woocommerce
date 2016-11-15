@@ -1,4 +1,5 @@
 <?php
+include_once( 'legacy/class-wc-legacy-shipping-zone.php' );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -8,12 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Represents a single shipping zone
  *
  * @class 		WC_Shipping_Zone
- * @version		2.6.0
+ * @since		2.6.0
+ * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		WooCommerce
  */
-class WC_Shipping_Zone extends WC_Data {
+class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 	protected $id = null;
 
@@ -28,29 +30,24 @@ class WC_Shipping_Zone extends WC_Data {
 	);
 
 	/**
-	 * True when location data needs to be re-saved
-	 * @var bool
-	 */
-	private $locations_changed = false;
-
-	/**
 	 * Constructor for zones
 	 * @param int|object $zone Zone ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $zone = null ) {
 		if ( is_numeric( $zone ) && ! empty( $zone ) ) {
-			$this->read( $zone );
+			$this->set_id( $zone );
 		} elseif ( is_object( $zone ) ) {
 			$this->set_id( $zone->zone_id );
-			$this->set_zone_name( $zone->zone_name );
-			$this->set_zone_order( $zone->zone_order );
-			$this->read_zone_locations( $zone->zone_id );
 		} elseif ( 0 === $zone || "0" === $zone ) {
 			$this->set_id( 0 );
-			$this->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
-			$this->read_zone_locations( 0 );
 		} else {
 			$this->set_zone_name( __( 'Zone', 'woocommerce' ) );
+			$this->set_object_read( true );
+		}
+
+		$this->data_store = WC_Data_Store::load( 'shipping-zone' );
+		if ( ! is_null( $zone ) ) {
+			$this->data_store->read( $this );
 		}
 	}
 
@@ -63,130 +60,51 @@ class WC_Shipping_Zone extends WC_Data {
 	}
 
 	/**
-	 * Insert zone into the database
-	 */
-	public function create() {
-		global $wpdb;
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zones', array(
-			'zone_name'  => $this->get_zone_name(),
-			'zone_order' => $this->get_zone_order(),
-		) );
-		$this->set_id( $wpdb->insert_id );
-	}
-
-	/**
-	 * Read zone.
-	 * @param int ID to read from DB
-	 */
-	public function read( $id ) {
-		global $wpdb;
-
-		if ( $zone_data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1;", $id ) ) ) {
-			$this->set_id( $zone_data->zone_id );
-			$this->set_zone_name( $zone_data->zone_name );
-			$this->set_zone_order( $zone_data->zone_order );
-			$this->read_zone_locations( $zone_data->zone_id );
-		}
-	}
-
-	/**
-	 * Update zone in the database
-	 */
-	public function update() {
-		global $wpdb;
-
-		if ( $this->get_id() ) {
-			$wpdb->update( $wpdb->prefix . 'woocommerce_shipping_zones', array(
-				'zone_name'  => $this->get_zone_name(),
-				'zone_order' => $this->get_zone_order(),
-			), array( 'zone_id' => $this->get_id() ) );
-		}
-	}
-
-	/**
-	 * Delete a zone.
-	 * @since 2.6.0
-	 */
-	public function delete( $force_delete = false ) {
-		if ( $this->get_id() ) {
-			global $wpdb;
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'zone_id' => $this->get_id() ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $this->get_id() ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $this->get_id() ) );
-			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
-			$this->set_id( null );
-		}
-	}
-
-	/**
 	 * Save zone data to the database.
 	 */
 	public function save() {
 		$name = $this->get_zone_name();
-
 		if ( empty( $name ) ) {
 			$this->set_zone_name( $this->generate_zone_name() );
 		}
-
-		if ( null === $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
+		if ( $this->data_store ) {
+			if ( null === $this->get_id() ) {
+				$this->data_store->create( $this );
+			} else {
+				$this->data_store->update( $this );
+			}
+			return $this->get_id();
 		}
-
-		$this->save_locations();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
-
-		// Increments the transient version to invalidate cache.
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
-	}
-
-	/**
-	 * Set ID.
-	 * @param int|null $id
-	 */
-	public function set_id( $id ) {
-		$this->id = $id;
-	}
-
-	/**
-	 * Get ID
-	 * @return int|null Null if the zone does not exist. 0 is the default zone.
-	 */
-	public function get_id() {
-		return is_null( $this->id ) ? null : absint( $this->id );
-	}
-
-	/**
-	 * Get zone ID
-	 * @return int|null Null if the zone does not exist. 0 is the default zone.
-	 */
-	public function get_zone_id() {
-		return $this->get_id();
 	}
 
 	/**
 	 * Get zone name
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_zone_name() {
-		return $this->data['zone_name'];
+	public function get_zone_name( $context = 'view' ) {
+		return $this->get_prop( 'zone_name', $context );
 	}
 
 	/**
 	 * Get zone order
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_zone_order() {
-		return absint( $this->data['zone_order'] );
+	public function get_zone_order( $context = 'view' ) {
+		return $this->get_prop( 'zone_order', $context );
 	}
 
 	/**
 	 * Get zone locations
+	 *
+	 * @param  string $context
 	 * @return array of zone objects
 	 */
-	public function get_zone_locations() {
-		return $this->data['zone_locations'];
+	public function get_zone_locations( $context = 'view' ) {
+		return $this->get_prop( 'zone_locations', $context );
 	}
 
 	/**
@@ -205,9 +123,12 @@ class WC_Shipping_Zone extends WC_Data {
 
 	/**
 	 * Return a text string representing what this zone is for.
+	 *
+	 * @param  int $max
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_formatted_location( $max = 10 ) {
+	public function get_formatted_location( $max = 10, $context = 'view' ) {
 		$location_parts = array();
 		$all_continents = WC()->countries->get_continents();
 		$all_countries  = WC()->countries->get_countries();
@@ -343,7 +264,7 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @param string $set
 	 */
 	public function set_zone_name( $set ) {
-		$this->data['zone_name'] = wc_clean( $set );
+		$this->set_prop( 'zone_name', wc_clean( $set ) );
 	}
 
 	/**
@@ -351,7 +272,17 @@ class WC_Shipping_Zone extends WC_Data {
 	 * @param int $set
 	 */
 	public function set_zone_order( $set ) {
-		$this->data['zone_order'] = absint( $set );
+		$this->set_prop( 'zone_order', absint( $set ) );
+	}
+
+	/**
+	 * Set zone locations
+	 *
+	 * @since 2.7.0
+	 * @param array
+	 */
+	public function set_zone_locations( $locations ) {
+		$this->set_prop( 'zone_locations', $locations );
 	}
 
 	/**
@@ -377,10 +308,12 @@ class WC_Shipping_Zone extends WC_Data {
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type ),
 			);
-			$this->data['zone_locations'][] = (object) $location;
-			$this->locations_changed = true;
+			$zone_locations = $this->get_prop( 'zone_locations', 'edit' );
+			$zone_locations[] = (object) $location;
+			$this->set_prop( 'zone_locations', $zone_locations );
 		}
 	}
+
 
 	/**
 	 * Clear all locations for this zone.
@@ -390,12 +323,13 @@ class WC_Shipping_Zone extends WC_Data {
 		if ( ! is_array( $types ) ) {
 			$types = array( $types );
 		}
-		foreach ( $this->data['zone_locations'] as $key => $values ) {
+		$zone_locations = $this->get_prop( 'zone_locations', 'edit' );
+		foreach ( $zone_locations as $key => $values ) {
 			if ( in_array( $values->type, $types ) ) {
-				unset( $this->data['zone_locations'][ $key ] );
-				$this->locations_changed = true;
+				unset( $zone_locations[ $key ] );
 			}
 		}
+		$this->set_prop( 'zone_locations', $zone_locations );
 	}
 
 	/**
@@ -404,47 +338,8 @@ class WC_Shipping_Zone extends WC_Data {
 	 */
 	public function set_locations( $locations = array() ) {
 		$this->clear_locations();
-
 		foreach ( $locations as $location ) {
 			$this->add_location( $location['code'], $location['type'] );
-		}
-
-		$this->locations_changed = true;
-	}
-
-	/**
-	 * Read location data from the database
-	 * @param  int $zone_id
-	 */
-	private function read_zone_locations( $zone_id ) {
-		global $wpdb;
-
-		if ( $locations = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d;", $zone_id ) ) ) {
-			foreach ( $locations as $location ) {
-				$this->add_location( $location->location_code, $location->location_type );
-			}
-		}
-		$this->locations_changed = false;
-	}
-
-	/**
-	 * Save locations to the DB.
-	 *
-	 * This function clears old locations, then re-inserts new if any changes are found.
-	 */
-	private function save_locations() {
-		if ( ! $this->locations_changed || null === $this->get_id() ) {
-			return false;
-		}
-		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $this->get_id() ) );
-
-		foreach ( $this->get_zone_locations() as $location ) {
-			$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
-				'zone_id'       => $this->get_id(),
-				'location_code' => $location->code,
-				'location_type' => $location->type,
-			) );
 		}
 	}
 
