@@ -1378,7 +1378,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		} else {
 			$variations = $request['variations'];
 		}
-		$attributes = $product->get_variation_attributes();
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
@@ -1504,7 +1503,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Update taxonomies.
 			if ( isset( $data['attributes'] ) ) {
-				$_attributes = array();
+				$attributes = array();
+				$parent_attributes = $product->get_attributes();
 
 				foreach ( $data['attributes'] as $attribute ) {
 					$attribute_id   = 0;
@@ -1522,30 +1522,28 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						continue;
 					}
 
-					if ( isset( $attributes[ $attribute_name ] ) ) {
-						$_attribute = $attributes[ $attribute_name ];
+					if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
+						continue;
 					}
 
-					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$_attribute_key  = sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+					$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
+					$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 
-						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
-							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
+						// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+						$term = get_term_by( 'name', $attribute_value, $attribute_name );
 
-							if ( $term && ! is_wp_error( $term ) ) {
-								$attribute_value = $term->slug;
-							} else {
-								$attribute_value = sanitize_title( $attribute_value );
-							}
+						if ( $term && ! is_wp_error( $term ) ) {
+							$attribute_value = $term->slug;
+						} else {
+							$attribute_value = sanitize_title( $attribute_value );
 						}
-
-						$_attributes[ $_attribute_key ] = $attribute_value;
 					}
+
+					$attributes[ $attribute_key ] = $attribute_value;
 				}
 
-				$variation->set_attributes( $_attributes );
+				$variation->set_attributes( $attributes );
 			}
 
 			$variation->save();
