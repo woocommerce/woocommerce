@@ -125,10 +125,10 @@ class WC_Data_Store {
 	 *
 	 * @since 2.7.0
 	 * @param WC_Data
-	 * @param bool $force_delete True to permently delete, false to trash.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$data, $force_delete = false ) {
-		$this->instance->delete( $data, $force_delete );
+	public function delete( &$data, $args = array() ) {
+		$this->instance->delete( $data, $args );
 	}
 
 	/**

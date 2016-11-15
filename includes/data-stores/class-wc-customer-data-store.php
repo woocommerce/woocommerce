@@ -28,7 +28,8 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 			$wp_user = new WP_User( $customer->get_id() );
 			$customer->set_date_created( strtotime( $wp_user->user_registered ) );
 			$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
-			$customer->read_meta_data();
+			$customer->save_meta_data();
+			$customer->apply_changes();
 		}
 	}
 
@@ -44,13 +45,11 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		// User object is required.
 		if ( ! $customer->get_id() || ! ( $user_object = get_user_by( 'id', $customer->get_id() ) ) || empty( $user_object->ID ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-			return;
 		}
 
 		// Only users on this site should be read.
 		if ( is_multisite() && ! is_user_member_of_blog( $customer->get_id() ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-			return;
 		}
 
 		$customer_id = $customer->get_id();
@@ -83,6 +82,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		$this->update_user_meta( $customer );
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
+		$customer->apply_changes();
 	}
 
 	/**
@@ -90,14 +90,16 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 	 *
 	 * @since 2.7.0
 	 * @param WC_Customer
-	 * @param bool $force_delete Unused for customers.
-	 * @param int|null $reassign Who to reassign posts to.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$customer, $force_delete = true, $reassign = null ) {
+	public function delete( &$customer, $args = array() ) {
 		if ( ! $customer->get_id() ) {
 			return;
 		}
-		return wp_delete_user( $customer->get_id(), $reassign );
+		$args = wp_parse_args( $args, array(
+			'reassign' => 0,
+		) );
+		return wp_delete_user( $customer->get_id(), $args['reassign'] );
 	}
 
 	/**

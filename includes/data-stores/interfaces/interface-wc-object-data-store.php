@@ -34,6 +34,7 @@ interface WC_Object_Data_Store {
 	 * Deletes a record from the database.
 	 * @param WC_Data
 	 * @param bool $force_delete True to permently delete, false to trash.
+	 * @return bool result
 	 */
 	public function delete( &$data, $force_delete = false );
 }

@@ -134,9 +134,9 @@ class WC_Customer_Data_Store_Session implements WC_Customer_Data_Store_Interface
 	 *
 	 * @since 2.7.0
 	 * @param WC_Customer
-	 * @param int|null $reassign Who to reassign posts to.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$customer, $force_delete = true, $reassign = null ) {
+	public function delete( &$customer, $args = array() ) {
 		WC()->session->set( 'customer', null );
 	}
 
