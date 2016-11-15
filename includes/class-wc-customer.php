@@ -190,7 +190,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function delete_and_reassign( $reassign = null ) {
 		if ( $this->data_store ) {
-			$this->data_store->delete( $this, true, $reassign );
+			$this->data_store->delete( $this, array( 'force_delete' => true, 'reassign' => $reassign ) );
 			$this->set_id( 0 );
 			return true;
 		}

@@ -15,14 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 interface WC_Customer_Data_Store_Interface {
 
 	/**
-	 * Deletes a customer from the database.
-	 *
-	 * @param WC_Customer
-	 * @param int|null $reassign Who to reassign posts to.
-	 */
-	public function delete( &$data, $reassign = null );
-
-	/**
 	 * Gets the customers last order.
 	 *
 	 * @param WC_Customer

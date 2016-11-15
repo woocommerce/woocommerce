@@ -117,7 +117,7 @@ abstract class WC_Data {
 	 */
 	public function delete( $force_delete = false ) {
 		if ( $this->data_store ) {
-			$this->data_store->delete( $this, $force_delete );
+			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );
 			return true;
 		}
