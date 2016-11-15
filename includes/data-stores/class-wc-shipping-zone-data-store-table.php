@@ -98,6 +98,150 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	}
 
 	/**
+	 * Get a list of shipping methods for a specific sone.
+	 *
+	 * @since 2.7.0
+	 * @param  int   $zone_id      Zone ID
+	 * @param  bool  $enabled_only True to request enabled methods only.
+	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
+	 */
+	public function get_methods( $zone_id, $enabled_only ) {
+		global $wpdb;
+		$raw_methods_sql = $enabled_only ? "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d AND is_enabled = 1;" : "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d;";
+		return $wpdb->get_results( $wpdb->prepare( $raw_methods_sql, $zone_id ) );
+	}
+
+	/**
+	 * Get count of methods for a zone.
+	 *
+	 * @since 2.7.0
+	 * @param  int Zone ID
+	 * @return int Method Count
+	 */
+	public function get_method_count( $zone_id ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d", $zone_id ) );
+	}
+
+	/**
+	 * Add a shipping method to a zone.
+	 *
+	 * @since  2.7.0
+	 * @param  int    $zone_id Zone ID
+	 * @param  string $type    Method Type/ID
+	 * @param  int    $order   Method Order
+	 * @return int             Instance ID
+	 */
+	public function add_method( $zone_id, $type, $order ) {
+		global $wpdb;
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+			array(
+				'method_id'    => $type,
+				'zone_id'      => $zone_id,
+				'method_order' => $order,
+			),
+			array(
+				'%s',
+				'%d',
+				'%d',
+			)
+		);
+		return $wpdb->insert_id;
+	}
+
+	/**
+	 * Delete a method instance.
+	 *
+	 * @since 2.7.0
+	 * @param int $instance_id
+	 */
+	public function delete_method( $instance_id ) {
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'instance_id' => $instance_id ) );
+	}
+
+	/**
+	 * Get a shipping zone method instance.
+	 *
+	 * @since  2.7.0
+	 * @param  int
+	 * @return object
+	 */
+	public function get_method( $instance_id ) {
+		global $wpdb;
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d LIMIT 1;", $instance_id ) );
+	}
+
+	/**
+	 * Find a matching zone ID for a given package.
+	 *
+	 * @since  2.7.0
+	 * @param  object $package
+	 * @return int
+	 */
+	public function get_zone_id_from_package( $package ) {
+		global $wpdb;
+
+		$country          = strtoupper( wc_clean( $package['destination']['country'] ) );
+		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
+		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
+		$postcode         = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
+
+		// Work out criteria for our zone search
+		$criteria = array();
+		$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
+		$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
+		$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
+		$criteria[] = "OR ( location_type IS NULL ) )";
+
+		// Postcode range and wildcard matching
+		$postcode_locations = $wpdb->get_results( "SELECT zone_id, location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'postcode';" );
+
+		if ( $postcode_locations ) {
+			$zone_ids_with_postcode_rules = array_map( 'absint', wp_list_pluck( $postcode_locations, 'zone_id' ) );
+			$matches                      = wc_postcode_location_matcher( $postcode, $postcode_locations, 'zone_id', 'location_code', $country );
+			$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $matches ) ) );
+
+			if ( ! empty( $do_not_match ) ) {
+				$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
+			}
+		}
+
+		// Get matching zones
+		return $wpdb->get_var( "
+			SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
+			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
+			WHERE " . implode( ' ', $criteria ) . "
+			ORDER BY zone_order ASC LIMIT 1
+		" );
+	}
+
+	/**
+	 * Return an ordered list of zones.
+	 *
+	 * @since 2.7.0
+	 * @return array An array of objects containing a zone_id, zone_name, and zone_order.
+	 */
+	public function get_zones() {
+		global $wpdb;
+		return $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
+	}
+
+
+	/**
+	 * Return a zone ID from an instance ID.
+	 *
+	 * @since 2.7.0
+	 * @param int
+	 * @return int
+	 */
+	public function get_zone_id_by_instance_id( $id ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods as methods WHERE methods.instance_id = %d LIMIT 1;", $id ) );
+	}
+
+	/**
 	 * Read location data from the database.
 	 *
 	 * @param WC_Shipping_Zone
@@ -136,5 +280,4 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 			) );
 		}
 	}
-
 }
