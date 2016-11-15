@@ -80,13 +80,54 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test log( 'level', ... ) === level( ... ).
+	 */
+	public function test_log_short_methods() {
+		$log = wc_get_logger();
+
+		$ctx_a = array( 'tag' => 'A' );
+		$ctx_b = array( 'tag' => 'B' );
+
+		$log->log( 'debug',     'debug',     $ctx_a );
+		$log->log( 'info',      'info',      $ctx_a );
+		$log->log( 'notice',    'notice',    $ctx_a );
+		$log->log( 'warning',   'warning',   $ctx_a );
+		$log->log( 'error',     'error',     $ctx_a );
+		$log->log( 'critical',  'critical',  $ctx_a );
+		$log->log( 'alert',     'alert',     $ctx_a );
+		$log->log( 'emergency', 'emergency', $ctx_a );
+
+		$log->debug(     'debug',     $ctx_b );
+		$log->info(      'info',      $ctx_b );
+		$log->notice(    'notice',    $ctx_b );
+		$log->warning(   'warning',   $ctx_b );
+		$log->error(     'error',     $ctx_b );
+		$log->critical(  'critical',  $ctx_b );
+		$log->alert(     'alert',     $ctx_b );
+		$log->emergency( 'emergency', $ctx_b );
+
+		$log_content_a = $this->read_content( 'A' );
+		$log_content_b = $this->read_content( 'B' );
+
+		$this->assertEquals( $log_content_a, $log_content_b );
+	}
+
+	/**
 	 * Test consumed logs do not bubble.
 	 */
 	public function test_log_entry_is_consumed() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_consume_error_handlers' ) );
 
 		$log = wc_get_logger();
-		$log->log( 'emergency', '' );
+
+		$log->debug( 'debug' );
+		$log->info( 'info' );
+		$log->notice( 'notice' );
+		$log->warning( 'warning' );
+		$log->error( 'error' );
+		$log->critical( 'critical' );
+		$log->alert( 'alert' );
+		$log->emergency( 'emergency' );
 	}
 
 	/**
@@ -96,7 +137,16 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_bubble_required_handlers' ) );
 
 		$log = wc_get_logger();
-		$log->log( 'emergency', '' );
+
+		$log->debug( 'debug' );
+		$log->info( 'info' );
+		$log->notice( 'notice' );
+		$log->warning( 'warning' );
+		$log->error( 'error' );
+		$log->critical( 'critical' );
+		$log->alert( 'alert' );
+		$log->emergency( 'emergency' );
+
 	}
 
 	/**
