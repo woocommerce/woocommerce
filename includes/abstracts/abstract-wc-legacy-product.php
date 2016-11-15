@@ -725,4 +725,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		wc_soft_deprecated_function( 'WC_Product::get_files', '2.7', '2.8', 'WC_Product::get_downloads' );
 		return $this->get_downloads();
 	}
+
+	/**
+	 * @deprected 2.7.0 Sync is taken care of during save - no need to call this directly.
+	 */
+	public function grouped_product_sync() {
+		_deprecated_function( 'WC_Product::grouped_product_sync', '2.7' );
+	}
 }

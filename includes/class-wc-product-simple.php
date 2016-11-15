@@ -55,31 +55,4 @@ class WC_Product_Simple extends WC_Product {
 
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
-
-	/**
-	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately). @todo should this be here?
-	 */
-	public function grouped_product_sync() {
-		if ( ! $this->get_parent_id() ) return;
-
-		$children_by_price = get_posts( array(
-			'post_parent'    => $this->get_parent_id(),
-			'orderby'        => 'meta_value_num',
-			'order'          => 'asc',
-			'meta_key'       => '_price',
-			'posts_per_page' => 1,
-			'post_type'      => 'product',
-			'fields'         => 'ids',
-		));
-		if ( $children_by_price ) {
-			foreach ( $children_by_price as $child ) {
-				$child_price = get_post_meta( $child, '_price', true );
-				update_post_meta( $this->get_parent_id(), '_price', $child_price );
-			}
-		}
-
-		delete_transient( 'wc_products_onsale' );
-
-		do_action( 'woocommerce_grouped_product_sync', $this->id, $children_by_price );
-	}
 }

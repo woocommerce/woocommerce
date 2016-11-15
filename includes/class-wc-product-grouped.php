@@ -148,4 +148,32 @@ class WC_Product_Grouped extends WC_Product {
 	public function set_children( $children ) {
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Sync with children.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Sync a grouped product with it's children. These sync functions sync
+	 * upwards (from child to parent) when the variation is saved.
+	 *
+	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
+	 * @param bool $save If true, the prouduct object will be saved to the DB before returning it.
+	 * @return WC_Product Synced product object.
+	 */
+	public static function sync( $product, $save = true ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+		if ( is_a( $product, 'WC_Product_Grouped' ) ) {
+			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store->sync_price( $product );
+			if ( $save ) {
+				$product->save();
+			}
+		}
+		return $product;
+	}
 }

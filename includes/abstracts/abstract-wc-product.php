@@ -1349,6 +1349,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			} else {
 				$this->data_store->create( $this );
 			}
+			if ( $this->get_parent_id() ) {
+				wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
+			}
 			return $this->get_id();
 		}
 	}

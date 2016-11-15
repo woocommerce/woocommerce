@@ -481,18 +481,6 @@ function wc_scheduled_sales() {
 			}
 
 			$product->save();
-
-			$parent = $product->get_parent_id();
-			// Sync parent
-			if ( $parent ) {
-				// Clear prices transient for variable products.
-				delete_transient( 'wc_var_prices_' . $parent );
-
-				// Grouped products need syncing via a function
-				if ( $product->is_type( 'simple' ) ) {
-					$product->grouped_product_sync();
-				}
-			}
 		}
 
 		delete_transient( 'wc_products_onsale' );
@@ -509,19 +497,6 @@ function wc_scheduled_sales() {
 			$product->set_date_on_sale_to( '' );
 			$product->set_date_on_sale_from( '' );
 			$product->save();
-
-			$parent = $product->get_parent_id();
-
-			// Sync parent
-			if ( $parent ) {
-				// Clear prices transient for variable products.
-				delete_transient( 'wc_var_prices_' . $parent );
-
-				// Grouped products need syncing via a function
-				if ( $product->is_type( 'simple' ) ) {
-					$product->grouped_product_sync();
-				}
-			}
 		}
 
 		WC_Cache_Helper::get_transient_version( 'product', true );
