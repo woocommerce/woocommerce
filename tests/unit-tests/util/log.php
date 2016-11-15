@@ -175,6 +175,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$log = wc_get_logger();
 		$context_tag = array( 'tag' => 'A' );
 
+		$log->debug( 'debug', $context_tag );
 		$log->info( 'info', $context_tag );
 		$log->notice( 'notice', $context_tag );
 		$log->warning( 'warning', $context_tag );
