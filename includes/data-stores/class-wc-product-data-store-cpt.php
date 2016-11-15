@@ -129,12 +129,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	/**
 	 * Method to delete a product from the database.
 	 * @param WC_Product
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$product, $force_delete = false ) {
-		$id = $product->get_id();
+	public function delete( &$product, $args = array() ) {
+		$id        = $product->get_id();
 		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 
-		if ( $force_delete ) {
+		$args = wp_parse_args( $args, array(
+			'force_delete' => false,
+		) );
+
+		if ( $args['force_delete'] ) {
 			wp_delete_post( $product->get_id() );
 			$product->set_id( 0 );
 		} else {
