@@ -805,13 +805,14 @@ class WC_Form_Handler {
 			$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
 		}
 
-		$variation = wc_get_product( $variation_id );
-
 		// Validate the attributes.
 		try {
 			if ( empty( $variation_id ) ) {
 				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			}
+
+			$variation_data = wc_get_product_variation_attributes( $variation_id );
+
 			foreach ( $attributes as $attribute ) {
 				if ( ! $attribute['is_variation'] ) {
 					continue;
@@ -829,7 +830,7 @@ class WC_Form_Handler {
 					}
 
 					// Get valid value from variation
-					$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
+					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
 					if ( '' === $valid_value || $valid_value === $value ) {
