@@ -16,7 +16,7 @@ class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store {
 	public function create( &$data ) { }
 	public function read( &$data ) { }
 	public function update( &$data ) { }
-	public function delete( &$data, $force_delete = false ) { }
+	public function delete( &$data, $args = array() ) { }
 }
 
 /**
@@ -32,5 +32,5 @@ class WC_Dummy_Data_Store_Custom_Table implements WC_Object_Data_Store {
 	public function create( &$data ) { }
 	public function read( &$data ) { }
 	public function update( &$data ) { }
-	public function delete( &$data, $force_delete = false ) { }
+	public function delete( &$data, $args = array() ) { }
 }

@@ -110,12 +110,18 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Updates object data in the database.
+	 * Delete an object, set the ID to 0, and return result.
+	 *
+	 * @param  bool $force_delete
+	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
 		if ( $this->data_store ) {
-			$this->data_store->delete( $this, $force_delete );
+			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
+			$this->set_id( 0 );
+			return true;
 		}
+		return false;
 	}
 
 	/**

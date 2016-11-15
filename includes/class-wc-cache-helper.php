@@ -55,8 +55,7 @@ class WC_Cache_Helper {
 	 * @return string
 	 */
 	public static function geolocation_ajax_get_location_hash() {
-		$customer             = new WC_Customer();
-		$customer->load_session();
+		$customer             = new WC_Customer( 0, true );
 		$location             = array();
 		$location['country']  = $customer->get_billing_country();
 		$location['state']    = $customer->get_billing_state();

@@ -106,11 +106,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 	 *
 	 * @since 2.7.0
 	 * @param WC_Coupon
-	 * @param bool $force_delete True to permently delete, false to trash.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$coupon, $force_delete = false ) {
+	public function delete( &$coupon, $args = array() ) {
+		$args = wp_parse_args( $args, array(
+			'force_delete' => false,
+		) );
+
 		$id = $coupon->get_id();
-		if ( $force_delete ) {
+
+		if ( $args['force_delete'] ) {
 			wp_delete_post( $coupon->get_id() );
 			$coupon->set_id( 0 );
 		} else {

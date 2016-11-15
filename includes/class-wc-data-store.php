@@ -28,8 +28,10 @@ class WC_Data_Store {
 	 * Ran through `woocommerce_data_stores`.
 	 */
 	private $stores = array(
-		'coupon'        => 'WC_Coupon_Data_Store_CPT',
-		'payment-token' => 'WC_Payment_Token_Data_Store_Table',
+		'customer'         => 'WC_Customer_Data_Store',
+		'customer-session' => 'WC_Customer_Data_Store_Session',
+		'coupon'           => 'WC_Coupon_Data_Store_CPT',
+		'payment-token'    => 'WC_Payment_Token_Data_Store_Table',
 	);
 	/**
 	 * Contains the name of the current data store's class name.
@@ -123,10 +125,10 @@ class WC_Data_Store {
 	 *
 	 * @since 2.7.0
 	 * @param WC_Data
-	 * @param bool $force_delete True to permently delete, false to trash.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$data, $force_delete = false ) {
-		$this->instance->delete( $data, $force_delete );
+	public function delete( &$data, $args = array() ) {
+		$this->instance->delete( $data, $args );
 	}
 
 	/**

@@ -311,7 +311,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$customer->set_username( $request['username'] );
 			$customer->set_password( $request['password'] );
 			$customer->set_email( $request['email'] );
-			$customer->create();
+			$customer->save();
 
 			if ( ! $customer->get_id() ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
