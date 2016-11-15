@@ -202,7 +202,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
-		$bubble->method( 'handle' )->willReturn( true );
+		$bubble->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( true ) );
 
 		$required = $this
 			->getMockBuilder( 'WC_Log_Handler' )
@@ -229,7 +229,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 			->setMethods( array( 'handle' ) )
 			->getMock();
 
-		$consume->method( 'handle' )->willReturn( false );
+		$consume->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( false ) );
 
 		$error = $this
 			->getMockBuilder( 'WC_Log_Handler' )
