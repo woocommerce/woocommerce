@@ -2127,7 +2127,7 @@ class WC_Cart {
 
 			if ( 'excl' === $this->tax_display_cart ) {
 
-				$row_price        = $product->get_price_excluding_tax( $quantity );
+				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
 				if ( $this->prices_include_tax && $this->tax_total > 0 ) {
@@ -2135,7 +2135,7 @@ class WC_Cart {
 				}
 			} else {
 
-				$row_price        = $product->get_price_including_tax( $quantity );
+				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
 				if ( ! $this->prices_include_tax && $this->tax_total > 0 ) {
