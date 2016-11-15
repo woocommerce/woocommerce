@@ -1259,7 +1259,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$product->set_backorders( 'no' );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
-			} elseif ( 'yes' === $product->get_manage_stock() ) {
+			} elseif ( $product->get_manage_stock() ) {
 				// Stock status is always determined by children so sync later.
 				if ( ! $product->is_type( 'variable' ) ) {
 					$product->set_stock_status( $stock_status );
