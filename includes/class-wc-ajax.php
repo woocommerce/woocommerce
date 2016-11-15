@@ -1983,7 +1983,7 @@ class WC_AJAX {
 		foreach ( $variations as $variation_id ) {
 			$_downloadable   = get_post_meta( $variation_id, '_downloadable', true );
 			$is_downloadable = 'no' === $_downloadable ? 'yes' : 'no';
-			update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
+			update_post_meta( $variation_id, '_downloadable', $is_downloadable );
 		}
 	}
 
@@ -1998,7 +1998,7 @@ class WC_AJAX {
 		foreach ( $variations as $variation_id ) {
 			$_virtual   = get_post_meta( $variation_id, '_virtual', true );
 			$is_virtual = 'no' === $_virtual ? 'yes' : 'no';
-			update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
+			update_post_meta( $variation_id, '_virtual', $is_virtual );
 		}
 	}
 

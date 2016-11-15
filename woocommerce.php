@@ -289,16 +289,14 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-coupon-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-product-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/interface-wc-product-variable-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-payment-token-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store-table.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php' );
-
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
-		}
 
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();

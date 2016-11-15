@@ -571,7 +571,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array
 	 */
 	public function expand_item_meta( $item ) {
-		_deprecated_function( 'expand_item_meta', '2.7', '' );
+		_deprecated_function( 'expand_item_meta', '2.7' );
 		return $item;
 	}
 

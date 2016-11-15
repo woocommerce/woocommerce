@@ -36,9 +36,7 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 		$token = WC_Helper_Payment_Token::create_eCheck_token();
 		$token_id = $token->get_id();
 
-		$token_read = new WC_Payment_Token_eCheck();
-		$token_read->read( $token_id );
-
+		$token_read = new WC_Payment_Token_eCheck( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}
 }
