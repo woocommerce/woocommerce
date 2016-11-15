@@ -86,7 +86,7 @@ class WC_Product_Grouped extends WC_Product {
 		foreach ( $this->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( '' !== $child->get_price() ) {
-				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_include_tax( $child ) : wc_get_price_excluding_tax( $child );
+				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
 			}
 		}
 
@@ -105,7 +105,7 @@ class WC_Product_Grouped extends WC_Product {
 			if ( $is_free ) {
 				$price = apply_filters( 'woocommerce_grouped_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
-				$price = apply_filters( 'woocommerce_grouped_price_html', $price . $this->get_price_suffix(), $this, $child_prices );
+				$price = apply_filters( 'woocommerce_grouped_price_html', $price . wc_get_price_suffix( $this ), $this, $child_prices );
 			}
 		} else {
 			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );

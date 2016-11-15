@@ -125,7 +125,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$this->expectOutputString( wc_price( $product->price ), wc_cart_totals_subtotal_html() );
+		$this->expectOutputString( wc_price( $product->get_price( 'edit' ) ), wc_cart_totals_subtotal_html() );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}

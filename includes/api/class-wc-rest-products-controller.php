@@ -1154,8 +1154,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product->set_date_on_sale_from( '' );
 			$product->set_price( '' );
 		} else {
-			$date_from = $date_to = '';
-
 			// Regular Price.
 			if ( isset( $request['regular_price'] ) ) {
 				$product->set_regular_price( $request['regular_price'] );
@@ -1180,8 +1178,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product->set_parent_id( $request['parent_id'] );
 		}
 
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
+		// Update parent if grouped so price sorting works and stays in sync with the cheapest child. @todo
+		/*if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
 
 			$clear_parent_ids = array();
 
@@ -1218,7 +1216,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 				}
 			}
-		}
+		}*/
 
 		// Sold individually.
 		if ( isset( $request['sold_individually'] ) ) {

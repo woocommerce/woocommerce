@@ -892,7 +892,7 @@ class WC_Cart {
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 			// Sanity check
-			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->post->post_status  ) {
+			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
 				return false;
 			}
 

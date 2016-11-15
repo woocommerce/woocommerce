@@ -118,6 +118,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'_downloadable',
 		'_featured',
 		'_downloadable_files',
+		'_wc_rating_count',
+		'_wc_average_rating',
+		'_wc_review_count',
 	);
 
 	/**

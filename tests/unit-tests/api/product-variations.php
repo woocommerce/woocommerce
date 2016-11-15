@@ -41,7 +41,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_variation_product();
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
-
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $variations ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
