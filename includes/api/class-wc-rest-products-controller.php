@@ -1178,46 +1178,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product->set_parent_id( $request['parent_id'] );
 		}
 
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child. @todo
-		/*if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
-
-			$clear_parent_ids = array();
-
-			if ( $product->get_parent_id() > 0 ) {
-				$clear_parent_ids[] = $product->get_parent_id();
-				$parent = wc_get_product( $product->get_parent_id() );
-				$children = $parent->get_children();
-				$parent->set_children( array_filter( array_merge( $children, array( $product->get_id() ) ) ) );
-				$parent->save();
-			}
-
-			if ( $product->is_type( 'grouped' ) ) {
-				$clear_parent_ids[] = $product->get_id();
-			}
-
-			if ( ! empty( $clear_parent_ids ) ) {
-				foreach ( $clear_parent_ids as $clear_id ) {
-					$clear_product     = wc_get_product( $clear_id );
-					$children_by_price = get_posts( array(
-						'post_parent'    => $clear_id,
-						'orderby'        => 'meta_value_num',
-						'order'          => 'asc',
-						'meta_key'       => '_price',
-						'posts_per_page' => 1,
-						'post_type'      => 'product',
-						'fields'         => 'ids',
-					) );
-
-					if ( $children_by_price ) {
-						foreach ( $children_by_price as $child ) {
-							$child_product = wc_get_product( $child );
-							$clear_product->set_price( $child_product->get_price() );
-						}
-					}
-				}
-			}
-		}*/
-
 		// Sold individually.
 		if ( isset( $request['sold_individually'] ) ) {
 			$product->set_sold_individually( $request['sold_individually'] );

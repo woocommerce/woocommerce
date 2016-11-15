@@ -1072,16 +1072,6 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_parent_id( absint( $data['parent_id'] ) );
 		}
 
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
-			if ( $product->get_parent_id() > 0 ) {
-				$parent = wc_get_product( $product->get_parent_id() );
-				$children = $parent->get_children();
-				$parent->set_children( array_filter( array_merge( $children, array( $product->get_id() ) ) ) );
-				$parent->save();
-			}
-		}
-
 		// Sold Individually
 		if ( isset( $data['sold_individually'] ) ) {
 			$product->set_sold_individually( true === $data['sold_individually'] ? 'yes' : '' );
