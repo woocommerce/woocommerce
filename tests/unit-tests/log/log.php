@@ -8,7 +8,6 @@
 class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	public function tearDown() {
-		parent::tearDown();
 		$log_files = array(
 			wc_get_log_file_path( 'unit-tests' ),
 			wc_get_log_file_path( 'log' ),
@@ -20,6 +19,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 				unlink( $file );
 			}
 		}
+		parent::tearDown();
 	}
 
 	public function read_content( $handle ) {
@@ -97,13 +97,13 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$log->log( 'alert',     'alert',     $ctx_a );
 		$log->log( 'emergency', 'emergency', $ctx_a );
 
-		$log->debug(     'debug',     $ctx_b );
-		$log->info(      'info',      $ctx_b );
-		$log->notice(    'notice',    $ctx_b );
-		$log->warning(   'warning',   $ctx_b );
-		$log->error(     'error',     $ctx_b );
-		$log->critical(  'critical',  $ctx_b );
-		$log->alert(     'alert',     $ctx_b );
+		$log->debug( 'debug', $ctx_b );
+		$log->info( 'info', $ctx_b );
+		$log->notice( 'notice', $ctx_b );
+		$log->warning( 'warning', $ctx_b );
+		$log->error( 'error', $ctx_b );
+		$log->critical( 'critical', $ctx_b );
+		$log->alert( 'alert', $ctx_b );
 		$log->emergency( 'emergency', $ctx_b );
 
 		$log_content_a = $this->read_content( 'A' );
@@ -203,7 +203,6 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$bubble->method( 'handle' )->willReturn( true );
-
 
 		$required = $this
 			->getMockBuilder( 'WC_Log_Handler' )
