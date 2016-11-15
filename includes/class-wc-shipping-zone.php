@@ -104,7 +104,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		$all_continents = WC()->countries->get_continents();
 		$all_countries  = WC()->countries->get_countries();
 		$all_states     = WC()->countries->get_states();
-		$locations      = $this->get_zone_locations();
+		$locations      = $this->get_zone_locations( $context );
 		$continents     = array_filter( $locations, array( $this, 'location_is_continent' ) );
 		$countries      = array_filter( $locations, array( $this, 'location_is_country' ) );
 		$states         = array_filter( $locations, array( $this, 'location_is_state' ) );

@@ -33,7 +33,7 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	}
 
 	/**
-	 * Update zone in the database
+	 * Update zone in the database.
 	 *
 	 * @since 2.7.0
 	 * @param WC_Shipping_Zone
@@ -52,7 +52,6 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
-
 
 	/**
 	 * Method to read a shipping zone from the database.
@@ -81,7 +80,7 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	/**
 	 * Deletes a shipping zone from the database.
 	 *
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @param  WC_Shipping_Zone
 	 * @param  array $args Array of args to pass to the delete method.
 	 * @return bool result
@@ -98,9 +97,9 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	}
 
 	/**
-	 * Get a list of shipping methods for a specific sone.
+	 * Get a list of shipping methods for a specific zone.
 	 *
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @param  int   $zone_id      Zone ID
 	 * @param  bool  $enabled_only True to request enabled methods only.
 	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
@@ -114,7 +113,7 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	/**
 	 * Get count of methods for a zone.
 	 *
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @param  int Zone ID
 	 * @return int Method Count
 	 */
@@ -189,7 +188,7 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 		$postcode         = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
 
 		// Work out criteria for our zone search
-		$criteria = array();
+		$criteria   = array();
 		$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
@@ -232,8 +231,8 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	/**
 	 * Return a zone ID from an instance ID.
 	 *
-	 * @since 2.7.0
-	 * @param int
+	 * @since  2.7.0
+	 * @param  int
 	 * @return int
 	 */
 	public function get_zone_id_by_instance_id( $id ) {
