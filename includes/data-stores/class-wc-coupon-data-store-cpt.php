@@ -36,6 +36,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 			$coupon->set_id( $coupon_id );
 			$this->update_post_meta( $coupon );
 			$coupon->save_meta_data();
+			$coupon->apply_changes();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
 		}
 	}
@@ -98,6 +99,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Da
 		wp_update_post( $post_data );
 		$this->update_post_meta( $coupon );
 		$coupon->save_meta_data();
+		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
 	}
 
