@@ -329,7 +329,6 @@ class WC_Tax {
 	 * 		- State code
 	 * @param  array $rates
 	 * @return array
-	 * @todo   remove tax_rate_order column
 	 */
 	private static function sort_rates( $rates ) {
 		uasort( $rates, __CLASS__ . '::sort_rates_callback' );
@@ -522,8 +521,10 @@ class WC_Tax {
 	 */
 	public static function get_shipping_tax_rates( $tax_class = null ) {
 		// See if we have an explicitly set shipping tax class
-		if ( $shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' ) ) {
-			$tax_class = 'standard' === $shipping_tax_class ? '' : $shipping_tax_class;
+		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+
+		if ( 'inherit' !== $shipping_tax_class ) {
+			$tax_class = $shipping_tax_class;
 		}
 
 		$location          = self::get_tax_location( $tax_class );

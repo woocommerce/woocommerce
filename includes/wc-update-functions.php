@@ -1001,3 +1001,29 @@ function wc_update_270_comment_type_index() {
 
 	$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 }
+
+function wc_update_270_grouped_products() {
+	global $wpdb;
+	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
+	foreach ( $parents as $parent_id ) {
+		$parent = wc_get_product( $parent_id );
+		if ( $parent && $parent->is_type( 'grouped' ) ) {
+			$children_ids = get_posts( array(
+				'post_parent'    => $parent_id,
+				'posts_per_page' => -1,
+				'post_type'      => 'product',
+				'fields'         => 'ids',
+			) );
+			add_post_meta( $parent_id, '_children', $children_ids, true );
+		}
+	}
+}
+
+function wc_update_270_settings() {
+	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+	if ( '' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+	} elseif ( 'standard' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', '' );
+	}
+}

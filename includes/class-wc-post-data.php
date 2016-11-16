@@ -28,6 +28,7 @@ class WC_Post_Data {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_deferred_product_sync', array( __CLASS__, 'deferred_product_sync' ), 10, 1 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -39,8 +40,25 @@ class WC_Post_Data {
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
-		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
-		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
+
+		// Status transitions
+		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
+		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
+		add_action( 'untrash_post', array( __CLASS__, 'untrash_post' ) );
+		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_items' ) );
+		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_downloadable_permissions' ) );
+	}
+
+	/**
+	 * Sync a product.
+	 * @param  int $product_id
+	 */
+	public static function deferred_product_sync( $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		if ( is_callable( array( $product, 'sync' ) ) ) {
+			$product->sync( $product );
+		}
 	}
 
 	/**
@@ -171,14 +189,10 @@ class WC_Post_Data {
 	 * @param  int $meta_id
 	 * @param  int $object_id
 	 * @param  string $meta_key
-	 * @param  mixed $_meta_value
+	 * @param  mixed $meta_value
+	 * @deprecated
 	 */
-	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) ) {
-			$product = wc_get_product( $object_id );
-			$product->check_stock_status();
-		}
-	}
+	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {}
 
 	/**
 	 * Forces the order posts to have a title in a certain format (containing the date).
@@ -208,22 +222,176 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
+	 * Removes variations etc belonging to a deleted post, and clears transients.
 	 *
-	 * @param int $post_id
+	 * @param mixed $id ID of post being deleted
 	 */
-	public static function pre_post_update( $post_id ) {
-		if ( 'product' === get_post_type( $post_id ) ) {
-			$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+	public static function delete_post( $id ) {
+		global $woocommerce, $wpdb;
 
-			if ( isset( $_POST['_visibility'] ) ) {
-				if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
-					do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+		if ( ! current_user_can( 'delete_posts' ) ) {
+			return;
+		}
+
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			switch ( $post_type ) {
+				case 'product' :
+
+					$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
+
+					if ( ! empty( $child_product_variations ) ) {
+						foreach ( $child_product_variations as $child ) {
+							wp_delete_post( $child->ID, true );
+						}
+					}
+
+					$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
+
+					if ( ! empty( $child_products ) ) {
+						foreach ( $child_products as $child ) {
+							$child_post                = array();
+							$child_post['ID']          = $child->ID;
+							$child_post['post_parent'] = 0;
+							wp_update_post( $child_post );
+						}
+					}
+
+					if ( $parent_id = wp_get_post_parent_id( $id ) ) {
+						wc_delete_product_transients( $parent_id );
+					}
+
+				break;
+				case 'product_variation' :
+					wc_delete_product_transients( wp_get_post_parent_id( $id ) );
+				break;
+				case 'shop_order' :
+					$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+					if ( ! is_null( $refunds ) ) {
+						foreach ( $refunds as $refund ) {
+							wp_delete_post( $refund->ID, true );
+						}
+					}
+				break;
+			}
+		}
+	}
+
+	/**
+	 * woocommerce_trash_post function.
+	 *
+	 * @param mixed $id
+	 */
+	public static function trash_post( $id ) {
+		global $wpdb;
+
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+
+				// Delete count - meta doesn't work on trashed posts
+				$user_id = get_post_meta( $id, '_customer_user', true );
+
+				if ( $user_id > 0 ) {
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
+				}
+
+				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+				foreach ( $refunds as $refund ) {
+					$wpdb->update( $wpdb->posts, array( 'post_status' => 'trash' ), array( 'ID' => $refund->ID ) );
+				}
+
+				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
+			}
+		}
+	}
+
+	/**
+	 * woocommerce_untrash_post function.
+	 *
+	 * @param mixed $id
+	 */
+	public static function untrash_post( $id ) {
+		global $wpdb;
+
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+
+				// Delete count - meta doesn't work on trashed posts
+				$user_id = get_post_meta( $id, '_customer_user', true );
+
+				if ( $user_id > 0 ) {
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
+				}
+
+				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+				foreach ( $refunds as $refund ) {
+					$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-completed' ), array( 'ID' => $refund->ID ) );
+				}
+
+				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
+			} elseif ( 'product' === $post_type ) {
+				// Check if SKU is valid before untrash the product.
+				$sku = get_post_meta( $id, '_sku', true );
+
+				if ( ! empty( $sku ) ) {
+					if ( ! wc_product_has_unique_sku( $id, $sku ) ) {
+						update_post_meta( $id, '_sku', '' );
+					}
 				}
 			}
-			if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
-				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
-			}
+		}
+	}
+
+	/**
+	 * Remove item meta on permanent deletion.
+	 */
+	public static function delete_order_items( $postid ) {
+		global $wpdb;
+
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+			do_action( 'woocommerce_delete_order_items', $postid );
+
+			$wpdb->query( "
+				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
+				FROM {$wpdb->prefix}woocommerce_order_items
+				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
+				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
+				" );
+
+			do_action( 'woocommerce_deleted_order_items', $postid );
+		}
+	}
+
+	/**
+	 * Remove downloadable permissions on permanent order deletion.
+	 */
+	public static function delete_order_downloadable_permissions( $postid ) {
+		global $wpdb;
+
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
+
+			$wpdb->query( $wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE order_id = %d
+			", $postid ) );
+
+			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}
 	}
 }

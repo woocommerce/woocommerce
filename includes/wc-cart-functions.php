@@ -205,7 +205,7 @@ function wc_cart_totals_shipping_html() {
 
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
-				$product_names[] = $values['data']->get_title() . ' &times;' . $values['quantity'];
+				$product_names[] = $values['data']->get_name() . ' &times;' . $values['quantity'];
 			}
 		}
 

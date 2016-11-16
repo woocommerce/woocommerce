@@ -253,8 +253,6 @@ add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 2 );
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
- *
  * @param mixed $term_id
  * @param string $meta_key
  * @param mixed $meta_value
@@ -271,7 +269,6 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param mixed $meta_key
  * @param mixed $meta_value
@@ -288,7 +285,6 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param string $meta_key
  * @param string $meta_value (default: '')
@@ -305,7 +301,6 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param string $key
  * @param bool $single (default: true)
@@ -485,14 +480,18 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
- *
  * @param  array $terms
  * @param  string $taxonomy
  * @param  bool $callback
  * @param  bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
-	global $wpdb;
+	global $wpdb, $wc_allow_term_recount;
+
+	// Don't recount unless CRUD is calling this.
+	if ( empty( $wc_allow_term_recount ) ) {
+		return;
+	}
 
 	// Standard callback
 	if ( $callback ) {
@@ -500,7 +499,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	}
 
 	// Stock query
-	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
 		$stock_query = "
 		AND meta_stock.meta_key = '_stock_status'

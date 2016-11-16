@@ -46,7 +46,7 @@ tree: true
 # generate documentation for deprecated elements
 deprecated: true
 
-# generate list of tasks with @todo annotation
+# generate list of tasks with @ todo annotation
 todo: true
 
 # add link to ZIP archive of documentation
