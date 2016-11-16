@@ -1368,7 +1368,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Thumbnail.
 			if ( isset( $data['image'] ) && is_array( $data['image'] ) ) {
-				$image = current( $data['image'] );
+				$image = $data['image'];
+				$image = current( $image );
 				if ( is_array( $image ) ) {
 					$image['position'] = 0;
 				}
