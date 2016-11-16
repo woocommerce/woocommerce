@@ -61,7 +61,6 @@ class WC_Shipping_Zone_Data_Store implements WC_Shipping_Zone_Data_Store_Interfa
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
-		error_log( print_r ( $zone->get_id(), 1 ) );
 		if ( 0 === $zone->get_id() || "0" === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
 			$zone->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );

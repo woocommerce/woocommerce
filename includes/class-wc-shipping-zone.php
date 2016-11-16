@@ -51,7 +51,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		}
 
 		$this->data_store = WC_Data_Store::load( 'shipping-zone' );
-		if ( ! is_null( $zone ) ) {
+		if ( false === $this->get_object_read() ) {
 			$this->data_store->read( $this );
 		}
 	}

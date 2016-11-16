@@ -80,7 +80,6 @@ class WC_Data_Store {
 	 */
 	public static function load( $object_type ) {
 		try {
-			error_log( print_r ( $object_type, 1 ) );
 			return new WC_Data_Store( $object_type );
 		} catch ( Exception $e ) {
 			return null;
