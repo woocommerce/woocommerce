@@ -35,9 +35,9 @@ class WC_Logger {
 	 * @var array
 	 * @access private
 	 */
-	private $_handlers;
+	private $handlers;
 
-	private static $_valid_levels = array(
+	private static $valid_levels = array(
 		self::DEBUG,
 		self::INFO,
 		self::NOTICE,
@@ -53,7 +53,7 @@ class WC_Logger {
 	 */
 	public function __construct() {
 		$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
-		$this->_handlers = $handlers;
+		$this->handlers = $handlers;
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Logger {
 	 * }
 	 */
 	public function log( $level, $message, $context = array() ) {
-		if ( ! in_array( $level, self::$_valid_levels ) ) {
+		if ( ! in_array( $level, self::$valid_levels ) ) {
 			$class = __CLASS__;
 			$method = __FUNCTION__;
 			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
@@ -94,7 +94,7 @@ class WC_Logger {
 
 		$timestamp = current_time( 'timestamp' );
 
-		foreach ( $this->_handlers as $handler ) {
+		foreach ( $this->handlers as $handler ) {
 			$continue = $handler->handle( $level, $timestamp, $message, $context );
 
 			if ( false === $continue ) {

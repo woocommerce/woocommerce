@@ -24,13 +24,13 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @var array
 	 * @access private
 	 */
-	private $_handles = array();
+	private $handles = array();
 
 	/**
 	 * Destructor.
 	 */
 	public function __destruct() {
-		foreach ( $this->_handles as $handle ) {
+		foreach ( $this->handles as $handle ) {
 			if ( is_resource( $handle ) ) {
 				fclose( $handle );
 			}
@@ -110,7 +110,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool success
 	 */
 	protected function open( $handle, $mode = 'a' ) {
-		if ( isset( $this->_handles[ $handle ] ) ) {
+		if ( isset( $this->handles[ $handle ] ) ) {
 			return true;
 		}
 
@@ -123,7 +123,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			}
 		}
 
-		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
+		if ( $this->handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
 			return true;
 		}
 
@@ -139,9 +139,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( is_resource( $this->_handles[ $handle ] ) ) {
-			$result = fclose( $this->_handles[ $handle ] );
-			unset( $this->_handles[ $handle ] );
+		if ( is_resource( $this->handles[ $handle ] ) ) {
+			$result = fclose( $this->handles[ $handle ] );
+			unset( $this->handles[ $handle ] );
 		}
 
 		return $result;
@@ -158,8 +158,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	public function add( $entry, $handle ) {
 		$result = false;
 
-		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
-			$result = fwrite( $this->_handles[ $handle ], $entry . "\n" );
+		if ( $this->open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
+			$result = fwrite( $this->handles[ $handle ], $entry . "\n" );
 		}
 
 		return false !== $result;
@@ -182,7 +182,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		 * $this->open( $handle, 'w' ) == Open the file for writing only. Place the file pointer at
 		 * the beginning of the file, and truncate the file to zero length.
 		 */
-		if ( $this->open( $handle, 'w' ) && is_resource( $this->_handles[ $handle ] ) ) {
+		if ( $this->open( $handle, 'w' ) && is_resource( $this->handles[ $handle ] ) ) {
 			$result = true;
 		}
 
