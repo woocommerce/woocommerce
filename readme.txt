@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.6.9 - 2016/11/xx =
 * Fix - Excluded webhook delivery logs from comments count.
+* Fix - Included password strength meter in "Lost Password" page.
 
 = 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
