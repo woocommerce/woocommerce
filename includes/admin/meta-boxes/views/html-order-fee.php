@@ -32,10 +32,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="line_cost" width="1%">
 		<div class="view">
 			<?php
-				echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ) ) : '';
+				echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ), array( 'currency' => $order->get_order_currency() ) ) : '';
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id, 'fee' ) ) {
-					echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
+					echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
 				}
 			?>
 		</div>
@@ -59,10 +59,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td class="line_tax" width="1%">
 						<div class="view">
 							<?php
-								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;';
+								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_order_currency() ) ) : '&ndash;';
 
 								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'fee' ) ) {
-									echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
+									echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
 								}
 							?>
 						</div>
