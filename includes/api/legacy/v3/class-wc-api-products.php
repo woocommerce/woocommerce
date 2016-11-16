@@ -1180,7 +1180,7 @@ class WC_API_Products extends WC_API_Resource {
 			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->get_id() ) ),
+			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => $product->get_download_limit(),
@@ -1555,16 +1555,6 @@ class WC_API_Products extends WC_API_Resource {
 		// Product parent ID for groups.
 		if ( isset( $data['parent_id'] ) ) {
 			$product->set_parent_id( absint( $data['parent_id'] ) );
-		}
-
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
-			if ( $product->get_parent_id() > 0 ) {
-				$parent = wc_get_product( $product->get_parent_id() );
-				$children = $parent->get_children();
-				$parent->set_children( array_filter( array_merge( $children, array( $product->get_id() ) ) ) );
-				$parent->save();
-			}
 		}
 
 		// Sold Individually.

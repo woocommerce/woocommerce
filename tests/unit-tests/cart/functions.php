@@ -125,7 +125,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$this->expectOutputString( wc_price( $product->price ), wc_cart_totals_subtotal_html() );
+		$this->expectOutputString( wc_price( $product->get_price( 'edit' ) ), wc_cart_totals_subtotal_html() );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
@@ -161,21 +161,21 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), false, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), false, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), true, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), true, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> 3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> 3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), false, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), true, true );
-		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View Cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 	}
 }

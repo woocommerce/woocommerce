@@ -8,11 +8,21 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product setters and getters
-	 * @todo needs tests for attributes
 	 * @since 2.7.0
 	 */
 	public function test_product_getters_and_setters() {
 		global $wpdb;
+
+		$attributes = array();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'Test Attribute' );
+		$attribute->set_options( array( 'Fish', 'Fingers' ) );
+		$attribute->set_position( 0 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( false );
+		$attributes['test-attribute'] = $attribute;
+
 		$getters_and_setters = array(
 			'name'               => 'Test',
 			'slug'               => 'test',
@@ -48,6 +58,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'gallery_image_ids'  => array(),
 			'download_expiry'    => -1,
 			'download_limit'     => 5,
+			'attributes'         => $attributes,
 		 );
 		$product = new WC_Product();
 		foreach ( $getters_and_setters as $function => $value ) {

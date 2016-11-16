@@ -41,4 +41,31 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 		parent::update_post_meta( $product );
 	}
 
+	/**
+	 * Sync grouped product prices with children.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product|int $product
+	 */
+	public function sync_price( &$product ) {
+		global $wpdb;
+
+		$children_ids = get_posts( array(
+			'post_parent' => $product->get_id(),
+			'post_type'   => 'product',
+			'fields'      => 'ids',
+		) );
+		$prices = $children_ids ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children_ids ) ) . " )" ) ) : array();
+
+		delete_post_meta( $product->get_id(), '_price' );
+		delete_transient( 'wc_var_prices_' . $product->get_id() );
+
+		if ( $prices ) {
+			sort( $prices );
+			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
+			foreach ( $prices as $price ) {
+				add_post_meta( $product->get_id(), '_price', $price, false );
+			}
+		}
+	}
 }

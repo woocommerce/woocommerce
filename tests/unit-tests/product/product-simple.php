@@ -51,7 +51,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( 'Dummy Product', $product->get_title() );
+		$this->assertEquals( 'Dummy Product', $product->get_name() );
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->get_id() );

@@ -1061,13 +1061,7 @@ class WC_AJAX {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-
-					if ( ! empty( $_product->variation_id ) ) {
-						$note = sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
-					} else {
-						$note = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
-					}
-
+					$note         = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -1107,13 +1101,7 @@ class WC_AJAX {
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-
-					if ( ! empty( $_product->variation_id ) ) {
-						$note = sprintf( __( 'Item %1$s variation #%2$s stock increased from %3$s to %4$s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
-					} else {
-						$note = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
-					}
-
+					$note         = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}

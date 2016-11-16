@@ -391,9 +391,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			 * Uses price inc tax if prices include tax to work around https://github.com/woocommerce/woocommerce/issues/7669 and https://github.com/woocommerce/woocommerce/issues/8074.
 			 */
 			if ( wc_prices_include_tax() ) {
-				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
+				$discount_percent = ( wc_get_price_including_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal;
 			} else {
-				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
 			}
 			$discount = ( $this->get_amount() * $discount_percent ) / $cart_item_qty;
 
@@ -845,7 +845,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid_for_cart = false;
 			if ( ! WC()->cart->is_empty() ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent(), $this->get_product_ids() ) ) {
+					if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_product_ids() ) ) {
 						$valid_for_cart = true;
 					}
 				}
@@ -949,7 +949,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid_for_cart = true;
 			if ( ! WC()->cart->is_empty() ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent(), $this->get_excluded_product_ids() ) ) {
+					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
 						$valid_for_cart = false;
 					}
 				}
@@ -1061,7 +1061,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		$valid        = false;
 		$product_cats = wc_get_product_cat_ids( $product->get_id() );
-		$product_ids  = array( $product->get_id(), ( isset( $product->variation_id ) ? $product->variation_id : 0 ), $product->get_parent() );
+		$product_ids  = array( $product->get_id(), $product->get_parent_id() );
 
 		// Specific products get the discount
 		if ( sizeof( $this->get_product_ids() ) && sizeof( array_intersect( $product_ids, $this->get_product_ids() ) ) ) {
@@ -1092,11 +1092,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $this->get_exclude_sale_items() ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
-			if ( isset( $product->variation_id ) ) {
-				if ( in_array( $product->variation_id, $product_ids_on_sale, true ) ) {
-					$valid = false;
-				}
-			} elseif ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
+			if ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
 				$valid = false;
 			}
 		}
@@ -1197,7 +1193,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$products = array();
 				if ( ! WC()->cart->is_empty() ) {
 					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-						if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent(), $this->get_excluded_product_ids() ) ) {
+						if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
 							$products[] = $cart_item['data']->get_title();
 						}
 					}

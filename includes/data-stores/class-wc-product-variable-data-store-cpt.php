@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store, WC_Product_Variable_Data_Store {
+class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store, WC_Product_Variable_Data_Store_Interface {
 
 	/**
 	 * Cached & hashed prices array for child variations.
@@ -196,7 +196,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$sale_prices    = array();
 				$variation_ids  = $product->get_visible_children();
 				foreach ( $variation_ids as $variation_id ) {
-					if ( $variation = wc_get_product( $variation_id ) ) { // @todo loop from missing args? remember?
+					if ( $variation = wc_get_product( $variation_id ) ) {
 						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price(), $variation, $product );
 						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price(), $variation, $product );
 						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price(), $variation, $product );

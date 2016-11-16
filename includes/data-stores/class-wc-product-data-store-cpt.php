@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Product_Data_Store {
+class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Product_Data_Store_Interface {
 
 	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
@@ -129,12 +129,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	/**
 	 * Method to delete a product from the database.
 	 * @param WC_Product
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$product, $force_delete = false ) {
-		$id = $product->get_id();
+	public function delete( &$product, $args = array() ) {
+		$id        = $product->get_id();
 		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 
-		if ( $force_delete ) {
+		$args = wp_parse_args( $args, array(
+			'force_delete' => false,
+		) );
+
+		if ( $args['force_delete'] ) {
 			wp_delete_post( $product->get_id() );
 			$product->set_id( 0 );
 		} else {
@@ -157,26 +162,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @since 2.7.0
 	 */
 	protected function read_product_data( &$product ) {
-		$id             = $product->get_id();
-		$review_count   = get_post_meta( $id, '_wc_review_count', true );
-		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
-		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
+		$id = $product->get_id();
 
-		if ( '' === $review_count ) {
-			$review_count = WC_Comments::get_review_count_for_product( $product );
+		if ( '' === ( $review_count = get_post_meta( $id, '_wc_review_count', true ) ) ) {
+			WC_Comments::get_review_count_for_product( $product );
+		} else {
+			$product->set_review_count( $review_count );
 		}
 
-		if ( '' === $rating_counts ) {
-			$rating_counts = WC_Comments::get_rating_counts_for_product( $product );
+		if ( '' === ( $rating_counts = get_post_meta( $id, '_wc_rating_count', true ) ) ) {
+			WC_Comments::get_rating_counts_for_product( $product );
+		} else {
+			$product->set_rating_counts( $rating_counts );
 		}
 
-		if ( '' === $average_rating ) {
-			$average_rating = WC_Comments::get_average_rating_for_product( $product );
+		if ( '' === ( $average_rating = get_post_meta( $id, '_wc_average_rating', true ) ) ) {
+			WC_Comments::get_average_rating_for_product( $product );
+		} else {
+			$product->set_average_rating( $average_rating );
 		}
 
-		$product->set_average_rating( $average_rating );
-		$product->set_rating_counts( $rating_counts );
-		$product->set_review_count( $review_count );
 		$product->set_props( array(
 			'featured'           => get_post_meta( $id, '_featured', true ),
 			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
@@ -750,7 +755,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param int   $limit       Limit of results.
 	 * @return string
 	 */
-	function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
+	public function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
 		global $wpdb;
 
 		// Arrays to string.
@@ -812,7 +817,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 	 * @param  int|null $stock_quantity
 	 * @param  string $operation set, increase and decrease.
 	 */
-	function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
@@ -830,6 +835,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		}
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+	}
+
+	/**
+	 * Update a products average rating meta.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 */
+	public function update_average_rating( $product ) {
+		update_post_meta( $product->get_id(), '_wc_average_rating', $product->get_average_rating( 'edit' ) );
+	}
+
+	/**
+	 * Update a products review count meta.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 */
+	public function update_review_count( $product ) {
+		update_post_meta( $product->get_id(), '_wc_review_count', $product->get_review_count( 'edit' ) );
+	}
+
+	/**
+	 * Update a products rating counts.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 */
+	public function update_rating_counts( $product ) {
+		update_post_meta( $product->get_id(), '_wc_rating_count', $product->get_rating_counts( 'edit' ) );
 	}
 
 }

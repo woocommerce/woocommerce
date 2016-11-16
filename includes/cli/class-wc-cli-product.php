@@ -771,7 +771,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Add data that applies to every product type.
 		$product_data = array(
-			'title'              => $product->get_title(),
+			'title'              => $product->get_name(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->get_id(),
 			'created_at'         => $this->format_datetime( $product->get_post_data()->post_date_gmt ),
 			'updated_at'         => $this->format_datetime( $product->get_post_data()->post_modified_gmt ),
@@ -1290,43 +1290,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 		// Product parent ID for groups
 		if ( isset( $data['parent_id'] ) ) {
 			wp_update_post( array( 'ID' => $product_id, 'post_parent' => absint( $data['parent_id'] ) ) );
-		}
-
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		$_product = wc_get_product( $product_id );
-		if ( $_product && $_product->post->post_parent > 0 || 'grouped' === $product_type ) {
-
-			$clear_parent_ids = array();
-
-			if ( $_product->post->post_parent > 0 ) {
-				$clear_parent_ids[] = $_product->post->post_parent;
-			}
-
-			if ( 'grouped' === $product_type ) {
-				$clear_parent_ids[] = $product_id;
-			}
-
-			if ( ! empty( $clear_parent_ids ) ) {
-				foreach ( $clear_parent_ids as $clear_id ) {
-
-					$children_by_price = get_posts( array(
-						'post_parent'    => $clear_id,
-						'orderby'        => 'meta_value_num',
-						'order'          => 'asc',
-						'meta_key'       => '_price',
-						'posts_per_page' => 1,
-						'post_type'      => 'product',
-						'fields'         => 'ids',
-					) );
-
-					if ( $children_by_price ) {
-						foreach ( $children_by_price as $child ) {
-							$child_price = get_post_meta( $child, '_price', true );
-							update_post_meta( $clear_id, '_price', $child_price );
-						}
-					}
-				}
-			}
 		}
 
 		// Sold Individually

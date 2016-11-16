@@ -485,26 +485,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 		parent::update_post_meta();
 	}
 
-	/**
-	 * Save data (either create or update depending on if we are working on an existing product).
-	 *
-	 * @since 2.7.0
-	 */
-	public function save() {
-		$this->validate_props();
-
-		if ( $this->data_store ) {
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
-
-			wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
-			return $this->get_id();
-		}
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Conditionals

@@ -481,7 +481,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_upsells() {
 		_deprecated_function( 'WC_Product::get_upsells', '2.7', 'WC_Product::get_upsell_ids' );
-		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ), $this );
+		return apply_filters( 'woocommerce_product_upsell_ids', $this->get_upsell_ids(), $this );
 	}
 
 	/**
@@ -492,7 +492,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_cross_sells() {
 		_deprecated_function( 'WC_Product::get_cross_sells', '2.7', 'WC_Product::get_cross_sell_ids' );
-		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
+		return apply_filters( 'woocommerce_product_crosssell_ids', $this->get_cross_sell_ids(), $this );
 	}
 
 	/**
@@ -724,5 +724,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	public function get_files() {
 		wc_soft_deprecated_function( 'WC_Product::get_files', '2.7', '2.8', 'WC_Product::get_downloads' );
 		return $this->get_downloads();
+	}
+
+	/**
+	 * @deprected 2.7.0 Sync is taken care of during save - no need to call this directly.
+	 */
+	public function grouped_product_sync() {
+		_deprecated_function( 'WC_Product::grouped_product_sync', '2.7' );
 	}
 }

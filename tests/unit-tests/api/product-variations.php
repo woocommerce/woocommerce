@@ -41,11 +41,11 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_variation_product();
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
-
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $variations ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
 		$this->assertEquals( 'size', $variations[0]['attributes'][0]['name'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -58,6 +58,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_variation_product();
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -77,6 +78,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $variation_id, $variation['id'] );
 		$this->assertEquals( 'size', $variation['attributes'][0]['name'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -91,6 +93,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$variation_id = $children[0];
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id ) );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -112,6 +115,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 1, count( $variations ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -129,6 +133,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -143,6 +148,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -184,6 +190,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertContains( 'Dr1Bczxq4q', $variation['image'][0]['src'] );
 		$this->assertContains( 'test upload image', $variation['image'][0]['alt'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -203,6 +210,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -219,6 +227,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -254,6 +263,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 3, count( $variations ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -274,6 +284,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -319,6 +330,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 2, count( $data ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -368,6 +380,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'shipping_class_id', $properties );
 		$this->assertArrayHasKey( 'image', $properties );
 		$this->assertArrayHasKey( 'attributes', $properties );
+		$product->delete( true );
 	}
 
 }

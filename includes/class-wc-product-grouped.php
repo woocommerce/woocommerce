@@ -86,7 +86,7 @@ class WC_Product_Grouped extends WC_Product {
 		foreach ( $this->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( '' !== $child->get_price() ) {
-				$child_prices[] = 'incl' === $tax_display_mode ? $child->get_price_including_tax() : $child->get_price_excluding_tax();
+				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
 			}
 		}
 
@@ -105,7 +105,7 @@ class WC_Product_Grouped extends WC_Product {
 			if ( $is_free ) {
 				$price = apply_filters( 'woocommerce_grouped_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
-				$price = apply_filters( 'woocommerce_grouped_price_html', $price . $this->get_price_suffix(), $this, $child_prices );
+				$price = apply_filters( 'woocommerce_grouped_price_html', $price . wc_get_price_suffix( $this ), $this, $child_prices );
 			}
 		} else {
 			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );
@@ -147,5 +147,33 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function set_children( $children ) {
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Sync with children.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Sync a grouped product with it's children. These sync functions sync
+	 * upwards (from child to parent) when the variation is saved.
+	 *
+	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
+	 * @param bool $save If true, the prouduct object will be saved to the DB before returning it.
+	 * @return WC_Product Synced product object.
+	 */
+	public static function sync( $product, $save = true ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+		if ( is_a( $product, 'WC_Product_Grouped' ) ) {
+			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store->sync_price( $product );
+			if ( $save ) {
+				$product->save();
+			}
+		}
+		return $product;
 	}
 }

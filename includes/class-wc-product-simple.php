@@ -55,48 +55,4 @@ class WC_Product_Simple extends WC_Product {
 
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
-
-	/**
-	 * Get the title of the post. @todo should this be deprecated or not? It's in deprecated class and needs review.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		$post  = get_post( $this->get_id() );
-		$title = $post->post_title;
-
-		if ( $this->get_parent_id() > 0 ) {
-			/* translators: 1: parent product title 2: product title */
-			$title = sprintf( __( '%1$s &rarr; %2$s' , 'woocommerce' ), get_the_title( $this->get_parent_id() ), $title );
-		}
-
-		return apply_filters( 'woocommerce_product_title', $title, $this );
-	}
-
-	/**
-	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately). @todo should this be here?
-	 */
-	public function grouped_product_sync() {
-		if ( ! $this->get_parent_id() ) return;
-
-		$children_by_price = get_posts( array(
-			'post_parent'    => $this->get_parent_id(),
-			'orderby'        => 'meta_value_num',
-			'order'          => 'asc',
-			'meta_key'       => '_price',
-			'posts_per_page' => 1,
-			'post_type'      => 'product',
-			'fields'         => 'ids',
-		));
-		if ( $children_by_price ) {
-			foreach ( $children_by_price as $child ) {
-				$child_price = get_post_meta( $child, '_price', true );
-				update_post_meta( $this->get_parent_id(), '_price', $child_price );
-			}
-		}
-
-		delete_transient( 'wc_products_onsale' );
-
-		do_action( 'woocommerce_grouped_product_sync', $this->id, $children_by_price );
-	}
 }

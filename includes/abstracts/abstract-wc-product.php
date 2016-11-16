@@ -118,6 +118,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'_downloadable',
 		'_featured',
 		'_downloadable_files',
+		'_wc_rating_count',
+		'_wc_average_rating',
+		'_wc_review_count',
 	);
 
 	/**
@@ -1345,6 +1348,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$this->data_store->update( $this );
 			} else {
 				$this->data_store->create( $this );
+			}
+			if ( $this->get_parent_id() ) {
+				wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
 			}
 			return $this->get_id();
 		}

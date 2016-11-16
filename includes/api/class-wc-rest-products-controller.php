@@ -1154,8 +1154,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product->set_date_on_sale_from( '' );
 			$product->set_price( '' );
 		} else {
-			$date_from = $date_to = '';
-
 			// Regular Price.
 			if ( isset( $request['regular_price'] ) ) {
 				$product->set_regular_price( $request['regular_price'] );
@@ -1178,46 +1176,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Product parent ID for groups.
 		if ( isset( $request['parent_id'] ) ) {
 			$product->set_parent_id( $request['parent_id'] );
-		}
-
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $product->get_parent_id() > 0 || $product->is_type( 'grouped' ) ) {
-
-			$clear_parent_ids = array();
-
-			if ( $product->get_parent_id() > 0 ) {
-				$clear_parent_ids[] = $product->get_parent_id();
-				$parent = wc_get_product( $product->get_parent_id() );
-				$children = $parent->get_children();
-				$parent->set_children( array_filter( array_merge( $children, array( $product->get_id() ) ) ) );
-				$parent->save();
-			}
-
-			if ( $product->is_type( 'grouped' ) ) {
-				$clear_parent_ids[] = $product->get_id();
-			}
-
-			if ( ! empty( $clear_parent_ids ) ) {
-				foreach ( $clear_parent_ids as $clear_id ) {
-					$clear_product     = wc_get_product( $clear_id );
-					$children_by_price = get_posts( array(
-						'post_parent'    => $clear_id,
-						'orderby'        => 'meta_value_num',
-						'order'          => 'asc',
-						'meta_key'       => '_price',
-						'posts_per_page' => 1,
-						'post_type'      => 'product',
-						'fields'         => 'ids',
-					) );
-
-					if ( $children_by_price ) {
-						foreach ( $children_by_price as $child ) {
-							$child_product = wc_get_product( $child );
-							$clear_product->set_price( $child_product->get_price() );
-						}
-					}
-				}
-			}
 		}
 
 		// Sold individually.
@@ -1380,7 +1338,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		} else {
 			$variations = $request['variations'];
 		}
-		$attributes = $product->get_variation_attributes();
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
@@ -1506,7 +1463,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Update taxonomies.
 			if ( isset( $data['attributes'] ) ) {
-				$_attributes = array();
+				$attributes = array();
+				$parent_attributes = $product->get_attributes();
 
 				foreach ( $data['attributes'] as $attribute ) {
 					$attribute_id   = 0;
@@ -1524,30 +1482,28 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						continue;
 					}
 
-					if ( isset( $attributes[ $attribute_name ] ) ) {
-						$_attribute = $attributes[ $attribute_name ];
+					if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
+						continue;
 					}
 
-					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$_attribute_key  = sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+					$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
+					$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 
-						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
-							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
+						// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+						$term = get_term_by( 'name', $attribute_value, $attribute_name );
 
-							if ( $term && ! is_wp_error( $term ) ) {
-								$attribute_value = $term->slug;
-							} else {
-								$attribute_value = sanitize_title( $attribute_value );
-							}
+						if ( $term && ! is_wp_error( $term ) ) {
+							$attribute_value = $term->slug;
+						} else {
+							$attribute_value = sanitize_title( $attribute_value );
 						}
-
-						$_attributes[ $_attribute_key ] = $attribute_value;
 					}
+
+					$attributes[ $attribute_key ] = $attribute_value;
 				}
 
-				$variation->set_attributes( $_attributes );
+				$variation->set_attributes( $attributes );
 			}
 
 			$variation->save();

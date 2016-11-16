@@ -222,6 +222,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
+		$product->delete();
 	}
 
 	/**
@@ -260,6 +261,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Variation #1 of Dummy Variable CRUD Product', $variation->get_name() );
 		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE GREEN', $variation->get_sku() );
 		$this->assertEquals( 10, $variation->get_price() );
+		$product->delete();
 
 		$product = new WC_Product_Variable( $product->get_id() );
 		$children = $product->get_children();
@@ -283,6 +285,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Variation #2 of Dummy Variable CRUD Product', $variation_2->get_name() );
 		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE RED', $variation_2->get_sku() );
 		$this->assertEquals( 10, $variation_2->get_price() );
+		$product->delete();
 
 		$product = new WC_Product_Variable( $product->get_id() );
 		$children = $product->get_children();
@@ -297,6 +300,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation_2->set_sale_price( 9.99 );
 		$variation_2->set_date_on_sale_to( '32532537600' );
 		$variation_2->save();
+		$product->delete();
 
 		$product = new WC_Product_Variable( $product->get_id() );
 		$expected_prices['price'][ $children[0] ] = 10.00;
@@ -312,6 +316,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->set_name( 'Renamed Variable Product' );
 		$product->save();
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
+		$product->delete();
 	}
 
 }
