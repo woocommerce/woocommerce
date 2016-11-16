@@ -39,7 +39,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'date_modified'      => '',
 		'status'             => false,
 		'featured'           => false,
-		'catalog_visibility' => 'hidden',
+		'catalog_visibility' => 'visible',
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
