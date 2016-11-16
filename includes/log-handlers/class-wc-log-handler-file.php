@@ -43,7 +43,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message
 	 * @param array $context {
-	 *     Optional. Array with additional information
+	 *     Array with additional information
 	 *
 	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
 	 * }
@@ -77,7 +77,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @param int $timestamp log entry timestamp
 	 * @param string $message provided log message
 	 * @param array $context {
-	 *     Optional. Array with additional information
+	 *     Array with additional information
 	 *
 	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
 	 * }

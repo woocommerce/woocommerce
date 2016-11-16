@@ -60,7 +60,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message
 	 * @param array $context {
-	 *     Optional. Array with additional information
+	 *     Array with additional information
 	 * }
 	 *
 	 * @return bool log entry should bubble to further loggers.
@@ -82,7 +82,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message
 	 * @param array $context {
-	 *     Optional. Array with additional information
+	 *     Array with additional information
 	 * }
 	 *
 	 * @return string subject
@@ -97,7 +97,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message
 	 * @param array $context {
-	 *     Optional. Array with additional information
+	 *     Array with additional information
 	 * }
 	 *
 	 * @return string body
