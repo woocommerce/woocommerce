@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Product_Data_Store {
+interface WC_Product_Data_Store_Interface {
 
 	/**
 	 * Returns an array of on sale products, as an array of objects with an

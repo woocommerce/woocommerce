@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Product_Variable_Data_Store {
+interface WC_Product_Variable_Data_Store_Interface {
 	/**
 	 * Does a child have a weight set?
 	 *
