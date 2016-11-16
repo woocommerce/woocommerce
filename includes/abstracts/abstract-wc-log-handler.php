@@ -23,7 +23,7 @@ abstract class WC_Log_Handler {
 	 * @var int 0-8 minimum level severity for handling log entry.
 	 * @access private
 	 */
-	protected $_threshold;
+	protected $threshold;
 
 	/**
 	 * Log levels by severity.
@@ -31,7 +31,7 @@ abstract class WC_Log_Handler {
 	 * @var array
 	 * @access private
 	 */
-	protected static $_log_levels = array(
+	protected static $log_levels = array(
 		WC_Logger::DEBUG     => 0,
 		WC_Logger::INFO      => 1,
 		WC_Logger::NOTICE    => 2,
@@ -80,7 +80,7 @@ abstract class WC_Log_Handler {
 	 */
 	public function set_threshold( $level ) {
 		$level = apply_filters( 'woocommerce_log_handler_set_threshold', $level, __CLASS__ );
-		$this->_threshold = $this->get_level_severity( $level );
+		$this->threshold = $this->get_level_severity( $level );
 	}
 
 	/**
@@ -90,8 +90,8 @@ abstract class WC_Log_Handler {
 	 * @return int 0 (debug) - 8 (emergency) or -1 if level is not valid
 	 */
 	public static function get_level_severity( $level ) {
-		if ( array_key_exists( $level, self::$_log_levels ) ) {
-			$severity = self::$_log_levels[ $level ];
+		if ( array_key_exists( $level, self::$log_levels ) ) {
+			$severity = self::$log_levels[ $level ];
 		} else {
 			$severity = -1;
 		}
@@ -105,7 +105,7 @@ abstract class WC_Log_Handler {
 	 * @return bool true if the log should be handled.
 	 */
 	public function should_handle( $level ) {
-		return $this->_threshold <= $this->get_level_severity( $level );
+		return $this->threshold <= $this->get_level_severity( $level );
 	}
 
 	/**

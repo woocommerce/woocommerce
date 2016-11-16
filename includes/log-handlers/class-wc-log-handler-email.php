@@ -24,7 +24,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @var array
 	 * @access private
 	 */
-	private $_to = array();
+	private $to = array();
 
 	/**
 	 * Constructor for the logger.
@@ -70,7 +70,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 		if ( $this->should_handle( $level ) ) {
 			$subject = $this->get_subject( $level, $timestamp, $message, $context );
 			$body = $this->get_body( $level, $timestamp, $message, $context );
-			wp_mail( $this->_to, $subject, $body );
+			wp_mail( $this->to, $subject, $body );
 		}
 
 		return true;
@@ -113,6 +113,6 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string email Email address to add
 	 */
 	public function add_email( $email ) {
-		array_push( $this->_to, $email );
+		array_push( $this->to, $email );
 	}
 }
