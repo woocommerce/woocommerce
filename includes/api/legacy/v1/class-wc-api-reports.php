@@ -399,7 +399,7 @@ class WC_API_Reports extends WC_API_Resource {
 			$product = wc_get_product( $top_seller->product_id );
 
 			$top_sellers_data[] = array(
-				'title'      => $product->get_title(),
+				'title'      => $product->get_name(),
 				'product_id' => $top_seller->product_id,
 				'quantity'   => $top_seller->order_item_qty,
 			);

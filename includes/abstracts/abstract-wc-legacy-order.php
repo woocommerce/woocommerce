@@ -151,10 +151,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handly qty if set
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_stock_quantity() ), true );
 			}
-			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : $product->get_price_excluding_tax( $args['qty'] );
-			$args['total']	= $args['total'] ? $args['total'] : $product->get_price_excluding_tax( $args['qty'] );
+			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
+			$args['total']	= $args['total'] ? $args['total'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
 		}
 
 		$item->set_order_id( $this->get_id() );

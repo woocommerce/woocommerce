@@ -128,7 +128,6 @@ class WC_AJAX {
 			'delete_order_note'                                => false,
 			'json_search_products'                             => false,
 			'json_search_products_and_variations'              => false,
-			'json_search_grouped_products'                     => false,
 			'json_search_downloadable_products_and_variations' => false,
 			'json_search_customers'                            => false,
 			'term_ordering'                                    => false,
@@ -441,7 +440,8 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = $variable_product->get_matching_variation( wp_unslash( $_POST ) );
+		$data_store   = WC_Data_Store::load( 'product' );
+		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );
@@ -503,28 +503,18 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		global $wc_product_attributes;
-
-		$thepostid     = 0;
-		$taxonomy      = sanitize_text_field( $_POST['taxonomy'] );
 		$i             = absint( $_POST['i'] );
-		$position      = 0;
 		$metabox_class = array();
-		$attribute     = array(
-			'name'         => $taxonomy,
-			'value'        => '',
-			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
-			'is_variation' => apply_filters( 'woocommerce_attribute_default_is_variation', 0 ),
-			'is_taxonomy'  => $taxonomy ? 1 : 0,
-		);
+		$attribute     = new WC_Product_Attribute();
 
-		if ( $taxonomy ) {
-			$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
-			$metabox_class[]    = 'taxonomy';
-			$metabox_class[]    = $taxonomy;
-			$attribute_label    = wc_attribute_label( $taxonomy );
-		} else {
-			$attribute_label = '';
+		$attribute->set_id( wc_attribute_taxonomy_id_by_name( sanitize_text_field( $_POST['taxonomy'] ) ) );
+		$attribute->set_name( sanitize_text_field( $_POST['taxonomy'] ) );
+		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
+		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 0 ) );
+
+		if ( $attribute->is_taxonomy() ) {
+			$metabox_class[] = 'taxonomy';
+			$metabox_class[] = $attribute->get_name();
 		}
 
 		include( 'admin/meta-boxes/views/html-product-attribute.php' );
@@ -601,117 +591,18 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		// Get post data
 		parse_str( $_POST['data'], $data );
-		$post_id = absint( $_POST['post_id'] );
+		$post_id    = absint( $_POST['post_id'] );
+		$product    = wc_get_product( $post_id );
+		$attributes = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 
-		// Save Attributes
-		$attributes = array();
-
-		if ( isset( $data['attribute_names'] ) ) {
-
-			$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
-			$attribute_values = isset( $data['attribute_values'] ) ? $data['attribute_values'] : array();
-
-			if ( isset( $data['attribute_visibility'] ) ) {
-				$attribute_visibility = $data['attribute_visibility'];
-			}
-
-			if ( isset( $data['attribute_variation'] ) ) {
-				$attribute_variation = $data['attribute_variation'];
-			}
-
-			$attribute_is_taxonomy   = $data['attribute_is_taxonomy'];
-			$attribute_position      = $data['attribute_position'];
-			$attribute_names_max_key = max( array_keys( $attribute_names ) );
-
-			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
-				if ( empty( $attribute_names[ $i ] ) ) {
-					continue;
-				}
-
-				$is_visible   = isset( $attribute_visibility[ $i ] ) ? 1 : 0;
-				$is_variation = isset( $attribute_variation[ $i ] ) ? 1 : 0;
-				$is_taxonomy  = $attribute_is_taxonomy[ $i ] ? 1 : 0;
-
-				if ( $is_taxonomy ) {
-
-					if ( isset( $attribute_values[ $i ] ) ) {
-
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute_values[ $i ] ) ) {
-							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
-
-						// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
-						} else {
-							$values     = array();
-							$raw_values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute_values[ $i ] ) );
-
-							foreach ( $raw_values as $value ) {
-								$term = get_term_by( 'name', $value, $attribute_names[ $i ] );
-								if ( ! $term ) {
-									$term = wp_insert_term( $value, $attribute_names[ $i ] );
-
-									if ( $term && ! is_wp_error( $term ) ) {
-										$values[] = $term['term_id'];
-									}
-								} else {
-									$values[] = $term->term_id;
-								}
-							}
-						}
-
-						// Remove empty items in the array
-						$values = array_filter( $values, 'strlen' );
-
-					} else {
-						$values = array();
-					}
-
-					// Update post terms
-					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
-						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
-					}
-
-					if ( ! empty( $values ) ) {
-						// Add attribute to array, but don't set values
-						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-							'name' 			=> wc_clean( $attribute_names[ $i ] ),
-							'value' 		=> '',
-							'position' 		=> $attribute_position[ $i ],
-							'is_visible' 	=> $is_visible,
-							'is_variation' 	=> $is_variation,
-							'is_taxonomy' 	=> $is_taxonomy,
-						);
-					}
-				} elseif ( isset( $attribute_values[ $i ] ) ) {
-
-					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
-					$values = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
-					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
-
-					// Custom attribute - Add attribute to array and set the values
-					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-						'name' 			=> wc_clean( $attribute_names[ $i ] ),
-						'value' 		=> $values,
-						'position' 		=> $attribute_position[ $i ],
-						'is_visible' 	=> $is_visible,
-						'is_variation' 	=> $is_variation,
-						'is_taxonomy' 	=> $is_taxonomy,
-					);
-				}
-			 }
-		}
-
-		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
-
-		update_post_meta( $post_id, '_product_attributes', $attributes );
-
+		$product->set_attributes( $attributes );
+		$product->save();
 		die();
 	}
 
 	/**
-	 * Add variation via ajax function.
+	 * Add variation via ajax function. @todo CRUD
 	 */
 	public static function add_variation() {
 
@@ -721,140 +612,23 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		global $post;
+		global $post; // Set $post global so its available, like within the admin screens
 
-		$post_id = intval( $_POST['post_id'] );
-		$post    = get_post( $post_id ); // Set $post global so its available like within the admin screens
-		$loop    = intval( $_POST['loop'] );
-
-		$variation = array(
-			'post_title'   => 'Product #' . $post_id . ' Variation',
-			'post_content' => '',
-			'post_status'  => 'publish',
-			'post_author'  => get_current_user_id(),
-			'post_parent'  => $post_id,
-			'post_type'    => 'product_variation',
-			'menu_order'   => -1,
-		);
-
-		$variation_id = wp_insert_post( $variation );
-
-		do_action( 'woocommerce_create_product_variation', $variation_id );
-
-		if ( $variation_id ) {
-			$variation        = get_post( $variation_id );
-			$variation_meta   = get_post_meta( $variation_id );
-			$variation_data   = array();
-			$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-			$variation_fields = array(
-				'_sku'                   => '',
-				'_stock'                 => '',
-				'_regular_price'         => '',
-				'_sale_price'            => '',
-				'_weight'                => '',
-				'_length'                => '',
-				'_width'                 => '',
-				'_height'                => '',
-				'_download_limit'        => '',
-				'_download_expiry'       => '',
-				'_downloadable_files'    => '',
-				'_downloadable'          => '',
-				'_virtual'               => '',
-				'_thumbnail_id'          => '',
-				'_sale_price_dates_from' => '',
-				'_sale_price_dates_to'   => '',
-				'_manage_stock'          => '',
-				'_stock_status'          => '',
-				'_backorders'            => null,
-				'_tax_class'             => null,
-				'_variation_description' => '',
-			);
-
-			foreach ( $variation_fields as $field => $value ) {
-				$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
-			}
-
-			// Add the variation attributes
-			$variation_data = array_merge( $variation_data, wc_get_product_variation_attributes( $variation_id ) );
-
-			// Formatting
-			$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
-			$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
-			$variation_data['_weight']        = wc_format_localized_decimal( $variation_data['_weight'] );
-			$variation_data['_length']        = wc_format_localized_decimal( $variation_data['_length'] );
-			$variation_data['_width']         = wc_format_localized_decimal( $variation_data['_width'] );
-			$variation_data['_height']        = wc_format_localized_decimal( $variation_data['_height'] );
-			$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
-			$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
-			$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
-			$variation_data['menu_order']     = $variation->menu_order;
-			$variation_data['_stock']         = wc_stock_amount( $variation_data['_stock'] );
-
-			// Get tax classes
-			$tax_classes           = WC_Tax::get_tax_classes();
-			$tax_class_options     = array();
-			$tax_class_options[''] = __( 'Standard', 'woocommerce' );
-
-			if ( ! empty( $tax_classes ) ) {
-				foreach ( $tax_classes as $class ) {
-					$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
-				}
-			}
-
-			// Set backorder options
-			$backorder_options = array(
-				'no'     => __( 'Do not allow', 'woocommerce' ),
-				'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-				'yes'    => __( 'Allow', 'woocommerce' ),
-			);
-
-			// set stock status options
-			$stock_status_options = array(
-				'instock'    => __( 'In stock', 'woocommerce' ),
-				'outofstock' => __( 'Out of stock', 'woocommerce' ),
-			);
-
-			// Get attributes
-			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
-
-			$parent_data = array(
-				'id'                   => $post_id,
-				'attributes'           => $attributes,
-				'tax_class_options'    => $tax_class_options,
-				'sku'                  => get_post_meta( $post_id, '_sku', true ),
-				'weight'               => wc_format_localized_decimal( get_post_meta( $post_id, '_weight', true ) ),
-				'length'               => wc_format_localized_decimal( get_post_meta( $post_id, '_length', true ) ),
-				'width'                => wc_format_localized_decimal( get_post_meta( $post_id, '_width', true ) ),
-				'height'               => wc_format_localized_decimal( get_post_meta( $post_id, '_height', true ) ),
-				'tax_class'            => get_post_meta( $post_id, '_tax_class', true ),
-				'backorder_options'    => $backorder_options,
-				'stock_status_options' => $stock_status_options,
-			);
-
-			if ( ! $parent_data['weight'] ) {
-				$parent_data['weight'] = wc_format_localized_decimal( 0 );
-			}
-
-			if ( ! $parent_data['length'] ) {
-				$parent_data['length'] = wc_format_localized_decimal( 0 );
-			}
-
-			if ( ! $parent_data['width'] ) {
-				$parent_data['width'] = wc_format_localized_decimal( 0 );
-			}
-
-			if ( ! $parent_data['height'] ) {
-				$parent_data['height'] = wc_format_localized_decimal( 0 );
-			}
-
-			include( 'admin/meta-boxes/views/html-variation-admin.php' );
-		}
-
+		$product_id       = intval( $_POST['post_id'] );
+		$post             = get_post( $product_id );
+		$loop             = intval( $_POST['loop'] );
+		$product_object   = wc_get_product( $product_id );
+		$variation_object = new WC_Product_Variation();
+		$variation_object->set_parent_id( $product_id );
+		$variation_id     = $variation_object->save();
+		$variation        = get_post( $variation_id );
+		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
+		include( 'admin/meta-boxes/views/html-variation-admin.php' );
 		die();
 	}
 
 	/**
-	 * Link all variations via ajax function.
+	 * Link all variations via ajax function. @todo CRUD
 	 */
 	public static function link_all_variations() {
 
@@ -877,42 +651,36 @@ class WC_AJAX {
 		}
 
 		$variations = array();
-		$_product   = wc_get_product( $post_id, array( 'product_type' => 'variable' ) );
+		$product    = wc_get_product( $post_id, array( 'product_type' => 'variable' ) );
 
 		// Put variation attributes into an array
-		foreach ( $_product->get_attributes() as $attribute ) {
-
-			if ( ! $attribute['is_variation'] ) {
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_variation() ) {
 				continue;
 			}
 
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
 
-			if ( $attribute['is_taxonomy'] ) {
-				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
+			if ( $attribute->is_taxonomy() ) {
+				$options = wc_get_product_terms( $post_id, $attribute->get_name(), array( 'fields' => 'slugs' ) );
 			} else {
-				$options = explode( WC_DELIMITER, $attribute['value'] );
+				$options = $attribute->get_options();
 			}
-
-			$options = array_map( 'trim', $options );
 
 			$variations[ $attribute_field_name ] = $options;
 		}
 
 		// Quit out if none were found
-		if ( sizeof( $variations ) == 0 ) {
+		if ( 0 === sizeof( $variations ) ) {
 			die();
 		}
 
 		// Get existing variations so we don't create duplicates
 		$available_variations = array();
 
-		foreach ( $_product->get_children() as $child_id ) {
-			$child = $_product->get_child( $child_id );
-
-			if ( ! empty( $child->variation_id ) ) {
-				$available_variations[] = $child->get_variation_attributes();
-			}
+		foreach ( $product->get_children() as $child_id ) {
+			$child                  = wc_get_product( $child_id );
+			$available_variations[] = $child->get_attributes();
 		}
 
 		// Created posts will all have the following data
@@ -1014,7 +782,7 @@ class WC_AJAX {
 
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
-			$files   = $product->get_files();
+			$files   = $product->get_downloads();
 
 			if ( ! $order->get_billing_email() ) {
 				die();
@@ -1030,8 +798,8 @@ class WC_AJAX {
 						$loop ++;
 						$file_counter ++;
 
-						if ( isset( $file['name'] ) ) {
-							$file_count = $file['name'];
+						if ( $file->get_name() ) {
+							$file_count = $file->get_name();
 						} else {
 							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 						}
@@ -1292,14 +1060,8 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
-
-					if ( ! empty( $_product->variation_id ) ) {
-						$note = sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $_product->variation_id, $new_stock + $stock_change, $new_stock );
-					} else {
-						$note = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
-					}
-
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
+					$note         = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -1338,14 +1100,8 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->id;
-
-					if ( ! empty( $_product->variation_id ) ) {
-						$note = sprintf( __( 'Item %1$s variation #%2$s stock increased from %3$s to %4$s.', 'woocommerce' ), $item_name, $_product->variation_id, $old_stock, $new_quantity );
-					} else {
-						$note = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
-					}
-
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
+					$note         = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
 					$order->add_order_note( $note );
 				}
@@ -1577,7 +1333,7 @@ class WC_AJAX {
 					continue;
 				}
 
-				if ( ! $product || ( $product->is_type( 'variation' ) && empty( $product->parent ) ) ) {
+				if ( ! $product || ( $product->is_type( 'variation' ) && ! $product->get_parent_id() ) ) {
 					continue;
 				}
 
@@ -1597,68 +1353,6 @@ class WC_AJAX {
 	 */
 	public static function json_search_products_and_variations() {
 		self::json_search_products( '', array( 'product', 'product_variation' ) );
-	}
-
-	/**
-	 * Search for grouped products and return json.
-	 */
-	public static function json_search_grouped_products() {
-		ob_start();
-
-		check_ajax_referer( 'search-products', 'security' );
-
-		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
-		$exclude = array();
-
-		if ( empty( $term ) ) {
-			die();
-		}
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
-		}
-
-		$found_products = array();
-
-		if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
-
-			$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
-
-			if ( sizeof( $posts_in ) > 0 ) {
-
-				$args = array(
-					'post_type'        => 'product',
-					'post_status'      => 'any',
-					'numberposts'      => -1,
-					'orderby'          => 'title',
-					'order'            => 'asc',
-					'post_parent'      => 0,
-					'suppress_filters' => 0,
-					'include'          => $posts_in,
-					's'                => $term,
-					'fields'           => 'ids',
-					'exclude'          => $exclude,
-				);
-
-				$posts = get_posts( $args );
-
-				if ( ! empty( $posts ) ) {
-					foreach ( $posts as $post ) {
-						$product = wc_get_product( $post );
-
-						if ( ! current_user_can( 'read_product', $post ) ) {
-							continue;
-						}
-
-						$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
-					}
-				}
-			}
-		}
-
-		$found_products = apply_filters( 'woocommerce_json_search_found_grouped_products', $found_products );
-
-		wp_send_json( $found_products );
 	}
 
 	/**
@@ -1998,7 +1692,7 @@ class WC_AJAX {
 
 						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %1$s to %2$s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
 
-						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order, $_product );
+						do_action( 'woocommerce_restock_refunded_item', $_product->get_id(), $old_stock, $new_quantity, $order, $_product );
 					}
 				}
 			}
@@ -2175,146 +1869,38 @@ class WC_AJAX {
 
 		check_ajax_referer( 'load-variations', 'security' );
 
-		// Check permissions again and make sure we have what we need
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['product_id'] ) || empty( $_POST['attributes'] ) ) {
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['product_id'] ) ) {
 			die( -1 );
 		}
 
+		// Set $post global so its available, like within the admin screens
 		global $post;
 
-		$product_id = absint( $_POST['product_id'] );
-		$post       = get_post( $product_id ); // Set $post global so its available like within the admin screens
-		$per_page   = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
-		$page       = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-
-		// Get attributes
-		$attributes        = array();
-		$posted_attributes = wp_unslash( $_POST['attributes'] );
-
-		foreach ( $posted_attributes as $key => $value ) {
-			$attributes[ $key ] = array_map( 'wc_clean', $value );
-		}
-
-		// Get tax classes
-		$tax_classes           = WC_Tax::get_tax_classes();
-		$tax_class_options     = array();
-		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
-
-		if ( ! empty( $tax_classes ) ) {
-			foreach ( $tax_classes as $class ) {
-				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
-			}
-		}
-
-		// Set backorder options
-		$backorder_options = array(
-			'no'     => __( 'Do not allow', 'woocommerce' ),
-			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-			'yes'    => __( 'Allow', 'woocommerce' ),
-		);
-
-		// set stock status options
-		$stock_status_options = array(
-			'instock'    => __( 'In stock', 'woocommerce' ),
-			'outofstock' => __( 'Out of stock', 'woocommerce' ),
-		);
-
-		$parent_data = array(
-			'id'                   => $product_id,
-			'attributes'           => $attributes,
-			'tax_class_options'    => $tax_class_options,
-			'sku'                  => get_post_meta( $product_id, '_sku', true ),
-			'weight'               => wc_format_localized_decimal( get_post_meta( $product_id, '_weight', true ) ),
-			'length'               => wc_format_localized_decimal( get_post_meta( $product_id, '_length', true ) ),
-			'width'                => wc_format_localized_decimal( get_post_meta( $product_id, '_width', true ) ),
-			'height'               => wc_format_localized_decimal( get_post_meta( $product_id, '_height', true ) ),
-			'tax_class'            => get_post_meta( $product_id, '_tax_class', true ),
-			'backorder_options'    => $backorder_options,
-			'stock_status_options' => $stock_status_options,
-		);
-
-		if ( ! $parent_data['weight'] ) {
-			$parent_data['weight'] = wc_format_localized_decimal( 0 );
-		}
-
-		if ( ! $parent_data['length'] ) {
-			$parent_data['length'] = wc_format_localized_decimal( 0 );
-		}
-
-		if ( ! $parent_data['width'] ) {
-			$parent_data['width'] = wc_format_localized_decimal( 0 );
-		}
-
-		if ( ! $parent_data['height'] ) {
-			$parent_data['height'] = wc_format_localized_decimal( 0 );
-		}
-
-		// Get variations
-		$args = apply_filters( 'woocommerce_ajax_admin_get_variations_args', array(
-			'post_type'      => 'product_variation',
-			'post_status'    => array( 'private', 'publish' ),
-			'posts_per_page' => $per_page,
-			'paged'          => $page,
-			'orderby'        => array( 'menu_order' => 'ASC', 'ID' => 'DESC' ),
-			'post_parent'    => $product_id,
-		), $product_id );
-
-		$variations = get_posts( $args );
-		$loop = 0;
+		$loop           = 0;
+		$product_id     = absint( $_POST['product_id'] );
+		$post           = get_post( $product_id );
+		$product_object = wc_get_product( $product_id );
+		$per_page       = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
+		$page           = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+		$variations     = wc_get_products( array(
+			'status'         => array( 'private', 'publish' ),
+			'type'           => 'variation',
+			'parent'         => $product_id,
+			'limit'          => $per_page,
+			'page'           => $page,
+			'orderby'        => array(
+				'menu_order' => 'ASC',
+				'ID'         => 'DESC',
+			),
+			'return'         => 'objects',
+		) );
 
 		if ( $variations ) {
-
-			foreach ( $variations as $variation ) {
-				$variation_id     = absint( $variation->ID );
-				$variation_meta   = get_post_meta( $variation_id );
-				$variation_data   = array();
-				$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-				$variation_fields = array(
-					'_sku'                   => '',
-					'_stock'                 => '',
-					'_regular_price'         => '',
-					'_sale_price'            => '',
-					'_weight'                => '',
-					'_length'                => '',
-					'_width'                 => '',
-					'_height'                => '',
-					'_download_limit'        => '',
-					'_download_expiry'       => '',
-					'_downloadable_files'    => '',
-					'_downloadable'          => '',
-					'_virtual'               => '',
-					'_thumbnail_id'          => '',
-					'_sale_price_dates_from' => '',
-					'_sale_price_dates_to'   => '',
-					'_manage_stock'          => '',
-					'_stock_status'          => '',
-					'_backorders'            => null,
-					'_tax_class'             => null,
-					'_variation_description' => '',
-				);
-
-				foreach ( $variation_fields as $field => $value ) {
-					$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
-				}
-
-				// Add the variation attributes
-				$variation_data = array_merge( $variation_data, wc_get_product_variation_attributes( $variation_id ) );
-
-				// Formatting
-				$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
-				$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
-				$variation_data['_weight']        = wc_format_localized_decimal( $variation_data['_weight'] );
-				$variation_data['_length']        = wc_format_localized_decimal( $variation_data['_length'] );
-				$variation_data['_width']         = wc_format_localized_decimal( $variation_data['_width'] );
-				$variation_data['_height']        = wc_format_localized_decimal( $variation_data['_height'] );
-				$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
-				$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
-				$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
-				$variation_data['menu_order']     = $variation->menu_order;
-				$variation_data['_stock']         = '' === $variation_data['_stock'] ? '' : wc_stock_amount( $variation_data['_stock'] );
-
+			foreach ( $variations as $variation_object ) {
+				$variation_id   = $variation_object->get_id();
+				$variation      = get_post( $variation_id );
+				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
-
 				$loop++;
 			}
 		}
@@ -2335,25 +1921,11 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		// Remove previous meta box errors
+		$product_id = absint( $_POST['product_id'] );
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
-
-		$product_id   = absint( $_POST['product_id'] );
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-
-		$product_type_terms = wp_get_object_terms( $product_id, 'product_type' );
-
-		// If the product type hasn't been set or it has changed, update it before saving variations
-		if ( empty( $product_type_terms ) || sanitize_title( current( $product_type_terms )->name ) !== $product_type ) {
-			wp_set_object_terms( $product_id, $product_type, 'product_type' );
-		}
-
 		WC_Meta_Box_Product_Data::save_variations( $product_id, get_post( $product_id ) );
 
 		do_action( 'woocommerce_ajax_save_product_variations', $product_id );
-
-		// Clear cache/transients
-		wc_delete_product_transients( $product_id );
 
 		if ( $errors = WC_Admin_Meta_Boxes::$meta_box_errors ) {
 			echo '<div class="error notice is-dismissible">';
@@ -2372,7 +1944,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Bulk action - Toggle Enabled.
+	 * Bulk action - Toggle Enabled. @todo CRUD
 	 * @access private
 	 * @used-by bulk_edit_variations
 	 * @param  array $variations
@@ -2446,17 +2018,9 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = wc_clean( $data['value'] );
-			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation = wc_get_product( $variation_id );
+			$variation->save_regular_price( wc_clean( $data['value'] ) );
+			$variation->save();
 		}
 	}
 
@@ -2473,22 +2037,14 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$sale_price    = wc_clean( $data['value'] );
-
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation = wc_get_product( $variation_id );
+			$variation->save_sale_price( wc_clean( $data['value'] ) );
+			$variation->save();
 		}
 	}
 
 	/**
-	 * Bulk action - Set Stock.
+	 * Bulk action - Set Stock. @todo CRUDIFY ALL THESE ACTIONS
 	 * @access private
 	 * @used-by bulk_edit_variations
 	 * @param  array $variations
@@ -2604,27 +2160,17 @@ class WC_AJAX {
 		}
 
 		foreach ( $variations as $variation_id ) {
-			// Price fields
-			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+			$variation = wc_get_product( $variation_id );
 
-			// Date fields
-			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-
-			if ( 'false' === $data['date_from'] ) {
-				$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			} else {
-				$date_from = $data['date_from'];
+			if ( 'false' !== $data['date_from'] ) {
+				$variation->set_date_on_sale_from( wc_clean( $data['date_from'] ) );
 			}
 
-			if ( 'false' === $data['date_to'] ) {
-				$date_to = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-			} else {
-				$date_to = $data['date_to'];
+			if ( 'false' !== $data['date_to'] ) {
+				$variation->set_date_on_sale_from( wc_clean( $data['date_to'] ) );
 			}
 
-			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+			$variation->save();
 		}
 	}
 
@@ -2676,28 +2222,25 @@ class WC_AJAX {
 	 * Bulk action - Set Price.
 	 * @access private
 	 * @used-by bulk_edit_variations
-	 * @param  array $variations
+	 * @param array $variations
 	 * @param string $operator + or -
-	 * @param string $field price being adjusted
+	 * @param string $field price being adjusted _regular_price or _sale_price
 	 * @param string $value Price or Percent
 	 */
 	private static function variation_bulk_adjust_price( $variations, $field, $operator, $value ) {
 		foreach ( $variations as $variation_id ) {
-			// Get existing data
-			$_regular_price = get_post_meta( $variation_id, '_regular_price', true );
-			$_sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-			$date_from      = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to        = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-			$date_from      = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-			$date_to        = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+			$variation   = wc_get_product( $variation_id );
+			$field_value = $variation->{"get$field"}( 'edit' );
 
 			if ( '%' === substr( $value, -1 ) ) {
 				$percent = wc_format_decimal( substr( $value, 0, -1 ) );
-				$$field  += ( ( $$field / 100 ) * $percent ) * "{$operator}1";
+				$field_value += ( ( $field_value / 100 ) * $percent ) * "{$operator}1";
 			} else {
-				$$field  += $value * "{$operator}1";
+				$field_value += $value * "{$operator}1";
 			}
-			_wc_save_product_price( $variation_id, $_regular_price, $_sale_price, $date_from, $date_to );
+
+			$variation->{"set$field"}( $field_value );
+			$variation->save();
 		}
 	}
 

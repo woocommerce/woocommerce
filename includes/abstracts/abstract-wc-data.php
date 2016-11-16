@@ -102,6 +102,16 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Get the data store.
+	 *
+	 * @since 2.7.0
+	 * @return object
+	 */
+	public function get_data_store() {
+		return $this->data_store;
+	}
+
+	/**
 	 * Returns the unique ID for this object.
 	 * @return int
 	 */
@@ -476,7 +486,7 @@ abstract class WC_Data {
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
-	public function set_props( $props ) {
+	public function set_props( $props, $context = 'set' ) {
 		$errors = new WP_Error();
 
 		foreach ( $props as $prop => $value ) {
@@ -513,7 +523,9 @@ abstract class WC_Data {
 	protected function set_prop( $prop, $value ) {
 		if ( array_key_exists( $prop, $this->data ) ) {
 			if ( true === $this->object_read ) {
-				$this->changes[ $prop ] = $value;
+				if ( $value !== $this->data[ $prop ] || array_key_exists( $prop, $this->changes ) ) {
+					$this->changes[ $prop ] = $value;
+				}
 			} else {
 				$this->data[ $prop ] = $value;
 			}

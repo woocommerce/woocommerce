@@ -232,10 +232,10 @@ class WC_Checkout {
 				$product = $values['data'];
 				$item    = new WC_Order_Item_Product( array(
 					'quantity'     => $values['quantity'],
-					'name'         => $product ? $product->get_title() : '',
+					'name'         => $product ? $product->get_name() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
-					'product_id'   => $product && isset( $product->id ) ? $product->id : 0,
-					'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
+					'product_id'   => $product ? ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) : 0,
+					'variation_id' => $product && $product->is_type( 'variation' ) ? $product->get_id() : 0,
 					'variation'    => $values['variation'],
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
@@ -245,7 +245,7 @@ class WC_Checkout {
 				) );
 
 				$item->set_backorder_meta();
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_values        = $values;
 				$item->legacy_cart_item_key = $cart_item_key;
 
@@ -264,7 +264,7 @@ class WC_Checkout {
 					),
 				) );
 
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_fee     = $fee;
 				$item->legacy_fee_key = $fee_key;
 
@@ -283,7 +283,7 @@ class WC_Checkout {
 						'meta_data'    => $shipping_rate->get_meta_data(),
 					) );
 
-					// Set this to pass to legacy actions @todo remove in future release
+					// Set this to pass to legacy actions.
 					$item->legacy_package_key = $package_key;
 
 					$order->add_item( $item );

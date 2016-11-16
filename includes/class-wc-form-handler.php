@@ -485,7 +485,7 @@ class WC_Form_Handler {
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
-				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_title() ) : __( 'Item', 'woocommerce' ), $cart_item );
+				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_name() ) : __( 'Item', 'woocommerce' ), $cart_item );
 
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
@@ -542,7 +542,7 @@ class WC_Form_Handler {
 
 					// is_sold_individually
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
-						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ), 'error' );
+						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_name() ), 'error' );
 						$passed_validation = false;
 					}
 
@@ -695,7 +695,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
+		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
 		// Variable product handling
 		if ( 'variable' === $add_to_cart_handler ) {
@@ -801,16 +801,18 @@ class WC_Form_Handler {
 
 		// If no variation ID is set, attempt to get a variation ID from posted attributes.
 		if ( empty( $variation_id ) ) {
-			$variation_id = $adding_to_cart->get_matching_variation( wp_unslash( $_POST ) );
+			$data_store   = WC_Data_Store::load( 'product' );
+			$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
 		}
-
-		$variation = wc_get_product( $variation_id );
 
 		// Validate the attributes.
 		try {
 			if ( empty( $variation_id ) ) {
 				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			}
+
+			$variation_data = wc_get_product_variation_attributes( $variation_id );
+
 			foreach ( $attributes as $attribute ) {
 				if ( ! $attribute['is_variation'] ) {
 					continue;
@@ -828,7 +830,7 @@ class WC_Form_Handler {
 					}
 
 					// Get valid value from variation
-					$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
+					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
 					if ( '' === $valid_value || $valid_value === $value ) {

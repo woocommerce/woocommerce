@@ -76,7 +76,7 @@ class WC_Report_Stock extends WP_List_Table {
 	public function column_default( $item, $column_name ) {
 		global $product;
 
-		if ( ! $product || $product->id !== $item->id ) {
+		if ( ! $product || $product->get_id() !== $item->id ) {
 			$product = wc_get_product( $item->id );
 		}
 
@@ -87,7 +87,7 @@ class WC_Report_Stock extends WP_List_Table {
 					echo $sku . ' - ';
 				}
 
-				echo $product->get_title();
+				echo $product->get_name();
 
 				// Get variation data
 				if ( $product->is_type( 'variation' ) ) {

@@ -693,7 +693,7 @@ class WC_Shortcodes {
 		if ( isset( $atts['sku'] ) && $single_product->have_posts() && 'product_variation' === $single_product->post->post_type ) {
 
 			$variation = new WC_Product_Variation( $single_product->post->ID );
-			$attributes = $variation->get_variation_attributes();
+			$attributes = $variation->get_attributes();
 
 			// set preselected id to be used by JS to provide context
 			$preselected_id = $single_product->post->ID;

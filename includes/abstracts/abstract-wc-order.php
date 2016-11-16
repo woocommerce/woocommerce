@@ -978,13 +978,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$default_args = array(
-				'name'         => $product->get_title(),
+				'name'         => $product->get_name(),
 				'tax_class'    => $product->get_tax_class(),
-				'product_id'   => $product->get_id(),
-				'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
-				'variation'    => isset( $product->variation_id ) ? $product->get_variation_attributes() : array(),
-				'subtotal'     => $product->get_price_excluding_tax( $qty ),
-				'total'        => $product->get_price_excluding_tax( $qty ),
+				'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+				'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
+				'variation'    => $product->is_type( 'variation' ) ? $product->get_attributes() : array(),
+				'subtotal'     => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
+				'total'        => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
 				'quantity'     => $qty,
 			);
 		} else {
@@ -1164,7 +1164,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
 			// Inherit tax class from items
-			if ( '' === $shipping_tax_class ) {
+			if ( 'inherit' === $shipping_tax_class ) {
 				$tax_rates         = array();
 				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 				$found_tax_classes = $this->get_items_tax_classes();
@@ -1188,7 +1188,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					'state'     => $args['state'],
 					'postcode'  => $args['postcode'],
 					'city'      => $args['city'],
-					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
+					'tax_class' => $shipping_tax_class,
 				) );
 			}
 

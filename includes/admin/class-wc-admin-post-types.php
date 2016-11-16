@@ -71,13 +71,6 @@ class WC_Admin_Post_Types {
 		add_filter( 'parse_query', array( $this, 'product_filters_query' ) );
 		add_filter( 'posts_search', array( $this, 'product_search' ) );
 
-		// Status transitions
-		add_action( 'delete_post', array( $this, 'delete_post' ) );
-		add_action( 'wp_trash_post', array( $this, 'trash_post' ) );
-		add_action( 'untrash_post', array( $this, 'untrash_post' ) );
-		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
-		add_action( 'before_delete_post', array( $this, 'delete_order_downloadable_permissions' ) );
-
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
@@ -319,7 +312,7 @@ class WC_Admin_Post_Types {
 	public function render_product_columns( $column ) {
 		global $post, $the_product;
 
-		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
+		if ( empty( $the_product ) || $the_product->get_id() != $post->ID ) {
 			$the_product = wc_get_product( $post );
 		}
 
@@ -353,25 +346,25 @@ class WC_Admin_Post_Types {
 				/* Custom inline data for woocommerce. */
 				echo '
 					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
-						<div class="menu_order">' . $post->menu_order . '</div>
-						<div class="sku">' . $the_product->sku . '</div>
-						<div class="regular_price">' . $the_product->regular_price . '</div>
-						<div class="sale_price">' . $the_product->sale_price . '</div>
-						<div class="weight">' . $the_product->weight . '</div>
-						<div class="length">' . $the_product->length . '</div>
-						<div class="width">' . $the_product->width . '</div>
-						<div class="height">' . $the_product->height . '</div>
+						<div class="menu_order">' . $the_product->get_menu_order() . '</div>
+						<div class="sku">' . $the_product->get_sku() . '</div>
+						<div class="regular_price">' . $the_product->get_regular_price() . '</div>
+						<div class="sale_price">' . $the_product->get_sale_price() . '</div>
+						<div class="weight">' . $the_product->get_weight() . '</div>
+						<div class="length">' . $the_product->get_length() . '</div>
+						<div class="width">' . $the_product->get_width() . '</div>
+						<div class="height">' . $the_product->get_height() . '</div>
 						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
-						<div class="visibility">' . $the_product->visibility . '</div>
-						<div class="stock_status">' . $the_product->stock_status . '</div>
-						<div class="stock">' . $the_product->stock . '</div>
-						<div class="manage_stock">' . $the_product->manage_stock . '</div>
-						<div class="featured">' . $the_product->featured . '</div>
-						<div class="product_type">' . $the_product->product_type . '</div>
-						<div class="product_is_virtual">' . $the_product->virtual . '</div>
-						<div class="tax_status">' . $the_product->tax_status . '</div>
-						<div class="tax_class">' . $the_product->tax_class . '</div>
-						<div class="backorders">' . $the_product->backorders . '</div>
+						<div class="visibility">' . $the_product->get_catalog_visibility() . '</div>
+						<div class="stock_status">' . $the_product->get_stock_status() . '</div>
+						<div class="stock">' . $the_product->get_stock_quantity() . '</div>
+						<div class="manage_stock">' . $the_product->get_manage_stock() . '</div>
+						<div class="featured">' . $the_product->get_featured() . '</div>
+						<div class="product_type">' . $the_product->get_type() . '</div>
+						<div class="product_is_virtual">' . $the_product->get_virtual() . '</div>
+						<div class="tax_status">' . $the_product->get_tax_status() . '</div>
+						<div class="tax_class">' . $the_product->get_tax_class() . '</div>
+						<div class="backorders">' . $the_product->get_backorders() . '</div>
 					</div>
 				';
 
@@ -380,11 +373,11 @@ class WC_Admin_Post_Types {
 				echo $the_product->get_sku() ? $the_product->get_sku() : '<span class="na">&ndash;</span>';
 				break;
 			case 'product_type' :
-				if ( 'grouped' == $the_product->product_type ) {
+				if ( $the_product->is_type( 'grouped' ) ) {
 					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
-				} elseif ( 'external' == $the_product->product_type ) {
-					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate product', 'woocommerce' ) . '"></span>';
-				} elseif ( 'simple' == $the_product->product_type ) {
+				} elseif ( $the_product->is_type( 'external' ) ) {
+					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
+				} elseif ( $the_product->is_type( 'simple' ) ) {
 
 					if ( $the_product->is_virtual() ) {
 						echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
@@ -393,11 +386,11 @@ class WC_Admin_Post_Types {
 					} else {
 						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
 					}
-				} elseif ( 'variable' == $the_product->product_type ) {
+				} elseif ( $the_product->is_type( 'variable' ) ) {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
+					echo '<span class="product-type tips ' . $the_product->get_type() . '" data-tip="' . ucfirst( $the_product->get_type() ) . '"></span>';
 				}
 				break;
 			case 'price' :
@@ -434,9 +427,8 @@ class WC_Admin_Post_Types {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
-				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
-				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
-					$stock_html .= ' (' . $the_product->get_total_stock() . ')';
+				if ( $the_product->managing_stock() ) {
+					$stock_html .= ' (' . $the_product->get_stock_quantity() . ')';
 				}
 
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );
@@ -690,7 +682,7 @@ class WC_Admin_Post_Types {
 							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
 							<td class="name">
 								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
+									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->get_id() ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
 								<?php else : ?>
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>
 								<?php endif; ?>
@@ -1080,7 +1072,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick edit.
+	 * Quick edit. @todo CRUDIFY
 	 *
 	 * @param integer $post_id
 	 * @param WC_Product $product
@@ -1924,180 +1916,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Removes variations etc belonging to a deleted post, and clears transients.
-	 *
-	 * @param mixed $id ID of post being deleted
-	 */
-	public function delete_post( $id ) {
-		global $woocommerce, $wpdb;
-
-		if ( ! current_user_can( 'delete_posts' ) ) {
-			return;
-		}
-
-		if ( $id > 0 ) {
-
-			$post_type = get_post_type( $id );
-
-			switch ( $post_type ) {
-				case 'product' :
-
-					$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
-
-					if ( ! empty( $child_product_variations ) ) {
-						foreach ( $child_product_variations as $child ) {
-							wp_delete_post( $child->ID, true );
-						}
-					}
-
-					$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
-
-					if ( ! empty( $child_products ) ) {
-						foreach ( $child_products as $child ) {
-							$child_post                = array();
-							$child_post['ID']          = $child->ID;
-							$child_post['post_parent'] = 0;
-							wp_update_post( $child_post );
-						}
-					}
-
-					if ( $parent_id = wp_get_post_parent_id( $id ) ) {
-						wc_delete_product_transients( $parent_id );
-					}
-
-				break;
-				case 'product_variation' :
-					wc_delete_product_transients( wp_get_post_parent_id( $id ) );
-				break;
-				case 'shop_order' :
-					$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
-
-					if ( ! is_null( $refunds ) ) {
-						foreach ( $refunds as $refund ) {
-							wp_delete_post( $refund->ID, true );
-						}
-					}
-				break;
-			}
-		}
-	}
-
-	/**
-	 * woocommerce_trash_post function.
-	 *
-	 * @param mixed $id
-	 */
-	public function trash_post( $id ) {
-		global $wpdb;
-
-		if ( $id > 0 ) {
-
-			$post_type = get_post_type( $id );
-
-			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
-
-				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
-
-				foreach ( $refunds as $refund ) {
-					$wpdb->update( $wpdb->posts, array( 'post_status' => 'trash' ), array( 'ID' => $refund->ID ) );
-				}
-
-				delete_transient( 'woocommerce_processing_order_count' );
-				wc_delete_shop_order_transients( $id );
-			}
-		}
-	}
-
-	/**
-	 * woocommerce_untrash_post function.
-	 *
-	 * @param mixed $id
-	 */
-	public function untrash_post( $id ) {
-		global $wpdb;
-
-		if ( $id > 0 ) {
-
-			$post_type = get_post_type( $id );
-
-			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
-
-				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
-
-				foreach ( $refunds as $refund ) {
-					$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-completed' ), array( 'ID' => $refund->ID ) );
-				}
-
-				delete_transient( 'woocommerce_processing_order_count' );
-				wc_delete_shop_order_transients( $id );
-			} elseif ( 'product' === $post_type ) {
-				// Check if SKU is valid before untrash the product.
-				$sku = get_post_meta( $id, '_sku', true );
-
-				if ( ! empty( $sku ) ) {
-					if ( ! wc_product_has_unique_sku( $id, $sku ) ) {
-						update_post_meta( $id, '_sku', '' );
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Remove item meta on permanent deletion.
-	 */
-	public function delete_order_items( $postid ) {
-		global $wpdb;
-
-		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
-			do_action( 'woocommerce_delete_order_items', $postid );
-
-			$wpdb->query( "
-				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
-				FROM {$wpdb->prefix}woocommerce_order_items
-				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
-				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				" );
-
-			do_action( 'woocommerce_deleted_order_items', $postid );
-		}
-	}
-
-	/**
-	 * Remove downloadable permissions on permanent order deletion.
-	 */
-	public function delete_order_downloadable_permissions( $postid ) {
-		global $wpdb;
-
-		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
-			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
-
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				WHERE order_id = %d
-			", $postid ) );
-
-			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
-		}
-	}
-
-	/**
 	 * Change title boxes in admin.
 	 * @param  string $text
 	 * @param  object $post
@@ -2248,7 +2066,7 @@ class WC_Admin_Post_Types {
 		}
 
 		$product               = wc_get_product( $product_id );
-		$existing_download_ids = array_keys( (array) $product->get_files() );
+		$existing_download_ids = array_keys( (array) $product->get_downloads() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
 		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
