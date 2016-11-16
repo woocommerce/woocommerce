@@ -277,6 +277,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
+		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );
 		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway
 		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php' ); // eCheck Payment Gateway
 		include_once( WC_ABSPATH . 'includes/class-wc-countries.php' ); // Defines countries and states
@@ -291,15 +292,17 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-product-variable-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-customer-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-payment-token-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-shipping-zone-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store-table.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php' );
 
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();

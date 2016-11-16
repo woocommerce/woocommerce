@@ -286,7 +286,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	public function test_update_shipping_zone_invalid_id() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/1' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/555555' );
 		$request->set_body_params( array(
 			'name'  => 'Zone Test',
 			'order' => 2,
@@ -332,7 +332,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_shipping_zone_invalid_id() {
 		wp_set_current_user( $this->user );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/0' );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/shipping/zones/555555' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
 	}
