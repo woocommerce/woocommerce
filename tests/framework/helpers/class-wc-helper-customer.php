@@ -33,8 +33,7 @@ class WC_Helper_Customer {
 
 		WC_Helper_Customer::set_customer_details( $customer_data );
 
-		$customer = new WC_Customer();
-		$customer->load_session();
+		$customer = new WC_Customer( 0, true );
 		return $customer;
 	}
 

@@ -154,6 +154,13 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	}
 
 	/**
+	 * Save data function.
+	 */
+	public function save_data() {
+		$this->save();
+	}
+
+	/**
 	 * Is the user a paying customer?
 	 * @return bool
 	 */

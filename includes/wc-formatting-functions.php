@@ -578,6 +578,17 @@ function wc_timezone_string() {
 	return $timezone;
 }
 
+/**
+ * Callback which can flatten post meta (gets the first value if it's an array).
+ *
+ * @since  2.7.0
+ * @param  array $value
+ * @return mixed
+ */
+function wc_flatten_meta_callback( $value ) {
+	return is_array( $value ) ? current( $value ) : $value;
+}
+
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 
 	/**
