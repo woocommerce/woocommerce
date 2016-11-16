@@ -867,4 +867,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 		update_post_meta( $product->get_id(), '_wc_rating_count', $product->get_rating_counts( 'edit' ) );
 	}
 
+	/**
+	 * Get shipping class ID by slug.
+	 *
+	 * @since 2.7.0
+	 * @param $slug string
+	 * @return int|false
+	 */
+	public function get_shipping_class_id_by_slug( $slug ) {
+		$shipping_class_term = get_term_by( 'slug', $slug, 'product_shipping_class' );
+		if ( $shipping_class_term ) {
+			return $shipping_class_term->term_id;
+		} else {
+			return false;
+		}
+	}
+
 }

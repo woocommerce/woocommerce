@@ -2,14 +2,14 @@
 /**
  * Post Types Admin
  *
- * @author   WooThemes
+ * @author   WooCommerce
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @version  2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
@@ -55,7 +55,8 @@ class WC_Admin_Post_Types {
 		// Bulk / quick edit
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
 		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
-		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
+		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
@@ -1017,6 +1018,20 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Offers a way to hook into save post without causing an infinite loop
+	 * when quick/bulk saving product info.
+	 *
+	 * @since 2.7.0
+	 * @param int    $post_id
+	 * @param object $post
+	 */
+	public function bulk_and_quick_edit_hook( $post_id, $post ) {
+		remove_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ) );
+		do_action( 'woocommerce_product_bulk_and_quick_edit', $post_id, $post );
+		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
+	}
+
+	/**
 	 * Quick and bulk edit saving.
 	 *
 	 * @param int $post_id
@@ -1024,7 +1039,6 @@ class WC_Admin_Post_Types {
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
-
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return $post_id;
@@ -1065,98 +1079,90 @@ class WC_Admin_Post_Types {
 			$this->bulk_edit_save( $post_id, $product );
 		}
 
-		// Clear transient
-		wc_delete_product_transients( $post_id );
-
 		return $post_id;
 	}
 
 	/**
-	 * Quick edit. @todo CRUDIFY
+	 * Quick edit.
 	 *
-	 * @param integer $post_id
+	 * @param integer    $post_id
 	 * @param WC_Product $product
 	 */
 	private function quick_edit_save( $post_id, $product ) {
-		global $wpdb;
-
-		$old_regular_price = $product->regular_price;
-		$old_sale_price    = $product->sale_price;
+		$data_store        = $product->get_data_store();
+		$old_regular_price = $product->get_regular_price();
+		$old_sale_price    = $product->get_sale_price();
 
 		// Save fields
 		if ( isset( $_REQUEST['_sku'] ) ) {
-			$sku     = get_post_meta( $post_id, '_sku', true );
+			$sku     = $product->get_sku();
 			$new_sku = (string) wc_clean( $_REQUEST['_sku'] );
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 					if ( $unique_sku ) {
-						update_post_meta( $post_id, '_sku', $new_sku );
+						$product->set_sku( $new_sku );
 					}
 				} else {
-					update_post_meta( $post_id, '_sku', '' );
+					$product->set_sku( '' );
 				}
 			}
 		}
 
 		if ( isset( $_REQUEST['_weight'] ) ) {
-			update_post_meta( $post_id, '_weight', wc_clean( $_REQUEST['_weight'] ) );
+			$product->set_weight( wc_clean( $_REQUEST['_weight'] ) );
 		}
 
 		if ( isset( $_REQUEST['_length'] ) ) {
-			update_post_meta( $post_id, '_length', wc_clean( $_REQUEST['_length'] ) );
+			$product->set_length( wc_clean( $_REQUEST['_length'] ) );
 		}
 
 		if ( isset( $_REQUEST['_width'] ) ) {
-			update_post_meta( $post_id, '_width', wc_clean( $_REQUEST['_width'] ) );
+			$product->set_width( wc_clean( $_REQUEST['_width'] ) );
 		}
 
 		if ( isset( $_REQUEST['_height'] ) ) {
-			update_post_meta( $post_id, '_height', wc_clean( $_REQUEST['_height'] ) );
+			$product->set_height( wc_clean( $_REQUEST['_height'] ) );
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-
-			wp_set_object_terms( $post_id, $shipping_class, 'product_shipping_class' );
+			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
+			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
+			if ( $shipping_class_id ) {
+				$product->set_shipping_class_id( $shipping_class_id );
+			}
 		}
 
 		if ( isset( $_REQUEST['_visibility'] ) ) {
-			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) ) ) {
-				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_REQUEST['_visibility'] ) );
-			}
+			$product->set_catalog_visibility( wc_clean( $_REQUEST['_visibility'] ) );
 		}
 
 		if ( isset( $_REQUEST['_featured'] ) ) {
-			if ( update_post_meta( $post_id, '_featured', 'yes' ) ) {
-				delete_transient( 'wc_featured_products' );
-			}
+			$product->set_featured( true );
 		} else {
-			if ( update_post_meta( $post_id, '_featured', 'no' ) ) {
-				delete_transient( 'wc_featured_products' );
-			}
+			$product->set_featured( false );
 		}
 
 		if ( isset( $_REQUEST['_tax_status'] ) ) {
-			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
+			$product->set_tax_status( wc_clean( $_REQUEST['_tax_status'] ) );
 		}
 
 		if ( isset( $_REQUEST['_tax_class'] ) ) {
-			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
+			$product->set_tax_class( wc_clean( $_REQUEST['_tax_class'] ) );
 		}
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) {
 				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
-				update_post_meta( $post_id, '_regular_price', $new_regular_price );
+				$product->set_regular_price( $new_regular_price );
 			} else {
 				$new_regular_price = null;
 			}
 			if ( isset( $_REQUEST['_sale_price'] ) ) {
 				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
-				update_post_meta( $post_id, '_sale_price', $new_sale_price );
+				$product->set_sale_price( $new_sale_price );
 			} else {
 				$new_sale_price = null;
 			}
@@ -1171,19 +1177,13 @@ class WC_Admin_Post_Types {
 			}
 
 			if ( $price_changed ) {
-				update_post_meta( $post_id, '_sale_price_dates_from', '' );
-				update_post_meta( $post_id, '_sale_price_dates_to', '' );
-
-				if ( ! is_null( $new_sale_price ) && '' !== $new_sale_price ) {
-					update_post_meta( $post_id, '_price', $new_sale_price );
-				} else {
-					update_post_meta( $post_id, '_price', $new_regular_price );
-				}
+				$product->set_date_on_sale_to( '' );
+				$product->set_date_on_sale_from( '' );
 			}
 		}
 
 		// Handle Stock Data
-		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
 		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_REQUEST['_stock'] ) : '';
@@ -1191,30 +1191,34 @@ class WC_Admin_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
 			// Apply product type constraints to stock status
-			if ( 'external' === $product->product_type ) {
+			if ( $product->is_type( 'external' ) ) {
 				// External always in stock
 				$stock_status = 'instock';
-			} elseif ( 'variable' === $product->product_type ) {
+			} elseif ( $product->is_type( 'variable' ) ) {
 				// Stock status is always determined by children
 				foreach ( $product->get_children() as $child_id ) {
-					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-						wc_update_product_stock_status( $child_id, $stock_status );
+					$child = wc_get_product( $child_id );
+					if ( ! $product->get_manage_stock() ) {
+						$child->set_stock_status( $stock_status );
+						$child->save();
 					}
 				}
 
-				WC_Product_Variable::sync_stock_status( $post_id );
+				$product = WC_Product_Variable::sync( $product, false );
 			}
 
-			update_post_meta( $post_id, '_manage_stock', $manage_stock );
-			update_post_meta( $post_id, '_backorders', $backorders );
+			$product->set_manage_stock( $manage_stock );
+			$product->set_backorders( $backorders );
+			$product->save();
 
-			if ( 'variable' !== $product->product_type ) {
+			if ( ! $product->is_type( 'variable') ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
 			wc_update_product_stock( $post_id, $stock_amount );
 
 		} else {
+			$product->save();
 			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
@@ -1223,33 +1227,33 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Bulk edit.
+	 *
 	 * @param integer $post_id
 	 * @param WC_Product $product
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
-
-		$old_regular_price = $product->regular_price;
-		$old_sale_price    = $product->sale_price;
+		$old_regular_price = $product->get_regular_price();
+		$old_sale_price    = $product->get_sale_price();
 
 		// Save fields
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) {
-			update_post_meta( $post_id, '_weight', wc_clean( stripslashes( $_REQUEST['_weight'] ) ) );
+			$product->set_weight( wc_clean( stripslashes( $_REQUEST['_weight'] ) ) );
 		}
 
 		if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
 			if ( isset( $_REQUEST['_length'] ) ) {
-				update_post_meta( $post_id, '_length', wc_clean( stripslashes( $_REQUEST['_length'] ) ) );
+				$product->set_length( wc_clean( stripslashes( $_REQUEST['_length'] ) ) );
 			}
 			if ( isset( $_REQUEST['_width'] ) ) {
-				update_post_meta( $post_id, '_width', wc_clean( stripslashes( $_REQUEST['_width'] ) ) );
+				$product->set_width( wc_clean( stripslashes( $_REQUEST['_width'] ) ) );
 			}
 			if ( isset( $_REQUEST['_height'] ) ) {
-				update_post_meta( $post_id, '_height', wc_clean( stripslashes( $_REQUEST['_height'] ) ) );
+				$product->set_height( wc_clean( stripslashes( $_REQUEST['_height'] ) ) );
 			}
 		}
 
 		if ( ! empty( $_REQUEST['_tax_status'] ) ) {
-			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
+			$product->set_tax_status( wc_clean( $_REQUEST['_tax_status'] ) );
 		}
 
 		if ( ! empty( $_REQUEST['_tax_class'] ) ) {
@@ -1257,33 +1261,31 @@ class WC_Admin_Post_Types {
 			if ( 'standard' == $tax_class ) {
 				$tax_class = '';
 			}
-			update_post_meta( $post_id, '_tax_class', $tax_class );
+			$product->set_tax_class( $tax_class );
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-
-			wp_set_object_terms( $post_id, $shipping_class, 'product_shipping_class' );
+			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
+			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
+			if ( $shipping_class_id ) {
+				$product->set_shipping_class_id( $shipping_class_id );
+			}
 		}
 
 		if ( ! empty( $_REQUEST['_visibility'] ) ) {
-			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) ) ) {
-				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_REQUEST['_visibility'] ) );
-			}
+			$product->set_catalog_visibility( wc_clean( $_REQUEST['_visibility'] ) );
 		}
 
 		if ( ! empty( $_REQUEST['_featured'] ) ) {
-			if ( update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) ) ) {
-				delete_transient( 'wc_featured_products' );
-			}
+			$product->set_featured( stripslashes( $_REQUEST['_featured'] ) );
 		}
 
 		// Sold Individually
 		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
 			if ( 'yes' === $_REQUEST['_sold_individually'] ) {
-				update_post_meta( $post_id, '_sold_individually', 'yes' );
+				$product->set_sold_individually( 'yes' );
 			} else {
-				update_post_meta( $post_id, '_sold_individually', '' );
+				$product->set_sold_individually( '' );
 			}
 		}
 
@@ -1302,7 +1304,6 @@ class WC_Admin_Post_Types {
 			$price_changed = false;
 
 			if ( ! empty( $_REQUEST['change_regular_price'] ) ) {
-
 				$change_regular_price = absint( $_REQUEST['change_regular_price'] );
 				$regular_price = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
 
@@ -1334,13 +1335,11 @@ class WC_Admin_Post_Types {
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
 					$new_price = round( $new_price, wc_get_price_decimals() );
-					update_post_meta( $post_id, '_regular_price', $new_price );
-					$product->regular_price = $new_price;
+					$product->set_regular_price( $new_price );
 				}
 			}
 
 			if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
-
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] );
 				$sale_price        = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
 
@@ -1380,32 +1379,24 @@ class WC_Admin_Post_Types {
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
 					$new_price = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
-					update_post_meta( $post_id, '_sale_price', $new_price );
-					$product->sale_price = $new_price;
+					$product->set_sale_price( $new_price );
 				}
 			}
 
 			if ( $price_changed ) {
-				update_post_meta( $post_id, '_sale_price_dates_from', '' );
-				update_post_meta( $post_id, '_sale_price_dates_to', '' );
+				$product->set_date_on_sale_to( '' );
+				$product->set_date_on_sale_from( '' );
 
-				if ( $product->regular_price < $product->sale_price ) {
-					$product->sale_price = '';
-					update_post_meta( $post_id, '_sale_price', '' );
-				}
-
-				if ( $product->sale_price ) {
-					update_post_meta( $post_id, '_price', $product->sale_price );
-				} else {
-					update_post_meta( $post_id, '_price', $product->regular_price );
+				if ( $product->get_regular_price() < $product->get_sale_price() ) {
+					$product->set_sale_price( '' );
 				}
 			}
 		}
 
 		// Handle Stock Data
-		$was_managing_stock = get_post_meta( $post_id, '_manage_stock', true );
-		$stock_status       = get_post_meta( $post_id, '_stock_status', true );
-		$backorders         = get_post_meta( $post_id, '_stock_status', true );
+		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
+		$stock_status       = $product->get_stock_status();
+		$backorders         = $product->get_backorders();
 
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
@@ -1421,30 +1412,34 @@ class WC_Admin_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
 			// Apply product type constraints to stock status
-			if ( 'external' === $product->product_type ) {
+			if ( $product->is_type( 'external' ) ) {
 				// External always in stock
 				$stock_status = 'instock';
-			} elseif ( 'variable' === $product->product_type ) {
+			} elseif ( $product->is_type( 'variable' ) ) {
 				// Stock status is always determined by children
 				foreach ( $product->get_children() as $child_id ) {
-					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-						wc_update_product_stock_status( $child_id, $stock_status );
+					$child = wc_get_product( $child_id );
+					if ( ! $product->get_manage_stock() ) {
+						$child->set_stock_status( $stock_status );
+						$child->save();
 					}
 				}
 
-				WC_Product_Variable::sync_stock_status( $post_id );
+				$product = WC_Product_Variable::sync( $product, false );
 			}
 
-			update_post_meta( $post_id, '_manage_stock', $manage_stock );
-			update_post_meta( $post_id, '_backorders', $backorders );
+			$product->set_manage_stock( $manage_stock );
+			$product->set_backorders( $backorders );
+			$product->save();
 
-			if ( 'variable' !== $product->product_type ) {
+			if ( ! $product->is_type( 'variable') ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
 			wc_update_product_stock( $post_id, $stock_amount );
 
 		} else {
+			$product->save();
 			wc_update_product_stock_status( $post_id, $stock_status );
 		}
 
