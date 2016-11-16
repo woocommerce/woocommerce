@@ -24,9 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      status array|string List of statuses to find. Default: any. Options: any, draft, pending, private and publish.
  *      type array|string Product type, e.g. Default: all. Options: all, simple, external, variable, variation, grouped.
  *      parent int post/product parent
- *      skus array Limit result set to products with specific SKUs.
- *      categories array Limit result set to products assigned a specific category, e.g. 9,14.
- *      tags array Limit result set to products assigned a specific tag, e.g. 9,14.
+ *      sku string Limit result set to products with specific SKU.
+ *      category array Limit result set to products assigned to specific categories by slug
+ *                     e.g. array('hoodie', 'cap', 't-shirt').
+ *      tag array Limit result set to products assigned to specific tags (by slug)
+ *                e.g. array('funky', 'retro', 'designer')
+ *      shipping_class array Limit results set to products in specific shipping classes (by slug)
+ *                           e.g. array('standard', 'next-day')
  *      limit int Maximum of products to retrieve.
  *      offset int Offset of products to retrieve.
  *      page int Page of products to retrieve. Ignored when using the 'offset' arg.
