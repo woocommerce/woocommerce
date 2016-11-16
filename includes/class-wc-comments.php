@@ -239,9 +239,9 @@ class WC_Comments {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
 			$product = wc_get_product( $post_id );
-			update_post_meta( $post_id, '_wc_rating_count', self::get_rating_counts_for_product( $product ) );
-			update_post_meta( $post_id, '_wc_average_rating', self::get_average_rating_for_product( $product ) );
-			update_post_meta( $post_id, '_wc_review_count', self::get_review_count_for_product( $product ) );
+			self::get_rating_counts_for_product( $product );
+			self::get_average_rating_for_product( $product );
+			self::get_review_count_for_product( $product );
 		}
 	}
 
@@ -336,7 +336,7 @@ class WC_Comments {
 	 * @param WC_Product $product
 	 * @return float
 	 */
-	public static function get_average_rating_for_product( $product ) {
+	public static function get_average_rating_for_product( &$product ) {
 		global $wpdb;
 
 		$count = $product->get_rating_count();
@@ -355,7 +355,10 @@ class WC_Comments {
 			$average = 0;
 		}
 
-		update_post_meta( $product->get_id(), '_wc_average_rating', $average );
+		$product->set_average_rating( $average );
+
+		$data_store = $product->get_data_store();
+		$data_store->update_average_rating( $product );
 
 		return $average;
 	}
@@ -367,7 +370,7 @@ class WC_Comments {
 	 * @param WC_Product $product
 	 * @return int
 	 */
-	public static function get_review_count_for_product( $product ) {
+	public static function get_review_count_for_product( &$product ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var( $wpdb->prepare("
@@ -377,7 +380,10 @@ class WC_Comments {
 			AND comment_approved = '1'
 		", $product->get_id() ) );
 
-		update_post_meta( $product->get_id(), '_wc_review_count', $count );
+		$product->set_review_count( $count );
+
+		$data_store = $product->get_data_store();
+		$data_store->update_review_count( $product );
 
 		return $count;
 	}
@@ -389,7 +395,7 @@ class WC_Comments {
 	 * @param WC_Product $product
 	 * @return array of integers
 	 */
-	public static function get_rating_counts_for_product( $product ) {
+	public static function get_rating_counts_for_product( &$product ) {
 		global $wpdb;
 
 		$counts     = array();
@@ -407,7 +413,10 @@ class WC_Comments {
 			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
 		}
 
-		update_post_meta( $product->get_id(), '_wc_rating_count', $counts );
+		$product->set_rating_counts( $counts );
+
+		$data_store = $product->get_data_store();
+		$data_store->update_rating_counts( $product );
 
 		return $counts;
 	}

@@ -102,6 +102,16 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Get the data store.
+	 *
+	 * @since 2.7.0
+	 * @return object
+	 */
+	public function get_data_store() {
+		return $this->data_store;
+	}
+
+	/**
 	 * Returns the unique ID for this object.
 	 * @return int
 	 */
