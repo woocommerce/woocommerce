@@ -35,7 +35,9 @@
 									$all_terms = get_terms( $attribute->get_taxonomy(), apply_filters( 'woocommerce_product_attribute_terms', $args ) );
 									if ( $all_terms ) {
 										foreach ( $all_terms as $term ) {
-											echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( in_array( $term->term_id, $attribute->get_options() ), true, false ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
+											$options = $attribute->get_options();
+											$options = ! empty( $options ) ? $options : array();
+											echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( in_array( $term->term_id, $options ), true, false ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
 										}
 									}
 									?>

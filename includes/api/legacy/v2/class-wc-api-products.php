@@ -1477,9 +1477,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Shipping class
 		if ( isset( $data['shipping_class'] ) ) {
-			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
+			$data_store         = $product->get_data_store();
+			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			if ( $shipping_class_id ) {
+				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 

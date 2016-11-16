@@ -352,7 +352,7 @@ class WC_Product_Variable extends WC_Product {
 
 		// Otherwise revert to status the children have.
 		} else {
-			$this->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
 	}
 
