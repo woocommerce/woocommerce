@@ -35,8 +35,8 @@ class WC_Data_Store {
 		'product_variation' => 'WC_Product_Variation_Data_Store_CPT',
 		'customer'          => 'WC_Customer_Data_Store',
 		'customer-session'  => 'WC_Customer_Data_Store_Session',
-		'payment-token'    => 'WC_Payment_Token_Data_Store',
-		'shipping-zone'    => 'WC_Shipping_Zone_Data_Store',
+		'payment-token'     => 'WC_Payment_Token_Data_Store',
+		'shipping-zone'     => 'WC_Shipping_Zone_Data_Store',
 	);
 
 	/**
@@ -80,6 +80,7 @@ class WC_Data_Store {
 	 */
 	public static function load( $object_type ) {
 		try {
+			error_log( print_r ( $object_type, 1 ) );
 			return new WC_Data_Store( $object_type );
 		} catch ( Exception $e ) {
 			return null;

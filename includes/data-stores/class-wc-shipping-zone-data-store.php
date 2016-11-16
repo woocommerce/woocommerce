@@ -4,13 +4,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Shipping Zone Data Store: Custom Table.
+ * WC Shipping Zone Data Store.
  *
  * @version  2.7.0
  * @category Class
  * @author   WooCommerce
  */
-class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_Interface, WC_Object_Data_Store {
+class WC_Shipping_Zone_Data_Store implements WC_Shipping_Zone_Data_Store_Interface, WC_Object_Data_Store {
 
 	/**
 	 * Method to create a new shipping zone.
@@ -61,6 +61,7 @@ class WC_Shipping_Zone_Data_Store_Table implements WC_Shipping_Zone_Data_Store_I
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
+		error_log( print_r ( $zone->get_id(), 1 ) );
 		if ( 0 === $zone->get_id() || "0" === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
 			$zone->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );

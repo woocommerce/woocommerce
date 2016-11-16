@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Shipping Zone Data Store Interface
+ * WC Shipping Zone Data Store Interface.
  *
  * Functions that must be defined by shipping zone store classes.
  *
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 interface WC_Shipping_Zone_Data_Store_Interface {
 	/**
-	 * Get a list of shipping methods for a specific sone.
+	 * Get a list of shipping methods for a specific zone.
 	 * @param  int   $zone_id      Zone ID
 	 * @param  bool  $enabled_only True to request enabled methods only.
 	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
