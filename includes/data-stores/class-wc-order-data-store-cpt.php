@@ -114,6 +114,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_cart_hash'            => 'cart_hash',
 		);
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+
+
+			// ADDRESSES @todo
+
 			if ( ! in_array( $prop, $changed_props ) ) {
 				continue;
 			}
