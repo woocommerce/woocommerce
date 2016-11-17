@@ -14,6 +14,10 @@ class WC_Meta_Data_Store implements WC_Meta_Data_Store_Interface {
 
 	/**
 	 * Returns an array of objects containing meta_id, meta_key, and meta_value.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data $object
+	 * @return array
 	 */
 	public function read_meta( $object ) {
 		global $wpdb;
@@ -39,9 +43,9 @@ class WC_Meta_Data_Store implements WC_Meta_Data_Store_Interface {
 	/**
 	 * Adds meta.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Data $object
-	 * @param object $meta Object containing ->key and ->value
+	 * @since  2.7.0
+	 * @param  WC_Data $object
+	 * @param  object $meta Object containing ->key and ->value
 	 * @return int Meta ID
 	 */
 	public function add_meta( $object, $meta ) {
