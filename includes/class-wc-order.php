@@ -832,6 +832,26 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Sets a prop for a setter method.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param string $address Name of address to set. billing or shipping.
+	 * @param mixed  $value Value of the prop.
+	 */
+	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			if ( true === $this->object_read ) {
+				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {
+					$this->changes[ $address ][ $prop ] = $value;
+				}
+			} else {
+				$this->data[ $address ][ $prop ] = $value;
+			}
+		}
+	}
+
+	/**
 	 * Set order_key.
 	 *
 	 * @param string $value Max length 20 chars.
@@ -849,26 +869,6 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_customer_id( $value ) {
 		$this->set_prop( 'customer_id', absint( $value ) );
-	}
-
-	/**
-	 * Sets a prop for a setter method.
-	 *
-	 * @since 2.7.0
-	 * @param string $prop Name of prop to set.
-	 * @param string $address Name of address to set. billing or shipping.
-	 * @param mixed  $value Value of the prop.
-	 */
-	protected function set_address_prop( $prop, $address = 'billing', $value ) {
-		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
-			if ( true === $this->object_read ) {
-				if ( $value !== $this->data[ $address ][ $prop ] || array_key_exists( $prop, $this->changes[ $address ] ) ) {
-					$this->changes[ $address ][ $prop ] = $value;
-				}
-			} else {
-				$this->data[ $address ][ $prop ] = $value;
-			}
-		}
 	}
 
 	/**

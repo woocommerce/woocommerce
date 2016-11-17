@@ -40,7 +40,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$order->set_id( $id );
-			$this->save_items( $order );
 			$this->update_post_meta( $order );
 			$order->save_meta_data();
 			$order->apply_changes();
@@ -86,7 +85,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 			'post_parent'   => $order->get_parent_id(),
 		) );
 
-		$this->save_items( $order );
 		$this->update_post_meta( $order );
 		$order->save_meta_data();
 		$order->apply_changes();

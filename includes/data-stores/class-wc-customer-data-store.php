@@ -109,7 +109,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 	 */
 	private function update_user_meta( $customer ) {
 		$updated_props = array();
-		$changed_props = array_keys( $customer->get_changes() );
+		$changed_props = $customer->get_changes();
 
 		$meta_key_to_props = array(
 			'paying_customer' => 'is_paying_customer',
@@ -118,7 +118,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) ) {
+			if ( ! array_key_exists( $prop, $changed_props ) ) {
 				continue;
 			}
 
@@ -143,7 +143,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 
 		foreach ( $billing_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 8 );
-			if ( ! isset( $changed_props['billing'] ) || ! in_array( $prop_key, $changed_props['billing'] ) ) {
+			if ( ! isset( $changed_props['billing'] ) || ! array_key_exists( $prop_key, $changed_props['billing'] ) ) {
 				continue;
 			}
 			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
@@ -165,7 +165,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 
 		foreach ( $shipping_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 9 );
-			if ( ! isset( $changed_props['shipping'] ) || ! in_array( $prop_key, $changed_props['shipping'] ) ) {
+			if ( ! isset( $changed_props['shipping'] ) || ! array_key_exists( $prop_key, $changed_props['shipping'] ) ) {
 				continue;
 			}
 			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {

@@ -78,7 +78,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $order->get_changes() );
+		$changed_props     = $order->get_changes();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_user',
@@ -95,7 +95,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) ) {
+			if ( ! array_key_exists( $prop, $changed_props ) ) {
 				continue;
 			}
 			$value = $order->{"get_$prop"}( 'edit' );
@@ -121,7 +121,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		foreach ( $billing_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 8 );
-			if ( ! isset( $changed_props['billing'] ) || ! in_array( $prop_key, $changed_props['billing'] ) ) {
+			if ( ! isset( $changed_props['billing'] ) || ! array_key_exists( $prop_key, $changed_props['billing'] ) ) {
 				continue;
 			}
 			$value = $order->{"get_$prop"}( 'edit' );
@@ -145,7 +145,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		foreach ( $shipping_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 9 );
-			if ( ! isset( $changed_props['shipping'] ) || ! in_array( $prop_key, $changed_props['shipping'] ) ) {
+			if ( ! isset( $changed_props['shipping'] ) || ! array_key_exists( $prop_key, $changed_props['shipping'] ) ) {
 				continue;
 			}
 			$value = $order->{"get_$prop"}( 'edit' );

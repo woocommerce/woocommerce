@@ -882,7 +882,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected function set_address_prop( $prop, $address = 'billing', $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
 			if ( true === $this->object_read ) {
-				if ( $value !== $this->data[ $address ][ $prop ] || array_key_exists( $prop, $this->changes[ $address ] ) ) {
+				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {
 					$this->changes[ $address ][ $prop ] = $value;
 				}
 			} else {

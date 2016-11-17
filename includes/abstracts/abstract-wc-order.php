@@ -102,6 +102,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $cache_group = 'order';
 
 	/**
+	 * Which data store to load.
+	 *
+	 * @var string
+	 */
+	protected $data_store_name = 'order';
+
+	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
@@ -127,7 +134,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_status( apply_filters( 'woocommerce_default_order_status', 'pending' ) );
 		}
 
-		$this->data_store = WC_Data_Store::load( 'order_' . $this->get_type() );
+		$this->data_store = WC_Data_Store::load( $this->data_store_name );
+
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
