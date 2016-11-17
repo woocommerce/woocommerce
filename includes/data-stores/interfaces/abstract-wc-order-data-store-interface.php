@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Order_Data_Store_Interface {
+interface Abstract_WC_Order_Data_Store_Interface {
 
 	/**
 	 * Read order items of a specific type from the database for this order.
@@ -46,28 +46,4 @@ interface WC_Order_Data_Store_Interface {
 	 * @param array $token_ids
 	 */
 	public function update_payment_token_ids( $order, $token_ids );
-
-	/**
-	 * Get amount already refunded.
-	 *
-	 * @param  WC_Order
-	 * @return string
-	 */
-	public function get_total_refunded( $order );
-
-	/**
-	 * Get the total tax refunded.
-	 *
-	 * @param  WC_Order
-	 * @return float
-	 */
-	public function get_total_tax_refunded( $order );
-
-	/**
-	 * Get the total shipping refunded.
-	 *
-	 * @param  WC_Order
-	 * @return float
-	 */
-	public function get_total_shipping_refunded( $order );
 }

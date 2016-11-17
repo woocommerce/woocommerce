@@ -260,175 +260,23 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
-	 * Insert data into the database.
+	 * Save data to the database.
+	 *
 	 * @since 2.7.0
+	 * @return int order ID
 	 */
-	public function create() {
-		parent::create();
-
-		// Store additonal order data
-		if ( $this->get_id() ) {
-			$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-			$this->update_post_meta( '_order_key', $this->get_order_key() );
-			$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-			$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-			$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-			$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-			$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-			$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-			$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-			$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-			$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-			$this->update_post_meta( '_billing_email', $this->get_billing_email() );
-			$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-			$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-			$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-			$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-			$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-			$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-			$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-			$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-			$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-			$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-			$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-			$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-			$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-			$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-			$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-			$this->update_post_meta( '_created_via', $this->get_created_via() );
-			$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-			$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-			$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-			$this->update_post_meta( '_cart_hash', $this->get_cart_hash() );
-			do_action( 'woocommerce_new_order', $this->get_id() );
-		}
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.7.0
-	 * @param int $id ID of object to read.
-	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$post_object = get_post( $this->get_id() );
-
-		$this->set_props( array(
-			'order_key'            => get_post_meta( $this->get_id(), '_order_key', true ),
-			'customer_id'          => get_post_meta( $this->get_id(), '_customer_user', true ),
-			'billing_first_name'   => get_post_meta( $this->get_id(), '_billing_first_name', true ),
-			'billing_last_name'    => get_post_meta( $this->get_id(), '_billing_last_name', true ),
-			'billing_company'      => get_post_meta( $this->get_id(), '_billing_company', true ),
-			'billing_address_1'    => get_post_meta( $this->get_id(), '_billing_address_1', true ),
-			'billing_address_2'    => get_post_meta( $this->get_id(), '_billing_address_2', true ),
-			'billing_city'         => get_post_meta( $this->get_id(), '_billing_city', true ),
-			'billing_state'        => get_post_meta( $this->get_id(), '_billing_state', true ),
-			'billing_postcode'     => get_post_meta( $this->get_id(), '_billing_postcode', true ),
-			'billing_country'      => get_post_meta( $this->get_id(), '_billing_country', true ),
-			'billing_email'        => get_post_meta( $this->get_id(), '_billing_email', true ),
-			'billing_phone'        => get_post_meta( $this->get_id(), '_billing_phone', true ),
-			'shipping_first_name'  => get_post_meta( $this->get_id(), '_shipping_first_name', true ),
-			'shipping_last_name'   => get_post_meta( $this->get_id(), '_shipping_last_name', true ),
-			'shipping_company'     => get_post_meta( $this->get_id(), '_shipping_company', true ),
-			'shipping_address_1'   => get_post_meta( $this->get_id(), '_shipping_address_1', true ),
-			'shipping_address_2'   => get_post_meta( $this->get_id(), '_shipping_address_2', true ),
-			'shipping_city'        => get_post_meta( $this->get_id(), '_shipping_city', true ),
-			'shipping_state'       => get_post_meta( $this->get_id(), '_shipping_state', true ),
-			'shipping_postcode'    => get_post_meta( $this->get_id(), '_shipping_postcode', true ),
-			'shipping_country'     => get_post_meta( $this->get_id(), '_shipping_country', true ),
-			'payment_method'       => get_post_meta( $this->get_id(), '_payment_method', true ),
-			'payment_method_title' => get_post_meta( $this->get_id(), '_payment_method_title', true ),
-			'transaction_id'       => get_post_meta( $this->get_id(), '_transaction_id', true ),
-			'customer_ip_address'  => get_post_meta( $this->get_id(), '_customer_ip_address', true ),
-			'customer_user_agent'  => get_post_meta( $this->get_id(), '_customer_user_agent', true ),
-			'created_via'          => get_post_meta( $this->get_id(), '_created_via', true ),
-			'customer_note'        => get_post_meta( $this->get_id(), '_customer_note', true ),
-			'date_completed'       => get_post_meta( $this->get_id(), '_completed_date', true ),
-			'date_paid'            => get_post_meta( $this->get_id(), '_paid_date', true ),
-			'cart_hash'            => get_post_meta( $this->get_id(), '_cart_hash', true ),
-			'customer_note'        => $post_object->post_excerpt,
-		) );
-
+	public function save() {
 		$this->maybe_set_user_billing_email();
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		global $wpdb;
-
-		// Store additonal order data.
-		$this->update_post_meta( '_order_key', $this->get_order_key() );
-		$customer_changed = $this->update_post_meta( '_customer_user', $this->get_customer_id() );
-		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-		$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-		$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-		$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-		$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-		$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-		$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-		$email_changed = $this->update_post_meta( '_billing_email', $this->get_billing_email() );
-		$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-		$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-		$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-		$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-		$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-		$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-		$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-		$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-		$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-		$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-		$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-		$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-		$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-		$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-		$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-		$this->update_post_meta( '_created_via', $this->get_created_via() );
-		$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-		$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-		$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-		$this->update_post_meta( '_cart_hash', $this->get_cart_hash() );
-
-		// Update parent.
-		parent::update();
-
-		// If customer changed, update any downloadable permissions.
-		if ( $customer_changed || $email_changed ) {
-			$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-				array(
-					'user_id'    => $this->get_customer_id(),
-					'user_email' => $this->get_billing_email(),
-				),
-				array(
-					'order_id'   => $this->get_id(),
-				),
-				array(
-					'%d',
-					'%s',
-				),
-				array(
-					'%d',
-				)
-			);
+		if ( $this->data_store ) {
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
 		}
-
-		// Clear order cache.
-		clean_post_cache( $this->get_id() );
-		wc_delete_shop_order_transients( $this->get_id() );
-
-		// Handle status change.
+		$this->save_items();
 		$this->status_transition();
-
+		return $this->get_id();
 	}
 
 	/**
@@ -1516,17 +1364,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( postmeta.meta_value )
-			FROM $wpdb->postmeta AS postmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			WHERE postmeta.meta_key = '_refund_amount'
-			AND postmeta.post_id = posts.ID
-		", $this->get_id() ) );
-
-		return $total;
+		return $this->data_store->get_total_refunded();
 	}
 
 	/**
@@ -1536,18 +1374,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-		", $this->get_id() ) );
-
-		return abs( $total );
+		return $this->data_store->get_total_tax_refunded();
 	}
 
 	/**
@@ -1557,18 +1384,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('cost')
-		", $this->get_id() ) );
-
-		return abs( $total );
+		return $this->data_store->get_total_shipping_refunded();
 	}
 
 	/**

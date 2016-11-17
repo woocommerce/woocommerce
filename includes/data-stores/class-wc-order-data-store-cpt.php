@@ -10,150 +10,64 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Order_Data_Store_Interface {
-
-	/**
-	 * If we have already saved our extra data, don't do automatic / default handling.
-	 */
-	protected $extra_data_saved = false;
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD Methods
-	|--------------------------------------------------------------------------
-	*/
+class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implements WC_Object_Data_Store, WC_Order_Data_Store_Interface {
 
 	/**
 	 * Method to create a new order in the database.
 	 * @param WC_Order $order
 	 */
 	public function create( &$order ) {
-		$order->set_version( WC_VERSION );
-		$order->set_date_created( current_time( 'timestamp' ) );
-		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
-
-		$id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
-			'post_type'     => $order->get_type( 'edit' ),
-			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'ping_status'   => 'closed',
-			'post_author'   => 1,
-			'post_title'    => $order->get_post_title( 'edit' ),
-			'post_password' => uniqid( 'order_' ),
-			'post_parent'   => $order->get_parent_id( 'edit' ),
-		) ), true );
-
-		if ( $id && ! is_wp_error( $id ) ) {
-			$order->set_id( $id );
-			$this->save_items( $order );
-			$this->update_post_meta( $order );
-			$order->save_meta_data();
-			$order->apply_changes();
-			$this->clear_caches( $order );
-		}
+		$order->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		parent::create( $order );
+		do_action( 'woocommerce_new_order', $order->get_id() );
 	}
-
-	/**
-	 * Method to read an order from the database.
-	 * @param WC_Order
-	 */
-	public function read( &$order ) {
-		$order->set_defaults();
-
-		if ( ! $order->get_id() || ! ( $post_object = get_post( $order->get_id() ) ) ) {
-			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
-		}
-
-		$id = $order->get_id();
-		$order->set_props( array(
-			'parent_id'          => $post_object->post_parent,
-			'date_created'       => $post_object->post_date,
-			'date_modified'      => $post_object->post_modified,
-			'status'             => $post_object->post_status,
-		) );
-		$this->read_order_data( $order );
-		$order->read_meta_data();
-		$order->set_object_read( true );
-	}
-
-	/**
-	 * Method to update an order in the database.
-	 * @param WC_Order $order
-	 */
-	public function update( &$order ) {
-		$order->set_version( WC_VERSION );
-
-		wp_update_post( array(
-			'ID'            => $order->get_id(),
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
-			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'post_parent'   => $order->get_parent_id(),
-		) );
-
-		$this->save_items( $order );
-		$this->update_post_meta( $order );
-		$order->save_meta_data();
-		$order->apply_changes();
-		$this->clear_caches( $order );
-	}
-
-	/**
-	 * Method to delete an order from the database.
-	 * @param WC_Order
-	 * @param array $args Array of args to pass to the delete method.
-	 */
-	public function delete( &$order, $args = array() ) {
-		$id   = $order->get_id();
-		$args = wp_parse_args( $args, array(
-			'force_delete' => false,
-		) );
-
-		if ( $args['force_delete'] ) {
-			wp_delete_post( $id );
-			$order->set_id( 0 );
-		} else {
-			wp_trash_post( $id );
-			$order->set_status( 'trash' );
-		}
-		do_action( 'woocommerce_delete_' . $post_type, $id );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Additional Methods
-	|--------------------------------------------------------------------------
-	*/
 
 	/**
 	 * Read order data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order
+	 * @param object $post_object
 	 * @since 2.7.0
 	 */
-	protected function read_order_data( &$order ) {
+	protected function read_order_data( &$order, $post_object ) {
+		parent::read_order_data( $order, $post_object );
 		$id = $order->get_id();
 
 		$order->set_props( array(
-			'currency'           => get_post_meta( $id, '_order_currency', true ),
-			'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
-			'discount_tax'       => get_post_meta( $id, '_cart_discount_tax', true ),
-			'shipping_total'     => get_post_meta( $id, '_order_shipping', true ),
-			'shipping_tax'       => get_post_meta( $id, '_order_shipping_tax', true ),
-			'cart_tax'           => get_post_meta( $id, '_order_tax', true ),
-			'total'              => get_post_meta( $id, '_order_total', true ),
-			'version'            => get_post_meta( $id, '_order_version', true ),
-			'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+			'order_key'            => get_post_meta( $id, '_order_key', true ),
+			'customer_id'          => get_post_meta( $id, '_customer_user', true ),
+			'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
+			'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
+			'billing_company'      => get_post_meta( $id, '_billing_company', true ),
+			'billing_address_1'    => get_post_meta( $id, '_billing_address_1', true ),
+			'billing_address_2'    => get_post_meta( $id, '_billing_address_2', true ),
+			'billing_city'         => get_post_meta( $id, '_billing_city', true ),
+			'billing_state'        => get_post_meta( $id, '_billing_state', true ),
+			'billing_postcode'     => get_post_meta( $id, '_billing_postcode', true ),
+			'billing_country'      => get_post_meta( $id, '_billing_country', true ),
+			'billing_email'        => get_post_meta( $id, '_billing_email', true ),
+			'billing_phone'        => get_post_meta( $id, '_billing_phone', true ),
+			'shipping_first_name'  => get_post_meta( $id, '_shipping_first_name', true ),
+			'shipping_last_name'   => get_post_meta( $id, '_shipping_last_name', true ),
+			'shipping_company'     => get_post_meta( $id, '_shipping_company', true ),
+			'shipping_address_1'   => get_post_meta( $id, '_shipping_address_1', true ),
+			'shipping_address_2'   => get_post_meta( $id, '_shipping_address_2', true ),
+			'shipping_city'        => get_post_meta( $id, '_shipping_city', true ),
+			'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
+			'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
+			'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
+			'payment_method'       => get_post_meta( $id, '_payment_method', true ),
+			'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
+			'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
+			'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
+			'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
+			'created_via'          => get_post_meta( $id, '_created_via', true ),
+			'customer_note'        => get_post_meta( $id, '_customer_note', true ),
+			'date_completed'       => get_post_meta( $id, '_completed_date', true ),
+			'date_paid'            => get_post_meta( $id, '_paid_date', true ),
+			'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
+			'customer_note'        => $post_object->post_excerpt,
 		) );
-
-		// Gets extra data associated with the order if needed.
-		foreach ( $order->get_extra_data_keys() as $key ) {
-			$function = 'set_' . $key;
-			if ( is_callable( array( $order, $function ) ) ) {
-				$order->{$function}( get_post_meta( $order->get_id(), '_' . $key, true ) );
-			}
-		}
 	}
 
 	/**
@@ -166,15 +80,38 @@ class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Dat
 		$updated_props     = array();
 		$changed_props     = array_keys( $order->get_changes() );
 		$meta_key_to_props = array(
-			'_order_currency'     => 'currency',
-			'_cart_discount'      => 'discount_total',
-			'_cart_discount_tax'  => 'discount_tax',
-			'_order_shipping'     => 'shipping_total',
-			'_order_shipping_tax' => 'shipping_tax',
-			'_order_tax'          => 'cart_tax',
-			'_order_total'        => 'total',
-			'_order_version'      => 'version',
-			'_prices_include_tax' => 'prices_include_tax',
+			'_order_key'            => 'order_key',
+			'_customer_user'        => 'customer_user',
+			'_billing_first_name'   => 'billing_first_name',
+			'_billing_last_name'    => 'billing_last_name',
+			'_billing_company'      => 'billing_company',
+			'_billing_address_1'    => 'billing_address_1',
+			'_billing_address_2'    => 'billing_address_2',
+			'_billing_city'         => 'billing_city',
+			'_billing_state'        => 'billing_state',
+			'_billing_postcode'     => 'billing_postcode',
+			'_billing_country'      => 'billing_country',
+			'_billing_email'        => 'billing_email',
+			'_billing_phone'        => 'billing_phone',
+			'_shipping_first_name'  => 'shipping_first_name',
+			'_shipping_last_name'   => 'shipping_last_name',
+			'_shipping_company'     => 'shipping_company',
+			'_shipping_address_1'   => 'shipping_address_1',
+			'_shipping_address_2'   => 'shipping_address_2',
+			'_shipping_city'        => 'shipping_city',
+			'_shipping_state'       => 'shipping_state',
+			'_shipping_postcode'    => 'shipping_postcode',
+			'_shipping_country'     => 'shipping_country',
+			'_payment_method'       => 'payment_method',
+			'_payment_method_title' => 'payment_method_title',
+			'_transaction_id'       => 'transaction_id',
+			'_customer_ip_address'  => 'customer_ip_address',
+			'_customer_user_agent'  => 'customer_user_agent',
+			'_created_via'          => 'created_via',
+			'_customer_note'        => 'customer_note',
+			'_date_completed'       => 'date_completed',
+			'_date_paid'            => 'date_paid',
+			'_cart_hash'            => 'cart_hash',
 		);
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) ) {
@@ -193,85 +130,90 @@ class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Dat
 			}
 		}
 
-		// Update extra data associated with the order if needed.
-		if ( ! $this->extra_data_saved ) {
-			foreach ( $order->get_extra_data_keys() as $key ) {
-				$function = 'get_' . $key;
-				if ( in_array( $key, $changed_props ) && is_callable( array( $order, $function ) ) ) {
-					update_post_meta( $order->get_id(), '_' . $key, $order->{$function}( 'edit' ) );
-				}
-			}
+		parent::update_post_meta( $order );
+
+		// If customer changed, update any downloadable permissions.
+		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
+			global $wpdb;
+
+			$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+				array(
+					'user_id'    => $order->get_customer_id(),
+					'user_email' => $order->get_billing_email(),
+				),
+				array(
+					'order_id'   => $order->get_id(),
+				),
+				array(
+					'%d',
+					'%s',
+				),
+				array(
+					'%d',
+				)
+			);
 		}
 	}
 
 	/**
-	 * Clear any caches.
+	 * Get amount already refunded.
 	 *
-	 * @param WC_Order
-	 * @since 2.7.0
+	 * @param  WC_Order
+	 * @return string
 	 */
-	protected function clear_caches( &$order ) {
-		clean_post_cache( $order->get_id() );
-		wc_delete_shop_order_transients( $order->get_id() );
-	}
-
-	/**
-	 * Read order items of a specific type from the database for this order.
-	 *
-	 * @param  WC_Order $order
-	 * @param  string $type
-	 * @return array
-	 */
-	public function read_items( $order, $type ) {
+	public function get_total_refunded( $order ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
-		$items         = $wpdb->get_results( $get_items_sql );
+		$total = $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( postmeta.meta_value )
+			FROM $wpdb->postmeta AS postmeta
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+			WHERE postmeta.meta_key = '_refund_amount'
+			AND postmeta.post_id = posts.ID
+		", $order->get_id() ) );
 
-		if ( ! empty( $items ) ) {
-			$items = array_map( array( 'WC_Order_Factory', 'get_order_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
-		} else {
-			$items = array();
-		}
-
-		return $items;
+		return $total;
 	}
 
 	/**
-	 * Remove all line items (products, coupons, shipping, taxes) from the order.
+	 * Get the total tax refunded.
 	 *
-	 * @param WC_Order
-	 * @param string $type Order item type. Default null.
+	 * @param  WC_Order
+	 * @return float
 	 */
-	public function delete_items( $order, $type = null ) {
+	public function get_total_tax_refunded( $order ) {
 		global $wpdb;
-		if ( ! empty( $type ) ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order->get_id(), $type ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order->get_id(), $type ) );
-		} else {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order->get_id() ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() ) );
-		}
+
+		$total = $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_itemmeta.meta_value )
+			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+			WHERE order_itemmeta.order_item_id = order_items.order_item_id
+			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
+		", $order->get_id() ) );
+
+		return abs( $total );
 	}
 
 	/**
-	 * Get token ids for an order.
+	 * Get the total shipping refunded.
 	 *
-	 * @param WC_Order
-	 * @return array
+	 * @param  WC_Order
+	 * @return float
 	 */
-	public function get_payment_token_ids( $order ) {
-		$token_ids = array_filter( (array) get_post_meta( $order->get_id(), '_payment_tokens', true ) );
-		return $token_ids;
-	}
+	public function get_total_shipping_refunded( $order ) {
+		global $wpdb;
 
-	/**
-	 * Update token ids for an order.
-	 *
-	 * @param WC_Order
-	 * @param array $token_ids
-	 */
-	public function update_payment_token_ids( $order, $token_ids ) {
-		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
+		$total = $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_itemmeta.meta_value )
+			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
+			WHERE order_itemmeta.order_item_id = order_items.order_item_id
+			AND order_itemmeta.meta_key IN ('cost')
+		", $order->get_id() ) );
+
+		return abs( $total );
 	}
 }

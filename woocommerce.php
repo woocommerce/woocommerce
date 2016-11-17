@@ -293,6 +293,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-customer-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-payment-token-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-shipping-zone-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/abstract-wc-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
@@ -304,6 +305,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
 
 		$this->query = new WC_Query();
