@@ -581,7 +581,7 @@ abstract class WC_Data {
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
-	public function get_prop( $prop, $context = 'view' ) {
+	protected function get_prop( $prop, $context = 'view' ) {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {

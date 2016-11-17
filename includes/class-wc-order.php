@@ -396,267 +396,343 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order key.
-	 * @since 2.7.0
+	 *
+	 * @since  2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_order_key() {
-		return $this->data['order_key'];
+	public function get_order_key( $context = 'view' ) {
+		return $this->get_prop( 'order_key', $context );
 	}
 
 	/**
-	 * Get customer_id
+	 * Get customer_id.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_customer_id() {
-		return $this->data['customer_id'];
+	public function get_customer_id( $context = 'view' ) {
+		return $this->get_prop( 'customer_id', $context );
 	}
 
 	/**
 	 * Alias for get_customer_id().
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_user_id() {
+	public function get_user_id( $context = 'view' ) {
 		return $this->get_customer_id();
 	}
 
 	/**
 	 * Get the user associated with the order. False for guests.
+	 *
+	 * @param  string $context
 	 * @return WP_User|false
 	 */
-	public function get_user() {
+	public function get_user( $context = 'view' ) {
 		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
 	}
 
 	/**
-	 * Get billing_first_name
+	 * Get billing_first_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_first_name() {
-		return $this->data['billing']['first_name'];
+	public function get_billing_first_name( $context = 'view' ) {
+		return $this->get_prop( 'billing']['first_name', $context );
 	}
 
 	/**
-	 * Get billing_last_name
+	 * Get billing_last_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_last_name() {
-		return $this->data['billing']['last_name'];
+	public function get_billing_last_name( $context = 'view' ) {
+		return $this->get_prop( 'billing']['last_name', $context );
 	}
 
 	/**
-	 * Get billing_company
+	 * Get billing_company.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_company() {
-		return $this->data['billing']['company'];
+	public function get_billing_company( $context = 'view' ) {
+		return $this->get_prop( 'billing']['company', $context );
 	}
 
 	/**
-	 * Get billing_address_1
+	 * Get billing_address_1.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_address_1() {
-		return $this->data['billing']['address_1'];
+	public function get_billing_address_1( $context = 'view' ) {
+		return $this->get_prop( 'billing']['address_1', $context );
 	}
 
 	/**
-	 * Get billing_address_2
+	 * Get billing_address_2.
+	 *
+	 * @param  string $context
 	 * @return string $value
 	 */
-	public function get_billing_address_2() {
-		return $this->data['billing']['address_2'];
+	public function get_billing_address_2( $context = 'view' ) {
+		return $this->get_prop( 'billing']['address_2', $context );
 	}
 
 	/**
-	 * Get billing_city
+	 * Get billing_city.
+	 *
+	 * @param  string $context
 	 * @return string $value
 	 */
-	public function get_billing_city() {
-		return $this->data['billing']['city'];
+	public function get_billing_city( $context = 'view' ) {
+		return $this->get_prop( 'billing']['city', $context );
 	}
 
 	/**
-	 * Get billing_state
+	 * Get billing_state.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_state() {
-		return $this->data['billing']['state'];
+	public function get_billing_state( $context = 'view' ) {
+		return $this->get_prop( 'billing']['state', $context );
 	}
 
 	/**
-	 * Get billing_postcode
+	 * Get billing_postcode.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_postcode() {
-		return $this->data['billing']['postcode'];
+	public function get_billing_postcode( $context = 'view' ) {
+		return $this->get_prop( 'billing']['postcode', $context );
 	}
 
 	/**
-	 * Get billing_country
+	 * Get billing_country.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_country() {
-		return $this->data['billing']['country'];
+	public function get_billing_country( $context = 'view' ) {
+		return $this->get_prop( 'billing']['country', $context );
 	}
 
 	/**
-	 * Get billing_email
+	 * Get billing_email.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_email() {
-		return $this->data['billing']['email'];
+	public function get_billing_email( $context = 'view' ) {
+		return $this->get_prop( 'billing']['email', $context );
 	}
 
 	/**
-	 * Get billing_phone
+	 * Get billing_phone.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_phone() {
-		return $this->data['billing']['phone'];
+	public function get_billing_phone( $context = 'view' ) {
+		return $this->get_prop( 'billing']['phone', $context );
 	}
 
 	/**
-	 * Get shipping_first_name
+	 * Get shipping_first_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_first_name() {
-		return $this->data['shipping']['first_name'];
+	public function get_shipping_first_name( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['first_name', $context );
 	}
 
 	/**
-	 * Get shipping_last_name
+	 * Get shipping_last_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_last_name() {
-		 return $this->data['shipping']['last_name'];
+	public function get_shipping_last_name( $context = 'view' ) {
+		 return $this->get_prop( 'shipping']['last_name', $context );
 	}
 
 	/**
-	 * Get shipping_company
+	 * Get shipping_company.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_company() {
-		return $this->data['shipping']['company'];
+	public function get_shipping_company( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['company', $context );
 	}
 
 	/**
-	 * Get shipping_address_1
+	 * Get shipping_address_1.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_address_1() {
-		return $this->data['shipping']['address_1'];
+	public function get_shipping_address_1( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['address_1', $context );
 	}
 
 	/**
-	 * Get shipping_address_2
+	 * Get shipping_address_2.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_address_2() {
-		return $this->data['shipping']['address_2'];
+	public function get_shipping_address_2( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['address_2', $context );
 	}
 
 	/**
-	 * Get shipping_city
+	 * Get shipping_city.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_city() {
-		return $this->data['shipping']['city'];
+	public function get_shipping_city( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['city', $context );
 	}
 
 	/**
-	 * Get shipping_state
+	 * Get shipping_state.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_state() {
-		return $this->data['shipping']['state'];
+	public function get_shipping_state( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['state', $context );
 	}
 
 	/**
-	 * Get shipping_postcode
+	 * Get shipping_postcode.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_postcode() {
-		return $this->data['shipping']['postcode'];
+	public function get_shipping_postcode( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['postcode', $context );
 	}
 
 	/**
-	 * Get shipping_country
+	 * Get shipping_country.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_country() {
-		return $this->data['shipping']['country'];
+	public function get_shipping_country( $context = 'view' ) {
+		return $this->get_prop( 'shipping']['country', $context );
 	}
 
 	/**
 	 * Get the payment method.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_payment_method() {
-		return $this->data['payment_method'];
+	public function get_payment_method( $context = 'view' ) {
+		return $this->get_prop( 'payment_method', $context );
 	}
 
 	/**
-	 * Get payment_method_title
+	 * Get payment_method_title.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_payment_method_title() {
-		return $this->data['payment_method_title'];
+	public function get_payment_method_title( $context = 'view' ) {
+		return $this->get_prop( 'payment_method_title', $context );
 	}
 
 	/**
-	 * Get transaction_id
+	 * Get transaction_id.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_transaction_id() {
-		return $this->data['transaction_id'];
+	public function get_transaction_id( $context = 'view' ) {
+		return $this->get_prop( 'transaction_id', $context );
 	}
 
 	/**
-	 * Get customer_ip_address
+	 * Get customer_ip_address.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_ip_address() {
-		return $this->data['customer_ip_address'];
+	public function get_customer_ip_address( $context = 'view' ) {
+		return $this->get_prop( 'customer_ip_address', $context );
 	}
 
 	/**
-	 * Get customer_user_agent
+	 * Get customer_user_agent.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_user_agent() {
-		return $this->data['customer_user_agent'];
+	public function get_customer_user_agent( $context = 'view' ) {
+		return $this->get_prop( 'customer_user_agent', $context );
 	}
 
 	/**
-	 * Get created_via
+	 * Get created_via.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_created_via() {
-		return $this->data['created_via'];
+	public function get_created_via( $context = 'view' ) {
+		return $this->get_prop( 'created_via', $context );
 	}
 
 	/**
-	 * Get customer_note
+	 * Get customer_note.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_note() {
-		return $this->data['customer_note'];
+	public function get_customer_note( $context = 'view' ) {
+		return $this->get_prop( 'customer_note', $context );
 	}
 
 	/**
-	 * Get date_completed
+	 * Get date_completed.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_completed() {
+	public function get_date_completed( $context = 'view' ) {
 		return absint( $this->data['date_completed'] );
 	}
 
 	/**
-	 * Get date_paid
+	 * Get date_paid.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_paid() {
+	public function get_date_paid( $context = 'view' ) {
 		return absint( $this->data['date_paid'] );
+	}
+
+	/**
+	 * Get cart hash.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_cart_hash( $context = 'view' ) {
+		return $this->get_prop( 'cart_hash', $context );
 	}
 
 	/**
@@ -715,14 +791,6 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			return '';
 		}
-	}
-
-	/**
-	 * Get cart hash
-	 * @return string
-	 */
-	public function get_cart_hash() {
-		return $this->data['cart_hash'];
 	}
 
 	/*
