@@ -29,13 +29,14 @@ class WC_Data_Store {
 	 */
 	private $stores = array(
 		'coupon'            => 'WC_Coupon_Data_Store_CPT',
+		'customer'          => 'WC_Customer_Data_Store',
+		'customer-session'  => 'WC_Customer_Data_Store_Session',
+		'order'             => 'WC_Order_Data_Store_CPT',
+		'payment-token'     => 'WC_Payment_Token_Data_Store',
 		'product'           => 'WC_Product_Data_Store_CPT',
 		'product_grouped'   => 'WC_Product_Grouped_Data_Store_CPT',
 		'product_variable'  => 'WC_Product_Variable_Data_Store_CPT',
 		'product_variation' => 'WC_Product_Variation_Data_Store_CPT',
-		'customer'          => 'WC_Customer_Data_Store',
-		'customer-session'  => 'WC_Customer_Data_Store_Session',
-		'payment-token'     => 'WC_Payment_Token_Data_Store',
 		'shipping-zone'     => 'WC_Shipping_Zone_Data_Store',
 	);
 

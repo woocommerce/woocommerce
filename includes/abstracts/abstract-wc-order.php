@@ -101,37 +101,31 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
 	 * methods that will be maintained going forward.
 	 *
-	 * @param  int|object|WC_Order $read Order to init.
+	 * @param  int|object|WC_Order $order Order to read.
 	 */
-	public function __construct( $read = 0 ) {
-		parent::__construct( $read );
+	public function __construct( $order = 0 ) {
+		parent::__construct( $order );
 
-		if ( is_numeric( $read ) && $read > 0 ) {
-			$this->read( $read );
-		} elseif ( $read instanceof self ) {
-			$this->read( absint( $read->get_id() ) );
-		} elseif ( ! empty( $read->ID ) ) {
-			$this->read( absint( $read->ID ) );
+		if ( is_numeric( $order ) && $order > 0 ) {
+			$this->set_id( $order );
+		} elseif ( $order instanceof self ) {
+			$this->set_id( absint( $order->get_id() ) );
+		} elseif ( ! empty( $order->ID ) ) {
+			$this->set_id( absint( $order->ID ) );
+		} else {
+			$this->set_object_read( true );
 		}
+
 		// Set default status if none were read.
 		if ( ! $this->get_status() ) {
 			$this->set_status( apply_filters( 'woocommerce_default_order_status', 'pending' ) );
 		}
-	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD methods
-	|--------------------------------------------------------------------------
-	|
-	| Methods which create, read, update and delete orders from the database.
-	| Written in abstract fashion so that the way orders are stored can be
-	| changed more easily in the future.
-	|
-	| A save method is included for convenience (chooses update or create based
-	| on if the order exists yet).
-	|
-	*/
+		$this->data_store = WC_Data_Store::load( 'order_' . $this->get_type() );
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
+		}
+	}
 
 	/**
 	 * Get internal type (post type.)
@@ -152,208 +146,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Insert data into the database.
-	 * @since 2.7.0
-	 */
-	public function create() {
-		$this->set_date_created( current_time( 'timestamp' ) );
-		$this->set_currency( $this->get_currency() ? $this->get_currency() : get_woocommerce_currency() );
-
-		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-			'post_type'     => $this->get_type(),
-			'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'ping_status'   => 'closed',
-			'post_author'   => 1,
-			'post_title'    => $this->get_post_title(),
-			'post_password' => uniqid( 'order_' ),
-			'post_parent'   => $this->get_parent_id(),
-		) ), true );
-
-		if ( $order_id ) {
-			$this->set_id( $order_id );
-
-			// Set meta data
-			$this->update_post_meta( '_order_currency', $this->get_currency() );
-			$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
-			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
-			$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
-			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax( true ) );
-			$this->update_post_meta( '_order_tax', $this->get_cart_tax( true ) );
-			$this->update_post_meta( '_order_total', $this->get_total( true ) );
-			$this->update_post_meta( '_order_version', $this->get_version() );
-			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
-			$this->save_meta_data();
-		}
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.7.0
-	 * @param int $id ID of object to read.
-	 */
-	public function read( $id ) {
-		$this->set_defaults();
-
-		if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
-			return;
-		}
-
-		$this->set_id( $id );
-		$this->set_props( array(
-			'parent_id'          => $post_object->post_parent,
-			'date_created'       => $post_object->post_date,
-			'date_modified'      => $post_object->post_modified,
-			'status'             => $post_object->post_status,
-			'currency'           => get_post_meta( $id, '_order_currency', true ),
-			'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
-			'discount_tax'       => get_post_meta( $id, '_cart_discount_tax', true ),
-			'shipping_total'     => get_post_meta( $id, '_order_shipping', true ),
-			'shipping_tax'       => get_post_meta( $id, '_order_shipping_tax', true ),
-			'cart_tax'           => get_post_meta( $id, '_order_tax', true ),
-			'total'              => get_post_meta( $id, '_order_total', true ),
-			'version'            => get_post_meta( $id, '_order_version', true ),
-			'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
-		) );
-
-		$this->read_meta_data();
-	}
-
-	/**
-	 * Post meta update wrapper. Sets or deletes based on value.
-	 * @since 2.7.0
-	 * @return bool Was it changed?
-	 */
-	protected function update_post_meta( $key, $value ) {
-		if ( '' !== $value ) {
-			return update_post_meta( $this->get_id(), $key, $value );
-		} else {
-			return delete_post_meta( $this->get_id(), $key );
-		}
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		global $wpdb;
-
-		$order_id = $this->get_id();
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-				'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-				'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-				'post_parent'   => $this->get_parent_id(),
-			),
-			array(
-				'ID' => $order_id,
-			)
-		);
-
-		// Update meta data
-		$this->update_post_meta( '_order_currency', $this->get_currency() );
-		$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
-		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
-		$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
-		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax( true ) );
-		$this->update_post_meta( '_order_tax', $this->get_cart_tax( true ) );
-		$this->update_post_meta( '_order_total', $this->get_total( true ) );
-		$this->update_post_meta( '_order_version', $this->get_version() );
-		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
-		$this->save_meta_data();
-	}
-
-	/**
-	 * Delete data from the database.
-	 * @since 2.7.0
-	 */
-	public function delete( $force_delete = false ) {
-		wp_delete_post( $this->get_id() );
-	}
-
-	/**
-	 * Save data to the database.
-	 * @since 2.7.0
-	 * @return int order ID
-	 */
-	public function save() {
-		$this->set_version( WC_VERSION );
-
-		if ( ! $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
-		}
-
-		$this->save_items();
-		clean_post_cache( $this->get_id() );
-		wc_delete_shop_order_transients( $this->get_id() );
-
-		return $this->get_id();
-	}
-
-	/**
-	 * Save all order items which are part of this order.
-	 */
-	protected function save_items() {
-		// remove items
-		foreach ( $this->items_to_delete as $item ) {
-			$item->delete();
-		}
-
-		$this->items_to_delete = array();
-
-		// Add/save items
-		foreach ( $this->items as $item_group => $items ) {
-			if ( is_array( $items ) ) {
-				foreach ( $items as $item_key => $item ) {
-					$item->set_order_id( $this->get_id() );
-					$item_id = $item->save();
-
-					// If ID changed (new item saved to DB)...
-					if ( $item_id !== $item_key ) {
-						$this->items[ $item_group ][ $item_id ] = $item;
-						unset( $this->items[ $item_group ][ $item_key ] );
-
-						// Legacy action handler
-						switch ( $item_group ) {
-							case 'fee_lines' :
-								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-							case 'shipping_lines' :
-								if ( isset( $item->legacy_package_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $item_id, $item->legacy_package_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-							case 'line_items' :
-								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	|
-	| Methods for getting data from the order object.
-	|
-	*/
-
-	/**
 	 * Get all class data in array format.
 	 * @since 2.7.0
 	 * @return array
@@ -371,6 +163,45 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			)
 		);
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| CRUD methods
+	|--------------------------------------------------------------------------
+	|
+	| Methods which create, read, update and delete orders from the database.
+	| Written in abstract fashion so that the way orders are stored can be
+	| changed more easily in the future.
+	|
+	| A save method is included for convenience (chooses update or create based
+	| on if the order exists yet).
+	|
+	*/
+
+	/**
+	 * Save data to the database.
+	 * @since 2.7.0
+	 * @return int order ID
+	 */
+	public function save() {
+		if ( $this->data_store ) {
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
+			return $this->get_id();
+		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the order object.
+	|
+	*/
 
 	/**
 	 * Get parent order ID.
