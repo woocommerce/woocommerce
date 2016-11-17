@@ -75,6 +75,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $meta_type = 'post';
 
 	/**
+	 * Cache group.
+	 * @var string
+	 */
+	protected $cache_group = 'coupons';
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for a coupon.
 	 * @since 2.7.0
 	 * @var array

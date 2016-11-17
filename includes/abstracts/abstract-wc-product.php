@@ -28,6 +28,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected $post_type = 'product';
 
 	/**
+	 * Cache group.
+	 * @var string
+	 */
+	protected $cache_group = 'products';
+
+	/**
 	 * Stores product data.
 	 *
 	 * @var array

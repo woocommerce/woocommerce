@@ -60,6 +60,12 @@ abstract class WC_Data {
 	protected $data_store;
 
 	/**
+	 * Contains a reference to the data store for meta handling.
+	 * @var object
+	 */
+	protected $meta_data_store;
+
+	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -98,7 +104,8 @@ abstract class WC_Data {
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $read = 0 ) {
-		$this->default_data = $this->data;
+		$this->default_data    = $this->data;
+		$this->meta_data_store = WC_Data_Store::load( 'meta' );
 	}
 
 	/**
@@ -109,6 +116,26 @@ abstract class WC_Data {
 	 */
 	public function get_data_store() {
 		return $this->data_store;
+	}
+
+	/**
+	 * Get the meta type for this data type.
+	 *
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_meta_type() {
+		return $this->meta_type;
+	}
+
+	/**
+	 * Get the object ID field this data type.
+	 *
+	 * @since 2.7.0
+	 * @return string
+	 */
+	public function get_object_id_field_for_meta() {
+		return $this->object_id_field_for_meta;
 	}
 
 	/**
@@ -330,7 +357,7 @@ abstract class WC_Data {
 	 * @param int $mid Meta ID
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
-		$array_keys         = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
 		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
@@ -350,10 +377,12 @@ abstract class WC_Data {
 
 	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
+	 *
 	 * @since 2.6.0
+	 * @param bool $force_read True to force a new DB read (and update cache).
 	 */
-	public function read_meta_data() {
-		$this->meta_data = array();
+	public function read_meta_data( $force_read = false ) {
+		$this->meta_data  = array();
 		$cache_loaded     = false;
 
 		if ( ! $this->get_id() ) {
@@ -361,37 +390,34 @@ abstract class WC_Data {
 		}
 
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key   = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . $this->get_id();
-			$cached_meta = wp_cache_get( $cache_key, $this->cache_group );
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
+		}
 
-			if ( false !== $cached_meta ) {
-				$this->meta_data = $cached_meta;
-				$cache_loaded = true;
+		if ( ! $force_read ) {
+			if ( ! empty( $this->cache_group ) ) {
+				$cached_meta = wp_cache_get( $cache_key, $this->cache_group );
+				if ( false !== $cached_meta ) {
+					$this->meta_data = $cached_meta;
+					$cache_loaded    = true;
+				}
 			}
 		}
 
 		if ( ! $cache_loaded ) {
-			global $wpdb;
-			$db_info = $this->get_db_info();
-			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
-				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
-			", $this->get_id() ) );
-
+			$raw_meta_data  = $this->meta_data_store->read_meta( $this );
 			if ( $raw_meta_data ) {
 				$raw_meta_data = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 				foreach ( $raw_meta_data as $meta ) {
 					$this->meta_data[] = (object) array(
-						'id'    => (int) $meta->{ $db_info['meta_id_field'] },
+						'id'    => (int) $meta->meta_id,
 						'key'   => $meta->meta_key,
 						'value' => maybe_unserialize( $meta->meta_value ),
 					);
 				}
-			}
 
-			if ( ! empty( $this->cache_group ) ) {
-				wp_cache_set( $cache_key, $this->meta_data, $this->cache_group );
+				if ( ! empty( $this->cache_group ) ) {
+					wp_cache_set( $cache_key, $this->meta_data, $this->cache_group );
+				}
 			}
 		}
 	}
@@ -404,55 +430,21 @@ abstract class WC_Data {
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
-					delete_metadata_by_mid( $this->meta_type, $meta->id );
+					$this->meta_data_store->delete_meta( $this, $meta );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id = add_metadata( $this->meta_type, $this->get_id(), $meta->key, $meta->value, false );
+				$new_meta_id                       = $this->meta_data_store->add_meta( $this, $meta );
 				$this->meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
-				update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
+				$this->meta_data_store->update_meta( $this, $meta );
 			}
 		}
 
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
 		}
-		$this->read_meta_data();
-	}
 
-	/**
-	 * Table structure is slightly different between meta types, this function will return what we need to know.
-	 * @since 2.6.0
-	 * @return array Array elements: table, object_id_field, meta_id_field
-	 */
-	protected function get_db_info() {
-		global $wpdb;
-
-		$meta_id_field   = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
-		$table           = $wpdb->prefix;
-
-		// If we are dealing with a type of metadata that is not a core type, the table should be prefixed.
-		if ( ! in_array( $this->meta_type, array( 'post', 'user', 'comment', 'term' ) ) ) {
-			$table .= 'woocommerce_';
-		}
-
-		$table .= $this->meta_type . 'meta';
-		$object_id_field = $this->meta_type . '_id';
-
-		// Figure out our field names.
-		if ( 'user' === $this->meta_type ) {
-			$meta_id_field   = 'umeta_id';
-		}
-
-		if ( ! empty( $this->object_id_field_for_meta ) ) {
-			$object_id_field = $this->object_id_field_for_meta;
-		}
-
-		return array(
-			'table'           => $table,
-			'object_id_field' => $object_id_field,
-			'meta_id_field'   => $meta_id_field,
-		);
+		$this->read_meta_data( true );
 	}
 
 	/**
