@@ -56,59 +56,9 @@ jQuery( function( $ ) {
 
 				} else {
 
-					$thisbutton.removeClass( 'loading' );
-
-					var fragments = response.fragments;
-					var cart_hash = response.cart_hash;
-
-					// Block fragments class
-					if ( fragments ) {
-						$.each( fragments, function( key ) {
-							$( key ).addClass( 'updating' );
-						});
-					}
-
-					// Block widgets and fragments
-					$( '.shop_table.cart, .updating, .cart_totals' ).fadeTo( '400', '0.6' ).block({
-						message: null,
-						overlayCSS: {
-							opacity: 0.6
-						}
-					});
-
-					// Changes button classes
-					$thisbutton.addClass( 'added' );
-
-					// View cart text
-					if ( ! wc_add_to_cart_params.is_cart && $thisbutton.parent().find( '.added_to_cart' ).length === 0 ) {
-						$thisbutton.after( ' <a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
-							wc_add_to_cart_params.i18n_view_cart + '">' + wc_add_to_cart_params.i18n_view_cart + '</a>' );
-					}
-
-					// Replace fragments
-					if ( fragments ) {
-						$.each( fragments, function( key, value ) {
-							$( key ).replaceWith( value );
-						});
-					}
-
-					// Unblock
-					$( '.widget_shopping_cart, .updating' ).stop( true ).css( 'opacity', '1' ).unblock();
-
-					// Cart page elements
-					$( '.shop_table.cart' ).load( this_page + ' .shop_table.cart:eq(0) > *', function() {
-
-						$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
-
-						$( document.body ).trigger( 'cart_page_refreshed' );
-					});
-
-					$( '.cart_totals' ).load( this_page + ' .cart_totals:eq(0) > *', function() {
-						$( '.cart_totals' ).stop( true ).css( 'opacity', '1' ).unblock();
-					});
-
 					// Trigger event so themes can refresh other areas
-					$( document.body ).trigger( 'added_to_cart', [ fragments, cart_hash, $thisbutton ] );
+					$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+
 				}
 			});
 
@@ -117,6 +67,65 @@ jQuery( function( $ ) {
 		}
 
 		return true;
+	});
+
+	// On "added_to_cart"
+	$( document.body ).on( 'added_to_cart', function( event, fragments, cart_hash, $button ) {
+
+    	$button = typeof $button === "undefined" ? false : $button;
+
+		if( $button ) { $button.removeClass( 'loading' ); }
+
+		// Block fragments class
+		if ( fragments ) {
+			$.each( fragments, function( key ) {
+				$( key ).addClass( 'updating' );
+			});
+		}
+
+		// Block widgets and fragments
+		$( '.shop_table.cart, .updating, .cart_totals' ).fadeTo( '400', '0.6' ).block({
+			message: null,
+			overlayCSS: {
+				opacity: 0.6
+			}
+		});
+
+		if( $button ) {
+
+    		// Changes button classes
+    		$button.addClass( 'added' );
+
+    		// View cart text
+    		if ( ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
+    			$button.after( ' <a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
+    				wc_add_to_cart_params.i18n_view_cart + '">' + wc_add_to_cart_params.i18n_view_cart + '</a>' );
+    		}
+
+        }
+
+		// Replace fragments
+		if ( fragments ) {
+			$.each( fragments, function( key, value ) {
+				$( key ).replaceWith( value );
+			});
+		}
+
+		// Unblock
+		$( '.widget_shopping_cart, .updating' ).stop( true ).css( 'opacity', '1' ).unblock();
+
+		// Cart page elements
+		$( '.shop_table.cart' ).load( this_page + ' .shop_table.cart:eq(0) > *', function() {
+
+			$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
+
+			$( document.body ).trigger( 'cart_page_refreshed' );
+		});
+
+		$( '.cart_totals' ).load( this_page + ' .cart_totals:eq(0) > *', function() {
+			$( '.cart_totals' ).stop( true ).css( 'opacity', '1' ).unblock();
+		});
+
 	});
 
 });
