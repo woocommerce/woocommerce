@@ -340,8 +340,6 @@ class WC_Admin_Post_Types {
 					echo apply_filters( 'the_excerpt', $post->post_excerpt );
 				}
 
-				$this->_render_product_row_actions( $post, $title );
-
 				get_inline_data( $post );
 
 				/* Custom inline data for woocommerce. */
@@ -441,70 +439,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Render product row actions for old version of WordPress.
-	 * Since WordPress 4.3 we don't have to build the row actions.
-	 *
-	 * @param WP_Post $post
-	 * @param string  $title
-	 */
-	private function _render_product_row_actions( $post, $title ) {
-		global $wp_version;
-
-		if ( version_compare( $wp_version, '4.3-beta', '>=' ) ) {
-			return;
-		}
-
-		$post_type_object = get_post_type_object( $post->post_type );
-		$can_edit_post    = current_user_can( $post_type_object->cap->edit_post, $post->ID );
-
-		// Get actions
-		$actions = array();
-
-		$actions['id'] = 'ID: ' . $post->ID;
-
-		if ( $can_edit_post && 'trash' != $post->post_status ) {
-			$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" aria-label="' . esc_attr( __( 'Edit this item', 'woocommerce' ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
-			$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" aria-label="' . esc_attr( __( 'Edit this item inline', 'woocommerce' ) ) . '">' . __( 'Quick&nbsp;Edit', 'woocommerce' ) . '</a>';
-		}
-		if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
-			if ( 'trash' == $post->post_status ) {
-				$actions['untrash'] = '<a aria-label="' . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
-			} elseif ( EMPTY_TRASH_DAYS ) {
-				$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $post->ID ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
-			}
-
-			if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" aria-label="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $post->ID, '', true ) . '">' . __( 'Delete permanently', 'woocommerce' ) . '</a>';
-			}
-		}
-		if ( $post_type_object->public ) {
-			if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
-				if ( $can_edit_post ) {
-					/* translators: %s: product title */
-					$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" aria-label="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
-				}
-			} elseif ( 'trash' != $post->post_status ) {
-				/* translators: %s: product title */
-				$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" aria-label="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
-			}
-		}
-
-		$actions = apply_filters( 'post_row_actions', $actions, $post );
-
-		echo '<div class="row-actions">';
-
-		$i = 0;
-		$action_count = sizeof( $actions );
-
-		foreach ( $actions as $action => $link ) {
-			++$i;
-			( $i == $action_count ) ? $sep = '' : $sep = ' | ';
-			echo '<span class="' . $action . '">' . $link . $sep . '</span>';
-		}
-		echo '</div>';
-	}
-
-	/**
 	 * Output custom columns for coupons.
 	 *
 	 * @param string $column
@@ -522,8 +456,6 @@ class WC_Admin_Post_Types {
 				_post_states( $post );
 
 				echo '</strong>';
-
-				$this->_render_shop_coupon_row_actions( $post, $title );
 			break;
 			case 'type' :
 				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
@@ -575,57 +507,6 @@ class WC_Admin_Post_Types {
 				echo wp_kses_post( $post->post_excerpt );
 			break;
 		}
-	}
-
-	/**
-	 * Render shop_coupon row actions for old version of WordPress.
-	 * Since WordPress 4.3 we don't have to build the row actions.
-	 *
-	 * @param WP_Post $post
-	 * @param string  $title
-	 */
-	private function _render_shop_coupon_row_actions( $post, $title ) {
-		global $wp_version;
-
-		if ( version_compare( $wp_version, '4.3-beta', '>=' ) ) {
-			return;
-		}
-
-		$post_type_object = get_post_type_object( $post->post_type );
-
-		// Get actions
-		$actions = array();
-
-		if ( current_user_can( $post_type_object->cap->edit_post, $post->ID ) ) {
-			$actions['edit'] = '<a href="' . admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $post->ID ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
-		}
-
-		if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
-
-			if ( 'trash' == $post->post_status ) {
-				$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
-			} elseif ( EMPTY_TRASH_DAYS ) {
-				$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
-			}
-
-			if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete permanently', 'woocommerce' ) . "</a>";
-			}
-		}
-
-		$actions = apply_filters( 'post_row_actions', $actions, $post );
-
-		echo '<div class="row-actions">';
-
-		$i = 0;
-		$action_count = sizeof( $actions );
-
-		foreach ( $actions as $action => $link ) {
-			++$i;
-			( $i == $action_count ) ? $sep = '' : $sep = ' | ';
-			echo "<span class='$action'>$link$sep</span>";
-		}
-		echo '</div>';
 	}
 
 	/**
