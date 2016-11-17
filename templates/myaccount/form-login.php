@@ -40,11 +40,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<?php do_action( 'woocommerce_login_form_start' ); ?>
 
-			<p class="woocommerce-FormRow woocommerce-FormRow--wide form-row form-row-wide">
+			<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 				<label for="username"><?php _e( 'Username or email address', 'woocommerce' ); ?> <span class="required">*</span></label>
 				<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="username" value="<?php if ( ! empty( $_POST['username'] ) ) echo esc_attr( $_POST['username'] ); ?>" />
 			</p>
-			<p class="woocommerce-FormRow woocommerce-FormRow--wide form-row form-row-wide">
+			<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 				<label for="password"><?php _e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
 				<input class="woocommerce-Input woocommerce-Input--text input-text" type="password" name="password" id="password" />
 			</p>
@@ -80,21 +80,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<?php if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) : ?>
 
-				<p class="woocommerce-FormRow woocommerce-FormRow--wide form-row form-row-wide">
+				<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 					<label for="reg_username"><?php _e( 'Username', 'woocommerce' ); ?> <span class="required">*</span></label>
 					<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="reg_username" value="<?php if ( ! empty( $_POST['username'] ) ) echo esc_attr( $_POST['username'] ); ?>" />
 				</p>
 
 			<?php endif; ?>
 
-			<p class="woocommerce-FormRow woocommerce-FormRow--wide form-row form-row-wide">
+			<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 				<label for="reg_email"><?php _e( 'Email address', 'woocommerce' ); ?> <span class="required">*</span></label>
 				<input type="email" class="woocommerce-Input woocommerce-Input--text input-text" name="email" id="reg_email" value="<?php if ( ! empty( $_POST['email'] ) ) echo esc_attr( $_POST['email'] ); ?>" />
 			</p>
 
 			<?php if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) : ?>
 
-				<p class="woocommerce-FormRow woocommerce-FormRow--wide form-row form-row-wide">
+				<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 					<label for="reg_password"><?php _e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
 					<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password" id="reg_password" />
 				</p>
