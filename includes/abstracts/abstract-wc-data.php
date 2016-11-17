@@ -60,12 +60,6 @@ abstract class WC_Data {
 	protected $data_store;
 
 	/**
-	 * Contains a reference to the data store for meta handling.
-	 * @var object
-	 */
-	protected $meta_data_store;
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -104,8 +98,7 @@ abstract class WC_Data {
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $read = 0 ) {
-		$this->default_data    = $this->data;
-		$this->meta_data_store = WC_Data_Store::load( 'meta' );
+		$this->default_data = $this->data;
 	}
 
 	/**
@@ -404,7 +397,8 @@ abstract class WC_Data {
 		}
 
 		if ( ! $cache_loaded ) {
-			$raw_meta_data  = $this->meta_data_store->read_meta( $this );
+			$meta_data_store = WC_Data_Store::load( 'meta' );
+			$raw_meta_data   = $meta_data_store->read_meta( $this );
 			if ( $raw_meta_data ) {
 				$raw_meta_data = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 				foreach ( $raw_meta_data as $meta ) {
@@ -427,16 +421,17 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 */
 	public function save_meta_data() {
+		$meta_data_store = WC_Data_Store::load( 'meta' );
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
-					$this->meta_data_store->delete_meta( $this, $meta );
+					$meta_data_store->delete_meta( $this, $meta );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id                       = $this->meta_data_store->add_meta( $this, $meta );
+				$new_meta_id                       = $meta_data_store->add_meta( $this, $meta );
 				$this->meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
-				$this->meta_data_store->update_meta( $this, $meta );
+				$meta_data_store->update_meta( $this, $meta );
 			}
 		}
 
