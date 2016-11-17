@@ -82,26 +82,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_user',
-			'_billing_first_name'   => 'billing_first_name',
-			'_billing_last_name'    => 'billing_last_name',
-			'_billing_company'      => 'billing_company',
-			'_billing_address_1'    => 'billing_address_1',
-			'_billing_address_2'    => 'billing_address_2',
-			'_billing_city'         => 'billing_city',
-			'_billing_state'        => 'billing_state',
-			'_billing_postcode'     => 'billing_postcode',
-			'_billing_country'      => 'billing_country',
-			'_billing_email'        => 'billing_email',
-			'_billing_phone'        => 'billing_phone',
-			'_shipping_first_name'  => 'shipping_first_name',
-			'_shipping_last_name'   => 'shipping_last_name',
-			'_shipping_company'     => 'shipping_company',
-			'_shipping_address_1'   => 'shipping_address_1',
-			'_shipping_address_2'   => 'shipping_address_2',
-			'_shipping_city'        => 'shipping_city',
-			'_shipping_state'       => 'shipping_state',
-			'_shipping_postcode'    => 'shipping_postcode',
-			'_shipping_country'     => 'shipping_country',
 			'_payment_method'       => 'payment_method',
 			'_payment_method_title' => 'payment_method_title',
 			'_transaction_id'       => 'transaction_id',
@@ -113,23 +93,64 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_date_paid'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
 		);
+
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-
-
-			// ADDRESSES @todo
-
 			if ( ! in_array( $prop, $changed_props ) ) {
 				continue;
 			}
 			$value = $order->{"get_$prop"}( 'edit' );
 
-			if ( '' !== $value ) {
-				$updated = update_post_meta( $order->get_id(), $meta_key, $value );
-			} else {
-				$updated = delete_post_meta( $order->get_id(), $meta_key );
+			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
+				$updated_props[] = $prop;
 			}
+		}
 
-			if ( $updated ) {
+		$billing_address_props = array(
+			'_billing_first_name' => 'billing_first_name',
+			'_billing_last_name'  => 'billing_last_name',
+			'_billing_company'    => 'billing_company',
+			'_billing_address_1'  => 'billing_address_1',
+			'_billing_address_2'  => 'billing_address_2',
+			'_billing_city'       => 'billing_city',
+			'_billing_state'      => 'billing_state',
+			'_billing_postcode'   => 'billing_postcode',
+			'_billing_country'    => 'billing_country',
+			'_billing_email'      => 'billing_email',
+			'_billing_phone'      => 'billing_phone',
+		);
+
+		foreach ( $billing_address_props as $meta_key => $prop ) {
+			$prop_key = substr( $prop, 8 );
+			if ( ! isset( $changed_props['billing'] ) || ! in_array( $prop_key, $changed_props['billing'] ) ) {
+				continue;
+			}
+			$value = $order->{"get_$prop"}( 'edit' );
+
+			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
+				$updated_props[] = $prop;
+			}
+		}
+
+		$shipping_address_props = array(
+			'_shipping_first_name' => 'shipping_first_name',
+			'_shipping_last_name'  => 'shipping_last_name',
+			'_shipping_company'    => 'shipping_company',
+			'_shipping_address_1'  => 'shipping_address_1',
+			'_shipping_address_2'  => 'shipping_address_2',
+			'_shipping_city'       => 'shipping_city',
+			'_shipping_state'      => 'shipping_state',
+			'_shipping_postcode'   => 'shipping_postcode',
+			'_shipping_country'    => 'shipping_country',
+		);
+
+		foreach ( $shipping_address_props as $meta_key => $prop ) {
+			$prop_key = substr( $prop, 9 );
+			if ( ! isset( $changed_props['shipping'] ) || ! in_array( $prop_key, $changed_props['shipping'] ) ) {
+				continue;
+			}
+			$value = $order->{"get_$prop"}( 'edit' );
+
+			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
 				$updated_props[] = $prop;
 			}
 		}

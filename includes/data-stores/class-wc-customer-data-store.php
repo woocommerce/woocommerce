@@ -127,30 +127,50 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 			}
 		}
 
-		if ( in_array( 'billing', $changed_props ) ) {
-			update_user_meta( $customer->get_id(), 'billing_first_name', $customer->get_billing_first_name( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_last_name', $customer->get_billing_last_name( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_company', $customer->get_billing_company( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_phone', $customer->get_billing_phone( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_email', $customer->get_billing_email( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_postcode', $customer->get_billing_postcode( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_city', $customer->get_billing_city( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_address_1', $customer->get_billing_address( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_address_2', $customer->get_billing_address_2( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_state', $customer->get_billing_state( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'billing_country', $customer->get_billing_country( 'edit' ) );
+		$billing_address_props = array(
+			'billing_first_name' => 'billing_first_name',
+			'billing_last_name'  => 'billing_last_name',
+			'billing_company'    => 'billing_company',
+			'billing_address_1'  => 'billing_address_1',
+			'billing_address_2'  => 'billing_address_2',
+			'billing_city'       => 'billing_city',
+			'billing_state'      => 'billing_state',
+			'billing_postcode'   => 'billing_postcode',
+			'billing_country'    => 'billing_country',
+			'billing_email'      => 'billing_email',
+			'billing_phone'      => 'billing_phone',
+		);
+
+		foreach ( $billing_address_props as $meta_key => $prop ) {
+			$prop_key = substr( $prop, 8 );
+			if ( ! isset( $changed_props['billing'] ) || ! in_array( $prop_key, $changed_props['billing'] ) ) {
+				continue;
+			}
+			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+				$updated_props[] = $prop;
+			}
 		}
 
-		if ( in_array( 'shipping', $changed_props ) ) {
-			update_user_meta( $customer->get_id(), 'shipping_first_name', $customer->get_shipping_first_name( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_last_name', $customer->get_shipping_last_name( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_company', $customer->get_shipping_company( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_postcode', $customer->get_shipping_postcode( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_city', $customer->get_shipping_city( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_address_1', $customer->get_shipping_address( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_address_2', $customer->get_shipping_address_2( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_state', $customer->get_shipping_state( 'edit' ) );
-			update_user_meta( $customer->get_id(), 'shipping_country', $customer->get_shipping_country( 'edit' ) );
+		$shipping_address_props = array(
+			'shipping_first_name' => 'shipping_first_name',
+			'shipping_last_name'  => 'shipping_last_name',
+			'shipping_company'    => 'shipping_company',
+			'shipping_address_1'  => 'shipping_address_1',
+			'shipping_address_2'  => 'shipping_address_2',
+			'shipping_city'       => 'shipping_city',
+			'shipping_state'      => 'shipping_state',
+			'shipping_postcode'   => 'shipping_postcode',
+			'shipping_country'    => 'shipping_country',
+		);
+
+		foreach ( $shipping_address_props as $meta_key => $prop ) {
+			$prop_key = substr( $prop, 9 );
+			if ( ! isset( $changed_props['shipping'] ) || ! in_array( $prop_key, $changed_props['shipping'] ) ) {
+				continue;
+			}
+			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+				$updated_props[] = $prop;
+			}
 		}
 	}
 

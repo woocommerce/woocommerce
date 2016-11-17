@@ -1510,7 +1510,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		return $this->data_store->get_total_refunded();
+		return $this->data_store->get_total_refunded( $this );
 	}
 
 	/**
@@ -1520,7 +1520,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		return $this->data_store->get_total_tax_refunded();
+		return $this->data_store->get_total_tax_refunded( $this );
 	}
 
 	/**
@@ -1530,7 +1530,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		return $this->data_store->get_total_shipping_refunded();
+		return $this->data_store->get_total_shipping_refunded( $this );
 	}
 
 	/**
