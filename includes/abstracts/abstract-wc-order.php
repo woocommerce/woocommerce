@@ -460,7 +460,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$new_status = 'pending';
 		}
 
-		$this->set_prop( 'status', 'wc-' . $new_status ); // 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) @todo removed this from getter.
+		$this->set_prop( 'status', $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
@@ -617,16 +617,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $type Order item type. Default null.
 	 */
 	public function remove_order_items( $type = null ) {
-		global $wpdb;
 		if ( ! empty( $type ) ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
+			$this->data_store->delete_items( $this, $type );
+
 			if ( $group = $this->type_to_group( $type ) ) {
 				$this->items[ $group ] = null;
 			}
 		} else {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
+			$this->data_store->delete_items( $this );
 			$this->items = array(
 				'line_items'     => null,
 				'coupon_lines'   => null,
@@ -665,7 +663,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $types as $type ) {
 			if ( $group = $this->type_to_group( $type ) ) {
 				if ( is_null( $this->items[ $group ] ) ) {
-					$this->items[ $group ] = $this->get_items_from_db( $type );
+					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 				}
 				// Don't use array_merge here because keys are numeric
 				$items = $items + $this->items[ $group ];
@@ -673,26 +671,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this );
-	}
-
-	/**
-	 * Gets items from the database by type.
-	 * @param  string $type
-	 * @return array
-	 */
-	protected function get_items_from_db( $type ) {
-		global $wpdb;
-
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $this->get_id(), $type );
-		$items         = $wpdb->get_results( $get_items_sql );
-
-		if ( ! empty( $items ) ) {
-			$items = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
-		} else {
-			$items = array();
-		}
-
-		return $items;
 	}
 
 	/**
@@ -905,15 +883,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
-		$token_ids = get_post_meta( $this->get_id(), '_payment_tokens', true );
-
-		if ( empty( $token_ids ) ) {
-			$token_ids = array();
-		}
-
+		$token_ids   = $this->data_store->get_payment_token_ids( $this );
 		$token_ids[] = $token->get_id();
+		$this->data_store->update_payment_token_ids( $this, $token_ids );
 
-		update_post_meta( $this->get_id(), '_payment_tokens', $token_ids );
 		do_action( 'woocommerce_payment_token_added_to_order', $this->get_id(), $token->get_id(), $token, $token_ids );
 		return $token->get_id();
 	}
@@ -981,8 +954,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param $args array Added in 2.7.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
-		$tax_based_on      = get_option( 'woocommerce_tax_based_on' );
-		$args              = wp_parse_args( $args, array(
+		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+		$args         = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
 			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),
 			'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
