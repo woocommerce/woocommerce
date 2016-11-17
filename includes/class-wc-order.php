@@ -422,17 +422,38 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_user_id( $context = 'view' ) {
-		return $this->get_customer_id();
+		return $this->get_customer_id( $context );
 	}
 
 	/**
 	 * Get the user associated with the order. False for guests.
 	 *
-	 * @param  string $context
 	 * @return WP_User|false
 	 */
-	public function get_user( $context = 'view' ) {
+	public function get_user() {
 		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
+	}
+
+	/**
+	 * Gets a prop for a getter method.
+	 *
+	 * @since  2.7.0
+	 * @param  string $prop Name of prop to get.
+	 * @param  string $address billing or shipping.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return mixed
+	 */
+	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
+		$value = null;
+
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
+			}
+		}
+		return $value;
 	}
 
 	/**
@@ -442,7 +463,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_first_name( $context = 'view' ) {
-		return $this->get_prop( 'billing']['first_name', $context );
+		return $this->get_address_prop( 'first_name', 'billing', $context );
 	}
 
 	/**
@@ -452,7 +473,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_last_name( $context = 'view' ) {
-		return $this->get_prop( 'billing']['last_name', $context );
+		return $this->get_address_prop( 'last_name', 'billing', $context );
 	}
 
 	/**
@@ -462,7 +483,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_company( $context = 'view' ) {
-		return $this->get_prop( 'billing']['company', $context );
+		return $this->get_address_prop( 'company', 'billing', $context );
 	}
 
 	/**
@@ -472,7 +493,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_address_1( $context = 'view' ) {
-		return $this->get_prop( 'billing']['address_1', $context );
+		return $this->get_address_prop( 'address_1', 'billing', $context );
 	}
 
 	/**
@@ -482,7 +503,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string $value
 	 */
 	public function get_billing_address_2( $context = 'view' ) {
-		return $this->get_prop( 'billing']['address_2', $context );
+		return $this->get_address_prop( 'address_2', 'billing', $context );
 	}
 
 	/**
@@ -492,7 +513,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string $value
 	 */
 	public function get_billing_city( $context = 'view' ) {
-		return $this->get_prop( 'billing']['city', $context );
+		return $this->get_address_prop( 'city', 'billing', $context );
 	}
 
 	/**
@@ -502,7 +523,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_state( $context = 'view' ) {
-		return $this->get_prop( 'billing']['state', $context );
+		return $this->get_address_prop( 'state', 'billing', $context );
 	}
 
 	/**
@@ -512,7 +533,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_postcode( $context = 'view' ) {
-		return $this->get_prop( 'billing']['postcode', $context );
+		return $this->get_address_prop( 'postcode', 'billing', $context );
 	}
 
 	/**
@@ -522,7 +543,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_country( $context = 'view' ) {
-		return $this->get_prop( 'billing']['country', $context );
+		return $this->get_address_prop( 'country', 'billing', $context );
 	}
 
 	/**
@@ -532,7 +553,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_email( $context = 'view' ) {
-		return $this->get_prop( 'billing']['email', $context );
+		return $this->get_address_prop( 'email', 'billing', $context );
 	}
 
 	/**
@@ -542,7 +563,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_phone( $context = 'view' ) {
-		return $this->get_prop( 'billing']['phone', $context );
+		return $this->get_address_prop( 'phone', 'billing', $context );
 	}
 
 	/**
@@ -552,7 +573,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_first_name( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['first_name', $context );
+		return $this->get_address_prop( 'first_name', 'shipping', $context );
 	}
 
 	/**
@@ -562,7 +583,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_last_name( $context = 'view' ) {
-		 return $this->get_prop( 'shipping']['last_name', $context );
+		 return $this->get_address_prop( 'last_name', 'shipping', $context );
 	}
 
 	/**
@@ -572,7 +593,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_company( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['company', $context );
+		return $this->get_address_prop( 'company', 'shipping', $context );
 	}
 
 	/**
@@ -582,7 +603,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_address_1( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['address_1', $context );
+		return $this->get_address_prop( 'address_1', 'shipping', $context );
 	}
 
 	/**
@@ -592,7 +613,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_address_2( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['address_2', $context );
+		return $this->get_address_prop( 'address_2', 'shipping', $context );
 	}
 
 	/**
@@ -602,7 +623,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_city( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['city', $context );
+		return $this->get_address_prop( 'city', 'shipping', $context );
 	}
 
 	/**
@@ -612,7 +633,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_state( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['state', $context );
+		return $this->get_address_prop( 'state', 'shipping', $context );
 	}
 
 	/**
@@ -622,7 +643,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_postcode( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['postcode', $context );
+		return $this->get_address_prop( 'postcode', 'shipping', $context );
 	}
 
 	/**
@@ -632,7 +653,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_country( $context = 'view' ) {
-		return $this->get_prop( 'shipping']['country', $context );
+		return $this->get_address_prop( 'country', 'shipping', $context );
 	}
 
 	/**
@@ -712,7 +733,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_date_completed( $context = 'view' ) {
-		return absint( $this->data['date_completed'] );
+		return $this->get_prop( 'date_completed', $context );
 	}
 
 	/**
@@ -722,7 +743,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_date_paid( $context = 'view' ) {
-		return absint( $this->data['date_paid'] );
+		return $this->get_prop( 'date_paid', $context );
 	}
 
 	/**
@@ -737,6 +758,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Returns the requested address in raw, non-formatted way.
+	 *
 	 * @since  2.4.0
 	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
 	 * @return array The stored address after filter.
@@ -757,6 +779,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted billing full name.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_billing_full_name() {
@@ -766,6 +789,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted shipping full name.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_shipping_full_name() {
@@ -775,6 +799,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted billing address for the order.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_billing_address() {
@@ -783,6 +808,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted shipping address for the order.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
@@ -807,101 +833,132 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set order_key.
+	 *
 	 * @param string $value Max length 20 chars.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		$this->data['order_key'] = substr( $value, 0, 20 );
+		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
 	}
 
 	/**
-	 * Set customer_id
+	 * Set customer_id.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_id( $value ) {
-		$this->data['customer_id'] = absint( $value );
+		$this->set_prop( 'customer_id', absint( $value ) );
 	}
 
 	/**
-	 * Set billing_first_name
+	 * Sets a prop for a setter method.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param string $address Name of address to set. billing or shipping.
+	 * @param mixed  $value Value of the prop.
+	 */
+	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			if ( true === $this->object_read ) {
+				if ( $value !== $this->data[ $address ][ $prop ] || array_key_exists( $prop, $this->changes[ $address ] ) ) {
+					$this->changes[ $address ][ $prop ] = $value;
+				}
+			} else {
+				$this->data[ $address ][ $prop ] = $value;
+			}
+		}
+	}
+
+	/**
+	 * Set billing_first_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
-		$this->data['billing']['first_name'] = $value;
+		$this->set_address_prop( 'first_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_last_name
+	 * Set billing_last_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
-		$this->data['billing']['last_name'] = $value;
+		$this->set_address_prop( 'last_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_company
+	 * Set billing_company.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
-		$this->data['billing']['company'] = $value;
+		$this->set_address_prop( 'company', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_address_1
+	 * Set billing_address_1.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_1( $value ) {
-		$this->data['billing']['address_1'] = $value;
+		$this->set_address_prop( 'address_1', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_address_2
+	 * Set billing_address_2.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_2( $value ) {
-		$this->data['billing']['address_2'] = $value;
+		$this->set_address_prop( 'address_2', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_city
+	 * Set billing_city.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_city( $value ) {
-		$this->data['billing']['city'] = $value;
+		$this->set_address_prop( 'city', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_state
+	 * Set billing_state.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_state( $value ) {
-		$this->data['billing']['state'] = $value;
+		$this->set_address_prop( 'state', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_postcode
+	 * Set billing_postcode.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_postcode( $value ) {
-		$this->data['billing']['postcode'] = $value;
+		$this->set_address_prop( 'postcode', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_country
+	 * Set billing_country.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_country( $value ) {
-		$this->data['billing']['country'] = $value;
+		$this->set_address_prop( 'country', 'billing', $value );
 	}
 
 	/**
@@ -918,109 +975,121 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Set billing_email
+	 * Set billing_email.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
-			$this->error( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
+			$this->error( 'order_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
 		}
-		$this->data['billing']['email'] = sanitize_email( $value );
+		$this->set_address_prop( 'email', 'billing', sanitize_email( $value ) );
 	}
 
 	/**
-	 * Set billing_phone
+	 * Set billing_phone.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_phone( $value ) {
-		$this->data['billing']['phone'] = $value;
+		$this->set_address_prop( 'phone', 'billing', $value );
 	}
 
 	/**
-	 * Set shipping_first_name
+	 * Set shipping_first_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_first_name( $value ) {
-		$this->data['shipping']['first_name'] = $value;
+		$this->set_address_prop( 'first_name', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_last_name
+	 * Set shipping_last_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_last_name( $value ) {
-		$this->data['shipping']['last_name'] = $value;
+		$this->set_address_prop( 'last_name', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_company
+	 * Set shipping_company.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_company( $value ) {
-		$this->data['shipping']['company'] = $value;
+		$this->set_address_prop( 'company', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_address_1
+	 * Set shipping_address_1.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_1( $value ) {
-		$this->data['shipping']['address_1'] = $value;
+		$this->set_address_prop( 'address_1', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_address_2
+	 * Set shipping_address_2.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_2( $value ) {
-		$this->data['shipping']['address_2'] = $value;
+		$this->set_address_prop( 'address_2', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_city
+	 * Set shipping_city.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_city( $value ) {
-		$this->data['shipping']['city'] = $value;
+		$this->set_address_prop( 'city', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_state
+	 * Set shipping_state.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_state( $value ) {
-		$this->data['shipping']['state'] = $value;
+		$this->set_address_prop( 'state', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_postcode
+	 * Set shipping_postcode.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_postcode( $value ) {
-		$this->data['shipping']['postcode'] = $value;
+		$this->set_address_prop( 'postcode', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_country
+	 * Set shipping_country.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_country( $value ) {
-		$this->data['shipping']['country'] = $value;
+		$this->set_address_prop( 'country', 'shipping', $value );
 	}
 
 	/**
 	 * Set the payment method.
+	 *
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
 	 * @throws WC_Data_Exception
 	 */
@@ -1029,92 +1098,101 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_payment_method( $payment_method->id );
 			$this->set_payment_method_title( $payment_method->get_title() );
 		} elseif ( '' === $payment_method ) {
-			$this->data['payment_method'] = '';
-			$this->data['payment_method_title'] = '';
+			$this->set_prop( 'payment_method', '' );
+			$this->set_prop( 'payment_method_title', '' );
 		} else {
-			$this->data['payment_method'] = $payment_method;
+			$this->set_prop( 'payment_method', $payment_method );
 		}
 	}
 
 	/**
-	 * Set payment_method_title
+	 * Set payment_method_title.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method_title( $value ) {
-		$this->data['payment_method_title'] = $value;
+		$this->set_prop( 'payment_method_title', $value );
 	}
 
 	/**
-	 * Set transaction_id
+	 * Set transaction_id.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_transaction_id( $value ) {
-		$this->data['transaction_id'] = $value;
+		$this->set_prop( 'transaction_id', $value );
 	}
 
 	/**
-	 * Set customer_ip_address
+	 * Set customer_ip_address.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_ip_address( $value ) {
-		$this->data['customer_ip_address'] = $value;
+		$this->set_prop( 'customer_ip_address', $value );
 	}
 
 	/**
-	 * Set customer_user_agent
+	 * Set customer_user_agent.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_user_agent( $value ) {
-		$this->data['customer_user_agent'] = $value;
+		$this->set_prop( 'customer_user_agent', $value );
 	}
 
 	/**
-	 * Set created_via
+	 * Set created_via.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_created_via( $value ) {
-		$this->data['created_via'] = $value;
+		$this->set_prop( 'created_via', $value );
 	}
 
 	/**
-	 * Set customer_note
+	 * Set customer_note.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_note( $value ) {
-		$this->data['customer_note'] = $value;
+		$this->set_prop( 'customer_note', $value );
 	}
 
 	/**
-	 * Set date_completed
+	 * Set date_completed.
+	 *
 	 * @param string $timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_completed( $timestamp ) {
-		$this->data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set date_paid
+	 * Set date_paid.
+	 *
 	 * @param string $timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_paid( $timestamp ) {
-		$this->data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set cart hash
+	 * Set cart hash.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_hash( $value ) {
-		$this->data['cart_hash'] = $value;
+		$this->set_prop( 'cart_hash', $value );
 	}
 
 	/*

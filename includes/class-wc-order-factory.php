@@ -26,6 +26,8 @@ class WC_Order_Factory {
 	public static function get_order( $the_order = false ) {
 		global $post;
 
+		//@todo
+
 		if ( false === $the_order ) {
 			$the_order = $post;
 		} elseif ( is_numeric( $the_order ) ) {
