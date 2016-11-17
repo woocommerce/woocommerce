@@ -20,28 +20,17 @@ class WC_Order_Factory {
 	/**
 	 * Get order.
 	 *
-	 * @param bool $the_order (default: false)
+	 * @param  mixed $order_id (default: false)
 	 * @return WC_Order|bool
 	 */
-	public static function get_order( $the_order = false ) {
-		global $post;
+	public static function get_order( $order_id = false ) {
+		$order_id = self::get_order_id( $order_id );
 
-		//@todo
-
-		if ( false === $the_order ) {
-			$the_order = $post;
-		} elseif ( is_numeric( $the_order ) ) {
-			$the_order = get_post( $the_order );
-		} elseif ( $the_order instanceof WC_Abstract_Order ) {
-			$the_order = get_post( $the_order->get_id() );
-		}
-
-		if ( ! $the_order || ! is_object( $the_order ) ) {
+		if ( ! $order_id ) {
 			return false;
 		}
 
-		$order_id  = absint( $the_order->ID );
-		$post_type = $the_order->post_type;
+		$post_type = get_post_type( $order_id );
 
 		if ( $order_type = wc_get_order_type( $post_type ) ) {
 			$classname = $order_type['class_name'];
@@ -50,13 +39,13 @@ class WC_Order_Factory {
 		}
 
 		// Filter classname so that the class can be overridden if extended.
-		$classname = apply_filters( 'woocommerce_order_class', $classname, $post_type, $order_id, $the_order );
+		$classname = apply_filters( 'woocommerce_order_class', $classname, $post_type, $order_id );
 
 		if ( ! class_exists( $classname ) ) {
 			return false;
 		}
 
-		return new $classname( $the_order );
+		return new $classname( $order_id );
 	}
 
 	/**
@@ -102,5 +91,28 @@ class WC_Order_Factory {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get the order ID depending on what was passed.
+	 *
+	 * @since 2.7.0
+	 * @param  mixed $product
+	 * @return int|bool false on failure
+	 */
+	private static function get_order_id( $order ) {
+		global $post;
+
+		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
+			return $post->ID;
+		} elseif ( is_numeric( $order ) ) {
+			return $order;
+		} elseif ( $order instanceof WC_Abstract_Order ) {
+			return $order->get_id();
+		} elseif ( ! empty( $order->ID ) ) {
+			return $order->ID;
+		} else {
+			return false;
+		}
 	}
 }
