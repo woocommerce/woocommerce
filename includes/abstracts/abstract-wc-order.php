@@ -905,7 +905,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$item = new WC_Order_Item_Product( $args );
+		$item = new WC_Order_Item_Product();
+		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
 		$item->save();

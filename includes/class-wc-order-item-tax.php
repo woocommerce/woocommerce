@@ -18,9 +18,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $_data = array(
-		'order_id'           => 0,
-		'id'                 => 0,
+	protected $extra_data = array(
 		'rate_code'          => '',
 		'rate_id'            => 0,
 		'label'              => '',
@@ -28,58 +26,6 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		'tax_total'          => 0,
 		'shipping_tax_total' => 0,
 	);
-
-	/**
-	 * Read/populate data properties specific to this order item.
-	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$this->set_props( array(
-			'rate_id'            => get_metadata( 'order_item', $this->get_id(), 'rate_id', true ),
-			'label'              => get_metadata( 'order_item', $this->get_id(), 'label', true ),
-			'compound'           => get_metadata( 'order_item', $this->get_id(), 'compound', true ),
-			'tax_total'          => get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ),
-			'shipping_tax_total' => get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ),
-		) );
-	}
-
-	/**
-	 * Save properties specific to this order item.
-	 * @return int Item ID
-	 */
-	public function save() {
-		parent::save();
-		if ( $this->get_id() ) {
-			wc_update_order_item_meta( $this->get_id(), 'rate_id', $this->get_rate_id() );
-			wc_update_order_item_meta( $this->get_id(), 'label', $this->get_label() );
-			wc_update_order_item_meta( $this->get_id(), 'compound', $this->get_compound() );
-			wc_update_order_item_meta( $this->get_id(), 'tax_amount', $this->get_tax_total() );
-			wc_update_order_item_meta( $this->get_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
-		}
-
-		return $this->get_id();
-	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
-	 */
-	protected function get_internal_meta_keys() {
-		return array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
-	}
-
-	/**
-	 * Is this a compound tax rate?
-	 * @return boolean
-	 */
-	public function is_compound() {
-		return $this->get_compound();
-	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -89,6 +35,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set order item name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -98,11 +45,12 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set item name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate_code( $value ) {
-		$this->_data['rate_code'] = wc_clean( $value );
+		$this->set_prop( 'rate_code', wc_clean( $value ) );
 	}
 
 	/**
@@ -111,7 +59,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_label( $value ) {
-		$this->_data['label'] = wc_clean( $value );
+		$this->set_prop( 'label', wc_clean( $value ) );
 	}
 
 	/**
@@ -120,7 +68,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate_id( $value ) {
-		$this->_data['rate_id'] = absint( $value );
+		$this->set_prop( 'rate_id', absint( $value ) );
 	}
 
 	/**
@@ -129,7 +77,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_total( $value ) {
-		$this->_data['tax_total'] = wc_format_decimal( $value );
+		$this->set_prop( 'tax_total', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -138,7 +86,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax_total( $value ) {
-		$this->_data['shipping_tax_total'] = wc_format_decimal( $value );
+		$this->set_prop( 'shipping_tax_total', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -147,7 +95,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_compound( $value ) {
-		$this->_data['compound'] = (bool) $value;
+		$this->set_prop( 'compound', (bool) $value );
 	}
 
 	/**
@@ -170,65 +118,104 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Get order item type.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_type() {
+	public function get_type( $context = 'view' ) {
 		return 'tax';
 	}
 
 	/**
 	 * Get rate code/name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_name() {
-		return $this->get_rate_code();
+	public function get_name( $context = 'view' ) {
+		return $this->get_rate_code( $context );
 	}
 
 	/**
 	 * Get rate code/name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_rate_code() {
-		return $this->_data['rate_code'];
+	public function get_rate_code( $context = 'view' ) {
+		return $this->get_prop( 'rate_code', $context );
 	}
 
 	/**
 	 * Get label.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_label() {
-		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce' );
+	public function get_label( $context = 'view' ) {
+		$label = $this->get_prop( 'label', $context );
+		return $label ? $label : __( 'Tax', 'woocommerce' );
 	}
 
 	/**
 	 * Get tax rate ID.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_rate_id() {
-		return absint( $this->_data['rate_id'] );
+	public function get_rate_id( $context = 'view' ) {
+		return $this->get_prop( 'rate_id', $context );
 	}
 
 	/**
 	 * Get tax_total
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_tax_total() {
-		return wc_format_decimal( $this->_data['tax_total'] );
+	public function get_tax_total( $context = 'view' ) {
+		return $this->get_prop( 'tax_total', $context );
 	}
 
 	/**
 	 * Get shipping_tax_total
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_tax_total() {
-		return wc_format_decimal( $this->_data['shipping_tax_total'] );
+	public function get_shipping_tax_total( $context = 'view' ) {
+		return $this->get_prop( 'shipping_tax_total', $context );
 	}
 
 	/**
 	 * Get compound.
+	 *
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_compound() {
-		return (bool) $this->_data['compound'];
+	public function get_compound( $context = 'view' ) {
+		return $this->get_prop( 'compound', $context );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Other
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Internal meta keys we don't want exposed as part of meta_data.
+	 * @return array()
+	 */
+	protected function get_internal_meta_keys() {
+		return array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
+	}
+
+	/**
+	 * Is this a compound tax rate?
+	 * @return boolean
+	 */
+	public function is_compound() {
+		return $this->get_compound();
 	}
 }

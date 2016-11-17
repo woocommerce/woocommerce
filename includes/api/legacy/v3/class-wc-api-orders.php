@@ -1188,7 +1188,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$item = new WC_Order_Item_Coupon( array(
+			$item = new WC_Order_Item_Coupon();
+			$item->set_props( array(
 				'code'         => $coupon['code'],
 				'discount'     => isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0,
 				'discount_tax' => 0,

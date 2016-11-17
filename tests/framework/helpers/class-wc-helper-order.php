@@ -69,7 +69,8 @@ class WC_Helper_Order {
 		// Add shipping costs
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
 		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping( array(
+		$item   = new WC_Order_Item_Shipping();
+		$item->set_props( array(
 			'method_title' => $rate->label,
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),

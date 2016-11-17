@@ -305,6 +305,12 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
