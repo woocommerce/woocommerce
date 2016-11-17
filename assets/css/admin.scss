@@ -830,6 +830,12 @@ ul.wc_coupon_list_block {
 		padding: 0 2% 0 0;
 		float: left;
 
+		> h3 {
+			span {
+				display: block;
+			}
+		}
+
 		&:last-child {
 			padding-right: 0;
 		}
@@ -951,7 +957,8 @@ ul.wc_coupon_list_block {
 				float: right;
 			}
 		}
-		a.edit_address, .billing-same-as-shipping, .load_customer_shipping, .load_customer_billing {
+
+		a.edit_address {
 			width: 14px;
 			height: 0;
 			padding: 14px 0 0;
@@ -977,26 +984,23 @@ ul.wc_coupon_list_block {
 				-webkit-font-smoothing: antialiased;
 			}
 		}
-		.billing-same-as-shipping {
-			&::after {
-				content: '\e008';
-			}
-		}
-		.load_customer_shipping {
-			&::after {
-				content: '\e03a';
-			}
-		}
-		.load_customer_billing {
-			&::after {
-				content: '\e03a';
-			}
-		}
 		a.edit_address {
 			&::after {
 				font-family: 'Dashicons';
 				content: '\f464';
 			}
+		}
+
+		.billing-same-as-shipping,
+		.load_customer_shipping,
+		.load_customer_billing {
+			font-size: 13px;
+			display: inline-block;
+			font-weight: normal;
+		}
+
+		.load_customer_shipping {
+			margin-right: .3em;
 		}
 	}
 }
