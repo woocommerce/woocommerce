@@ -216,54 +216,8 @@ class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Dat
 	}
 
 	/**
-	 * Save all order items which are part of this order. @todo
-	 */
-	protected function save_items( $order ) {
-		// remove items
-		foreach ( $this->items_to_delete as $item ) {
-			$item->delete();
-		}
-
-		$this->items_to_delete = array();
-
-		// Add/save items
-		foreach ( $this->items as $item_group => $items ) {
-			if ( is_array( $items ) ) {
-				foreach ( $items as $item_key => $item ) {
-					$item->set_order_id( $this->get_id() );
-					$item_id = $item->save();
-
-					// If ID changed (new item saved to DB)...
-					if ( $item_id !== $item_key ) {
-						$this->items[ $item_group ][ $item_id ] = $item;
-						unset( $this->items[ $item_group ][ $item_key ] );
-
-						// Legacy action handler
-						switch ( $item_group ) {
-							case 'fee_lines' :
-								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-							case 'shipping_lines' :
-								if ( isset( $item->legacy_package_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $item_id, $item->legacy_package_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-							case 'line_items' :
-								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
-								}
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Read order items of a specific type from the database for this order.
+	 *
 	 * @param  WC_Order $order
 	 * @param  string $type
 	 * @return array
@@ -271,11 +225,11 @@ class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Dat
 	public function read_items( $order, $type ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $this->get_id(), $type );
+		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {
-			$items = array_map( array( WC_Order_Factory, 'get_order_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
+			$items = array_map( array( 'WC_Order_Factory', 'get_order_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
 		} else {
 			$items = array();
 		}
@@ -289,7 +243,7 @@ class WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Dat
 	 * @param WC_Order
 	 * @param string $type Order item type. Default null.
 	 */
-	public function delete_items( $order, $type = null ) { // @todo BW compat legacy
+	public function delete_items( $order, $type = null ) {
 		global $wpdb;
 		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order->get_id(), $type ) );
