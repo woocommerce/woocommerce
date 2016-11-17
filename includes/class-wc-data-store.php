@@ -32,6 +32,7 @@ class WC_Data_Store {
 		'customer'          => 'WC_Customer_Data_Store',
 		'customer-session'  => 'WC_Customer_Data_Store_Session',
 		'order'             => 'WC_Order_Data_Store_CPT',
+		'order-refund'      => 'WC_Order_Refund_Data_Store_CPT',
 		'payment-token'     => 'WC_Payment_Token_Data_Store',
 		'product'           => 'WC_Product_Data_Store_CPT',
 		'product_grouped'   => 'WC_Product_Grouped_Data_Store_CPT',

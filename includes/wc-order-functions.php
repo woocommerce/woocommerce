@@ -816,7 +816,7 @@ function wc_create_refund( $args = array() ) {
 					continue;
 				}
 
-				$qty          = $args['line_items'][ $item_id ]['qty'];
+				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
 				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
 

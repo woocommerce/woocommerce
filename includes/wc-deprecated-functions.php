@@ -584,6 +584,8 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_order_get_total_discount'      => 'woocommerce_order_amount_total_discount',
 	'woocommerce_order_get_subtotal'            => 'woocommerce_order_amount_subtotal',
 	'woocommerce_order_get_tax_totals'          => 'woocommerce_order_tax_totals',
+	'woocommerce_get_order_refund_get_amount'   => 'woocommerce_refund_amount',
+	'woocommerce_get_order_refund_get_reason'   => 'woocommerce_refund_reason',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

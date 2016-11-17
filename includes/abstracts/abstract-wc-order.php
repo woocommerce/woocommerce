@@ -151,11 +151,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_order_';
+	}
+
+	/**
 	 * Get a title for the new post type.
 	 *
 	 * @return string
 	 */
-	protected function get_post_title() {
+	public function get_post_title() {
 		// @codingStandardsIgnoreStart
 		/* translators: %s: Order date */
 		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
