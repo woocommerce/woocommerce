@@ -1211,7 +1211,7 @@ class WC_Admin_Post_Types {
 			$product->set_backorders( $backorders );
 			$product->save();
 
-			if ( ! $product->is_type( 'variable') ) {
+			if ( ! $product->is_type( 'variable' ) ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 
@@ -1432,7 +1432,7 @@ class WC_Admin_Post_Types {
 			$product->set_backorders( $backorders );
 			$product->save();
 
-			if ( ! $product->is_type( 'variable') ) {
+			if ( ! $product->is_type( 'variable' ) ) {
 				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 

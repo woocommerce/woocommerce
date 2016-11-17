@@ -22,7 +22,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 * @deprecated 2.7.0 - Init a token class with an ID.
 	 */
 	public function read( $token_id ) {
-		//wc_soft_deprecated_function( 'WC_Payment_Token::read', '2.7', '2.8', 'Init a token class with an ID.' );
+		// wc_soft_deprecated_function( 'WC_Payment_Token::read', '2.7', '2.8', 'Init a token class with an ID.' );
 		$this->set_id( $token_id );
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		$data_store->read( $this );
@@ -33,7 +33,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 * @deprecated 2.7.0 - Use ::save instead.
 	 */
 	public function update() {
-		//wc_soft_deprecated_function( 'WC_Payment_Token::update', '2.7', '2.8', 'Use ::save instead.' );
+		// wc_soft_deprecated_function( 'WC_Payment_Token::update', '2.7', '2.8', 'Use ::save instead.' );
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		try {
 			$data_store->update( $this );
@@ -47,7 +47,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 * @deprecated 2.7.0 - Use ::save instead.
 	 */
 	public function create() {
-		//wc_soft_deprecated_function( 'WC_Payment_Token::create', '2.7', '2.8', 'Use ::save instead.' );
+		// wc_soft_deprecated_function( 'WC_Payment_Token::create', '2.7', '2.8', 'Use ::save instead.' );
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		try {
 			$data_store->create( $this );
