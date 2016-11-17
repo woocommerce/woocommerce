@@ -146,57 +146,44 @@ class WC_API_Customers extends WC_API_Resource {
 			return $id;
 		}
 
-		$customer = new WP_User( $id );
-
-		// Get info about user's last order
-		$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = {$customer->ID}
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-						ORDER BY posts.ID DESC
-					" );
-
-		$roles = array_values( $customer->roles );
-
+		$customer      = new WC_Customer( $id );
+		$last_order    = $customer->get_last_order();
 		$customer_data = array(
-			'id'               => $customer->ID,
-			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
-			'email'            => $customer->user_email,
-			'first_name'       => $customer->first_name,
-			'last_name'        => $customer->last_name,
-			'username'         => $customer->user_login,
-			'role'             => $roles[0],
+			'id'               => $customer->get_id(),
+			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ),
+			'email'            => $customer->get_email(),
+			'first_name'       => $customer->get_first_name(),
+			'last_name'        => $customer->get_last_name(),
+			'username'         => $customer->get_username(),
+			'role'             => $customer->get_role(),
 			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
-			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
-			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
-			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
-			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
+			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created() ) : null,
+			'orders_count'     => $customer->get_order_count(),
+			'total_spent'      => wc_format_decimal( $customer->get_total_spent(), 2 ),
+			'avatar_url'       => $customer->get_avatar_url(),
 			'billing_address'  => array(
-				'first_name' => $customer->billing_first_name,
-				'last_name'  => $customer->billing_last_name,
-				'company'    => $customer->billing_company,
-				'address_1'  => $customer->billing_address_1,
-				'address_2'  => $customer->billing_address_2,
-				'city'       => $customer->billing_city,
-				'state'      => $customer->billing_state,
-				'postcode'   => $customer->billing_postcode,
-				'country'    => $customer->billing_country,
-				'email'      => $customer->billing_email,
-				'phone'      => $customer->billing_phone,
+				'first_name' => $customer->get_billing_first_name(),
+				'last_name'  => $customer->get_billing_last_name(),
+				'company'    => $customer->get_billing_company(),
+				'address_1'  => $customer->get_billing_address_1(),
+				'address_2'  => $customer->get_billing_address_2(),
+				'city'       => $customer->get_billing_city(),
+				'state'      => $customer->get_billing_state(),
+				'postcode'   => $customer->get_billing_postcode(),
+				'country'    => $customer->get_billing_country(),
+				'email'      => $customer->get_billing_email(),
+				'phone'      => $customer->get_billing_phone(),
 			),
 			'shipping_address' => array(
-				'first_name' => $customer->shipping_first_name,
-				'last_name'  => $customer->shipping_last_name,
-				'company'    => $customer->shipping_company,
-				'address_1'  => $customer->shipping_address_1,
-				'address_2'  => $customer->shipping_address_2,
-				'city'       => $customer->shipping_city,
-				'state'      => $customer->shipping_state,
-				'postcode'   => $customer->shipping_postcode,
-				'country'    => $customer->shipping_country,
+				'first_name' => $customer->get_shipping_first_name(),
+				'last_name'  => $customer->get_shipping_last_name(),
+				'company'    => $customer->get_shipping_company(),
+				'address_1'  => $customer->get_shipping_address_1(),
+				'address_2'  => $customer->get_shipping_address_2(),
+				'city'       => $customer->get_shipping_city(),
+				'state'      => $customer->get_shipping_state(),
+				'postcode'   => $customer->get_shipping_postcode(),
+				'country'    => $customer->get_shipping_country(),
 			),
 		);
 
