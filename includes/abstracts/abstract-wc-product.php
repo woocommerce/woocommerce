@@ -1785,7 +1785,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			return '';
 		}
-		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_object_terms( $this->get_id(), $attribute_object->get_name(), 'name' ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
 	/**

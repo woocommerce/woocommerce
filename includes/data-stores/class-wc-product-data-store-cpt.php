@@ -244,7 +244,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
 					}
-					$options = wp_get_post_terms( $product->get_id(), $meta_value['name'], array( 'fields' => 'ids' ) );
+					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
@@ -508,7 +508,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 
 			// Update counts for the post's terms.
 			foreach ( (array) get_object_taxonomies( $post_type ) as $taxonomy ) {
-				$tt_ids = wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'tt_ids' ) );
+				$tt_ids = wc_get_object_terms( $product->get_id(), $taxonomy, 'term_taxonomy_id' );
 				wp_update_term_count( $tt_ids, $taxonomy );
 			}
 		}
