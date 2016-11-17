@@ -573,6 +573,17 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_product_get_gallery_image_ids' => 'woocommerce_product_gallery_attachment_ids',
 	'woocommerce_product_get_review_count'      => 'woocommerce_product_review_count',
 	'woocommerce_product_get_downloads'         => 'woocommerce_product_files',
+	'woocommerce_order_get_currency'            => 'woocommerce_get_currency',
+	'woocommerce_order_get_discount_total'      => 'woocommerce_order_amount_discount_total',
+	'woocommerce_order_get_discount_tax'        => 'woocommerce_order_amount_discount_tax',
+	'woocommerce_order_get_shipping_total'      => 'woocommerce_order_amount_shipping_total',
+	'woocommerce_order_get_shipping_tax'        => 'woocommerce_order_amount_shipping_tax',
+	'woocommerce_order_get_cart_tax'            => 'woocommerce_order_amount_cart_tax',
+	'woocommerce_order_get_total'               => 'woocommerce_order_amount_total',
+	'woocommerce_order_get_total_tax'           => 'woocommerce_order_amount_total_tax',
+	'woocommerce_order_get_total_discount'      => 'woocommerce_order_amount_total_discount',
+	'woocommerce_order_get_subtotal'            => 'woocommerce_order_amount_subtotal',
+	'woocommerce_order_get_tax_totals'          => 'woocommerce_order_tax_totals',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
@@ -587,9 +598,6 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
 	if ( isset( $wc_map_deprecated_filters[ $filter ] ) ) {
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
 			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
-			if ( ! is_ajax() ) {
-				_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '', $filter );
-			}
 		}
 	}
 

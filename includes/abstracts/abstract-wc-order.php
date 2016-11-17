@@ -24,6 +24,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
 	 * which is the tax for items only, not shipping.
+	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -46,6 +47,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
+	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -64,6 +66,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Order items will be stored here, sometimes before they persist in the DB.
+	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -77,19 +80,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Order items that need deleting are stored here.
+	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $items_to_delete = array();
 
 	/**
-	 *  Internal meta type used to store order data.
+	 * Internal meta type used to store order data.
+	 *
 	 * @var string
 	 */
 	protected $meta_type = 'post';
 
 	/**
 	 * Stores meta in cache for future reads.
+	 *
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
@@ -128,7 +134,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get internal type (post type.)
+	 * Get internal type.
+	 *
 	 * @return string
 	 */
 	public function get_type() {
@@ -137,6 +144,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get a title for the new post type.
+	 *
+	 * @return string
 	 */
 	protected function get_post_title() {
 		// @codingStandardsIgnoreStart
@@ -147,6 +156,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get all class data in array format.
+	 *
 	 * @since 2.7.0
 	 * @return array
 	 */
@@ -180,6 +190,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Save data to the database.
+	 *
 	 * @since 2.7.0
 	 * @return int order ID
 	 */
@@ -198,146 +209,159 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	|--------------------------------------------------------------------------
 	| Getters
 	|--------------------------------------------------------------------------
-	|
-	| Methods for getting data from the order object.
-	|
 	*/
 
 	/**
 	 * Get parent order ID.
+	 *
 	 * @since 2.7.0
+	 * @param  string $context
 	 * @return integer
 	 */
-	public function get_parent_id() {
-		return $this->data['parent_id'];
+	public function get_parent_id( $context = 'view' ) {
+		return $this->get_prop( 'parent_id', $context );
 	}
 
 	/**
 	 * Gets order currency.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_currency() {
-		return apply_filters( 'woocommerce_get_currency', $this->data['currency'], $this );
+	public function get_currency( $context = 'view' ) {
+		return $this->get_prop( 'currency', $context );
 	}
 
 	/**
-	 * Get order_version
+	 * Get order_version.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_version() {
-		return $this->data['version'];
+	public function get_version( $context = 'view' ) {
+		return $this->get_prop( 'version', $context );
 	}
 
 	/**
-	 * Get prices_include_tax
+	 * Get prices_include_tax.
+	 *
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_prices_include_tax() {
-		return $this->data['prices_include_tax'];
+	public function get_prices_include_tax( $context = 'view' ) {
+		return $this->get_prop( 'prices_include_tax', $context );
 	}
 
 	/**
-	 * Get date_created
+	 * Get date_created.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_created() {
-		return $this->data['date_created'];
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
 	}
 
 	/**
-	 * Get date_modified
+	 * Get date_modified.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_modified() {
-		return $this->data['date_modified'];
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
 	}
 
 	/**
 	 * Return the order statuses without wc- internal prefix.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_status() {
-		$status = $this->data['status'];
-		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status, $this );
+	public function get_status( $context = 'view' ) {
+		return $this->get_prop( 'status', $context );
 	}
 
 	/**
-	 * Get discount_total
-	 * @param bool $raw Gets raw unfiltered value.
+	 * Get discount_total.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_discount_total( $raw = false ) {
-		$value = wc_format_decimal( $this->data['discount_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_total', $value, $this );
+	public function get_discount_total( $context = 'view' ) {
+		return $this->get_prop( 'discount_total', $context );
 	}
 
 	/**
-	 * Get discount_tax
-	 * @param bool $raw Gets raw unfiltered value.
+	 * Get discount_tax.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_discount_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['discount_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_tax', $value, $this );
+	public function get_discount_tax( $context = 'view' ) {
+		return $this->get_prop( 'discount_tax', $context );
 	}
 
 	/**
-	 * Get shipping_total
-	 * @param bool $raw Gets raw unfiltered value.
+	 * Get shipping_total.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_total( $raw = false ) {
-		$value = wc_format_decimal( $this->data['shipping_total'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_total', $value, $this );
+	public function get_shipping_total( $context = 'view' ) {
+		return $this->get_prop( 'shipping_total', $context );
 	}
 
 	/**
 	 * Get shipping_tax.
-	 * @param bool $raw Gets raw unfiltered value.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['shipping_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_tax', $value, $this );
+	public function get_shipping_tax( $context = 'view' ) {
+		return $this->get_prop( 'shipping_tax', $context );
 	}
 
 	/**
 	 * Gets cart tax amount.
-	 * @param bool $raw Gets raw unfiltered value.
+	 *
+	 * @param  string $context
 	 * @return float
 	 */
-	public function get_cart_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['cart_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_cart_tax', $value, $this );
+	public function get_cart_tax( $context = 'view' ) {
+		return $this->get_prop( 'cart_tax', $context );
 	}
 
 	/**
-	 * Gets order grand total. incl. taxes. Used in gateways. Filtered.
-	 * @param bool $raw Gets raw unfiltered value.
+	 * Gets order grand total. incl. taxes. Used in gateways.
+	 *
+	 * @param  string $context
 	 * @return float
 	 */
-	public function get_total( $raw = false ) {
-		return $raw ? $this->data['total'] : apply_filters( 'woocommerce_order_amount_total', $this->data['total'], $this );
+	public function get_total( $context = 'view' ) {
+		return $this->get_prop( 'total', $context );
 	}
 
 	/**
 	 * Get total tax amount. Alias for get_order_tax().
 	 *
-	 * @since 2.7.0 woocommerce_order_amount_total_tax filter has been removed to avoid
-	 * these values being modified and then saved back to the DB. There are
-	 * other, later hooks available to change totals on display. e.g.
-	 * woocommerce_get_order_item_totals.
-	 * @param bool $raw Gets raw unfiltered value.
+	 * @param  string $context
 	 * @return float
 	 */
-	public function get_total_tax( $raw = false ) {
-		$value = wc_format_decimal( $this->data['total_tax'] );
-		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total_tax', $value, $this );
+	public function get_total_tax( $context = 'view' ) {
+		return $this->get_prop( 'total_tax', $context );
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Gets the total discount amount.
-	 * @param  bool $ex_tax Show discount excl any tax.
+	 *
+	 * @param  bool $ex_tax Show discount excl any tax. // @todo
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
@@ -346,7 +370,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
 		}
-		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
+		return apply_filters( 'woocommerce_order_get_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
 	/**
@@ -360,7 +384,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal += $item->get_subtotal();
 		}
 
-		return apply_filters( 'woocommerce_order_amount_subtotal', (double) $subtotal, $this );
+		return apply_filters( 'woocommerce_order_get_subtotal', (double) $subtotal, $this );
 	}
 
 	/**
@@ -392,7 +416,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals = array_intersect_key( $tax_totals, $amounts );
 		}
 
-		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
+		return apply_filters( 'woocommerce_order_get_tax_totals', $tax_totals, $this );
 	}
 
 	/*
@@ -404,7 +428,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	| database itself and should only change what is stored in the class
 	| object. However, for backwards compatibility pre 2.7.0 some of these
 	| setters may handle both.
-	|
 	*/
 
 	/**
@@ -435,7 +458,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$new_status = 'pending';
 		}
 
-		$this->data['status'] = 'wc-' . $new_status;
+		$this->data['status'] = 'wc-' . $new_status; /// 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) @todo removed this from getter.
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
