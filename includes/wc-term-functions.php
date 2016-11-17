@@ -15,14 +15,66 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Helper to get cached object terms and filter by field using wp_list_pluck().
+ * Works as a cached alternative for wp_get_post_terms() and wp_get_object_terms().
+ *
+ * @since  2.7.0
+ * @param  int    $object_id Object ID.
+ * @param  string $taxonomy  Taxonomy slug.
+ * @param  string $field     Field name.
+ * @param  string $index_key Index key name.
+ * @return array
+ */
+function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key = null ) {
+	$terms = array();
+
+	// Test if terms exists.
+	// get_the_terms() return false when don't found terms.
+	if ( $terms = get_the_terms( $object_id, $taxonomy ) ) {
+		if ( ! is_null( $field ) ) {
+			$terms = wp_list_pluck( $terms, $field, $index_key );
+		}
+	}
+
+	return $terms;
+}
+
+/**
+ * Cached version of wp_get_post_terms().
+ * This is a private function (internal use ONLY).
+ *
+ * @since  2.7.0
+ * @param  int    $product_id Product ID.
+ * @param  string $taxonomy   Taxonomy slug.
+ * @param  array  $args       Query arguments.
+ * @return array
+ */
+function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() ) {
+	$cache_key = 'wc_' . $taxonomy . md5( json_encode( $args ) );
+	$terms     = wp_cache_get( $product_id, $cache_key );
+
+	if ( false !== $terms ) {
+		return $terms;
+	}
+
+	// @codingStandardsIgnoreStart
+	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+	// @codingStandardsIgnoreEnd
+
+	wp_cache_add( $product_id, $terms, $cache_key );
+
+	return $terms;
+}
+
+/**
  * Wrapper for wp_get_post_terms which supports ordering by parent.
  *
  * NOTE: At this point in time, ordering by menu_order for example isn't possible with this function. wp_get_post_terms has no.
  *   filters which we can utilise to modify it's query. https://core.trac.wordpress.org/ticket/19094.
  *
- * @param  int $product_id
- * @param  string $taxonomy
- * @param  array  $args
+ * @param  int    $product_id Product ID.
+ * @param  string $taxonomy   Taxonomy slug.
+ * @param  array  $args       Query arguments.
  * @return array
  */
 function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
@@ -34,16 +86,16 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
-	// Support ordering by parent
+	// Support ordering by parent.
 	if ( ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'name_num', 'parent' ) ) ) {
 		$fields  = isset( $args['fields'] ) ? $args['fields'] : 'all';
 		$orderby = $args['orderby'];
 
-		// Unset for wp_get_post_terms
+		// Unset for wp_get_post_terms.
 		unset( $args['orderby'] );
 		unset( $args['fields'] );
 
-		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 
 		switch ( $orderby ) {
 			case 'name_num' :
@@ -66,26 +118,26 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				break;
 		}
 	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
-		// wp_get_post_terms doesn't let us use custom sort order
-		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
+		// wp_get_post_terms doesn't let us use custom sort order.
+		$args['include'] = wc_get_object_terms( $product_id, $taxonomy, 'id' );
 
 		if ( empty( $args['include'] ) ) {
 			$terms = array();
 		} else {
-			// This isn't needed for get_terms
+			// This isn't needed for get_terms.
 			unset( $args['orderby'] );
 
-			// Set args for get_terms
+			// Set args for get_terms.
 			$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
 			$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
 			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
-			// Ensure slugs is valid for get_terms - slugs isn't supported
+			// Ensure slugs is valid for get_terms - slugs isn't supported.
 			$args['fields']     = ( 'slugs' === $args['fields'] ) ? 'id=>slug' : $args['fields'];
 			$terms              = get_terms( $taxonomy, $args );
 		}
 	} else {
-		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 	}
 
 	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $args );
