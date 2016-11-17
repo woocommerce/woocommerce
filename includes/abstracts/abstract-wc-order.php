@@ -361,7 +361,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets the total discount amount.
 	 *
-	 * @param  bool $ex_tax Show discount excl any tax. // @todo
+	 * @param  bool $ex_tax Show discount excl any tax.
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
@@ -432,6 +432,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Set parent order ID.
+	 *
 	 * @since 2.7.0
 	 * @param int $value
 	 * @throws WC_Data_Exception
@@ -440,11 +441,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $value && ! get_post( $value ) ) {
 			$this->error( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
-		$this->data['parent_id'] = absint( $value );
+		$this->set_prop( 'parent_id', absint( $value ) );
 	}
 
 	/**
 	 * Set order status.
+	 *
 	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
@@ -458,7 +460,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$new_status = 'pending';
 		}
 
-		$this->data['status'] = 'wc-' . $new_status; /// 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) @todo removed this from getter.
+		$this->set_prop( 'status', 'wc-' . $new_status ); // 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) @todo removed this from getter.
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
@@ -472,16 +474,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 }
 
 	/**
-	 * Set order_version
+	 * Set order_version.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_version( $value ) {
-		$this->data['version'] = $value;
+		$this->set_prop( 'version', $value );
 	}
 
 	/**
-	 * Set order_currency
+	 * Set order_currency.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -489,94 +493,104 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
 			$this->error( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
-		$this->data['currency'] = $value ? $value : get_woocommerce_currency();
+		$this->set_prop( 'currency', $value ? $value : get_woocommerce_currency() );
 	}
 
 	/**
-	 * Set prices_include_tax
+	 * Set prices_include_tax.
+	 *
 	 * @param bool $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_prices_include_tax( $value ) {
-		$this->data['prices_include_tax'] = (bool) $value;
+		$this->set_prop( 'prices_include_tax', (bool) $value );
 	}
 
 	/**
-	 * Set date_created
+	 * Set date_created.
+	 *
 	 * @param string $timestamp Timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_created( $timestamp ) {
-		$this->data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set date_modified
+	 * Set date_modified.
+	 *
 	 * @param string $timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_modified( $timestamp ) {
-		$this->data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set discount_total
+	 * Set discount_total.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_total( $value ) {
-		$this->data['discount_total'] = wc_format_decimal( $value );
+		$this->set_prop( 'discount_total', wc_format_decimal( $value ) );
 	}
 
 	/**
-	 * Set discount_tax
+	 * Set discount_tax.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_tax( $value ) {
-		$this->data['discount_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
-	 * Set shipping_total
+	 * Set shipping_total.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_total( $value ) {
-		$this->data['shipping_total'] = wc_format_decimal( $value );
+		$this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
 	}
 
 	/**
-	 * Set shipping_tax
+	 * Set shipping_tax.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->data['shipping_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
 	}
 
 	/**
-	 * Set cart tax
+	 * Set cart tax.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_tax( $value ) {
-		$this->data['cart_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
 		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
 	}
 
 	/**
 	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	protected function set_total_tax( $value ) {
-		$this->data['total_tax'] = wc_format_decimal( $value );
+		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
 	}
 
 	/**
-	 * Set total
+	 * Set total.
+	 *
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
 	 * @throws WC_Data_Exception
@@ -586,7 +600,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
-		$this->data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
+		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
 	/*
@@ -596,7 +610,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	|
 	| Order items are used for products, taxes, shipping, and fees within
 	| each order.
-	|
 	*/
 
 	/**
