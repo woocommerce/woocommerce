@@ -702,7 +702,9 @@ class WC_Checkout {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-					}
+					} else { 
+						$result = apply_filters( 'woocommerce_payment_fail_result', $result, $order_id );
+					}	
 				} else {
 
 					if ( empty( $order ) ) {
