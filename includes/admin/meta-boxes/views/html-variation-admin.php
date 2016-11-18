@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<option value=""><?php
 						/* translators: %s: attribute label */
 						echo sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute->get_name() ) ) );
-						?>&hellip;</option>
+						?></option>
 					<?php if ( $attribute->is_taxonomy() ) : ?>
 						<?php foreach ( $attribute->get_terms() as $option ) : ?>
 							<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name ) ); ?></option>
