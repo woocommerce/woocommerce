@@ -1352,7 +1352,7 @@ class WC_Admin_Post_Types {
 	public function bulk_action() {
 		global $wp_version;
 
-		if ( version_compare( $wp_version, '4.7-beta', '>=' ) ) {
+		if ( version_compare( $wp_version, '4.7-beta', '>=' ) || empty( $_REQUEST['post'] ) ) {
 			return;
 		}
 
