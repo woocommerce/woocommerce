@@ -292,8 +292,12 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'billing_' . $key;
 
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
+										$field_value = call_user_func( array( $order, 'get_' . $field_name ) );
+									} else {
+										$field_value = $order->get_meta( '_' . $field_name );
 									}
+
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 								}
 
 							echo '</div>';
@@ -380,8 +384,12 @@ class WC_Meta_Box_Order_Data {
 										$field_name = 'shipping_' . $key;
 
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
+											$field_value = call_user_func( array( $order, 'get_' . $field_name ) );
+										} else {
+											$field_value = $order->get_meta( '_' . $field_name );
 										}
+
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 									}
 								}
 
@@ -469,7 +477,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_billing_' . $key;
 				}
 
-				$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
+					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 
@@ -480,7 +492,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_shipping_' . $key;
 				}
 
-				$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
+					$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 
