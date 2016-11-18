@@ -532,7 +532,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['meta_data'] ) ) {
 			if ( is_array( $request['meta_data'] ) ) {
 				foreach ( $request['meta_data'] as $meta ) {
-					$coupon->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
+					$customer->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
 				}
 			}
 		}
