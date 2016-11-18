@@ -249,6 +249,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Return count of orders with type.
+	 *
 	 * @param  string $type
 	 * @return int
 	 */
@@ -324,6 +325,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Generate meta query for wc_get_orders.
+	 *
 	 * @param  array $values
 	 * @param  string $relation
 	 * @return array
@@ -367,6 +369,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Get unpaid orders after a certain date,
+	 *
 	 * @param  int timestamp $date
 	 * @return array
 	 */
@@ -386,6 +389,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Search order data for a term and return ids.
+	 *
 	 * @param  string $term
 	 * @return array of ids
 	 */
@@ -433,55 +437,121 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Gets information about whether permissions were generated yet.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @return boolet
 	 */
 	public function get_download_permissions_granted( $order ) {
-		return wc_string_to_bool( get_post_meta( $order->get_id(), '_download_permissions_granted', true ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		return wc_string_to_bool( get_post_meta( $order_id, '_download_permissions_granted', true ) );
 	}
 
 	/**
 	 * Stores information about whether permissions were generated yet.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @param bool $set
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
-		update_post_meta( $order->get_id(), '_download_permissions_granted', wc_bool_to_string( $set ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
 
 	/**
 	 * Gets information about whether sales were recorded.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @return boolet
 	 */
 	public function get_recorded_sales( $order ) {
-		return wc_string_to_bool( get_post_meta( $order->get_id(), '_recorded_sales', true ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
 	}
 
 	/**
 	 * Stores information about whether sales were recorded.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @param bool $set
 	 */
 	public function set_recorded_sales( $order, $set ) {
-		update_post_meta( $order->get_id(), '_recorded_sales', wc_bool_to_string( $set ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
 	}
 
 	/**
 	 * Gets information about whether coupon counts were updated.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @return boolet
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
-		return wc_string_to_bool( get_post_meta( $order->get_id(), '_recorded_sales', true ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
 	}
 
 	/**
 	 * Stores information about whether coupon counts were updated.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order|int $order
 	 * @param bool $set
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
-		update_post_meta( $order->get_id(), '_recorded_sales', wc_bool_to_string( $set ) );
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order
+	 * @return boolet
+	 */
+	public function get_stock_reduced( $order ) {
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		return wc_string_to_bool( get_post_meta( $order_id, '_order_stock_reduced', true ) );
+	}
+
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order
+	 * @param bool $set
+	 */
+	public function set_stock_reduced( $order, $set ) {
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$order_id = $order->get_id();
+		} else {
+			$order_id = $order;
+		}
+		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
 	}
 }

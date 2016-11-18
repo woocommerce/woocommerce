@@ -142,7 +142,7 @@ class WC_Meta_Box_Product_Data {
 	 * Prepare downloads for save.
 	 * @return array
 	 */
-	private static function prepare_downloads( $file_names, $file_urls ) {
+	private static function prepare_downloads( $file_names, $file_urls, $file_hashes ) {
 		$downloads = array();
 
 		if ( ! empty( $file_urls ) ) {
@@ -151,8 +151,9 @@ class WC_Meta_Box_Product_Data {
 			for ( $i = 0; $i < $file_url_size; $i ++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
-						'name' => wc_clean( $file_names[ $i ] ),
-						'file' => wp_unslash( trim( $file_urls[ $i ] ) ),
+						'name'          => wc_clean( $file_names[ $i ] ),
+						'file'          => wp_unslash( trim( $file_urls[ $i ] ) ),
+						'previous_hash' => wc_clean( $file_hashes[ $i ] ),
 					);
 				}
 			}
@@ -286,7 +287,11 @@ class WC_Meta_Box_Product_Data {
 			'stock_quantity'     => wc_stock_amount( $_POST['_stock'] ),
 			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
-			'downloads'          => self::prepare_downloads( isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array(), isset( $_POST['_wc_file_urls'] ) ? $_POST['_wc_file_urls'] : array() ),
+			'downloads'          => self::prepare_downloads(
+				isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array(),
+				isset( $_POST['_wc_file_urls'] ) ? $_POST['_wc_file_urls'] : array(),
+				isset( $_POST['_wc_file_hashes'] ) ? $_POST['_wc_file_hashes'] : array()
+			),
 			'product_url'        => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'        => wc_clean( $_POST['_button_text'] ),
 			'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
@@ -334,7 +339,11 @@ class WC_Meta_Box_Product_Data {
 					'description'       => wp_kses_post( wc_sanitize_textarea( $_POST['variable_description'][ $i ] ) ),
 					'download_limit'    => wc_clean( $_POST['variable_download_limit'][ $i ] ),
 					'download_expiry'   => wc_clean( $_POST['variable_download_expiry'][ $i ] ),
-					'downloads'         => self::prepare_downloads( isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? $_POST['_wc_variation_file_names'][ $variation_id ] : array(), isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? $_POST['_wc_variation_file_urls'][ $variation_id ] : array() ),
+					'downloads'         => self::prepare_downloads(
+						isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? $_POST['_wc_variation_file_names'][ $variation_id ] : array(),
+						isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? $_POST['_wc_variation_file_urls'][ $variation_id ] : array(),
+						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
+					),
 					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
 					'stock_quantity'    => wc_clean( $_POST['variable_stock'][ $i ] ),
 					'backorders'        => wc_clean( $_POST['variable_backorders'][ $i ] ),

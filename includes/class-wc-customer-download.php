@@ -38,15 +38,15 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $download
 	 */
 	 public function __construct( $download = 0 ) {
-		parent::__construct( $order );
+		parent::__construct( $download );
 
 		if ( is_numeric( $download ) && $download > 0 ) {
 			$this->set_id( $download );
 		} elseif ( $download instanceof self ) {
 			$this->set_id( absint( $download->get_id() ) );
-		} elseif ( is_array( $download ) && $download['permission_id'] ) {
-			$this->set_id( absint( $download['permission_id'] ) );
-			$this->set_props( $download );
+		} elseif ( is_object( $download ) && ! empty( $download->permission_id ) ) {
+			$this->set_id( $download->permission_id );
+			$this->set_props( (array) $download );
 			$this->set_object_read( true );
 		} else {
 			$this->set_object_read( true );

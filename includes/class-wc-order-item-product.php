@@ -188,10 +188,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
 			$data_store   = WC_Data_Store::load( 'customer-download' );
-			$download_ids = $data_store->get_download_ids( array(
+			$download_ids = $data_store->get_downloads( array(
 				'user_email' => $order->get_billing_email(),
 				'order_key'  => $order->get_order_key(),
 				'product_id' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+				'return'     => 'ids',
 			) );
 
 			foreach ( $download_ids as $download_id ) {

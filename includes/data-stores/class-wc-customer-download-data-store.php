@@ -183,21 +183,39 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	}
 
 	/**
+	 * Get a download object from an order.
+	 *
+	 * @param  int $order_id
+	 * @param  int $product_id
+	 * @param  string $download_id
+	 * @return WC_Customer_Download
+	 */
+	private function get_download_from_order( $order_id, $product_id, $download_id ) {
+		global $wpdb;
+
+		$raw_download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order_id, $product_id, $download_id ) );
+
+		return $raw_download ? new WC_Customer_Download( $raw_download ) : false;
+	}
+
+	/**
 	 * Get array of download ids by specified args.
 	 *
 	 * @param  array $args
-	 * @return array of WC_Customer_Download
+	 * @return array
 	 */
 	public function get_downloads( $args = array() ) {
 		global $wpdb;
 
 		$args = wp_parse_args( $args, array(
 			'user_email' => '',
+			'order_id'   => '',
 			'order_key'  => '',
 			'product_id' => '',
 			'orderby'    => 'permission_id',
 			'order'      => 'DESC',
 			'limit'      => -1,
+			'return'     => 'objects',
 		) );
 
 		extract( $args );
@@ -207,6 +225,10 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		if ( $user_email ) {
 			$query[] = $wpdb->prepare( "AND user_email = %s", $user_email );
+		}
+
+		if ( $order_id ) {
+			$query[] = $wpdb->prepare( "AND order_id = %d", $order_id );
 		}
 
 		if ( $order_key ) {
@@ -221,23 +243,45 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		$order   = esc_sql( $order );
 		$query[] = "ORDER BY {$orderby} {$order}";
 
-		if ( $limit ) {
+		if ( 0 < $limit ) {
 			$query[] = $wpdb->prepare( "LIMIT %d", $limit );
 		}
 
 		$raw_downloads = $wpdb->get_results( implode( ' ', $query ) );
 
-		return array_map( array( $this, 'get_download' ), $raw_downloads );
+		switch ( $return ) {
+			case 'ids' :
+				return wp_list_pluck( $raw_downloads, 'permission_id' );
+			default :
+				return array_map( array( $this, 'get_download' ), $raw_downloads );
+		}
 	}
 
+	/**
+	 * Update download ids if the hash changes.
+	 *
+	 * @param  int $product_id
+	 * @param  string $old_id
+	 * @param  string $new_idn
+	 */
+	public function update_download_id( $product_id, $old_id, $new_id ) {
+		global $wpdb;
 
-	//@todo get_download_ids
-
-
-
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+			array(
+				'download_id' => $new_id,
+			),
+			array(
+				'download_id' => $old_id,
+				'product_id'  => $product_id,
+			)
+		);
+	}
 
 	/**
 	 * Get a customers downloads.
+	 *
 	 * @param  int $customer_id
 	 * @return array
 	 */
@@ -265,9 +309,16 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				$customer_id,
 				date( 'Y-m-d', current_time( 'timestamp' ) )
 			)
-		)
+		);
 	}
 
+	/**
+	 * Update user prop for downloads based on order id.
+	 *
+	 * @param  int $order_id
+	 * @param  int $customer_id
+	 * @param  string $email
+	 */
 	public function update_user_by_order_id( $order_id, $customer_id, $email ) {
 		global $wpdb;
 		$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
@@ -287,7 +338,4 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			)
 		);
 	}
-
-
-
 }

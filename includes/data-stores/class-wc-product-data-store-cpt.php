@@ -320,7 +320,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 			'_download_expiry'       => 'download_expiry',
 			'_featured'              => 'featured',
 			'_thumbnail_id'          => 'image_id',
-			'_downloadable_files'    => 'downloads',
 			'_stock'                 => 'stock_quantity',
 			'_stock_status'          => 'stock_status',
 			'_wc_average_rating'     => 'average_rating',
@@ -343,15 +342,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 					break;
 				case 'gallery_image_ids' :
 					$updated = update_post_meta( $product->get_id(), $meta_key, implode( ',', $value ) );
-					break;
-				case 'downloads' :
-					// grant permission to any newly added files on any existing orders for this product prior to saving.
-					if ( $product->is_type( 'variation' ) ) {
-						do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $value );
-					} else {
-						do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $value );
-					}
-					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 					break;
 				case 'image_id' :
 					if ( ! empty( $value ) ) {
@@ -477,6 +467,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_D
 				$meta_values[ $key ] = $download->get_data();
 			}
 		}
+
+		if ( $product->is_type( 'variation' ) ) {
+			do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
+		} else {
+			do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
+		}
+
 		update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
 	}
 

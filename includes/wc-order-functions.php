@@ -364,7 +364,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_product_id( $product->get_id() );
 	$download->set_user_id( $order->get_customer_id() );
 	$download->set_order_id( $order->get_id() );
-	$download->set_user_email();
+	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
 	$download->set_access_granted( current_time( 'timestamp' ) );

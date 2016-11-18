@@ -41,7 +41,7 @@ class WC_Meta_Box_Order_Downloads {
 				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) {
 					foreach ( $download_permissions as $download ) {
 						if ( ! $product || $product->get_id() !== $download->get_product_id() ) {
-							$product      = wc_get_product( absint( $download->get_product_id() ) );
+							$product      = wc_get_product( $download->get_product_id() );
 							$file_counter = 1;
 						}
 
@@ -89,36 +89,16 @@ class WC_Meta_Box_Order_Downloads {
 			$downloads_remaining = $_POST['downloads_remaining'];
 			$access_expires      = $_POST['access_expires'];
 			$product_ids_max     = max( array_keys( $product_ids ) );
+			$data_store          = WC_Data_Store::load( 'customer-download' );
 
 			for ( $i = 0; $i <= $product_ids_max; $i ++ ) {
 				if ( ! isset( $product_ids[ $i ] ) ) {
 					continue;
 				}
-
-				// @todo $download = new WC_Customer_Download( $data );
-
-				$data = array(
-					'downloads_remaining' => wc_clean( $downloads_remaining[ $i ] ),
-				);
-
-				$format = array(
-					'%s',
-				);
-
-				$expiry  = ( array_key_exists( $i, $access_expires ) && '' != $access_expires[ $i ] ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
-
-				$data['access_expires'] = $expiry;
-				$format[]               = '%s';
-
-				$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
-					$data,
-					array(
-						'order_id' 		=> $post_id,
-						'product_id' 	=> absint( $product_ids[ $i ] ),
-						'download_id'	=> wc_clean( $download_ids[ $i ] ),
-						),
-					$format, array( '%d', '%d', '%s' )
-				);
+				$download = $data_store::get_download_from_order( $post_id, absint( $product_ids[ $i ] ), $download_ids[ $i ] );
+				$download->set_downloads_remaining( wc_clean( $downloads_remaining[ $i ] ) );
+				$download->set_access_expires( array_key_exists( $i, $access_expires ) && '' !== $access_expires[ $i ] ? strtotime( $access_expires[ $i ] ) : '' );
+				$download->save();
 			}
 		}
 	}

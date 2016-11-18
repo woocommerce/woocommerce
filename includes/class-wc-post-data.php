@@ -47,6 +47,9 @@ class WC_Post_Data {
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_items' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_downloadable_permissions' ) );
+
+		// Download permissions
+		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
 	}
 
 	/**
@@ -373,6 +376,32 @@ class WC_Post_Data {
 			$data_store->delete_by_order_id( $postid );
 
 			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
+		}
+	}
+
+	/**
+	 * Update changed downloads.
+	 *
+	 * @param int $product_id product identifier
+	 * @param int $variation_id optional product variation identifier
+	 * @param array $downloads newly set files
+	 */
+	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
+		if ( $variation_id ) {
+			$product_id = $variation_id;
+		}
+		$product    = wc_get_product( $product_id );
+		$data_store = WC_Data_Store::load( 'customer-download' );
+
+		if ( $downloads ) {
+			foreach ( $downloads as $download ) {
+				$new_hash = md5( $download->get_file() );
+
+				if ( $download->get_previous_hash() && $download->get_previous_hash() !== $new_hash ) {
+					// Update permissions.
+					$data_store->update_download_id( $product_id, $download->get_previous_hash(), $new_hash );
+				}
+			}
 		}
 	}
 }

@@ -41,7 +41,7 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$download_ids = $data_store->get_download_ids( array(
+		$download_ids = $data_store->get_downloads( array(
 			'user_email'  => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
 			'order_key'   => wc_clean( $_GET['order'] ),
 			'product_id'  => $product_id,
@@ -49,6 +49,7 @@ class WC_Download_Handler {
 			'orderby'     => 'downloads_remaining',
 			'order'       => 'DESC',
 			'limit'       => 1,
+			'return'      => 'ids',
 		) );
 
 		if ( empty( $download_ids ) ) {

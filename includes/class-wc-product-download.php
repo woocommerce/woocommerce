@@ -19,9 +19,10 @@ class WC_Product_Download implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'id'   => '',
-		'name' => '',
-		'file' => '',
+		'id'            => '',
+		'name'          => '',
+		'file'          => '',
+		'previous_hash' => '',
 	);
 
 	/**
@@ -123,6 +124,14 @@ class WC_Product_Download implements ArrayAccess {
 	}
 
 	/**
+	 * Set previous_hash.
+	 * @param string $value
+	 */
+	public function set_previous_hash( $value ) {
+		$this->data['previous_hash'] = wc_clean( $value );
+	}
+
+	/**
 	 * Set file.
 	 * @param string $value
 	 */
@@ -157,6 +166,14 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_name() {
 		return $this->data['name'];
+	}
+
+	/**
+	 * Get previous_hash.
+	 * @return string
+	 */
+	public function get_previous_hash() {
+		return $this->data['previous_hash'];
 	}
 
 	/**
