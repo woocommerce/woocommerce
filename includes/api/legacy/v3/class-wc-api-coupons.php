@@ -111,14 +111,12 @@ class WC_API_Coupons extends WC_API_Resource {
 				return $id;
 			}
 
-			// get the coupon code
-			$code = wc_get_coupon_code_by_id( $id );
+			$coupon = new WC_Coupon( $id );
 
-			if ( empty( $code ) ) {
+			if ( 0 === $coupon->get_id() ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), 404 );
 			}
 
-			$coupon = new WC_Coupon( $code );
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
