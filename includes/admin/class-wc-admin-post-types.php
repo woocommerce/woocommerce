@@ -1493,7 +1493,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Manipule shop order bulk actions.
+	 * Manipulate shop order bulk actions.
 	 *
 	 * @param  array $actions List of actions.
 	 * @return array
@@ -1549,7 +1549,7 @@ class WC_Admin_Post_Types {
 			'post_type'    => 'shop_order',
 			$report_action => true,
 			'changed'      => $changed,
-			'ids'          => join( ',', $ids )
+			'ids'          => join( ',', $ids ),
 		), $redirect_to );
 
 		return esc_url_raw( $redirect_to );
