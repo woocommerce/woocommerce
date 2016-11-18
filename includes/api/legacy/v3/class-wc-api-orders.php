@@ -149,10 +149,9 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession.
-		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
-		$order      = wc_get_order( $id );
-		$order_post = get_post( $id );
-		$expand     = array();
+		$dp     = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order  = wc_get_order( $id );
+		$expand = array();
 
 		if ( ! empty( $filter['expand'] ) ) {
 			$expand = explode( ',', $filter['expand'] );

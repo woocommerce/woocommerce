@@ -109,10 +109,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = wc_get_order( $id );
-
-		$order_post = get_post( $id );
-
+		$order      = wc_get_order( $id );
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),

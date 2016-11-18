@@ -151,8 +151,6 @@ class WC_API_Orders extends WC_API_Resource {
 		// Get the decimal precession
 		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 		$order      = wc_get_order( $id );
-		$order_post = get_post( $id );
-
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
