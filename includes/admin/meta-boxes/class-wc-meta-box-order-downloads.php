@@ -27,43 +27,40 @@ class WC_Meta_Box_Order_Downloads {
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
 
-			<div class="wc-metaboxes">
-				<?php
-					$download_permissions = $wpdb->get_results( $wpdb->prepare( "
-						SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-						WHERE order_id = %d ORDER BY product_id
-					", $post->ID ) );
+			<div class="wc-metaboxes"><?php
+				$data_store = WC_Data_Store::load( 'customer-download' );
+				$download_permissions = $data_store->get_downloads( array(
+					'order_id' => $post->ID,
+					'orderby'  => 'product_id',
+				) );
 
-					$product      = null;
-					$loop         = 0;
-					$file_counter = 1;
+				$product      = null;
+				$loop         = 0;
+				$file_counter = 1;
 
-					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
-
-						if ( ! $product || $product->get_id() != $download->product_id ) {
-							$product      = wc_get_product( absint( $download->product_id ) );
+				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) {
+					foreach ( $download_permissions as $download ) {
+						if ( ! $product || $product->get_id() !== $download->get_product_id() ) {
+							$product      = wc_get_product( absint( $download->get_product_id() ) );
 							$file_counter = 1;
 						}
 
 						// don't show permissions to files that have since been removed
-						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) )
+						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->get_download_id() ) ) {
 							continue;
+						}
 
 						// Show file title instead of count if set
-						$file = $product->get_file( $download->download_id );
-						if ( isset( $file['name'] ) ) {
-							$file_count = $file['name'];
-						} else {
-							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
-						}
+						$file       = $product->get_file( $download->get_download_id() );
+						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 
 						include( 'views/html-order-download-permission.php' );
 
 						$loop++;
 						$file_counter++;
 					}
-				?>
-			</div>
+				}
+			?></div>
 
 			<div class="toolbar">
 				<p class="buttons">
@@ -87,21 +84,18 @@ class WC_Meta_Box_Order_Downloads {
 		global $wpdb;
 
 		if ( isset( $_POST['download_id'] ) ) {
-
-			// Download data
-			$download_ids           = $_POST['download_id'];
-			$product_ids            = $_POST['product_id'];
-			$downloads_remaining    = $_POST['downloads_remaining'];
-			$access_expires         = $_POST['access_expires'];
-
-			// Order data
-			$product_ids_max = max( array_keys( $product_ids ) );
+			$download_ids        = $_POST['download_id'];
+			$product_ids         = $_POST['product_id'];
+			$downloads_remaining = $_POST['downloads_remaining'];
+			$access_expires      = $_POST['access_expires'];
+			$product_ids_max     = max( array_keys( $product_ids ) );
 
 			for ( $i = 0; $i <= $product_ids_max; $i ++ ) {
-
 				if ( ! isset( $product_ids[ $i ] ) ) {
 					continue;
 				}
+
+				// @todo $download = new WC_Customer_Download( $data );
 
 				$data = array(
 					'downloads_remaining' => wc_clean( $downloads_remaining[ $i ] ),

@@ -369,10 +369,8 @@ class WC_Post_Data {
 		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				WHERE order_id = %d
-			", $postid ) );
+			$data_store = WC_Data_Store::load( 'customer-download' );
+			$data_store->delete_by_order_id( $postid );
 
 			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}

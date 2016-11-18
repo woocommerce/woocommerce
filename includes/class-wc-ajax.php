@@ -740,15 +740,12 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die( -1 );
 		}
-
-		global $wpdb;
-
 		$download_id   = $_POST['download_id'];
 		$product_id    = intval( $_POST['product_id'] );
 		$order_id      = intval( $_POST['order_id'] );
 		$permission_id = absint( $_POST['permission_id'] );
-
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d;", $permission_id ) );
+		$data_store    = WC_Data_Store::load( 'customer-download' );
+		$data_store->delete_by_id( $permission_id );
 
 		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id, $permission_id );
 
@@ -791,10 +788,7 @@ class WC_AJAX {
 			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
 					if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
-
-						// insert complete - get inserted data
-						$download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d", $inserted_id ) );
-
+						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;
 						$file_counter ++;
 

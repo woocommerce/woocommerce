@@ -349,9 +349,9 @@ function wc_orders_count( $status ) {
 /**
  * Grant downloadable product access to the file identified by $download_id.
  *
- * @param string $download_id file identifier
- * @param int|WC_Product $product
- * @param WC_Order $order the order
+ * @param  string $download_id file identifier
+ * @param  int|WC_Product $product
+ * @param  WC_Order $order the order
  * @param  int $qty purchased
  * @return int|bool insert id or false on failure
  */
@@ -359,13 +359,25 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
 	}
-	$data_store = WC_Data_Store::load( 'customer-download' );
-	return $data_store->create( array(
-		'download_id' => $download_id,
-		'product'     => $product,
-		'order'       => $order,
-		'qty'         => $qty
-	) );
+	$download = new WC_Customer_Download();
+	$download->set_download_id( $download_id );
+	$download->set_product_id( $product->get_id() );
+	$download->set_user_id( $order->get_customer_id() );
+	$download->set_order_id( $order->get_id() );
+	$download->set_user_email();
+	$download->set_order_key( $order->get_order_key() );
+	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
+	$download->set_access_granted( current_time( 'timestamp' ) );
+	$download->set_download_count( 0 );
+
+	$expiry = $product->get_download_expiry();
+
+	if ( $expiry > 0 ) {
+		$order_completed_date = date_i18n( "Y-m-d", $order->get_date_completed() );
+		$download->set_access_expires( strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+	}
+
+	return $download->save();
 }
 
 /**
@@ -373,10 +385,10 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
  *
  * @param int $order_id
  */
-function wc_downloadable_product_permissions( $order_id ) {
+function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || $order->get_data_store()->get_download_permissions_granted( $order ) ) {
+	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
 		return;
 	}
 

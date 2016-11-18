@@ -187,14 +187,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$order   = $this->get_order();
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
-			$download_ids        = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT download_id FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE user_email = %s AND order_key = %s AND product_id = %d ORDER BY permission_id",
-					$order->get_billing_email(),
-					$order->get_order_key(),
-					$this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id()
-				)
-			);
+			$data_store   = WC_Data_Store::load( 'customer-download' );
+			$download_ids = $data_store->get_download_ids( array(
+				'user_email' => $order->get_billing_email(),
+				'order_key'  => $order->get_order_key(),
+				'product_id' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+			) );
 
 			foreach ( $download_ids as $download_id ) {
 				if ( $product->has_file( $download_id ) ) {
