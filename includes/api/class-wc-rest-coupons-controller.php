@@ -140,8 +140,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$code           = wc_get_coupon_code_by_id( $post->ID );
-		$coupon         = new WC_Coupon( $code );
+		$coupon         = new WC_Coupon( (int) $post->ID );
 		$data           = $coupon->get_data();
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
