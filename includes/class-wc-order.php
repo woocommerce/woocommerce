@@ -68,6 +68,8 @@ class WC_Order extends WC_Abstract_Order {
 		'_date_completed',
 		'_date_paid',
 		'_payment_tokens',
+		'_billing_address_index',
+		'_shipping_address_index'
 	);
 
 	/**

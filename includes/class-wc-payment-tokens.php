@@ -105,8 +105,8 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
-		// @todo Order Data Store should handle this one.
-		$token_ids = get_post_meta( $order_id, '_payment_tokens', true );
+		$token_ids = $order->get_payment_tokens();
+
 		if ( empty( $token_ids ) ) {
 			return array();
 		}
