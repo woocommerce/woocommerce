@@ -204,10 +204,10 @@ class WC_API_Customers extends WC_API_Resource {
 			if ( is_email( $email ) ) {
 				$customer = get_user_by( 'email', $email );
 				if ( ! is_object( $customer ) ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer Email', 'woocommerce' ), 404 );
+					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer email', 'woocommerce' ), 404 );
 				}
 			} else {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer Email', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer email', 'woocommerce' ), 404 );
 			}
 
 			return $this->get_customer( $customer->ID, $fields );
@@ -289,37 +289,47 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
+	 * @param WC_Customer $customer
 	 */
-	protected function update_customer_data( $id, $data ) {
+	protected function update_customer_data( $id, $data, $customer ) {
+
 		// Customer first name.
 		if ( isset( $data['first_name'] ) ) {
-			update_user_meta( $id, 'first_name', wc_clean( $data['first_name'] ) );
+			$customer->set_first_name( wc_clean( $data['first_name'] ) );
 		}
 
 		// Customer last name.
 		if ( isset( $data['last_name'] ) ) {
-			update_user_meta( $id, 'last_name', wc_clean( $data['last_name'] ) );
+			$customer->set_last_name( wc_clean( $data['last_name'] ) );
 		}
 
 		// Customer billing address.
 		if ( isset( $data['billing_address'] ) ) {
-			foreach ( $this->get_customer_billing_address() as $address ) {
-				if ( isset( $data['billing_address'][ $address ] ) ) {
-					update_user_meta( $id, 'billing_' . $address, wc_clean( $data['billing_address'][ $address ] ) );
+			foreach ( $this->get_customer_billing_address() as $field ) {
+				if ( isset( $data['billing_address'][ $field ] ) ) {
+					if ( is_callable( array( $customer, "set_billing_{$field}" ) ) ) {
+						$customer->{"set_billing_{$field}"}( $data['billing_address'][ $field ] );
+					} else {
+						$customer->update_meta_data( 'billing_' . $field, wc_clean( $data['billing_address'][ $field ] ), $meta['id'] );
+					}
 				}
 			}
 		}
 
 		// Customer shipping address.
 		if ( isset( $data['shipping_address'] ) ) {
-			foreach ( $this->get_customer_shipping_address() as $address ) {
-				if ( isset( $data['shipping_address'][ $address ] ) ) {
-					update_user_meta( $id, 'shipping_' . $address, wc_clean( $data['shipping_address'][ $address ] ) );
+			foreach ( $this->get_customer_shipping_address() as $field ) {
+				if ( isset( $data['shipping_address'][ $field ] ) ) {
+					if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
+						$customer->{"set_shipping_{$field}"}( $data['shipping_address'][ $field ] );
+					} else {
+						$customer->update_meta_data( 'shipping_' . $field, wc_clean( $data['shipping_address'][ $field ] ), $meta['id'] );
+					}
 				}
 			}
 		}
 
-		do_action( 'woocommerce_api_update_customer_data', $id, $data );
+		do_action( 'woocommerce_api_update_customer_data', $id, $data, $customer );
 	}
 
 	/**
@@ -349,29 +359,27 @@ class WC_API_Customers extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_customer_email', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'email' ), 400 );
 			}
 
-			// Sets the username.
-			$data['username'] = ! empty( $data['username'] ) ? $data['username'] : '';
+			// Create customer.
+			$customer = new WC_Customer;
+			$customer->set_username( ! empty( $data['username'] ) ? $data['username'] : '' );
+			$customer->set_password( ! empty( $data['password'] ) ? $data['password'] : '' );
+			$customer->set_email( $data['email'] );
+			$customer->save();
 
-			// Sets the password.
-			$data['password'] = ! empty( $data['password'] ) ? $data['password'] : '';
-
-			// Attempts to create the new customer
-			$id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );
-
-			// Checks for an error in the customer creation.
-			if ( is_wp_error( $id ) ) {
-				throw new WC_API_Exception( $id->get_error_code(), $id->get_error_message(), 400 );
+			if ( ! $customer->get_id() ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_customer', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
 			}
 
 			// Added customer data.
-			$this->update_customer_data( $id, $data );
+			$this->update_customer_data( $customer->get_id(), $data, $customer );
+			$customer->save();
 
-			do_action( 'woocommerce_api_create_customer', $id, $data );
+			do_action( 'woocommerce_api_create_customer', $customer->get_id(), $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_customer( $id );
-		} catch ( WC_API_Exception $e ) {
+			return $this->get_customer( $customer->get_id() );
+		} catch ( Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -402,23 +410,27 @@ class WC_API_Customers extends WC_API_Resource {
 
 			$data = apply_filters( 'woocommerce_api_edit_customer_data', $data, $this );
 
+			$customer = new WC_Customer( $id );
+
 			// Customer email.
 			if ( isset( $data['email'] ) ) {
-				wp_update_user( array( 'ID' => $id, 'user_email' => sanitize_email( $data['email'] ) ) );
+				$customer->set_email( $data['email'] );
 			}
 
 			// Customer password.
 			if ( isset( $data['password'] ) ) {
-				wp_update_user( array( 'ID' => $id, 'user_pass' => wc_clean( $data['password'] ) ) );
+				$customer->set_password( $data['password'] );
 			}
 
 			// Update customer data.
-			$this->update_customer_data( $id, $data );
+			$this->update_customer_data( $customer->get_id(), $data, $customer );
 
-			do_action( 'woocommerce_api_edit_customer', $id, $data );
+			$customer->save();
 
-			return $this->get_customer( $id );
-		} catch ( WC_API_Exception $e ) {
+			do_action( 'woocommerce_api_edit_customer', $customer->get_id(), $data );
+
+			return $this->get_customer( $customer->get_id() );
+		} catch ( Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}

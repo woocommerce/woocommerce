@@ -320,7 +320,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$this->update_customer_meta_fields( $customer, $request );
 			$customer->save();
 
-			$user_data = get_user_by( 'id', $customer->get_id() );
+			$user_data = get_userdata( $customer->get_id() );
 			$this->update_additional_fields_for_object( $user_data, $request );
 
 			/**
@@ -551,7 +551,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['billing'] ) ) {
 			foreach ( array_keys( $schema['properties']['billing']['properties'] ) as $field ) {
 				if ( isset( $request['billing'][ $field ] ) && is_callable( array( $customer, "set_billing_{$field}" ) ) ) {
-					$customer->{"set_billing_{$field}"}( $request['billing'][ $field ]  );
+					$customer->{"set_billing_{$field}"}( $request['billing'][ $field ] );
 				}
 			}
 		}
@@ -560,7 +560,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['shipping'] ) ) {
 			foreach ( array_keys( $schema['properties']['shipping']['properties'] ) as $field ) {
 				if ( isset( $request['shipping'][ $field ] ) && is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
-					$customer->{"set_shipping_{$field}"}( $request['shipping'][ $field ]  );
+					$customer->{"set_shipping_{$field}"}( $request['shipping'][ $field ] );
 				}
 			}
 		}
