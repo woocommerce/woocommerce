@@ -81,21 +81,17 @@ class WC_Meta_Box_Order_Downloads {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
-		if ( isset( $_POST['download_id'] ) ) {
-			$download_ids        = $_POST['download_id'];
-			$product_ids         = $_POST['product_id'];
+		if ( isset( $_POST['permission_id'] ) ) {
+			$permission_ids      = $_POST['permission_id'];
 			$downloads_remaining = $_POST['downloads_remaining'];
 			$access_expires      = $_POST['access_expires'];
-			$product_ids_max     = max( array_keys( $product_ids ) );
-			$data_store          = WC_Data_Store::load( 'customer-download' );
+			$max                 = max( array_keys( $permission_ids ) );
 
-			for ( $i = 0; $i <= $product_ids_max; $i ++ ) {
-				if ( ! isset( $product_ids[ $i ] ) ) {
+			for ( $i = 0; $i <= $max; $i ++ ) {
+				if ( ! isset( $permission_ids[ $i ] ) ) {
 					continue;
 				}
-				$download = $data_store::get_download_from_order( $post_id, absint( $product_ids[ $i ] ), $download_ids[ $i ] );
+				$download = new WC_Customer_Download( $permission_ids[ $i ] );
 				$download->set_downloads_remaining( wc_clean( $downloads_remaining[ $i ] ) );
 				$download->set_access_expires( array_key_exists( $i, $access_expires ) && '' !== $access_expires[ $i ] ? strtotime( $access_expires[ $i ] ) : '' );
 				$download->save();

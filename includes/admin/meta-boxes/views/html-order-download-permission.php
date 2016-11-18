@@ -17,8 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr>
 				<td>
 					<label><?php _e( 'Downloads remaining', 'woocommerce' ); ?></label>
-					<input type="hidden" name="product_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_product_id() ); ?>" />
-					<input type="hidden" name="download_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_product_id() ); ?>" />
+					<input type="hidden" name="permission_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_id() ); ?>" />
 					<input type="number" step="1" min="0" class="short" name="downloads_remaining[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_downloads_remaining() ); ?>" placeholder="<?php esc_attr_e( 'Unlimited', 'woocommerce' ); ?>" />
 				</td>
 				<td>

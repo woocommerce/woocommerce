@@ -176,7 +176,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get any associated downloadable files.
+	 * Get any associated downloadable files. @todo
 	 * @return array
 	 */
 	public function get_item_downloads() {
@@ -190,7 +190,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$data_store   = WC_Data_Store::load( 'customer-download' );
 			$download_ids = $data_store->get_downloads( array(
 				'user_email' => $order->get_billing_email(),
-				'order_key'  => $order->get_order_key(),
+				'order_id'   => $order->get_id(),
 				'product_id' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
 				'return'     => 'ids',
 			) );

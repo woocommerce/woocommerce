@@ -112,7 +112,14 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			'%s',
 		);
 
-		$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', $data, $format );
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+			$data,
+			array(
+				'permission_id' => $download->get_id(),
+			),
+			$format
+		);
 		$download->apply_changes();
 	}
 
@@ -180,22 +187,6 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	private function get_download( $data ) {
 		return new WC_Customer_Download( $data );
-	}
-
-	/**
-	 * Get a download object from an order.
-	 *
-	 * @param  int $order_id
-	 * @param  int $product_id
-	 * @param  string $download_id
-	 * @return WC_Customer_Download
-	 */
-	private function get_download_from_order( $order_id, $product_id, $download_id ) {
-		global $wpdb;
-
-		$raw_download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order_id, $product_id, $download_id ) );
-
-		return $raw_download ? new WC_Customer_Download( $raw_download ) : false;
 	}
 
 	/**
