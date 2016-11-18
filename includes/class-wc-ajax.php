@@ -929,7 +929,8 @@ class WC_AJAX {
 			// Add new shipping
 			$item = new WC_Order_Item_Shipping();
 			$item->set_shipping_rate( new WC_Shipping_Rate() );
-			$order->add_item( $item );
+			$item->set_order_id( $order_id );
+			$item_id = $item->save();
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-shipping.php' );

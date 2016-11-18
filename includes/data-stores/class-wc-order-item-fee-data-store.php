@@ -35,10 +35,10 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Data_Store imp
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		wc_update_order_item_meta( $item->get_id(), '_tax_class', $item->get_tax_class() );
-		wc_update_order_item_meta( $item->get_id(), '_tax_status', $item->get_tax_status() );
-		wc_update_order_item_meta( $item->get_id(), '_line_total', $item->get_total() );
-		wc_update_order_item_meta( $item->get_id(), '_line_tax', $item->get_total_tax() );
-		wc_update_order_item_meta( $item->get_id(), '_line_tax_data', $item->get_taxes() );
+		wc_update_order_item_meta( $item->get_id(), '_tax_class', $item->get_tax_class( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_tax_status', $item->get_tax_status( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_total', $item->get_total( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_tax', $item->get_total_tax( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_tax_data', $item->get_taxes( 'edit' ) );
 	}
 }

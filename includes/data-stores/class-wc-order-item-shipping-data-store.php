@@ -34,9 +34,9 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Data_Stor
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		wc_update_order_item_meta( $item->get_id(), 'method_id', $item->get_method_id() );
-		wc_update_order_item_meta( $item->get_id(), 'cost', $item->get_total() );
-		wc_update_order_item_meta( $item->get_id(), 'total_tax', $item->get_total_tax() );
-		wc_update_order_item_meta( $item->get_id(), 'taxes', $item->get_taxes() );
+		wc_update_order_item_meta( $item->get_id(), 'method_id', $item->get_method_id( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), 'cost', $item->get_total( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), 'total_tax', $item->get_total_tax( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), 'taxes', $item->get_taxes( 'edit' ) );
 	}
 }

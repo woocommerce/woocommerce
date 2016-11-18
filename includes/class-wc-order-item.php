@@ -24,7 +24,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $data = array(
 		'order_id' => 0,
 		'name'     => '',
-		'type'     => '',
 	);
 
 	/**
@@ -102,7 +101,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_type() {
-		return $this->get_prop( 'type', 'view' );
+		return;
 	}
 
 	/**
@@ -150,15 +149,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$this->set_prop( 'name', wc_clean( $value ) );
 	}
 
-	/**
-	 * Set order item type.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	protected function set_type( $value ) {
-		$this->set_prop( 'type', wc_clean( $value ) );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Other Methods
@@ -184,6 +174,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->data_store ) {
 			$this->data_store->save_item_data( $this );
 		}
+
+		$this->apply_changes();
 
 		return $this->get_id();
 	}

@@ -28,8 +28,6 @@ abstract class Abstract_WC_Order_Item_Data_Store implements WC_Object_Data_Store
 		$item->set_id( $wpdb->insert_id );
 
 		do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
-
-		$item->apply_changes();
 	}
 
 	/**
@@ -48,8 +46,6 @@ abstract class Abstract_WC_Order_Item_Data_Store implements WC_Object_Data_Store
 		), array( 'order_item_id' => $item->get_id() ) );
 
 		do_action( 'woocommerce_update_order_item', $item->get_id(), $item, $item->get_order_id() );
-
-		$item->apply_changes();
 	}
 
 	/**

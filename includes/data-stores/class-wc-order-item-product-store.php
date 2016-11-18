@@ -38,15 +38,15 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Data_Store
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		wc_update_order_item_meta( $item->get_id(), '_product_id', $item->get_product_id() );
-		wc_update_order_item_meta( $item->get_id(), '_variation_id', $item->get_variation_id() );
-		wc_update_order_item_meta( $item->get_id(), '_qty', $item->get_quantity() );
-		wc_update_order_item_meta( $item->get_id(), '_tax_class', $item->get_tax_class() );
-		wc_update_order_item_meta( $item->get_id(), '_line_subtotal', $item->get_subtotal() );
-		wc_update_order_item_meta( $item->get_id(), '_line_subtotal_tax', $item->get_subtotal_tax() );
-		wc_update_order_item_meta( $item->get_id(), '_line_total', $item->get_total() );
-		wc_update_order_item_meta( $item->get_id(), '_line_tax', $item->get_total_tax() );
-		wc_update_order_item_meta( $item->get_id(), '_line_tax_data', $item->get_taxes() );
+		wc_update_order_item_meta( $item->get_id(), '_product_id', $item->get_product_id( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_variation_id', $item->get_variation_id( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_qty', $item->get_quantity( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_tax_class', $item->get_tax_class( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_subtotal', $item->get_subtotal( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_subtotal_tax', $item->get_subtotal_tax( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_total', $item->get_total( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_tax', $item->get_total_tax( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), '_line_tax_data', $item->get_taxes( 'edit' ) );
 	}
 
 	/**

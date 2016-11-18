@@ -33,7 +33,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Data_Store 
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		wc_update_order_item_meta( $item->get_id(), 'discount_amount', $item->get_discount() );
-		wc_update_order_item_meta( $item->get_id(), 'discount_amount_tax', $item->get_discount_tax() );
+		wc_update_order_item_meta( $item->get_id(), 'discount_amount', $item->get_discount( 'edit' ) );
+		wc_update_order_item_meta( $item->get_id(), 'discount_amount_tax', $item->get_discount_tax( 'edit' ) );
 	}
 }

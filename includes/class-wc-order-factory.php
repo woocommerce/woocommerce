@@ -63,7 +63,7 @@ class WC_Order_Factory {
 			$item_type = $item_id->get_type();
 			$id        = $item_id->get_id();
 		} elseif ( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
-			$id        = $item_id;
+			$id        = $item_id->order_item_id;
 			$item_type = $item_id->order_item_type;
 		} else {
 			$item_data = false;
