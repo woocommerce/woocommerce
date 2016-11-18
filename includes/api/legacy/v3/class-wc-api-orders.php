@@ -954,35 +954,37 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// quantity
 		if ( $creating ) {
-			$item = new WC_Order_Item_Product();
+			$line_item = new WC_Order_Item_Product();
 		} else {
-			$item = new WC_Order_Item_Product( $item['id'] );
+			$line_item = new WC_Order_Item_Product( $item['id'] );
 		}
 
-		$item->set_product( $product );
-		$item->set_order_id( $order->get_id() );
+		error_log( print_r ( $item, 1 ) );
+
+		$line_item->set_product( $product );
+		$line_item->set_order_id( $order->get_id() );
 
 		if ( isset( $item['quantity'] ) ) {
-			$item->set_quantity( $item['quantity'] );
+			$line_item->set_quantity( $item['quantity'] );
 		}
 		if ( isset( $item['total'] ) ) {
-			$item->set_total( floatval( $item['total'] ) );
+			$line_item->set_total( floatval( $item['total'] ) );
 		}
 		if ( isset( $item['total_tax'] ) ) {
-			$item->set_total_tax( floatval( $item['total_tax'] ) );
+			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
 		}
 		if ( isset( $item['subtotal'] ) ) {
-			$item->set_subtotal( floatval( $item['subtotal'] ) );
+			$line_item->set_subtotal( floatval( $item['subtotal'] ) );
 		}
 		if ( isset( $item['subtotal_tax'] ) ) {
-			$item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
+			$line_item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
 		}
 		if ( $variation_id ) {
-			$item->set_variation_id( $variation_id );
-			$item->set_variation( $item['variations'] );
+			$line_item->set_variation_id( $variation_id );
+			$line_item->set_variation( $item['variations'] );
 		}
 
-		$item_id = $item->save();
+		$item_id = $line_item->save();
 	}
 
 	/**
