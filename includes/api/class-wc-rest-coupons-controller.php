@@ -125,7 +125,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		if ( ! empty( $request['code'] ) ) {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['code'] ) );
+			$id = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
 		}
 
