@@ -2013,7 +2013,7 @@ class WC_AJAX {
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
-			$variation->save_regular_price( wc_clean( $data['value'] ) );
+			$variation->set_regular_price( wc_clean( $data['value'] ) );
 			$variation->save();
 		}
 	}

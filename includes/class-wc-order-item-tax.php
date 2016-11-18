@@ -119,10 +119,9 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get order item type.
 	 *
-	 * @param  string $context
 	 * @return string
 	 */
-	public function get_type( $context = 'view' ) {
+	public function get_type() {
 		return 'tax';
 	}
 

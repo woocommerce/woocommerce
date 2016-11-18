@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -13,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		WooCommerce
  */
 class WC_Order_Factory {
 
@@ -73,23 +72,31 @@ class WC_Order_Factory {
 		}
 
 		if ( $id && $item_type ) {
+			$classname = false;
 			switch ( $item_type ) {
 				case 'line_item' :
 				case 'product' :
-					return new WC_Order_Item_Product( $id );
+					$classname = 'WC_Order_Item_Product';
 				break;
 				case 'coupon' :
-					return new WC_Order_Item_Coupon( $id );
+					$classname = 'WC_Order_Item_Coupon';
 				break;
 				case 'fee' :
-					return new WC_Order_Item_Fee( $id );
+					$classname = 'WC_Order_Item_Fee';
 				break;
 				case 'shipping' :
-					return new WC_Order_Item_Shipping( $id );
+					$classname = 'WC_Order_Item_Shipping';
 				break;
 				case 'tax' :
-					return new WC_Order_Item_Tax( $id );
+					$classname = 'WC_Order_Item_Tax';
 				break;
+			}
+			if ( $classname ) {
+				try {
+					return new $classname( $id );
+				} catch ( Exception $e ) {
+					return false;
+				}
 			}
 		}
 		return false;

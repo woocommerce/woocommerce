@@ -97,13 +97,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get order item type.
+	 * Get order item type. Overridden by child classes.
 	 *
-	 * @param  string $context
 	 * @return string
 	 */
-	public function get_type( $context = 'view' ) {
-		return $this->get_prop( 'type', $context );
+	public function get_type() {
+		return $this->get_prop( 'type', 'view' );
 	}
 
 	/**

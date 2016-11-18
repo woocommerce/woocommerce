@@ -8,10 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  2.7.0
  * @category Class
- * @author   WooThemes
+ * @author   WooCommerce
  */
-class WC_Order_Item_Tax_Data_Store extends WC_Order_Item_Data_Store implements WC_Object_Data_Store {
-
+class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Data_Store implements WC_Object_Data_Store, WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Read/populate data properties specific to this order item.
 	 *
@@ -30,7 +29,11 @@ class WC_Order_Item_Tax_Data_Store extends WC_Order_Item_Data_Store implements W
 	}
 
 	/**
-	 * Save properties specific to this order item.
+	 * Saves an item's data to the database / item meta.
+	 * Ran after both create and update, so $item->get_id() will be set.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
 		wc_update_order_item_meta( $item->get_id(), 'rate_id', $item->get_rate_id() );
@@ -39,5 +42,4 @@ class WC_Order_Item_Tax_Data_Store extends WC_Order_Item_Data_Store implements W
 		wc_update_order_item_meta( $item->get_id(), 'tax_amount', $item->get_tax_total() );
 		wc_update_order_item_meta( $item->get_id(), 'shipping_tax_amount', $item->get_shipping_tax_total() );
 	}
-
 }

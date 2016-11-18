@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     2.7.0
  * @since       2.7.0
  * @package     WooCommerce/Classes
- * @author      WooThemes
+ * @author      WooCommerce
  */
 class WC_Order_Item_Coupon extends WC_Order_Item {
 
@@ -79,10 +79,9 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get order item type.
 	 *
-	 * @param  string $context
 	 * @return string
 	 */
-	public function get_type( $context = 'view' ) {
+	public function get_type() {
 		return 'coupon';
 	}
 

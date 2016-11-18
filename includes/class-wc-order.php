@@ -167,7 +167,6 @@ class WC_Order extends WC_Abstract_Order {
 			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
 				$order_needs_processing = false;
 
-				error_log( print_r ( $this->get_items(), 1 ) );
 				if ( sizeof( $this->get_items() ) > 0 ) {
 					foreach ( $this->get_items() as $item ) {
 						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
