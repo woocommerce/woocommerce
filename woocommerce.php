@@ -293,7 +293,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-customer-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-payment-token-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-shipping-zone-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/abstract-wc-order-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-abstract-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-order-refund-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );

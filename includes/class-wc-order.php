@@ -758,13 +758,14 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Returns the requested address in raw, non-formatted way.
+	 * Note: Merges raw data with get_prop data so changes are returned too.
 	 *
 	 * @since  2.4.0
 	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
 	 * @return array The stored address after filter.
 	 */
 	public function get_address( $type = 'billing' ) {
-		return apply_filters( 'woocommerce_get_order_address', isset( $this->data[ $type ] ) ? $this->data[ $type ] : array(), $type, $this );
+		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $type ], $this->get_prop( $type, 'view' ) ), $type, $this );
 	}
 
 	/**

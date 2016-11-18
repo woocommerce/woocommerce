@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface Abstract_WC_Order_Data_Store_Interface {
+interface WC_Abstract_Order_Data_Store_Interface {
 
 	/**
 	 * Read order items of a specific type from the database for this order.

@@ -7,11 +7,9 @@
  * @author      WooThemes
  * @category    Core
  * @package     WooCommerce/Functions
- * @version     2.1.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -722,14 +720,16 @@ function wc_orders_count( $status ) {
 /**
  * Clear all transients cache for order data.
  *
- * @param int $post_id (default: 0)
+ * @param int|WC_Order $order
  */
-function wc_delete_shop_order_transients( $post_id = 0 ) {
-	$post_id             = absint( $post_id );
-	$transients_to_clear = array();
-
-	// Clear report transients
-	$reports = WC_Admin_Reports::get_reports();
+function wc_delete_shop_order_transients( $order = 0 ) {
+	if ( is_numeric( $order ) ) {
+		$order = wc_get_order( $order );
+	}
+	$reports             = WC_Admin_Reports::get_reports();
+	$transients_to_clear = array(
+		'wc_admin_report'
+	);
 
 	foreach ( $reports as $report_group ) {
 		foreach ( $report_group['reports'] as $report_key => $report ) {
@@ -737,18 +737,17 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		}
 	}
 
-	// clear API report transient
-	$transients_to_clear[] = 'wc_admin_report';
-
-	// Clear transients where we have names
 	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
 	// Clear money spent for user associated with order
-	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
-		delete_user_meta( $user_id, '_money_spent' );
-		delete_user_meta( $user_id, '_order_count' );
+	if ( is_a( $order, 'WC_Order' ) ) {
+		$order_id = $order->get_id();
+		delete_user_meta( $order->get_customer_id(), '_money_spent' );
+		delete_user_meta( $order->get_customer_id(), '_order_count' );
+	} else {
+		$order_id = 0;
 	}
 
 	// Increments the transient version to invalidate cache
@@ -757,7 +756,7 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	// Do the same for regular cache
 	WC_Cache_Helper::incr_cache_prefix( 'orders' );
 
-	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
+	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
 
 /**
@@ -916,7 +915,7 @@ function wc_order_fully_refunded( $order_id ) {
 		'line_items' => array(),
 	) );
 
-	wc_delete_shop_order_transients( $order_id );
+	wc_delete_shop_order_transients( $order );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 

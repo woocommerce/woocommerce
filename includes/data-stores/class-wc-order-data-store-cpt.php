@@ -81,7 +81,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$changed_props     = $order->get_changes();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_user',
+			'_customer_user'        => 'customer_id',
 			'_payment_method'       => 'payment_method',
 			'_payment_method_title' => 'payment_method_title',
 			'_transaction_id'       => 'transaction_id',

@@ -44,7 +44,7 @@ class WC_Post_Data {
 		// Status transitions
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
-		add_action( 'untrash_post', array( __CLASS__, 'untrash_post' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_items' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_downloadable_permissions' ) );
 	}
@@ -293,15 +293,6 @@ class WC_Post_Data {
 			$post_type = get_post_type( $id );
 
 			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
-
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
 				foreach ( $refunds as $refund ) {
@@ -327,14 +318,6 @@ class WC_Post_Data {
 			$post_type = get_post_type( $id );
 
 			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 

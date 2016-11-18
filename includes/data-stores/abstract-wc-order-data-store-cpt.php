@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, Abstract_WC_Order_Data_Store_Interface {
+abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Abstract_Order_Data_Store_Interface {
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -195,7 +195,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 	 */
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
-		wc_delete_shop_order_transients( $order->get_id() );
+		wc_delete_shop_order_transients( $order );
 	}
 
 	/**
