@@ -44,8 +44,6 @@ class WC_Admin_Post_Types {
 		add_filter( 'manage_edit-shop_coupon_sortable_columns', array( $this, 'shop_coupon_sortable_columns' ) );
 		add_filter( 'manage_edit-shop_order_sortable_columns', array( $this, 'shop_order_sortable_columns' ) );
 
-		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
-
 		add_filter( 'list_table_primary_column', array( $this, 'list_table_primary_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 2, 100 );
 
@@ -58,7 +56,9 @@ class WC_Admin_Post_Types {
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
+		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
+		add_filter( 'handle_bulk_actions-edit-shop_order', 'handle_shop_order_bulk_actions', 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 
 		// Order Search
@@ -774,21 +774,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Remove edit from the bulk actions.
-	 *
-	 * @param array $actions
-	 * @return array
-	 */
-	public function shop_order_bulk_actions( $actions ) {
-
-		if ( isset( $actions['edit'] ) ) {
-			unset( $actions['edit'] );
-		}
-
-		return $actions;
-	}
-
-	/**
 	 * Set list table primary column for products and orders.
 	 * Support for WordPress 4.3.
 	 *
@@ -1329,24 +1314,30 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Add extra bulk action options to mark orders as complete or processing.
+	 * Fallback for old versions of WordPress.
+	 * See: https://core.trac.wordpress.org/ticket/16031.
 	 *
-	 * Using Javascript until WordPress core fixes: https://core.trac.wordpress.org/ticket/16031.
+	 * @todo Remove when start require at least 4.7.
 	 */
 	public function bulk_admin_footer() {
-		global $post_type;
+		global $post_type, $wp_version;
 
-		if ( 'shop_order' == $post_type ) {
+		if ( version_compare( $wp_version, '4.7-beta', '>=' ) ) {
+			return;
+		}
+
+		if ( 'shop_order' === $post_type ) {
 			?>
 			<script type="text/javascript">
-			jQuery(function() {
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action2"]');
+			jQuery( function( $ ) {
+				$( '<option>' ).val( 'mark_processing' ).text( '<?php _e( 'Mark processing', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
+				$( '<option>' ).val( 'mark_processing' ).text( '<?php _e( 'Mark processing', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
 
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action2"]');
+				$( '<option>' ).val( 'mark_on-hold' ).text( '<?php _e( 'Mark on-hold', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
+				$( '<option>' ).val( 'mark_on-hold' ).text( '<?php _e( 'Mark on-hold', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
 
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action"]');
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action2"]');
+				$( '<option>' ).val( 'mark_completed' ).text( '<?php _e( 'Mark complete', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
+				$( '<option>' ).val( 'mark_completed' ).text( '<?php _e( 'Mark complete', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
 			});
 			</script>
 			<?php
@@ -1355,46 +1346,94 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Process the new bulk actions for changing order status.
+	 *
+	 * @todo Remove when start require at least 4.7.
 	 */
 	public function bulk_action() {
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '4.7-beta', '>=' ) ) {
+			return;
+		}
+
 		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
 		$action        = $wp_list_table->current_action();
+		$ids           = wp_unslash( $_REQUEST['post'] );
+		$sendback      = $this->handle_shop_order_bulk_actions( '', $action, $ids );
 
-		// Bail out if this is not a status-changing action
-		if ( strpos( $action, 'mark_' ) === false ) {
+		if ( empty( $sendback ) ) {
 			return;
 		}
-
-		$order_statuses = wc_get_order_statuses();
-
-		$new_status    = substr( $action, 5 ); // get the status name from action
-		$report_action = 'marked_' . $new_status;
-
-		// Sanity check: bail out if this is actually not a status, or is
-		// not a registered status
-		if ( ! isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
-			return;
-		}
-
-		$changed = 0;
-
-		$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
-
-		foreach ( $post_ids as $post_id ) {
-			$order = wc_get_order( $post_id );
-			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
-			do_action( 'woocommerce_order_edit_status', $post_id, $new_status );
-			$changed++;
-		}
-
-		$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => true, 'changed' => $changed, 'ids' => join( ',', $post_ids ) ), '' );
 
 		if ( isset( $_GET['post_status'] ) ) {
 			$sendback = add_query_arg( 'post_status', sanitize_text_field( $_GET['post_status'] ), $sendback );
 		}
 
-		wp_redirect( esc_url_raw( $sendback ) );
+		wp_redirect( $sendback );
 		exit();
+	}
+
+	/**
+	 * Manipulate shop order bulk actions.
+	 *
+	 * @param  array $actions List of actions.
+	 * @return array
+	 */
+	public function shop_order_bulk_actions( $actions ) {
+		if ( isset( $actions['edit'] ) ) {
+			unset( $actions['edit'] );
+		}
+
+		$actions['mark_processing'] = __( 'Mark processing', 'woocommerce' );
+		$actions['mark_on-hold']    = __( 'Mark on-hold', 'woocommerce' );
+		$actions['mark_completed']  = __( 'Mark complete', 'woocommerce' );
+
+		return $actions;
+	}
+
+	/**
+	 * Handle shop order bulk actions.
+	 *
+	 * @since  2.7.0
+	 * @param  string $redirect_to URL to redirect to.
+	 * @param  string $action      Action name.
+	 * @param  array  $ids         List of ids.
+	 * @return string
+	 */
+	public function handle_shop_order_bulk_actions( $redirect_to, $action, $ids ) {
+		// Bail out if this is not a status-changing action.
+		if ( false === strpos( $action, 'mark_' ) ) {
+			return $redirect_to;
+		}
+
+		$order_statuses = wc_get_order_statuses();
+		$new_status     = substr( $action, 5 ); // Get the status name from action.
+		$report_action  = 'marked_' . $new_status;
+
+		// Sanity check: bail out if this is actually not a status, or is
+		// not a registered status.
+		if ( ! isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+			return $redirect_to;
+		}
+
+		$changed = 0;
+		$ids = array_map( 'absint', $ids );
+
+		foreach ( $ids as $id ) {
+			$order = wc_get_order( $id );
+			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
+			do_action( 'woocommerce_order_edit_status', $id, $new_status );
+			$changed++;
+		}
+
+		$redirect_to = add_query_arg( array(
+			'post_type'    => 'shop_order',
+			$report_action => true,
+			'changed'      => $changed,
+			'ids'          => join( ',', $ids ),
+		), $redirect_to );
+
+		return esc_url_raw( $redirect_to );
 	}
 
 	/**
