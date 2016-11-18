@@ -962,7 +962,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return array An array of payment token objects
 	 */
 	public function get_payment_tokens() {
-		return WC_Payment_Tokens::get_order_tokens( $this->get_id() );
+		return $this->data_store->get_payment_token_ids( $this );
 	}
 
 	/*
