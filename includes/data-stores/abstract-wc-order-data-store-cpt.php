@@ -109,7 +109,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 			wp_trash_post( $id );
 			$order->set_status( 'trash' );
 		}
-		do_action( 'woocommerce_delete_' . $post_type, $id );
+		do_action( 'woocommerce_delete_order', $id );
 	}
 
 	/*

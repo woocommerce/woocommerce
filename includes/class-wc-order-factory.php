@@ -97,7 +97,7 @@ class WC_Order_Factory {
 	 * Get the order ID depending on what was passed.
 	 *
 	 * @since 2.7.0
-	 * @param  mixed $product
+	 * @param  mixed $order
 	 * @return int|bool false on failure
 	 */
 	private static function get_order_id( $order ) {
