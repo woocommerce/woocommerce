@@ -260,14 +260,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	protected function get_taxonomy_terms( $product, $taxonomy = 'cat' ) {
 		$terms = array();
 
-		if ( $_terms = get_the_terms( $product->get_id(), 'product_' . $taxonomy ) ) {
-			foreach ( $_terms as $term ) {
-				$terms[] = array(
-					'id'   => $term->term_id,
-					'name' => $term->name,
-					'slug' => $term->slug,
-				);
-			}
+		foreach ( wc_get_object_terms( $product->get_id(), 'product_' . $taxonomy ) as $term ) {
+			$terms[] = array(
+				'id'   => $term->term_id,
+				'name' => $term->name,
+				'slug' => $term->slug,
+			);
 		}
 
 		return $terms;
@@ -381,7 +379,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}

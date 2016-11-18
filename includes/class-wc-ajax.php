@@ -662,7 +662,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
 
 			if ( $attribute->is_taxonomy() ) {
-				$options = wc_get_product_terms( $post_id, $attribute->get_name(), array( 'fields' => 'slugs' ) );
+				$options = wc_get_object_terms( $post_id, $attribute->get_name(), 'slug' );
 			} else {
 				$options = $attribute->get_options();
 			}
