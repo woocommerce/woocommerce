@@ -116,9 +116,9 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ) ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ) ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ) ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),

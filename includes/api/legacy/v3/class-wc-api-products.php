@@ -1129,8 +1129,8 @@ class WC_API_Products extends WC_API_Resource {
 		return array(
 			'title'              => $product->get_name(),
 			'id'                 => $product->get_id(),
-			'created_at'         => $this->server->format_datetime( $product->get_date_created() ),
-			'updated_at'         => $this->server->format_datetime( $product->get_date_modified() ),
+			'created_at'         => $this->server->format_datetime( $product->get_date_created(), false, true ),
+			'updated_at'         => $this->server->format_datetime( $product->get_date_modified(), false, true ),
 			'type'               => $product->get_type(),
 			'status'             => $product->get_status(),
 			'downloadable'       => $product->is_downloadable(),
@@ -1227,8 +1227,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variations[] = array(
 				'id'                 => $variation->get_id(),
-				'created_at'         => $this->server->format_datetime( $variation->get_date_created() ),
-				'updated_at'         => $this->server->format_datetime( $variation->get_date_modified() ),
+				'created_at'         => $this->server->format_datetime( $variation->get_date_created(), false, true ),
+				'updated_at'         => $this->server->format_datetime( $variation->get_date_modified(), false, true ),
 				'downloadable'       => $variation->is_downloadable(),
 				'virtual'            => $variation->is_virtual(),
 				'permalink'          => $variation->get_permalink(),
