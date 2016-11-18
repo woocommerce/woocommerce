@@ -106,8 +106,9 @@ class WC_API_Orders extends WC_API_Resource {
 		// ensure order ID is valid & user has permission to read
 		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$order      = wc_get_order( $id );
 		$order_data = array(
@@ -126,8 +127,8 @@ class WC_API_Orders extends WC_API_Resource {
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
-			'cart_discount'             => wc_format_decimal( $order->get_cart_discount(), 2 ),
-			'order_discount'            => wc_format_decimal( $order->get_order_discount(), 2 ),
+			'cart_discount'             => wc_format_decimal( 0, 2 ),
+			'order_discount'            => wc_format_decimal( 0, 2 ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
