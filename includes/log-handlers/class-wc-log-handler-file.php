@@ -139,7 +139,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( is_resource( $this->handles[ $handle ] ) ) {
+		if ( array_key_exists( $handle, $this->handles ) && is_resource( $this->handles[ $handle ] ) ) {
 			$result = fclose( $this->handles[ $handle ] );
 			unset( $this->handles[ $handle ] );
 		}
@@ -214,5 +214,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		do_action( 'woocommerce_log_remove', $handle, $removed );
 
 		return $removed;
+	}
+
+	protected static function log_rotate( $handle ) {
+		$base_log_file = wc_get_log_file_path( $handle );
 	}
 }
