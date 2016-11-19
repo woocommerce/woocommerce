@@ -27,7 +27,37 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	private $handles = array();
 
 	/**
+	 * File size limit for log files in bytes.
+	 *
+	 * @var int
+	 * @access private
+	 */
+	private $log_size_limit;
+
+	/**
+	 * Constructor for the logger.
+	 *
+	 * @param $args additional args. {
+	 *     Optional. @see WC_Log_Handler::__construct.
+	 *
+	 *     @type int $log_size_limit Optional. Size limit for log files. Default 5mb.
+	 * }
+	 */
+	public function __construct( $args = array() ) {
+
+		$args = wp_parse_args( $args, array(
+			'log_size_limit' => 5 * 1024 * 1024,
+		) );
+
+		parent::__construct( $args );
+
+		$this->log_size_limit = $args['log_size_limit'];
+	}
+
+	/**
 	 * Destructor.
+	 *
+	 * Cleans up open file handles.
 	 */
 	public function __destruct() {
 		foreach ( $this->handles as $handle ) {
@@ -110,7 +140,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool success
 	 */
 	protected function open( $handle, $mode = 'a' ) {
-		if ( isset( $this->handles[ $handle ] ) ) {
+		if ( $this->is_open( $handle ) ) {
 			return true;
 		}
 
@@ -131,6 +161,16 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	}
 
 	/**
+	 * Check if a handle is open.
+	 *
+	 * @param string $handle Log handle.
+	 * @return bool True if $handle is open.
+	 */
+	protected function is_open( $handle ) {
+		return array_key_exists( $handle, $this->handles );
+	}
+
+	/**
 	 * Close a handle.
 	 *
 	 * @param string $handle
@@ -139,7 +179,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( array_key_exists( $handle, $this->handles ) && is_resource( $this->handles[ $handle ] ) ) {
+		if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
 			$result = fclose( $this->handles[ $handle ] );
 			unset( $this->handles[ $handle ] );
 		}
@@ -157,6 +197,10 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function add( $entry, $handle ) {
 		$result = false;
+
+		if ( $this->should_rotate( $handle ) ) {
+			$this->log_rotate( $handle );
+		}
 
 		if ( $this->open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
 			$result = fwrite( $this->handles[ $handle ], $entry . "\n" );
@@ -216,7 +260,76 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		return $removed;
 	}
 
-	protected static function log_rotate( $handle ) {
-		$base_log_file = wc_get_log_file_path( $handle );
+	/**
+	 * Check if log file should be rotated.
+	 *
+	 * Compares the size of the log file to determine whether it is over the size limit.
+	 *
+	 * @param string $handle Log handle
+	 * @return bool True if if should be rotated.
+	 */
+	protected function should_rotate( $handle ) {
+		$file = wc_get_log_file_path( $handle );
+		if ( $this->is_open( $handle ) ) {
+			$file_stat = fstat( $this->handles[ $handle ] );
+			return $file_stat['size'] > $this->log_size_limit;
+		} elseif ( file_exists( $file ) ) {
+			return filesize( $file ) > $this->log_size_limit;
+		} else {
+			return false;
+		}
 	}
+
+	/**
+	 * Rotate log files.
+	 *
+	 * Logs are rotatated by prepending '.x' to the '.log' suffix.
+	 * The current log plus 10 historical logs are maintained.
+	 * For example:
+	 *     base.9.log -> [ REMOVED ]
+	 *     base.8.log -> base.9.log
+	 *     ...
+	 *     base.0.log -> base.1.log
+	 *     base.log   -> base.0.log
+	 *
+	 * @param string $handle Log handle
+	 */
+	protected function log_rotate( $handle ) {
+		for ( $i = 8; $i >= 0; $i-- ) {
+			$this->increment_log_infix( $handle, $i );
+		}
+		$this->increment_log_infix( $handle );
+	}
+
+	/**
+	 * Increment a log file suffix.
+	 *
+	 * @param string $handle Log handle
+	 * @param null|int $number Optional. Default null. Log suffix number to be incremented.
+	 * @return bool True if increment was successful, otherwise false.
+	 */
+	protected function increment_log_infix( $handle, $number = null ) {
+		if ( null === $number ) {
+			$suffix = '';
+			$next_suffix = '.0';
+		} else {
+			$suffix = '.' . $number;
+			$next_suffix = '.' . ($number + 1);
+		}
+
+		$rename_from = wc_get_log_file_path( "{$handle}{$suffix}" );
+		$rename_to = wc_get_log_file_path( "{$handle}{$next_suffix}" );
+
+		if ( $this->is_open( $rename_from ) ) {
+			$this->close( $rename_from );
+		}
+
+		if ( is_writable( $rename_from ) ) {
+			return rename( $rename_from, $rename_to );
+		} else {
+			return false;
+		}
+
+	}
+
 }

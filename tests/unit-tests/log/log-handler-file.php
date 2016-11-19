@@ -20,8 +20,19 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 			'unit-tests',
 			'log',
 			'A',
-			 '_cleartestfile',
-			 '_clearremovefile',
+			 '_test_clear',
+			 '_test_remove',
+			 '_test_log_rotate',
+			 '_test_log_rotate.0',
+			 '_test_log_rotate.1',
+			 '_test_log_rotate.2',
+			 '_test_log_rotate.3',
+			 '_test_log_rotate.4',
+			 '_test_log_rotate.5',
+			 '_test_log_rotate.6',
+			 '_test_log_rotate.7',
+			 '_test_log_rotate.8',
+			 '_test_log_rotate.9',
 		);
 
 		foreach ( $log_files as $file ) {
@@ -58,7 +69,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 */
 	public function test_clear() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
-		$log_name = '_cleartestfile';
+		$log_name = '_test_clear';
 		$handler->handle( 'debug', time(), 'debug', array( 'tag' => $log_name ) );
 		$handler->clear( $log_name );
 		$this->assertEquals( '', $this->read_content( $log_name ) );
@@ -71,7 +82,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 */
 	public function test_remove() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
-		$log_name = '_clearremovefile';
+		$log_name = '_test_remove';
 		$handler->handle( 'debug', time(), 'debug', array( 'tag' => $log_name ) );
 		$handler->remove( $log_name );
 		$this->assertFileNotExists( wc_get_log_file_path( $log_name ) );
@@ -120,6 +131,40 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'A' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+	}
+
+	/**
+	 * Test log_rotate()
+	 *
+	 * @since 2.8
+	 */
+	public function test_log_rotate() {
+		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$time = time();
+		$log_name = '_test_log_rotate';
+		$base_log_file = wc_get_log_file_path( $log_name );
+
+		// Create log file larger than limit (5mb) to ensure log is rotated
+		$handle = fopen( $base_log_file, 'w' );
+		fseek( $handle, 6 * 1024 * 1024 );
+		fwrite( $handle, '_base_log_file_contents_' );
+		fclose( $handle );
+
+		for ( $i = 0; $i < 10; $i++ ) {
+			file_put_contents( wc_get_log_file_path( $log_name . ".{$i}" ), $i );
+		}
+
+		$context_tag = array( 'tag' => $log_name );
+
+		$handler->handle( 'emergency', $time, 'emergency', $context_tag );
+
+		$this->assertFileExists( wc_get_log_file_path( $log_name ) );
+		$this->assertStringEndsWith( 'EMERGENCY emergency' . PHP_EOL, $this->read_content( $log_name ) );
+
+		$this->assertEquals( '_base_log_file_contents_', trim( $this->read_content( $log_name . '.0' ) ) );
+		for ( $i = 1; $i < 10; $i++ ) {
+			$this->assertEquals( $i - 1, $this->read_content( $log_name . ".{$i}" ) );
+		}
 	}
 
 }
