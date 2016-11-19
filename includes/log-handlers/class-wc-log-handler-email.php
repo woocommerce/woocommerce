@@ -88,7 +88,8 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @return string subject
 	 */
 	public function get_subject( $level, $timestamp, $message, $context ) {
-		return sprintf( __( '[%s] WooCommerce log message', 'woocommerce' ), $level );
+		$site_name = get_bloginfo( 'name' );
+		return sprintf( __( '[%1$s] WooCommerce log message from %2$s', 'woocommerce' ), strtoupper($level), $site_name );
 	}
 
 	/**
