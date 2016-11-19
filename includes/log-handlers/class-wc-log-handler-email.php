@@ -104,7 +104,8 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 */
 	public function get_body( $level, $timestamp, $message, $context ) {
 		$entry = $this->format_entry( $level, $timestamp, $message, $context );
-		return sprintf( __( "You have recieved the following WooCommerce log message: \n\n%s", 'woocommerce' ), $entry );
+		return __( 'You have recieved the following WooCommerce log message:', 'woocommerce' )
+			. PHP_EOL . PHP_EOL . $entry;
 	}
 
 	/**
