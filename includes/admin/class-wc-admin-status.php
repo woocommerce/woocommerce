@@ -250,8 +250,13 @@ class WC_Admin_Status {
 		}
 
 		if ( ! empty( $_REQUEST['handle'] ) ) {
-			$logger = wc_get_logger();
-			$logger->remove( $_REQUEST['handle'] );
+
+			if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-file.php' );
+			}
+
+			$log_handler = new WC_Log_Handler_File();
+			$log_handler->remove( $_REQUEST['handle'] );
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
