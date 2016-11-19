@@ -12,6 +12,7 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 			wc_get_log_file_path( 'unit-tests' ),
 			wc_get_log_file_path( 'log' ),
 			wc_get_log_file_path( 'A' ),
+			wc_get_log_file_path( 'B' ),
 		);
 
 		foreach ( $log_files as $file ) {
@@ -165,26 +166,6 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 		$log->emergency( 'emergency' );
 
 		$log_content = $this->read_content( 'log' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-	}
-
-	/**
-	 * Test 'tag' context determines log file.
-	 */
-	public function test_log_file_tag() {
-		$log = wc_get_logger();
-		$context_tag = array( 'tag' => 'A' );
-
-		$log->debug( 'debug', $context_tag );
-		$log->info( 'info', $context_tag );
-		$log->notice( 'notice', $context_tag );
-		$log->warning( 'warning', $context_tag );
-		$log->error( 'error', $context_tag );
-		$log->critical( 'critical', $context_tag );
-		$log->alert( 'alert', $context_tag );
-		$log->emergency( 'emergency', $context_tag );
-
-		$log_content = $this->read_content( 'A' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
 	}
 
