@@ -96,6 +96,29 @@ class WC_Admin_Status {
 	}
 
 	/**
+	 * Show db logs
+	 *
+	 * @todo Make woocommerce base logger configurable, and show page based on configuration.
+	 */
+	public static function status_logs_db() {
+		$log_table_list = new WC_Admin_Log_Table_List();
+		$log_table_list->prepare_items();
+
+		echo '<form method="get" id="mainform" action="" enctype="multipart/form-data">';
+
+			echo '<input type="hidden" name="page" value="wc-status" />';
+			echo '<input type="hidden" name="tab" value="logs-db" />';
+
+			$log_table_list->views();
+			$log_table_list->search_box( __( 'Search message', 'woocommerce' ), 'message' );
+			$log_table_list->display();
+
+			wp_nonce_field( 'woocommerce-status-db-log' );
+
+		echo '</form>';
+	}
+
+	/**
 	 * Retrieve metadata from a file. Based on WP Core's get_file_data function.
 	 * @since  2.1.1
 	 * @param  string $file Path to the file
