@@ -10,7 +10,7 @@ if ( ! class_exists( 'WC_Logger' ) ) {
 /**
  * Abstract WC Log Handler Class
  *
- * @version        2.8.0
+ * @version        1.0.0
  * @package        WooCommerce/Abstracts
  * @category       Abstract Class
  * @author         WooThemes
