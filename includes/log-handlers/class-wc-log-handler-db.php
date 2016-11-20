@@ -75,11 +75,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			$insert['context'] = serialize( $context );
 		}
 
-		$result = $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert );
-
-		var_dump( $result );
-
-		return false !== $result;
+		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert );
 	}
 
 }
