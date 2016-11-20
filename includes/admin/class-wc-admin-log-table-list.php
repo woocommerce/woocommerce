@@ -200,7 +200,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 				// Level requires special case to order Emergency -> Debug
 				case 'level':
-					$order_by = "CASE level "
+					$order_by = 'CASE level '
 						. "WHEN 'emergency' THEN 8 "
 						. "WHEN 'alert' THEN 7 "
 						. "WHEN 'critical' THEN 6 "
@@ -209,8 +209,8 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 						. "WHEN 'notice' THEN 3 "
 						. "WHEN 'info' THEN 2 "
 						. "WHEN 'debug' THEN 1 "
-						. "ELSE 0 "
-						. "END";
+						. 'ELSE 0 '
+						. 'END';
 					break;
 
 				// Intentional cascade, these are valid values.
@@ -232,7 +232,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		} else {
 			$order_order = 'DESC';
 		}
-
 
 		$logs = $wpdb->get_results(
 			"SELECT log_id, timestamp, level, message, tag FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$level_filter} {$search}" .
