@@ -12,7 +12,7 @@ if ( ! class_exists( 'WC_Log_Handler' ) ) {
  *
  * @class          WC_Log_Handler_Email
  * @version        1.0.0
- * @package        WooCommerce/Classes
+ * @package        WooCommerce/Classes/Log_Handlers
  * @category       Class
  * @author         WooThemes
  */
