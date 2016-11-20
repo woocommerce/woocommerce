@@ -30,6 +30,38 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Get list views.
+	 *
+	 * @return array
+	 */
+	public function get_views() {
+
+		$current = ! empty( $_REQUEST['level'] ) ? $_REQUEST['level'] : false;
+
+		$views = array();
+
+		$process_levels = array(
+			array( 'query_arg' => false, 'label' => _x( 'All levels', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'emergency', 'label' => _x( 'Emergency', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'alert', 'label' => _x( 'Alert', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'critical', 'label' => _x( 'Critical', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'error', 'label' => _x( 'Error', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'warning', 'label' => _x( 'Warning', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'notice', 'label' => _x( 'Notice', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'info', 'label' => _x( 'Info', 'Log level', 'woocommerce' ) ),
+			array( 'query_arg' => 'debug', 'label' => _x( 'Debug', 'Log level', 'woocommerce' ) ),
+		);
+
+		foreach ( $process_levels as $level ) {
+			$url = esc_url( add_query_arg( 'level', $level['query_arg'] ) );
+			$class = $current === $level['query_arg'] ? ' class="current"' : '';
+			$views[] = sprintf( '<a href="%1$s"%2$s>%3$s</a>', $url, $class, esc_html( $level['label'] ) );
+		}
+
+		return $views;
+	}
+
+	/**
 	 * Get list columns.
 	 *
 	 * @return array
@@ -153,10 +185,14 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$offset = 0;
 		}
 
-		$search = '';
+		$level_filter = '';
+		if ( ! empty( $_REQUEST['level'] ) ) {
+			$level_filter = $wpdb->prepare( 'AND level = %s', array( $_REQUEST['level'] ) );
+		}
 
+		$search = '';
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			$search = "AND message LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
+			$search = "AND tag LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
@@ -199,11 +235,11 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 
 		$logs = $wpdb->get_results(
-			"SELECT log_id, timestamp, level, message, tag FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$search}" .
+			"SELECT log_id, timestamp, level, message, tag FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$level_filter} {$search}" .
 			$wpdb->prepare( "ORDER BY {$order_by} {$order_order} LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A
 		);
 
-		$count = $wpdb->get_var( "SELECT COUNT(log_id) FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$search};" );
+		$count = $wpdb->get_var( "SELECT COUNT(log_id) FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$level_filter} {$search};" );
 
 		$this->items = $logs;
 
