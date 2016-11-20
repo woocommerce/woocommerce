@@ -578,6 +578,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   KEY payment_token_id (payment_token_id),
   KEY meta_key (meta_key($max_index_length))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_log (
+  log_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  level varchar(255) NOT NULL,
+  tag varchar(255) NOT NULL,
+  message longtext NOT NULL,
+  context longtext NULL,
+  PRIMARY KEY (log_id),
+  KEY level (level)
+) $collate;
 		";
 
 		// Term meta is only needed for old installs.

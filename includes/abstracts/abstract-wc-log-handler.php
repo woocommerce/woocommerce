@@ -62,16 +62,14 @@ abstract class WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param int $timestamp
-	 * @param string $message
-	 * @param array $context {
-	 *     Optional. Array with additional information.
-	 * }
+	 * @param string $message Log message.
+	 * @param array $context Additional information for log handlers.
 	 *
-	 * @return bool log entry should bubble to further loggers.
+	 * @return bool True if log entry should bubble to further loggers.
 	 */
-	abstract public function handle( $level, $timestamp, $message, $context );
+	abstract public function handle( $timestamp, $level, $message, $context );
 
 	/**
 	 * Set handler severity threshold.
@@ -99,10 +97,10 @@ abstract class WC_Log_Handler {
 	}
 
 	/**
-	 * Should this handler process this log?
+	 * Determine whether handler should handle log.
 	 *
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @return bool true if the log should be handled.
+	 * @return bool True if the log should be handled.
 	 */
 	public function should_handle( $level ) {
 		return $this->threshold <= $this->get_level_severity( $level );
@@ -111,8 +109,8 @@ abstract class WC_Log_Handler {
 	/**
 	 * Formats a timestamp for use in log messages.
 	 *
-	 * @param int $timestamp
-	 * @return string formatted time
+	 * @param int $timestamp Log timestamp.
+	 * @return string Formatted time for use in log entry.
 	 */
 	public static function format_time( $timestamp ) {
 		return date( 'c', $timestamp );
@@ -121,13 +119,14 @@ abstract class WC_Log_Handler {
 	/**
 	 * Builds a log entry text from level, timestamp and message.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param int $timestamp
-	 * @param string $message
+	 * @param string $message Log message.
+	 * @param array $context Additional information for log handlers.
 	 *
-	 * @return string Formatted log entry
+	 * @return string Formatted log entry.
 	 */
-	public function format_entry( $level, $timestamp, $message, $context ) {
+	public function format_entry( $timestamp, $level, $message, $context ) {
 		$time_string = $this->format_time( $timestamp );
 		$level_string = strtoupper( $level );
 		return "{$time_string} {$level_string} {$message}";

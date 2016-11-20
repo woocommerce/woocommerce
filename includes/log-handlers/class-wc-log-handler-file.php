@@ -70,17 +70,18 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param string $message
+	 * @param string $message Log message.
 	 * @param array $context {
-	 *     Array with additional information
+	 *     Additional information for log handlers.
 	 *
-	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
+	 *     @type string $tag Optional. Determines log file to write to. Default 'log'.
 	 * }
 	 *
-	 * @return bool log entry should bubble to further loggers.
+	 * @return bool Log entry should bubble to further loggers.
 	 */
-	public function handle( $level, $timestamp, $message, $context ) {
+	public function handle( $timestamp, $level, $message, $context ) {
 
 		if ( ! $this->should_handle( $level ) ) {
 			return true;
@@ -92,29 +93,23 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$handle = 'log';
 		}
 
-		$entry = $this->format_entry( $level, $timestamp, $message, $context );
+		$entry = $this->format_entry( $timestamp, $level, $message, $context );
 
 		// Bubble if add is NOT successful
 		return ! $this->add( $entry, $handle );
 	}
 
 	/**
-	 * Builds a log entry text from level, timestamp and message.
+	 * Builds a log entry text from timestamp, level and message.
 	 *
-	 * Attempt to ensure backwards compatibility for legacy WC_Logger::add calls
-	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param int $timestamp log entry timestamp
-	 * @param string $message provided log message
-	 * @param array $context {
-	 *     Array with additional information
+	 * @param string $message Log message.
+	 * @param array $context Additional information for log handlers.
 	 *
-	 *     @type string $tag Optional. The tag will be used to determine which file an entry will be written to.
-	 * }
-	 *
-	 * @return string Formatted log entry
+	 * @return string Formatted log entry.
 	 */
-	public function format_entry( $level, $timestamp, $message, $context ) {
+	public function format_entry( $timestamp, $level, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
 			if ( isset( $context['tag'] ) && $context['tag'] ) {
@@ -126,7 +121,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$time = date_i18n( 'm-d-Y @ H:i:s' );
 			$entry = "{$time} - {$message}";
 		} else {
-			$entry = parent::format_entry( $level, $timestamp, $message, $context );
+			$entry = parent::format_entry( $timestamp, $level, $message, $context );
 		}
 
 		return $entry;
@@ -135,9 +130,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Open log file for writing.
 	 *
-	 * @param string $handle
-	 * @param string $mode
-	 * @return bool success
+	 * @param string $handle Log handle.
+	 * @param string $mode Optional. File mode. Default 'a'.
+	 * @return bool Success.
 	 */
 	protected function open( $handle, $mode = 'a' ) {
 		if ( $this->is_open( $handle ) ) {

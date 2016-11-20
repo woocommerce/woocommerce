@@ -56,7 +56,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_legacy_format() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 
-		$handler->handle( 'info', time(), 'this is a message', array( 'tag' => 'unit-tests', '_legacy' => true ) );
+		$handler->handle( time(), 'info', 'this is a message', array( 'tag' => 'unit-tests', '_legacy' => true ) );
 
 		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
 		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
@@ -70,7 +70,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_clear() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 		$log_name = '_test_clear';
-		$handler->handle( 'debug', time(), 'debug', array( 'tag' => $log_name ) );
+		$handler->handle( time(), 'debug', 'debug', array( 'tag' => $log_name ) );
 		$handler->clear( $log_name );
 		$this->assertEquals( '', $this->read_content( $log_name ) );
 	}
@@ -83,7 +83,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_remove() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 		$log_name = '_test_remove';
-		$handler->handle( 'debug', time(), 'debug', array( 'tag' => $log_name ) );
+		$handler->handle( time(), 'debug', 'debug', array( 'tag' => $log_name ) );
 		$handler->remove( $log_name );
 		$this->assertFileNotExists( wc_get_log_file_path( $log_name ) );
 	}
@@ -97,14 +97,14 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 		$time = time();
 
-		$handler->handle( 'debug', $time, 'debug', array() );
-		$handler->handle( 'info', $time, 'info', array() );
-		$handler->handle( 'notice', $time, 'notice', array() );
-		$handler->handle( 'warning', $time, 'warning', array() );
-		$handler->handle( 'error', $time, 'error', array() );
-		$handler->handle( 'critical', $time, 'critical', array() );
-		$handler->handle( 'alert', $time, 'alert', array() );
-		$handler->handle( 'emergency', $time, 'emergency', array() );
+		$handler->handle( $time, 'debug', 'debug', array() );
+		$handler->handle( $time, 'info', 'info', array() );
+		$handler->handle( $time, 'notice', 'notice', array() );
+		$handler->handle( $time, 'warning', 'warning', array() );
+		$handler->handle( $time, 'error', 'error', array() );
+		$handler->handle( $time, 'critical', 'critical', array() );
+		$handler->handle( $time, 'alert', 'alert', array() );
+		$handler->handle( $time, 'emergency', 'emergency', array() );
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
@@ -120,14 +120,14 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$time = time();
 		$context_tag = array( 'tag' => 'A' );
 
-		$handler->handle( 'debug', $time, 'debug', $context_tag );
-		$handler->handle( 'info', $time, 'info', $context_tag );
-		$handler->handle( 'notice', $time, 'notice', $context_tag );
-		$handler->handle( 'warning', $time, 'warning', $context_tag );
-		$handler->handle( 'error', $time, 'error', $context_tag );
-		$handler->handle( 'critical', $time, 'critical', $context_tag );
-		$handler->handle( 'alert', $time, 'alert', $context_tag );
-		$handler->handle( 'emergency', $time, 'emergency', $context_tag );
+		$handler->handle( $time, 'debug', 'debug', $context_tag );
+		$handler->handle( $time, 'info', 'info', $context_tag );
+		$handler->handle( $time, 'notice', 'notice', $context_tag );
+		$handler->handle( $time, 'warning', 'warning', $context_tag );
+		$handler->handle( $time, 'error', 'error', $context_tag );
+		$handler->handle( $time, 'critical', 'critical', $context_tag );
+		$handler->handle( $time, 'alert', 'alert', $context_tag );
+		$handler->handle( $time, 'emergency', 'emergency', $context_tag );
 
 		$log_content = $this->read_content( 'A' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
@@ -156,7 +156,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
 		$context_tag = array( 'tag' => $log_name );
 
-		$handler->handle( 'emergency', $time, 'emergency', $context_tag );
+		$handler->handle( $time, 'emergency', 'emergency', $context_tag );
 
 		$this->assertFileExists( wc_get_log_file_path( $log_name ) );
 		$this->assertStringEndsWith( 'EMERGENCY emergency' . PHP_EOL, $this->read_content( $log_name ) );
