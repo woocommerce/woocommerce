@@ -32,7 +32,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param $args additional args. {
 	 *     Optional. @see WC_Log_Handler::__construct.
 	 *
-	 *     @type string|arr $to Optional. Email or emails to recieve log messages. Default site admin.
+	 *     @type string|array $to Optional. Email or emails to recieve log messages. Default site admin.
 	 * }
 	 */
 	public function __construct( $args = array() ) {
@@ -57,19 +57,18 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param string $message
-	 * @param array $context {
-	 *     Array with additional information
-	 * }
+	 * @param string $message Log message.
+	 * @param array $context Optional. Additional information for log handlers.
 	 *
 	 * @return bool log entry should bubble to further loggers.
 	 */
-	public function handle( $level, $timestamp, $message, $context ) {
+	public function handle( $timestamp, $level, $message, $context ) {
 
 		if ( $this->should_handle( $level ) ) {
-			$subject = $this->get_subject( $level, $timestamp, $message, $context );
-			$body = $this->get_body( $level, $timestamp, $message, $context );
+			$subject = $this->get_subject( $timestamp, $level, $message, $context );
+			$body = $this->get_body( $timestamp, $level, $message, $context );
 			wp_mail( $this->to, $subject, $body );
 		}
 
@@ -79,15 +78,14 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Build subject for log email.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param string $message
-	 * @param array $context {
-	 *     Array with additional information
-	 * }
+	 * @param string $message Log message.
+	 * @param array $context Optional. Additional information for log handlers.
 	 *
 	 * @return string subject
 	 */
-	public function get_subject( $level, $timestamp, $message, $context ) {
+	public function get_subject( $timestamp, $level, $message, $context ) {
 		$site_name = get_bloginfo( 'name' );
 		return sprintf( __( '[%1$s] WooCommerce log message from %2$s', 'woocommerce' ), strtoupper( $level ), $site_name );
 	}
@@ -95,16 +93,15 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Build body for log email.
 	 *
+	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param string $message
-	 * @param array $context {
-	 *     Array with additional information
-	 * }
+	 * @param string $message Log message.
+	 * @param array $context Optional. Additional information for log handlers.
 	 *
 	 * @return string body
 	 */
-	public function get_body( $level, $timestamp, $message, $context ) {
-		$entry = $this->format_entry( $level, $timestamp, $message, $context );
+	public function get_body( $timestamp, $level, $message, $context ) {
+		$entry = $this->format_entry( $timestamp, $level, $message, $context );
 		return __( 'You have recieved the following WooCommerce log message:', 'woocommerce' )
 			. PHP_EOL . PHP_EOL . $entry;
 	}
