@@ -198,7 +198,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		}
 
 		if ( $this->open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
-			$result = fwrite( $this->handles[ $handle ], $entry . "\n" );
+			$result = fwrite( $this->handles[ $handle ], $entry . PHP_EOL );
 		}
 
 		return false !== $result;
