@@ -104,18 +104,7 @@ class WC_Admin_Status {
 		$log_table_list = new WC_Admin_Log_Table_List();
 		$log_table_list->prepare_items();
 
-		echo '<form method="get" id="mainform" action="" enctype="multipart/form-data">';
-
-			echo '<input type="hidden" name="page" value="wc-status" />';
-			echo '<input type="hidden" name="tab" value="logs-db" />';
-
-			$log_table_list->views();
-			$log_table_list->search_box( __( 'Search message', 'woocommerce' ), 'message' );
-			$log_table_list->display();
-
-			wp_nonce_field( 'woocommerce-status-db-log' );
-
-		echo '</form>';
+		include_once( 'views/html-admin-page-status-logs-db.php' );
 	}
 
 	/**
