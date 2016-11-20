@@ -77,7 +77,7 @@ abstract class WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 */
 	public function set_threshold( $level ) {
-		$level = apply_filters( 'woocommerce_log_handler_set_threshold', $level, __CLASS__ );
+		$level = apply_filters( 'woocommerce_log_handler_set_threshold', $level, get_class( $this ) );
 		$this->threshold = $this->get_level_severity( $level );
 	}
 
