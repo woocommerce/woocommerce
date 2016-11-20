@@ -129,6 +129,13 @@ abstract class WC_Log_Handler {
 	public function format_entry( $timestamp, $level, $message, $context ) {
 		$time_string = $this->format_time( $timestamp );
 		$level_string = strtoupper( $level );
-		return "{$time_string} {$level_string} {$message}";
+		$entry = "{$time_string} {$level_string} {$message}";
+
+		return apply_filters( 'woocommerce_format_log_entry', $entry, array(
+			'timestamp' => $timestamp,
+			'level' => $level,
+			'message' => $message,
+			'context' => $context,
+		) );
 	}
 }
