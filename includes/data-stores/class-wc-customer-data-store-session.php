@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Customer_Data_Store_Session implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store {
+class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store {
 
 	/**
 	 * Keys which are also stored in a session (so we can make sure they get updated...)

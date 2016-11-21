@@ -10,7 +10,34 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Abstract_Order_Data_Store_Interface {
+abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store, WC_Abstract_Order_Data_Store_Interface {
+
+	/**
+	 * Internal meta type used to store order data.
+	 *
+	 * @var string
+	 */
+	protected $meta_type = 'post';
+
+	/**
+	 * Data stored in meta keys, but not considered "meta" for an order.
+	 *
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $internal_meta_keys = array(
+		'_order_currency',
+		'_cart_discount',
+		'_cart_discount_tax',
+		'_order_shipping',
+		'_order_shipping_tax',
+		'_order_tax',
+		'_order_total',
+		'_order_version',
+		'_prices_include_tax',
+		'_payment_tokens',
+	);
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods

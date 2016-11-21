@@ -43,27 +43,6 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Data stored in meta keys, but not considered "meta" for an order.
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $internal_meta_keys = array(
-		'_order_currency',
-		'_cart_discount',
-		'_refund_amount',
-		'_refunded_by',
-		'_refund_reason',
-		'_cart_discount_tax',
-		'_order_shipping',
-		'_order_shipping_tax',
-		'_order_tax',
-		'_order_total',
-		'_order_version',
-		'_prices_include_tax',
-		'_payment_tokens',
-	);
-
-	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */

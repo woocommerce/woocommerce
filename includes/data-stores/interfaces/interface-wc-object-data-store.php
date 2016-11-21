@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  */
 interface WC_Object_Data_Store {
-
 	/**
 	 * Method to create a new record of a WC_Data based object.
 	 * @param WC_Data
@@ -37,4 +36,12 @@ interface WC_Object_Data_Store {
 	 * @return bool result
 	 */
 	public function delete( &$data, $args = array() );
+
+	public function read_meta( &$data );
+
+	public function delete_meta( &$data, $meta );
+
+	public function add_meta( &$data, $meta );
+
+	public function update_meta( &$data, $meta );
 }

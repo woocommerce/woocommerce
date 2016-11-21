@@ -33,12 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	);
 
 	/**
-	 * Meta type. Payment tokens are a new object type.
-	 * @var string
-	 */
-	protected $meta_type = 'payment_token';
-
-	/**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:

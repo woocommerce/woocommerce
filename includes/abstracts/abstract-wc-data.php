@@ -67,31 +67,10 @@ abstract class WC_Data {
 	protected $cache_group = '';
 
 	/**
-	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
-	 * WP defines 'post', 'user', 'comment', and 'term'.
-	 */
-	protected $meta_type = 'post';
-
-	/**
-	 * This only needs set if you are using a custom metadata type (for example payment tokens.
-	 * This should be the name of the field your table uses for associating meta with objects.
-	 * For example, in payment_tokenmeta, this would be payment_token_id.
-	 * @var string
-	 */
-	protected $object_id_field_for_meta = '';
-
-	/**
 	 * Stores additonal meta data.
 	 * @var array
 	 */
 	protected $meta_data = array();
-
-	/**
-	 * Internal meta keys we don't want exposed for the object.
-	 * @var array
-	 */
-	protected $internal_meta_keys = array();
 
 	/**
 	 * Default constructor.
@@ -109,26 +88,6 @@ abstract class WC_Data {
 	 */
 	public function get_data_store() {
 		return $this->data_store;
-	}
-
-	/**
-	 * Get the meta type for this data type.
-	 *
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_meta_type() {
-		return $this->meta_type;
-	}
-
-	/**
-	 * Get the object ID field this data type.
-	 *
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_object_id_field_for_meta() {
-		return $this->object_id_field_for_meta;
 	}
 
 	/**
@@ -221,26 +180,6 @@ abstract class WC_Data {
 	 */
 	public function get_meta_data() {
 		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
-	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data. This is in
-	 * addition to all data props with _ prefix.
-	 * @since 2.6.0
-	 * @return array
-	 */
-	protected function prefix_key( $key ) {
-		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;
-	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data. This is in
-	 * addition to all data props with _ prefix.
-	 * @since 2.6.0
-	 * @return array
-	 */
-	protected function get_internal_meta_keys() {
-		return array_merge( array_map( array( $this, 'prefix_key' ), array_keys( $this->data ) ), $this->internal_meta_keys );
 	}
 
 	/**
@@ -359,16 +298,6 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Callback to remove unwanted meta data.
-	 *
-	 * @param object $meta
-	 * @return bool
-	 */
-	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() );
-	}
-
-	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 *
 	 * @since 2.6.0
@@ -379,6 +308,10 @@ abstract class WC_Data {
 		$cache_loaded     = false;
 
 		if ( ! $this->get_id() ) {
+			return;
+		}
+
+		if ( ! $this->data_store ) {
 			return;
 		}
 
@@ -397,10 +330,8 @@ abstract class WC_Data {
 		}
 
 		if ( ! $cache_loaded ) {
-			$meta_data_store = WC_Data_Store::load( 'meta' );
-			$raw_meta_data   = $meta_data_store->read_meta( $this );
+			$raw_meta_data   = $this->data_store->read_meta( $this );
 			if ( $raw_meta_data ) {
-				$raw_meta_data = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 				foreach ( $raw_meta_data as $meta ) {
 					$this->meta_data[] = (object) array(
 						'id'    => (int) $meta->meta_id,
@@ -421,17 +352,19 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 */
 	public function save_meta_data() {
-		$meta_data_store = WC_Data_Store::load( 'meta' );
+		if ( ! $this->data_store ) {
+			return;
+		}
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
-					$meta_data_store->delete_meta( $this, $meta );
+					$this->data_store->delete_meta( $this, $meta );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id                       = $meta_data_store->add_meta( $this, $meta );
+				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
 				$this->meta_data[ $array_key ]->id = $new_meta_id;
 			} else {
-				$meta_data_store->update_meta( $this, $meta );
+				$this->data_store->update_meta( $this, $meta );
 			}
 		}
 

@@ -43,7 +43,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param mixed $product
 	 */
 	public function __construct( $product = 0 ) {
-		$this->internal_meta_keys[] = '_variation_description';
 		parent::__construct( $product );
 	}
 
