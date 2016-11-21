@@ -20,8 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return mixed
  */
 function wc_add_order_item( $order_id, $item ) {
-	global $wpdb;
-
 	$order_id = absint( $order_id );
 
 	if ( ! $order_id )
@@ -34,21 +32,8 @@ function wc_add_order_item( $order_id, $item ) {
 
 	$item = wp_parse_args( $item, $defaults );
 
-	$wpdb->insert(
-		$wpdb->prefix . "woocommerce_order_items",
-		array(
-			'order_item_name'       => $item['order_item_name'],
-			'order_item_type'       => $item['order_item_type'],
-			'order_id'              => $order_id,
-		),
-		array(
-			'%s',
-			'%s',
-			'%d',
-		)
-	);
-
-	$item_id = absint( $wpdb->insert_id );
+	$data_store = WC_Data_Store::load( 'order-item' );
+	$item_id    = $data_store->add_order_item( $order_id, $item );
 
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
@@ -64,9 +49,8 @@ function wc_add_order_item( $order_id, $item ) {
  * @return bool true if successfully updated, false otherwise
  */
 function wc_update_order_item( $item_id, $args ) {
-	global $wpdb;
-
-	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+	$data_store = WC_Data_Store::load( 'order-item' );
+	$update     = $data_store->update_order_item( $item_id, $args );
 
 	if ( false === $update ) {
 		return false;
@@ -85,17 +69,16 @@ function wc_update_order_item( $item_id, $args ) {
  * @return bool
  */
 function wc_delete_order_item( $item_id ) {
-	global $wpdb;
+	$item_id    = absint( $item_id );
+	$data_store = WC_Data_Store::load( 'order-item' );
 
-	$item_id = absint( $item_id );
-
-	if ( ! $item_id )
+	if ( ! $item_id ) {
 		return false;
+	}
 
 	do_action( 'woocommerce_before_delete_order_item', $item_id );
 
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
+	$data_store->delete_order_item( $item_id );
 
 	do_action( 'woocommerce_delete_order_item', $item_id );
 
@@ -113,7 +96,8 @@ function wc_delete_order_item( $item_id ) {
  * @return bool
  */
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
-	if ( update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value ) ) {
+	$data_store = WC_Data_Store::load( 'order-item' );
+	if ( $data_store->update_metadata( $item_id, $meta_key, $meta_value, $prev_value ) ) {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
 		wp_cache_delete( $cache_key, 'orders' );
 		return true;
@@ -132,7 +116,8 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @return int New row ID or 0
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
-	if ( $meta_id = add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
+	$data_store = WC_Data_Store::load( 'order-item' );
+	if ( $meta_id = $data_store->add_metadata( $item_id, $meta_key, $meta_value, $unique ) ) {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
 		wp_cache_delete( $cache_key, 'orders' );
 		return $meta_id;
@@ -151,7 +136,8 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
  * @return bool
  */
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
-	if ( delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all ) ) {
+	$data_store = WC_Data_Store::load( 'order-item' );
+	if ( $data_store->delete_metadata( $item_id, $meta_key, $meta_value, $delete_all ) ) {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
 		wp_cache_delete( $cache_key, 'orders' );
 		return true;
@@ -169,5 +155,6 @@ function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $dele
  * @return mixed
  */
 function wc_get_order_item_meta( $item_id, $key, $single = true ) {
-	return get_metadata( 'order_item', $item_id, $key, $single );
+	$data_store = WC_Data_Store::load( 'order-item' );
+	return $data_store->get_metadata( $item_id, $key, $single );
 }

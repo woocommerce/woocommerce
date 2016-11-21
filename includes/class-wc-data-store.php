@@ -34,6 +34,7 @@ class WC_Data_Store {
 		'customer-session'    => 'WC_Customer_Data_Store_Session',
 		'order'               => 'WC_Order_Data_Store_CPT',
 		'order-refund'        => 'WC_Order_Refund_Data_Store_CPT',
+		'order-item'          => 'WC_Order_Item_Data_Store',
 		'order-item-coupon'   => 'WC_Order_Item_Coupon_Data_Store',
 		'order-item-fee'      => 'WC_Order_Item_Fee_Data_Store',
 		'order-item-product'  => 'WC_Order_Item_Product_Data_Store',

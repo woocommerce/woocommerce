@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooCommerce
  */
-abstract class Abstract_WC_Order_Item_Data_Store implements WC_Object_Data_Store {
+abstract class Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store {
 	/**
 	 * Create a new order item in the database.
 	 *

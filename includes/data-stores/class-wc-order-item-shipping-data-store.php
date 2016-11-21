@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooCommerce
  */
-class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Data_Store implements WC_Object_Data_Store, WC_Order_Item_Data_Store_Interface {
+class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store, WC_Order_Item_Type_Data_Store_Interface {
 	/**
 	 * Read/populate data properties specific to this order item.
 	 *

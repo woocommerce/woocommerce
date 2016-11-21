@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Data Store Interface
  *
- * Functions that must be defined by order item store classes.
+ * Functions that must be defined by the order item data store (for functions).
  *
  * @version  2.7.0
  * @category Interface
@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 interface WC_Order_Item_Data_Store_Interface {
 	/**
-	 * Saves an item's data to the database / item meta.
-	 * Ran after both create and update, so $item->get_id() will be set.
-	 *
-	 * @param WC_Order_Item $item
+	 * Add an order item to an order.
+	 * @param  int   $order_id
+	 * @param  array $item. order_item_name and order_item_type.
+	 * @return int Order Item ID
 	 */
-	public function save_item_data( &$item );
+	public function add_order_item( $order_id, $item );
 }

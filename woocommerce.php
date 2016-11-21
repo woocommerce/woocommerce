@@ -298,6 +298,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-abstract-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/wc-order-refund-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-order-item-type-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-order-item-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/interfaces/class-wc-order-item-product-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-cpt.php' );
@@ -306,7 +307,8 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php' );
