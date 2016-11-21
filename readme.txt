@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Included password strength meter in "Lost Password" page.
 * Fix - Order fee currency in admin screen.
 * Fix - Variation selection on Firefox 40.
+* Fix - Don't prevent submission when table is not found on cart.
 
 = 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.

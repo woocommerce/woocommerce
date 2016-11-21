@@ -392,7 +392,7 @@ jQuery( function( $ ) {
 			}
 
 			if ( 0 === $form.find( '.shop_table.cart' ).length ) {
-				return false;
+				return;
 			}
 			if ( is_blocked( $form ) ) {
 				return false;
