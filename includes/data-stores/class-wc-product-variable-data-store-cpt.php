@@ -97,7 +97,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Empty value indicates that all options for given attribute are available.
 				if ( in_array( '', $values ) || empty( $values ) ) {
-					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $product->get_id(), $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
+					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 				// Get custom attributes (non taxonomy) as defined.
 				} elseif ( ! $attribute['is_taxonomy'] ) {
 					$text_attributes          = wc_get_text_attributes( $attribute['value'] );

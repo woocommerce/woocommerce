@@ -1177,8 +1177,8 @@ class WC_API_Products extends WC_API_Resource {
 			'upsell_ids'         => array_map( 'absint', $product->get_upsell_ids() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sell_ids() ),
 			'parent_id'          => $product->get_parent_id(),
-			'categories'         => wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
-			'tags'               => wp_get_post_terms( $product->get_id(), 'product_tag', array( 'fields' => 'names' ) ),
+			'categories'         => wc_get_object_terms( $product->get_id(), 'product_cat', 'name' ),
+			'tags'               => wc_get_object_terms( $product->get_id(), 'product_tag', 'name' ),
 			'images'             => $this->get_images( $product ),
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->get_id() ) ),
 			'attributes'         => $this->get_attributes( $product ),
@@ -1976,9 +1976,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Shipping class
 		if ( isset( $data['shipping_class'] ) ) {
-			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
+			$data_store         = $product->get_data_store();
+			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			if ( $shipping_class_id ) {
+				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 
@@ -2340,7 +2341,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}

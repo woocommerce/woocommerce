@@ -189,7 +189,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string $gateway_id
 	 */
 	public function set_gateway_id( $gateway_id ) {
-		$this->set_prop( 'gateway_id', $gateway_id);
+		$this->set_prop( 'gateway_id', $gateway_id );
 	}
 
 	/**

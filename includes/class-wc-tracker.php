@@ -139,21 +139,11 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_theme_info() {
-		$wp_version = get_bloginfo( 'version' );
-
-		if ( version_compare( $wp_version, '3.4', '<' ) ) {
-			$theme_data = get_theme_data( get_stylesheet_directory() . '/style.css' );
-			$theme_name = $theme_data['Name'];
-			$theme_version = $theme_data['Version'];
-		} else {
-			$theme_data = wp_get_theme();
-			$theme_name = $theme_data->Name;
-			$theme_version = $theme_data->Version;
-		}
+		$theme_data        = wp_get_theme();
 		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+		$theme_wc_support  = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
 
-		return array( 'name' => $theme_name, 'version' => $theme_version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
+		return array( 'name' => $theme_data->Name, 'version' => $theme_data->Version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
 	}
 
 	/**

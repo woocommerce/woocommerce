@@ -24,9 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      status array|string List of statuses to find. Default: any. Options: any, draft, pending, private and publish.
  *      type array|string Product type, e.g. Default: all. Options: all, simple, external, variable, variation, grouped.
  *      parent int post/product parent
- *      skus array Limit result set to products with specific SKUs.
- *      categories array Limit result set to products assigned a specific category, e.g. 9,14.
- *      tags array Limit result set to products assigned a specific tag, e.g. 9,14.
+ *      sku string Limit result set to products with specific SKU.
+ *      category array Limit result set to products assigned to specific categories by slug
+ *                     e.g. array('hoodie', 'cap', 't-shirt').
+ *      tag array Limit result set to products assigned to specific tags (by slug)
+ *                e.g. array('funky', 'retro', 'designer')
+ *      shipping_class array Limit results set to products in specific shipping classes (by slug)
+ *                           e.g. array('standard', 'next-day')
  *      limit int Maximum of products to retrieve.
  *      offset int Offset of products to retrieve.
  *      page int Page of products to retrieve. Ignored when using the 'offset' arg.
@@ -80,99 +84,7 @@ function wc_get_products( $args ) {
 		}
 	}
 
-	/**
-	 * Generate WP_Query args.
-	 */
-	$wp_query_args = array(
-		'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
-		'post_status'    => $args['status'],
-		'posts_per_page' => $args['limit'],
-		'meta_query'     => array(),
-		'orderby'        => $args['orderby'],
-		'order'          => $args['order'],
-		'tax_query'      => array(),
-	);
-	// Do not load unneccessary post data if the user only wants IDs.
-	if ( 'ids' === $args['return'] ) {
-		$wp_query_args['fields'] = 'ids';
-	}
-
-	if ( 'variation' !== $args['type'] ) {
-		$wp_query_args['tax_query'][] = array(
-			'taxonomy' => 'product_type',
-			'field'    => 'slug',
-			'terms'    => $args['type'],
-		);
-	}
-
-	if ( ! empty( $args['sku'] ) ) {
-		$wp_query_args['meta_query'][] = array(
-			'key'     => '_sku',
-			'value'   => $args['sku'],
-			'compare' => 'LIKE',
-		);
-	}
-
-	if ( ! empty( $args['category'] ) ) {
-		$wp_query_args['tax_query'][] = array(
-			'taxonomy' => 'product_cat',
-			'field'    => 'slug',
-			'terms'   => $args['category'],
-		);
-	}
-
-	if ( ! empty( $args['tag'] ) ) {
-		$wp_query_args['tax_query'][] = array(
-			'taxonomy' => 'product_tag',
-			'field'    => 'slug',
-			'terms'   => $args['tag'],
-		);
-	}
-
-	if ( ! empty( $args['shipping_class'] ) ) {
-		$wp_query_args['tax_query'][] = array(
-			'taxonomy' => 'product_shipping_class',
-			'field'    => 'slug',
-			'terms'   => $args['shipping_class'],
-		);
-	}
-
-	if ( ! is_null( $args['parent'] ) ) {
-		$wp_query_args['post_parent'] = absint( $args['parent'] );
-	}
-
-	if ( ! is_null( $args['offset'] ) ) {
-		$wp_query_args['offset'] = absint( $args['offset'] );
-	} else {
-		$wp_query_args['paged'] = absint( $args['page'] );
-	}
-
-	if ( ! empty( $args['exclude'] ) ) {
-		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
-	}
-
-	if ( ! $args['paginate'] ) {
-		$wp_query_args['no_found_rows'] = true;
-	}
-
-	// Get results.
-	$products = new WP_Query( $wp_query_args );
-
-	if ( 'objects' === $args['return'] ) {
-		$return = array_map( 'wc_get_product', $products->posts );
-	} else {
-		$return = $products->posts;
-	}
-
-	if ( $args['paginate'] ) {
-		return (object) array(
-			'products'      => $return,
-			'total'         => $products->found_posts,
-			'max_num_pages' => $products->max_num_pages,
-		);
-	} else {
-		return $return;
-	}
+	return WC_Data_Store::load( 'product' )->get_products( $args );
 }
 
 /**

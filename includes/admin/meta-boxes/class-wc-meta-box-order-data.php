@@ -270,7 +270,9 @@ class WC_Meta_Box_Order_Data {
 						<h3>
 							<?php _e( 'Billing details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-							<a href="#" class="tips load_customer_billing" data-tip="<?php esc_attr_e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+							<span>
+								<a href="#" class="load_customer_billing" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+							</span>
 						</h3>
 						<?php
 							// Display values
@@ -290,8 +292,12 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'billing_' . $key;
 
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->{"get_$field_name"}( 'edit' ) ) ) . '</p>';
+										$field_value = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field_value = $order->get_meta( '_' . $field_name );
 									}
+
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 								}
 
 							echo '</div>';
@@ -354,8 +360,10 @@ class WC_Meta_Box_Order_Data {
 						<h3>
 							<?php _e( 'Shipping details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-							<a href="#" class="tips billing-same-as-shipping" data-tip="<?php esc_attr_e( 'Copy from billing', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Copy from billing', 'woocommerce' ); ?></a>
-							<a href="#" class="tips load_customer_shipping" data-tip="<?php esc_attr_e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
+							<span>
+								<a href="#" class="load_customer_shipping" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
+								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php _e( 'Copy billing address', 'woocommerce' ); ?></a>
+							</span>
 						</h3>
 						<?php
 							// Display values
@@ -376,8 +384,12 @@ class WC_Meta_Box_Order_Data {
 										$field_name = 'shipping_' . $key;
 
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->{"get_$field_name"}( 'edit' ) ) ) . '</p>';
+											$field_value = $order->{"get_$field_name"}( 'edit' );
+										} else {
+											$field_value = $order->get_meta( '_' . $field_name );
 										}
+
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 									}
 								}
 
@@ -465,7 +477,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_billing_' . $key;
 				}
 
-				$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
+					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 
@@ -476,7 +492,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_shipping_' . $key;
 				}
 
-				$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
+					$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 

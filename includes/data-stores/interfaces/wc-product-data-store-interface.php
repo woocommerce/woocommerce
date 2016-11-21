@@ -93,4 +93,19 @@ interface WC_Product_Data_Store_Interface {
 	 * @param  string $operation set, increase and decrease.
 	 */
 	function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
+
+	/**
+	 * Get shipping class ID by slug.
+	 * @param $slug string
+	 * @return int|false
+	 */
+	public function get_shipping_class_id_by_slug( $slug );
+
+	/**
+	 * Returns an array of products.
+	 *
+	 * @param  array $args @see wc_get_products
+	 * @return array
+	 */
+	public function get_products( $args = array() );
 }

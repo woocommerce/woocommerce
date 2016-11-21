@@ -19,18 +19,21 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 	 * @param WC_Customer
 	 */
 	public function create( &$customer ) {
-		$customer_id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
+		$id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
 
-		if ( ! is_wp_error( $customer_id ) ) {
-			$customer->set_id( $customer_id );
-			$this->update_user_meta( $customer );
-			wp_update_user( array( 'ID' => $customer->get_id(), 'role' => $customer->get_role() ) );
-			$wp_user = new WP_User( $customer->get_id() );
-			$customer->set_date_created( strtotime( $wp_user->user_registered ) );
-			$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
-			$customer->save_meta_data();
-			$customer->apply_changes();
+		if ( is_wp_error( $id ) ) {
+			throw new WC_Data_Exception( $id->get_error_code(), $id->get_error_message() );
 		}
+
+		$customer->set_id( $id );
+		$this->update_user_meta( $customer );
+		wp_update_user( array( 'ID' => $customer->get_id(), 'role' => $customer->get_role() ) );
+		$wp_user = new WP_User( $customer->get_id() );
+		$customer->set_date_created( strtotime( $wp_user->user_registered ) );
+		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
+		$customer->save_meta_data();
+		$customer->apply_changes();
+		do_action( 'woocommerce_new_customer', $customer->get_id() );
 	}
 
 	/**
@@ -64,6 +67,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		) );
 		$customer->read_meta_data();
 		$customer->set_object_read( true );
+		do_action( 'woocommerce_customer_loaded', $customer );
 	}
 
 	/**
@@ -83,6 +87,7 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
+		do_action( 'woocommerce_update_customer', $customer->get_id() );
 	}
 
 	/**
@@ -99,7 +104,11 @@ class WC_Customer_Data_Store implements WC_Customer_Data_Store_Interface, WC_Obj
 		$args = wp_parse_args( $args, array(
 			'reassign' => 0,
 		) );
-		return wp_delete_user( $customer->get_id(), $args['reassign'] );
+
+		$id = $customer->get_id();
+		wp_delete_user( $id, $args['reassign'] );
+
+		do_action( 'woocommerce_delete_customer', $id );
 	}
 
 	/**

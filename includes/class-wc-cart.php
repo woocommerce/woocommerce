@@ -2043,6 +2043,7 @@ class WC_Cart {
 	/**
 	 * Gets the cart contents total (after calculation).
 	 *
+	 * @todo deprecate? It's unused.
 	 * @return string formatted price
 	 */
 	public function get_cart_total() {
