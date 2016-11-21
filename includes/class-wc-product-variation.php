@@ -308,10 +308,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name value pairs.
-	 * @param array
+	 * @param array $raw_attributes
 	 */
-	public function set_attributes( $attributes ) {
-		$this->set_prop( 'attributes', (array) $attributes );
+	public function set_attributes( $raw_attributes ) {
+		$raw_attributes = (array) $raw_attributes;
+		$attributes     = array();
+
+		foreach ( $raw_attributes as $key => $value ) {
+			// Add attribute prefix which meta gets stored with.
+			if ( 0 !== strpos( $key, 'attribute_' ) ) {
+				$key = 'attribute_' . $key;
+			}
+			$attributes[ $key ] = $value;
+		}
+		$this->set_prop( 'attributes', $attributes );
 	}
 
 	/**

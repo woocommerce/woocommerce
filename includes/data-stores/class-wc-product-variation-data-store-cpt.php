@@ -222,8 +222,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$attributes             = $product->get_attributes();
 		$updated_attribute_keys = array();
 		foreach ( $attributes as $key => $value ) {
-			update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
-			$updated_attribute_keys[] = 'attribute_' . $key;
+			update_post_meta( $product->get_id(), $key, $value );
+			$updated_attribute_keys[] = $key;
 		}
 
 		// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
