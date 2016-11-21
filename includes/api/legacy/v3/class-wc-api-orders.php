@@ -149,10 +149,9 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession.
-		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
-		$order      = wc_get_order( $id );
-		$order_post = get_post( $id );
-		$expand     = array();
+		$dp     = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order  = wc_get_order( $id );
+		$expand = array();
 
 		if ( ! empty( $filter['expand'] ) ) {
 			$expand = explode( ',', $filter['expand'] );
@@ -162,9 +161,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
 			'order_key'                 => $order->get_order_key(),
-			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -1579,7 +1578,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
+				'created_at' => $this->server->format_datetime( $refund->get_date_created(), false, true ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items,

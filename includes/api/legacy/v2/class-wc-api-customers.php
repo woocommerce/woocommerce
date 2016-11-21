@@ -150,14 +150,14 @@ class WC_API_Customers extends WC_API_Resource {
 		$last_order    = $customer->get_last_order();
 		$customer_data = array(
 			'id'               => $customer->get_id(),
-			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ),
+			'created_at'       => $this->server->format_datetime( $customer->get_date_created(), false, true ),
 			'email'            => $customer->get_email(),
 			'first_name'       => $customer->get_first_name(),
 			'last_name'        => $customer->get_last_name(),
 			'username'         => $customer->get_username(),
 			'role'             => $customer->get_role(),
 			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
-			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created() ) : null,
+			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created(), false, true ) : null,
 			'orders_count'     => $customer->get_order_count(),
 			'total_spent'      => wc_format_decimal( $customer->get_total_spent(), 2 ),
 			'avatar_url'       => $customer->get_avatar_url(),

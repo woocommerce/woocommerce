@@ -111,21 +111,18 @@ class WC_API_Coupons extends WC_API_Resource {
 				return $id;
 			}
 
-			// get the coupon code
-			$code = wc_get_coupon_code_by_id( $id );
+			$coupon = new WC_Coupon( $id );
 
-			if ( empty( $code ) ) {
+			if ( 0 === $coupon->get_id() ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), 404 );
 			}
 
-			$coupon      = new WC_Coupon( $code );
-			$coupon_post = get_post( $coupon->get_id() );
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
 				'type'                         => $coupon->get_discount_type(),
-				'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
-				'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
+				'created_at'                   => $this->server->format_datetime( $coupon->get_date_created(), false, true ),
+				'updated_at'                   => $this->server->format_datetime( $coupon->get_date_modified(), false, true ),
 				'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
 				'individual_use'               => $coupon->get_individual_use(),
 				'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
