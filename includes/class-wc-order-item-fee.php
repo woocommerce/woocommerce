@@ -114,7 +114,11 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 */
 	public function get_name( $context = 'view' ) {
 		$name = $this->get_prop( 'name', $context );
-		return $name ? $name : __( 'Fee', 'woocommerce' );
+		if ( 'view' === $context ) {
+			return $name ? $name : __( 'Fee', 'woocommerce' );
+		} else {
+			return $name;
+		}
 	}
 
 	/**

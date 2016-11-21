@@ -153,7 +153,11 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 */
 	public function get_label( $context = 'view' ) {
 		$label = $this->get_prop( 'label', $context );
-		return $label ? $label : __( 'Tax', 'woocommerce' );
+		if ( 'view' === $context ) {
+			return $label ? $label : __( 'Tax', 'woocommerce' );
+		} else {
+			return $label;
+		}
 	}
 
 	/**
