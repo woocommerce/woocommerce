@@ -106,7 +106,6 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
 	}
 
-
 	/**
 	 * Get term meta.
 	 *
