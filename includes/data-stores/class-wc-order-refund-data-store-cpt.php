@@ -55,4 +55,16 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 			}
 		}
 	}
+
+	/**
+	 * Get a title for the new post type.
+	 *
+	 * @return string
+	 */
+	protected function get_post_title() {
+		// @codingStandardsIgnoreStart
+		/* translators: %s: Order date */
+		return sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
+	}
 }

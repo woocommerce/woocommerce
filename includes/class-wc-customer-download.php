@@ -43,7 +43,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		if ( is_numeric( $download ) && $download > 0 ) {
 			$this->set_id( $download );
 		} elseif ( $download instanceof self ) {
-			$this->set_id( absint( $download->get_id() ) );
+			$this->set_id( $download->get_id() );
 		} elseif ( is_object( $download ) && ! empty( $download->permission_id ) ) {
 			$this->set_id( $download->permission_id );
 			$this->set_props( (array) $download );

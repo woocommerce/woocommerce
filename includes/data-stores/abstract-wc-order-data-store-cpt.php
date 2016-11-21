@@ -33,7 +33,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 			'ping_status'   => 'closed',
 			'post_author'   => 1,
-			'post_title'    => $order->get_post_title( 'edit' ),
+			'post_title'    => $this->get_post_title(),
 			'post_password' => uniqid( 'order_' ),
 			'post_parent'   => $order->get_parent_id( 'edit' ),
 		) ), true );
@@ -117,6 +117,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_CPT implem
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Get a title for the new post type.
+	 *
+	 * @return string
+	 */
+	protected function get_post_title() {
+		// @codingStandardsIgnoreStart
+		/* translators: %s: Order date */
+		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
+	}
 
 	/**
 	 * Read order data. Can be overridden by child classes to load other props.

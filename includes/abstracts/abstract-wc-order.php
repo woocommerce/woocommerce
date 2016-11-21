@@ -122,7 +122,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_numeric( $order ) && $order > 0 ) {
 			$this->set_id( $order );
 		} elseif ( $order instanceof self ) {
-			$this->set_id( absint( $order->get_id() ) );
+			$this->set_id( $order->get_id() );
 		} elseif ( ! empty( $order->ID ) ) {
 			$this->set_id( absint( $order->ID ) );
 		} else {
@@ -158,18 +158,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function get_hook_prefix() {
 		return 'woocommerce_get_order_';
-	}
-
-	/**
-	 * Get a title for the new post type.
-	 *
-	 * @return string
-	 */
-	public function get_post_title() {
-		// @codingStandardsIgnoreStart
-		/* translators: %s: Order date */
-		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		// @codingStandardsIgnoreEnd
 	}
 
 	/**
