@@ -74,14 +74,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Logging method.
-	 * @param string $message
+	 *
+	 * @param string $message Log message.
+	 * @param string $level   Optional. Default 'info'.
+	 *     emergency|alert|critical|error|warning|notice|info|debug
 	 */
-	public static function log( $message ) {
+	public static function log( $message, $level = 'info' ) {
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->add( 'paypal', $message );
+			self::$log->log( $level, $message, array( 'tag' => 'paypal' ) );
 		}
 	}
 
