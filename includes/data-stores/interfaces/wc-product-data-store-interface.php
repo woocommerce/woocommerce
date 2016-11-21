@@ -100,4 +100,12 @@ interface WC_Product_Data_Store_Interface {
 	 * @return int|false
 	 */
 	public function get_shipping_class_id_by_slug( $slug );
+
+	/**
+	 * Returns an array of products.
+	 *
+	 * @param  array $args @see wc_get_products
+	 * @return array
+	 */
+	public function get_products( $args = array() );
 }
