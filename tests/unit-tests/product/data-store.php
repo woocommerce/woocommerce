@@ -316,4 +316,36 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->delete();
 	}
 
+	function test_varation_save_attributes() {
+		// Create a variable product with a color attribute.
+		$product = new WC_Product_Variable;
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'color' );
+		$attribute->set_options( explode( WC_DELIMITER, 'green | red' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Create a new variation with the color 'green'.
+		$variation = new WC_Product_Variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'green' ) );
+		$variation->set_status( 'private' );
+		$variation->save();
+
+		// Now update some value unrelated to attributes.
+		$variation = wc_get_product( $variation->get_id() );
+		$variation->set_status( 'publish' );
+		$variation->save();
+
+		// Load up the updated variation and verify that the saved state is correct.
+		$loaded_variation = wc_get_product( $variation->get_id() );
+
+		$this->assertEquals( 'publish', $loaded_variation->get_status( 'edit' ) );
+		$this->assertEquals( 'green', $loaded_variation->get_attributes( 'edit' )[ 'attribute_color' ] );
+	}
 }
