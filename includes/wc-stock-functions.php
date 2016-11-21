@@ -29,15 +29,13 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
 		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
-		$product_with_stock    = $product->get_id() !== $product_id_with_stock ? wc_get_product( $product_id_with_stock ) : $product;
-
-		$data_store = WC_Data_Store::load( 'product' );
+		$data_store            = WC_Data_Store::load( 'product' );
 		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
 
 		// Re-read product data after updating stock, then have stock status calculated and saved.
-		$product_with_stock = wc_get_product( $product_with_stock->get_id() );
+		$product_with_stock = wc_get_product( $product_id_with_stock );
 		$product_with_stock->set_stock_status();
 		$product_with_stock->save();
 
@@ -68,9 +66,10 @@ function wc_update_product_stock_status( $product_id, $status ) {
  * @param int $order_id
  */
 function wc_maybe_reduce_stock_levels( $order_id ) {
-	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $order_id, '_order_stock_reduced', true ), $order_id ) ) {
+	$data_store = WC_Data_Store::load( 'order' );
+	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! $data_store->get_stock_reduced( $order_id ), $order_id ) ) {
 		wc_reduce_stock_levels( $order_id );
-		add_post_meta( $order_id, '_order_stock_reduced', '1', true );
+		$data_store->set_stock_reduced( $order_id, true );
 	}
 }
 add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
@@ -88,7 +87,7 @@ function wc_reduce_stock_levels( $order_id ) {
 			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
 				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 				$item_name = $product->get_formatted_name();
-				$new_stock = wc_update_product_stock( $product, $qty, 'subtract' );
+				$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
 
 				if ( ! is_wp_error( $new_stock ) ) {
 					/* translators: 1: item name 2: old stock quantity 3: new stock quantity */

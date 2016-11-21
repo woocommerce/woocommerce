@@ -491,6 +491,7 @@ abstract class WC_Data {
 	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
+	 *
 	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
@@ -581,7 +582,7 @@ abstract class WC_Data {
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
-	public function get_prop( $prop, $context = 'view' ) {
+	protected function get_prop( $prop, $context = 'view' ) {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {

@@ -44,9 +44,12 @@ class WC_Post_Data {
 		// Status transitions
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
-		add_action( 'untrash_post', array( __CLASS__, 'untrash_post' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_items' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_downloadable_permissions' ) );
+
+		// Download permissions
+		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
 	}
 
 	/**
@@ -293,15 +296,6 @@ class WC_Post_Data {
 			$post_type = get_post_type( $id );
 
 			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
-
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
 				foreach ( $refunds as $refund ) {
@@ -327,14 +321,6 @@ class WC_Post_Data {
 			$post_type = get_post_type( $id );
 
 			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_money_spent' );
-					delete_user_meta( $user_id, '_order_count' );
-				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
@@ -386,12 +372,36 @@ class WC_Post_Data {
 		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				WHERE order_id = %d
-			", $postid ) );
+			$data_store = WC_Data_Store::load( 'customer-download' );
+			$data_store->delete_by_order_id( $postid );
 
 			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
+		}
+	}
+
+	/**
+	 * Update changed downloads.
+	 *
+	 * @param int $product_id product identifier
+	 * @param int $variation_id optional product variation identifier
+	 * @param array $downloads newly set files
+	 */
+	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
+		if ( $variation_id ) {
+			$product_id = $variation_id;
+		}
+		$product    = wc_get_product( $product_id );
+		$data_store = WC_Data_Store::load( 'customer-download' );
+
+		if ( $downloads ) {
+			foreach ( $downloads as $download ) {
+				$new_hash = md5( $download->get_file() );
+
+				if ( $download->get_previous_hash() && $download->get_previous_hash() !== $new_hash ) {
+					// Update permissions.
+					$data_store->update_download_id( $product_id, $download->get_previous_hash(), $new_hash );
+				}
+			}
 		}
 	}
 }

@@ -936,7 +936,7 @@ class WC_Cart {
 			if ( $product_data->managing_stock() ) {
 				$products_qty_in_cart = $this->get_cart_item_quantities();
 
-				if ( ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
+				if ( isset( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ]  ) && ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
 					throw new Exception( sprintf(
 						'<a href="%s" class="button wc-forward">%s</a> %s',
 						wc_get_cart_url(),

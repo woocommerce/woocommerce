@@ -360,30 +360,8 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
  * @return array
  */
 function wc_get_customer_download_permissions( $customer_id ) {
-	global $wpdb;
-
-	return apply_filters( 'woocommerce_permission_list', $wpdb->get_results(
-		$wpdb->prepare( "
-			SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
-			WHERE user_id = %d
-			AND permissions.order_id > 0
-			AND
-				(
-					permissions.downloads_remaining > 0
-					OR permissions.downloads_remaining = ''
-				)
-			AND
-				(
-					permissions.access_expires IS NULL
-					OR permissions.access_expires >= %s
-					OR permissions.access_expires = '0000-00-00 00:00:00'
-				)
-			ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
-			",
-			$customer_id,
-			date( 'Y-m-d', current_time( 'timestamp' ) )
-		)
-	), $customer_id );
+	$data_store = WC_Data_Store::load( 'customer-download' );
+	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id );
 }
 
 /**

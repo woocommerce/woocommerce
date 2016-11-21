@@ -50,7 +50,7 @@ class WC_Meta_Box_Order_Actions {
 						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
 								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . esc_html( $mail->title ) . '</option>';
+									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocomerce' ), esc_html( $mail->title ) ) . '</option>';
 								}
 							}
 						}
@@ -139,13 +139,9 @@ class WC_Meta_Box_Order_Actions {
 
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
-				delete_post_meta( $post_id, '_download_permissions_granted' );
-				$wpdb->delete(
-					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-					array( 'order_id' => $post_id ),
-					array( '%d' )
-				);
-				wc_downloadable_product_permissions( $post_id );
+				$data_store = WC_Data_Store::load( 'customer-download' );
+				$data_store->delete_by_order_id( $post_id );
+				wc_downloadable_product_permissions( $post_id, true );
 
 			} else {
 

@@ -15,16 +15,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
+	 * Which data store to load.
+	 *
+	 * @var string
+	 */
+	protected $data_store_name = 'order-refund';
+
+	/**
+	 * Stores product data.
+	 *
+	 * @var array
+	 */
+	protected $extra_data = array(
+		'amount'      => '',
+		'reason'      => '',
+		'refunded_by' => 0,
+	);
+
+	/**
 	 * Extend the abstract _data properties and then read the order object.
+	 *
 	 * @param int|object|WC_Order $read Order to init.
 	 */
 	 public function __construct( $read = 0 ) {
-		// Extend order data
-		$this->data = array_merge( $this->data, array(
-			'amount'      => '',
-			'reason'      => '',
-			'refunded_by' => 0,
-		) );
+		$this->data = array_merge( $this->data, $this->extra_data );
 		parent::__construct( $read );
 	}
 
@@ -50,63 +64,6 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	);
 
 	/**
-	 * Insert data into the database.
-	 * @since 2.7.0
-	 */
-	public function create() {
-		parent::create();
-
-		// Store additonal order data
-		if ( $this->get_id() ) {
-			$this->update_post_meta( '_refund_amount', $this->get_amount() );
-			$this->update_post_meta( '_refunded_by', $this->get_refunded_by() );
-			$this->update_post_meta( '_refund_reason', $this->get_reason() );
-		}
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.7.0
-	 * @param int $id ID of object to read.
-	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$post_object = get_post( $id );
-
-		$this->set_props( array(
-			'amount'      => get_post_meta( $this->get_id(), '_refund_amount', true ),
-			'refunded_by' => metadata_exists( 'post', $this->get_id(), '_refunded_by' ) ? get_post_meta( $this->get_id(), '_refunded_by', true ) : absint( $post_object->post_author ),
-			'reason'      => metadata_exists( 'post', $this->get_id(), '_refund_reason' ) ? get_post_meta( $this->get_id(), '_refund_reason', true ) : $post_object->post_excerpt,
-		) );
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		parent::update();
-
-		// Store additonal order data
-		$this->update_post_meta( '_refund_amount', $this->get_amount() );
-		$this->update_post_meta( '_refunded_by', $this->get_refunded_by() );
-		$this->update_post_meta( '_refund_reason', $this->get_reason() );
-	}
-
-	/**
-	 * Delete data from the database.
-	 * @since 2.7.0
-	 */
-	public function delete( $force_delete = false ) {
-		wp_delete_post( $this->get_id(), true );
-	}
-
-	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */
@@ -115,41 +72,70 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get status - always completed for refunds.
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
 	 * @return string
 	 */
-	public function get_status() {
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_order_refund_';
+	}
+
+	/**
+	 * Get status - always completed for refunds.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_status( $context = 'view' ) {
 		return 'completed';
 	}
 
 	/**
 	 * Get a title for the new post type.
 	 */
-	protected function get_post_title() {
+	public function get_post_title() {
 		// @codingStandardsIgnoreStart
 		return sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
 		// @codingStandardsIgnoreEnd
 	}
 
 	/**
-	 * Set refunded amount.
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * Get refunded amount.
+	 *
+	 * @param  string $context
+	 * @return int|float
 	 */
-	public function set_amount( $value ) {
-		$this->data['amount'] = wc_format_decimal( $value );
+	public function get_amount( $context = 'view' ) {
+		return $this->get_prop( 'amount', $context );
 	}
 
 	/**
-	 * Get refunded amount.
+	 * Get refund reason.
+	 *
+	 * @since 2.2
+	 * @param  string $context
 	 * @return int|float
 	 */
-	public function get_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->data['amount'], $this );
+	public function get_reason( $context = 'view' ) {
+		return $this->get_prop( 'reason', $context );
+	}
+
+	/**
+	 * Get ID of user who did the refund.
+	 *
+	 * @since 2.7
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_refunded_by( $context = 'view' ) {
+		return $this->get_prop( 'refunded_by', $context );
+
 	}
 
 	/**
 	 * Get formatted refunded amount.
+	 *
 	 * @since 2.4
 	 * @return string
 	 */
@@ -158,43 +144,38 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Set refunded amount.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_amount( $value ) {
+		$this->set_prop( 'amount', wc_format_decimal( $value ) );
+	}
+
+	/**
 	 * Set refund reason.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_reason( $value ) {
-		$this->data['reason'] = $value;
-	}
-
-	/**
-	 * Get refund reason.
-	 * @since 2.2
-	 * @return int|float
-	 */
-	public function get_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->data['reason'], $this );
+		$this->set_prop( 'reason', $value );
 	}
 
 	/**
 	 * Set refunded by.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_refunded_by( $value ) {
-		$this->data['refunded_by'] = absint( $value );
-	}
-
-	/**
-	 * Get ID of user who did the refund.
-	 * @since 2.7
-	 * @return int
-	 */
-	public function get_refunded_by() {
-		return absint( $this->data['refunded_by'] );
+		$this->set_prop( 'refunded_by', absint( $value ) );
 	}
 
 	/**
 	 * Magic __get method for backwards compatibility.
+	 *
 	 * @param string $key
 	 * @return mixed
 	 */

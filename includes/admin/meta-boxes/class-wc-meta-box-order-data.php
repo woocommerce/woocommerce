@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = $order->get_payment_method() ? $order->get_payment_method() : '';
+		$payment_method = $order->get_payment_method();
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -228,18 +228,18 @@ class WC_Meta_Box_Order_Data {
 							<?php
 								$statuses = wc_get_order_statuses();
 								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status(), false ) . '>' . esc_html( $status_name ) . '</option>';
+									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
 								}
 							?>
 						</select></p>
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( $order->get_user_id() ) {
+								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->get_user_id() ),
+										'_customer_user' => $order->get_user_id( 'edit' ),
 									);
 									printf( '<a href="%s">%s</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -292,7 +292,7 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'billing_' . $key;
 
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										$field_value = call_user_func( array( $order, 'get_' . $field_name ) );
+										$field_value = $order->{"get_$field_name"}( 'edit' );
 									} else {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
@@ -384,7 +384,7 @@ class WC_Meta_Box_Order_Data {
 										$field_name = 'shipping_' . $key;
 
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-											$field_value = call_user_func( array( $order, 'get_' . $field_name ) );
+											$field_value = $order->{"get_$field_name"}( 'edit' );
 										} else {
 											$field_value = $order->get_meta( '_' . $field_name );
 										}

@@ -457,7 +457,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 
@@ -618,7 +618,7 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
 

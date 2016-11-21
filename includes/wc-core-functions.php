@@ -21,6 +21,7 @@ include( 'wc-user-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
 include( 'wc-order-functions.php' );
+include( 'wc-order-item-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
 include( 'wc-stock-functions.php' );

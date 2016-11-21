@@ -1196,6 +1196,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$download_object->set_id( md5( $download['file'] ) );
 				$download_object->set_name( $download['name'] );
 				$download_object->set_file( $download['file'] );
+				if ( isset( $download['previous_hash'] ) ) {
+					$download_object->set_previous_hash( $download['previous_hash'] );
+				}
 			}
 
 			// Validate the file extension

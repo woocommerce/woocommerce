@@ -651,7 +651,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $update_id, $save_id );
 
 		// Delete
-		$object->delete();
+		$object->delete( true );
 		$post = get_post( $save_id );
 		$this->assertNull( $post );
 	}
