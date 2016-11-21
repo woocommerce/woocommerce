@@ -459,7 +459,17 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->get_post_data() ? $this->get_post_data()->post_title : '', $this );
+		_deprecated_function( 'WC_Product::get_title', '2.7', 'WC_Product::get_name' );
+
+		// In order to keep backwards compatibility it's required to use the parent title for variations.
+		if ( $this->is_type( 'variation' ) ) {
+			$parent = get_post( $this->get_parent_id() );
+			$title  = $parent ? $parent->post_title : '';
+		} else {
+			$title = $this->get_post_data() ? $this->get_post_data()->post_title : '';
+		}
+
+		return apply_filters( 'woocommerce_product_title', $title, $this );
 	}
 
 	/**
