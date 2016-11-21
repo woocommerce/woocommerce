@@ -10,6 +10,9 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
+## Reporting Security issues
+To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).
+
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
 
