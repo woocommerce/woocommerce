@@ -124,7 +124,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} elseif ( $order instanceof self ) {
 			$this->set_id( $order->get_id() );
 		} elseif ( ! empty( $order->ID ) ) {
-			$this->set_id( absint( $order->ID ) );
+			$this->set_id( $order->ID );
 		} else {
 			$this->set_object_read( true );
 		}
