@@ -647,8 +647,7 @@ class WC_Query {
 	public static function get_main_tax_query() {
 		global $wp_the_query;
 
-		$args      = $wp_the_query->query_vars;
-		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+		$tax_query = isset( $wp_the_query->tax_query, $wp_the_query->tax_query->queries ) ? $wp_the_query->tax_query->queries : array();
 
 		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
 			$tax_query[ $args['taxonomy'] ] = array(
