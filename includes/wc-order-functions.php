@@ -156,7 +156,7 @@ function wc_get_order_status_name( $status ) {
  */
 function wc_get_order_id_by_order_key( $order_key ) {
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->get_order_id_by_order_key();
+	return $data_store->get_order_id_by_order_key( $order_key );
 }
 
 /**

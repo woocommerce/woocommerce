@@ -15,6 +15,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 *
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -38,6 +39,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset
 	 * @return mixed
@@ -59,6 +61,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset
 	 * @param mixed $value
@@ -79,7 +82,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
+	 * offsetExists for ArrayAccess.
+	 *
 	 * @param string $offset
 	 * @return bool
 	 */
@@ -113,6 +117,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Save properties specific to this order item.
+	 *
 	 * @return int Item ID
 	 */
 	public function save() {
@@ -134,6 +139,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data.
+	 *
 	 * @return array()
 	 */
 	protected function get_internal_meta_keys() {
@@ -142,6 +148,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get the associated product.
+	 *
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
@@ -161,6 +168,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get the Download URL.
+	 *
 	 * @param  int $download_id
 	 * @return string
 	 */
@@ -176,7 +184,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get any associated downloadable files. @todo
+	 * Get any associated downloadable files.
+	 *
 	 * @return array
 	 */
 	public function get_item_downloads() {
@@ -208,6 +217,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get tax status.
+	 *
 	 * @return string
 	 */
 	public function get_tax_status() {
@@ -232,6 +242,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set quantity.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
@@ -244,6 +255,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set tax class.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -255,7 +267,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set Product ID
+	 * Set Product ID.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
@@ -268,6 +281,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set variation ID.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
@@ -280,6 +294,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Line subtotal (before discounts).
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -289,6 +304,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Line total (after discounts).
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -303,6 +319,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Line subtotal tax (before discounts).
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -312,6 +329,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Line total tax (after discounts).
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -321,6 +339,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set line taxes and totals for passed in taxes.
+	 *
 	 * @param array $raw_tax_data
 	 * @throws WC_Data_Exception
 	 */
@@ -346,6 +365,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set variation data (stored as meta data - write only).
+	 *
 	 * @param array $data Key/Value pairs
 	 */
 	public function set_variation( $data ) {
@@ -356,6 +376,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Set properties based on passed in product object.
+	 *
 	 * @param WC_Product $product
 	 * @throws WC_Data_Exception
 	 */
@@ -382,6 +403,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get order item type.
+	 *
 	 * @return string
 	 */
 	public function get_type() {
@@ -390,6 +412,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get product ID.
+	 *
 	 * @return int
 	 */
 	public function get_product_id() {
@@ -398,6 +421,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get variation ID.
+	 *
 	 * @return int
 	 */
 	public function get_variation_id() {
@@ -406,6 +430,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get quantity.
+	 *
 	 * @return int
 	 */
 	public function get_quantity() {
@@ -414,6 +439,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get tax class.
+	 *
 	 * @return string
 	 */
 	public function get_tax_class() {
@@ -422,6 +448,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get subtotal.
+	 *
 	 * @return string
 	 */
 	public function get_subtotal() {
@@ -430,6 +457,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get subtotal tax.
+	 *
 	 * @return string
 	 */
 	public function get_subtotal_tax() {
@@ -438,6 +466,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get total.
+	 *
 	 * @return string
 	 */
 	public function get_total() {
@@ -446,6 +475,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get total tax.
+	 *
 	 * @return string
 	 */
 	public function get_total_tax() {
@@ -454,6 +484,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get fee taxes.
+	 *
 	 * @return array
 	 */
 	public function get_taxes() {

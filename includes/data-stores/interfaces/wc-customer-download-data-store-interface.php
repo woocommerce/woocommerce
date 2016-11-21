@@ -46,7 +46,7 @@ interface WC_Customer_Download_Data_Store_Interface {
 	 *
 	 * @param  int $product_id
 	 * @param  string $old_id
-	 * @param  string $new_idn
+	 * @param  string $new_id
 	 */
 	public function update_download_id( $product_id, $old_id, $new_id );
 

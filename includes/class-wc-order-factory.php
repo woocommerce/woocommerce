@@ -100,7 +100,7 @@ class WC_Order_Factory {
 	 * @param  mixed $order
 	 * @return int|bool false on failure
 	 */
-	private static function get_order_id( $order ) {
+	public static function get_order_id( $order ) {
 		global $post;
 
 		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
