@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Improved layered nav counts on attribute archives.
 * Fix - Fixed pagination when removing layered nav items via widget.
 * Fix - Default BE tax rate.
+* Dev - API - Only update categories menu order and display if defined.
 
 = 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
