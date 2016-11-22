@@ -76,6 +76,7 @@
 					<tr>
 						<th colspan="5">
 							<a href="#" class="button insert" data-row="<?php
+								$key  = '';
 								$file = array(
 									'file' => '',
 									'name' => '',
