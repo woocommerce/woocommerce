@@ -343,6 +343,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<div>
 								<th colspan="4">
 									<a href="#" class="button insert" data-row="<?php
+										$key  = '';
 										$file = array(
 											'file' => '',
 											'name' => '',
