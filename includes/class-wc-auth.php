@@ -650,14 +650,15 @@ class WC_Auth {
 
 		$data = wp_cache_get( $consumer_key, 'wc_api_keys_consumer' );
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "
-				SELECT * FROM {$wpdb->prefix}woocommerce_api_keys 
-				WHERE consumer_key = %s ", $consumer_key )
+			$data = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}woocommerce_api_keys 
+					WHERE consumer_key = %s ",
+					$consumer_key
+				)
 			);
-
 			wp_cache_add( $consumer_key, $data, 'wc_api_keys_consumer' );
 		}
-
 
 		return self::_format_api_key_data( $data );
 	}
