@@ -959,8 +959,6 @@ class WC_API_Orders extends WC_API_Resource {
 			$line_item = new WC_Order_Item_Product( $item['id'] );
 		}
 
-		error_log( print_r ( $item, 1 ) );
-
 		$line_item->set_product( $product );
 		$line_item->set_order_id( $order->get_id() );
 
