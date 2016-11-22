@@ -168,7 +168,7 @@ class WC_Product_Grouped extends WC_Product {
 			$product = wc_get_product( $product );
 		}
 		if ( is_a( $product, 'WC_Product_Grouped' ) ) {
-			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_price( $product );
 			if ( $save ) {
 				$product->save();

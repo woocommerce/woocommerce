@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Coupon_Data_Store {
+interface WC_Coupon_Data_Store_Interface {
 	/**
 	 * Increase usage count for current coupon.
 	 * @param WC_Coupon
