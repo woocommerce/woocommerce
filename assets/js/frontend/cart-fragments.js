@@ -1,4 +1,4 @@
-/* global wc_cart_fragments_params */
+/* global wc_cart_fragments_params, Cookies */
 jQuery( function( $ ) {
 
 	// wc_cart_fragments_params is required to continue, ensure the object exists
@@ -108,7 +108,7 @@ jQuery( function( $ ) {
 		try {
 			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
 				cart_hash    = sessionStorage.getItem( cart_hash_key ),
-				cookie_hash  = $.cookie( 'woocommerce_cart_hash'),
+				cookie_hash  = Cookies.get( 'woocommerce_cart_hash'),
 				cart_created = sessionStorage.getItem( 'wc_cart_created' );
 
 			if ( cart_hash === null || cart_hash === undefined || cart_hash === '' ) {
@@ -152,7 +152,7 @@ jQuery( function( $ ) {
 	}
 
 	/* Cart Hiding */
-	if ( $.cookie( 'woocommerce_items_in_cart' ) > 0 ) {
+	if ( Cookies.get( 'woocommerce_items_in_cart' ) > 0 ) {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
 	} else {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).hide();
