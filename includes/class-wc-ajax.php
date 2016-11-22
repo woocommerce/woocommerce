@@ -929,7 +929,8 @@ class WC_AJAX {
 			// Add new shipping
 			$item = new WC_Order_Item_Shipping();
 			$item->set_shipping_rate( new WC_Shipping_Rate() );
-			$order->add_item( $item );
+			$item->set_order_id( $order_id );
+			$item_id = $item->save();
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-shipping.php' );
@@ -2013,7 +2014,7 @@ class WC_AJAX {
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
-			$variation->save_regular_price( wc_clean( $data['value'] ) );
+			$variation->set_regular_price( wc_clean( $data['value'] ) );
 			$variation->save();
 		}
 	}

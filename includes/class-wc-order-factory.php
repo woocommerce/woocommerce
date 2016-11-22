@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -13,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		WooCommerce
  */
 class WC_Order_Factory {
 
@@ -61,37 +60,47 @@ class WC_Order_Factory {
 		global $wpdb;
 
 		if ( is_numeric( $item_id ) ) {
-			$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
+			$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
 			$item_type = $item_data->order_item_type;
+			$id        = $item_id;
 		} elseif ( $item_id instanceof WC_Order_Item ) {
-			$item_data = $item_id->get_data();
-			$item_type = $item_data->get_type();
+			$item_type = $item_id->get_type();
+			$id        = $item_id->get_id();
 		} elseif ( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
-			$item_data = $item_id;
+			$id        = $item_id->order_item_id;
 			$item_type = $item_id->order_item_type;
 		} else {
 			$item_data = false;
 			$item_type = false;
+			$id        = false;
 		}
 
-		if ( $item_data && $item_type ) {
+		if ( $id && $item_type ) {
+			$classname = false;
 			switch ( $item_type ) {
 				case 'line_item' :
 				case 'product' :
-					return new WC_Order_Item_Product( $item_data );
+					$classname = 'WC_Order_Item_Product';
 				break;
 				case 'coupon' :
-					return new WC_Order_Item_Coupon( $item_data );
+					$classname = 'WC_Order_Item_Coupon';
 				break;
 				case 'fee' :
-					return new WC_Order_Item_Fee( $item_data );
+					$classname = 'WC_Order_Item_Fee';
 				break;
 				case 'shipping' :
-					return new WC_Order_Item_Shipping( $item_data );
+					$classname = 'WC_Order_Item_Shipping';
 				break;
 				case 'tax' :
-					return new WC_Order_Item_Tax( $item_data );
+					$classname = 'WC_Order_Item_Tax';
 				break;
+			}
+			if ( $classname ) {
+				try {
+					return new $classname( $id );
+				} catch ( Exception $e ) {
+					return false;
+				}
 			}
 		}
 		return false;

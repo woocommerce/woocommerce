@@ -230,7 +230,8 @@ class WC_Checkout {
 			// Add line items.
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = $values['data'];
-				$item    = new WC_Order_Item_Product( array(
+				$item    = new WC_Order_Item_Product();
+				$item->set_props( array(
 					'quantity'     => $values['quantity'],
 					'name'         => $product ? $product->get_name() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
@@ -243,7 +244,6 @@ class WC_Checkout {
 					'total_tax'    => $values['line_tax'],
 					'taxes'        => $values['line_tax_data'],
 				) );
-
 				$item->set_backorder_meta();
 				// Set this to pass to legacy actions.
 				$item->legacy_values        = $values;
@@ -254,7 +254,8 @@ class WC_Checkout {
 
 			// Add fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-				$item = new WC_Order_Item_Fee( array(
+				$item = new WC_Order_Item_Fee();
+				$item->set_props( array(
 					'name'      => $fee->name,
 					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
 					'total'     => $fee->amount,
@@ -275,7 +276,8 @@ class WC_Checkout {
 			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
 					$shipping_rate = $package['rates'][ $this->shipping_methods[ $package_key ] ];
-					$item = new WC_Order_Item_Shipping( array(
+					$item = new WC_Order_Item_Shipping();
+					$item->set_props( array(
 						'method_title' => $shipping_rate->label,
 						'method_id'    => $shipping_rate->id,
 						'total'        => wc_format_decimal( $shipping_rate->cost ),
@@ -293,20 +295,23 @@ class WC_Checkout {
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
 				if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					$order->add_item( new WC_Order_Item_Tax( array(
+					$item = new WC_Order_Item_Tax();
+					$item->set_props( array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
 						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
 						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-					) ) );
+					) );
+					$order->add_item( $item );
 				}
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				$item = new WC_Order_Item_Coupon( array(
+				$item = new WC_Order_Item_Coupon();
+				$item->set_props( array(
 					'code'         => $code,
 					'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
 					'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
