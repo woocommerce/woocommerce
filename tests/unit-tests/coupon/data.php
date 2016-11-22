@@ -57,7 +57,8 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
 		$coupon = WC_Helper_Coupon::create_coupon();
-		add_post_meta( $coupon->get_id(), 'test_coupon_field', 'testing', true );
+		$coupon->add_meta_data( 'test_coupon_field', 'testing', true );
+		$coupon->save_meta_data();
 		$coupon = new WC_Coupon( $coupon->get_id() );
 
 		$this->assertEquals( $coupon->get_id(), $coupon->id );
@@ -194,7 +195,9 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$coupon     = WC_Helper_Coupon::create_coupon();
 		$coupon_id  = $coupon->get_id();
 		$meta_value = time() . '-custom-value';
-		add_post_meta( $coupon_id, 'test_coupon_field', $meta_value, true );
+		$coupon->add_meta_data( 'test_coupon_field', $meta_value, true );
+		$coupon->save_meta_data();
+
 		$coupon = new WC_Coupon( $coupon_id );
 		$custom_fields = $coupon->get_meta_data();
 		$this->assertCount( 1, $custom_fields );

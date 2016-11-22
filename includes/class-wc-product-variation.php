@@ -43,7 +43,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param mixed $product
 	 */
 	public function __construct( $product = 0 ) {
-		$this->internal_meta_keys[] = '_variation_description';
 		parent::__construct( $product );
 	}
 
@@ -284,16 +283,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	| CRUD methods
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Callback to remove unwanted meta data.
-	 *
-	 * @param object $meta
-	 * @return bool false if excluded.
-	 */
-	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() ) && 0 !== stripos( $meta->meta_key, 'attribute_' );
-	}
 
 	/**
 	 * Set the parent data array for this variation.

@@ -11,6 +11,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  */
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store {
+
+	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool false if excluded.
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys ) && 0 !== stripos( $meta->meta_key, 'attribute_' );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods

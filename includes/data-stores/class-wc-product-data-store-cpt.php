@@ -10,7 +10,48 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Product_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Object_Data_Store, WC_Product_Data_Store_Interface {
+class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store, WC_Product_Data_Store_Interface {
+
+	/**
+	 * Data stored in meta keys, but not considered "meta".
+	 *
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $internal_meta_keys = array(
+		'_visibility',
+		'_sku',
+		'_price',
+		'_regular_price',
+		'_sale_price',
+		'_sale_price_dates_from',
+		'_sale_price_dates_to',
+		'total_sales',
+		'_tax_status',
+		'_tax_class',
+		'_manage_stock',
+		'_stock',
+		'_stock_status',
+		'_backorders',
+		'_sold_individually',
+		'_weight',
+		'_length',
+		'_width',
+		'_height',
+		'_upsell_ids',
+		'_crosssell_ids',
+		'_purchase_note',
+		'_default_attributes',
+		'_product_attributes',
+		'_virtual',
+		'_downloadable',
+		'_featured',
+		'_downloadable_files',
+		'_wc_rating_count',
+		'_wc_average_rating',
+		'_wc_review_count',
+		'_variation_description',
+	);
 
 	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.

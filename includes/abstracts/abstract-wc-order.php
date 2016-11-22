@@ -46,25 +46,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	);
 
 	/**
-	 * Data stored in meta keys, but not considered "meta" for an order.
-	 *
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $internal_meta_keys = array(
-		'_order_currency',
-		'_cart_discount',
-		'_cart_discount_tax',
-		'_order_shipping',
-		'_order_shipping_tax',
-		'_order_tax',
-		'_order_total',
-		'_order_version',
-		'_prices_include_tax',
-		'_payment_tokens',
-	);
-
-	/**
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 2.7.0
@@ -85,13 +66,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $items_to_delete = array();
-
-	/**
-	 * Internal meta type used to store order data.
-	 *
-	 * @var string
-	 */
-	protected $meta_type = 'post';
 
 	/**
 	 * Stores meta in cache for future reads.

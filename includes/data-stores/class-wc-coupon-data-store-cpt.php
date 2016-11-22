@@ -10,7 +10,42 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Coupon_Data_Store_CPT extends WC_Data_Store_CPT implements WC_Coupon_Data_Store, WC_Object_Data_Store {
+class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Data_Store, WC_Object_Data_Store {
+
+	/**
+	 * Internal meta type used to store coupon data.
+	 * @since 2.7.0
+	 * @var string
+	 */
+	protected $meta_type = 'post';
+
+	/**
+	 * Data stored in meta keys, but not considered "meta" for a coupon.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $internal_meta_keys = array(
+		'discount_type',
+		'coupon_amount',
+		'expiry_date',
+		'usage_count',
+		'individual_use',
+		'product_ids',
+		'exclude_product_ids',
+		'usage_limit',
+		'usage_limit_per_user',
+		'limit_usage_to_x_items',
+		'free_shipping',
+		'product_categories',
+		'exclude_product_categories',
+		'exclude_sale_items',
+		'minimum_amount',
+		'maximum_amount',
+		'customer_email',
+		'_used_by',
+		'_edit_lock',
+		'_edit_last',
+	);
 
 	/**
 	 * Method to create a new coupon in the database.

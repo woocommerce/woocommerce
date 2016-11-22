@@ -57,60 +57,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	);
 
 	/**
-	 * Data stored in meta keys, but not considered "meta".
-	 *
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $internal_meta_keys = array(
-		'billing_postcode',
-		'billing_city',
-		'billing_address_1',
-		'billing_address_2',
-		'billing_state',
-		'billing_country',
-		'shipping_postcode',
-		'shipping_city',
-		'shipping_address_1',
-		'shipping_address_2',
-		'shipping_state',
-		'shipping_country',
-		'paying_customer',
-		'last_update',
-		'first_name',
-		'last_name',
-		'show_admin_bar_front',
-		'use_ssl',
-		'admin_color',
-		'rich_editing',
-		'comment_shortcuts',
-		'dismissed_wp_pointers',
-		'show_welcome_panel',
-		'_woocommerce_persistent_cart',
-		'session_tokens',
-		'nickname',
-		'description',
-		'billing_first_name',
-		'billing_last_name',
-		'billing_company',
-		'billing_phone',
-		'billing_email',
-		'shipping_first_name',
-		'shipping_last_name',
-		'shipping_company',
-		'default_password_nag',
-		'primary_blog',
-		'source_domain',
-	);
-
-	/**
-	 * Internal meta type used to store user data.
-	 *
-	 * @var string
-	 */
-	protected $meta_type = 'user';
-
-	/**
 	 * Stores a password if this needs to be changed. Write-only and hidden from _data.
 	 *
 	 * @var string
