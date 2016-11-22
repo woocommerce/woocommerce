@@ -45,7 +45,11 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		return new $classname( $order_id );
+		try {
+			return new $classname( $order_id );
+		} catch ( Exception $e ) {
+			return false;
+		}
 	}
 
 	/**
