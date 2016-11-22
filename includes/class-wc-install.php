@@ -245,7 +245,10 @@ class WC_Install {
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );
+					$logger->info(
+						sprintf( 'Queuing %s - %s', $version, $update_callback ),
+						array( 'tag' => 'wc_db_updates' )
+					);
 					self::$background_updater->push_to_queue( $update_callback );
 					$update_queued = true;
 				}
