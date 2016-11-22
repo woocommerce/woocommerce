@@ -268,7 +268,7 @@ return array(
 					'country'  => 'FR',
 					'state'    => '',
 					'rate'     => '20.0000',
-					'name'     => 'VAT',
+					'name'     => 'TVA',
 					'shipping' => true,
 				),
 			),
