@@ -206,7 +206,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function zone_methods_screen( $zone_id ) {
 		if ( 'new' === $zone_id ) {
 			$zone = new WC_Shipping_Zone();
-			$zone->set_zone_name( __( 'New zone', 'woocommerce' ) );
+			$zone->set_zone_name( '' );
 		} else {
 			$zone = WC_Shipping_Zones::get_zone( absint( $zone_id ) );
 		}
