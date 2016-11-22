@@ -5,6 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Shared logic for WP based data.
+ * Contains functions like meta handling for all default data stores.
+ * Your own data store doesn't need to use WC_Data_Store_WP -- you can write
+ * your own meta handling functions.
  *
  * @version  2.7.0
  * @category Class
@@ -28,7 +31,7 @@ class WC_Data_Store_WP {
 	protected $object_id_field_for_meta = '';
 
 	/**
-	 * Data stored in meta keys, but not considered "meta" for a coupon.
+	 * Data stored in meta keys, but not considered "meta" for an object.
 	 * @since 2.7.0
 	 * @var array
 	 */
@@ -50,6 +53,13 @@ class WC_Data_Store_WP {
 		return wp_list_pluck( $terms, 'term_id' );
 	}
 
+	/**
+	 * Returns an array of meta for an object.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data
+	 * @return array
+	 */
 	public function read_meta( &$object ) {
 		global $wpdb;
 		$db_info       = $this->get_db_info();
@@ -63,14 +73,37 @@ class WC_Data_Store_WP {
 		return array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 	}
 
+	/**
+	 * Deletes meta based on meta ID.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data
+	 * @param  stdClass (containing at least ->id)
+	 * @return array
+	 */
 	public function delete_meta( &$object, $meta ) {
 		delete_metadata_by_mid( $this->meta_type, $meta->id );
 	}
 
+	/**
+	 * Add new piece of meta.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data
+	 * @param  stdClass (containing ->key and ->value)
+	 * @return meta ID
+	 */
 	public function add_meta( &$object, $meta ) {
 		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, $meta->value, false );
 	}
 
+	/**
+	 * Update meta.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data
+	 * @param  stdClass (containing ->id, ->key and ->value)
+	 */
 	public function update_meta( &$object, $meta ) {
 		update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
 	}

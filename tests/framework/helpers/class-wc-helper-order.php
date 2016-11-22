@@ -90,7 +90,6 @@ class WC_Helper_Order {
 		$order->set_cart_tax( 0 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 40 ); // 4 x $10 simple helper product
-
 		$order->save();
 
 		return $order;

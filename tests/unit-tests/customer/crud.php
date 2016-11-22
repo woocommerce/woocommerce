@@ -220,7 +220,6 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$order = WC_Helper_Order::create_order( $customer_id );
 		$customer = new WC_Customer( $customer_id );
-
 		$last_order = $customer->get_last_order();
 		$this->assertEquals( $order->get_id(), $last_order ? $last_order->get_id() : 0 );
 		$this->assertEquals( $order->get_date_created(), $last_order ? $last_order->get_date_created() : 0 );

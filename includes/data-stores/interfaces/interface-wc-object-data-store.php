@@ -37,11 +37,33 @@ interface WC_Object_Data_Store {
 	 */
 	public function delete( &$data, $args = array() );
 
+	/**
+	 * Returns an array of meta for an object.
+	 * @param  WC_Data
+	 * @return array
+	 */
 	public function read_meta( &$data );
 
+	/**
+	 * Deletes meta based on meta ID.
+	 * @param  WC_Data
+	 * @param  stdClass (containing at least ->id)
+	 * @return array
+	 */
 	public function delete_meta( &$data, $meta );
 
+	/**
+	 * Add new piece of meta.
+	 * @param  WC_Data
+	 * @param  stdClass (containing ->key and ->value)
+	 * @return meta ID
+	 */
 	public function add_meta( &$data, $meta );
 
+	/**
+	 * Update meta.
+	 * @param  WC_Data
+	 * @param  stdClass (containing ->id, ->key and ->value)
+	 */
 	public function update_meta( &$data, $meta );
 }
