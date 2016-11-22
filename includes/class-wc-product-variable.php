@@ -387,7 +387,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		$data_store = WC_Data_Store::load( 'product_variable' );
+		$data_store = WC_Data_Store::load( 'product-variable' );
 		$prices = $data_store->read_price_data( $this );
 		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
 	}
@@ -489,7 +489,7 @@ class WC_Product_Variable extends WC_Product {
 			$product = wc_get_product( $product );
 		}
 		if ( is_a( $product, 'WC_Product_Variable' ) ) {
-			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_price( $product );
 			$data_store->sync_stock_status( $product );
 			self::sync_attributes( $product ); // Legacy update of attributes.
@@ -515,7 +515,7 @@ class WC_Product_Variable extends WC_Product {
 			$product = wc_get_product( $product );
 		}
 		if ( is_a( $product, 'WC_Product_Variable' ) ) {
-			$data_store = WC_Data_Store::load( 'product_' . $product->get_type() );
+			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_stock_status( $product );
 
 			if ( $save ) {

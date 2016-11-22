@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store {
+class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 	public function create( &$data ) { }
 	public function read( &$data ) { }
 	public function update( &$data ) { }
@@ -32,7 +32,7 @@ class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store {
  * @category Class
  * @author   WooThemes
  */
-class WC_Dummy_Data_Store_Custom_Table implements WC_Object_Data_Store {
+class WC_Dummy_Data_Store_Custom_Table implements WC_Object_Data_Store_Interface {
 	public function create( &$data ) { }
 	public function read( &$data ) { }
 	public function update( &$data ) { }

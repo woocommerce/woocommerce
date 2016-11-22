@@ -28,7 +28,7 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	function test_invalid_store_load_returns_null() {
-		$product_store = WC_Data_Store::load( 'product-test' );
+		$product_store = WC_Data_Store::load( 'does-not-exist' );
 		$this->assertNull( $product_store );
 	}
 
@@ -58,14 +58,14 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	 */
 	function test_store_sub_type() {
 		$this->load_dummy_store();
-		$store = WC_Data_Store::load( 'dummy_sub' );
+		$store = WC_Data_Store::load( 'dummy-sub' );
 		$this->assertEquals( 'WC_Dummy_Data_Store_CPT', $store->get_current_class_name() );
 	}
 
 	/* Helper Functions. */
 
 	/**
-	 * Loads two dummy data store classes that can be swapt out for each other. Adds to the `woocommerce_data_stores` filter.
+	 * Loads two dummy data store classes that can be swapped out for each other. Adds to the `woocommerce_data_stores` filter.
 	 *
 	 * @since 2.7.0
 	 */

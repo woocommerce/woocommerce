@@ -115,7 +115,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_object_read( true );
 		}
 
-		$this->data_store = WC_Data_Store::load( 'product_' . $this->get_type() );
+		$this->data_store = WC_Data_Store::load( 'product-' . $this->get_type() );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}

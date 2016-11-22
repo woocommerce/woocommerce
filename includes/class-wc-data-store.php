@@ -42,9 +42,9 @@ class WC_Data_Store {
 		'order-item-tax'      => 'WC_Order_Item_Tax_Data_Store',
 		'payment-token'       => 'WC_Payment_Token_Data_Store',
 		'product'             => 'WC_Product_Data_Store_CPT',
-		'product_grouped'     => 'WC_Product_Grouped_Data_Store_CPT',
-		'product_variable'    => 'WC_Product_Variable_Data_Store_CPT',
-		'product_variation'   => 'WC_Product_Variation_Data_Store_CPT',
+		'product-grouped'     => 'WC_Product_Grouped_Data_Store_CPT',
+		'product-variable'    => 'WC_Product_Variable_Data_Store_CPT',
+		'product-variation'   => 'WC_Product_Variation_Data_Store_CPT',
 		'shipping-zone'       => 'WC_Shipping_Zone_Data_Store',
 	);
 
@@ -63,9 +63,9 @@ class WC_Data_Store {
 		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
 		// If this object type can't be found, check to see if we can load one
-		// level up (so if product_type isn't found, we try product).
+		// level up (so if product-type isn't found, we try product).
 		if ( ! array_key_exists( $object_type, $this->stores ) ) {
-			$pieces = explode( '_', $object_type );
+			$pieces = explode( '-', $object_type );
 			$object_type = $pieces[0];
 		}
 

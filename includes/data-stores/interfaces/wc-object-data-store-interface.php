@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Interface
  * @author   WooThemes
  */
-interface WC_Object_Data_Store {
+interface WC_Object_Data_Store_Interface {
 	/**
 	 * Method to create a new record of a WC_Data based object.
 	 * @param WC_Data
