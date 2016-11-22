@@ -109,6 +109,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		return ( $this->get_discount_type() == $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
 	}
 
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_coupon_';
+	}
+
 	/*
 	 |--------------------------------------------------------------------------
 	 | Getters

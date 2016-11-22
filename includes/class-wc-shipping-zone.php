@@ -56,6 +56,16 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		}
 	}
 
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_shipping_zone_';
+	}
+
 	/*
 	 |--------------------------------------------------------------------------
 	 | Getters
