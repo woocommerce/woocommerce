@@ -521,7 +521,7 @@ class WC_Checkout {
 										break;
 									case 'state' :
 										// Get valid states
-										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
+										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_billing_country() : WC()->customer->get_shipping_country() ) );
 
 										if ( ! empty( $valid_states ) && is_array( $valid_states ) ) {
 											$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );

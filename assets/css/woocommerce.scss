@@ -1951,7 +1951,6 @@ button.pswp__button--zoom:hover {
 				text-align: left;
 				margin: 0;
 				font-weight: normal;
-				@include clearfix;
 
 				input {
 					margin: 0 1em 0 0;
@@ -1968,6 +1967,10 @@ button.pswp__button--zoom:hover {
 				img + img {
 					margin-left: 2px;
 				}
+			}
+
+			li:not(.woocommerce-notice) {
+				@include clearfix;
 			}
 		}
 
