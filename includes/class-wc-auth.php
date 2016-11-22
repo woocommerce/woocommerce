@@ -211,18 +211,15 @@ class WC_Auth {
 	 * @return array
 	 */
 	protected function create_keys( $app_name, $app_user_id, $scope ) {
-		$description = sprintf( __( '%s - API %s (created on %s at %s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
+		$description = sprintf( __( '%1$s - API %2$s (created on %3$s at %4$s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
 		$user        = wp_get_current_user();
 
 		// Created API keys.
 		$result = WC_Auth::create_api_key( array(
 			'description' => $description,
 			'user_id' => $user->ID,
-			'scope' => $scope
+			'scope' => $scope,
 		) );
-
-		// @TODO: Apparently $app_user_id was not used previously (before 2.6.2) but for return array
-		// @TODO: It could be deprecated and user only current user or actually use $app_user_id instead
 
 		$result['user_id'] = $app_user_id;
 		return $result;
@@ -390,7 +387,7 @@ class WC_Auth {
 		$defaults = array(
 			'description' => '',
 			'user_id' => 0,
-			'scope' => 'read'
+			'scope' => 'read',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -426,7 +423,7 @@ class WC_Auth {
 				'permissions'     => $permissions,
 				'consumer_key'    => wc_api_hash( $consumer_key ),
 				'consumer_secret' => $consumer_secret,
-				'truncated_key'   => substr( $consumer_key, -7 )
+				'truncated_key'   => substr( $consumer_key, -7 ),
 			),
 			array(
 				'%d',
@@ -434,7 +431,7 @@ class WC_Auth {
 				'%s',
 				'%s',
 				'%s',
-				'%s'
+				'%s',
 			)
 		);
 
@@ -443,7 +440,7 @@ class WC_Auth {
 			'user_id'         => $user_id,
 			'consumer_key'    => $consumer_key,
 			'consumer_secret' => $consumer_secret,
-			'key_permissions' => $permissions
+			'key_permissions' => $permissions,
 		);
 	}
 
@@ -541,7 +538,7 @@ class WC_Auth {
 			'per_page' => 10,
 			'page' => 1,
 			's' => '',
-			'count' => false
+			'count' => false,
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -567,12 +564,10 @@ class WC_Auth {
 
 			return $count;
 
-		}
-		else {
+		} else {
 			if ( $args['per_page'] < 0 ) {
 				$limit = '';
-			}
-			else {
+			} else {
 				if ( 1 < $args['page'] ) {
 					$offset = $args['per_page'] * ( $args['page'] - 1 );
 				} else {
@@ -655,13 +650,9 @@ class WC_Auth {
 
 		$data = wp_cache_get( $consumer_key, 'wc_api_keys_consumer' );
 		if ( false === $data ) {
-			$data         = $wpdb->get_row(
-				$wpdb->prepare( "
-				SELECT *
-				FROM {$wpdb->prefix}woocommerce_api_keys
-				WHERE consumer_key = %s ",
-					$consumer_key
-				)
+			$data = $wpdb->get_row( $wpdb->prepare( "
+				SELECT * FROM {$wpdb->prefix}woocommerce_api_keys 
+				WHERE consumer_key = %s ", $consumer_key )
 			);
 
 			wp_cache_add( $consumer_key, $data, 'wc_api_keys_consumer' );

@@ -8,7 +8,7 @@
  * @group api-keys
  */
 class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
-	
+
 	public function test_insert_api_keys() {
 		$user_id = $this->factory->user->create();
 
@@ -27,7 +27,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 	public function test_should_not_insert_wrong_user() {
 		$args   = array(
-			'user_id' => 500000
+			'user_id' => 500000,
 		);
 		$result = WC_Auth::create_api_key( $args );
 		$this->assertFalse( $result );
@@ -37,7 +37,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 
 		$args   = array(
-			'user_id' => $user_id
+			'user_id' => $user_id,
 		);
 		$result = WC_Auth::create_api_key( $args );
 		$this->assertEquals( 'read', $result['key_permissions'] );
@@ -61,7 +61,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 		$args   = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION'
+			'description' => 'APP_DESCRIPTION',
 		);
 		$result = WC_Auth::create_api_key( $args );
 
@@ -80,7 +80,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 
 		$args   = array(
-			'user_id' => $user_id
+			'user_id' => $user_id,
 		);
 		$result = WC_Auth::create_api_key( $args );
 
@@ -101,25 +101,25 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION1'
+			'description' => 'APP_DESCRIPTION1',
 		);
 		$result1 = WC_Auth::create_api_key( $args );
 
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION2'
+			'description' => 'APP_DESCRIPTION2',
 		);
 		$result2 = WC_Auth::create_api_key( $args );
 
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION3'
+			'description' => 'APP_DESCRIPTION3',
 		);
 		$result3 = WC_Auth::create_api_key( $args );
 
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION4'
+			'description' => 'APP_DESCRIPTION4',
 		);
 		$result4 = WC_Auth::create_api_key( $args );
 
@@ -157,7 +157,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 		$args   = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION'
+			'description' => 'APP_DESCRIPTION',
 		);
 		$result = WC_Auth::create_api_key( $args );
 		$key_id = $result['key_id'];
@@ -168,7 +168,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 			'scope'       => 'write',
 			'description' => 'APP_DESCRIPTION_2',
 			'last_access' => current_time( 'mysql' ),
-			'nonces'      => array( 'nonce1' => '1', 'nonce2' => '2' )
+			'nonces'      => array( 'nonce1' => '1', 'nonce2' => '2' ),
 		);
 		$result    = WC_Auth::update_api_key( $key_id, $new_args );
 		$this->assertTrue( $result );
@@ -185,7 +185,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 
 		$args   = array(
-			'user_id' => $user_id
+			'user_id' => $user_id,
 		);
 		$result = WC_Auth::create_api_key( $args );
 
@@ -200,7 +200,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 
 		$args   = array(
 			'user_id'     => $user_id,
-			'description' => 'APP_DESCRIPTION'
+			'description' => 'APP_DESCRIPTION',
 		);
 		$result = WC_Auth::create_api_key( $args );
 
@@ -218,7 +218,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 
 		$args   = array(
-			'user_id' => $user_id
+			'user_id' => $user_id,
 		);
 		$result = WC_Auth::create_api_key( $args );
 
@@ -240,7 +240,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'DESCRIPTION1'
+			'description' => 'DESCRIPTION1',
 		);
 		$result1 = WC_Auth::create_api_key( $args );
 
@@ -273,7 +273,7 @@ class WC_Tests_API_API_Keys extends WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create();
 		$args    = array(
 			'user_id'     => $user_id,
-			'description' => 'DESCRIPTION1'
+			'description' => 'DESCRIPTION1',
 		);
 		$result1 = WC_Auth::create_api_key( $args );
 

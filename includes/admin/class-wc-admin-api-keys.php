@@ -98,7 +98,7 @@ class WC_Admin_API_Keys {
 			return $empty;
 		}
 
-		return (array)$key;
+		return (array) $key;
 	}
 
 	/**

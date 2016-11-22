@@ -2102,7 +2102,7 @@ class WC_AJAX {
 				$data = array(
 					'user_id'     => $user_id,
 					'description' => $description,
-					'scope' => $permissions
+					'scope' => $permissions,
 				);
 
 				WC_Auth::update_api_key( $key_id, $data );
@@ -2114,7 +2114,7 @@ class WC_AJAX {
 				$result = WC_Auth::create_api_key( array(
 					'description' => $description,
 					'user_id' => $user_id,
-					'scope' => $permissions
+					'scope' => $permissions,
 				));
 
 				if ( ! $result ) {
