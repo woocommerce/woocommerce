@@ -69,6 +69,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 	}
 
+	/**
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  2.7.0
+	 * @return string
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_order_item_';
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters

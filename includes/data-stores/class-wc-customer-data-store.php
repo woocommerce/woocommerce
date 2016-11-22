@@ -64,6 +64,21 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	protected $meta_type = 'user';
 
 	/**
+	 * Callback to remove unwanted meta data.
+	 *
+	 * @param object $meta
+	 * @return bool
+	 */
+	protected function exclude_internal_meta_keys( $meta ) {
+		global $wpdb;
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys )
+			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
+			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
+			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
+			&& ! strstr( $meta->meta_key, $wpdb->prefix );
+	 }
+
+	/**
 	 * Method to create a new customer in the database.
 	 *
 	 * @since 2.7.0

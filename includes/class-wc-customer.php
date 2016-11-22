@@ -113,19 +113,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Callback to remove unwanted meta data.
+	 * Prefix for action and filter hooks on data.
 	 *
-	 * @param object $meta
-	 * @return bool
+	 * @since  2.7.0
+	 * @return string
 	 */
-	protected function exclude_internal_meta_keys( $meta ) {
-		global $wpdb;
-		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() )
-			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
-			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
-			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
-			&& ! strstr( $meta->meta_key, $wpdb->prefix );
-	 }
+	protected function get_hook_prefix() {
+		return 'woocommerce_get_customer_';
+	}
 
 	/**
 	 * Delete a customer and reassign posts..
