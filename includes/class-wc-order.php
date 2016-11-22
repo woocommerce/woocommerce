@@ -18,59 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order extends WC_Abstract_Order {
 
 	/**
-	 * Data stored in meta keys, but not considered "meta" for an order.
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $internal_meta_keys = array(
-		'_customer_user',
-		'_order_key',
-		'_order_currency',
-		'_billing_first_name',
-		'_billing_last_name',
-		'_billing_company',
-		'_billing_address_1',
-		'_billing_address_2',
-		'_billing_city',
-		'_billing_state',
-		'_billing_postcode',
-		'_billing_country',
-		'_billing_email',
-		'_billing_phone',
-		'_shipping_first_name',
-		'_shipping_last_name',
-		'_shipping_company',
-		'_shipping_address_1',
-		'_shipping_address_2',
-		'_shipping_city',
-		'_shipping_state',
-		'_shipping_postcode',
-		'_shipping_country',
-		'_completed_date',
-		'_paid_date',
-		'_edit_lock',
-		'_edit_last',
-		'_cart_discount',
-		'_cart_discount_tax',
-		'_order_shipping',
-		'_order_shipping_tax',
-		'_order_tax',
-		'_order_total',
-		'_payment_method',
-		'_payment_method_title',
-		'_transaction_id',
-		'_customer_ip_address',
-		'_customer_user_agent',
-		'_created_via',
-		'_order_version',
-		'_prices_include_tax',
-		'_customer_note',
-		'_date_completed',
-		'_date_paid',
-		'_payment_tokens',
-	);
-
-	/**
 	 * Stores data about status changes so relevant hooks can be fired.
 	 * @var bool|array
 	 */
@@ -198,6 +145,10 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Gets order total - formatted for display.
+	 *
+	 * @param  string $tax_display     Type of tax display.
+	 * @param  bool  $display_refunded If should include refunded value.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_order_total( $tax_display = '', $display_refunded = true ) {
@@ -206,7 +157,7 @@ class WC_Order extends WC_Abstract_Order {
 		$total_refunded = $this->get_total_refunded();
 		$tax_string     = '';
 
-		// Tax for inclusive prices
+		// Tax for inclusive prices.
 		if ( wc_tax_enabled() && 'incl' == $tax_display ) {
 			$tax_string_array = array();
 
@@ -230,7 +181,15 @@ class WC_Order extends WC_Abstract_Order {
 			$formatted_total .= $tax_string;
 		}
 
-		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
+		/**
+		 * Filter WooCommerce formatted order total.
+		 *
+		 * @param string   $formatted_total  Total to display.
+		 * @param WC_Order $order            Order data.
+		 * @param string   $tax_display      Type of tax display.
+		 * @param bool     $display_refunded If should include refunded value.
+		 */
+		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this, $tax_display, $display_refunded );
 	}
 
 	/*
@@ -248,175 +207,23 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
-	 * Insert data into the database.
+	 * Save data to the database.
+	 *
 	 * @since 2.7.0
+	 * @return int order ID
 	 */
-	public function create() {
-		parent::create();
-
-		// Store additonal order data
-		if ( $this->get_id() ) {
-			$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-			$this->update_post_meta( '_order_key', $this->get_order_key() );
-			$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-			$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-			$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-			$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-			$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-			$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-			$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-			$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-			$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-			$this->update_post_meta( '_billing_email', $this->get_billing_email() );
-			$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-			$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-			$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-			$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-			$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-			$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-			$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-			$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-			$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-			$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-			$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-			$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-			$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-			$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-			$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-			$this->update_post_meta( '_created_via', $this->get_created_via() );
-			$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-			$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-			$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-			$this->update_post_meta( '_cart_hash', $this->get_cart_hash() );
-			do_action( 'woocommerce_new_order', $this->get_id() );
-		}
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.7.0
-	 * @param int $id ID of object to read.
-	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$post_object = get_post( $this->get_id() );
-
-		$this->set_props( array(
-			'order_key'            => get_post_meta( $this->get_id(), '_order_key', true ),
-			'customer_id'          => get_post_meta( $this->get_id(), '_customer_user', true ),
-			'billing_first_name'   => get_post_meta( $this->get_id(), '_billing_first_name', true ),
-			'billing_last_name'    => get_post_meta( $this->get_id(), '_billing_last_name', true ),
-			'billing_company'      => get_post_meta( $this->get_id(), '_billing_company', true ),
-			'billing_address_1'    => get_post_meta( $this->get_id(), '_billing_address_1', true ),
-			'billing_address_2'    => get_post_meta( $this->get_id(), '_billing_address_2', true ),
-			'billing_city'         => get_post_meta( $this->get_id(), '_billing_city', true ),
-			'billing_state'        => get_post_meta( $this->get_id(), '_billing_state', true ),
-			'billing_postcode'     => get_post_meta( $this->get_id(), '_billing_postcode', true ),
-			'billing_country'      => get_post_meta( $this->get_id(), '_billing_country', true ),
-			'billing_email'        => get_post_meta( $this->get_id(), '_billing_email', true ),
-			'billing_phone'        => get_post_meta( $this->get_id(), '_billing_phone', true ),
-			'shipping_first_name'  => get_post_meta( $this->get_id(), '_shipping_first_name', true ),
-			'shipping_last_name'   => get_post_meta( $this->get_id(), '_shipping_last_name', true ),
-			'shipping_company'     => get_post_meta( $this->get_id(), '_shipping_company', true ),
-			'shipping_address_1'   => get_post_meta( $this->get_id(), '_shipping_address_1', true ),
-			'shipping_address_2'   => get_post_meta( $this->get_id(), '_shipping_address_2', true ),
-			'shipping_city'        => get_post_meta( $this->get_id(), '_shipping_city', true ),
-			'shipping_state'       => get_post_meta( $this->get_id(), '_shipping_state', true ),
-			'shipping_postcode'    => get_post_meta( $this->get_id(), '_shipping_postcode', true ),
-			'shipping_country'     => get_post_meta( $this->get_id(), '_shipping_country', true ),
-			'payment_method'       => get_post_meta( $this->get_id(), '_payment_method', true ),
-			'payment_method_title' => get_post_meta( $this->get_id(), '_payment_method_title', true ),
-			'transaction_id'       => get_post_meta( $this->get_id(), '_transaction_id', true ),
-			'customer_ip_address'  => get_post_meta( $this->get_id(), '_customer_ip_address', true ),
-			'customer_user_agent'  => get_post_meta( $this->get_id(), '_customer_user_agent', true ),
-			'created_via'          => get_post_meta( $this->get_id(), '_created_via', true ),
-			'customer_note'        => get_post_meta( $this->get_id(), '_customer_note', true ),
-			'date_completed'       => get_post_meta( $this->get_id(), '_completed_date', true ),
-			'date_paid'            => get_post_meta( $this->get_id(), '_paid_date', true ),
-			'cart_hash'            => get_post_meta( $this->get_id(), '_cart_hash', true ),
-			'customer_note'        => $post_object->post_excerpt,
-		) );
-
+	public function save() {
 		$this->maybe_set_user_billing_email();
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		global $wpdb;
-
-		// Store additonal order data.
-		$this->update_post_meta( '_order_key', $this->get_order_key() );
-		$customer_changed = $this->update_post_meta( '_customer_user', $this->get_customer_id() );
-		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-		$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-		$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-		$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-		$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-		$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-		$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-		$email_changed = $this->update_post_meta( '_billing_email', $this->get_billing_email() );
-		$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-		$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-		$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-		$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-		$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-		$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-		$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-		$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-		$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-		$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-		$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-		$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-		$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-		$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-		$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-		$this->update_post_meta( '_created_via', $this->get_created_via() );
-		$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-		$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-		$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-		$this->update_post_meta( '_cart_hash', $this->get_cart_hash() );
-
-		// Update parent.
-		parent::update();
-
-		// If customer changed, update any downloadable permissions.
-		if ( $customer_changed || $email_changed ) {
-			$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-				array(
-					'user_id'    => $this->get_customer_id(),
-					'user_email' => $this->get_billing_email(),
-				),
-				array(
-					'order_id'   => $this->get_id(),
-				),
-				array(
-					'%d',
-					'%s',
-				),
-				array(
-					'%d',
-				)
-			);
+		if ( $this->data_store ) {
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
 		}
-
-		// Clear order cache.
-		clean_post_cache( $this->get_id() );
-		wc_delete_shop_order_transients( $this->get_id() );
-
-		// Handle status change.
+		$this->save_items();
 		$this->status_transition();
-
+		return $this->get_id();
 	}
 
 	/**
@@ -536,31 +343,38 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order key.
-	 * @since 2.7.0
+	 *
+	 * @since  2.7.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_order_key() {
-		return $this->data['order_key'];
+	public function get_order_key( $context = 'view' ) {
+		return $this->get_prop( 'order_key', $context );
 	}
 
 	/**
-	 * Get customer_id
+	 * Get customer_id.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_customer_id() {
-		return $this->data['customer_id'];
+	public function get_customer_id( $context = 'view' ) {
+		return $this->get_prop( 'customer_id', $context );
 	}
 
 	/**
 	 * Alias for get_customer_id().
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_user_id() {
-		return $this->get_customer_id();
+	public function get_user_id( $context = 'view' ) {
+		return $this->get_customer_id( $context );
 	}
 
 	/**
 	 * Get the user associated with the order. False for guests.
+	 *
 	 * @return WP_User|false
 	 */
 	public function get_user() {
@@ -568,245 +382,337 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get billing_first_name
-	 * @return string
+	 * Gets a prop for a getter method.
+	 *
+	 * @since  2.7.0
+	 * @param  string $prop Name of prop to get.
+	 * @param  string $address billing or shipping.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return mixed
 	 */
-	public function get_billing_first_name() {
-		return $this->data['billing']['first_name'];
+	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
+		$value = null;
+
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
+			}
+		}
+		return $value;
 	}
 
 	/**
-	 * Get billing_last_name
+	 * Get billing_first_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_last_name() {
-		return $this->data['billing']['last_name'];
+	public function get_billing_first_name( $context = 'view' ) {
+		return $this->get_address_prop( 'first_name', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_company
+	 * Get billing_last_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_company() {
-		return $this->data['billing']['company'];
+	public function get_billing_last_name( $context = 'view' ) {
+		return $this->get_address_prop( 'last_name', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_address_1
+	 * Get billing_company.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_address_1() {
-		return $this->data['billing']['address_1'];
+	public function get_billing_company( $context = 'view' ) {
+		return $this->get_address_prop( 'company', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_address_2
+	 * Get billing_address_1.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_address_1( $context = 'view' ) {
+		return $this->get_address_prop( 'address_1', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_address_2.
+	 *
+	 * @param  string $context
 	 * @return string $value
 	 */
-	public function get_billing_address_2() {
-		return $this->data['billing']['address_2'];
+	public function get_billing_address_2( $context = 'view' ) {
+		return $this->get_address_prop( 'address_2', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_city
+	 * Get billing_city.
+	 *
+	 * @param  string $context
 	 * @return string $value
 	 */
-	public function get_billing_city() {
-		return $this->data['billing']['city'];
+	public function get_billing_city( $context = 'view' ) {
+		return $this->get_address_prop( 'city', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_state
+	 * Get billing_state.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_state() {
-		return $this->data['billing']['state'];
+	public function get_billing_state( $context = 'view' ) {
+		return $this->get_address_prop( 'state', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_postcode
+	 * Get billing_postcode.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_postcode() {
-		return $this->data['billing']['postcode'];
+	public function get_billing_postcode( $context = 'view' ) {
+		return $this->get_address_prop( 'postcode', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_country
+	 * Get billing_country.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_country() {
-		return $this->data['billing']['country'];
+	public function get_billing_country( $context = 'view' ) {
+		return $this->get_address_prop( 'country', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_email
+	 * Get billing_email.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_email() {
-		return $this->data['billing']['email'];
+	public function get_billing_email( $context = 'view' ) {
+		return $this->get_address_prop( 'email', 'billing', $context );
 	}
 
 	/**
-	 * Get billing_phone
+	 * Get billing_phone.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_billing_phone() {
-		return $this->data['billing']['phone'];
+	public function get_billing_phone( $context = 'view' ) {
+		return $this->get_address_prop( 'phone', 'billing', $context );
 	}
 
 	/**
-	 * Get shipping_first_name
+	 * Get shipping_first_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_first_name() {
-		return $this->data['shipping']['first_name'];
+	public function get_shipping_first_name( $context = 'view' ) {
+		return $this->get_address_prop( 'first_name', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_last_name
+	 * Get shipping_last_name.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_last_name() {
-		 return $this->data['shipping']['last_name'];
+	public function get_shipping_last_name( $context = 'view' ) {
+		 return $this->get_address_prop( 'last_name', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_company
+	 * Get shipping_company.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_company() {
-		return $this->data['shipping']['company'];
+	public function get_shipping_company( $context = 'view' ) {
+		return $this->get_address_prop( 'company', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_address_1
+	 * Get shipping_address_1.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_address_1() {
-		return $this->data['shipping']['address_1'];
+	public function get_shipping_address_1( $context = 'view' ) {
+		return $this->get_address_prop( 'address_1', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_address_2
+	 * Get shipping_address_2.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_address_2() {
-		return $this->data['shipping']['address_2'];
+	public function get_shipping_address_2( $context = 'view' ) {
+		return $this->get_address_prop( 'address_2', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_city
+	 * Get shipping_city.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_city() {
-		return $this->data['shipping']['city'];
+	public function get_shipping_city( $context = 'view' ) {
+		return $this->get_address_prop( 'city', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_state
+	 * Get shipping_state.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_state() {
-		return $this->data['shipping']['state'];
+	public function get_shipping_state( $context = 'view' ) {
+		return $this->get_address_prop( 'state', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_postcode
+	 * Get shipping_postcode.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_postcode() {
-		return $this->data['shipping']['postcode'];
+	public function get_shipping_postcode( $context = 'view' ) {
+		return $this->get_address_prop( 'postcode', 'shipping', $context );
 	}
 
 	/**
-	 * Get shipping_country
+	 * Get shipping_country.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_shipping_country() {
-		return $this->data['shipping']['country'];
+	public function get_shipping_country( $context = 'view' ) {
+		return $this->get_address_prop( 'country', 'shipping', $context );
 	}
 
 	/**
 	 * Get the payment method.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_payment_method() {
-		return $this->data['payment_method'];
+	public function get_payment_method( $context = 'view' ) {
+		return $this->get_prop( 'payment_method', $context );
 	}
 
 	/**
-	 * Get payment_method_title
+	 * Get payment_method_title.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_payment_method_title() {
-		return $this->data['payment_method_title'];
+	public function get_payment_method_title( $context = 'view' ) {
+		return $this->get_prop( 'payment_method_title', $context );
 	}
 
 	/**
-	 * Get transaction_id
+	 * Get transaction_id.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_transaction_id() {
-		return $this->data['transaction_id'];
+	public function get_transaction_id( $context = 'view' ) {
+		return $this->get_prop( 'transaction_id', $context );
 	}
 
 	/**
-	 * Get customer_ip_address
+	 * Get customer_ip_address.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_ip_address() {
-		return $this->data['customer_ip_address'];
+	public function get_customer_ip_address( $context = 'view' ) {
+		return $this->get_prop( 'customer_ip_address', $context );
 	}
 
 	/**
-	 * Get customer_user_agent
+	 * Get customer_user_agent.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_user_agent() {
-		return $this->data['customer_user_agent'];
+	public function get_customer_user_agent( $context = 'view' ) {
+		return $this->get_prop( 'customer_user_agent', $context );
 	}
 
 	/**
-	 * Get created_via
+	 * Get created_via.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_created_via() {
-		return $this->data['created_via'];
+	public function get_created_via( $context = 'view' ) {
+		return $this->get_prop( 'created_via', $context );
 	}
 
 	/**
-	 * Get customer_note
+	 * Get customer_note.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_customer_note() {
-		return $this->data['customer_note'];
+	public function get_customer_note( $context = 'view' ) {
+		return $this->get_prop( 'customer_note', $context );
 	}
 
 	/**
-	 * Get date_completed
+	 * Get date_completed.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_completed() {
-		return absint( $this->data['date_completed'] );
+	public function get_date_completed( $context = 'view' ) {
+		return $this->get_prop( 'date_completed', $context );
 	}
 
 	/**
-	 * Get date_paid
+	 * Get date_paid.
+	 *
+	 * @param  string $context
 	 * @return int
 	 */
-	public function get_date_paid() {
-		return absint( $this->data['date_paid'] );
+	public function get_date_paid( $context = 'view' ) {
+		return $this->get_prop( 'date_paid', $context );
+	}
+
+	/**
+	 * Get cart hash.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_cart_hash( $context = 'view' ) {
+		return $this->get_prop( 'cart_hash', $context );
 	}
 
 	/**
 	 * Returns the requested address in raw, non-formatted way.
+	 * Note: Merges raw data with get_prop data so changes are returned too.
+	 *
 	 * @since  2.4.0
 	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
 	 * @return array The stored address after filter.
 	 */
 	public function get_address( $type = 'billing' ) {
-		return apply_filters( 'woocommerce_get_order_address', isset( $this->data[ $type ] ) ? $this->data[ $type ] : array(), $type, $this );
+		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $type ], $this->get_prop( $type, 'view' ) ), $type, $this );
 	}
 
 	/**
@@ -821,6 +727,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted billing full name.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_billing_full_name() {
@@ -830,6 +737,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted shipping full name.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_shipping_full_name() {
@@ -839,6 +747,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted billing address for the order.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_billing_address() {
@@ -847,6 +756,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted shipping address for the order.
+	 *
 	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
@@ -855,14 +765,6 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			return '';
 		}
-	}
-
-	/**
-	 * Get cart hash
-	 * @return string
-	 */
-	public function get_cart_hash() {
-		return $this->data['cart_hash'];
 	}
 
 	/*
@@ -878,102 +780,133 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Sets a prop for a setter method.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param string $address Name of address to set. billing or shipping.
+	 * @param mixed  $value Value of the prop.
+	 */
+	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			if ( true === $this->object_read ) {
+				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {
+					$this->changes[ $address ][ $prop ] = $value;
+				}
+			} else {
+				$this->data[ $address ][ $prop ] = $value;
+			}
+		}
+	}
+
+	/**
 	 * Set order_key.
+	 *
 	 * @param string $value Max length 20 chars.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		$this->data['order_key'] = substr( $value, 0, 20 );
+		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
 	}
 
 	/**
-	 * Set customer_id
+	 * Set customer_id.
+	 *
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_id( $value ) {
-		$this->data['customer_id'] = absint( $value );
+		$this->set_prop( 'customer_id', absint( $value ) );
 	}
 
 	/**
-	 * Set billing_first_name
+	 * Set billing_first_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
-		$this->data['billing']['first_name'] = $value;
+		$this->set_address_prop( 'first_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_last_name
+	 * Set billing_last_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
-		$this->data['billing']['last_name'] = $value;
+		$this->set_address_prop( 'last_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_company
+	 * Set billing_company.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
-		$this->data['billing']['company'] = $value;
+		$this->set_address_prop( 'company', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_address_1
+	 * Set billing_address_1.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_1( $value ) {
-		$this->data['billing']['address_1'] = $value;
+		$this->set_address_prop( 'address_1', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_address_2
+	 * Set billing_address_2.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_2( $value ) {
-		$this->data['billing']['address_2'] = $value;
+		$this->set_address_prop( 'address_2', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_city
+	 * Set billing_city.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_city( $value ) {
-		$this->data['billing']['city'] = $value;
+		$this->set_address_prop( 'city', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_state
+	 * Set billing_state.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_state( $value ) {
-		$this->data['billing']['state'] = $value;
+		$this->set_address_prop( 'state', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_postcode
+	 * Set billing_postcode.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_postcode( $value ) {
-		$this->data['billing']['postcode'] = $value;
+		$this->set_address_prop( 'postcode', 'billing', $value );
 	}
 
 	/**
-	 * Set billing_country
+	 * Set billing_country.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_country( $value ) {
-		$this->data['billing']['country'] = $value;
+		$this->set_address_prop( 'country', 'billing', $value );
 	}
 
 	/**
@@ -990,109 +923,121 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Set billing_email
+	 * Set billing_email.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
-			$this->error( 'order_invalid_billing_email', __( 'Invalid order billing email address', 'woocommerce' ) );
+			$this->error( 'order_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
 		}
-		$this->data['billing']['email'] = sanitize_email( $value );
+		$this->set_address_prop( 'email', 'billing', sanitize_email( $value ) );
 	}
 
 	/**
-	 * Set billing_phone
+	 * Set billing_phone.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_phone( $value ) {
-		$this->data['billing']['phone'] = $value;
+		$this->set_address_prop( 'phone', 'billing', $value );
 	}
 
 	/**
-	 * Set shipping_first_name
+	 * Set shipping_first_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_first_name( $value ) {
-		$this->data['shipping']['first_name'] = $value;
+		$this->set_address_prop( 'first_name', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_last_name
+	 * Set shipping_last_name.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_last_name( $value ) {
-		$this->data['shipping']['last_name'] = $value;
+		$this->set_address_prop( 'last_name', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_company
+	 * Set shipping_company.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_company( $value ) {
-		$this->data['shipping']['company'] = $value;
+		$this->set_address_prop( 'company', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_address_1
+	 * Set shipping_address_1.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_1( $value ) {
-		$this->data['shipping']['address_1'] = $value;
+		$this->set_address_prop( 'address_1', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_address_2
+	 * Set shipping_address_2.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_2( $value ) {
-		$this->data['shipping']['address_2'] = $value;
+		$this->set_address_prop( 'address_2', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_city
+	 * Set shipping_city.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_city( $value ) {
-		$this->data['shipping']['city'] = $value;
+		$this->set_address_prop( 'city', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_state
+	 * Set shipping_state.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_state( $value ) {
-		$this->data['shipping']['state'] = $value;
+		$this->set_address_prop( 'state', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_postcode
+	 * Set shipping_postcode.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_postcode( $value ) {
-		$this->data['shipping']['postcode'] = $value;
+		$this->set_address_prop( 'postcode', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping_country
+	 * Set shipping_country.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_country( $value ) {
-		$this->data['shipping']['country'] = $value;
+		$this->set_address_prop( 'country', 'shipping', $value );
 	}
 
 	/**
 	 * Set the payment method.
+	 *
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
 	 * @throws WC_Data_Exception
 	 */
@@ -1101,92 +1046,101 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_payment_method( $payment_method->id );
 			$this->set_payment_method_title( $payment_method->get_title() );
 		} elseif ( '' === $payment_method ) {
-			$this->data['payment_method'] = '';
-			$this->data['payment_method_title'] = '';
+			$this->set_prop( 'payment_method', '' );
+			$this->set_prop( 'payment_method_title', '' );
 		} else {
-			$this->data['payment_method'] = $payment_method;
+			$this->set_prop( 'payment_method', $payment_method );
 		}
 	}
 
 	/**
-	 * Set payment_method_title
+	 * Set payment_method_title.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method_title( $value ) {
-		$this->data['payment_method_title'] = $value;
+		$this->set_prop( 'payment_method_title', $value );
 	}
 
 	/**
-	 * Set transaction_id
+	 * Set transaction_id.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_transaction_id( $value ) {
-		$this->data['transaction_id'] = $value;
+		$this->set_prop( 'transaction_id', $value );
 	}
 
 	/**
-	 * Set customer_ip_address
+	 * Set customer_ip_address.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_ip_address( $value ) {
-		$this->data['customer_ip_address'] = $value;
+		$this->set_prop( 'customer_ip_address', $value );
 	}
 
 	/**
-	 * Set customer_user_agent
+	 * Set customer_user_agent.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_user_agent( $value ) {
-		$this->data['customer_user_agent'] = $value;
+		$this->set_prop( 'customer_user_agent', $value );
 	}
 
 	/**
-	 * Set created_via
+	 * Set created_via.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_created_via( $value ) {
-		$this->data['created_via'] = $value;
+		$this->set_prop( 'created_via', $value );
 	}
 
 	/**
-	 * Set customer_note
+	 * Set customer_note.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_customer_note( $value ) {
-		$this->data['customer_note'] = $value;
+		$this->set_prop( 'customer_note', $value );
 	}
 
 	/**
-	 * Set date_completed
+	 * Set date_completed.
+	 *
 	 * @param string $timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_completed( $timestamp ) {
-		$this->data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set date_paid
+	 * Set date_paid.
+	 *
 	 * @param string $timestamp
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_paid( $timestamp ) {
-		$this->data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
 	}
 
 	/**
-	 * Set cart hash
+	 * Set cart hash.
+	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_cart_hash( $value ) {
-		$this->data['cart_hash'] = $value;
+		$this->set_prop( 'cart_hash', $value );
 	}
 
 	/*
@@ -1504,17 +1458,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( postmeta.meta_value )
-			FROM $wpdb->postmeta AS postmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			WHERE postmeta.meta_key = '_refund_amount'
-			AND postmeta.post_id = posts.ID
-		", $this->get_id() ) );
-
-		return $total;
+		return $this->data_store->get_total_refunded( $this );
 	}
 
 	/**
@@ -1524,18 +1468,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-		", $this->get_id() ) );
-
-		return abs( $total );
+		return $this->data_store->get_total_tax_refunded( $this );
 	}
 
 	/**
@@ -1545,18 +1478,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		global $wpdb;
-
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('cost')
-		", $this->get_id() ) );
-
-		return abs( $total );
+		return $this->data_store->get_total_shipping_refunded( $this );
 	}
 
 	/**

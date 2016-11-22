@@ -25,6 +25,19 @@ function wc_string_to_bool( $string ) {
 }
 
 /**
+ * Converts a bool to a string.
+ * @since 2.7.0
+ * @param bool $bool
+ * @return string yes or no
+ */
+function wc_bool_to_string( $bool ) {
+	if ( ! is_bool( $bool ) ) {
+		$bool = wc_string_to_bool( $bool );
+	}
+	return true === $bool ? 'yes' : 'no';
+}
+
+/**
  * Explode a string into an array by $delimiter and remove empty values.
  * @since 2.7.0
  * @param string $string
@@ -298,6 +311,17 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
+ * Format a coupon code.
+ *
+ * @since  2.7.0
+ * @param  string $value
+ * @return string
+ */
+function wc_format_coupon_code( $value ) {
+	return apply_filters( 'woocommerce_coupon_code', $value );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  * @param string|array $var
@@ -309,6 +333,16 @@ function wc_clean( $var ) {
 	} else {
 		return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
 	}
+}
+
+/**
+ * Run wc_clean over posted textarea but maintain line breaks.
+ * @since  2.7.0
+ * @param string $var
+ * @return string
+ */
+function wc_sanitize_textarea( $var ) {
+	return implode( "\n", array_map( 'wc_clean', explode( "\n", $var ) ) );
 }
 
 /**
@@ -395,8 +429,8 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	$separator = stripslashes( get_option( 'woocommerce_price_thousand_sep' ) );
-	return $separator;
+	$separator = apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ) );
+	return stripslashes( $separator );
 }
 
 /**
@@ -405,8 +439,8 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = stripslashes( get_option( 'woocommerce_price_decimal_sep' ) );
-	return $separator ? $separator : '.';
+	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ) );
+	return $separator ? stripslashes( $separator ) : '.';
 }
 
 /**
@@ -415,7 +449,8 @@ function wc_get_price_decimal_separator() {
  * @return int
  */
 function wc_get_price_decimals() {
-	return absint( get_option( 'woocommerce_price_num_decimals', 2 ) );
+	$decimals = apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ) );
+	return absint( $decimals );
 }
 
 /**
@@ -541,6 +576,17 @@ function wc_timezone_string() {
 	}
 
 	return $timezone;
+}
+
+/**
+ * Callback which can flatten post meta (gets the first value if it's an array).
+ *
+ * @since  2.7.0
+ * @param  array $value
+ * @return mixed
+ */
+function wc_flatten_meta_callback( $value ) {
+	return is_array( $value ) ? current( $value ) : $value;
 }
 
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
@@ -872,4 +918,93 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 
 		return $numeric_postcode;
 	}
+}
+
+/**
+ * Format the stock amount ready for display based on settings.
+ * @since  2.7.0
+ * @param  int  $stock_amount
+ * @param  boolean $show_backorder_notification
+ * @return string
+ */
+function wc_format_stock_for_display( $stock_amount, $show_backorder_notification = false ) {
+	$display = __( 'In stock', 'woocommerce' );
+
+	switch ( get_option( 'woocommerce_stock_format' ) ) {
+		case 'low_amount' :
+			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $stock_amount );
+			}
+		break;
+		case '' :
+			$display = sprintf( __( '%s in stock', 'woocommerce' ), $stock_amount );
+		break;
+	}
+
+	if ( $show_backorder_notification ) {
+		$display .= ' ' . __( '(can be backordered)', 'woocommerce' );
+	}
+
+	return $display;
+}
+
+/**
+ * Format a sale price for display.
+ * @since  2.7.0
+ * @param  string $regular_price
+ * @param  string $sale_price
+ * @return string
+ */
+function wc_format_sale_price( $regular_price, $sale_price ) {
+	$price = '<del>' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
+	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
+}
+
+/**
+ * Format a price range for display.
+ * @param  string $from
+ * @param  string $to
+ * @return string
+ */
+function wc_format_price_range( $from, $to ) {
+	$price = sprintf( _x( '%1$s &ndash; %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
+	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
+}
+
+/**
+ * Format a weight for display.
+ *
+ * @since  2.7.0
+ * @param  float $weight Weight.
+ * @return string
+ */
+function wc_format_weight( $weight ) {
+	$weight_string = wc_format_localized_decimal( $weight );
+
+	if ( ! empty( $weight_string ) ) {
+		$weight_string .= ' ' . get_option( 'woocommerce_weight_unit' );
+	} else {
+		$weight_string = __( 'N/A', 'woocommerce' );
+	}
+
+	return apply_filters( 'woocommerce_format_weight', $weight_string, $weight );
+}
+
+/**
+ * Format dimensions for display.
+ *
+ * @since  2.7.0
+ * @param  array $dimensions Array of dimensions.
+ * @return string
+ */
+function wc_format_dimensions( $dimensions ) {
+	$dimension_string = implode( ' x ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
+
+	if ( ! empty( $dimension_string ) ) {
+		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+	} else {
+		$dimension_string = __( 'N/A', 'woocommerce' );
+	}
+
+	return apply_filters( 'woocommerce_format_dimensions', $dimension_string, $dimensions );
 }

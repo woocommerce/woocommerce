@@ -11,18 +11,10 @@ class WC_Helper_Product {
 	 * Delete a product.
 	 *
 	 * @param $product_id
-	 *
-	 * @todo check for variations, attributes, etc.
 	 */
 	public static function delete_product( $product_id ) {
-
-		/**
-		 * @todo check for variations, attributes, etc.
-		 */
-
 		// Delete the psot
 		wp_delete_post( $product_id, true );
-
 	}
 
 	/**
@@ -47,11 +39,66 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_manage_stock', 'no' );
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'taxable' );
+		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
+		wp_set_object_terms( $product, 'simple', 'product_type' );
 
 		return new WC_Product_Simple( $product );
+	}
+
+	/**
+	 * Create external product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_External
+	 */
+	public static function create_external_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy External Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		update_post_meta( $product, '_price', '10' );
+		update_post_meta( $product, '_regular_price', '10' );
+		update_post_meta( $product, '_sale_price', '' );
+		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
+		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
+		update_post_meta( $product, '_button_text', 'Buy external product' );
+		wp_set_object_terms( $product, 'external', 'product_type' );
+
+		return new WC_Product_External( $product );
+	}
+
+	/**
+	 * Create grouped product.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @return WC_Product_Grouped
+	 */
+	public static function create_grouped_product() {
+		// Create the product
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy Grouped Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		) );
+		$simple_product_1 = self::create_simple_product( $product );
+		$simple_product_2 = self::create_simple_product( $product );
+		update_post_meta( $product, '_children', array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
+		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
+		update_post_meta( $product, '_manage_stock', 'no' );
+		update_post_meta( $product, '_tax_status', 'taxable' );
+		update_post_meta( $product, '_downloadable', 'no' );
+		update_post_meta( $product, '_virtual', 'no' );
+		update_post_meta( $product, '_visibility', 'visible' );
+		update_post_meta( $product, '_stock_status', 'instock' );
+		wp_set_object_terms( $product, 'grouped', 'product_type' );
+
+		return new WC_Product_Grouped( $product );
 	}
 
 	/**
@@ -89,7 +136,7 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_manage_stock', 'no' );
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
-		update_post_meta( $product_id, '_virtual', 'taxable' );
+		update_post_meta( $product_id, '_virtual', 'no' );
 		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
@@ -105,6 +152,8 @@ class WC_Helper_Product {
 				'is_taxonomy'  => 1,
 			),
 		) );
+
+		wp_set_object_terms( $product_id, 'variable', 'product_type' );
 
 		// Link the product to the attribute
 		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
@@ -130,8 +179,10 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
+
+		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
 
 		// Attribute meta
 		update_post_meta( $variation_id, 'attribute_pa_size', 'small' );
@@ -149,10 +200,10 @@ class WC_Helper_Product {
 		update_post_meta( $variation_id, '_regular_price', '15' );
 
 		// General meta
-		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
+		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE LARGE' );
 		update_post_meta( $variation_id, '_manage_stock', 'no' );
 		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
 		update_post_meta( $variation_id, '_stock_status', 'instock' );
 
 		// Attribute meta
@@ -160,6 +211,8 @@ class WC_Helper_Product {
 
 		// Add the variation meta to the main product
 		update_post_meta( $product_id, '_max_price_variation_id', $variation_id );
+
+		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
 
 		return new WC_Product_Variable( $product_id );
 	}
@@ -234,8 +287,6 @@ class WC_Helper_Product {
 	 * @param $attribute_id
 	 *
 	 * @since 2.3
-	 *
-	 * @todo clean up all term/taxonomy/etc data
 	 */
 	public static function delete_attribute( $attribute_id ) {
 		global $wpdb;
@@ -256,12 +307,12 @@ class WC_Helper_Product {
 	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
-		    'comment_author'       => 'admin',
-		    'comment_author_email' => 'woo@woo.local',
-		    'comment_author_url'   => '',
+			'comment_author'       => 'admin',
+			'comment_author_email' => 'woo@woo.local',
+			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
-		    'comment_content'      => $review_content,
-    		'comment_approved'     => 1,
+			'comment_content'      => $review_content,
+			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
 

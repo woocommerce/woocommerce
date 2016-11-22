@@ -414,6 +414,23 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						),
 					),
 				),
+				'security' => array(
+					'description' => __( 'Security', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'secure_connection' => array(
+							'description' => __( 'Is the connection to your store secure?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'hide_errors' => array(
+							'description' => __( 'Hide errors from visitors?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' ),
+						),
+					),
+				),
 				'pages' => array(
 					'description' => __( 'WooCommerce pages', 'woocommerce' ),
 					'type'        => 'array',
@@ -437,6 +454,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'active_plugins' => $this->get_active_plugins(),
 			'theme'          => $this->get_theme_info(),
 			'settings'       => $this->get_settings(),
+			'security'       => $this->get_security_info(),
 			'pages'          => $this->get_pages(),
 		);
 	}
@@ -738,6 +756,18 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Returns security tips.
+	 *
+	 * @return array
+	 */
+	public function get_security_info() {
+		return array(
+			'secure_connection' => 'https' === substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ),
+			'hide_errors'       => ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ),
+		);
+	}
+
+	/**
 	 * Returns a mini-report on WC pages and if they are configured correctly:
 	 * Present, visible, and including the correct shortcode.
 	 *
@@ -793,14 +823,14 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 			// Wrap up our findings into an output array
 			$pages_output[] = array(
-					'page_name'          => $page_name,
-					'page_id'            => $page_id,
-					'page_set'           => $page_set,
-					'page_exists'        => $page_exists,
-					'page_visible'       => $page_visible,
-					'shortcode'          => $values['shortcode'],
-					'shortcode_required' => $shortcode_required,
-					'shortcode_present'  => $shortcode_present,
+				'page_name'          => $page_name,
+				'page_id'            => $page_id,
+				'page_set'           => $page_set,
+				'page_exists'        => $page_exists,
+				'page_visible'       => $page_visible,
+				'shortcode'          => $values['shortcode'],
+				'shortcode_required' => $shortcode_required,
+				'shortcode_present'  => $shortcode_present,
 			);
 		}
 

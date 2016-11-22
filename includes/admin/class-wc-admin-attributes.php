@@ -94,7 +94,7 @@ class WC_Admin_Attributes {
 	 * @return bool|WP_error result
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
-		if ( strlen( $attribute_name ) >= 28 ) {
+		if ( strlen( $attribute_name ) > 28 ) {
 			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
@@ -290,7 +290,7 @@ class WC_Admin_Attributes {
 								</th>
 								<td>
 									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -455,7 +455,7 @@ class WC_Admin_Attributes {
 								<div class="form-field">
 									<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
 									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
-									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">

@@ -125,7 +125,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		if ( ! empty( $request['code'] ) ) {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['code'] ) );
+			$id = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
 		}
 
@@ -140,8 +140,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$code           = wc_get_coupon_code_by_id( $post->ID );
-		$coupon         = new WC_Coupon( $code );
+		$coupon         = new WC_Coupon( (int) $post->ID );
 		$data           = $coupon->get_data();
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );

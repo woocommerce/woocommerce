@@ -11,7 +11,55 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
+}
+
+/**
+ * Runs a deprecated action with notice only if used.
+ *
+ * @since  2.7.0
+ * @param  string $action
+ * @param  array $args
+ * @param  string $deprecated_in
+ * @param  string $replacement
+ */
+function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
+	if ( has_action( $action ) ) {
+		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		do_action_ref_array( $action, $args );
+	}
+}
+
+/**
+ * Soft deprecate a function so that it's technically deprecated, but not shown
+ * until a future version to ease transition for developers.
+ *
+ * @since  2.7.0
+ * @param  string $function
+ * @param  string $version
+ * @param  string $deprecate_in_version
+ * @param  string $replacement
+ */
+function wc_soft_deprecated_function( $function, $version, $deprecate_in_version, $replacement = null ) {
+	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+		_deprecated_function( $function, $version, $replacement );
+	}
+}
+
+/**
+ * Soft deprecate an argument so that it's technically deprecated, but not shown
+ * until a future version to ease transition for developers.
+ *
+ * @since  2.7.0
+ * @param  string $argument
+ * @param  string $version
+ * @param  string $deprecate_in_version
+ * @param  string $replacement
+ */
+function wc_soft_deprecated_argument( $argument, $version, $deprecate_in_version, $message = null ) {
+	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+		_deprecated_argument( $argument, $version, $message );
+	}
 }
 
 /**
@@ -25,25 +73,25 @@ function woocommerce_show_messages() {
  * @deprecated
  */
 function woocommerce_weekend_area_js() {
-	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_weekend_area_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_tooltip_js() {
-	_deprecated_function( 'woocommerce_tooltip_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_tooltip_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_datepicker_js() {
-	_deprecated_function( 'woocommerce_datepicker_js', '2.1', '' );
+	_deprecated_function( 'woocommerce_datepicker_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_admin_scripts() {
-	_deprecated_function( 'woocommerce_admin_scripts', '2.1', '' );
+	_deprecated_function( 'woocommerce_admin_scripts', '2.1' );
 }
 /**
  * @deprecated
@@ -508,9 +556,36 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect',
-	'woocommerce_structured_data_order' => 'woocommerce_email_order_schema_markup',
+	'woocommerce_structured_data_order'         => 'woocommerce_email_order_schema_markup',
+	'woocommerce_add_to_cart_fragments'         => 'add_to_cart_fragments',
+	'woocommerce_add_to_cart_redirect'          => 'add_to_cart_redirect',
+	'woocommerce_product_get_width'             => 'woocommerce_product_width',
+	'woocommerce_product_get_height'            => 'woocommerce_product_height',
+	'woocommerce_product_get_length'            => 'woocommerce_product_length',
+	'woocommerce_product_get_weight'            => 'woocommerce_product_weight',
+	'woocommerce_product_get_sku'               => 'woocommerce_get_sku',
+	'woocommerce_product_get_price'             => 'woocommerce_get_price',
+	'woocommerce_product_get_regular_price'     => 'woocommerce_get_regular_price',
+	'woocommerce_product_get_sale_price'        => 'woocommerce_get_sale_price',
+	'woocommerce_product_get_tax_class'         => 'woocommerce_product_tax_class',
+	'woocommerce_product_get_stock_quantity'    => 'woocommerce_get_stock_quantity',
+	'woocommerce_product_get_attributes'        => 'woocommerce_get_product_attributes',
+	'woocommerce_product_get_gallery_image_ids' => 'woocommerce_product_gallery_attachment_ids',
+	'woocommerce_product_get_review_count'      => 'woocommerce_product_review_count',
+	'woocommerce_product_get_downloads'         => 'woocommerce_product_files',
+	'woocommerce_order_get_currency'            => 'woocommerce_get_currency',
+	'woocommerce_order_get_discount_total'      => 'woocommerce_order_amount_discount_total',
+	'woocommerce_order_get_discount_tax'        => 'woocommerce_order_amount_discount_tax',
+	'woocommerce_order_get_shipping_total'      => 'woocommerce_order_amount_shipping_total',
+	'woocommerce_order_get_shipping_tax'        => 'woocommerce_order_amount_shipping_tax',
+	'woocommerce_order_get_cart_tax'            => 'woocommerce_order_amount_cart_tax',
+	'woocommerce_order_get_total'               => 'woocommerce_order_amount_total',
+	'woocommerce_order_get_total_tax'           => 'woocommerce_order_amount_total_tax',
+	'woocommerce_order_get_total_discount'      => 'woocommerce_order_amount_total_discount',
+	'woocommerce_order_get_subtotal'            => 'woocommerce_order_amount_subtotal',
+	'woocommerce_order_get_tax_totals'          => 'woocommerce_order_tax_totals',
+	'woocommerce_get_order_refund_get_amount'   => 'woocommerce_refund_amount',
+	'woocommerce_get_order_refund_get_reason'   => 'woocommerce_refund_reason',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
@@ -525,9 +600,6 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
 	if ( isset( $wc_map_deprecated_filters[ $filter ] ) ) {
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
 			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
-			if ( ! is_ajax() ) {
-				_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '', $filter );
-			}
 		}
 	}
 
@@ -667,56 +739,6 @@ function woocommerce_prepare_attachment_for_js( $response ) {
 function woocommerce_track_product_view() {
 	return wc_track_product_view();
 }
-
-/**
- * Shop order status.
- *
- * @since 2.2
- * @param WP_Query $q
- */
-function wc_shop_order_status_backwards_compatibility( $q ) {
-	if ( $q->is_main_query() ) {
-		return;
-	}
-
-	if (
-		isset( $q->query_vars['post_type'] ) && 'shop_order' == $q->query_vars['post_type']
-		&& isset( $q->query_vars['post_status'] ) && 'publish' == $q->query_vars['post_status']
-	) {
-		$tax_query    = isset( $q->query_vars['tax_query'] ) ? $q->query_vars['tax_query'] : array();
-		$order_status = array();
-		$tax_key      = '';
-
-		// Look for shop_order_status taxonomy and get the terms
-		foreach ( $tax_query as $key => $tax ) {
-			if ( 'shop_order_status' == $tax['taxonomy'] ) {
-				$tax_key = $key;
-				$order_status = $tax['terms'];
-				break;
-			}
-		}
-
-		if ( $order_status ) {
-			// Remove old tax_query
-			unset( $tax_query[ $tax_key ] );
-
-			// Set the new order status
-			$order_status = is_array( $order_status ) ? 'wc-' . implode( ',wc-', $order_status ) : 'wc-' . $order_status;
-
-			$q->set( 'post_status', $order_status );
-			$q->set( 'tax_query', $tax_query );
-
-			_doing_it_wrong( 'WP_Query', sprintf( __( 'The shop_order_status taxonomy is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'https://woocommerce.wordpress.com/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
-		} else {
-			$q->set( 'post_status', array_keys( wc_get_order_statuses() ) );
-
-			_doing_it_wrong( 'WP_Query', sprintf( __( 'The "publish" order status is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'https://woocommerce.wordpress.com/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
-		}
-	}
-}
-
-add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
-
 /**
  * @since 2.3
  * @deprecated has no replacement
@@ -769,4 +791,55 @@ function woocommerce_get_product_schema() {
 	}
 
 	return 'http://schema.org/' . $schema;
+}
+
+/**
+ * Save product price.
+ *
+ * This is a private function (internal use ONLY) used until a data manipulation api is built.
+ *
+ * @deprecated 2.7.0
+ * @param int $product_id
+ * @param float $regular_price
+ * @param float $sale_price
+ * @param string $date_from
+ * @param string $date_to
+ */
+function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
+	_doing_it_wrong( '_wc_save_product_price()', 'This function is not for developer use and is deprecated.', '2.7' );
+
+	$product_id    = absint( $product_id );
+	$regular_price = wc_format_decimal( $regular_price );
+	$sale_price    = '' === $sale_price ? '' : wc_format_decimal( $sale_price );
+	$date_from     = wc_clean( $date_from );
+	$date_to       = wc_clean( $date_to );
+
+	update_post_meta( $product_id, '_regular_price', $regular_price );
+	update_post_meta( $product_id, '_sale_price', $sale_price );
+
+	// Save Dates
+	update_post_meta( $product_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
+	update_post_meta( $product_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
+
+	if ( $date_to && ! $date_from ) {
+		$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+		update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
+	}
+
+	// Update price if on sale
+	if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
+		update_post_meta( $product_id, '_price', $sale_price );
+	} else {
+		update_post_meta( $product_id, '_price', $regular_price );
+	}
+
+	if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $product_id, '_price', $sale_price );
+	}
+
+	if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $product_id, '_price', $regular_price );
+		update_post_meta( $product_id, '_sale_price_dates_from', '' );
+		update_post_meta( $product_id, '_sale_price_dates_to', '' );
+	}
 }

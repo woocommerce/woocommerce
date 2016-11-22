@@ -21,8 +21,10 @@ include( 'wc-user-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
 include( 'wc-order-functions.php' );
+include( 'wc-order-item-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
+include( 'wc-stock-functions.php' );
 include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
@@ -920,7 +922,6 @@ function wc_format_country_state_string( $country_string ) {
 /**
  * Get the store's base location.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
  */
@@ -936,8 +937,6 @@ function wc_get_base_location() {
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
- * @todo deprecate woocommerce_customer_default_location and support an array filter only to cover all cases.
  * @since 2.3.0
  * @return array
  */
@@ -1363,7 +1362,7 @@ function wc_set_time_limit( $limit = 0 ) {
  * @since 2.6.0
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	if ( $a['position'] == $b['position'] ) {
+	if ( $a['position'] === $b['position'] ) {
 		return 0;
 	}
 	return ( $a['position'] < $b['position'] ) ? -1 : 1;
@@ -1410,21 +1409,6 @@ function wc_get_logger() {
 }
 
 /**
- * Runs a deprecated action with notice only if used.
- * @since  2.7.0
- * @param  string $action
- * @param  array $args
- * @param  string $deprecated_in
- * @param  string $replacement
- */
-function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
-	if ( has_action( $action ) ) {
-		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
-		do_action_ref_array( $action, $args );
-	}
-}
-
-/**
  * Store user agents. Used for tracker.
  * @since 2.7.0
  */
@@ -1436,3 +1420,45 @@ function wc_maybe_store_user_agent( $user_login, $user ) {
 	}
 }
 add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
+
+/**
+ * Based on wp_list_pluck, this calls a method instead of returning a property.
+ *
+ * @since 2.7.0
+ * @param array      $list      List of objects or arrays
+ * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
+ * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
+ *                              Default null.
+ * @return array Array of values.
+ */
+function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
+	// Use wp_list_pluck if this isn't a callback
+	$first_el = current( $list );
+	if ( ! is_object( $first_el ) || ! is_callable( array( $first_el, $callback_or_field ) ) ) {
+		return wp_list_pluck( $list, $callback_or_field, $index_key );
+	}
+	if ( ! $index_key ) {
+		/*
+		 * This is simple. Could at some point wrap array_column()
+		 * if we knew we had an array of arrays.
+		 */
+		foreach ( $list as $key => $value ) {
+			$list[ $key ] = $value->{$callback_or_field}();
+		}
+		return $list;
+	}
+
+	/*
+	 * When index_key is not set for a particular item, push the value
+	 * to the end of the stack. This is how array_column() behaves.
+	 */
+	$newlist = array();
+	foreach ( $list as $value ) {
+		if ( isset( $value->$index_key ) ) {
+			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
+		} else {
+			$newlist[] = $value->{$callback_or_field}();
+		}
+	}
+	return $newlist;
+}

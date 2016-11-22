@@ -13,6 +13,7 @@ $environment    = $system_status->get_environment_info();
 $database       = $system_status->get_database_info();
 $active_plugins = $system_status->get_active_plugins();
 $theme          = $system_status->get_theme_info();
+$security       = $system_status->get_security_info();
 $settings       = $system_status->get_settings();
 $pages          = $system_status->get_pages();
 ?>
@@ -330,6 +331,37 @@ $pages          = $system_status->get_pages();
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
+			<th colspan="3" data-export-label="Security"><h2><?php _e( 'Security', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Secure connection (HTTPS)"><?php _e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Is the connection to your store secure?', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['secure_connection'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Hide errors from visitors"><?php _e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['hide_errors'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ) ?>)"><h2><?php _e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ) ?>)</h2></th>
 		</tr>
 	</thead>
@@ -617,94 +649,3 @@ $pages          = $system_status->get_pages();
 </table>
 
 <?php do_action( 'woocommerce_system_status_report' ); ?>
-
-<script type="text/javascript">
-
-	jQuery( 'a.help_tip, a.woocommerce-help-tip' ).click( function() {
-		return false;
-	});
-
-	jQuery( 'a.debug-report' ).click( function() {
-
-		var report = '';
-
-		jQuery( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
-
-			if ( jQuery( this ).is( 'thead' ) ) {
-
-				var label = jQuery( this ).find( 'th:eq(0)' ).data( 'export-label' ) || jQuery( this ).text();
-				report = report + '\n### ' + jQuery.trim( label ) + ' ###\n\n';
-
-			} else {
-
-				jQuery( 'tr', jQuery( this ) ).each( function() {
-
-					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
-					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
-
-					// Find value
-					var $value_html = jQuery( this ).find( 'td:eq(2)' ).clone();
-					$value_html.find( '.private' ).remove();
-					$value_html.find( '.dashicons-yes' ).replaceWith( '&#10004;' );
-					$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
-
-					// Format value
-					var the_value   = jQuery.trim( $value_html.text() );
-					var value_array = the_value.split( ', ' );
-
-					if ( value_array.length > 1 ) {
-						// If value have a list of plugins ','.
-						// Split to add new line.
-						var temp_line ='';
-						jQuery.each( value_array, function( key, line ) {
-							temp_line = temp_line + line + '\n';
-						});
-
-						the_value = temp_line;
-					}
-
-					report = report + '' + the_name + ': ' + the_value + '\n';
-				});
-
-			}
-		});
-
-		try {
-			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).focus().select();
-			jQuery( this ).fadeOut();
-			return false;
-		} catch ( e ) {
-			/* jshint devel: true */
-			console.log( e );
-		}
-
-		return false;
-	});
-
-	jQuery( document ).ready( function( $ ) {
-
-		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
-			e.clipboardData.clearData();
-			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
-			e.preventDefault();
-		});
-
-		$( document.body ).on( 'aftercopy', '#copy-for-support', function( e ) {
-			if ( true === e.success['text/plain'] ) {
-				$( '#copy-for-support' ).tipTip({
-					'attribute':  'data-tip',
-					'activation': 'focus',
-					'fadeIn':     50,
-					'fadeOut':    50,
-					'delay':      0
-				}).focus();
-			} else {
-				$( '.copy-error' ).removeClass( 'hidden' );
-				$( '#debug-report' ).find( 'textarea' ).focus().select();
-			}
-		});
-
-	});
-
-</script>

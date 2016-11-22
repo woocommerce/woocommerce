@@ -27,7 +27,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
 		_deprecated_function( 'WC_Order::add_coupon', '2.7', 'Create new WC_Order_Item_Coupon object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Coupon( array(
+		$item = new WC_Order_Item_Coupon();
+		$item->set_props( array(
 			'code'         => $code,
 			'discount'     => $discount,
 			'discount_tax' => $discount_tax,
@@ -50,7 +51,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
 		_deprecated_function( 'WC_Order::add_tax', '2.7', 'Create new WC_Order_Item_Tax object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Tax( array(
+		$item = new WC_Order_Item_Tax();
+		$item->set_props( array(
 			'rate_id'            => $tax_rate_id,
 			'tax_total'          => $tax_amount,
 			'shipping_tax_total' => $shipping_tax_amount,
@@ -72,7 +74,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function add_shipping( $shipping_rate ) {
 		_deprecated_function( 'WC_Order::add_shipping', '2.7', 'Create new WC_Order_Item_Shipping object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Shipping( array(
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props( array(
 			'method_title' => $shipping_rate->label,
 			'method_id'    => $shipping_rate->id,
 			'total'        => wc_format_decimal( $shipping_rate->cost ),
@@ -96,7 +99,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function add_fee( $fee ) {
 		_deprecated_function( 'WC_Order::add_fee', '2.7', 'Create new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Fee( array(
+		$item = new WC_Order_Item_Fee();
+		$item->set_props( array(
 			'name'      => $fee->name,
 			'tax_class' => $fee->taxable ? $fee->tax_class : 0,
 			'total'     => $fee->amount,
@@ -151,10 +155,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handly qty if set
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_stock_quantity() ), true );
 			}
-			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : $product->get_price_excluding_tax( $args['qty'] );
-			$args['total']	= $args['total'] ? $args['total'] : $product->get_price_excluding_tax( $args['qty'] );
+			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
+			$args['total']	= $args['total'] ? $args['total'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
 		}
 
 		$item->set_order_id( $this->get_id() );
@@ -408,7 +412,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} elseif ( 'post' === $key ) {
 			return get_post( $this->get_id() );
 		} elseif ( 'status' === $key || 'post_status' === $key ) {
-			return $this->get_status();
+			return 'wc-' . $this->get_status();
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
 			return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
@@ -571,7 +575,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array
 	 */
 	public function expand_item_meta( $item ) {
-		_deprecated_function( 'expand_item_meta', '2.7', '' );
+		_deprecated_function( 'expand_item_meta', '2.7' );
 		return $item;
 	}
 

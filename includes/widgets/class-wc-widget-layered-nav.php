@@ -331,7 +331,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Count products within certain terms, taking the main WP query into consideration.
-	 * @param  array $term_ids
+	 *
+	 * @param  array  $term_ids
 	 * @param  string $taxonomy
 	 * @param  string $query_type
 	 * @return array
@@ -386,10 +387,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Show list based layered nav.
-	 * @param  array $terms
+	 *
+	 * @param  array  $terms
 	 * @param  string $taxonomy
 	 * @param  string $query_type
-	 * @return bool Will nav display?
+	 * @return bool   Will nav display?
 	 */
 	protected function layered_nav_list( $terms, $taxonomy, $query_type ) {
 		// List display
@@ -400,11 +402,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$found              = false;
 
 		foreach ( $terms as $term ) {
-			$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
-			$option_is_set     = in_array( $term->slug, $current_values );
-			$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
+			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
+			$option_is_set  = in_array( $term->slug, $current_values );
+			$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
-			// skip the term for the current archive
+			// Skip the term for the current archive
 			if ( $this->get_current_term_id() === $term->term_id ) {
 				continue;
 			}
@@ -412,7 +414,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			// Only show options with count > 0
 			if ( 0 < $count ) {
 				$found = true;
-			} elseif ( 'and' === $query_type && 0 === $count && ! $option_is_set ) {
+			} elseif ( 0 === $count && ! $option_is_set ) {
 				continue;
 			}
 

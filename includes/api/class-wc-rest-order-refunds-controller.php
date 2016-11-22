@@ -263,10 +263,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
 				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->get_id(), $refund->get_amount(), $refund->get_reason() );
 
-				if ( is_wp_error( $result ) ) {
-					return $result;
-				} elseif ( ! $result ) {
-					return new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
+				if ( ! $result || is_wp_error( $result ) ) {
+					$refund->delete();
+
+					$message = is_wp_error( $result ) ? $result : new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
+
+					return $message;
 				}
 			}
 		}

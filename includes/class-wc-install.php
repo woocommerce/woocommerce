@@ -74,6 +74,7 @@ class WC_Install {
 		),
 		'2.7.0' => array(
 			'wc_update_270_webhooks',
+			'wc_update_270_grouped_products',
 		),
 	);
 
@@ -136,6 +137,10 @@ class WC_Install {
 	 */
 	public static function install() {
 		global $wpdb;
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
 			define( 'WC_INSTALLING', true );

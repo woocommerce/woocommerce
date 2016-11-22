@@ -230,12 +230,13 @@ class WC_Checkout {
 			// Add line items.
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$product = $values['data'];
-				$item    = new WC_Order_Item_Product( array(
+				$item    = new WC_Order_Item_Product();
+				$item->set_props( array(
 					'quantity'     => $values['quantity'],
-					'name'         => $product ? $product->get_title() : '',
+					'name'         => $product ? $product->get_name() : '',
 					'tax_class'    => $product ? $product->get_tax_class() : '',
-					'product_id'   => $product && isset( $product->id ) ? $product->id : 0,
-					'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
+					'product_id'   => $product ? ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) : 0,
+					'variation_id' => $product && $product->is_type( 'variation' ) ? $product->get_id() : 0,
 					'variation'    => $values['variation'],
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
@@ -243,9 +244,8 @@ class WC_Checkout {
 					'total_tax'    => $values['line_tax'],
 					'taxes'        => $values['line_tax_data'],
 				) );
-
 				$item->set_backorder_meta();
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_values        = $values;
 				$item->legacy_cart_item_key = $cart_item_key;
 
@@ -254,7 +254,8 @@ class WC_Checkout {
 
 			// Add fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-				$item = new WC_Order_Item_Fee( array(
+				$item = new WC_Order_Item_Fee();
+				$item->set_props( array(
 					'name'      => $fee->name,
 					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
 					'total'     => $fee->amount,
@@ -264,7 +265,7 @@ class WC_Checkout {
 					),
 				) );
 
-				// Set this to pass to legacy actions @todo remove in future release
+				// Set this to pass to legacy actions.
 				$item->legacy_fee     = $fee;
 				$item->legacy_fee_key = $fee_key;
 
@@ -275,7 +276,8 @@ class WC_Checkout {
 			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
 					$shipping_rate = $package['rates'][ $this->shipping_methods[ $package_key ] ];
-					$item = new WC_Order_Item_Shipping( array(
+					$item = new WC_Order_Item_Shipping();
+					$item->set_props( array(
 						'method_title' => $shipping_rate->label,
 						'method_id'    => $shipping_rate->id,
 						'total'        => wc_format_decimal( $shipping_rate->cost ),
@@ -283,7 +285,7 @@ class WC_Checkout {
 						'meta_data'    => $shipping_rate->get_meta_data(),
 					) );
 
-					// Set this to pass to legacy actions @todo remove in future release
+					// Set this to pass to legacy actions.
 					$item->legacy_package_key = $package_key;
 
 					$order->add_item( $item );
@@ -293,20 +295,23 @@ class WC_Checkout {
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
 				if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					$order->add_item( new WC_Order_Item_Tax( array(
+					$item = new WC_Order_Item_Tax();
+					$item->set_props( array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
 						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
 						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-					) ) );
+					) );
+					$order->add_item( $item );
 				}
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				$item = new WC_Order_Item_Coupon( array(
+				$item = new WC_Order_Item_Coupon();
+				$item->set_props( array(
 					'code'         => $code,
 					'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
 					'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
@@ -516,7 +521,7 @@ class WC_Checkout {
 										break;
 									case 'state' :
 										// Get valid states
-										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
+										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_billing_country() : WC()->customer->get_shipping_country() ) );
 
 										if ( ! empty( $valid_states ) && is_array( $valid_states ) ) {
 											$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );

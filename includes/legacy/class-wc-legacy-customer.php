@@ -44,7 +44,6 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * __get function.
-	 * @todo use get_* methods
 	 * @param string $key
 	 * @return string
 	 */
@@ -59,7 +58,6 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * __set function.
-	 * @todo use set_* methods
 	 * @param mixed $property
 	 * @param mixed $key
 	 */
@@ -152,12 +150,18 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set default data for a customer.
 	 */
 	public function set_default_data() {
-		_deprecated_function( 'WC_Customer::set_default_data', '2.7', '' );
+		_deprecated_function( 'WC_Customer::set_default_data', '2.7' );
+	}
+
+	/**
+	 * Save data function.
+	 */
+	public function save_data() {
+		$this->save();
 	}
 
 	/**
 	 * Is the user a paying customer?
-	 * @todo should this be moved to a get_ readonly?
 	 * @return bool
 	 */
 	function is_paying_customer( $user_id = '' ) {

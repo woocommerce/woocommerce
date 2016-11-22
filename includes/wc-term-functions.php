@@ -15,14 +15,66 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Helper to get cached object terms and filter by field using wp_list_pluck().
+ * Works as a cached alternative for wp_get_post_terms() and wp_get_object_terms().
+ *
+ * @since  2.7.0
+ * @param  int    $object_id Object ID.
+ * @param  string $taxonomy  Taxonomy slug.
+ * @param  string $field     Field name.
+ * @param  string $index_key Index key name.
+ * @return array
+ */
+function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key = null ) {
+	// Test if terms exists.
+	// get_the_terms() return false when don't found terms.
+	if ( $terms = get_the_terms( $object_id, $taxonomy ) ) {
+		if ( ! is_null( $field ) ) {
+			$terms = wp_list_pluck( $terms, $field, $index_key );
+		}
+	} else {
+		$terms = array();
+	}
+
+	return $terms;
+}
+
+/**
+ * Cached version of wp_get_post_terms().
+ * This is a private function (internal use ONLY).
+ *
+ * @since  2.7.0
+ * @param  int    $product_id Product ID.
+ * @param  string $taxonomy   Taxonomy slug.
+ * @param  array  $args       Query arguments.
+ * @return array
+ */
+function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() ) {
+	$cache_key = 'wc_' . $taxonomy . md5( json_encode( $args ) );
+	$terms     = wp_cache_get( $product_id, $cache_key );
+
+	if ( false !== $terms ) {
+		return $terms;
+	}
+
+	// @codingStandardsIgnoreStart
+	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+	// @codingStandardsIgnoreEnd
+
+	wp_cache_add( $product_id, $terms, $cache_key );
+
+	return $terms;
+}
+
+/**
  * Wrapper for wp_get_post_terms which supports ordering by parent.
  *
  * NOTE: At this point in time, ordering by menu_order for example isn't possible with this function. wp_get_post_terms has no.
  *   filters which we can utilise to modify it's query. https://core.trac.wordpress.org/ticket/19094.
  *
- * @param  int $product_id
- * @param  string $taxonomy
- * @param  array  $args
+ * @param  int    $product_id Product ID.
+ * @param  string $taxonomy   Taxonomy slug.
+ * @param  array  $args       Query arguments.
  * @return array
  */
 function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
@@ -34,16 +86,16 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
-	// Support ordering by parent
+	// Support ordering by parent.
 	if ( ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'name_num', 'parent' ) ) ) {
 		$fields  = isset( $args['fields'] ) ? $args['fields'] : 'all';
 		$orderby = $args['orderby'];
 
-		// Unset for wp_get_post_terms
+		// Unset for wp_get_post_terms.
 		unset( $args['orderby'] );
 		unset( $args['fields'] );
 
-		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 
 		switch ( $orderby ) {
 			case 'name_num' :
@@ -66,26 +118,26 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				break;
 		}
 	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
-		// wp_get_post_terms doesn't let us use custom sort order
-		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
+		// wp_get_post_terms doesn't let us use custom sort order.
+		$args['include'] = wc_get_object_terms( $product_id, $taxonomy, 'id' );
 
 		if ( empty( $args['include'] ) ) {
 			$terms = array();
 		} else {
-			// This isn't needed for get_terms
+			// This isn't needed for get_terms.
 			unset( $args['orderby'] );
 
-			// Set args for get_terms
+			// Set args for get_terms.
 			$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
 			$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
 			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
-			// Ensure slugs is valid for get_terms - slugs isn't supported
+			// Ensure slugs is valid for get_terms - slugs isn't supported.
 			$args['fields']     = ( 'slugs' === $args['fields'] ) ? 'id=>slug' : $args['fields'];
 			$terms              = get_terms( $taxonomy, $args );
 		}
 	} else {
-		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 	}
 
 	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $args );
@@ -253,8 +305,6 @@ add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 2 );
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
- *
  * @param mixed $term_id
  * @param string $meta_key
  * @param mixed $meta_value
@@ -271,7 +321,6 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param mixed $meta_key
  * @param mixed $meta_value
@@ -288,7 +337,6 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param string $meta_key
  * @param string $meta_value (default: '')
@@ -305,7 +353,6 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
  * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
- * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
  * @param string $key
  * @param bool $single (default: true)
@@ -485,14 +532,18 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
- *
  * @param  array $terms
  * @param  string $taxonomy
  * @param  bool $callback
  * @param  bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
-	global $wpdb;
+	global $wpdb, $wc_allow_term_recount;
+
+	// Don't recount unless CRUD is calling this.
+	if ( empty( $wc_allow_term_recount ) ) {
+		return;
+	}
 
 	// Standard callback
 	if ( $callback ) {
@@ -500,7 +551,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	}
 
 	// Stock query
-	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
 		$stock_query = "
 		AND meta_stock.meta_key = '_stock_status'
@@ -516,8 +567,6 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-		LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 		$stock_join
 		WHERE 	post_status = 'publish'
 		AND 	post_type 	= 'product'

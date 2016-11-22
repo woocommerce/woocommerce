@@ -218,7 +218,6 @@ class WC_Admin_Duplicate_Product {
 	 *
 	 * @param mixed $id
 	 * @return WP_Post|bool
-	 * @todo Returning false? Need to check for it in...
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {
@@ -252,7 +251,7 @@ class WC_Admin_Duplicate_Product {
 		$taxonomies = array_diff( get_object_taxonomies( $post_type ), $exclude );
 
 		foreach ( $taxonomies as $taxonomy ) {
-			$post_terms       = wp_get_object_terms( $id, $taxonomy );
+			$post_terms       = wc_get_object_terms( $id, $taxonomy );
 			$post_terms_count = sizeof( $post_terms );
 
 			for ( $i = 0; $i < $post_terms_count; $i++ ) {

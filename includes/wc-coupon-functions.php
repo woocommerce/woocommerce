@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WooCommerce Coupons Functions
  *
@@ -7,12 +11,8 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version     2.7.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
 
 /**
  * Get coupon types.
@@ -79,17 +79,8 @@ function wc_coupons_enabled() {
  * @return string
  */
 function wc_get_coupon_code_by_id( $id ) {
-	global $wpdb;
-
-	$code = $wpdb->get_var( $wpdb->prepare( "
-		SELECT post_title
-		FROM $wpdb->posts
-		WHERE ID = %d
-		AND post_type = 'shop_coupon'
-		AND post_status = 'publish';
-	", $id ) );
-
-	return (string) $code;
+	$data_store = WC_Data_Store::load( 'coupon' );
+	return (string) $data_store->get_code_by_id( $id );
 }
 
 /**
@@ -101,14 +92,11 @@ function wc_get_coupon_code_by_id( $id ) {
  * @return int
  */
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
-	global $wpdb;
-
-	$ids = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+	$data_store = WC_Data_Store::load( 'coupon' );
+	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
 	if ( false === $ids ) {
-		$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC;", $code );
-		$ids = $wpdb->get_col( $sql );
-
+		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
 			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
 		}

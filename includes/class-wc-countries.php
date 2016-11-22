@@ -98,19 +98,24 @@ class WC_Countries {
 			'EE' => array(),
 			'FI' => array(),
 			'FR' => array(),
+			'GP' => array(),
+			'GF' => array(),
 			'IS' => array(),
 			'IL' => array(),
 			'KR' => array(),
+			'MQ' => array(),
 			'NL' => array(),
 			'NO' => array(),
 			'PL' => array(),
 			'PT' => array(),
+			'RE' => array(),
 			'SG' => array(),
 			'SK' => array(),
 			'SI' => array(),
 			'LK' => array(),
 			'SE' => array(),
 			'VN' => array(),
+			'YT' => array(),
 		);
 
 		// Load only the state files the shop owner wants/needs.
@@ -627,7 +632,6 @@ class WC_Countries {
 	/**
 	 * Get country locale settings.
 	 * @return array
-	 * @todo  [2.4] Check select2 4.0.0 compatibility with `placeholder` attribute and uncomment relevant lines. https://github.com/woocommerce/woocommerce/issues/7729
 	 */
 	public function get_country_locale() {
 		if ( empty( $this->locale ) ) {

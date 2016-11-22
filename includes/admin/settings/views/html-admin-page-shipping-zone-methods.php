@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
-		<?php if ( 0 !== $zone->get_zone_id() ) : ?>
+		<?php if ( 0 !== $zone->get_id() ) : ?>
 			<tr valign="top" class="">
 				<th scope="row" class="titledesc">
 					<label for="zone_name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></label>

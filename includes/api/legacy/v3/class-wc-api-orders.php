@@ -149,10 +149,9 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession.
-		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
-		$order      = wc_get_order( $id );
-		$order_post = get_post( $id );
-		$expand     = array();
+		$dp     = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order  = wc_get_order( $id );
+		$expand = array();
 
 		if ( ! empty( $filter['expand'] ) ) {
 			$expand = explode( ',', $filter['expand'] );
@@ -162,9 +161,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
 			'order_key'                 => $order->get_order_key(),
-			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -236,7 +235,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
 				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'quantity'     => $item->get_qty(),
+				'quantity'     => $item->get_quantity(),
 				'tax_class'    => $item->get_tax_class(),
 				'name'         => $item->get_name(),
 				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
@@ -500,7 +499,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 
@@ -660,7 +659,7 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
 
@@ -955,35 +954,35 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// quantity
 		if ( $creating ) {
-			$item = new WC_Order_Item_Product();
+			$line_item = new WC_Order_Item_Product();
 		} else {
-			$item = new WC_Order_Item_Product( $item['id'] );
+			$line_item = new WC_Order_Item_Product( $item['id'] );
 		}
 
-		$item->set_product( $product );
-		$item->set_order_id( $order->get_id() );
+		$line_item->set_product( $product );
+		$line_item->set_order_id( $order->get_id() );
 
 		if ( isset( $item['quantity'] ) ) {
-			$item->set_quantity( $item['quantity'] );
+			$line_item->set_quantity( $item['quantity'] );
 		}
 		if ( isset( $item['total'] ) ) {
-			$item->set_total( floatval( $item['total'] ) );
+			$line_item->set_total( floatval( $item['total'] ) );
 		}
 		if ( isset( $item['total_tax'] ) ) {
-			$item->set_total_tax( floatval( $item['total_tax'] ) );
+			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
 		}
 		if ( isset( $item['subtotal'] ) ) {
-			$item->set_subtotal( floatval( $item['subtotal'] ) );
+			$line_item->set_subtotal( floatval( $item['subtotal'] ) );
 		}
 		if ( isset( $item['subtotal_tax'] ) ) {
-			$item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
+			$line_item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
 		}
 		if ( $variation_id ) {
-			$item->set_variation_id( $variation_id );
-			$item->set_variation( $item['variations'] );
+			$line_item->set_variation_id( $variation_id );
+			$line_item->set_variation( $item['variations'] );
 		}
 
-		$item_id = $item->save();
+		$item_id = $line_item->save();
 	}
 
 	/**
@@ -1189,7 +1188,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$item = new WC_Order_Item_Coupon( array(
+			$item = new WC_Order_Item_Coupon();
+			$item->set_props( array(
 				'code'         => $coupon['code'],
 				'discount'     => isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0,
 				'discount_tax' => 0,
@@ -1579,7 +1579,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
+				'created_at' => $this->server->format_datetime( $refund->get_date_created(), false, true ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items,

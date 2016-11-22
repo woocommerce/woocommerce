@@ -55,8 +55,7 @@ class WC_Cache_Helper {
 	 * @return string
 	 */
 	public static function geolocation_ajax_get_location_hash() {
-		$customer             = new WC_Customer();
-		$customer->load_session();
+		$customer             = new WC_Customer( 0, true );
 		$location             = array();
 		$location['country']  = $customer->get_billing_country();
 		$location['state']    = $customer->get_billing_state();
@@ -165,9 +164,13 @@ class WC_Cache_Helper {
 
 	/**
 	 * Prevent caching on dynamic pages.
-	 * @access public
 	 */
 	public static function prevent_caching() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
@@ -177,7 +180,7 @@ class WC_Cache_Helper {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach ( $wc_page_uris as $uri ) {
-				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
+				if ( stristr( trailingslashit( $_SERVER['REQUEST_URI'] ), $uri ) ) {
 					self::nocache();
 					break;
 				}

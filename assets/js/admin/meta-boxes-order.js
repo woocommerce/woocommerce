@@ -1149,7 +1149,7 @@ jQuery( function ( $ ) {
 	var wc_meta_boxes_order_notes = {
 		init: function() {
 			$( '#woocommerce-order-notes' )
-				.on( 'click', 'a.add_note', this.add_order_note )
+				.on( 'click', 'button.add_note', this.add_order_note )
 				.on( 'click', 'a.delete_note', this.delete_order_note );
 
 		},

@@ -73,8 +73,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->id, '_price', '10' );
-		update_post_meta( $product->id, '_regular_price', '10' );
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -90,7 +90,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		}
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -119,7 +119,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -131,8 +131,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->id, '_price', '10' );
-		update_post_meta( $product->id, '_regular_price', '10' );
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -148,7 +148,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		}
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -177,7 +177,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -189,8 +189,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->id, '_price', '10' );
-		update_post_meta( $product->id, '_regular_price', '10' );
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -209,7 +209,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Fee::add_cart_fee();
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -241,7 +241,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -253,8 +253,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->id, '_price', '10' );
-		update_post_meta( $product->id, '_regular_price', '10' );
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -273,7 +273,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Fee::add_cart_fee();
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -305,6 +305,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }
