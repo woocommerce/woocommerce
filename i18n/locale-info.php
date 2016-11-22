@@ -53,7 +53,7 @@ return array(
 			  array(
 					'country'  => 'BE',
 					'state'    => '',
-					'rate'     => '20.0000',
+					'rate'     => '21.0000',
 					'name'     => 'BTW',
 					'shipping' => true
 				)
