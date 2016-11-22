@@ -1194,7 +1194,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				if ( ! WC()->cart->is_empty() ) {
 					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 						if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
-							$products[] = $cart_item['data']->get_title();
+							$products[] = $cart_item['data']->get_name();
 						}
 					}
 				}

@@ -449,7 +449,15 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_post_data() {
 		_deprecated_function( 'WC_Product::get_post_data', '2.7', 'get_post' );
-		return get_post( $this->get_id() );
+
+		// In order to keep backwards compatibility it's required to use the parent data for variations.
+		if ( $this->is_type( 'variation' ) ) {
+			$post_data = get_post( $this->get_parent_id() );
+		} else {
+			$post_data = get_post( $this->get_id() );
+		}
+
+		return $post_data;
 	}
 
 	/**
@@ -459,6 +467,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_title() {
+		_deprecated_function( 'WC_Product::get_title', '2.7', 'WC_Product::get_name' );
+
 		return apply_filters( 'woocommerce_product_title', $this->get_post_data() ? $this->get_post_data()->post_title : '', $this );
 	}
 
