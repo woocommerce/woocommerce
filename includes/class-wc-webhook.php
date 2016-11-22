@@ -139,7 +139,7 @@ class WC_Webhook {
 			$should_deliver = false;
 
 		// only deliver deleted event for coupons, orders, and products
-		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product', 'product_variation' ) ) ) {
 			$should_deliver = false;
 
 		} elseif ( 'delete_user' == $current_action ) {
