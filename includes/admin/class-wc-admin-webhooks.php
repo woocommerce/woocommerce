@@ -124,6 +124,17 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Update webhook api version.
+	 *
+	 * @param WC_Webhook $webhook Webhook instance.
+	 */
+	private function update_api_version( $webhook ) {
+		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v1';
+
+		$webhook->set_api_version( $version );
+	}
+
+	/**
 	 * Save method.
 	 */
 	private function save() {
@@ -153,6 +164,9 @@ class WC_Admin_Webhooks {
 
 		// Topic
 		$this->update_topic( $webhook );
+
+		// API version.
+		$this->update_api_version( $webhook );
 
 		// Update date.
 		wp_update_post( array( 'ID' => $webhook->id, 'post_modified' => current_time( 'mysql' ) ) );
@@ -210,6 +224,8 @@ class WC_Admin_Webhooks {
 		}
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->set_api_version( 'wp_api_v1' );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
