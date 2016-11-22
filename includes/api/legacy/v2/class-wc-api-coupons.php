@@ -139,7 +139,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
 				'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
 				'customer_emails'              => $coupon->get_email_restrictions(),
-				'description'                  => $coupon_post->post_excerpt,
+				'description'                  => $coupon->get_description(),
 			);
 
 			return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
