@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Don't prevent submission when table is not found on cart.
 * Fix - Improved layered nav counts on attribute archives.
 * Fix - Fixed pagination when removing layered nav items via widget.
+* Fix - Default BE tax rate.
 
 = 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
