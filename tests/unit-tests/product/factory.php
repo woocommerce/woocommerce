@@ -56,13 +56,13 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that an incorrect product returns null.
+	 * Tests that an incorrect product returns false.
 	 *
 	 * @since 2.7.0
 	 */
-	function test_get_invalid_product_returns_null() {
+	function test_get_invalid_product_returns_false() {
 		$product = WC()->product_factory->get_product( 50000 );
-		$this->assertNull( $product );
+		$this->assertFalse( $product );
 	}
 
 }
