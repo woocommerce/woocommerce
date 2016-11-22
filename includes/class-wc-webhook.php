@@ -828,4 +828,31 @@ class WC_Webhook {
 	public function get_post_data() {
 		return $this->post_data;
 	}
+
+	/**
+	 * Set API version.
+	 *
+	 * @param string $version REST API version.
+	 */
+	public function set_api_version( $version ) {
+		$versions = array(
+			'wp_api_v1',
+			'legacy_v3',
+		);
+
+		if ( ! in_array( $version, $versions, true ) ) {
+			$version = 'wp_api_v1';
+		}
+
+		update_post_meta( $this->id, '_api_version', $version );
+	}
+
+	/**
+	 * API version.
+	 *
+	 * @return string
+	 */
+	public function get_api_version() {
+		return $this->api_version ? $this->api_version : 'legacy_v3';
+	}
 }
