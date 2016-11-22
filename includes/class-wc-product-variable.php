@@ -139,7 +139,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param  boolean $include_taxes Should the price include taxes?
 	 * @return string
 	 */
-	public function get_variation_sale_price( $min_or_max = 'min', $inclde_taxes = false ) {
+	public function get_variation_sale_price( $min_or_max = 'min', $include_taxes = false ) {
 		$prices = $include_taxes ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
 		$price  = 'min' === $min_or_max ? current( $prices['sale_price'] ) : end( $prices['sale_price'] );
 		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $include_taxes );
