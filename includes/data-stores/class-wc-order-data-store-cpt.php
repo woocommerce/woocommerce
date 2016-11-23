@@ -64,7 +64,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_date_paid',
 		'_payment_tokens',
 		'_billing_address_index',
-		'_shipping_address_index'
+		'_shipping_address_index',
 	);
 
 	/**

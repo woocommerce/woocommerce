@@ -38,15 +38,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	);
 
 	/**
-	 * Initialize simple product.
-	 *
-	 * @param mixed $product
-	 */
-	public function __construct( $product = 0 ) {
-		parent::__construct( $product );
-	}
-
-	/**
 	 * Prefix for action and filter hooks on data.
 	 *
 	 * @since  2.7.0
