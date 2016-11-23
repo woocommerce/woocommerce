@@ -829,6 +829,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
+		// Set parent.
+		$item->set_order_id( $this->get_id() );
+
 		// Append new row with generated temporary ID
 		if ( $item->get_id() ) {
 			$this->items[ $items_key ][ $item->get_id() ] = $item;
