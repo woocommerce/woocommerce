@@ -1890,15 +1890,15 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'] );
 
 		if ( $args['maxlength'] ) {
-		    $args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
 		}
 
-		if ( true === $args['autocomplete'] ) {
-		    $args['custom_attributes']['autocomplete'] = 'true';
+		if ( ! empty( $args['autocomplete'] ) ) {
+			$args['custom_attributes']['autocomplete'] = $args['autocomplete'];
 		}
 
 		if ( true === $args['autofocus'] ) {
-		    $args['custom_attributes']['autofocus'] = 'autofocus';
+			$args['custom_attributes']['autofocus'] = 'autofocus';
 		}
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
