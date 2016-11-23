@@ -214,6 +214,9 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// set secret if provided, defaults to API users consumer secret
 			$webhook->set_secret( ! empty( $data['secret'] ) ? $data['secret'] : '' );
 
+			// Set API version to legacy v3.
+			$webhook->set_api_version( 'legacy_v3' );
+
 			// send ping
 			$webhook->deliver_ping();
 
