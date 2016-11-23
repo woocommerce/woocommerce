@@ -40,7 +40,9 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
 	if ( is_ajax() ) {
-		error_log( "The {$function} function is deprecated since version {$version}." );
+		$log_string  = "The {$function} function is deprecated since version {$version}.";
+		$log_string .= $replacement ? "Replace with {$replacement}." : '';
+		error_log( $log_string );
 	} else {
 		_deprecated_function( $function, $version, $replacement );
 	}
