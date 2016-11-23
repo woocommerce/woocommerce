@@ -226,6 +226,101 @@ class WC_Webhook {
 		do_action( 'woocommerce_webhook_delivery', $http_args, $response, $duration, $arg, $this->id );
 	}
 
+	/**
+	 * Get Legacy API payload.
+	 *
+	 * @since  2.7.0
+	 * @param  string $resource    Resource type.
+	 * @param  int    $resource_id Resource ID.
+	 * @param  string $event       Event type.
+	 * @return array
+	 */
+	private function get_legacy_api_payload( $resource, $resource_id, $event ) {
+		// Include & load API classes.
+		WC()->api->includes();
+		WC()->api->register_resources( new WC_API_Server( '/' ) );
+
+		switch ( $resource ) {
+			case 'coupon' :
+				$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
+				break;
+
+			case 'customer' :
+				$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
+				break;
+
+			case 'order' :
+				$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
+				break;
+
+			case 'product' :
+				// Bulk and quick edit action hooks return a product object instead of an ID.
+				if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+					$resource_id = $resource_id->get_id();
+				}
+				$payload = WC()->api->WC_API_Products->get_product( $resource_id );
+				break;
+
+			// Custom topics include the first hook argument.
+			case 'action' :
+				$payload = array(
+					'action' => current( $this->get_hooks() ),
+					'arg'    => $resource_id,
+				);
+				break;
+
+			default :
+				$payload = array();
+				break;
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Get WP API integration payload.
+	 *
+	 * @since  2.7.0
+	 * @param  string $resource    Resource type.
+	 * @param  int    $resource_id Resource ID.
+	 * @param  string $event       Event type.
+	 * @return array
+	 */
+	private function get_wp_api_payload( $resource, $resource_id, $event ) {
+		switch ( $resource ) {
+			case 'coupon' :
+			case 'customer' :
+			case 'order' :
+			case 'product' :
+				$class      = 'WC_REST_' . ucfirst( $resource ) . 's_Controller';
+				$request    = new WP_REST_Request( 'GET' );
+				$controller = new $class;
+
+				// Bulk and quick edit action hooks return a product object instead of an ID.
+				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+					$resource_id = $resource_id->get_id();
+				}
+
+				$request->set_param( 'id', $resource_id );
+				$result  = $controller->get_item( $request );
+				$payload = isset( $result->data ) ? $result->data : array();
+				break;
+
+			// Custom topics include the first hook argument.
+			case 'action' :
+				$payload = array(
+					'action' => current( $this->get_hooks() ),
+					'arg'    => $resource_id,
+				);
+				break;
+
+			default :
+				$payload = array();
+				break;
+		}
+
+		return $payload;
+	}
 
 	/**
 	 * Build the payload data for the webhook.
@@ -235,7 +330,6 @@ class WC_Webhook {
 	 * @return mixed payload data
 	 */
 	private function build_payload( $resource_id ) {
-
 		// build the payload with the same user context as the user who created
 		// the webhook -- this avoids permission errors as background processing
 		// runs with no user context
@@ -245,55 +339,20 @@ class WC_Webhook {
 		$resource = $this->get_resource();
 		$event    = $this->get_event();
 
-		// if a resource has been deleted, just include the ID
+		// If a resource has been deleted, just include the ID.
 		if ( 'deleted' == $event ) {
-
 			$payload = array(
 				'id' => $resource_id,
 			);
-
 		} else {
-
-			// include & load API classes
-			WC()->api->includes();
-			WC()->api->register_resources( new WC_API_Server( '/' ) );
-
-			switch ( $resource ) {
-
-				case 'coupon':
-					$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
-					break;
-
-				case 'customer':
-					$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
-					break;
-
-				case 'order':
-					$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
-					break;
-
-				case 'product':
-					// bulk and quick edit action hooks return a product object instead of an ID
-					if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
-						$resource_id = $resource_id->get_id();
-					}
-					$payload = WC()->api->WC_API_Products->get_product( $resource_id );
-					break;
-
-				// custom topics include the first hook argument
-				case 'action':
-					$payload = array(
-						'action' => current( $this->get_hooks() ),
-						'arg'    => $resource_id,
-					);
-					break;
-
-				default:
-					$payload = array();
+			if ( 'wp_api_v1' === $this->get_api_version() ) {
+				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+			} else {
+				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
 			}
 		}
 
-		// restore the current user
+		// Restore the current user.
 		wp_set_current_user( $current_user );
 
 		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->id );
@@ -832,6 +891,7 @@ class WC_Webhook {
 	/**
 	 * Set API version.
 	 *
+	 * @since 2.7.0
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
@@ -850,6 +910,7 @@ class WC_Webhook {
 	/**
 	 * API version.
 	 *
+	 * @since  2.7.0
 	 * @return string
 	 */
 	public function get_api_version() {
