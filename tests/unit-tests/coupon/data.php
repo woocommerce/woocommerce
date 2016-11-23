@@ -54,7 +54,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'maximum_amount',
 			'customer_email',
 		);
-		$this->expectedwc_doing_it_wrong = array_merge( $this->expectedwc_doing_it_wrong, $legacy_keys );
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
 		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon->add_meta_data( 'test_coupon_field', 'testing', true );
@@ -121,7 +121,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		 * PHPUnit know that its okay to continue.
 		 */
 		$legacy_keys = array( 'product_ids', 'exclude_product_ids', 'individual_use', 'free_shipping', 'exclude_sale_items' );
-		$this->expectedwc_doing_it_wrong = array_merge( $this->expectedwc_doing_it_wrong, $legacy_keys );
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 		$code = 'bc_manual_coupon_' . time();
 		$coupon = new WC_Coupon( $code );
 		$coupon->read_manual_coupon( $code, array(

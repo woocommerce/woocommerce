@@ -138,7 +138,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 			'calculated_shipping',
 		);
 
-		$this->expectedwc_doing_it_wrong = array_merge( $this->expectedwc_doing_it_wrong, $legacy_keys );
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
 		$customer = WC_Helper_Customer::create_customer();
 
