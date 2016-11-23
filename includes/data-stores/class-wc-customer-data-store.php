@@ -144,8 +144,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function update( &$customer ) {
 		wp_update_user( array( 'ID' => $customer->get_id(), 'user_email' => $customer->get_email() ) );
-		// Only update password if a new one was set with set_password
-		if ( ! empty( $customer->get_password() ) ) {
+		// Only update password if a new one was set with set_password.
+		if ( $customer->get_password() ) {
 			wp_update_user( array( 'ID' => $customer->get_id(), 'user_pass' => $customer->get_password() ) );
 			$customer->set_password( '' );
 		}
