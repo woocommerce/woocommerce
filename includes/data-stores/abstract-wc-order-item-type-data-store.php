@@ -11,6 +11,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooCommerce
  */
 abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface {
+
+	/**
+	 * Meta type. This should match up with
+	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * WP defines 'post', 'user', 'comment', and 'term'.
+	 */
+	protected $meta_type = 'order_item';
+
+	/**
+	 * This only needs set if you are using a custom metadata type (for example payment tokens.
+	 * This should be the name of the field your table uses for associating meta with objects.
+	 * For example, in payment_tokenmeta, this would be payment_token_id.
+	 * @var string
+	 */
+	protected $object_id_field_for_meta = 'order_item_id';
+
 	/**
 	 * Create a new order item in the database.
 	 *
