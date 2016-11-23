@@ -82,7 +82,7 @@ class WC_Shortcode_My_Account {
 					}
 	 			}
 
-				_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
+				wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
 			}
 
 			// Send output buffer

@@ -69,7 +69,7 @@ class WC_Admin_Assets {
 
 		if ( has_action( 'woocommerce_admin_css' ) ) {
 			do_action( 'woocommerce_admin_css' );
-			_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
+			wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 		}
 	}
 

@@ -460,7 +460,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_dimensions( $formatted = true ) {
 		if ( $formatted ) {
-			wc_soft_deprecated_argument( 'WC_Product::get_dimensions', '2.7', '2.8', 'By default, get_dimensions has an argument set to true so that HTML is returned. This is to support the legacy version of the method. To get HTML dimensions, instead use wc_format_dimensions() function. Pass false to this method to return an array of dimensions. This will be the new default behavior in future versions.' );
+			wc_deprecated_argument( 'WC_Product::get_dimensions', '2.7', 'By default, get_dimensions has an argument set to true so that HTML is returned. This is to support the legacy version of the method. To get HTML dimensions, instead use wc_format_dimensions() function. Pass false to this method to return an array of dimensions. This will be the new default behavior in future versions.' );
 			return apply_filters( 'woocommerce_product_dimensions', wc_format_dimensions( $this->get_dimensions( false ) ), $this );
 		}
 		return array(
