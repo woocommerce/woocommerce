@@ -516,7 +516,7 @@ class WC_Admin_Webhooks {
 			$html .= '<p class="info" style="float: left;"><strong>';
 			/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
 			$html .= sprintf(
-				__( '%1%s &ndash; Page %2$d of %3$d', 'woocommerce' ),
+				__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
 				sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ),
 				$current,
 				$pages
