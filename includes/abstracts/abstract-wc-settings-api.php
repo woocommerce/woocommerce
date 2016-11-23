@@ -886,7 +886,7 @@ abstract class WC_Settings_API {
 	 * @deprecated 2.6.0 No longer used
 	 */
 	public function validate_settings_fields( $form_fields = array() ) {
-		_deprecated_function( 'validate_settings_fields', '2.6' );
+		wc_deprecated_function( 'validate_settings_fields', '2.6' );
 	}
 
 	/**
@@ -896,7 +896,7 @@ abstract class WC_Settings_API {
 	 * @return array
 	 */
 	public function format_settings( $value ) {
-		_deprecated_function( 'format_settings', '2.6' );
+		wc_deprecated_function( 'format_settings', '2.6' );
 		return $value;
 	}
 }

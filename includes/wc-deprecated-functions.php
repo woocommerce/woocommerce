@@ -25,39 +25,56 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
 	if ( has_action( $action ) ) {
-		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
+		wc_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
 		do_action_ref_array( $action, $args );
 	}
 }
 
 /**
- * Soft deprecate a function so that it's technically deprecated, but not shown
- * until a future version to ease transition for developers.
+ * Wrapper for deprecated functions so we can apply some extra logic.
  *
  * @since  2.7.0
  * @param  string $function
  * @param  string $version
- * @param  string $deprecate_in_version
  * @param  string $replacement
  */
-function wc_soft_deprecated_function( $function, $version, $deprecate_in_version, $replacement = null ) {
-	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+function wc_deprecated_function( $function, $version, $replacement = null ) {
+	if ( is_ajax() ) {
+		error_log( "The {$function} function is deprecated since version {$version}." );
+	} else {
 		_deprecated_function( $function, $version, $replacement );
 	}
 }
 
+
 /**
- * Soft deprecate an argument so that it's technically deprecated, but not shown
- * until a future version to ease transition for developers.
+ * Wrapper for wc_doing_it_wrong.
+ *
+ * @since  2.7.0
+ * @param  string $function
+ * @param  string $version
+ * @param  string $replacement
+ */
+function wc_doing_it_wrong( $function, $message, $version ) {
+	if ( is_ajax() ) {
+		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
+	} else {
+		_doing_it_wrong( $function, $message, $version );
+	}
+}
+
+/**
+ * Wrapper for deprecated arguments so we can apply some extra logic.
  *
  * @since  2.7.0
  * @param  string $argument
  * @param  string $version
- * @param  string $deprecate_in_version
  * @param  string $replacement
  */
-function wc_soft_deprecated_argument( $argument, $version, $deprecate_in_version, $message = null ) {
-	if ( version_compare( WC_VERSION, $deprecate_in_version, '>=' ) ) {
+function wc_deprecated_argument( $argument, $version, $message = null ) {
+	if ( is_ajax() ) {
+		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
+	} else {
 		_deprecated_argument( $argument, $version, $message );
 	}
 }
@@ -66,45 +83,45 @@ function wc_soft_deprecated_argument( $argument, $version, $deprecate_in_version
  * @deprecated
  */
 function woocommerce_show_messages() {
-	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_notices' );
+	wc_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_notices' );
 	wc_print_notices();
 }
 /**
  * @deprecated
  */
 function woocommerce_weekend_area_js() {
-	_deprecated_function( 'woocommerce_weekend_area_js', '2.1' );
+	wc_deprecated_function( 'woocommerce_weekend_area_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_tooltip_js() {
-	_deprecated_function( 'woocommerce_tooltip_js', '2.1' );
+	wc_deprecated_function( 'woocommerce_tooltip_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_datepicker_js() {
-	_deprecated_function( 'woocommerce_datepicker_js', '2.1' );
+	wc_deprecated_function( 'woocommerce_datepicker_js', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_admin_scripts() {
-	_deprecated_function( 'woocommerce_admin_scripts', '2.1' );
+	wc_deprecated_function( 'woocommerce_admin_scripts', '2.1' );
 }
 /**
  * @deprecated
  */
 function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
-	_deprecated_function( 'woocommerce_create_page', '2.1', 'wc_create_page' );
+	wc_deprecated_function( 'woocommerce_create_page', '2.1', 'wc_create_page' );
 	return wc_create_page( $slug, $option, $page_title, $page_content, $post_parent );
 }
 /**
  * @deprecated
  */
 function woocommerce_readfile_chunked( $file, $retbytes = true ) {
-	_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
+	wc_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
 	return WC_Download_Handler::readfile_chunked( $file );
 }
 
@@ -117,7 +134,7 @@ function woocommerce_readfile_chunked( $file, $retbytes = true ) {
  * @return string
  */
 function woocommerce_format_total( $number ) {
-	_deprecated_function( __FUNCTION__, '2.1', 'wc_format_decimal()' );
+	wc_deprecated_function( __FUNCTION__, '2.1', 'wc_format_decimal()' );
 	return wc_format_decimal( $number, wc_get_price_decimals(), false );
 }
 
@@ -130,7 +147,7 @@ function woocommerce_format_total( $number ) {
  * @return string
  */
 function woocommerce_get_formatted_product_name( $product ) {
-	_deprecated_function( __FUNCTION__, '2.1', 'WC_Product::get_formatted_name()' );
+	wc_deprecated_function( __FUNCTION__, '2.1', 'WC_Product::get_formatted_name()' );
 	return $product->get_formatted_name();
 }
 
@@ -744,7 +761,7 @@ function woocommerce_track_product_view() {
  * @deprecated has no replacement
  */
 function woocommerce_compile_less_styles() {
-	_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
+	wc_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
 }
 
 /**
@@ -769,7 +786,7 @@ add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_b
  * @return string
  */
 function woocommerce_get_product_schema() {
-	_deprecated_function( 'woocommerce_get_product_schema', '2.7' );
+	wc_deprecated_function( 'woocommerce_get_product_schema', '2.7' );
 
 	global $product;
 
@@ -806,7 +823,7 @@ function woocommerce_get_product_schema() {
  * @param string $date_to
  */
 function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
-	_doing_it_wrong( '_wc_save_product_price()', 'This function is not for developer use and is deprecated.', '2.7' );
+	wc_doing_it_wrong( '_wc_save_product_price()', 'This function is not for developer use and is deprecated.', '2.7' );
 
 	$product_id    = absint( $product_id );
 	$regular_price = wc_format_decimal( $regular_price );

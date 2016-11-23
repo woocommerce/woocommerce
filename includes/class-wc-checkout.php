@@ -71,7 +71,7 @@ class WC_Checkout {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_Checkout {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -404,7 +404,7 @@ class WC_Checkout {
 			$this->posted['ship_to_different_address'] = ! empty( $_POST['ship_to_different_address'] );
 
 			if ( isset( $_POST['shiptobilling'] ) ) {
-				_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date' );
+				wc_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date' );
 
 				$this->posted['ship_to_different_address'] = $_POST['shiptobilling'] ? false : true;
 			}

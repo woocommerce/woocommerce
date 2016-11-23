@@ -48,7 +48,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @return string
 	 */
 	public function __get( $key ) {
-		_doing_it_wrong( $key, 'Customer properties should not be accessed directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Customer properties should not be accessed directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
 		if ( in_array( $key, array( 'country', 'state', 'postcode', 'city', 'address_1', 'address', 'address_2' ) ) ) {
 			$key = 'billing_' . $key;
@@ -62,7 +62,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @param mixed $key
 	 */
 	public function __set( $key, $value ) {
-		_doing_it_wrong( $key, 'Customer properties should not be set directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Customer properties should not be set directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
 
 		if ( is_callable( array( $this, "set_{$key}" ) ) ) {
@@ -106,7 +106,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @return string
 	 */
 	public function get_default_country() {
-		_deprecated_function( 'WC_Customer::get_default_country', '2.7', 'wc_get_customer_default_location' );
+		wc_deprecated_function( 'WC_Customer::get_default_country', '2.7', 'wc_get_customer_default_location' );
 		$default = wc_get_customer_default_location();
 		return $default['country'];
 	}
@@ -116,7 +116,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @return string
 	 */
 	public function get_default_state() {
-		_deprecated_function( 'WC_Customer::get_default_state', '2.7', 'wc_get_customer_default_location' );
+		wc_deprecated_function( 'WC_Customer::get_default_state', '2.7', 'wc_get_customer_default_location' );
 		$default = wc_get_customer_default_location();
 		return $default['state'];
 	}
@@ -125,7 +125,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set customer address to match shop base address.
 	 */
 	public function set_to_base() {
-		_deprecated_function( 'WC_Customer::set_to_base', '2.7', 'WC_Customer::set_billing_address_to_base' );
+		wc_deprecated_function( 'WC_Customer::set_to_base', '2.7', 'WC_Customer::set_billing_address_to_base' );
 		$this->set_billing_address_to_base();
 	}
 
@@ -133,7 +133,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set customer shipping address to base address.
 	 */
 	public function set_shipping_to_base() {
-		_deprecated_function( 'WC_Customer::set_shipping_to_base', '2.7', 'WC_Customer::set_shipping_address_to_base' );
+		wc_deprecated_function( 'WC_Customer::set_shipping_to_base', '2.7', 'WC_Customer::set_shipping_address_to_base' );
 		$this->set_shipping_address_to_base();
 	}
 
@@ -142,7 +142,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @param boolean $calculated
 	 */
 	public function calculated_shipping( $calculated = true ) {
-		_deprecated_function( 'WC_Customer::calculated_shipping', '2.7', 'WC_Customer::set_calculated_shipping' );
+		wc_deprecated_function( 'WC_Customer::calculated_shipping', '2.7', 'WC_Customer::set_calculated_shipping' );
 		$this->set_calculated_shipping( $calculated );
 	}
 
@@ -150,7 +150,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set default data for a customer.
 	 */
 	public function set_default_data() {
-		_deprecated_function( 'WC_Customer::set_default_data', '2.7' );
+		wc_deprecated_function( 'WC_Customer::set_default_data', '2.7' );
 	}
 
 	/**
@@ -165,7 +165,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @return bool
 	 */
 	function is_paying_customer( $user_id = '' ) {
-		_deprecated_function( 'WC_Customer::is_paying_customer', '2.7', 'WC_Customer::get_is_paying_customer' );
+		wc_deprecated_function( 'WC_Customer::is_paying_customer', '2.7', 'WC_Customer::get_is_paying_customer' );
 		if ( ! empty( $user_id ) ) {
 			$user_id = get_current_user_id();
 		}
@@ -176,7 +176,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy get country.
 	 */
 	function get_country() {
-		_deprecated_function( 'WC_Customer::get_country', '2.7', 'WC_Customer::get_billing_country' );
+		wc_deprecated_function( 'WC_Customer::get_country', '2.7', 'WC_Customer::get_billing_country' );
 		return $this->get_billing_country();
 	}
 
@@ -184,7 +184,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy get state.
 	 */
 	function get_state() {
-		_deprecated_function( 'WC_Customer::get_state', '2.7', 'WC_Customer::get_billing_state' );
+		wc_deprecated_function( 'WC_Customer::get_state', '2.7', 'WC_Customer::get_billing_state' );
 		return $this->get_billing_state();
 	}
 
@@ -192,7 +192,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy get postcode.
 	 */
 	function get_postcode() {
-		_deprecated_function( 'WC_Customer::get_postcode', '2.7', 'WC_Customer::get_billing_postcode' );
+		wc_deprecated_function( 'WC_Customer::get_postcode', '2.7', 'WC_Customer::get_billing_postcode' );
 		return $this->get_billing_postcode();
 	}
 
@@ -200,7 +200,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy get city.
 	 */
 	function get_city() {
-		_deprecated_function( 'WC_Customer::get_city', '2.7', 'WC_Customer::get_billing_city' );
+		wc_deprecated_function( 'WC_Customer::get_city', '2.7', 'WC_Customer::get_billing_city' );
 		return $this->get_billing_city();
 	}
 
@@ -208,7 +208,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set country.
 	 */
 	function set_country( $country ) {
-		_deprecated_function( 'WC_Customer::set_country', '2.7', 'WC_Customer::set_billing_country' );
+		wc_deprecated_function( 'WC_Customer::set_country', '2.7', 'WC_Customer::set_billing_country' );
 		$this->set_billing_country( $country );
 	}
 
@@ -216,7 +216,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set state.
 	 */
 	function set_state( $state ) {
-		_deprecated_function( 'WC_Customer::set_state', '2.7', 'WC_Customer::set_billing_state' );
+		wc_deprecated_function( 'WC_Customer::set_state', '2.7', 'WC_Customer::set_billing_state' );
 		$this->set_billing_state( $state );
 	}
 
@@ -224,7 +224,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set postcode.
 	 */
 	function set_postcode( $postcode ) {
-		_deprecated_function( 'WC_Customer::set_postcode', '2.7', 'WC_Customer::set_billing_postcode' );
+		wc_deprecated_function( 'WC_Customer::set_postcode', '2.7', 'WC_Customer::set_billing_postcode' );
 		$this->set_billing_postcode( $postcode );
 	}
 
@@ -232,7 +232,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set city.
 	 */
 	function set_city( $city ) {
-		_deprecated_function( 'WC_Customer::set_city', '2.7', 'WC_Customer::set_billing_city' );
+		wc_deprecated_function( 'WC_Customer::set_city', '2.7', 'WC_Customer::set_billing_city' );
 		$this->set_billing_city( $city );
 	}
 
@@ -240,7 +240,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set address.
 	 */
 	function set_address( $address ) {
-		_deprecated_function( 'WC_Customer::set_address', '2.7', 'WC_Customer::set_billing_address' );
+		wc_deprecated_function( 'WC_Customer::set_address', '2.7', 'WC_Customer::set_billing_address' );
 		$this->set_billing_address( $address );
 	}
 
@@ -248,7 +248,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Legacy set address.
 	 */
 	function set_address_2( $address ) {
-		_deprecated_function( 'WC_Customer::set_address_2', '2.7', 'WC_Customer::set_billing_address_2' );
+		wc_deprecated_function( 'WC_Customer::set_address_2', '2.7', 'WC_Customer::set_billing_address_2' );
 		$this->set_billing_address_2( $address );
 	}
 }

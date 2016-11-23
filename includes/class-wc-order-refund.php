@@ -159,7 +159,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
 		/**
 		 * Maps legacy vars to new getters.
 		 */
@@ -178,7 +178,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_refund( $id = 0 ) {
-		_deprecated_function( 'get_refund', '2.7', 'read' );
+		wc_deprecated_function( 'get_refund', '2.7', 'read' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -195,7 +195,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_refund_amount() {
-		_deprecated_function( 'get_refund_amount', '2.7', 'get_amount' );
+		wc_deprecated_function( 'get_refund_amount', '2.7', 'get_amount' );
 		return $this->get_amount();
 	}
 
@@ -205,7 +205,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_refund_reason() {
-		_deprecated_function( 'get_refund_reason', '2.7', 'get_reason' );
+		wc_deprecated_function( 'get_refund_reason', '2.7', 'get_reason' );
 		return $this->get_reason();
 	}
 }

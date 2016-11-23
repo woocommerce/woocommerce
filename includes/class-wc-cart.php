@@ -143,11 +143,11 @@ class WC_Cart {
 				return $this->get_cart_contents_count();
 			break;
 			case 'tax' :
-				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
+				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
 			return $this->tax;
 			case 'discount_total':
-				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
+				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
 			return 0;
 		}
 	}
@@ -682,7 +682,7 @@ class WC_Cart {
 	 */
 	public function get_cart() {
 		if ( ! did_action( 'wp_loaded' ) ) {
-			_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
 			$this->get_cart_from_session();
@@ -2247,7 +2247,7 @@ class WC_Cart {
 	 * @return mixed formatted price or false if there are none
 	 */
 	public function get_discounts_before_tax() {
-		_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
+		wc_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
 		if ( $this->get_cart_discount_total() ) {
 			$discounts_before_tax = wc_price( $this->get_cart_discount_total() );
 		} else {
@@ -2263,7 +2263,7 @@ class WC_Cart {
 	 * @return int
 	 */
 	public function get_order_discount_total() {
-		_deprecated_function( 'get_order_discount_total', '2.3' );
+		wc_deprecated_function( 'get_order_discount_total', '2.3' );
 		return 0;
 	}
 
@@ -2272,7 +2272,7 @@ class WC_Cart {
 	 * @deprecated Coupons can not be applied after tax
 	 */
 	public function apply_cart_discounts_after_tax( $values, $price ) {
-		_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
+		wc_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
 	}
 
 	/**
@@ -2280,7 +2280,7 @@ class WC_Cart {
 	 * @deprecated Coupons can not be applied after tax
 	 */
 	public function apply_product_discounts_after_tax( $values, $price ) {
-		_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );
+		wc_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );
 	}
 
 	/**
@@ -2288,6 +2288,6 @@ class WC_Cart {
 	 * @deprecated Coupons can not be applied after tax
 	 */
 	public function get_discounts_after_tax() {
-		_deprecated_function( 'get_discounts_after_tax', '2.3' );
+		wc_deprecated_function( 'get_discounts_after_tax', '2.3' );
 	}
 }
