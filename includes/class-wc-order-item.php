@@ -174,22 +174,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
 	}
 
-	/**
-	 * Save properties specific to this order item.
-	 * @return int Item ID
-	 */
-	public function save() {
-		parent::save();
-
-		if ( $this->data_store ) {
-			$this->data_store->save_item_data( $this );
-		}
-
-		$this->apply_changes();
-
-		return $this->get_id();
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Meta Data Handling

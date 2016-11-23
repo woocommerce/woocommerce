@@ -26,6 +26,9 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			'order_id'        => $item->get_order_id(),
 		) );
 		$item->set_id( $wpdb->insert_id );
+		$this->save_item_data( $item );
+		$item->save_meta_data();
+		$item->apply_changes();
 
 		do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
@@ -44,6 +47,10 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			'order_item_type' => $item->get_type(),
 			'order_id'        => $item->get_order_id(),
 		), array( 'order_item_id' => $item->get_id() ) );
+
+		$this->save_item_data( $item );
+		$item->save_meta_data();
+		$item->apply_changes();
 
 		do_action( 'woocommerce_update_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
@@ -90,4 +97,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->read_meta_data();
 		$item->set_object_read( true );
 	}
+
+	/**
+	 * Saves an item's data to the database / item meta.
+	 * Ran after both create and update, so $item->get_id() will be set.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Order_Item $item
+	 */
+	public function save_item_data( &$item ) {}
 }

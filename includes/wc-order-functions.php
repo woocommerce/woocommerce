@@ -534,7 +534,7 @@ function wc_create_refund( $args = array() ) {
 				}
 
 				if ( is_callable( array( $refunded_item, 'set_quantity' ) ) ) {
-					$refunded_item->set_quantity( $qty );
+					$refunded_item->set_quantity( $qty * -1 );
 				}
 
 				$refund->add_item( $refunded_item );
