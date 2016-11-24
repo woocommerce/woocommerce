@@ -336,4 +336,36 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		return wc_format_decimal( $spent, 2 );
 	}
+
+	/**
+	 * Search customers and return customer IDs.
+	 *
+	 * @param  string $term
+	 * @return array
+	 */
+	public function search_customers( $term ) {
+		$query = new WP_User_Query( array(
+			'search'         => '*' . esc_attr( $term ) . '*',
+			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
+			'fields'         => 'ID',
+		) );
+
+		$query2 = new WP_User_Query( array(
+			'fields'         => 'ID',
+			'meta_query'     => array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'first_name',
+					'value'   => $term,
+					'compare' => 'LIKE',
+				),
+				array(
+					'key'     => 'last_name',
+					'value'   => $term,
+					'compare' => 'LIKE',
+				),
+			),
+		) );
+		return wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+	}
 }

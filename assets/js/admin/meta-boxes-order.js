@@ -125,10 +125,9 @@ jQuery( function ( $ ) {
 				}
 
 				var data = {
-					user_id:      user_id,
-					type_to_load: 'billing',
-					action:       'woocommerce_get_customer_details',
-					security:     woocommerce_admin_meta_boxes.get_customer_details_nonce
+					user_id : user_id,
+					action  : 'woocommerce_get_customer_details',
+					security: woocommerce_admin_meta_boxes.get_customer_details_nonce
 				};
 
 				$( this ).closest( 'div.edit_address' ).block({
@@ -144,9 +143,9 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						if ( response ) {
-							$.each( response, function( key, data ) {
-							    $( ':input#_' + key ).val( data ).change();
+						if ( response && response.billing ) {
+							$.each( response.billing, function( key, data ) {
+								$( ':input#_billing_' + key ).val( data ).change();
 							});
 						}
 						$( 'div.edit_address' ).unblock();
@@ -169,7 +168,6 @@ jQuery( function ( $ ) {
 
 				var data = {
 					user_id:      user_id,
-					type_to_load: 'shipping',
 					action:       'woocommerce_get_customer_details',
 					security:     woocommerce_admin_meta_boxes.get_customer_details_nonce
 				};
@@ -187,9 +185,9 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						if ( response ) {
-							$.each( response, function( key, data ) {
-							    $( ':input#_' + key ).val( data ).change();
+						if ( response && response.billing ) {
+							$.each( response.shipping, function( key, data ) {
+								$( ':input#_shipping_' + key ).val( data ).change();
 							});
 						}
 						$( 'div.edit_address' ).unblock();
