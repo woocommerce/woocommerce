@@ -256,7 +256,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * AJAX update order review on checkout. @todo
+	 * AJAX update order review on checkout.
 	 */
 	public static function update_order_review() {
 		check_ajax_referer( 'update-order-review', 'security' );
@@ -1266,94 +1266,50 @@ class WC_AJAX {
 	 * Ajax request handling for product ordering.
 	 *
 	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
-	 * @todo CRUD (orders, SQL)
 	 */
 	public static function product_ordering() {
 		global $wpdb;
 
-		ob_start();
-
-		// check permissions again and make sure we have what we need
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			die( -1 );
 		}
 
-		// real post?
-		if ( ! $post = get_post( $_POST['id'] ) ) {
-			die( -1 );
+		$sorting_id  = absint( $_POST['id'] );
+		$previd      = absint( isset( $_POST['previd'] ) ? $_POST['previd'] : 0 );
+		$nextid      = absint( isset( $_POST['nextid'] ) ? $_POST['nextid'] : 0 );
+		$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
+		$index       = 0;
+
+		foreach ( $menu_orders as $id => $menu_order ) {
+			$id = absint( $id );
+
+			if ( $sorting_id === $id ) {
+				continue;
+			}
+			if ( $nextid === $id ) {
+				$index ++;
+			}
+			$index ++;
+			$menu_orders[ $id ] = $index;
+			$wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) );
 		}
 
-		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
-		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
-		$new_pos = array(); // store new positions for ajax
-
-		$siblings = $wpdb->get_results( $wpdb->prepare( "
-			SELECT ID, menu_order FROM {$wpdb->posts} AS posts
-			WHERE 	posts.post_type 	= 'product'
-			AND 	posts.post_status 	IN ( 'publish', 'pending', 'draft', 'future', 'private' )
-			AND 	posts.ID			NOT IN (%d)
-			ORDER BY posts.menu_order ASC, posts.ID DESC
-		", $post->ID ) );
-
-		$menu_order = 0;
-
-		foreach ( $siblings as $sibling ) {
-
-			// if this is the post that comes after our repositioned post, set our repositioned post position and increment menu order
-			if ( $nextid == $sibling->ID ) {
-				$wpdb->update(
-					$wpdb->posts,
-					array(
-						'menu_order' => $menu_order,
-					),
-					array( 'ID' => $post->ID ),
-					array( '%d' ),
-					array( '%d' )
-				);
-				$new_pos[ $post->ID ] = $menu_order;
-				$menu_order++;
-			}
-
-			// if repositioned post has been set, and new items are already in the right order, we can stop
-			if ( isset( $new_pos[ $post->ID ] ) && $sibling->menu_order >= $menu_order ) {
-				break;
-			}
-
-			// set the menu order of the current sibling and increment the menu order
-			$wpdb->update(
-				$wpdb->posts,
-				array(
-					'menu_order' => $menu_order,
-				),
-				array( 'ID' => $sibling->ID ),
-				array( '%d' ),
-				array( '%d' )
-			);
-			$new_pos[ $sibling->ID ] = $menu_order;
-			$menu_order++;
-
-			if ( ! $nextid && $previd == $sibling->ID ) {
-				$wpdb->update(
-					$wpdb->posts,
-					array(
-						'menu_order' => $menu_order,
-					),
-					array( 'ID' => $post->ID ),
-					array( '%d' ),
-					array( '%d' )
-				);
-				$new_pos[ $post->ID ] = $menu_order;
-				$menu_order++;
-			}
+		if ( isset( $menu_orders[ $previd ] ) ) {
+			$menu_orders[ $sorting_id ] = $menu_orders[ $previd ] + 1;
+		} elseif( isset( $menu_orders[ $nextid ] ) ) {
+			$menu_orders[ $sorting_id ] = $menu_orders[ $nextid ] - 1;
+		} else {
+			$menu_orders[ $sorting_id ] = 0;
 		}
+
+		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
 
 		do_action( 'woocommerce_after_product_ordering' );
-
-		wp_send_json( $new_pos );
+		wp_send_json( $menu_orders );
 	}
 
 	/**
-	 * Handle a refund via the edit order screen. @todo
+	 * Handle a refund via the edit order screen.
 	 */
 	public static function refund_line_items() {
 		ob_start();
@@ -1370,13 +1326,12 @@ class WC_AJAX {
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
 		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
-		$api_refund             = ( 'true' === $_POST['api_refund'] ) ? true : false;
-		$restock_refunded_items = ( 'true' === $_POST['restock_refunded_items'] ) ? true : false;
+		$api_refund             = 'true' === $_POST['api_refund'];
+		$restock_refunded_items = 'true' === $_POST['restock_refunded_items'];
 		$refund                 = false;
 		$response_data          = array();
 
 		try {
-			// Validate that the refund can occur
 			$order       = wc_get_order( $order_id );
 			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
