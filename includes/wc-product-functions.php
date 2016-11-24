@@ -823,7 +823,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( ! $product->is_taxable() ) {
 		$price = $price * $qty;
-	} elseif ( wc_prices_include_tax() ) {
+	} elseif ( ! wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_rates( $product->get_tax_class() );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
 		$tax_amount = WC_Tax::get_tax_total( $taxes );
