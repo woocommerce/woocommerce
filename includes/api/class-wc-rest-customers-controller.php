@@ -403,6 +403,10 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$user_data = get_userdata( $customer->get_id() );
 			$this->update_additional_fields_for_object( $user_data, $request );
 
+			if ( ! is_user_member_of_blog( $user_data->ID ) ) {
+				$user_data->add_role( 'customer' );
+			}
+
 			/**
 			 * Fires after a customer is created or updated via the REST API.
 			 *
