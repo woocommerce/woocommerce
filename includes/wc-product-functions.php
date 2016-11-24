@@ -325,26 +325,38 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  *
  * @param string $variation
  * @param bool $flat (default: false)
+ * @param bool $include_names include attribute names/labels
  * @return string
  */
-function wc_get_formatted_variation( $variation, $flat = false ) {
+function wc_get_formatted_variation( $variation, $flat = false, $include_names = true ) {
 	$return = '';
-	if ( is_array( $variation ) ) {
+
+	if ( is_a( $variation, 'WC_Product_Variation' ) ) {
+		$variation_attributes = $variation->get_attributes();
+		$product              = $variation;
+	} else {
+		$variation_attributes = $variation;
+		$product              = false;
+	}
+
+	$list_type = $include_names ? 'dl' : 'ul';
+
+	if ( is_array( $variation_attributes ) ) {
 
 		if ( ! $flat ) {
-			$return = '<dl class="variation">';
+			$return = '<' . $list_type . ' class="variation">';
 		}
 
 		$variation_list = array();
 
-		foreach ( $variation as $name => $value ) {
+		foreach ( $variation_attributes as $name => $value ) {
 			if ( ! $value ) {
 				continue;
 			}
 
 			// If this is a term slug, get the term's nice name
-			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+			if ( taxonomy_exists( $name ) ) {
+				$term = get_term_by( 'slug', $value, $name );
 				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
 				}
@@ -352,10 +364,18 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 				$value = ucwords( str_replace( '-', ' ', $value ) );
 			}
 
-			if ( $flat ) {
-				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . rawurldecode( $value );
+			if ( $include_names ) {
+				if ( $flat ) {
+					$variation_list[] = wc_attribute_label( $name, $product ) . ': ' . rawurldecode( $value );
+				} else {
+					$variation_list[] = '<dt>' . wc_attribute_label( $name, $product ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
+				}
 			} else {
-				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
+				if ( $flat ) {
+					$variation_list[] = rawurldecode( $value );
+				} else {
+					$variation_list[] = '<li>' . rawurldecode( $value ) . '</li>';
+				}
 			}
 		}
 
@@ -366,7 +386,7 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 		}
 
 		if ( ! $flat ) {
-			$return .= '</dl>';
+			$return .= '</' . $list_type . '>';
 		}
 	}
 	return $return;

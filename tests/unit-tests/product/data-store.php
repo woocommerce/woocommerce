@@ -347,6 +347,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'publish', $loaded_variation->get_status( 'edit' ) );
 		$_attribute = $loaded_variation->get_attributes( 'edit' );
-		$this->assertEquals( 'green', $_attribute['attribute_color'] );
+		$this->assertEquals( 'green', $_attribute['color'] );
 	}
 }

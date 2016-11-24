@@ -57,6 +57,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Gets terms from the stored options.
+	 *
 	 * @return array|null
 	 */
 	public function get_terms() {
@@ -72,6 +73,28 @@ class WC_Product_Attribute implements ArrayAccess {
 
 			if ( $term && ! is_wp_error( $term ) ) {
 				$terms[] = $term;
+			}
+		}
+		return $terms;
+	}
+
+	/**
+	 * Gets slugs from the stored options, or just the string if text based.
+	 *
+	 * @return array
+	 */
+	public function get_slugs() {
+		if ( ! $this->is_taxonomy() || ! taxonomy_exists( $this->get_name() ) ) {
+			return $this->get_options();
+		}
+		foreach ( $this->get_options() as $option ) {
+			if ( is_int( $option ) ) {
+				$term = get_term_by( 'id', $option, $this->get_name() );
+			} else {
+				$term = get_term_by( 'name', $option, $this->get_name() );
+			}
+			if ( $term && ! is_wp_error( $term ) ) {
+				$terms[] = $term->slug;
 			}
 		}
 		return $terms;

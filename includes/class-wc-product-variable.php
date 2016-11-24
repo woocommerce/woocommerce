@@ -247,6 +247,7 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_available_variation', array_merge( $variation->get_data(), array(
+			'attributes'            => $variation->get_variation_attributes(),
 			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
 			'weight_html'           => wc_format_weight( $variation->get_weight() ),
 			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),

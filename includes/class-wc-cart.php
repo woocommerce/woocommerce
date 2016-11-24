@@ -537,12 +537,11 @@ class WC_Cart {
 	public function get_item_data( $cart_item, $flat = false ) {
 		$item_data = array();
 
-		// Variation data
+		// Variation values are shown only if they are not found in the title as of 2.7.
+		// This is because variation titles display the attributes.
 		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
-
 			foreach ( $cart_item['variation'] as $name => $value ) {
-
-				if ( '' === $value ) {
+				if ( '' === $value || stristr( $cart_item['data']->get_name(), $value ) ) {
 					continue;
 				}
 
@@ -558,13 +557,8 @@ class WC_Cart {
 
 				// If this is a custom option slug, get the options name
 				} else {
-					$value              = apply_filters( 'woocommerce_variation_option_name', $value );
-					$product_attributes = $cart_item['data']->get_attributes();
-					if ( isset( $product_attributes[ str_replace( 'attribute_', '', $name ) ] ) ) {
-						$label = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', $name ) ]['name'] );
-					} else {
-						$label = $name;
-					}
+					$value = apply_filters( 'woocommerce_variation_option_name', $value );
+					$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 				}
 
 				$item_data[] = array(
