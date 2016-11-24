@@ -269,6 +269,9 @@ class WC_Meta_Box_Coupon_Data {
 			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
 		}
 
+		$product_categories         = isset( $_POST['product_categories'] ) ? (array) $_POST['product_categories'] : array();
+		$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
+
 		$coupon = new WC_Coupon( $post_id );
 		$coupon->set_props( array(
 			'code'                        => $post->post_title,
@@ -282,8 +285,8 @@ class WC_Meta_Box_Coupon_Data {
 			'usage_limit_per_user'        => absint( $_POST['usage_limit_per_user'] ),
 			'limit_usage_to_x_items'      => absint( $_POST['limit_usage_to_x_items'] ),
 			'free_shipping'               => isset( $_POST['free_shipping'] ),
-			'product_categories'          => array_filter( array_map( 'intval', (array) $_POST['product_categories'] ) ),
-			'excluded_product_categories' => array_filter( array_map( 'intval', (array) $_POST['exclude_product_categories'] ) ),
+			'product_categories'          => array_filter( array_map( 'intval', $product_categories ) ),
+			'excluded_product_categories' => array_filter( array_map( 'intval', $exclude_product_categories ) ),
 			'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
 			'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 			'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
