@@ -1108,7 +1108,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_product_reviews_tab() {
-		_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
+		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
 	}
 }
 
@@ -1890,15 +1890,15 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'] );
 
 		if ( $args['maxlength'] ) {
-		    $args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
 		}
 
-		if ( true === $args['autocomplete'] ) {
-		    $args['custom_attributes']['autocomplete'] = 'true';
+		if ( ! empty( $args['autocomplete'] ) ) {
+			$args['custom_attributes']['autocomplete'] = $args['autocomplete'];
 		}
 
 		if ( true === $args['autofocus'] ) {
-		    $args['custom_attributes']['autofocus'] = 'autofocus';
+			$args['custom_attributes']['autofocus'] = 'autofocus';
 		}
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
@@ -2507,7 +2507,7 @@ function wc_get_stock_html( $product ) {
 	$html = ob_get_clean();
 
 	if ( has_filter( 'woocommerce_stock_html' ) ) {
-		_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );
+		wc_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );
 		$html = apply_filters( 'woocommerce_stock_html', $html, $product->get_availability_text(), $product );
 	}
 

@@ -160,7 +160,7 @@ class WC_Frontend_Scripts {
 		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70' );
 		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
-		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
+		self::register_script( 'js-cookie', $assets_path . 'js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.3' );
 		self::register_script( 'wc-credit-card-form', $frontend_script_path . 'credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ) );
 		self::register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery', 'wp-util' ) );
 		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ) );
@@ -195,10 +195,6 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-lost-password', $frontend_script_path . 'lost-password' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
 		}
 
-		self::register_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
-		self::register_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
-		self::register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
-
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			self::enqueue_script( 'flexslider', $assets_path . 'js/flexslider/jquery.flexslider' . $suffix . '.js', array( 'jquery' ), '2.7.0', true );
 			self::enqueue_script( 'photoswipe', $assets_path . 'js/photoswipe/photoswipe' . $suffix . '.js', '4.1.1', true );
@@ -229,8 +225,8 @@ class WC_Frontend_Scripts {
 		}
 
 		// Global frontend scripts
-		self::enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ) );
-		self::enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ) );
+		self::enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'js-cookie' ) );
+		self::enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'js-cookie' ) );
 
 		// CSS Styles
 		if ( $enqueue_styles = self::get_styles() ) {
@@ -238,6 +234,12 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
 		}
+
+		// These are deprecated scripts only included for BW compatibility. @todo remove in future version.
+		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
+		self::register_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
+		self::register_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery', 'prettyPhoto' ) );
+		self::register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 	}
 
 	/**

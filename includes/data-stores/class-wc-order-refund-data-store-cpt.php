@@ -57,6 +57,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta( &$refund ) {
+		parent::update_post_meta( $refund );
+
 		$updated_props     = array();
 		$changed_props     = $refund->get_changes();
 		$meta_key_to_props = array(

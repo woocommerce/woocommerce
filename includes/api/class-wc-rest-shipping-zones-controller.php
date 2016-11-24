@@ -127,7 +127,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			$zone->set_zone_order( $request->get_param( 'order' ) );
 		}
 
-		$zone->create();
+		$zone->save();
 
 		if ( $zone->get_id() !== 0 ) {
 			$request->set_param( 'id', $zone->get_id() );

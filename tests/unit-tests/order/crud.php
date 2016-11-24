@@ -460,7 +460,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$token = new WC_Payment_Token_Stub();
 		$token->set_extra( __FUNCTION__ );
 		$token->set_token( time() );
-		$token->create();
+		$token->save();
 		$this->assertTrue( 0 < $object->add_payment_token( $token ) );
 	}
 
@@ -473,7 +473,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$token = new WC_Payment_Token_Stub();
 		$token->set_extra( __FUNCTION__ );
 		$token->set_token( time() );
-		$token->create();
+		$token->save();
 		$object->add_payment_token( $token );
 		$this->assertCount( 1, $object->get_payment_tokens() );
 	}

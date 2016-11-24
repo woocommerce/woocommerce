@@ -66,7 +66,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -402,7 +402,7 @@ class WC_Shipping {
 	 * @deprecated 2.6.0 Was previously used to determine sort order of methods, but this is now controlled by zones and thus unused.
 	 */
 	public function sort_shipping_methods() {
-		_deprecated_function( 'sort_shipping_methods', '2.6' );
+		wc_deprecated_function( 'sort_shipping_methods', '2.6' );
 		return $this->shipping_methods;
 	}
 }

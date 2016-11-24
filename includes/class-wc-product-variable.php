@@ -61,11 +61,11 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_children( $context = 'view' ) {
 		if ( is_bool( $context ) ) {
-			_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
+			wc_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
 			return $context ? $this->get_visible_children() : $this->get_children();
 		}
 		if ( has_filter( 'woocommerce_get_children' ) ) {
-			_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
 		}
 		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'children', $context ), $this, false );
 	}
@@ -79,7 +79,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_visible_children( $context = 'view' ) {
 		if ( has_filter( 'woocommerce_get_children' ) ) {
-			_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
 		}
 		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'visible_children', $context ), $this, true );
 	}
@@ -102,7 +102,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_prices( $context = 'view' ) {
 		if ( is_bool( $context ) ) {
-			_deprecated_argument( 'display', '2.7', 'Use WC_Product_Variable::get_variation_prices_including_taxes' );
+			wc_deprecated_argument( 'display', '2.7', 'Use WC_Product_Variable::get_variation_prices_including_taxes' );
 			return $context ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
 		}
 		return $this->get_prop( 'variation_prices', $context );

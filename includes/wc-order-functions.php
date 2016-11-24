@@ -90,7 +90,7 @@ function wc_get_orders( $args ) {
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -534,7 +534,7 @@ function wc_create_refund( $args = array() ) {
 				}
 
 				if ( is_callable( array( $refunded_item, 'set_quantity' ) ) ) {
-					$refunded_item->set_quantity( $qty );
+					$refunded_item->set_quantity( $qty * -1 );
 				}
 
 				$refund->add_item( $refunded_item );

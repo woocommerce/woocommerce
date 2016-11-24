@@ -124,6 +124,17 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Update webhook api version.
+	 *
+	 * @param WC_Webhook $webhook Webhook instance.
+	 */
+	private function update_api_version( $webhook ) {
+		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v1';
+
+		$webhook->set_api_version( $version );
+	}
+
+	/**
 	 * Save method.
 	 */
 	private function save() {
@@ -153,6 +164,9 @@ class WC_Admin_Webhooks {
 
 		// Topic
 		$this->update_topic( $webhook );
+
+		// API version.
+		$this->update_api_version( $webhook );
 
 		// Update date.
 		wp_update_post( array( 'ID' => $webhook->id, 'post_modified' => current_time( 'mysql' ) ) );
@@ -210,6 +224,8 @@ class WC_Admin_Webhooks {
 		}
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->set_api_version( 'wp_api_v1' );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
@@ -500,7 +516,7 @@ class WC_Admin_Webhooks {
 			$html .= '<p class="info" style="float: left;"><strong>';
 			/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
 			$html .= sprintf(
-				__( '%1%s &ndash; Page %2$d of %3$d', 'woocommerce' ),
+				__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
 				sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ),
 				$current,
 				$pages

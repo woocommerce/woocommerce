@@ -83,7 +83,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $data instanceof WC_Coupon ) {
 			$this->set_id( absint( $data->get_id() ) );
 		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $data ) ) {
-			_doing_it_wrong( 'woocommerce_get_shop_coupon_data', 'Reading a manual coupon via woocommerce_get_shop_coupon_data has been deprecated. Please sent an instance of WC_Coupon instead.', '2.7' );
+			wc_doing_it_wrong( 'woocommerce_get_shop_coupon_data', 'Reading a manual coupon via woocommerce_get_shop_coupon_data has been deprecated. Please sent an instance of WC_Coupon instead.', '2.7' );
 			$this->read_manual_coupon( $data, $coupon );
 		} elseif ( is_numeric( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->set_id( $data );
@@ -665,20 +665,20 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				case 'excluded_product_ids' :
 				case 'exclude_product_ids' :
 					if ( ! is_array( $coupon[ $key ] ) ) {
-						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						wc_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
 						$coupon['excluded_product_ids'] = wc_string_to_array( $value );
 					}
 					break;
 				case 'exclude_product_categories' :
 				case 'excluded_product_categories' :
 					if ( ! is_array( $coupon[ $key ] ) ) {
-						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						wc_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
 						$coupon['excluded_product_categories'] = wc_string_to_array( $value );
 					}
 					break;
 				case 'product_ids' :
 					if ( ! is_array( $coupon[ $key ] ) ) {
-						_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
+						wc_doing_it_wrong( $key, $key . ' should be an array instead of a string.', '2.7' );
 						$coupon[ $key ] = wc_string_to_array( $value );
 					}
 					break;
@@ -686,7 +686,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				case 'free_shipping' :
 				case 'exclude_sale_items' :
 					if ( ! is_bool( $coupon[ $key ] ) ) {
-						_doing_it_wrong( $key, $key . ' should be true or false instead of yes or no.', '2.7' );
+						wc_doing_it_wrong( $key, $key . ' should be true or false instead of yes or no.', '2.7' );
 						$coupon[ $key ] = wc_string_to_bool( $value );
 					}
 					break;

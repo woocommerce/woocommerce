@@ -57,7 +57,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.7' );
 
 		switch ( $key ) {
 			case 'id' :
@@ -140,7 +140,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return array
 	 */
 	public function format_array( $array ) {
-		_deprecated_function( 'format_array', '2.7' );
+		wc_deprecated_function( 'format_array', '2.7' );
 		if ( ! is_array( $array ) ) {
 			if ( is_serialized( $array ) ) {
 				$array = maybe_unserialize( $array );
@@ -158,7 +158,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function apply_before_tax() {
-		_deprecated_function( 'apply_before_tax', '2.7' );
+		wc_deprecated_function( 'apply_before_tax', '2.7' );
 		return true;
 	}
 
@@ -168,7 +168,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function enable_free_shipping() {
-		_deprecated_function( 'enable_free_shipping', '2.7', 'get_free_shipping' );
+		wc_deprecated_function( 'enable_free_shipping', '2.7', 'get_free_shipping' );
 		return $this->get_free_shipping();
 	}
 
@@ -178,7 +178,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function exclude_sale_items() {
-		_deprecated_function( 'exclude_sale_items', '2.7', 'get_exclude_sale_items' );
+		wc_deprecated_function( 'exclude_sale_items', '2.7', 'get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
 

@@ -176,7 +176,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	if ( ! file_exists( $located ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
 		return;
 	}
 

@@ -172,6 +172,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		// Set secret.
 		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : '' );
 
+		// Set API version to WP API integration v1.
+		$webhook->set_api_version( 'wp_api_v1' );
+
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
 			$webhook->update_status( $request['status'] );

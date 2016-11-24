@@ -623,7 +623,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
-			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
+			wc_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
@@ -828,6 +828,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_null( $this->items[ $items_key ] ) ) {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
+
+		// Set parent.
+		$item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID
 		if ( $item->get_id() ) {

@@ -142,7 +142,7 @@ if ( ! function_exists( 'register_api_field' ) ) {
 	 * Backwards compat shim
 	 */
 	function register_api_field( $object_type, $attributes, $args = array() ) {
-		_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
+		wc_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
 		register_rest_field( $object_type, $attributes, $args );
 	}
 }

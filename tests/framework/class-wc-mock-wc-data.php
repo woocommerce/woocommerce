@@ -155,7 +155,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	 * @param string $content
 	 */
 	public function set_content( $content ) {
-		$this->set_prop('content', $content );
+		$this->set_prop( 'content', $content );
 	}
 
 	/**

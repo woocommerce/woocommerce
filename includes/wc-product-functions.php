@@ -98,7 +98,7 @@ function wc_get_products( $args ) {
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->product_factory->get_product( $the_product );
@@ -823,7 +823,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( ! $product->is_taxable() ) {
 		$price = $price * $qty;
-	} elseif ( wc_prices_include_tax() ) {
+	} elseif ( ! wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_rates( $product->get_tax_class() );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
 		$tax_amount = WC_Tax::get_tax_total( $taxes );

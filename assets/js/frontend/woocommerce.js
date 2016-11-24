@@ -1,3 +1,4 @@
+/* global Cookies */
 jQuery( function( $ ) {
 	// Orderby
 	$( '.woocommerce-ordering' ).on( 'change', 'select.orderby', function() {
@@ -15,12 +16,12 @@ jQuery( function( $ ) {
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
 	jQuery( '.woocommerce-store-notice__dismiss-link' ).click( function() {
-		jQuery.cookie( 'store_notice', 'hidden', { path: '/' } );
+		Cookies.set( 'store_notice', 'hidden', { path: '/' } );
 		jQuery( '.woocommerce-store-notice' ).hide();
 	});
 
 	// Check the value of that cookie and show/hide the notice accordingly
-	if ( 'hidden' === jQuery.cookie( 'store_notice' ) ) {
+	if ( 'hidden' === Cookies.get( 'store_notice' ) ) {
 		jQuery( '.woocommerce-store-notice' ).hide();
 	} else {
 		jQuery( '.woocommerce-store-notice' ).show();
