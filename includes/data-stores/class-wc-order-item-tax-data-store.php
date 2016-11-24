@@ -12,6 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface {
 	/**
+	 * Data stored in meta keys.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $internal_meta_keys = array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
+
+	/**
 	 * Read/populate data properties specific to this order item.
 	 *
 	 * @since 2.7.0

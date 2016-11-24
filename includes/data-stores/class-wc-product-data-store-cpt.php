@@ -1022,4 +1022,61 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $return;
 		}
 	}
+
+	/**
+	 * Search product data for a term and return ids.
+	 *
+	 * @param  string $term
+	 * @param  string $type of product
+	 * @param  bool $include_variations in search or not
+	 * @return array of ids
+	 */
+	public function search_products( $term, $type = '', $include_variations = false ) {
+		global $wpdb;
+
+		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_product_search_fields', array(
+			'_sku',
+		) ) );
+		$like_term  = '%' . $wpdb->esc_like( $term ) . '%';
+		$post_types = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$type_join  = '';
+		$type_where = '';
+
+		if ( $type ) {
+			if ( in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
+				$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
+				$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
+			}
+		}
+
+		$product_ids = $wpdb->get_col(
+			$wpdb->prepare( "
+				SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
+				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+				$type_join
+				WHERE (
+					posts.post_title LIKE %s
+					OR posts.post_content LIKE %s
+					OR (
+						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
+					)
+				)
+				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
+				AND posts.post_status = 'publish'
+				$type_where
+				ORDER BY posts.post_parent ASC, posts.post_title ASC
+				",
+				$like_term,
+				$like_term,
+				$like_term
+			)
+		);
+
+		if ( is_numeric( $term ) ) {
+			$product_ids[] = absint( $term );
+			$product_ids[] = get_post_parent( $term );
+		}
+
+		return wp_parse_id_list( $product_ids );
+	}
 }
