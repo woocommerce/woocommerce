@@ -65,12 +65,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get the title to show in catalog.
+	 * Get the product's title. For variations this is the parent product name.
 	 *
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_variation_title', $this->parent_data['title'], $this );
+		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
 	}
 
 	/**

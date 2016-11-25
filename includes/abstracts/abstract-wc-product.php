@@ -1617,7 +1617,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
-	 * Get the title to show in catalog.
+	 * Get the product's title. For products this is the product name.
 	 *
 	 * @return string
 	 */
