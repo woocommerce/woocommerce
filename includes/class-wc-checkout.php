@@ -100,21 +100,23 @@ class WC_Checkout {
 		$this->checkout_fields['billing'] 	= WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' );
 		$this->checkout_fields['shipping'] 	= WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' );
 
-		if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->checkout_fields['account']['account_username'] = array(
-				'type' 			=> 'text',
-				'label' 		=> __( 'Account username', 'woocommerce' ),
-				'required'      => true,
-				'placeholder' 	=> esc_attr__( 'Username', 'woocommerce' ),
+				'type'         => 'text',
+				'label'        => __( 'Account username', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
+				'autocomplete' => 'username',
 			);
 		}
 
-		if ( get_option( 'woocommerce_registration_generate_password' ) == 'no' ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 			$this->checkout_fields['account']['account_password'] = array(
-				'type' 				=> 'password',
-				'label' 			=> __( 'Account password', 'woocommerce' ),
-				'required'          => true,
-				'placeholder' 		=> esc_attr__( 'Password', 'woocommerce' ),
+				'type'         => 'password',
+				'label'        => __( 'Account password', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
+				'autocomplete' => 'password',
 			);
 		}
 

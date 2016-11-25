@@ -185,6 +185,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * New gallery on single product pages with better mobile support, PhotoSwipe and Zoom.
 * Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
 * Use all paid statuses in $customer->get_total_spent().
+* Move location of billing email field to work with password managers.
 
 * CRUD - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
 * CRUD - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).

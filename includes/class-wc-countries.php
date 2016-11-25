@@ -1016,27 +1016,27 @@ class WC_Countries {
 		foreach ( $fields as $key => $value ) {
 			$keys = array_keys( $fields );
 			$address_fields[ $type . $key ] = $value;
+		}
 
-			// Add email and phone after company or last
-			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && end( $keys ) === $key ) ) ) {
-				$address_fields['billing_email'] = array(
-					'label'        => __( 'Email address', 'woocommerce' ),
-					'required'     => true,
-					'type'         => 'email',
-					'class'        => array( 'form-row-first' ),
-					'validate'     => array( 'email' ),
-					'autocomplete' => 'email',
-				);
-				$address_fields['billing_phone'] = array(
-					'label'        => __( 'Phone', 'woocommerce' ),
-					'required'     => true,
-					'type'         => 'tel',
-					'class'        => array( 'form-row-last' ),
-					'clear'        => true,
-					'validate'     => array( 'phone' ),
-					'autocomplete' => 'tel',
-				);
-			}
+		// Add email and phone fields.
+		if ( 'billing_' === $type ) {
+			$address_fields['billing_phone'] = array(
+				'label'        => __( 'Phone', 'woocommerce' ),
+				'required'     => true,
+				'type'         => 'tel',
+				'class'        => array( 'form-row-first' ),
+				'validate'     => array( 'phone' ),
+				'autocomplete' => 'tel',
+			);
+			$address_fields['billing_email'] = array(
+				'label'        => __( 'Email address', 'woocommerce' ),
+				'required'     => true,
+				'clear'        => true,
+				'type'         => 'email',
+				'class'        => array( 'form-row-last' ),
+				'validate'     => array( 'email' ),
+				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
+			);
 		}
 
 		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
