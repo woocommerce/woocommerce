@@ -57,6 +57,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'email'         => 'test@woo.local',
 			'first_name'    => 'Justin',
 			'last_name'     => '',
+			'role'          => 'customer',
 			'username'      => 'testcustomer',
 			'billing' => array(
 				'first_name' => '',
@@ -139,6 +140,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'email'         => 'create_customer_test@woo.local',
 			'first_name'    => '',
 			'last_name'     => '',
+			'role'          => 'customer',
 			'username'      => 'create_customer_test',
 			'billing' => array(
 				'first_name' => '',
@@ -199,6 +201,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'email'         => 'create_customer_test2@woo.local',
 			'first_name'    => 'Test',
 			'last_name'     => 'McTestFace',
+			'role'          => 'customer',
 			'username'      => 'create_customer_test2',
 			'billing' => array(
 				'first_name' => '',
@@ -305,6 +308,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'is_paying_customer' => false,
 			'meta_data' => array(),
 			'last_name'     => '',
+			'role'          => 'customer',
 			'username'      => 'get_customer_test',
 			'orders_count'  => 0,
 			'total_spent'   => '0.00',
@@ -487,13 +491,14 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 15, count( $properties ) );
+		$this->assertEquals( 16, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
 		$this->assertArrayHasKey( 'email', $properties );
 		$this->assertArrayHasKey( 'first_name', $properties );
 		$this->assertArrayHasKey( 'last_name', $properties );
+		$this->assertArrayHasKey( 'role', $properties );
 		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'password', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
