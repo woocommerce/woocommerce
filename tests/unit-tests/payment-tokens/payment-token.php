@@ -161,7 +161,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_token_last4_doesnt_work() {
 		$token = new WC_Payment_Token_Stub();
-		$this->assertFalse( is_callable( $token, 'get_last4' ) );
+		$this->assertFalse( is_callable( array( $token, 'get_last4' ) ) );
 	}
 
 	/**

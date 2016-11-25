@@ -13,7 +13,7 @@
 
 		<?php foreach ( self::get_product_type_options() as $key => $option ) :
 			if ( $thepostid ) {
-				$selected_value = is_callable( $product_object, "is_$key" ) ? $product_object->{"is_$key"}() : get_post_meta( $post->ID, '_' . $key, true );
+				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : get_post_meta( $post->ID, '_' . $key, true );
 			} else {
 				$selected_value = isset( $option['default'] ) ? $option['default'] : 'no';
 			}
