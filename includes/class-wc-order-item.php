@@ -194,8 +194,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				continue;
 			}
 
-			$meta->key     = rawurldecode( $meta->key );
-			$meta->value   = rawurldecode( $meta->value );
+			$meta->key     = rawurldecode( (string) $meta->key );
+			$meta->value   = rawurldecode( (string) $meta->value );
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
 			$display_value = $meta->value;

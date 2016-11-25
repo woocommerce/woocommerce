@@ -65,12 +65,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get variation attribute values.
+	 * Get the product's title. For variations this is the parent product name.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
+	}
+
+	/**
+	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
 	public function get_variation_attributes() {
-		return $this->get_attributes();
+		$attributes           = $this->get_attributes();
+		$variation_attributes = array();
+		foreach ( $attributes as $key => $value ) {
+			$variation_attributes[ 'attribute_' . $key ] = $value;
+		}
+		return $variation_attributes;
 	}
 
 	/**
@@ -87,9 +101,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
 			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
 			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
-			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_attributes() );
+			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
 		} else {
-			$data = $this->get_attributes();
+			$data         = $this->get_variation_attributes();
 		}
 
 		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
@@ -101,7 +115,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		$variation_data = array_map( 'urlencode', $this->get_attributes() );
+		$variation_data = array_map( 'urlencode', $this->get_variation_attributes() );
 		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
@@ -295,9 +309,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$attributes     = array();
 
 		foreach ( $raw_attributes as $key => $value ) {
-			// Add attribute prefix which meta gets stored with.
-			if ( 0 !== strpos( $key, 'attribute_' ) ) {
-				$key = 'attribute_' . $key;
+			// Remove attribute prefix which meta gets stored with.
+			if ( 0 === strpos( $key, 'attribute_' ) ) {
+				$key = substr( $key, 10 );
 			}
 			$attributes[ $key ] = $value;
 		}
@@ -305,7 +319,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Returns array of attribute name value pairs.
+	 * Returns array of attribute name value pairs. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @param  string $context
 	 * @return array

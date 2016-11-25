@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $attribute->get_variation() ) {
 					continue;
 				}
-				$selected_value = isset( $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] : '';
+				$selected_value = isset( $attribute_values[ sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ sanitize_title( $attribute->get_name() ) ] : '';
 				?>
 				<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
 					<option value=""><?php
@@ -114,15 +114,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 						__( 'Sale price (%s)', 'woocommerce' ),
 						get_woocommerce_currency_symbol()
 					);
-
-					woocommerce_wp_text_input( array(
-						'id'            => "variable_regular_price_{$loop}",
-						'name'          => "variable_regular_price[{$loop}]",
-						'value'         => wc_format_localized_price( $variation_object->get_regular_price( 'edit' ) ),
-						'label'         => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-						'data_type'     => 'price',
-						'wrapper_class' => 'form-row form-row-first',
-					) );
 
 					woocommerce_wp_text_input( array(
 						'id'            => "variable_sale_price{$loop}",

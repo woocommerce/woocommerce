@@ -86,7 +86,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $product->get_attributes(), true ),
+			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -121,7 +121,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public function update( &$product ) {
 		$post_data = array(
 			'ID'             => $product->get_id(),
-			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $product->get_attributes(), true ),
+			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
@@ -199,6 +199,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_parent_data( array(
+			'title'          => get_the_title( $product->get_parent_id() ),
 			'sku'            => get_post_meta( $product->get_parent_id(), '_sku', true ),
 			'manage_stock'   => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 			'backorders'     => get_post_meta( $product->get_parent_id(), '_backorders', true ),
@@ -233,8 +234,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$attributes             = $product->get_attributes();
 		$updated_attribute_keys = array();
 		foreach ( $attributes as $key => $value ) {
-			update_post_meta( $product->get_id(), $key, $value );
-			$updated_attribute_keys[] = $key;
+			update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
+			$updated_attribute_keys[] = 'attribute_' . $key;
 		}
 
 		// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.

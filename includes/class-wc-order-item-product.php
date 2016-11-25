@@ -450,13 +450,4 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		return parent::offsetExists( $offset );
 	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 *
-	 * @return array
-	 */
-	protected function get_internal_meta_keys() {
-		return array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
-	}
 }

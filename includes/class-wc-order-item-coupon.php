@@ -173,12 +173,4 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 		}
 		return parent::offsetExists( $offset );
 	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
-	 */
-	protected function get_internal_meta_keys() {
-		return array( 'discount_amount', 'discount_amount_tax' );
-	}
 }

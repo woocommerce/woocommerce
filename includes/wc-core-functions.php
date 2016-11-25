@@ -51,6 +51,19 @@ add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
 
 /**
+ * Define a constant if it is not already defined.
+ *
+ * @since  2.7.0
+ * @param  string $name
+ * @param  string $value
+ */
+function wc_maybe_define_constant( $name, $value ) {
+	if ( ! defined( $name ) ) {
+		define( $name, $value );
+	}
+}
+
+/**
  * Create a new order programmatically.
  *
  * Returns a new order object on success which can then be used to add additional data.

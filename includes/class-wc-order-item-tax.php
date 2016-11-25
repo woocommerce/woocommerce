@@ -200,20 +200,6 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		return $this->get_prop( 'compound', $context );
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| Other
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
-	 */
-	protected function get_internal_meta_keys() {
-		return array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
-	}
-
 	/**
 	 * Is this a compound tax rate?
 	 * @return boolean

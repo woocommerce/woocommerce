@@ -461,18 +461,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Get the title of the post.
-	 *
-	 * @deprecated 2.7.0
-	 * @return string
-	 */
-	public function get_title() {
-		wc_deprecated_function( 'WC_Product::get_title', '2.7', 'WC_Product::get_name' );
-
-		return apply_filters( 'woocommerce_product_title', $this->get_post_data() ? $this->get_post_data()->post_title : '', $this );
-	}
-
-	/**
 	 * Get the parent of the post.
 	 *
 	 * @deprecated 2.7.0
