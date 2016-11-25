@@ -21,7 +21,7 @@
 /**
  * Mixins
  */
-@mixin button() {
+@mixin link() {
 	box-shadow: 0 1px 0 rgba(15, 15, 15, 1);
 	@include transition( box-shadow ease-in-out 130ms );
 
@@ -51,7 +51,7 @@ ul.products {
 		}
 
 		.button {
-			@include button();
+			@include link();
 
 			&.loading {
 				opacity: .5;
@@ -59,7 +59,7 @@ ul.products {
 		}
 
 		.added_to_cart {
-			@include button();
+			@include link();
 			margin-left: .5em;
 		}
 	}
