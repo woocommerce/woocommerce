@@ -342,6 +342,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );                          // Embeds
 		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );                // Structured Data class
+		include_once( WC_ABSPATH . 'includes/class-wc-twenty-seventeen.php' );               // Twenty Seventeen support
 	}
 
 	/**
