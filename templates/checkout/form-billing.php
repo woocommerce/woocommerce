@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
 
-	<?php if ( ! is_user_logged_in() && $checkout->enable_signup ) : ?>
+	<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
 
 		<?php if ( $checkout->enable_guest_checkout ) : ?>
 
