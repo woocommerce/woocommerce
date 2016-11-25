@@ -45,6 +45,60 @@
 	}
 }
 
+.woocommerce-pagination {
+	padding-top: 2em;
+	margin-top: 4em;
+	border-top: 1px solid #eee;
+	font-size: 13px;
+	font-size: 0.8125rem;
+
+	ul.page-numbers {
+		padding: 0;
+	}
+
+	span.page-numbers,
+	a.page-numbers,
+	.next.page-numbers,
+	.prev.page-numbers {
+		padding: 0.5em 1em;
+		background: #ddd;
+		display: inline-block;
+		font-size: 1em;
+		float: none;
+		line-height: 1.5;
+		border-radius: 2px;
+		@include transition( background-color ease-in-out .3s );
+	}
+
+	span.page-numbers {
+		background-color: #fff;
+	}
+
+	a.page-numbers:hover {
+		background-color: #767676;
+		color: #fff;
+	}
+}
+
+.onsale {
+	background-color: #fff;
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: inline-block;
+	padding: .5em 1em;
+	font-size: 13px;
+	font-size: 0.8125rem;
+	text-transform: uppercase;
+	font-weight: 800;
+}
+
+.price {
+	del {
+		opacity: .5;
+	}
+}
+
 /**
  * Shop page
  */
@@ -120,4 +174,13 @@ ul.products {
 	text-transform: uppercase;
 	font-weight: 800;
 	letter-spacing: 0.15em;
+}
+
+/**
+ * Single product
+ */
+.single-product {
+	div.product {
+		position: relative;
+	}
 }
