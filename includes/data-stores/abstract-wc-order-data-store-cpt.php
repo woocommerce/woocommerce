@@ -63,6 +63,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'post_title'    => $this->get_post_title(),
 			'post_password' => uniqid( 'order_' ),
 			'post_parent'   => $order->get_parent_id( 'edit' ),
+			'post_excerpt'  => $this->get_post_excerpt( $order ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -110,6 +111,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
 			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 			'post_parent'   => $order->get_parent_id(),
+			'post_excerpt'  => $this->get_post_excerpt( $order ),
 		) );
 
 		$this->update_post_meta( $order );
@@ -144,6 +146,16 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Excerpt for post.
+	 *
+	 * @param  WC_order $order
+	 * @return string
+	 */
+	protected function get_post_excerpt( $order ) {
+		return '';
+	}
 
 	/**
 	 * Get a title for the new post type.
