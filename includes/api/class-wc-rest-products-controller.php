@@ -1220,7 +1220,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				if ( isset( $request['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $request['stock_quantity'] ) );
 				} elseif ( isset( $request['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $product->get_stock() );
+					$stock_quantity  = wc_stock_amount( $product->get_stock_amount() );
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
@@ -1423,7 +1423,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$variation->set_stock_quantity( $data['stock_quantity'] );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $variation->get_stock() );
+					$stock_quantity  = wc_stock_amount( $variation->get_stock_amount() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$variation->set_stock_quantity( $stock_quantity );
 				}
