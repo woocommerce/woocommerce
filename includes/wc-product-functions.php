@@ -323,7 +323,7 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  *
  * Gets a formatted version of variation data or item meta.
  *
- * @param string $variation
+ * @param array|WC_Product_Variation $variation
  * @param bool $flat (default: false)
  * @param bool $include_names include attribute names/labels
  * @return string

@@ -121,7 +121,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public function update( &$product ) {
 		$post_data = array(
 			'ID'             => $product->get_id(),
-			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash;' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
