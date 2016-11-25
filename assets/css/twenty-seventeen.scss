@@ -31,6 +31,21 @@
 }
 
 /**
+ * Global elements
+ */
+.woocommerce-breadcrumb {
+	padding-bottom: 2em;
+	margin-bottom: 4em;
+	border-bottom: 1px solid #eee;
+	font-size: 13px;
+	font-size: 0.8125rem;
+
+	a {
+		@include link();
+	}
+}
+
+/**
  * Shop page
  */
 .woocommerce-result-count {
