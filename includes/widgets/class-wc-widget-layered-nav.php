@@ -233,14 +233,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				}
 
 				// Get count based on current view
-				$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
-				$option_is_set     = in_array( $term->slug, $current_values );
-				$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
+				$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
+				$option_is_set  = in_array( $term->slug, $current_values );
+				$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
 				// Only show options with count > 0
 				if ( 0 < $count ) {
 					$found = true;
-				} elseif ( 'and' === $query_type && 0 === $count && ! $option_is_set ) {
+				} elseif ( 0 === $count && ! $option_is_set ) {
 					continue;
 				}
 
