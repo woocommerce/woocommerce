@@ -2,3 +2,107 @@
  * Twenty Seventeen integration styles
  */
 
+@import 'bourbon';
+
+/**
+ * Fonts
+ */
+@font-face {
+	font-family: 'star';
+	src: url('../fonts/star.eot');
+	src: url('../fonts/star.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/star.woff') format('woff'),
+		url('../fonts/star.ttf') format('truetype'),
+		url('../fonts/star.svg#star') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/**
+ * Mixins
+ */
+@mixin button() {
+	box-shadow: 0 1px 0 rgba(15, 15, 15, 1);
+	@include transition( box-shadow ease-in-out 130ms );
+
+	&:hover {
+		box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
+	}
+}
+
+/**
+ * Shop page
+ */
+.woocommerce-result-count {
+	padding: .75em 0;
+}
+
+/**
+ * Products
+ */
+ul.products {
+	li.product {
+		list-style: none;
+
+		.price,
+		.star-rating {
+			display: block;
+			margin-bottom: .75em;
+		}
+
+		.button {
+			@include button();
+
+			&.loading {
+				opacity: .5;
+			}
+		}
+
+		.added_to_cart {
+			@include button();
+			margin-left: .5em;
+		}
+	}
+}
+
+.star-rating {
+	overflow: hidden;
+	position: relative;
+	height: 1em;
+	line-height: 1;
+	font-size: 1em;
+	width: 5.4em;
+	font-family: 'star';
+
+	&::before {
+		content: '\73\73\73\73\73';
+		float: left;
+		top: 0;
+		left: 0;
+		position: absolute;
+	}
+
+	span {
+		overflow: hidden;
+		float: left;
+		top: 0;
+		left: 0;
+		position: absolute;
+		padding-top: 1.5em;
+	}
+
+	span::before {
+		content: '\53\53\53\53\53';
+		top: 0;
+		position: absolute;
+		left: 0;
+	}
+}
+
+.woocommerce-loop-product__title {
+	font-size: 13px;
+	font-size: 0.8125rem;
+	text-transform: uppercase;
+	font-weight: 800;
+	letter-spacing: 0.15em;
+}
