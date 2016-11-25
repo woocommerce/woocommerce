@@ -75,8 +75,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
-		$validate_ipn = array( 'cmd' => '_notify-validate' );
-		$validate_ipn += wp_unslash( $_POST );
+		$validate_ipn        = wp_unslash( $_POST );
+		$validate_ipn['cmd'] = '_notify-validate';
 
 		// Send back post vars to paypal
 		$params = array(
