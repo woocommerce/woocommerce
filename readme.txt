@@ -163,7 +163,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 = 2.7.0 =
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
-* Added Nigerian Provinces to i18n/state.
 * Improved handling of shop page rewrite rules to allow subpages.
 * Redirect to login after password reset.
 * When using authorizations in PayPal Standard, automatically capture funds when the order goes processing/completed.
@@ -175,7 +174,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Show better labels in nav menus metabox.
 * Sort “Recently Viewed” products by the view order.
 * Remove checkbox options in system status tools and replace with constants.
-* Allow oAuth1.0a authentication using headers.
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
 * When deleting a tax rate class, remove it's tax rates.
@@ -183,14 +181,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Improved the zone setup flow.
 * Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
 * New gallery on single product pages with better mobile support, PhotoSwipe and Zoom.
-* Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
 * Use all paid statuses in $customer->get_total_spent().
 * Move location of billing email field to work with password managers.
 
-* CRUD - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
-* CRUD - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
-
+* Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
+* Performance - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
+* Performance - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
 * Performance - Removed the feature where old orders get access to new downloads on product edit. Looping potentially thousands of orders to do this is too much of a performance burden for stores and this can sometimes be unexpected behavior too. This does however updates *edited* downloads.
+* API - Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
+* API - Allow oAuth1.0a authentication using headers.
+* Localization - Added Nigerian Provinces to i18n/state.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
