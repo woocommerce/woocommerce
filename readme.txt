@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Default BE tax rate.
 * Fix - Downloads should store variation ID rather than product if set. Also fixes link on account page.
 * Dev - API - Only update categories menu order and display if defined.
+* Dev - Fixed when should deliver wp_trash_post webhooks.
 
 = 2.6.8 - 10/11/16 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
