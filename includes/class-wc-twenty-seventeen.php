@@ -37,7 +37,7 @@ class WC_Twenty_Seventeen {
 		unset( $styles['woocommerce-general'] );
 
 		$styles['woocommerce-twenty-seventeen'] = array(
-			'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/themes/woocommerce-twenty-seventeen.css',
+			'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-twenty-seventeen.css',
 			'deps'    => '',
 			'version' => WC_VERSION,
 			'media'   => 'all',
