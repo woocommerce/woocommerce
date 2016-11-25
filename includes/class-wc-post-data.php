@@ -28,6 +28,7 @@ class WC_Post_Data {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -41,6 +42,19 @@ class WC_Post_Data {
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
 		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
+	}
+
+	/**
+	 * Link to parent products when getting permalink for variation.
+	 *
+	 * @return string
+	 */
+	public static function variation_post_link( $permalink, $post ) {
+		if ( 'product_variation' === $post->post_type ) {
+			$variation = wc_get_product( $post->ID );
+			return $variation->get_permalink();
+		}
+		return $permalink;
 	}
 
 	/**
