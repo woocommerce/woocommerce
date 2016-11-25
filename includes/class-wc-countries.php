@@ -1039,6 +1039,12 @@ class WC_Countries {
 			);
 		}
 
+		/**
+		 * Important note on this filter: Changes to address fields can and will be overridden by
+		 * the woocommerce_default_address_fields. The locales/default locales apply on top based
+		 * on country selection. If you want to change things like the required status of an
+		 * address field, filter woocommerce_default_address_fields instead.
+		 */
 		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 
 		return $address_fields;
