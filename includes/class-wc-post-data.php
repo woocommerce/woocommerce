@@ -28,6 +28,7 @@ class WC_Post_Data {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'woocommerce_deferred_product_sync', array( __CLASS__, 'deferred_product_sync' ), 10, 1 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
@@ -50,6 +51,19 @@ class WC_Post_Data {
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
+	}
+
+	/**
+	 * Link to parent products when getting permalink for variation.
+	 *
+	 * @return string
+	 */
+	public static function variation_post_link( $permalink, $post ) {
+		if ( 'product_variation' === $post->post_type ) {
+			$variation = wc_get_product( $post->ID );
+			return $variation->get_permalink();
+		}
+		return $permalink;
 	}
 
 	/**
