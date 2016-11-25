@@ -961,7 +961,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set the product's weight.
 	 *
 	 * @since 2.7.0
-	 * @param float $weigth Total weigth.
+	 * @param float|string $weight Total weight.
 	 */
 	public function set_weight( $weight ) {
 		$this->set_prop( 'weight', '' === $weight ? '' : wc_format_decimal( $weight ) );
@@ -971,7 +971,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set the product length.
 	 *
 	 * @since 2.7.0
-	 * @param float $weigth Total weigth.
+	 * @param float|string $length Total length.
 	 */
 	public function set_length( $length ) {
 		$this->set_prop( 'length', '' === $length ? '' : wc_format_decimal( $length ) );
@@ -981,7 +981,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set the product width.
 	 *
 	 * @since 2.7.0
-	 * @param float $width Total width.
+	 * @param float|string $width Total width.
 	 */
 	public function set_width( $width ) {
 		$this->set_prop( 'width', '' === $width ? '' : wc_format_decimal( $width ) );
@@ -991,7 +991,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set the product height.
 	 *
 	 * @since 2.7.0
-	 * @param float $height Total height.
+	 * @param float|string $height Total height.
 	 */
 	public function set_height( $height ) {
 		$this->set_prop( 'height', '' === $height ? '' : wc_format_decimal( $height ) );
