@@ -276,7 +276,7 @@ class WC_Meta_Box_Product_Data {
 			'shipping_class_id'  => absint( $_POST['product_shipping_class'] ),
 			'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
 			'upsell_ids'         => array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ),
-			'crosssell_ids'      => array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ),
+			'cross_sell_ids'     => array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ),
 			'regular_price'      => wc_clean( $_POST['_regular_price'] ),
 			'sale_price'         => wc_clean( $_POST['_sale_price'] ),
 			'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
