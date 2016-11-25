@@ -495,9 +495,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
 		}
 
-		// Remove unwanted CRUD data.
-		unset( $data['role'] );
-
 		// Additional non-crud data.
 		$data['orders_count'] = $customer->get_order_count();
 		$data['total_spent']  = $customer->get_total_spent();
@@ -635,6 +632,12 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+				),
+				'role' => array(
+					'description' => __( 'Customer role.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'username' => array(
 					'description' => __( 'Customer login name.', 'woocommerce' ),
