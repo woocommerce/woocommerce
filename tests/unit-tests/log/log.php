@@ -55,6 +55,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test log() complains for bad levels.
+	 *
+	 * @since 2.8
 	 */
 	public function test_bad_level() {
 		$log = wc_get_logger();
@@ -64,6 +66,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test log().
+	 *
+	 * @since 2.8
 	 */
 	public function test_log() {
 		$log = wc_get_logger();
@@ -82,6 +86,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test log( 'level', ... ) === level( ... ).
+	 *
+	 * @since 2.8
 	 */
 	public function test_log_short_methods() {
 		$log = wc_get_logger();
@@ -115,6 +121,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test consumed logs do not bubble.
+	 *
+	 * @since 2.8
 	 */
 	public function test_log_entry_is_consumed() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_consume_error_handlers' ) );
@@ -133,6 +141,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test unconsumed logs bubble.
+	 *
+	 * @since 2.8
 	 */
 	public function test_log_entry_bubbles() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_bubble_required_handlers' ) );
@@ -152,6 +162,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 	/**
 	 * Test WC_Logger->[debug..emergency] methods
+	 *
+	 * @since 2.8
 	 */
 	public function test_level_methods() {
 		$log = wc_get_logger();
@@ -170,11 +182,29 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test conversion to string level to integers.
+	 *
+	 * @since 2.8
+	 */
+	public function test_get_level_severity() {
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'debug' ), 0 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'info' ), 1 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'notice' ), 2 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'warning' ), 3 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'error' ), 4 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'critical' ), 5 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'alert' ), 6 );
+		$this->assertEquals( WC_Log_Handler::get_level_severity( 'emergency' ), 7 );
+	}
+
+	/**
 	 * Helper for log handler comsume test.
 	 *
 	 * Returns an array of 2 mocked log hanlders.
 	 * The first handler always bubbles.
 	 * The second handler expects to recieve exactly 8 messages (1 for each level).
+	 *
+	 * @since 2.8
 	 *
 	 * @return WC_Log_Handler[] array of mocked log handlers
 	 */
@@ -201,6 +231,8 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 	 * Returns an array of 2 mocked log hanlders.
 	 * The first handler never bubbles.
 	 * The second handler expects to never be called.
+	 *
+	 * @since 2.8
 	 *
 	 * @return WC_Log_Handler[] array of mocked log handlers
 	 */
