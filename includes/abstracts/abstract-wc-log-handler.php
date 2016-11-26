@@ -37,9 +37,9 @@ abstract class WC_Log_Handler {
 		WC_Logger::NOTICE    => 2,
 		WC_Logger::WARNING   => 3,
 		WC_Logger::ERROR     => 4,
-		WC_Logger::CRITICAL  => 6,
-		WC_Logger::ALERT     => 7,
-		WC_Logger::EMERGENCY => 8,
+		WC_Logger::CRITICAL  => 5,
+		WC_Logger::ALERT     => 6,
+		WC_Logger::EMERGENCY => 7,
 	);
 
 	/**
