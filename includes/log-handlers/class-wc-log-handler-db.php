@@ -61,7 +61,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 *
 	 * @return bool True if write was successful.
 	 */
-	public function add( $timestamp, $level, $message, $tag, $context ) {
+	public static function add( $timestamp, $level, $message, $tag, $context ) {
 		global $wpdb;
 
 		$insert = array(
