@@ -78,4 +78,15 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert );
 	}
 
+	/**
+	 * Clear all logs from the DB.
+	 *
+	 * @return bool True if flush was successful.
+	 */
+	public static function flush() {
+		global $wpdb;
+
+		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_log" );
+	}
+
 }

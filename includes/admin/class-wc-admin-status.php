@@ -101,6 +101,10 @@ class WC_Admin_Status {
 	 * @todo Make woocommerce base logger configurable, and show page based on configuration.
 	 */
 	public static function status_logs_db() {
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+			self::flush_db_logs();
+		}
 		$log_table_list = new WC_Admin_Log_Table_List();
 		$log_table_list->prepare_items();
 
@@ -272,6 +276,27 @@ class WC_Admin_Status {
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+		exit();
+	}
+
+	/**
+	 * Clear DB log table.
+	 *
+	 * @since 2.8
+	 */
+	public static function flush_db_logs() {
+		check_admin_referer( 'flush-logs' );
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+
+			if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-db.php' );
+			}
+
+			WC_Log_Handler_DB::flush();
+		}
+
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs-db' ) ) );
 		exit();
 	}
 }
