@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Class Log.
- * @package WooCommerce\Tests\Util
+ * Class WC_Tests_Logger
+ * @package WooCommerce\Tests\Log
  * @since 2.3
  */
-class WC_Tests_Log extends WC_Unit_Test_Case {
+class WC_Tests_Logger extends WC_Unit_Test_Case {
 
 	public function tearDown() {
 		$log_files = array(
@@ -82,41 +82,6 @@ class WC_Tests_Log extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-	}
-
-	/**
-	 * Test log( 'level', ... ) === level( ... ).
-	 *
-	 * @since 2.8
-	 */
-	public function test_log_short_methods() {
-		$log = wc_get_logger();
-
-		$ctx_a = array( 'tag' => 'A' );
-		$ctx_b = array( 'tag' => 'B' );
-
-		$log->log( 'debug',     'debug',     $ctx_a );
-		$log->log( 'info',      'info',      $ctx_a );
-		$log->log( 'notice',    'notice',    $ctx_a );
-		$log->log( 'warning',   'warning',   $ctx_a );
-		$log->log( 'error',     'error',     $ctx_a );
-		$log->log( 'critical',  'critical',  $ctx_a );
-		$log->log( 'alert',     'alert',     $ctx_a );
-		$log->log( 'emergency', 'emergency', $ctx_a );
-
-		$log->debug( 'debug', $ctx_b );
-		$log->info( 'info', $ctx_b );
-		$log->notice( 'notice', $ctx_b );
-		$log->warning( 'warning', $ctx_b );
-		$log->error( 'error', $ctx_b );
-		$log->critical( 'critical', $ctx_b );
-		$log->alert( 'alert', $ctx_b );
-		$log->emergency( 'emergency', $ctx_b );
-
-		$log_content_a = $this->read_content( 'A' );
-		$log_content_b = $this->read_content( 'B' );
-
-		$this->assertEquals( $log_content_a, $log_content_b );
 	}
 
 	/**
