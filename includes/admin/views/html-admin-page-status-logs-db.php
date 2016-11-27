@@ -23,3 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		submit_button( __( 'Flush all logs', 'woocommerce' ), 'delete', 'flush-logs' );
 	?>
 </form>
+<?php
+wc_enqueue_js( "
+	jQuery( '#flush-logs' ).click( function() {
+		if ( window.confirm('" . esc_js( __( 'Are you sure you want to clear all logs from the database?', 'woocommerce' ) ) . "') ) {
+			return true;
+		}
+		return false;
+	});
+" );
