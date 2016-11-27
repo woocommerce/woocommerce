@@ -13,7 +13,7 @@ if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
 	);
 }
 
-class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
+class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 
 	public function tearDown() {
 		WC_Log_Handler_DB::flush();
