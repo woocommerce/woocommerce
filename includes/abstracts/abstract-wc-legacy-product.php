@@ -33,6 +33,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	public function __isset( $key ) {
 		return
 			in_array( $key, array_merge( array(
+				'id',
 				'variation_id',
 				'variation_data',
 				'variation_has_stock',
