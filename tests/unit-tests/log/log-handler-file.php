@@ -128,7 +128,32 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler->handle( $time, 'alert', 'alert', $context_tag );
 		$handler->handle( $time, 'emergency', 'emergency', $context_tag );
 
-		$log_content = $this->read_content( 'A' );
+		$log_content = $this->read_content( 'unit-tests' );
+		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+	}
+
+	/**
+	 * Test multiple handlers don't conflict on log writing.
+	 *
+	 * @since 2.8
+	 */
+	public function test_multiple_handlers() {
+		$handler_a = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler_b = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$time = time();
+		$context_tag = array( 'tag' => 'unit-tests' );
+
+		// Different loggers should not conflict.
+		$handler_a->handle( $time, 'debug', 'debug', $context_tag );
+		$handler_b->handle( $time, 'info', 'info', $context_tag );
+		$handler_a->handle( $time, 'notice', 'notice', $context_tag );
+		$handler_b->handle( $time, 'warning', 'warning', $context_tag );
+		$handler_a->handle( $time, 'error', 'error', $context_tag );
+		$handler_b->handle( $time, 'critical', 'critical', $context_tag );
+		$handler_a->handle( $time, 'alert', 'alert', $context_tag );
+		$handler_b->handle( $time, 'emergency', 'emergency', $context_tag );
+
+		$log_content = $this->read_content( 'unit-tests' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
 	}
 
