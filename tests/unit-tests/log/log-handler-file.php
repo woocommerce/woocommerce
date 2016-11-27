@@ -19,7 +19,6 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$log_files = array(
 			'unit-tests',
 			'log',
-			'A',
 			 '_test_clear',
 			 '_test_remove',
 			 '_test_log_rotate',
@@ -118,7 +117,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_log_file_tag() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 		$time = time();
-		$context_tag = array( 'tag' => 'A' );
+		$context_tag = array( 'tag' => 'unit-tests' );
 
 		$handler->handle( $time, 'debug', 'debug', $context_tag );
 		$handler->handle( $time, 'info', 'info', $context_tag );
