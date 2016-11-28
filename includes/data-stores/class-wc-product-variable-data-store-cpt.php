@@ -197,9 +197,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$variation_ids  = $product->get_visible_children();
 				foreach ( $variation_ids as $variation_id ) {
 					if ( $variation = wc_get_product( $variation_id ) ) {
-						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price(), $variation, $product );
-						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price(), $variation, $product );
-						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price(), $variation, $product );
+						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
+						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price( 'edit' ), $variation, $product );
+						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
 
 						// Skip empty prices
 						if ( '' === $price ) {
