@@ -123,6 +123,10 @@
 
 .required {
 	color: firebrick;
+
+	&[title] {
+		border-bottom: none;
+	}
 }
 
 .woocommerce-message,
