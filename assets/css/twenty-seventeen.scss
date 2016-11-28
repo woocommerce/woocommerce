@@ -536,6 +536,76 @@ table.variations {
 	}
 }
 
+.widget_price_filter {
+	.price_slider {
+		margin-bottom: 1em;
+	}
+
+	.price_slider_amount {
+		text-align: right;
+		line-height: 2.4;
+		font-size: 0.8751em;
+
+		.button {
+			float: left;
+			padding: .4em 1em;
+		}
+	}
+
+	.ui-slider {
+		position: relative;
+		text-align: left;
+		margin-left: 0.5em;
+		margin-right: 0.5em;
+	}
+
+	.ui-slider .ui-slider-handle {
+		position: absolute;
+		z-index: 2;
+		width: 1em;
+		height: 1em;
+		background-color: #000;
+		border-radius: 1em;
+		cursor: ew-resize;
+		outline: none;
+		top: -0.3em;
+		margin-left: -0.5em;
+	}
+
+	.ui-slider .ui-slider-range {
+		position: absolute;
+		z-index: 1;
+		font-size: 0.7em;
+		display: block;
+		border: 0;
+		border-radius: 1em;
+		background-color: #000;
+	}
+
+	.price_slider_wrapper .ui-widget-content {
+		border-radius: 1em;
+		background-color: #666;
+		border: 0;
+	}
+
+	.ui-slider-horizontal {
+		height: 0.5em;
+	}
+
+	.ui-slider-horizontal .ui-slider-range {
+		top: 0;
+		height: 100%;
+	}
+
+	.ui-slider-horizontal .ui-slider-range-min {
+		left: -1px;
+	}
+
+	.ui-slider-horizontal .ui-slider-range-max {
+		right: -1px;
+	}
+}
+
 /**
  * Layout stuff
  */
