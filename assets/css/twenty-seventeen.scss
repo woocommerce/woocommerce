@@ -205,6 +205,48 @@ ul.products {
 
 	.summary {
 		margin-bottom: 2em;
+
+		p.price {
+			margin-bottom: 2em;
+		}
+	}
+
+	.woocommerce-product-rating {
+		margin-bottom: 2em;
+		line-height: 1;
+
+		.star-rating {
+			float: left;
+			margin-right: .25em;
+		}
+	}
+
+	form.cart {
+		.quantity {
+			float: left;
+			margin-right: .5em;
+		}
+
+		input {
+			width: 5em;
+		}
+	}
+
+	.woocommerce-variation-add-to-cart {
+		.button {
+			padding-top: .72em;
+			padding-bottom: .72em;
+		}
+	}
+}
+
+table.variations {
+	label {
+		margin: 0;
+	}
+
+	select {
+		margin-right: .5em;
 	}
 }
 
