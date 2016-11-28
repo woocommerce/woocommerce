@@ -18,6 +18,17 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'WooCommerce';
+	src: url('../fonts/WooCommerce.eot');
+	src: url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/WooCommerce.woff') format('woff'),
+		url('../fonts/WooCommerce.ttf') format('truetype'),
+		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
 /**
  * Mixins
  */
@@ -97,6 +108,10 @@
 	del {
 		opacity: .5;
 	}
+}
+
+.required {
+	color: tomato;
 }
 
 /**
@@ -187,10 +202,15 @@ ul.products {
 	.single-featured-image-header {
 		display: none;
 	}
+
+	.summary {
+		margin-bottom: 2em;
+	}
 }
 
 .woocommerce-product-gallery {
 	position: relative;
+	margin-bottom: 2em;
 
 	figure {
 		margin: 0;
@@ -241,4 +261,103 @@ ul.products {
 	top: 1em;
 	right: 1em;
 	z-index: 99;
+}
+
+.woocommerce-tabs {
+	margin-bottom: 2em;
+
+	li {
+		margin-right: 1em;
+
+		&.active {
+			a {
+				box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
+			}
+		}
+	}
+
+	a {
+		@include link();
+	}
+
+	#comments {
+		padding-top: 0;
+	}
+
+	.comment-reply-title {
+		font-size: 22px;
+		font-size: 1.375rem;
+		font-weight: 300;
+		line-height: 1.4;
+		margin: 0 0 0.75em;
+		display: block;
+	}
+
+	#reviews {
+		li.comment {
+			list-style: none;
+			margin-right: 0;
+
+			.avatar {
+				max-width: 128px;
+			}
+		}
+
+		p.stars {
+			a {
+				position: relative;
+				height: 1em;
+				width: 1em;
+				text-indent: -999em;
+				display: inline-block;
+				text-decoration: none;
+				box-shadow: none;
+
+				&::before {
+					display: block;
+					position: absolute;
+					top: 0;
+					left: 0;
+					width: 1em;
+					height: 1em;
+					line-height: 1;
+					font-family: 'WooCommerce';
+					content: '\e021';
+					text-indent: 0;
+				}
+
+				&:hover {
+					~ a::before {
+						content: '\e021';
+					}
+				}
+			}
+
+			&:hover {
+				a {
+					&::before {
+						content: '\e020';
+					}
+				}
+			}
+
+			&.selected {
+				a.active {
+					&::before {
+						content: '\e020';
+					}
+
+					~ a::before {
+						content: '\e021';
+					}
+				}
+
+				a:not( .active ) {
+					&::before {
+						content: '\e020';
+					}
+				}
+			}
+		}
+	}
 }
