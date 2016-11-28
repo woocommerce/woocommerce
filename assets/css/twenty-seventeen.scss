@@ -617,6 +617,24 @@ table.variations {
 	}
 }
 
+.widget_product_search {
+	form {
+		position: relative;
+	}
+
+	.search-field {
+		padding-right: 100px;
+	}
+
+	input[type=submit] {
+		position: absolute;
+		top: .5em;
+		right: .5em;
+		padding-left: 1em;
+		padding-right: 1em;
+	}
+}
+
 /**
  * Layout stuff
  */
