@@ -486,7 +486,8 @@ table.variations {
 /**
  * Widgets
  */
-.widget .product_list_widget {
+.widget .product_list_widget,
+.site-footer .widget .product_list_widget {
 	margin-bottom: 1.5em;
 
 	a {
