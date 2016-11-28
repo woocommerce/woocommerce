@@ -361,3 +361,18 @@ ul.products {
 		}
 	}
 }
+
+/**
+ * Layout stuff
+ */
+@media screen and (min-width: 48em) {
+	.has-sidebar.woocommerce-page:not(.error404) {
+		#primary {
+			width: 74%;
+		}
+
+		#secondary {
+			width: 20%;
+		}
+	}
+}
