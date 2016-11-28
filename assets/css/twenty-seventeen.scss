@@ -241,9 +241,10 @@ ul.products {
 
 a.remove {
 	display: inline-block;
-	width: 1em;
-	height: 1em;
-	line-height: 1;
+	width: 16px;
+	height: 16px;
+	line-height: 16px;
+	font-size: 16px;
 	text-align: center;
 	border-radius: 100%;
 	box-shadow: none !important;
@@ -504,6 +505,7 @@ table.variations {
 
 		a.remove {
 			float: right;
+			margin-top: 2px;
 		}
 	}
 
@@ -526,9 +528,10 @@ table.variations {
 		&:before {
 			content: "×";
 			display: inline-block;
-			width: 1em;
-			height: 1em;
-			line-height: 1;
+			width: 16px;
+			height: 16px;
+			line-height: 16px;
+			font-size: 16px;
 			text-align: center;
 			border-radius: 100%;
 			border: 1px solid black;
