@@ -64,6 +64,7 @@ class WC_Twenty_Seventeen {
 	public function output_content_wrapper_end () {?>
 				</main>
 			</div>
+			<?php get_sidebar(); ?>
 		</div>
 		<?php
 	}
