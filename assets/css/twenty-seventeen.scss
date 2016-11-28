@@ -239,6 +239,37 @@ ul.products {
 	letter-spacing: 0.15em;
 }
 
+a.remove {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	line-height: 1;
+	text-align: center;
+	border-radius: 100%;
+	box-sizing: content-box;
+	box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	border: 1px solid #000;
+
+	&:hover {
+		background: #000;
+		color: #fff !important;
+	}
+}
+
+dl.variation {
+	dt {
+		float: left;
+		clear: both;
+		margin-right: .25em;
+		display: inline-block;
+	}
+
+	dd {
+		margin: 0;
+	}
+}
+
 /**
  * Single product
  */
@@ -449,6 +480,43 @@ table.variations {
 					}
 				}
 			}
+		}
+	}
+}
+
+/**
+ * Widgets
+ */
+.widget .product_list_widget {
+	margin-bottom: 1.5em;
+
+	a {
+		display: block;
+		box-shadow: none;
+
+		&:hover {
+			box-shadow: none;
+		}
+	}
+
+	li {
+		padding: 1.5em 0;
+
+		a.remove {
+			float: right;
+		}
+	}
+
+	img {
+		display: none;
+	}
+}
+
+.widget_shopping_cart {
+	.buttons {
+		a {
+			display: inline-block;
+			margin: 0 .5em 0 0;
 		}
 	}
 }
