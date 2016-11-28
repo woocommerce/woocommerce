@@ -606,6 +606,17 @@ table.variations {
 	}
 }
 
+.widget_rating_filter {
+	li {
+		text-align: right;
+
+		.star-rating {
+			float: left;
+			margin-top: .3em;
+		}
+	}
+}
+
 /**
  * Layout stuff
  */
