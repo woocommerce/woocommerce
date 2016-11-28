@@ -246,7 +246,6 @@ a.remove {
 	line-height: 1;
 	text-align: center;
 	border-radius: 100%;
-	box-sizing: content-box;
 	box-shadow: none !important;
 	-webkit-box-shadow: none !important;
 	border: 1px solid #000;
@@ -517,6 +516,22 @@ table.variations {
 		a {
 			display: inline-block;
 			margin: 0 .5em 0 0;
+		}
+	}
+}
+
+.widget_layered_nav {
+	.chosen {
+		&:before {
+			content: "×";
+			display: inline-block;
+			width: 1em;
+			height: 1em;
+			line-height: 1;
+			text-align: center;
+			border-radius: 100%;
+			border: 1px solid black;
+			margin-right: .25em;
 		}
 	}
 }
