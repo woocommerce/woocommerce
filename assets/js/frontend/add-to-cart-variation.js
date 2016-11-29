@@ -336,18 +336,18 @@
 
 				var current_attr_name, current_attr_select = $( el ),
 					show_option_none                       = $( el ).data( 'show_option_none' ),
-					option_gt_filter                       = 'no' === show_option_none ? '' : ':gt(0)';
+					option_gt_filter                       = 'no' === show_option_none ? '' : ':gt(0)',
+					new_attr_select                        = $( '<select/>' ),
+					selected_attr_val                      = current_attr_select.val();
 
-				// Reset options
+				// Reference options set
 				if ( ! current_attr_select.data( 'attribute_options' ) ) {
-					current_attr_select.data( 'attribute_options', current_attr_select.find( 'option' + option_gt_filter ).get() );
+					var ref_attr_select = current_attr_select.clone();
+					ref_attr_select.find( 'option' ).removeClass( 'attached enabled' ).removeAttr( 'disabled' ).removeAttr( 'selected' );
+					current_attr_select.data( 'attribute_options', ref_attr_select.html() );
 				}
 
-				current_attr_select.find( 'option' + option_gt_filter ).remove();
-				current_attr_select.append( current_attr_select.data( 'attribute_options' ) );
-				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'attached' );
-				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'enabled' );
-				current_attr_select.find( 'option' + option_gt_filter ).removeAttr( 'disabled' );
+				new_attr_select.html( current_attr_select.data( 'attribute_options' ) );
 
 				// Get name from data-attribute_name, or from input name if it doesn't exist
 				if ( typeof( current_attr_select.data( 'attribute_name' ) ) !== 'undefined' ) {
@@ -385,12 +385,10 @@
 										attr_val = attr_val.replace( /"/g, '\\\"' );
 
 										// Compare the meerkat
-										current_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'attached ' + variation_active );
+										new_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'attached ' + variation_active );
 
 									} else {
-
-										current_attr_select.find( 'option' + option_gt_filter ).addClass( 'attached ' + variation_active );
-
+										new_attr_select.find( 'option' + option_gt_filter ).addClass( 'attached ' + variation_active );
 									}
 								}
 							}
@@ -399,16 +397,26 @@
 				}
 
 				// Detach unattached
-				current_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
+				new_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
 
 				// Grey out disabled
-				current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).attr( 'disabled', 'disabled' );
+				new_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).attr( 'disabled', 'disabled' );
 
-			});
+				// Choose selected
+				if ( selected_attr_val ) {
+					new_attr_select.find( 'option[value="' + selected_attr_val + '"]' ).attr( 'selected', 'selected' );
+				} else {
+					new_attr_select.find( 'option:eq(0)' ).attr( 'selected', 'selected' );
+				}
+
+				// Copy to DOM
+				current_attr_select.html( new_attr_select.html() );
+
+			} );
 
 			// Custom event for when variations have been updated
 			$form.trigger( 'woocommerce_update_variation_values' );
-		});
+		} );
 
 		$form.trigger( 'wc_variation_form' );
 
