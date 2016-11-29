@@ -774,6 +774,160 @@ table.variations {
 }
 
 /**
+ * Checkout
+ */
+#ship-to-different-address {
+	label {
+		font-weight: 300;
+		cursor: pointer;
+
+		span {
+			position: relative;
+			display: block;
+
+			&:before {
+				content: "";
+				display: block;
+				height: 16px;
+				width: 30px;
+				border: 2px solid #bbb;
+				background: #bbb;
+				border-radius: 13em;
+				box-sizing: content-box;
+				@include transition(all,ease-in-out,.3s);
+				position: absolute;
+				top: 4px;
+				right: 0;
+			}
+
+			&:after {
+				content: "";
+				display: block;
+				width: 14px;
+				height: 14px;
+				background: white;
+				position: absolute;
+				top: 7px;
+				right: 17px;
+				border-radius: 13em;
+				@include transition(all,ease-in-out,.3s);
+			}
+		}
+
+		input[type=checkbox] {
+			display: none;
+		}
+
+		input[type=checkbox]:checked + span:after {
+			right: 3px;
+		}
+
+		input[type=checkbox]:checked + span:before {
+			border-color: #000;
+			background: #000;
+		}
+	}
+}
+
+.woocommerce-checkout {
+	.select2-choice,
+	.select2-choice:hover {
+		box-shadow: none !important;
+		-webkit-box-shadow: none !important;
+	}
+
+	.select2-choice {
+		padding: .7em 0 .7em .7em;
+	}
+}
+
+.woocommerce-checkout-review-order-table {
+	td {
+		padding: 1em .5em;
+	}
+
+	dl.variation {
+		margin: 0;
+
+		p {
+			margin: 0;
+		}
+	}
+}
+
+.wc_payment_method {
+	list-style: none;
+	border-bottom: 1px solid #ddd;
+
+	.payment_box {
+		padding: 2em;
+		background: #eee;
+
+		ul,
+		ol {
+			&:last-of-type {
+				margin-bottom: 0;
+			}
+		}
+
+		fieldset {
+			padding: 1.5em;
+			padding-bottom: 0;
+			border: 0;
+			background: #f6f6f6;
+		}
+
+		li {
+			list-style: none;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	> label:first-of-type {
+		margin: 1em 0;
+
+		img {
+			max-height: 24px;
+			max-width: 200px;
+			float: right;
+		}
+	}
+
+	label {
+		cursor: pointer;
+	}
+
+	input[type=radio] {
+		display: none;
+
+		& + label {
+			&:before {
+				content: "";
+				display: inline-block;
+				width: 16px;
+				height: 16px;
+				border: 2px solid white;
+				box-shadow: 0 0 0 2px black;
+				background: white;
+				margin-left: 4px;
+				margin-right: .5em;
+				border-radius: 100%;
+				@include transform(translateY(2px));
+			}
+		}
+
+		&:checked + label {
+			&:before {
+				background: black;
+			}
+		}
+	}
+}
+
+/**
  * Layout stuff
  */
 @media screen and (min-width: 48em) {
