@@ -670,6 +670,48 @@ table.variations {
 }
 
 /**
+ * Account section
+ */
+.woocommerce-account {
+	.woocommerce-MyAccount-navigation {
+		float: right;
+		width: 25%;
+		border-top: 1px solid #ddd;
+
+		li {
+			list-style: none;
+			padding: .5em 0;
+			border-bottom: 1px solid #ddd;
+
+			a {
+				box-shadow: none;
+
+				&:hover {
+					box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
+				}
+			}
+
+			&:before {
+				content: "→";
+				display: inline-block;
+				margin-right: .25em;
+				color: #ddd;
+			}
+
+			&.is-active {
+				a {
+					box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
+				}
+			}
+		}
+	}
+
+	.woocommerce-MyAccount-content {
+		float: left;
+	}
+}
+
+/**
  * Layout stuff
  */
 @media screen and (min-width: 48em) {
@@ -681,5 +723,17 @@ table.variations {
 		#secondary {
 			width: 20%;
 		}
+	}
+
+	body.page-two-column.woocommerce-cart:not(.archive) #primary .entry-header,
+	body.page-two-column.woocommerce-checkout:not(.archive) #primary .entry-header,
+	body.page-two-column.woocommerce-account:not(.archive) #primary .entry-header {
+		width: 16%;
+	}
+
+	body.page-two-column.woocommerce-cart:not(.archive) #primary .entry-content,
+	body.page-two-column.woocommerce-checkout:not(.archive) #primary .entry-content,
+	body.page-two-column.woocommerce-account:not(.archive) #primary .entry-content {
+		width: 78%;
 	}
 }
