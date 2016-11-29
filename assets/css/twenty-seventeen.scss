@@ -438,13 +438,20 @@ table.variations {
 	}
 
 	#reviews {
+		li.review,
 		li.comment {
 			list-style: none;
 			margin-right: 0;
+			margin-bottom: 2.5em;
 
 			.avatar {
 				max-height: 36px;
 				width: auto;
+				float: right;
+			}
+
+			p.meta {
+				margin-bottom: .5em;
 			}
 		}
 
