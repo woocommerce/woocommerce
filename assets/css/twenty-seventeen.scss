@@ -712,6 +712,68 @@ table.variations {
 }
 
 /**
+ * Cart
+ */
+.woocommerce-cart-form {
+	td {
+		padding: 1em .5em;
+	}
+
+	img {
+		max-width: 42px;
+		height: auto;
+		display: block;
+	}
+
+	dl.variation {
+		margin-top: 0;
+
+		p,
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.button {
+		padding: 1.2em 2em;
+	}
+
+	.actions {
+		.input-text {
+			width: 130px !important;
+			float: left;
+			margin-right: .25em;
+		}
+	}
+
+	.quantity {
+		input {
+			width: 4em;
+		}
+	}
+}
+
+.checkout-button {
+	display: block;
+	padding: 1em 2em;
+	border: 2px solid #000;
+	text-align: center;
+	font-weight: 800;
+	box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+
+	&:hover {
+		box-shadow: none !important;
+		-webkit-box-shadow: none !important;
+		border-color: #999;
+	}
+
+	&:after {
+		content: "→";
+	}
+}
+
+/**
  * Layout stuff
  */
 @media screen and (min-width: 48em) {
