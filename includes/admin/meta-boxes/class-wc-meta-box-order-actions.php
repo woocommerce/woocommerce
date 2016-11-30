@@ -41,21 +41,23 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-					<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
 						$mails            = $mailer->get_emails();
 
-						if ( ! empty( $mails ) ) {
+						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>
+							<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
+							<?php
 							foreach ( $mails as $mail ) {
 								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
 									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocomerce' ), esc_html( $mail->title ) ) . '</option>';
 								}
-							}
+							} ?>
+							</optgroup>
+							<?php
 						}
 						?>
-					</optgroup>
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
