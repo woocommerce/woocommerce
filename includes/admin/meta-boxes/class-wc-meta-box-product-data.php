@@ -267,6 +267,8 @@ class WC_Meta_Box_Product_Data {
 			'purchase_note'      => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
 			'downloadable'       => isset( $_POST['_downloadable'] ),
 			'virtual'            => isset( $_POST['_virtual'] ),
+			'featured'           => isset( $_POST['_featured'] ),
+			'catalog_visibility' => wc_clean( $_POST['_visibility'] ),
 			'tax_status'         => wc_clean( $_POST['_tax_status'] ),
 			'tax_class'          => wc_clean( $_POST['_tax_class'] ),
 			'weight'             => wc_clean( $_POST['_weight'] ),
