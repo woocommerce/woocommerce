@@ -653,13 +653,15 @@ class WC_Checkout {
 						$this->customer_id = absint( $new_customer );
 					}
 
-					wc_set_customer_auth_cookie( $this->customer_id );
+					if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
+						wc_set_customer_auth_cookie( $new_customer );
 
-					// As we are now logged in, checkout will need to refresh to show logged in data
-					WC()->session->set( 'reload_checkout', true );
+						// As we are now logged in, checkout will need to refresh to show logged in data
+						WC()->session->set( 'reload_checkout', true );
 
-					// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
-					WC()->cart->calculate_totals();
+						// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
+						WC()->cart->calculate_totals();
+					}
 
 					// Add customer info from other billing fields
 					if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
