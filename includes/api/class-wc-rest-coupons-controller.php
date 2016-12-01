@@ -350,6 +350,11 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	public function save_coupon( $request ) {
 		try {
 			$coupon = $this->prepare_item_for_database( $request );
+
+			if ( is_wp_error( $coupon ) ) {
+				return $coupon;
+			}
+
 			$coupon->save();
 			return $coupon->get_id();
 		} catch ( WC_Data_Exception $e ) {
