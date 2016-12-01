@@ -77,6 +77,8 @@ class WC_Template_Loader {
 
 		}
 
+		$find = apply_filters( 'woocommerce_template_location', $find , $template );
+
 		if ( $file ) {
 			$template       = locate_template( array_unique( $find ) );
 			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
