@@ -1056,12 +1056,12 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		$args['max_value'] = isset( $args['max_value'] ) ? $args['max_value'] : '';
 
 		// Apply sanity to min/max args - min cannot be lower than 0
-		if ( '' !== $args['min_value'] && is_numeric( $args['min_value'] ) && $args['min_value'] < 0 ) {
+		if ( ! empty( $args['min_value'] ) && is_numeric( $args['min_value'] ) && $args['min_value'] < 0 ) {
 			$args['min_value'] = 0; // Cannot be lower than 0
 		}
 
 		// Max cannot be lower than 0 or min
-		if ( '' !== $args['max_value'] && is_numeric( $args['max_value'] ) ) {
+		if ( ! empty( $args['max_value'] ) && is_numeric( $args['max_value'] ) ) {
 			$args['max_value'] = $args['max_value'] < 0 ? 0 : $args['max_value'];
 			$args['max_value'] = $args['max_value'] < $args['min_value'] ? $args['min_value'] : $args['max_value'];
 		}
