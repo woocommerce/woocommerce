@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @class 		WC_Checkout
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class    WC_Checkout
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   WooThemes
  */
 class WC_Checkout {
 
@@ -116,6 +116,9 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function __get( $key ) {
+		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && ! $this->legacy_posted_data ) {
+			$this->legacy_posted_data = $this->get_posted_data();
+		}
 		switch ( $key ) {
 			case 'enable_signup' :
 				return $this->is_registration_enabled();
@@ -126,25 +129,15 @@ class WC_Checkout {
 			case 'checkout_fields' :
 				return $this->get_checkout_fields();
 			case 'posted' :
-				if ( ! $this->legacy_posted_data ) {
-					$this->legacy_posted_data = $this->get_posted_data();
-				}
 				return $this->legacy_posted_data;
 			case 'shipping_method' :
-				if ( ! $this->legacy_posted_data ) {
-					$this->legacy_posted_data = $this->get_posted_data();
-				}
 				return $this->legacy_posted_data['shipping_method'];
 			case 'payment_method' :
-				if ( ! $this->legacy_posted_data ) {
-					$this->legacy_posted_data = $this->get_posted_data();
-				}
 				return $this->legacy_posted_data['payment_method'];
 			case 'customer_id' :
 				return apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 			case 'shipping_methods' :
 				return (array) WC()->session->get( 'chosen_shipping_methods' );
-				break;
 		}
 	}
 
@@ -690,7 +683,7 @@ class WC_Checkout {
 	 * @param  int $order_id
 	 * @param  string $payment_method
 	 */
-	protected function process_payment( $order_id, $payment_method ) {
+	protected function process_order_payment( $order_id, $payment_method ) {
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $payment_method ] ) ) {
@@ -722,15 +715,15 @@ class WC_Checkout {
 	 * @since  2.7.0
 	 * @param  int $order_id
 	 */
-	protected function payment_complete( $order_id ) {
+	protected function process_order_without_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 		$order->payment_complete();
 		wc_empty_cart();
 
 		if ( is_ajax() ) {
 			wp_send_json( array(
-				'result' 	=> 'success',
-				'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
+				'result'   => 'success',
+				'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
 			) );
 		} else {
 			wp_safe_redirect(
@@ -855,9 +848,9 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_order_processed', $order, $posted_data );
 
 				if ( WC()->cart->needs_payment() ) {
-					$this->process_payment( $order, $posted_data['payment_method'] );
+					$this->process_order_payment( $order, $posted_data['payment_method'] );
 				} else {
-					$this->payment_complete( $order );
+					$this->process_order_without_payment( $order );
 				}
 			}
 		} catch ( Exception $e ) {
