@@ -268,19 +268,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Get the suffix to display after prices > 0.
-	 *
-	 * @deprecated 2.7.0 Use wc_get_price_suffix instead.
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_price_suffix( $price = '', $qty = 1 ) {
-		wc_deprecated_function( 'WC_Product::get_price_suffix', '2.7', 'wc_get_price_suffix' );
-		return wc_get_price_suffix( $this, $price, $qty );
-	}
-
-	/**
 	 * Lists a table of attributes for the product page.
 	 * @deprecated 2.7.0 Use wc_display_product_attributes instead.
 	 */

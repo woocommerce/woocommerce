@@ -1661,9 +1661,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( $this->is_on_sale() ) {
-			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		} else {
-			$price = wc_price( wc_get_price_to_display( $this ) ) . wc_get_price_suffix( $this );
+			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
@@ -1815,6 +1815,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
+	}
+
+	/**
+	 * Get the suffix to display after prices > 0.
+	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+		$html = '';
+
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
+			if ( '' === $price ) {
+				$price = $this->get_price();
+			}
+			$replacements = array(
+				'{price_including_tax}' => wc_price( wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
+				'{price_excluding_tax}' => wc_price( wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
+			);
+			$html = str_replace( array_keys( $replacements ), array_values( $replacements ), ' <small class ="woocommerce-price-suffix">' . wp_kses_post( $suffix ) . '</small>' );
+		}
+		return apply_filters( 'woocommerce_get_price_suffix', $html, $this );
 	}
 
 	/**
