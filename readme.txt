@@ -162,6 +162,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 2.7.0 =
+* New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom.
+* Made the store notice dismissible on the frontend.
+* Improved structured product data by using JSON-LD instead of inline Microdata.
+* Improved downloads list layout (template file).
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
 * Improved handling of shop page rewrite rules to allow subpages.
 * Redirect to login after password reset.
@@ -169,32 +173,39 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
 * Show variable weights/dimensions even when parent values are not set.
 * Automatically sort tax rates rather than allow clunky manual sorting.
+* When deleting a tax rate class, remove it's tax rates.
 * Made WC_Logger pluggable via wc_get_logger function.
 * Use 'average rating' post meta for 'rating' product sorting option.
 * Show better labels in nav menus metabox.
 * Sort “Recently Viewed” products by the view order.
-* Remove checkbox options in system status tools and replace with constants.
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
-* When deleting a tax rate class, remove it's tax rates.
-* Made the store notice dismissible.
 * Improved the zone setup flow.
 * Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
-* New gallery on single product pages with better mobile support, PhotoSwipe and Zoom.
 * Use all paid statuses in $customer->get_total_spent().
 * Move location of billing email field to work with password managers.
-
+* Option to restrict selling locations by country.
+* Added tool to clear orphaned variations in system status.
+* Remove checkbox options in system status tools and replace with constants.
+* Added security section in system status report.
 * Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
 * Performance - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
 * Performance - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
 * Performance - Removed the feature where old orders get access to new downloads on product edit. Looping potentially thousands of orders to do this is too much of a performance burden for stores and this can sometimes be unexpected behavior too. This does however updates *edited* downloads.
 * API - Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
 * API - Allow oAuth1.0a authentication using headers.
+* API - New Shipping Zones endpoints.
+* API - New variations endpoints.
+* API - New settings endpoints.
+* API - Payment gateways and shipping methods endpoints.
+* API - Prevented the (broken) ability to manipulate variations directly on the products endpoints.
+* Localization - Added inline comments for placeholder strings.
 * Localization - Added Nigerian Provinces to i18n/state.
+* Localization - US and Poland postcode validation.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 
-= 2.6 =
-2.6 is a major update. It is important that you make backups and ensure themes and extensions are 2.6 compatible before upgrading, in particular shipping method extensions (e.g. Table Rate Shipping) since 2.6 introduces Shipping Zone functionality. [Read more here](https://woocommerce.wordpress.com/2016/06/14/say-hello-to-woocommerce-2-6-zipping-zebra/).
+= 2.7 =
+2.7 is a major update. It is important that you make backups and ensure themes and extensions are 2.7 compatible before upgrading..
