@@ -59,7 +59,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_created_via',
 		'_order_version',
 		'_prices_include_tax',
-		'_customer_note',
 		'_date_completed',
 		'_date_paid',
 		'_payment_tokens',
@@ -117,7 +116,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
 			'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
 			'created_via'          => get_post_meta( $id, '_created_via', true ),
-			'customer_note'        => get_post_meta( $id, '_customer_note', true ),
 			'date_completed'       => get_post_meta( $id, '_completed_date', true ),
 			'date_paid'            => get_post_meta( $id, '_paid_date', true ),
 			'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
@@ -143,7 +141,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_customer_ip_address'  => 'customer_ip_address',
 			'_customer_user_agent'  => 'customer_user_agent',
 			'_created_via'          => 'created_via',
-			'_customer_note'        => 'customer_note',
 			'_date_completed'       => 'date_completed',
 			'_date_paid'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
@@ -227,6 +224,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
 		}
+	}
+
+	/**
+	 * Excerpt for post.
+	 *
+	 * @param  WC_Order $order
+	 * @return string
+	 */
+	protected function get_post_excerpt( $order ) {
+		return $order->get_customer_note();
 	}
 
 	/**

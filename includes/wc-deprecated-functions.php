@@ -605,6 +605,9 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_order_get_tax_totals'          => 'woocommerce_order_tax_totals',
 	'woocommerce_get_order_refund_get_amount'   => 'woocommerce_refund_amount',
 	'woocommerce_get_order_refund_get_reason'   => 'woocommerce_refund_reason',
+	'default_checkout_billing_country'          => 'default_checkout_country',
+	'default_checkout_billing_state'            => 'default_checkout_state',
+	'default_checkout_billing_country'          => 'default_checkout_postcode',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

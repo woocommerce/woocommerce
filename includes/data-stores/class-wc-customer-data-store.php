@@ -52,6 +52,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'billing_phone',
 		'billing_email',
 		'shipping_first_name',
+		'shipping_last_name',
 		'wptests_capabilities',
 		'wptests_user_level',
 	);
@@ -93,7 +94,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$customer->set_id( $id );
 		$this->update_user_meta( $customer );
-		wp_update_user( array( 'ID' => $customer->get_id(), 'role' => $customer->get_role() ) );
+		wp_update_user( array(
+			'ID'           => $customer->get_id(),
+			'role'         => $customer->get_role(),
+			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+		) );
 		$wp_user = new WP_User( $customer->get_id() );
 		$customer->set_date_created( strtotime( $wp_user->user_registered ) );
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
@@ -143,7 +148,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param WC_Customer
 	 */
 	public function update( &$customer ) {
-		wp_update_user( array( 'ID' => $customer->get_id(), 'user_email' => $customer->get_email() ) );
+		wp_update_user( array(
+			'ID'           => $customer->get_id(),
+			'user_email'   => $customer->get_email(),
+			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+		) );
 		// Only update password if a new one was set with set_password.
 		if ( $customer->get_password() ) {
 			wp_update_user( array( 'ID' => $customer->get_id(), 'user_pass' => $customer->get_password() ) );
