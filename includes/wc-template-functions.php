@@ -2500,15 +2500,19 @@ function wc_display_product_attributes( $product ) {
 function wc_get_stock_html( $product ) {
 	ob_start();
 
+	$availability = $product->get_availability();
+
 	wc_get_template( 'single-product/stock.php', array(
-		'product' => $product,
+		'product'      => $product,
+		'class'        => $availability['class'],
+		'availability' => $availability['availability'],
 	) );
 
 	$html = ob_get_clean();
 
 	if ( has_filter( 'woocommerce_stock_html' ) ) {
 		wc_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );
-		$html = apply_filters( 'woocommerce_stock_html', $html, $product->get_availability_text(), $product );
+		$html = apply_filters( 'woocommerce_stock_html', $html, $availability['availability'], $product );
 	}
 
 	return apply_filters( 'woocommerce_get_stock_html', $html, $product );

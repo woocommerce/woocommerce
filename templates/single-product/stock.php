@@ -20,16 +20,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! $product->is_in_stock() ) : ?>
-
-	<p class="stock out-of-stock"><?php _e( 'Out of stock', 'woocommerce' ); ?></p>
-
-<?php elseif ( $product->managing_stock() && $product->is_on_backorder( 1 ) ) : ?>
-
-	<p class="stock available-on-backorder"><?php _e( 'Available on backorder', 'woocommerce' ); ?></p>
-
-<?php elseif ( $product->managing_stock() ) : ?>
-
-	<p class="stock in-stock"><?php echo wp_kses_post( wc_format_stock_for_display( $product->get_stock_quantity(), $product->backorders_allowed() && $product->backorders_require_notification() ) ); ?></p>
-
-<?php endif; ?>
+?>
+<p class="stock <?php echo esc_attr( $class ); ?>"><?php echo wp_kses_post( $availability ); ?></p>

@@ -1816,4 +1816,50 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
+
+	/**
+	 * Returns the availability of the product.
+	 *
+	 * @return string
+	 */
+	public function get_availability() {
+		return apply_filters( 'woocommerce_get_availability', array(
+			'availability' => $this->get_availability_text(),
+			'class'        => $this->get_availability_class(),
+		), $this );
+	}
+
+	/**
+	 * Get availability text based on stock status.
+	 *
+	 * @return string
+	 */
+	protected function get_availability_text() {
+		if ( ! $this->is_in_stock() ) {
+			$availability = __( 'Out of stock', 'woocommerce' );
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$availability = __( 'Available on backorder', 'woocommerce' );
+		} elseif ( $this->managing_stock() ) {
+			$availability = wc_format_stock_for_display( $this->get_stock_quantity(), $this->backorders_allowed() && $this->backorders_require_notification() );
+		} else {
+			$availability = '';
+		}
+		return apply_filters( 'woocommerce_get_availability_text', $availability, $this );
+	}
+
+	/**
+	 * Get availability classname based on stock status.
+	 *
+	 * @return string
+	 */
+	protected function get_availability_class() {
+		if ( ! $this->is_in_stock() ) {
+			$class = 'out-of-stock';
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$class = 'available-on-backorder';
+		} else {
+			$class = 'in-stock';
+		}
+		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
+	}
 }
