@@ -134,6 +134,18 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
+				'title'    => __( 'Default log handler', 'woocommerce' ),
+				'id'       => 'woocommerce_default_log_handler',
+				'default'  => 'geolocation',
+				'type'     => 'select',
+				'class'    => 'wc-enhanced-select',
+				'options'  => array(
+					'file' => __( 'File system log handler', 'woocommerce' ),
+					'db'   => __( 'Database log handler', 'woocommerce' ),
+				),
+			),
+
+			array(
 				'title'   => __( 'Enable taxes', 'woocommerce' ),
 				'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
 				'id'      => 'woocommerce_calc_taxes',
