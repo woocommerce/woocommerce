@@ -169,11 +169,11 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper for log handler comsume test.
+	 * Helper for log handler consume test.
 	 *
-	 * Returns an array of 2 mocked log hanlders.
+	 * Returns an array of 2 mocked log handlers.
 	 * The first handler always bubbles.
-	 * The second handler expects to recieve exactly 8 messages (1 for each level).
+	 * The second handler expects to receive exactly 8 messages (1 for each level).
 	 *
 	 * @since 2.8
 	 *
@@ -197,9 +197,9 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper for log handler comsume test.
+	 * Helper for log handler consume test.
 	 *
-	 * Returns an array of 2 mocked log hanlders.
+	 * Returns an array of 2 mocked log handlers.
 	 * The first handler never bubbles.
 	 * The second handler expects to never be called.
 	 *
