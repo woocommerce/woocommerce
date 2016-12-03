@@ -77,6 +77,17 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
+		if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
+			self::status_logs_db();
+		} else {
+			self::status_logs_file();
+		}
+	}
+
+	/**
+	 * Show the log page contents for file log handler.
+	 */
+	public static function status_logs_file() {
 
 		$logs = self::scan_log_files();
 
@@ -96,9 +107,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Show db logs
-	 *
-	 * @todo Make woocommerce base logger configurable, and show page based on configuration.
+	 * Show the log page contents for db log handler.
 	 */
 	public static function status_logs_db() {
 

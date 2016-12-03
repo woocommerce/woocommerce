@@ -12,7 +12,6 @@ $tabs        = array(
 	'status' => __( 'System status', 'woocommerce' ),
 	'tools'  => __( 'Tools', 'woocommerce' ),
 	'logs'   => __( 'Logs', 'woocommerce' ),
-	'logs-db'   => __( 'Database logs', 'woocommerce' ),
 );
 $tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 ?>
@@ -34,9 +33,6 @@ $tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 			break;
 			case "logs" :
 				WC_Admin_Status::status_logs();
-			break;
-			case "logs-db" :
-				WC_Admin_Status::status_logs_db();
 			break;
 			default :
 				if ( array_key_exists( $current_tab, $tabs ) && has_action( 'woocommerce_admin_status_content_' . $current_tab ) ) {
