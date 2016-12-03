@@ -4,6 +4,8 @@
  * Class WC_Tests_Logger
  * @package WooCommerce\Tests\Log
  * @since 2.3
+ *
+ * @todo isolate test
  */
 class WC_Tests_Logger extends WC_Unit_Test_Case {
 
@@ -11,8 +13,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log_files = array(
 			wc_get_log_file_path( 'unit-tests' ),
 			wc_get_log_file_path( 'log' ),
-			wc_get_log_file_path( 'A' ),
-			wc_get_log_file_path( 'B' ),
 		);
 
 		foreach ( $log_files as $file ) {
@@ -33,6 +33,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_add() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 		$log = wc_get_logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
@@ -40,6 +41,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
 		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
 		$this->setExpectedDeprecated( 'WC_Logger::add' );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 	}
 
 	/**
@@ -70,6 +72,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_log() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 		$log = wc_get_logger();
 		$log->log( 'debug', 'debug' );
 		$log->log( 'info', 'info' );
@@ -82,6 +85,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 	}
 
 	/**
@@ -131,6 +135,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_level_methods() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 		$log = wc_get_logger();
 
 		$log->debug( 'debug' );
@@ -144,6 +149,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 	}
 
 	/**
@@ -217,5 +223,16 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$error->expects( $this->never() )->method( 'handle' );
 
 		return array( $consume, $error );
+	}
+
+	/**
+	 * Filter callback to register file log handler.
+	 *
+	 * @since 2.8
+	 *
+	 * @return Array with instantiated file log handler.
+	 */
+	public function _return_file_log_handler( $handlers ) {
+		return array( new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
 	}
 }
