@@ -5,14 +5,6 @@
  * @package WooCommerce\Tests\Log
  * @since 2.8
  */
-
-if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
-	include_once(
-		dirname( dirname( dirname( dirname( __FILE__ ) ) ) )
-		. '/includes/log-handlers/class-wc-log-handler-db.php'
-	);
-}
-
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 
 	public function tearDown() {
