@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php $log_table_list->display(); ?>
 
 	<input type="hidden" name="page" value="wc-status" />
-	<input type="hidden" name="tab" value="logs-db" />
+	<input type="hidden" name="tab" value="logs" />
 
 </form>
 <form method="post" action="">

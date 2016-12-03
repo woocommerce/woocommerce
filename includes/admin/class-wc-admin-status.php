@@ -305,7 +305,7 @@ class WC_Admin_Status {
 			WC_Log_Handler_DB::flush();
 		}
 
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs-db' ) ) );
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 		exit();
 	}
 }
