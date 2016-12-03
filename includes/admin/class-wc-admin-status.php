@@ -77,6 +77,17 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
+		if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
+			self::status_logs_db();
+		} else {
+			self::status_logs_file();
+		}
+	}
+
+	/**
+	 * Show the log page contents for file log handler.
+	 */
+	public static function status_logs_file() {
 
 		$logs = self::scan_log_files();
 
@@ -93,6 +104,20 @@ class WC_Admin_Status {
 		}
 
 		include_once( 'views/html-admin-page-status-logs.php' );
+	}
+
+	/**
+	 * Show the log page contents for db log handler.
+	 */
+	public static function status_logs_db() {
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+			self::flush_db_logs();
+		}
+		$log_table_list = new WC_Admin_Log_Table_List();
+		$log_table_list->prepare_items();
+
+		include_once( 'views/html-admin-page-status-logs-db.php' );
 	}
 
 	/**
@@ -248,11 +273,37 @@ class WC_Admin_Status {
 		}
 
 		if ( ! empty( $_REQUEST['handle'] ) ) {
-			$logger = wc_get_logger();
-			$logger->remove( $_REQUEST['handle'] );
+
+			if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-file.php' );
+			}
+
+			$log_handler = new WC_Log_Handler_File();
+			$log_handler->remove( $_REQUEST['handle'] );
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+		exit();
+	}
+
+	/**
+	 * Clear DB log table.
+	 *
+	 * @since 2.8
+	 */
+	public static function flush_db_logs() {
+		check_admin_referer( 'flush-logs' );
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+
+			if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-db.php' );
+			}
+
+			WC_Log_Handler_DB::flush();
+		}
+
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs-db' ) ) );
 		exit();
 	}
 }
