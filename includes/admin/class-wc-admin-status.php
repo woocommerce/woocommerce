@@ -275,11 +275,6 @@ class WC_Admin_Status {
 		}
 
 		if ( ! empty( $_REQUEST['handle'] ) ) {
-
-			if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
-				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-file.php' );
-			}
-
 			$log_handler = new WC_Log_Handler_File();
 			$log_handler->remove( $_REQUEST['handle'] );
 		}
@@ -297,11 +292,6 @@ class WC_Admin_Status {
 		check_admin_referer( 'flush-logs' );
 
 		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
-
-			if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
-				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-db.php' );
-			}
-
 			WC_Log_Handler_DB::flush();
 		}
 
