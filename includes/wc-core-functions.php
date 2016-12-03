@@ -1460,14 +1460,8 @@ function wc_safe_dump( $expression ) {
  */
 function wc_register_default_log_handler( $handlers ) {
 	if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
-		if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
-			include_once( dirname( __FILE__ ) . '/log-handlers/class-wc-log-handler-db.php' );
-		}
 		array_push( $handlers, new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) ) );
 	} else {
-		if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
-			include_once( dirname( __FILE__ ) . '/log-handlers/class-wc-log-handler-file.php' );
-		}
 		array_push( $handlers, new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
 	}
 
