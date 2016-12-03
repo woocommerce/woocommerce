@@ -39,7 +39,8 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
-		$find = array( 'woocommerce.php' );
+		$find = apply_filters( 'woocommerce_template_loader_files', array() );
+		$find[] = 'woocommerce.php';
 		$file = '';
 
 		if ( is_embed() ) {
