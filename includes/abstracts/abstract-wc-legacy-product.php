@@ -449,7 +449,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return boolean
 	 */
 	public function has_all_attributes_set() {
-		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7' );
+		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7', 'Use array filter on get_variation_attributes for a quick solution.' );
 		$set = true;
 
 		// undefined attributes have null strings as array values
