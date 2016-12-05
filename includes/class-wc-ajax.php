@@ -740,7 +740,7 @@ class WC_AJAX {
 			$order_id    = absint( $_POST['order_id'] );
 			$order       = wc_get_order( $order_id );
 
-			if (! $order || ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
+			if ( ! $order || ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
 				throw new Exception( __( 'Invalid product', 'woocommerce' ) );
 			}
 
@@ -1296,7 +1296,7 @@ class WC_AJAX {
 
 		if ( isset( $menu_orders[ $previd ] ) ) {
 			$menu_orders[ $sorting_id ] = $menu_orders[ $previd ] + 1;
-		} elseif( isset( $menu_orders[ $nextid ] ) ) {
+		} elseif ( isset( $menu_orders[ $nextid ] ) ) {
 			$menu_orders[ $sorting_id ] = $menu_orders[ $nextid ] - 1;
 		} else {
 			$menu_orders[ $sorting_id ] = 0;

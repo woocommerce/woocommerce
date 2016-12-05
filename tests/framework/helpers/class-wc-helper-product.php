@@ -169,6 +169,7 @@ class WC_Helper_Product {
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
 			'post_status' => 'publish',
+			'menu_order'  => 1,
 		) );
 
 		// Price related meta
@@ -193,6 +194,7 @@ class WC_Helper_Product {
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
 			'post_status' => 'publish',
+			'menu_order'  => 2,
 		) );
 
 		// Price related meta

@@ -83,7 +83,7 @@ class WC_Product_Download implements ArrayAccess {
 		if ( 'shortcode' === $this->get_type_of_file_path() ) {
 			return true;
 		}
-		return empty( $this->get_file_extension() ) || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
+		return ! $this->get_file_extension() || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
 	}
 
 	/**
