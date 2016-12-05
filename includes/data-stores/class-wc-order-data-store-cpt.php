@@ -157,55 +157,45 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		$billing_address_props = array(
-			'_billing_first_name' => 'billing_first_name',
-			'_billing_last_name'  => 'billing_last_name',
-			'_billing_company'    => 'billing_company',
-			'_billing_address_1'  => 'billing_address_1',
-			'_billing_address_2'  => 'billing_address_2',
-			'_billing_city'       => 'billing_city',
-			'_billing_state'      => 'billing_state',
-			'_billing_postcode'   => 'billing_postcode',
-			'_billing_country'    => 'billing_country',
-			'_billing_email'      => 'billing_email',
-			'_billing_phone'      => 'billing_phone',
+		$address_props = array(
+			'billing' => array(
+				'_billing_first_name' => 'billing_first_name',
+				'_billing_last_name'  => 'billing_last_name',
+				'_billing_company'    => 'billing_company',
+				'_billing_address_1'  => 'billing_address_1',
+				'_billing_address_2'  => 'billing_address_2',
+				'_billing_city'       => 'billing_city',
+				'_billing_state'      => 'billing_state',
+				'_billing_postcode'   => 'billing_postcode',
+				'_billing_country'    => 'billing_country',
+				'_billing_email'      => 'billing_email',
+				'_billing_phone'      => 'billing_phone',
+			),
+			'shipping' => array(
+				'_shipping_first_name' => 'shipping_first_name',
+				'_shipping_last_name'  => 'shipping_last_name',
+				'_shipping_company'    => 'shipping_company',
+				'_shipping_address_1'  => 'shipping_address_1',
+				'_shipping_address_2'  => 'shipping_address_2',
+				'_shipping_city'       => 'shipping_city',
+				'_shipping_state'      => 'shipping_state',
+				'_shipping_postcode'   => 'shipping_postcode',
+				'_shipping_country'    => 'shipping_country',
+			),
 		);
 
-		foreach ( $billing_address_props as $meta_key => $prop ) {
-			$prop_key = substr( $prop, 8 );
-			if ( ! isset( $changed_props['billing'] ) || ! array_key_exists( $prop_key, $changed_props['billing'] ) ) {
-				continue;
-			}
-			$value = $order->{"get_$prop"}( 'edit' );
+		foreach ( $address_props as $props_key => $props ) {
+			foreach ( $props as $meta_key => $prop ) {
+				$prop_key = substr( $prop, 8 );
+				if ( ! isset( $changed_props[ $props_key ] ) || ! array_key_exists( $prop_key, $changed_props[ $props_key ] ) ) {
+					continue;
+				}
+				$value = $order->{"get_$prop"}( 'edit' );
 
-			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
-				$updated_props[] = 'billing';
-			}
-		}
-
-		$shipping_address_props = array(
-			'_shipping_first_name' => 'shipping_first_name',
-			'_shipping_last_name'  => 'shipping_last_name',
-			'_shipping_company'    => 'shipping_company',
-			'_shipping_address_1'  => 'shipping_address_1',
-			'_shipping_address_2'  => 'shipping_address_2',
-			'_shipping_city'       => 'shipping_city',
-			'_shipping_state'      => 'shipping_state',
-			'_shipping_postcode'   => 'shipping_postcode',
-			'_shipping_country'    => 'shipping_country',
-		);
-
-		foreach ( $shipping_address_props as $meta_key => $prop ) {
-			$prop_key = substr( $prop, 9 );
-			if ( ! isset( $changed_props['shipping'] ) || ! array_key_exists( $prop_key, $changed_props['shipping'] ) ) {
-				continue;
-			}
-			$value = $order->{"get_$prop"}( 'edit' );
-
-			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
-				$updated_props[] = 'shipping';
+				if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
+					$updated_props[] = $prop;
+					$updated_props[] = $props_key;
+				}
 			}
 		}
 
