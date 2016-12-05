@@ -175,7 +175,7 @@ class WC_Product_Variable extends WC_Product {
 		$max_price = end( $prices['price'] );
 
 		if ( $min_price !== $max_price ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
+			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ), $this );
 		} else {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
 		}
