@@ -26,12 +26,10 @@ class WC_Helper_Product {
 	 */
 	public static function create_simple_product() {
 		// Create the product
-		$product_count = wp_count_posts( 'product' );
-		$product       = wp_insert_post( array(
+		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'menu_order'  => $product_count->publish,
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -57,12 +55,10 @@ class WC_Helper_Product {
 	 */
 	public static function create_external_product() {
 		// Create the product
-		$product_count = wp_count_posts( 'product' );
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy External Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'menu_order'  => $product_count->publish,
 		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
@@ -84,12 +80,10 @@ class WC_Helper_Product {
 	 */
 	public static function create_grouped_product() {
 		// Create the product
-		$product_count = wp_count_posts( 'product' );
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Grouped Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'menu_order'  => $product_count->publish,
 		) );
 		$simple_product_1 = self::create_simple_product( $product );
 		$simple_product_2 = self::create_simple_product( $product );
@@ -120,12 +114,10 @@ class WC_Helper_Product {
 		$attribute_data = self::create_attribute();
 
 		// Create the product
-		$product_count = wp_count_posts( 'product' );
 		$product_id = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'menu_order'  => $product_count->publish,
 		) );
 
 		// Set it as variable.
@@ -177,6 +169,7 @@ class WC_Helper_Product {
 			'post_parent' => $product_id,
 			'post_status' => 'publish',
 			'menu_order'  => 1,
+			'post_date'   => date( 'Y-m-d H:i:s', time() - 30 ), // Makes sure post dates differ if super quick.
 		) );
 
 		// Price related meta
