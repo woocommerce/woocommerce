@@ -2500,48 +2500,22 @@ function wc_display_product_attributes( $product ) {
 function wc_get_stock_html( $product ) {
 	ob_start();
 
+	$availability = $product->get_availability();
+
 	wc_get_template( 'single-product/stock.php', array(
-		'product' => $product,
+		'product'      => $product,
+		'class'        => $availability['class'],
+		'availability' => $availability['availability'],
 	) );
 
 	$html = ob_get_clean();
 
 	if ( has_filter( 'woocommerce_stock_html' ) ) {
 		wc_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );
-		$html = apply_filters( 'woocommerce_stock_html', $html, $product->get_availability_text(), $product );
+		$html = apply_filters( 'woocommerce_stock_html', $html, $availability['availability'], $product );
 	}
 
 	return apply_filters( 'woocommerce_get_stock_html', $html, $product );
-}
-
-/**
- * Get the price suffix for a product if needed.
- * @since  2.7.0
- * @param  WC_Product  $product
- * @param  string  $price
- * @param  integer $qty
- * @return string
- */
-function wc_get_price_suffix( $product, $price = '', $qty = 1 ) {
-	if ( ( $price_display_suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
-		$price                = '' === $price ? $product->get_price() : $price;
-		$price_display_suffix = ' <small class="woocommerce-price-suffix">' . wp_kses_post( $price_display_suffix ) . '</small>';
-
-		$find = array(
-			'{price_including_tax}',
-			'{price_excluding_tax}',
-		);
-
-		$replace = array(
-			wc_price( wc_get_price_including_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) ),
-			wc_price( wc_get_price_excluding_tax( $product, array( 'qty' => $qty, 'price' => $price ) ) ),
-		);
-
-		$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
-	} else {
-		$price_display_suffix = '';
-	}
-	return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $product );
 }
 
 /**
@@ -2560,4 +2534,14 @@ function wc_get_rating_html( $rating ) {
 		$rating_html  = '';
 	}
 	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+}
+
+/**
+ * Returns a 'from' prefix if you want to show where prices start at.
+ *
+ * @since  2.7.0
+ * @return string
+ */
+function wc_get_price_html_from_text() {
+	return apply_filters( 'woocommerce_get_price_html_from_text', '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>' );
 }
