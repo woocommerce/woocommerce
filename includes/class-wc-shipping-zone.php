@@ -364,6 +364,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 				unset( $zone_locations[ $key ] );
 			}
 		}
+		$zone_locations = array_values( $zone_locations ); // reindex.
 		$this->set_prop( 'zone_locations', $zone_locations );
 	}
 
