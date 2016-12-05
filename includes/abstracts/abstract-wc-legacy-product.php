@@ -249,9 +249,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		wc_deprecated_function( 'WC_Product::get_price_html_from_text', '2.7' );
-		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
-		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
+		wc_deprecated_function( 'WC_Product::get_price_html_from_text', '2.7', 'wc_get_price_from_prefix' );
+		return wc_get_price_html_from_text();
 	}
 
 	/**

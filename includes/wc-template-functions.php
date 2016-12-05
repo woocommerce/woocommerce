@@ -2535,3 +2535,13 @@ function wc_get_rating_html( $rating ) {
 	}
 	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
 }
+
+/**
+ * Returns a 'from' prefix if you want to show where prices start at.
+ *
+ * @since  2.7.0
+ * @return string
+ */
+function wc_get_price_html_from_text() {
+	return apply_filters( 'woocommerce_get_price_html_from_text', '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>' );
+}
