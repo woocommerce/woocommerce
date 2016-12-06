@@ -195,6 +195,7 @@ class WC_Shortcodes {
 			'order'               => $ordering_args['order'],
 			'posts_per_page'      => $atts['per_page'],
 			'meta_query'          => $meta_query,
+			'tax_query'           => WC()->query->get_tax_query(),
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
@@ -308,6 +309,7 @@ class WC_Shortcodes {
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
 			'meta_query'          => WC()->query->get_meta_query(),
+			'tax_query'           => WC()->query->get_tax_query(),
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
@@ -338,6 +340,7 @@ class WC_Shortcodes {
 			'order'               => $atts['order'],
 			'posts_per_page'      => -1,
 			'meta_query'          => WC()->query->get_meta_query(),
+			'tax_query'           => WC()->query->get_tax_query(),
 		);
 
 		if ( ! empty( $atts['skus'] ) ) {
@@ -380,6 +383,7 @@ class WC_Shortcodes {
 			'no_found_rows'  => 1,
 			'post_status'    => 'publish',
 			'meta_query'     => $meta_query,
+			'tax_query'      => WC()->query->get_tax_query(),
 		);
 
 		if ( isset( $atts['sku'] ) ) {
@@ -537,6 +541,7 @@ class WC_Shortcodes {
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
 			'meta_query'     => WC()->query->get_meta_query(),
+			'tax_query'      => WC()->query->get_tax_query(),
 			'post__in'       => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
 		);
 
@@ -567,6 +572,7 @@ class WC_Shortcodes {
 			'meta_key'            => 'total_sales',
 			'orderby'             => 'meta_value_num',
 			'meta_query'          => WC()->query->get_meta_query(),
+			'tax_query'           => WC()->query->get_tax_query(),
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
@@ -598,6 +604,7 @@ class WC_Shortcodes {
 			'order'               => $atts['order'],
 			'posts_per_page'      => $atts['per_page'],
 			'meta_query'          => WC()->query->get_meta_query(),
+			'tax_query'           => WC()->query->get_tax_query(),
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
@@ -627,10 +634,13 @@ class WC_Shortcodes {
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts, 'featured_products' );
 
-		$meta_query   = WC()->query->get_meta_query();
-		$meta_query[] = array(
-			'key'   => '_featured',
-			'value' => 'yes',
+		$meta_query  = WC()->query->get_meta_query();
+		$tax_query   = WC()->query->get_tax_query();
+		$tax_query[] = array(
+			'taxonomy' => 'product_visibility',
+			'field'    => 'name',
+			'terms'    => 'featured',
+			'operator' => 'IN',
 		);
 
 		$query_args = array(
@@ -641,6 +651,7 @@ class WC_Shortcodes {
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
 			'meta_query'          => $meta_query,
+			'tax_query'           => $tax_query,
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
@@ -795,13 +806,13 @@ class WC_Shortcodes {
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
 			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => array(
-				array(
-					'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
-					'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
-					'field'    => 'slug',
-				),
-			),
+			'tax_query'           => WC()->query->get_tax_query(),
+		);
+
+		$query_args['tax_query'][] = array(
+			'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
+			'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
+			'field'    => 'slug',
 		);
 
 		return self::product_loop( $query_args, $atts, 'product_attribute' );
@@ -840,7 +851,10 @@ class WC_Shortcodes {
 	 */
 	private static function _maybe_add_category_args( $args, $category, $operator ) {
 		if ( ! empty( $category ) ) {
-			$args['tax_query'] = array(
+			if ( empty( $args['tax_query'] ) ) {
+				$args['tax_query'] = array();
+			}
+			$args['tax_query'][] = array(
 				array(
 					'taxonomy' => 'product_cat',
 					'terms'    => array_map( 'sanitize_title', explode( ',', $category ) ),

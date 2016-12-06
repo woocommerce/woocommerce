@@ -390,8 +390,8 @@ class WC_Query {
 		}
 
 		// Query vars that affect posts shown
-		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ) ) );
-		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
+		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
+		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
@@ -526,9 +526,10 @@ class WC_Query {
 	 * Appends meta queries to an array.
 	 *
 	 * @param  array $meta_query
+	 * @param  bool $main_query
 	 * @return array
 	 */
-	public function get_meta_query( $meta_query = array() ) {
+	public function get_meta_query( $meta_query = array(), $main_query = false ) {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
@@ -596,21 +597,22 @@ class WC_Query {
 	/**
 	 * Appends tax queries to an array.
 	 * @param array $tax_query
+	 * @param bool  $main_query
 	 * @return array
 	 */
-	public function get_tax_query( $tax_query = array() ) {
+	public function get_tax_query( $tax_query = array(), $main_query = false ) {
 		if ( ! is_array( $tax_query ) ) {
-			$tax_query = array();
+			$tax_query = array( 'relation' => 'AND' );
 		}
 
 		// Layered nav filters on terms
-		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
+		if ( $main_query && ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) ) {
 			foreach ( $_chosen_attributes as $taxonomy => $data ) {
 				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'slug',
-					'terms'    => $data['terms'],
-					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
 					'include_children' => false,
 				);
 			}

@@ -1886,7 +1886,7 @@ class WC_Admin_Post_Types {
 				echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
 				if ( 'yes' === $current_featured ) {
-					echo ', ' . __( 'Featured', 'woocommerce' ); // @todo
+					echo ', ' . __( 'Featured', 'woocommerce' );
 				}
 			?></strong>
 

@@ -169,19 +169,20 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$args['tax_query'] = $tax_query;
 		}
 
+		// Filter featured.
+		if ( is_bool( $request['featured'] ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => 'featured',
+			);
+		}
+
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'   => '_sku',
 				'value' => $request['sku'],
-			) );
-		}
-
-		// Filter featured.
-		if ( is_bool( $request['featured'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'   => '_featured',
-				'value' => true === $request['featured'] ? 'yes' : 'no',
 			) );
 		}
 

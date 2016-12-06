@@ -345,7 +345,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		if ( 'or' === $query_type ) {
 			foreach ( $tax_query as $key => $query ) {
-				if ( $taxonomy === $query['taxonomy'] ) {
+				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
 					unset( $tax_query[ $key ] );
 				}
 			}
