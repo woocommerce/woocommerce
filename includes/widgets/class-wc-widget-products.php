@@ -125,8 +125,16 @@ class WC_Widget_Products extends WC_Widget {
 			);
 		}
 
-		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-		$query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => 'outofstock',
+					'operator' => 'NOT IN',
+				),
+			);
+		}
 
 		switch ( $show ) {
 			case 'featured' :

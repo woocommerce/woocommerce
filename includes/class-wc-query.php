@@ -534,7 +534,6 @@ class WC_Query {
 			$meta_query = array();
 		}
 
-		$meta_query['stock_status']  = $this->stock_status_meta_query();
 		$meta_query['price_filter']  = $this->price_filter_meta_query();
 		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
 
@@ -577,21 +576,19 @@ class WC_Query {
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
-	public function visibility_meta_query( $compare = 'IN' ) {}
+	public function visibility_meta_query( $compare = 'IN' ) {
+		return array();
+	}
 
 	/**
 	 * Returns a meta query to handle product stock status.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0 Replaced with taxonomy.
 	 * @param string $status (default: 'instock')
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
-		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
-			'key' 		=> '_stock_status',
-			'value' 	=> $status,
-			'compare' 	=> '=',
-		) : array();
+		return array();
 	}
 
 	/**
@@ -605,7 +602,7 @@ class WC_Query {
 			$tax_query = array( 'relation' => 'AND' );
 		}
 
-		// Layered nav filters on terms
+		// Layered nav filters on terms.
 		if ( $main_query && ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) ) {
 			foreach ( $_chosen_attributes as $taxonomy => $data ) {
 				$tax_query[] = array(
@@ -618,10 +615,17 @@ class WC_Query {
 			}
 		}
 
+		$product_visibility_not_in = array( is_search() && $main_query ? 'exclude-from-search' : 'exclude-from-catalog' );
+
+		// Hide out of stock products.
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_not_in[] = 'outofstock';
+		}
+
 		$tax_query[] = array(
 			'taxonomy' => 'product_visibility',
 			'field'    => 'name',
-			'terms'    => is_search() ? 'exclude-from-search' : 'exclude-from-catalog',
+			'terms'    => $product_visibility_not_in,
 			'operator' => 'NOT IN',
 		);
 

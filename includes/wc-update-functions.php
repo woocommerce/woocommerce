@@ -1037,6 +1037,7 @@ function wc_update_270_product_visibility() {
 	$featured_term        = get_term_by( 'name', 'featured', 'product_visibility' );
 	$exclude_search_term  = get_term_by( 'name', 'exclude-from-search', 'product_visibility' );
 	$exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' );
+	$outofstock_term      = get_term_by( 'name', 'out-of-stock', 'product_visibility' );
 
 	if ( $featured_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
@@ -1048,5 +1049,9 @@ function wc_update_270_product_visibility() {
 
 	if ( $exclude_catalog_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
+	}
+
+	if ( $outofstock_term ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IN 'outofstock';", $outofstock_term->term_id ) );
 	}
 }

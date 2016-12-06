@@ -483,6 +483,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$terms[] = 'featured';
 		}
 
+		if ( 'outofstock' === $product->get_stock_status() ) {
+			$terms[] = 'outofstock';
+		}
+
 		switch ( $product->get_catalog_visibility() ) {
 			case 'hidden' :
 				$terms[] = 'exclude-from-search';
@@ -861,22 +865,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$query['join']   = " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
-		}
-
 		$query['where']  = ' WHERE 1=1';
 		$query['where'] .= " AND p.post_status = 'publish'";
 		$query['where'] .= " AND p.post_type = 'product'";
 		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$query['where'] .= " AND pm2.meta_value = 'instock'";
+		if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+			$query['where'] .= " AND t.term_id !=" . absint( $exclude_catalog_term->term_id );
 		}
 
-		if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
-			$query['where'] .= "AND t.term_id !=" . absint( $exclude_catalog_term->term_id );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) ) {
+			$query['where'] .= " AND t.term_id !=" . absint( $outofstock_term->term_id );
 		}
 
 		if ( $cats_array || $tags_array ) {

@@ -62,7 +62,7 @@ class WC_Post_types {
 		);
 
 		register_taxonomy( 'product_visibility',
-			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product' ) ),
+			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_visibility', array(
 				'hierarchical'      => false,
 				'show_ui'           => false,
