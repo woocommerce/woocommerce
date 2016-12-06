@@ -807,7 +807,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
-		if ( ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
+		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'sku', $sku );
