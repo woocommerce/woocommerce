@@ -684,7 +684,7 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
  */
 function wc_get_product_visibility_options() {
 	return apply_filters( 'woocommerce_product_visibility_options', array(
-		'visible' => __( 'Catalog/search', 'woocommerce' ),
+		'visible' => __( 'Visible', 'woocommerce' ),
 		'catalog' => __( 'Catalog', 'woocommerce' ),
 		'search'  => __( 'Search', 'woocommerce' ),
 		'hidden'  => __( 'Hidden', 'woocommerce' ),

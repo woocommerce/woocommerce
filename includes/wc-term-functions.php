@@ -564,16 +564,17 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	// Main query
 	$count_query = "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		$stock_join
 		WHERE 	post_status = 'publish'
 		AND 	post_type 	= 'product'
-		AND 	meta_visibility.meta_key = '_visibility'
-		AND 	meta_visibility.meta_value IN ( 'visible', 'catalog' )
 		$stock_query
 	";
+
+	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+		$count_query .= "AND term_id !=" . absint( $exclude_catalog_term->term_id );
+	}
 
 	// Pre-process term taxonomy ids
 	if ( ! $terms_are_term_taxonomy_ids ) {

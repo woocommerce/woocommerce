@@ -101,10 +101,18 @@ class WC_Widget_Products extends WC_Widget {
 			'no_found_rows'  => 1,
 			'order'          => $order,
 			'meta_query'     => array(),
+			'tax_query'      => array(
+				'relation' => 'AND',
+			),
 		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => is_search() ? 'exclude-from-search' : 'exclude-from-catalog',
+				'operator' => 'NOT IN',
+			);
 			$query_args['post_parent']  = 0;
 		}
 
@@ -122,9 +130,10 @@ class WC_Widget_Products extends WC_Widget {
 
 		switch ( $show ) {
 			case 'featured' :
-				$query_args['meta_query'][] = array(
-					'key'   => '_featured',
-					'value' => 'yes',
+				$query_args['tax_query'][] = array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => 'featured',
 				);
 				break;
 			case 'onsale' :

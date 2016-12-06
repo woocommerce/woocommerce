@@ -533,7 +533,6 @@ class WC_Query {
 			$meta_query = array();
 		}
 
-		$meta_query['visibility']    = $this->visibility_meta_query();
 		$meta_query['stock_status']  = $this->stock_status_meta_query();
 		$meta_query['price_filter']  = $this->price_filter_meta_query();
 		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
@@ -572,16 +571,12 @@ class WC_Query {
 
 	/**
 	 * Returns a meta query to handle product visibility.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
-	public function visibility_meta_query( $compare = 'IN' ) {
-		return array(
-			'key'     => '_visibility',
-			'value'   => is_search() ? array( 'visible', 'search' ) : array( 'visible', 'catalog' ),
-			'compare' => $compare,
-		);
-	}
+	public function visibility_meta_query( $compare = 'IN' ) {}
 
 	/**
 	 * Returns a meta query to handle product stock status.
@@ -620,6 +615,13 @@ class WC_Query {
 				);
 			}
 		}
+
+		$tax_query[] = array(
+			'taxonomy' => 'product_visibility',
+			'field'    => 'name',
+			'terms'    => is_search() ? 'exclude-from-search' : 'exclude-from-catalog',
+			'operator' => 'NOT IN',
+		);
 
 		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
 	}

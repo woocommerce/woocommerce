@@ -157,7 +157,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
 		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
 		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->get_id(), '_featured', 'yes' );
 
 		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
 		wc_get_featured_product_ids(); // Creates the transient for featured products
@@ -205,8 +204,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-
-		update_post_meta( $product->get_id(), '_featured', 'yes' );
+		$product->set_featured( true );
+		$product->save();
 
 		$this->assertEquals( array( $product->get_id() ), wc_get_featured_product_ids() );
 

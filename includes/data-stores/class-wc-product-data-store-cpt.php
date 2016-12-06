@@ -132,6 +132,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->read_meta_data();
 		$this->read_attributes( $product );
 		$this->read_downloads( $product );
+		$this->read_visibility( $product );
 		$this->read_product_data( $product );
 		$product->set_object_read( true );
 	}
@@ -155,6 +156,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
+		$this->update_visibility( $product );
 		$this->update_attributes( $product );
 		$this->update_downloads( $product );
 		$product->save_meta_data();
@@ -224,8 +226,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$product->set_props( array(
-			'featured'           => get_post_meta( $id, '_featured', true ),
-			'catalog_visibility' => get_post_meta( $id, '_visibility', true ),
 			'sku'                => get_post_meta( $id, '_sku', true ),
 			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
 			'sale_price'         => get_post_meta( $id, '_sale_price', true ),
@@ -267,6 +267,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$product->{$function}( get_post_meta( $product->get_id(), '_' . $key, true ) );
 			}
 		}
+	}
+
+	/**
+	 * Convert visibility terms to props.
+	 * Catalog visibility valid values are 'visible', 'catalog', 'search', and 'hidden'.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function read_visibility( &$product ) {
+		$terms           = get_the_terms( $product->get_id(), 'product_visibility' );
+		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
+		$featured        = in_array( 'featured', $term_names );
+		$exclude_search  = in_array( 'exclude-from-search', $term_names );
+		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
+
+		if ( $exclude_search && $exclude_catalog ) {
+			$catalog_visibility = 'hidden';
+		} elseif ( $exclude_search ) {
+			$catalog_visibility = 'catalog';
+		} elseif ( $exclude_catalog ) {
+			$catalog_visibility = 'search';
+		} else {
+			$catalog_visibility = 'visible';
+		}
+
+		$product->set_props( array(
+			'featured'           => $featured,
+			'catalog_visibility' => $catalog_visibility,
+		) );
 	}
 
 	/**
@@ -334,7 +364,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$updated_props     = array();
 		$changed_props     = array_keys( $product->get_changes() );
 		$meta_key_to_props = array(
-			'_visibility'            => 'catalog_visibility',
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
@@ -359,7 +388,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_product_image_gallery' => 'gallery_image_ids',
 			'_download_limit'        => 'download_limit',
 			'_download_expiry'       => 'download_expiry',
-			'_featured'              => 'featured',
 			'_thumbnail_id'          => 'image_id',
 			'_stock'                 => 'stock_quantity',
 			'_stock_status'          => 'stock_status',
@@ -377,7 +405,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'virtual' :
 				case 'downloadable' :
 				case 'manage_stock' :
-				case 'featured' :
 				case 'sold_individually' :
 					$updated = update_post_meta( $product->get_id(), $meta_key, wc_bool_to_string( $value ) );
 					break;
@@ -411,14 +438,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( in_array( 'featured', $updated_props ) ) {
-			delete_transient( 'wc_featured_products' );
-		}
-
-		if ( in_array( 'catalog_visibility', $updated_props ) ) {
-			do_action( 'woocommerce_product_set_visibility',  $product->get_id(), $product->get_catalog_visibility() );
-		}
-
 		if ( in_array( 'stock_quantity', $updated_props ) ) {
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $product );
 		}
@@ -449,6 +468,38 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
 		wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+	}
+
+	/**
+	 * Update visibility terms based on props.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function update_visibility( &$product ) {
+		$terms = array();
+
+		if ( $product->get_featured() ) {
+			$terms[] = 'featured';
+		}
+
+		switch ( $product->get_catalog_visibility() ) {
+			case 'hidden' :
+				$terms[] = 'exclude-from-search';
+				$terms[] = 'exclude-from-catalog';
+				break;
+			case 'catalog' :
+				$terms[] = 'exclude-from-search';
+				break;
+			case 'search' :
+				$terms[] = 'exclude-from-catalog';
+				break;
+		}
+
+		if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
+			delete_transient( 'wc_featured_products' );
+			do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
+		}
 	}
 
 	/**
@@ -605,15 +656,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'post_type'      => array( 'product', 'product_variation' ),
 			'posts_per_page' => -1,
 			'post_status'    => 'publish',
-			'meta_query'     => array(
+			'tax_query'      => array(
+				'relation' => 'AND',
 				array(
-					'key' 		=> '_visibility',
-					'value' 	=> array( 'catalog', 'visible' ),
-					'compare' 	=> 'IN',
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => array( 'featured' ),
 				),
 				array(
-					'key' 	=> '_featured',
-					'value' => 'yes',
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => array( 'exclude-from-catalog' ),
+					'operator' => 'NOT IN',
 				),
 			),
 			'fields' => 'id=>parent',
@@ -804,8 +858,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$limit           = absint( $limit );
 		$query           = array();
 		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
-		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
+		$query['join']   = " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
 
@@ -817,10 +870,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$query['where'] .= " AND p.post_status = 'publish'";
 		$query['where'] .= " AND p.post_type = 'product'";
 		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
-		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
+		}
+
+		if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+			$query['where'] .= "AND t.term_id !=" . absint( $exclude_catalog_term->term_id );
 		}
 
 		if ( $cats_array || $tags_array ) {
