@@ -4,12 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$template = get_option( 'template' );
-
-if ( 'twentyseventeen' != $template ) {
-	return; // Only do any of the things if Twenty Seventeen is the active theme
-}
-
 /**
  * Twenty Seventeen suport.
  *
