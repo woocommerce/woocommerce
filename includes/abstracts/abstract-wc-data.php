@@ -299,6 +299,7 @@ abstract class WC_Data {
 
 	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
+	 * Uses it's own caches because get_metadata does not provide meta_ids.
 	 *
 	 * @since 2.6.0
 	 * @param bool $force_read True to force a new DB read (and update cache).
