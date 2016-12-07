@@ -370,7 +370,7 @@ class WC_Install {
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
 			foreach ( $terms as $term ) {
-				if ( ! get_term_by( 'slug', sanitize_title( $term ), $taxonomy ) ) {
+				if ( ! get_term_by( 'name', $term, $taxonomy ) ) {
 					wp_insert_term( $term, $taxonomy );
 				}
 			}
