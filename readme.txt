@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.9 - 2016/12/07 =
+* Theme - Added support for Twenty Seventeen Theme.
 * Fix - Excluded webhook delivery logs from comments count.
 * Fix - Included password strength meter in "Lost Password" page.
 * Fix - Order fee currency in admin screen.
