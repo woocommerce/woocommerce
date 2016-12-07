@@ -16,9 +16,6 @@ elif [ $1 == 'during' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	## Only run on 5.6 box.
-	[ $TRAVIS_PHP_VERSION != '5.6' ] && $TRAVIS_PHP_VERSION && exit;
-
 	# Get scrutinizer ocular and run it
 	wget https://scrutinizer-ci.com/ocular.phar
 	chmod +x ocular.phar
