@@ -885,7 +885,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'billing' => array(
 					'description' => __( 'Billing address.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
@@ -948,7 +948,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'shipping' => array(
 					'description' => __( 'Shipping address.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
@@ -1060,7 +1060,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'meta_data' => array(
 					'description' => __( 'Order meta data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -1083,7 +1083,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'line_items' => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -1141,7 +1141,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
@@ -1164,7 +1164,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -1199,7 +1199,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta' => array(
 							'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
@@ -1227,7 +1227,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'tax_lines' => array(
 					'description' => __( 'Tax lines data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => array(
@@ -1275,7 +1275,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -1300,7 +1300,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'shipping_lines' => array(
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -1332,7 +1332,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
@@ -1352,7 +1352,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -1377,7 +1377,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'fee_lines' => array(
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -1415,7 +1415,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
@@ -1441,7 +1441,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -1466,7 +1466,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'coupon_lines' => array(
 					'description' => __( 'Coupons line data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -1493,7 +1493,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -1518,7 +1518,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'refunds' => array(
 					'description' => __( 'List of refunds.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => array(

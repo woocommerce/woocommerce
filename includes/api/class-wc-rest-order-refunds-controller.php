@@ -334,7 +334,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				),
 				'meta_data' => array(
 					'description' => __( 'Order meta data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -357,7 +357,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				),
 				'line_items' => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -415,7 +415,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						),
 						'taxes' => array(
 							'description' => __( 'Line taxes.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
@@ -438,7 +438,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						),
 						'meta_data' => array(
 							'description' => __( 'Order item meta data.', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -473,7 +473,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						),
 						'meta' => array(
 							'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
-							'type'        => 'array',
+							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(

@@ -502,7 +502,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				),
 				'meta_data' => array(
 					'description' => __( 'Order meta data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(

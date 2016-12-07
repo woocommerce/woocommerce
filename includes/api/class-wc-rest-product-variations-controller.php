@@ -403,7 +403,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'downloads' => array(
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -492,7 +492,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'dimensions' => array(
 					'description' => __( 'Variation dimensions.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
@@ -528,7 +528,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'image' => array(
 					'description' => __( 'Variation image data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -573,7 +573,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'attributes' => array(
 					'description' => __( 'List of attributes.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
