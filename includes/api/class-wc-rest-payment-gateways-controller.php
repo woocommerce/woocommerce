@@ -377,7 +377,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				),
 				'settings' => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 				),
 			),
