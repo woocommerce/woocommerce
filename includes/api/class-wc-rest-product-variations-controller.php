@@ -405,22 +405,25 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'File MD5 hash.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'name' => array(
-							'description' => __( 'File name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'file' => array(
-							'description' => __( 'File URL.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'File MD5 hash.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'name' => array(
+								'description' => __( 'File name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'file' => array(
+								'description' => __( 'File URL.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),
@@ -575,21 +578,24 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'List of attributes.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Attribute ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'name' => array(
-							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'option' => array(
-							'description' => __( 'Selected attribute term name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Attribute ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'name' => array(
+								'description' => __( 'Attribute name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'option' => array(
+								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),

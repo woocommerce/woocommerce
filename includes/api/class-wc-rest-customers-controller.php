@@ -799,22 +799,25 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 					'description' => __( 'Order meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'int',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'key' => array(
-							'description' => __( 'Meta key.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'value' => array(
-							'description' => __( 'Meta value.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'int',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key' => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),
