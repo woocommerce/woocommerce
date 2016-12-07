@@ -403,7 +403,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'downloads' => array(
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -573,7 +573,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'attributes' => array(
 					'description' => __( 'List of attributes.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(

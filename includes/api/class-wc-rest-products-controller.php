@@ -1860,7 +1860,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'downloads' => array(
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2065,7 +2065,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'categories' => array(
 					'description' => __( 'List of categories.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2089,7 +2089,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'tags' => array(
 					'description' => __( 'List of tags.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2113,7 +2113,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'images' => array(
 					'description' => __( 'List of images.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2158,7 +2158,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'attributes' => array(
 					'description' => __( 'List of attributes.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2197,7 +2197,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'default_attributes' => array(
 					'description' => __( 'Defaults variation attributes.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2219,7 +2219,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				),
 				'variations' => array(
 					'description' => __( 'List of variations.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -2314,7 +2314,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						),
 						'downloads' => array(
 							'description' => __( 'List of downloadable files.', 'woocommerce' ),
-							'type'        => 'object',
+							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
@@ -2484,7 +2484,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						),
 						'attributes' => array(
 							'description' => __( 'List of attributes.', 'woocommerce' ),
-							'type'        => 'object',
+							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'id' => array(
