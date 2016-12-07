@@ -509,7 +509,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 						'properties' => array(
 							'id' => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
-								'type'        => 'int',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

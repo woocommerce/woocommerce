@@ -804,7 +804,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 						'properties' => array(
 							'id' => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
-								'type'        => 'int',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

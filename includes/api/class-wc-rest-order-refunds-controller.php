@@ -329,7 +329,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				),
 				'refunded_by' => array(
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
-					'type'        => 'int',
+					'type'        => 'integer',
 					'context'     => array( 'view' ),
 				),
 				'meta_data' => array(
@@ -341,7 +341,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 						'properties' => array(
 							'id' => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
-								'type'        => 'int',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -453,7 +453,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 									'properties' => array(
 										'id' => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
-											'type'        => 'int',
+											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
