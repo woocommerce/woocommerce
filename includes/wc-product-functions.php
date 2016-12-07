@@ -247,7 +247,9 @@ function wc_product_post_type_link( $permalink, $post ) {
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
-		usort( $terms, '_usort_terms_by_ID' ); // order by ID
+		
+		// _usort_terms_by_ID is deprecated since version 4.7.0! 
+		usort( $terms, 'wp_list_sort' ); // order by ID
 
 		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $terms[0], $terms, $post );
 		$category_object = get_term( $category_object, 'product_cat' );
