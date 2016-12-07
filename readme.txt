@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Downloads should store variation ID rather than product if set. Also fixes link on account page.
 * Fix - Use wp_list_sort instead of _usort_terms_by_ID to be compatible with 4.7.
 * Fix - Only return empty string if empty for weight and dimension functions.
+* Fix - Added correct fallbacks for logout/lost password URLs when endpoints are not defined.
 * Dev - API - Only update categories menu order and display if defined.
 * Dev - Fixed when should deliver wp_trash_post webhooks.
 

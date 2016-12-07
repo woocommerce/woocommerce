@@ -2228,3 +2228,20 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 		WC_Shortcode_My_Account::edit_account();
 	}
 }
+
+/**
+ * Get logout endpoint.
+ *
+ * @since  2.6.9
+ * @return string
+ */
+function wc_logout_url( $redirect = '' ) {
+	$logout_endpoint = get_option( 'woocommerce_logout_endpoint' );
+	$redirect        = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
+
+	if ( $logout_endpoint ) {
+		return wc_get_endpoint_url( 'customer-logout', '', $redirect );
+	} else {
+		return wp_logout_url( $redirect );
+	}
+}
