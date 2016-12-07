@@ -12,8 +12,6 @@ if [ $1 == 'before' ]; then
 	composer self-update
 	composer install --no-interaction
 
-elif [ $1 == 'during' ]; then
-
 elif [ $1 == 'after' ]; then
 
 	# Get scrutinizer ocular and run it
