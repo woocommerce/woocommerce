@@ -2,7 +2,7 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, icaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
-Tested up to: 4.6
+Tested up to: 4.7
 Stable tag: 2.6.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.9 - 2016/11/xx =
+= 2.6.9 - 2016/12/07 =
 * Fix - Excluded webhook delivery logs from comments count.
 * Fix - Included password strength meter in "Lost Password" page.
 * Fix - Order fee currency in admin screen.
@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed pagination when removing layered nav items via widget.
 * Fix - Default BE tax rate.
 * Fix - Downloads should store variation ID rather than product if set. Also fixes link on account page.
+* Fix - Use wp_list_sort instead of _usort_terms_by_ID to be compatible with 4.7.
 * Dev - API - Only update categories menu order and display if defined.
 * Dev - Fixed when should deliver wp_trash_post webhooks.
 
