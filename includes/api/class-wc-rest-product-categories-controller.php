@@ -208,7 +208,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				),
 				'image' => array(
 					'description' => __( 'Image data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(

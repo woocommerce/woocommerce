@@ -373,8 +373,8 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'tax',
-			'type'       => 'order_note',
+			'title'      => 'order_note',
+			'type'       => 'object',
 			'properties' => array(
 				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),

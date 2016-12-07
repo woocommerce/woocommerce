@@ -206,7 +206,7 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
 				),
 				'file' => array(
 					'description' => __( 'File details.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties' => array(
