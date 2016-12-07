@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 2.6.8
+Stable tag: 2.6.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Use wp_list_sort instead of _usort_terms_by_ID to be compatible with 4.7.
 * Fix - Only return empty string if empty for weight and dimension functions.
 * Fix - Added correct fallbacks for logout/lost password URLs when endpoints are not defined.
+* Security - Wrapped admin tax rate table values in _escape to thwart evil CSVs an admin user could upload. Vulnerability was discovered by Fortinet’s FortiGuard Labs.
 * Dev - API - Only update categories menu order and display if defined.
 * Dev - Fixed when should deliver wp_trash_post webhooks.
 
