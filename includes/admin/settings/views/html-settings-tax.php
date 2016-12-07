@@ -57,11 +57,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 
 		<td class="postcode">
-			<input type="text" value="<# if ( data.postcode ) print( data.postcode.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_postcode[{{ data.tax_rate_id }}]" data-attribute="postcode" />
+			<input type="text" value="<# if ( data.postcode ) print( _.escape( data.postcode.join( '; ' ) ) ); #>" placeholder="*" data-name="tax_rate_postcode[{{ data.tax_rate_id }}]" data-attribute="postcode" />
 		</td>
 
 		<td class="city">
-			<input type="text" value="<# if ( data.city ) print( data.city.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_city[{{ data.tax_rate_id }}]" data-attribute="city" />
+			<input type="text" value="<# if ( data.city ) print( _.escape( data.city.join( '; ' ) ) ); #>" placeholder="*" data-name="tax_rate_city[{{ data.tax_rate_id }}]" data-attribute="city" />
 		</td>
 
 		<td class="rate">
