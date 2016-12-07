@@ -525,8 +525,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_version_and_type( &$product ) {
-		$type_term = get_term_by( 'name', $product->get_type(), 'product_type' );
-		wp_set_object_terms( $product->get_id(), absint( $type_term->term_id ), 'product_type' );
+		wp_set_object_terms( $product->get_id(), $product->get_type(), 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
 	}
 
