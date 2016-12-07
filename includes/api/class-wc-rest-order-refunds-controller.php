@@ -380,7 +380,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
