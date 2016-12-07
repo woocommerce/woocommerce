@@ -1,15 +1,14 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
 
 /**
  * Twenty Seventeen suport.
  *
  * @class   WC_Twenty_Seventeen
- * @since   2.7.0
- * @version 2.7.0
+ * @since   2.6.9
+ * @version 2.6.9
  * @package WooCommerce/Classes
  */
 class WC_Twenty_Seventeen {
@@ -23,10 +22,15 @@ class WC_Twenty_Seventeen {
 
 		add_action( 'woocommerce_before_main_content', array( $this, 'output_content_wrapper' ), 10 );
 		add_action( 'woocommerce_after_main_content', array( $this, 'output_content_wrapper_end' ), 10 );
-
 		add_filter( 'woocommerce_enqueue_styles', array( $this, 'enqueue_styles' ) );
 	}
 
+	/**
+	 * Enqueue CSS for this theme.
+	 *
+	 * @param  array $styles
+	 * @return array
+	 */
 	public function enqueue_styles( $styles ) {
 		unset( $styles['woocommerce-general'] );
 
@@ -41,8 +45,7 @@ class WC_Twenty_Seventeen {
 	}
 
 	/**
-	 * Open the Twenty Seventeen wrapper
-	 * @return void
+	 * Open the Twenty Seventeen wrapper.
 	 */
 	public function output_content_wrapper() { ?>
 		<div class="wrap">
@@ -52,10 +55,9 @@ class WC_Twenty_Seventeen {
 	}
 
 	/**
-	 * Close the Twenty Seventeen wrapper
-	 * @return void
+	 * Close the Twenty Seventeen wrapper.
 	 */
-	public function output_content_wrapper_end () {?>
+	public function output_content_wrapper_end() { ?>
 				</main>
 			</div>
 			<?php get_sidebar(); ?>
@@ -64,5 +66,4 @@ class WC_Twenty_Seventeen {
 	}
 }
 
-return new WC_Twenty_Seventeen();
-
+new WC_Twenty_Seventeen();

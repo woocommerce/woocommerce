@@ -230,15 +230,14 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Check the active theme
+	 * Check the active theme.
 	 *
+	 * @since  2.6.9
 	 * @param  string $theme Theme slug to check
 	 * @return bool
 	 */
 	private function is_active_theme( $theme ) {
-		$template = get_template();
-
-		return ( $theme === $template ) ? true : false;
+		return $theme === get_template();
 	}
 
 	/**
@@ -356,7 +355,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );                // Structured Data class
 
 		if ( $this->is_active_theme( 'twentyseventeen' ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-twenty-seventeen.php' );           // Twenty Seventeen support
+			include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php' );
 		}
 	}
 
