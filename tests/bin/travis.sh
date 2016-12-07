@@ -12,8 +12,14 @@ if [ $1 == 'before' ]; then
 	composer self-update
 	composer install --no-interaction
 
-	## Only run on 5.6 box.
-	[ $TRAVIS_PHP_VERSION != '5.6' ] && $TRAVIS_PHP_VERSION && exit;
+	## Only run on 7.0 box.
+	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.4' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.5' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.6' ] && exit;
+	[ $TRAVIS_PHP_VERSION == 'hhvm' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '7.1' ] && exit;
 
 	# Install CodeSniffer for WordPress Coding Standards checks. Only check once.
 	git clone -b master --depth 1 https://github.com/squizlabs/PHP_CodeSniffer.git /tmp/phpcs
@@ -29,8 +35,14 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'during' ]; then
 
-	## Only run on 5.6 box.
-	[ $TRAVIS_PHP_VERSION != '5.6' ] && $TRAVIS_PHP_VERSION && exit;
+	## Only run on 7.0 box.
+	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.4' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.5' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.6' ] && exit;
+	[ $TRAVIS_PHP_VERSION == 'hhvm' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '7.1' ] && exit;
 
 	# WordPress Coding Standards.
 	# @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
@@ -41,7 +53,7 @@ elif [ $1 == 'during' ]; then
 	# -n flag: Do not print warnings. (shortcut for --warning-severity=0)
 	# --standard: Use WordPress as the standard.
 	# --extensions: Only sniff PHP files.
-	tmp/phpcs/scripts/phpcs -p -s -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
+	/tmp/phpcs/scripts/phpcs -p -s -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
 	/tmp/phpcs/scripts/phpcs -p -s -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/*.php
 	/tmp/phpcs/scripts/phpcs -p -s -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/*.php
 	/tmp/phpcs/scripts/phpcs -p -s -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php
@@ -49,8 +61,14 @@ elif [ $1 == 'during' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	## Only run on 5.6 box.
-	[ $TRAVIS_PHP_VERSION != '5.6' ] && $TRAVIS_PHP_VERSION && exit;
+	## Only run on 7.0 box.
+	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.4' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.5' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '5.6' ] && exit;
+	[ $TRAVIS_PHP_VERSION == 'hhvm' ] && exit;
+	[ $TRAVIS_PHP_VERSION == '7.1' ] && exit;
 
 	# Get scrutinizer ocular and run it
 	wget https://scrutinizer-ci.com/ocular.phar
