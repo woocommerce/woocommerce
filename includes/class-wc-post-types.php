@@ -190,7 +190,7 @@ class WC_Post_types {
 					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					$wc_product_attributes[ $name ] = $tax;
 					$taxonomy_data                  = array(
-						'hierarchical'          => true,
+						'hierarchical'          => false,
 						'update_count_callback' => '_update_post_term_count',
 						'labels'                => array(
 								'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
