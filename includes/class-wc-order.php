@@ -249,6 +249,10 @@ class WC_Order extends WC_Abstract_Order {
 				$this->set_date_paid( current_time( 'timestamp' ) );
 			}
 
+			if ( ! $this->get_date_paid() && 'pending' === $result['from'] ) {
+				$this->set_date_paid( current_time( 'timestamp' ) );
+			}
+
 			if ( 'completed' === $result['to'] ) {
 				$this->set_date_completed( current_time( 'timestamp' ) );
 			}

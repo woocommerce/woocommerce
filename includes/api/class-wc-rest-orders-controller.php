@@ -190,7 +190,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		$order             = wc_get_order( $post );
 		$data              = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed' );
+		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Format decimal values.

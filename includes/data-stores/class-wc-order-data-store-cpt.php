@@ -141,8 +141,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_customer_ip_address'  => 'customer_ip_address',
 			'_customer_user_agent'  => 'customer_user_agent',
 			'_created_via'          => 'created_via',
-			'_date_completed'       => 'date_completed',
-			'_date_paid'            => 'date_paid',
+			'_completed_date'       => 'date_completed',
+			'_paid_date'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
 		);
 
