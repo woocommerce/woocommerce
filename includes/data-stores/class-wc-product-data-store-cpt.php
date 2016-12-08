@@ -90,6 +90,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_id( $id );
 			$this->update_post_meta( $product );
 			$this->update_terms( $product );
+			$this->update_visibility( $product );
 			$this->update_attributes( $product );
 			$this->update_downloads( $product );
 			$product->save_meta_data();
