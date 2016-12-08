@@ -29,7 +29,6 @@ class WC_Product_Factory {
 		if ( ! $product_id ) {
 			return false;
 		}
-
 		$product_type = $this->get_product_type( $product_id );
 		$classname    = $this->get_classname_from_product_type( $product_type );
 
@@ -64,6 +63,7 @@ class WC_Product_Factory {
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
 			$post_type = get_post_type( $product_id );
+
 			if ( 'product_variation' === $post_type ) {
 				return 'variation';
 			} elseif ( 'product' === $post_type ) {

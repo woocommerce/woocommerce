@@ -656,6 +656,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	public function get_featured_product_ids() {
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
+
 		return get_posts( array(
 			'post_type'      => array( 'product', 'product_variation' ),
 			'posts_per_page' => -1,
@@ -664,13 +666,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'relation' => 'AND',
 				array(
 					'taxonomy' => 'product_visibility',
-					'field'    => 'name',
-					'terms'    => array( 'featured' ),
+					'field'    => 'term_taxonomy_id',
+					'terms'    => array( $product_visibility_term_ids['featured'] ),
 				),
 				array(
 					'taxonomy' => 'product_visibility',
-					'field'    => 'name',
-					'terms'    => array( 'exclude-from-catalog' ),
+					'field'    => 'term_taxonomy_id',
+					'terms'    => array( $product_visibility_term_ids['exclude-from-catalog'] ),
 					'operator' => 'NOT IN',
 				),
 			),
@@ -870,12 +872,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$query['where'] .= " AND p.post_type = 'product'";
 		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
 
-		if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
-			$query['where'] .= " AND t.term_id !=" . absint( $exclude_catalog_term->term_id );
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
+
+		if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
+			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) ) {
-			$query['where'] .= " AND t.term_id !=" . absint( $outofstock_term->term_id );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
+			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['outofstock'];
 		}
 
 		if ( $cats_array || $tags_array ) {

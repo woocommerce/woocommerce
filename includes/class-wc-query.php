@@ -615,16 +615,17 @@ class WC_Query {
 			}
 		}
 
-		$product_visibility_not_in = array( is_search() && $main_query ? 'exclude-from-search' : 'exclude-from-catalog' );
+		$product_visibiity_terms   = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibiity_terms['exclude-from-search'] : $product_visibiity_terms['exclude-from-catalog'] );
 
 		// Hide out of stock products.
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = 'outofstock';
+			$product_visibility_not_in[] = $product_visibiity_terms['outofstock'];
 		}
 
 		$tax_query[] = array(
 			'taxonomy' => 'product_visibility',
-			'field'    => 'name',
+			'field'    => 'term_taxonomy_id',
 			'terms'    => $product_visibility_not_in,
 			'operator' => 'NOT IN',
 		);

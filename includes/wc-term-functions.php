@@ -559,12 +559,14 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		AND 	post_type 	= 'product'
 	";
 
-	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
-		$count_query .= "AND term_id !=" . absint( $exclude_catalog_term->term_id );
+	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
+
+	if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
+		$count_query .= "AND term_taxonomy_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
 	}
 
-	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) ) {
-		$count_query .= "AND term_id !=" . absint( $outofstock_term->term_id );
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
+		$count_query .= "AND term_taxonomy_id !=" . $product_visibility_term_ids['outofstock'];
 	}
 
 	// Pre-process term taxonomy ids
@@ -733,3 +735,28 @@ function wc_clear_term_product_ids( $object_id, $terms, $tt_ids, $taxonomy, $app
 	}
 }
 add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
+
+/**
+ * Get full list of product visibilty term ids.
+ *
+ * @since  2.7.0
+ * @return int[]
+ */
+function wc_get_product_visibility_term_ids() {
+	return array_map( 'absint', wp_parse_args(
+		wp_list_pluck(
+			get_terms( array(
+				'taxonomy' => 'product_visibility',
+				'hide_empty' => false,
+			) ),
+			'term_taxonomy_id',
+			'name'
+		),
+		array(
+			'exclude-from-catalog' => 0,
+			'exclude-from-search'  => 0,
+			'featured'             => 0,
+			'outofstock'           => 0,
+		)
+	) );
+}
