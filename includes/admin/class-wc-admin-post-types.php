@@ -1878,7 +1878,7 @@ class WC_Admin_Post_Types {
 		$thepostid          = $post->ID;
 		$product_object     = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 		$current_visibility = $product_object->get_catalog_visibility();
-		$current_featured   = $product_object->get_featured() ? 'yes' : 'no';
+		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">
