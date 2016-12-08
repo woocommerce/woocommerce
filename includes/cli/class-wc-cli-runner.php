@@ -5,9 +5,11 @@
  * Hooks into the REST API, figures out which endpoints come from WC,
  * and registers them as CLI commands.
  *
- * @version	2.7.0
+ * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
+ * https://github.com/wp-cli/restful
+ *
+ * @version 2.7.0
  * @package WooCommerce
- * @author  WooCommerce
  */
 class WC_CLI_Runner {
 	/**

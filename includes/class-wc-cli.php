@@ -2,7 +2,7 @@
 /**
  * Enables WooCommerce, via the the command line.
  *
- * @version	2.7.0
+ * @version 2.7.0
  * @package WooCommerce
  * @author  WooCommerce
  */

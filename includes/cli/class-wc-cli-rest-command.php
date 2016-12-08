@@ -6,10 +6,11 @@
  * off of Restful to generate commands for each WooCommerce REST API endpoint
  * so most of the logic is shared.
  *
+ * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
+ * https://github.com/wp-cli/restful
  *
- * @version	2.7.0
+ * @version 2.7.0
  * @package WooCommerce
- * @author  WooCommerce
  */
 class WC_CLI_REST_Command {
 	/**

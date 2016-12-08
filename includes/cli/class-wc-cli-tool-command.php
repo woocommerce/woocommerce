@@ -2,9 +2,11 @@
 /**
  * Hooks up our system status tools to the CLI.
  *
- * @version	2.7.0
+ * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
+ * https://github.com/wp-cli/restful
+ *
+ * @version 2.7.0
  * @package WooCommerce
- * @author  WooCommerce
  */
 class WC_CLI_Tool_Command {
 
