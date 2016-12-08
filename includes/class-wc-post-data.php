@@ -187,6 +187,11 @@ class WC_Post_Data {
 	 * @return null|bool
 	 */
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
+		// Delete product cache if someone uses meta directly.
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ) ) ) {
+			wp_cache_delete( 'product-' . $object_id, 'products' );
+		}
+
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ) ) ) {
 
 			// Convert float to string

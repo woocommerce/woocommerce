@@ -46,11 +46,11 @@ class WC_Product_Factory {
 
 		try {
 			// Try to get from cache, otherwise create a new object,
-			$product = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'product-' . $product_id ), 'products' );
+			$product = wp_cache_get( 'product-' . $product_id, 'products' );
 
 			if ( ! is_a( $product, 'WC_Product' ) ) {
 				$product = new $classname( $product_id );
-				wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'product-' . $product_id ), $product, 'products' );
+				wp_cache_set( 'product-' . $product_id, $product, 'products' );
 			}
 
 			return $product;
