@@ -736,7 +736,6 @@ class WC_Admin_Post_Types {
 	public function product_sortable_columns( $columns ) {
 		$custom = array(
 			'price'    => 'price',
-			'featured' => array( 'featured', 1 ),
 			'sku'      => 'sku',
 			'name'     => 'title',
 		);
@@ -1671,12 +1670,6 @@ class WC_Admin_Post_Types {
 						'orderby'   => 'meta_value_num',
 					) );
 				}
-				if ( 'featured' == $vars['orderby'] ) {
-					$vars = array_merge( $vars, array(
-						'meta_key'  => '_featured',
-						'orderby'   => 'meta_value',
-					) );
-				}
 				if ( 'sku' == $vars['orderby'] ) {
 					$vars = array_merge( $vars, array(
 						'meta_key'  => '_sku',
@@ -1876,27 +1869,23 @@ class WC_Admin_Post_Types {
 	 * Output product visibility options.
 	 */
 	public function product_data_visibility() {
-		global $post;
+		global $post, $thepostid, $product_object;
 
-		if ( 'product' != $post->post_type ) {
+		if ( 'product' !== $post->post_type ) {
 			return;
 		}
 
-		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : apply_filters( 'woocommerce_product_visibility_default' , 'visible' );
-		$current_featured   = ( $current_featured = get_post_meta( $post->ID, '_featured', true ) ) ? $current_featured : 'no';
-
-		$visibility_options = apply_filters( 'woocommerce_product_visibility_options', array(
-			'visible' => __( 'Catalog/search', 'woocommerce' ),
-			'catalog' => __( 'Catalog', 'woocommerce' ),
-			'search'  => __( 'Search', 'woocommerce' ),
-			'hidden'  => __( 'Hidden', 'woocommerce' ),
-		) );
+		$thepostid          = $post->ID;
+		$product_object     = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
+		$current_visibility = $product_object->get_catalog_visibility();
+		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
+		$visibility_options = wc_get_product_visibility_options();
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">
 			<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
 				echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
-				if ( 'yes' == $current_featured ) {
+				if ( 'yes' === $current_featured ) {
 					echo ', ' . __( 'Featured', 'woocommerce' );
 				}
 			?></strong>

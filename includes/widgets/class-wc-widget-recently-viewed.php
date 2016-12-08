@@ -63,11 +63,25 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'post__in' );
+		$query_args = array(
+			'posts_per_page' => $number,
+			'no_found_rows'  => 1,
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'post__in'       => $viewed_products,
+			'orderby'        => 'post__in',
+		);
 
-		$query_args['meta_query']   = array();
-		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-		$query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => 'outofstock',
+					'operator' => 'NOT IN',
+				),
+			);
+		}
 
 		$r = new WP_Query( $query_args );
 

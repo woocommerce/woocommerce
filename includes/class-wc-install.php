@@ -75,6 +75,8 @@ class WC_Install {
 		'2.7.0' => array(
 			'wc_update_270_webhooks',
 			'wc_update_270_grouped_products',
+			'wc_update_270_settings',
+			'wc_update_270_product_visibility',
 		),
 	);
 
@@ -365,6 +367,12 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external',
+			),
+			'product_visibility' => array(
+				'exclude-from-search',
+				'exclude-from-catalog',
+				'featured',
+				'outofstock',
 			),
 		);
 

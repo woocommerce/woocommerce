@@ -550,30 +550,22 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		_update_post_term_count( $terms, $taxonomy );
 	}
 
-	// Stock query
-	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
-		$stock_query = "
-		AND meta_stock.meta_key = '_stock_status'
-		AND meta_stock.meta_value = 'instock'
-		";
-	} else {
-		$stock_query = $stock_join = '';
-	}
-
 	// Main query
 	$count_query = "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		$stock_join
 		WHERE 	post_status = 'publish'
 		AND 	post_type 	= 'product'
-		AND 	meta_visibility.meta_key = '_visibility'
-		AND 	meta_visibility.meta_value IN ( 'visible', 'catalog' )
-		$stock_query
 	";
+
+	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+		$count_query .= "AND term_id !=" . absint( $exclude_catalog_term->term_id );
+	}
+
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) ) {
+		$count_query .= "AND term_id !=" . absint( $outofstock_term->term_id );
+	}
 
 	// Pre-process term taxonomy ids
 	if ( ! $terms_are_term_taxonomy_ids ) {
@@ -634,8 +626,9 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
  * @param int $product_id
  */
 function wc_recount_after_stock_change( $product_id ) {
-	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) != 'yes' )
+	if ( 'yes' !== get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 		return;
+	}
 
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
 

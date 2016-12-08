@@ -2174,13 +2174,9 @@ table.wp-list-table {
 	}
 
 	span.wc-featured {
-		margin: 0;
-		cursor: pointer;
-
 		&::before {
 			content: '\f155';
 		}
-
 		&.not-featured {
 			&::before {
 				content: '\f154';
@@ -2191,12 +2187,11 @@ table.wp-list-table {
 	td.column-featured {
 		span.wc-featured {
 			font-size: 1.6em;
+			cursor: pointer;
 		}
 	}
 
 	span.wc-type {
-		margin: 0;
-
 		&::before {
 			font-family: 'WooCommerce';
 			content: '\e006';
@@ -2206,6 +2201,7 @@ table.wp-list-table {
 	span.product-type {
 		@include ir();
 		font-size: 1.6em;
+		margin: 0 auto;
 
 		&::before {
 			@include icon( '\e006' );

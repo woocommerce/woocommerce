@@ -39,7 +39,6 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 		wp_set_object_terms( $product, 'simple', 'product_type' );
 
@@ -93,7 +92,6 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 		wp_set_object_terms( $product, 'grouped', 'product_type' );
 
@@ -136,7 +134,6 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
 		update_post_meta( $product_id, '_virtual', 'no' );
-		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
 		// Attributes

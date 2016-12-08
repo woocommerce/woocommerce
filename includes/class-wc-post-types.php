@@ -61,6 +61,18 @@ class WC_Post_types {
 			) )
 		);
 
+		register_taxonomy( 'product_visibility',
+			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
+			apply_filters( 'woocommerce_taxonomy_args_product_visibility', array(
+				'hierarchical'      => false,
+				'show_ui'           => false,
+				'show_in_nav_menus' => false,
+				'query_var'         => is_admin(),
+				'rewrite'           => false,
+				'public'            => false,
+			) )
+		);
+
 		register_taxonomy( 'product_cat',
 			apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_cat', array(

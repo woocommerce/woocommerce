@@ -55,10 +55,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				'numberposts' => -1,
 			);
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-				$visible_only_args['meta_query'][] = array(
-					'key'     => '_stock_status',
-					'value'   => 'instock',
-					'compare' => '=',
+				$visible_only_args['tax_query'][] = array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => 'outofstock',
+					'operator' => 'NOT IN',
 				);
 			}
 			$children['all']     = get_posts( apply_filters( 'woocommerce_variable_children_args', $all_args, $product, false ) );
