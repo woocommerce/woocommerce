@@ -26,7 +26,7 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	2.6.0
+ * @version	2.7.0
  */
 final class WooCommerce {
 
@@ -331,6 +331,11 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php' );
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
+			new WC_CLI;
+		}
 
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
