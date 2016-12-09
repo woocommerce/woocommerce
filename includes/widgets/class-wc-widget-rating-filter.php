@@ -110,11 +110,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		}
 
 		// Set new rating filter.
-		$product_visibiity_terms = wc_get_product_visibility_term_ids();
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
 		$tax_query[]             = array(
 			'taxonomy'      => 'product_visibility',
 			'field'         => 'term_taxonomy_id',
-			'terms'         => $product_visibiity_terms[ 'rated-' . $rating ],
+			'terms'         => $product_visibility_terms[ 'rated-' . $rating ],
 			'operator'      => 'IN',
 			'rating_filter' => true,
 		);

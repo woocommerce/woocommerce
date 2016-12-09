@@ -561,22 +561,22 @@ class WC_Query {
 			}
 		}
 
-		$product_visibiity_terms   = wc_get_product_visibility_term_ids();
-		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibiity_terms['exclude-from-search'] : $product_visibiity_terms['exclude-from-catalog'] );
+		$product_visibility_terms   = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 		$product_visibility_in     = array();
 
 		// Hide out of stock products.
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = $product_visibiity_terms['outofstock'];
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
 		}
 
 		// Filter by rating.
 		if ( isset( $_GET['rating_filter'] ) ) {
 			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
-			$rating_terms = array();
+			$rating_terms  = array();
 			for ( $i = 1; $i <= 5; $i ++ ) {
-				if ( in_array( $i, $rating_filter ) && isset( $product_visibiity_terms[ 'rated-' . $i ] ) ) {
-					$rating_terms[] = $product_visibiity_terms[ 'rated-' . $i ];
+				if ( in_array( $i, $rating_filter ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
+					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
 				}
 			}
 			if ( ! empty( $rating_terms ) ) {
