@@ -70,7 +70,7 @@ abstract class WC_Data {
 	 * Stores additonal meta data.
 	 * @var array
 	 */
-	protected $meta_data = array();
+	protected $meta_data = null;
 
 	/**
 	 * Default constructor.
@@ -179,6 +179,9 @@ abstract class WC_Data {
 	 * @return array
 	 */
 	public function get_meta_data() {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
 		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
@@ -191,6 +194,9 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
 		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
 		$value    = '';
 
@@ -216,6 +222,9 @@ abstract class WC_Data {
 	 */
 	public function set_meta_data( $data ) {
 		if ( ! empty( $data ) && is_array( $data ) ) {
+			if ( is_null( $this->meta_data ) ) {
+				$this->read_meta_data();
+			}
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
@@ -237,6 +246,9 @@ abstract class WC_Data {
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
@@ -254,11 +266,10 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
-		$array_key = '';
-		if ( $meta_id ) {
-			$array_key = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id );
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
 		}
-		if ( $array_key ) {
+		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
 			$this->meta_data[ current( $array_key ) ] = (object) array(
 				'id'    => $meta_id,
 				'key'   => $key,
@@ -275,8 +286,10 @@ abstract class WC_Data {
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key );
-		if ( $array_keys ) {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
+		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key ) ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -289,8 +302,10 @@ abstract class WC_Data {
 	 * @param int $mid Meta ID
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
-		if ( $array_keys ) {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
+		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid ) ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -353,7 +368,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 */
 	public function save_meta_data() {
-		if ( ! $this->data_store ) {
+		if ( ! $this->data_store || is_null( $this->meta_data ) ) {
 			return;
 		}
 		foreach ( $this->meta_data as $array_key => $meta ) {

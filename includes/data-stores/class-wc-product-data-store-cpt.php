@@ -130,7 +130,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'reviews_allowed'   => 'open' === $post_object->comment_status,
 		) );
 
-		$product->read_meta_data();
 		$this->read_attributes( $product );
 		$this->read_downloads( $product );
 		$this->read_visibility( $product );
