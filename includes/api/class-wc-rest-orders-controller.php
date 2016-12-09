@@ -212,6 +212,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Refunds.
+		$data['refunds'] = array();
 		foreach ( $order->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
