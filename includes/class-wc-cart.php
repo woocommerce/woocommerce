@@ -225,6 +225,7 @@ class WC_Cart {
 		if ( is_array( $cart ) ) {
 			// Prime meta cache to reduce future queries
 			update_meta_cache( 'post', wp_list_pluck( $cart, 'product_id' ) );
+			update_object_term_cache( wp_list_pluck( $cart, 'product_id' ), 'product' );
 
 			foreach ( $cart as $key => $values ) {
 				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
