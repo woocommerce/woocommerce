@@ -258,7 +258,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Round the total cost after taxes have been calculated.
-		$total_cost = wc_format_decimal( $total_cost, wc_get_price_decimals() );
+		if( wc_prices_include_tax() || WC()->cart->tax_display_cart == 'incl' )
+			$total_cost = wc_format_decimal( $total_cost );
+		else
+			$total_cost = wc_format_decimal( $total_cost, wc_get_price_decimals() );
 
 		// Create rate object
 		$rate = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
