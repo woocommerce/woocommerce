@@ -203,6 +203,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * API - New settings endpoints.
 * API - Payment gateways and shipping methods endpoints.
 * API - Prevented the (broken) ability to manipulate variations directly on the products endpoints.
+* CLI - New CLI which uses the REST API endpoints rather than it's own functions.
 * Localization - Added inline comments for placeholder strings.
 * Localization - Added Nigerian Provinces to i18n/state.
 * Localization - US and Poland postcode validation.
