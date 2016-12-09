@@ -326,10 +326,17 @@ class WC_Gateway_Paypal_Request {
 			return false;
 		}
 
-		$this->line_items[ 'item_name_' . $index ]   = html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' );
-		$this->line_items[ 'quantity_' . $index ]    = (int) $quantity;
-		$this->line_items[ 'amount_' . $index ]      = (float) $amount;
-		$this->line_items[ 'item_number_' . $index ] = $item_number;
+		$item = apply_filters( 'woocommerce_paypal_line_item', array(
+			'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
+			'quantity'    => (int) $quantity,
+			'amount'      => (float) $amount,
+			'item_number' => $item_number,
+		), $item_name, $quantity, $amount, $item_number );
+
+		$this->line_items[ 'item_name_' . $index ]   = $item['item_name'];
+		$this->line_items[ 'quantity_' . $index ]    = $item['quantity'];
+		$this->line_items[ 'amount_' . $index ]      = $item['amount'];
+		$this->line_items[ 'item_number_' . $index ] = $item['item_number'];
 
 		return true;
 	}
