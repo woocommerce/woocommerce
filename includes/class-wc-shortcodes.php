@@ -87,7 +87,7 @@ class WC_Shortcodes {
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $loop_name;
-		$transient_name              = 'wc_loop_' . $loop_name . '_' . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$transient_name              = 'wc_loop' . substr( md5( json_encode( $query_args ) . $loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
