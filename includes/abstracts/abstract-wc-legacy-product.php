@@ -504,7 +504,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_formatted_variation_attributes( $flat = false ) {
 		wc_deprecated_function( 'WC_Product::get_formatted_variation_attributes', '2.7', 'wc_get_formatted_variation' );
-		return wc_get_formatted_variation( $this->get_variation_attributes(), $flat );
+		return wc_get_formatted_variation( $this, $flat );
 	}
 
 	/**
