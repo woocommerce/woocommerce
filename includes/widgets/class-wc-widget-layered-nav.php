@@ -306,8 +306,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 
 		// Min Rating Arg
-		if ( isset( $_GET['min_rating'] ) ) {
-			$link = add_query_arg( 'min_rating', wc_clean( $_GET['min_rating'] ), $link );
+		if ( isset( $_GET['rating_filter'] ) ) {
+			$link = add_query_arg( 'rating_filter', wc_clean( $_GET['rating_filter'] ), $link );
 		}
 
 		// All current filters

@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Added security section in system status report.
 * Fixed attribute registration. Attributes are non-hierarchical by default (parent is not supported).
 * Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
+* Performance - Converted rating filters to visibility terms.
 * Performance - Added visibility term for outofstock products to speed those queries up also.
 * Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
 * Performance - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.

@@ -141,7 +141,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			);
 		}
 
-		foreach ( $meta_query as $key => $query ) {
+		foreach ( $meta_query + $tax_query as $key => $query ) {
 			if ( ! empty( $query['price_filter'] ) || ! empty( $query['rating_filter'] ) ) {
 				unset( $meta_query[ $key ] );
 			}

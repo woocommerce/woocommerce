@@ -487,6 +487,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$terms[] = 'outofstock';
 		}
 
+		$rating  = max( array( 5, min( array( 1, round( $product->get_average_rating(), 0 ) ) ) ) );
+		$terms[] = 'rated-' . $rating;
+
 		switch ( $product->get_catalog_visibility() ) {
 			case 'hidden' :
 				$terms[] = 'exclude-from-search';

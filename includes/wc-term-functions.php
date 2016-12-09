@@ -757,6 +757,11 @@ function wc_get_product_visibility_term_ids() {
 			'exclude-from-search'  => 0,
 			'featured'             => 0,
 			'outofstock'           => 0,
+			'rated-1'              => 0,
+			'rated-2'              => 0,
+			'rated-3'              => 0,
+			'rated-4'              => 0,
+			'rated-5'              => 0,
 		)
 	) );
 }
