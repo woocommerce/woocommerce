@@ -48,8 +48,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$all_args = $visible_only_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',
-				'orderby'     => 'menu_order',
-				'order'       => 'ASC',
+				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
 				'fields'      => 'ids',
 				'post_status' => 'publish',
 				'numberposts' => -1,

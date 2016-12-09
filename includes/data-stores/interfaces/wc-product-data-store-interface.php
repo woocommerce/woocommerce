@@ -72,6 +72,13 @@ interface WC_Product_Data_Store_Interface {
 	public function find_matching_product_variation( $product, $match_attributes = array() );
 
 	/**
+	 * Make sure all variations have a sort order set so they can be reordered correctly.
+	 *
+	 * @param int $parent_id
+	 */
+	public function sort_all_product_variations( $parent_id );
+
+	/**
 	 * Return a list of related products (using data like categories and IDs).
 	 *
 	 * @param array $cats_array  List of categories IDs.

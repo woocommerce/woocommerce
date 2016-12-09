@@ -631,6 +631,9 @@ class WC_AJAX {
 
 				echo $added;
 			}
+
+			$data_store = $product->get_data_store();
+			$data_store->sort_all_product_variations( $product->get_id() );
 		}
 		die();
 	}
