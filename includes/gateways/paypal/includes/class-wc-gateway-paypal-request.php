@@ -74,6 +74,7 @@ class WC_Gateway_Paypal_Request {
 				'return'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				'page_style'    => $this->gateway->get_option( 'page_style' ),
+				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
 				'bn'            => 'WooThemes_Cart',
 				'invoice'       => $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(),

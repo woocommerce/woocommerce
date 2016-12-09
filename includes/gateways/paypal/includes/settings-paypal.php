@@ -107,7 +107,15 @@ return array(
 	'page_style' => array(
 		'title'       => __( 'Page style', 'woocommerce' ),
 		'type'        => 'text',
-		'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ),
+		'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account. This affects classic PayPal checkout screens.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'image_url' => array(
+		'title'       => __( 'Image url', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
