@@ -52,7 +52,15 @@ class WC_Logger {
 	 * Add a log entry.
 	 *
 	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level One of the following:
+	 *     'emergency': System is unusable.
+	 *     'alert': Action must be taken immediately.
+	 *     'critical': Critical conditions.
+	 *     'error': Error conditions.
+	 *     'warning': Warning conditions.
+	 *     'notice': Normal but significant condition.
+	 *     'informational': Informational messages.
+	 *     'debug': Debug-level messages.
 	 * @param string $message Log message.
 	 * @param array $context Optional. Additional information for log handlers.
 	 */
@@ -74,6 +82,8 @@ class WC_Logger {
 	/**
 	 * Adds an emergency level message.
 	 *
+	 * System is unusable.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function emergency( $message, $context = array() ) {
@@ -82,6 +92,9 @@ class WC_Logger {
 
 	/**
 	 * Adds an alert level message.
+	 *
+	 * Action must be taken immediately.
+	 * Example: Entire website down, database unavailable, etc.
 	 *
 	 * @see WC_Logger::log
 	 */
@@ -92,6 +105,9 @@ class WC_Logger {
 	/**
 	 * Adds a critical level message.
 	 *
+	 * Critical conditions.
+	 * Example: Application component unavailable, unexpected exception.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function critical( $message, $context = array() ) {
@@ -100,6 +116,9 @@ class WC_Logger {
 
 	/**
 	 * Adds an error level message.
+	 *
+	 * Runtime errors that do not require immediate action but should typically be logged
+	 * and monitored.
 	 *
 	 * @see WC_Logger::log
 	 */
@@ -110,6 +129,11 @@ class WC_Logger {
 	/**
 	 * Adds a warning level message.
 	 *
+	 * Exceptional occurrences that are not errors.
+	 *
+	 * Example: Use of deprecated APIs, poor use of an API, undesirable things that are not
+	 * necessarily wrong.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function warning( $message, $context = array() ) {
@@ -118,6 +142,8 @@ class WC_Logger {
 
 	/**
 	 * Adds a notice level message.
+	 *
+	 * Normal but significant events.
 	 *
 	 * @see WC_Logger::log
 	 */
@@ -128,6 +154,9 @@ class WC_Logger {
 	/**
 	 * Adds a info level message.
 	 *
+	 * Interesting events.
+	 * Example: User logs in, SQL logs.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function info( $message, $context = array() ) {
@@ -136,6 +165,8 @@ class WC_Logger {
 
 	/**
 	 * Adds a debug level message.
+	 *
+	 * Detailed debug information.
 	 *
 	 * @see WC_Logger::log
 	 */
