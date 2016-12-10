@@ -46,7 +46,7 @@ abstract class WC_Log_Handler {
 	 * @param string $message Log message.
 	 * @param array $context Additional information for log handlers.
 	 *
-	 * @return bool True if log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	abstract public function handle( $timestamp, $level, $message, $context );
 

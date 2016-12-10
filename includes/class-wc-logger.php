@@ -66,11 +66,7 @@ class WC_Logger {
 		$timestamp = current_time( 'timestamp' );
 
 		foreach ( $this->handlers as $handler ) {
-			$continue = $handler->handle( $timestamp, $level, $message, $context );
-
-			if ( false === $continue ) {
-				break;
-			}
+			$handler->handle( $timestamp, $level, $message, $context );
 		}
 
 	}
