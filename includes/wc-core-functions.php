@@ -1442,7 +1442,7 @@ function wc_safe_dump( $expression ) {
 		array( 'func' => 'serialize', 'args' => array( $expression ) ),
 	);
 
-	$alternatives = apply_filters( 'woocommerce_safe_sump_alternatives', $alternatives, $expression );
+	$alternatives = apply_filters( 'woocommerce_safe_dump_alternatives', $alternatives, $expression );
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {

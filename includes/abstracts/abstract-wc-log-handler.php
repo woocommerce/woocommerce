@@ -20,7 +20,7 @@ abstract class WC_Log_Handler {
 	/**
 	 * Minimum log level this handler will process.
 	 *
-	 * @var int 0-8 minimum level severity for handling log entry.
+	 * @var int 0-7 minimum level severity for handling log entry.
 	 * @access private
 	 */
 	protected $threshold;
@@ -85,7 +85,7 @@ abstract class WC_Log_Handler {
 	 * Decode level string into integer.
 	 *
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @return int 0 (debug) - 8 (emergency) or -1 if level is not valid
+	 * @return int 0 (debug) - 7 (emergency) or -1 if level is not valid
 	 */
 	public static function get_level_severity( $level ) {
 		if ( array_key_exists( $level, self::$log_levels ) ) {
