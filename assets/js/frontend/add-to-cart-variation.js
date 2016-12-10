@@ -354,7 +354,7 @@
 
 				// The attribute of this select field should not be taken into account when calculating its matching variations:
 				// The constraints of this attribute are shaped by the values of the other attributes.
-				var settings = $.extend( {}, current_settings, true );
+				var settings = $.extend( true, {}, current_settings );
 
 				// Selections UX is 'non-locking': The constraints of this attribute are shaped by the values of all preceding attributes.
 				if ( 'non-locking' === ux ) {
