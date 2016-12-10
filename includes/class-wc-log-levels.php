@@ -18,6 +18,16 @@ abstract class WC_Log_Levels {
 	/**
 	 * Log Levels
 	 *
+	 * Description of levels:
+	 *     'emergency': System is unusable.
+	 *     'alert': Action must be taken immediately.
+	 *     'critical': Critical conditions.
+	 *     'error': Error conditions.
+	 *     'warning': Warning conditions.
+	 *     'notice': Normal but significant condition.
+	 *     'informational': Informational messages.
+	 *     'debug': Debug-level messages.
+	 *
 	 * @see @link {https://tools.ietf.org/html/rfc5424}
 	 */
 	const DEBUG     = 'debug';
