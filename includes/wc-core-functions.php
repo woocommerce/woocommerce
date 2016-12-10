@@ -1420,7 +1420,6 @@ function wc_get_logger() {
 function wc_safe_dump( $expression ) {
 	$alternatives = array(
 		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
-		array( 'func' => 'var_dump', 'args' => array( $expression, true ) ),
 		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
 		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
 		array( 'func' => 'serialize', 'args' => array( $expression ) ),
