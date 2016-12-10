@@ -30,7 +30,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 *     @type string $tag Optional. Tag will be available in log table. Default '';
 	 * }
 	 *
-	 * @return bool Log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
@@ -44,8 +44,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			$tag = '';
 		}
 
-		// Bubble if add is NOT successful
-		return ! $this->add( $timestamp, $level, $message, $tag, $context );
+		return $this->add( $timestamp, $level, $message, $tag, $context );
 	}
 
 	/**

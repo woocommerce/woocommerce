@@ -79,7 +79,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *     @type string $tag Optional. Determines log file to write to. Default 'log'.
 	 * }
 	 *
-	 * @return bool Log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
@@ -95,8 +95,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		$entry = $this->format_entry( $timestamp, $level, $message, $context );
 
-		// Bubble if add is NOT successful
-		return ! $this->add( $entry, $handle );
+		return $this->add( $entry, $handle );
 	}
 
 	/**

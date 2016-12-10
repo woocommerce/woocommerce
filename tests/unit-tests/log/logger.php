@@ -33,7 +33,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_add() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 		$log = wc_get_logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
@@ -41,7 +41,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
 		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
 		$this->setExpectedDeprecated( 'WC_Logger::add' );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_log() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 		$log = wc_get_logger();
 		$log->log( 'debug', 'debug' );
 		$log->log( 'info', 'info' );
@@ -85,36 +85,16 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 	}
 
 	/**
-	 * Test consumed logs do not bubble.
+	 * Test logs passed to all handlers.
 	 *
 	 * @since 2.8
 	 */
-	public function test_log_entry_is_consumed() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_consume_error_handlers' ) );
-
-		$log = wc_get_logger();
-
-		$log->debug( 'debug' );
-		$log->info( 'info' );
-		$log->notice( 'notice' );
-		$log->warning( 'warning' );
-		$log->error( 'error' );
-		$log->critical( 'critical' );
-		$log->alert( 'alert' );
-		$log->emergency( 'emergency' );
-	}
-
-	/**
-	 * Test unconsumed logs bubble.
-	 *
-	 * @since 2.8
-	 */
-	public function test_log_entry_bubbles() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_bubble_required_handlers' ) );
+	public function test_log_() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 
 		$log = wc_get_logger();
 
@@ -127,6 +107,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log->alert( 'alert' );
 		$log->emergency( 'emergency' );
 
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 	}
 
 	/**
@@ -135,7 +116,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_level_methods() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 		$log = wc_get_logger();
 
 		$log->debug( 'debug' );
@@ -149,64 +130,41 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 
 		$log_content = $this->read_content( 'log' );
 		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
 	}
 
 	/**
-	 * Helper for log handler consume test.
+	 * Helper for log handler test.
 	 *
-	 * Returns an array of 2 mocked log handlers.
-	 * The first handler always bubbles.
-	 * The second handler expects to receive exactly 8 messages (1 for each level).
-	 *
-	 * @since 2.8
-	 *
-	 * @return WC_Log_Handler[] array of mocked log handlers
-	 */
-	public function _return_bubble_required_handlers() {
-		$bubble = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-		$bubble->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( true ) );
-
-		$required = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-
-		$required->expects( $this->exactly( 8 ) )->method( 'handle' );
-
-		return array( $bubble, $required );
-	}
-
-	/**
-	 * Helper for log handler consume test.
-	 *
-	 * Returns an array of 2 mocked log handlers.
-	 * The first handler never bubbles.
-	 * The second handler expects to never be called.
+	 * Returns an array of 3 mocked log handlers.
+	 * The first handler always returns false.
+	 * The second handler always returns true.
+	 * All handlers expects to receive exactly 8 messages (1 for each level).
 	 *
 	 * @since 2.8
 	 *
-	 * @return WC_Log_Handler[] array of mocked log handlers
+	 * @return WC_Log_Handler[] array of mocked log handlers.
 	 */
-	public function _return_consume_error_handlers() {
-		$consume = $this
+	public function return_assertion_handlers() {
+		$false_handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( false ) );
 
-		$consume->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( false ) );
-
-		$error = $this
+		$true_handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( true ) );
 
-		$error->expects( $this->never() )->method( 'handle' );
+		$final_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$final_handler->expects( $this->exactly( 8 ) )->method( 'handle' );
 
-		return array( $consume, $error );
+		return array( $false_handler, $true_handler, $final_handler );
 	}
 
 	/**
@@ -216,7 +174,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 *
 	 * @return Array with instantiated file log handler.
 	 */
-	public function _return_file_log_handler( $handlers ) {
+	public function return_file_log_handler( $handlers ) {
 		return array( new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
 	}
 }

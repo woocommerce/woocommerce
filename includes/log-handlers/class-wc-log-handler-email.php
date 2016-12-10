@@ -62,14 +62,14 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $message Log message.
 	 * @param array $context Optional. Additional information for log handlers.
 	 *
-	 * @return bool log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
 		if ( $this->should_handle( $level ) ) {
 			$subject = $this->get_subject( $timestamp, $level, $message, $context );
 			$body = $this->get_body( $timestamp, $level, $message, $context );
-			wp_mail( $this->to, $subject, $body );
+			return wp_mail( $this->to, $subject, $body );
 		}
 
 		return true;
