@@ -153,22 +153,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test conversion to string level to integers.
-	 *
-	 * @since 2.8
-	 */
-	public function test_get_level_severity() {
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'debug' ), 0 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'info' ), 1 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'notice' ), 2 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'warning' ), 3 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'error' ), 4 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'critical' ), 5 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'alert' ), 6 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'emergency' ), 7 );
-	}
-
-	/**
 	 * Helper for log handler consume test.
 	 *
 	 * Returns an array of 2 mocked log handlers.

@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Logger' ) ) {
-	include_once( dirname( dirname( __FILE__ ) ) . '/class-wc-logger.php' );
-}
-
 /**
  * Abstract WC Log Handler Class
  *
@@ -26,23 +22,6 @@ abstract class WC_Log_Handler {
 	protected $threshold;
 
 	/**
-	 * Log levels by severity.
-	 *
-	 * @var array
-	 * @access private
-	 */
-	protected static $log_levels = array(
-		WC_Logger::DEBUG     => 0,
-		WC_Logger::INFO      => 1,
-		WC_Logger::NOTICE    => 2,
-		WC_Logger::WARNING   => 3,
-		WC_Logger::ERROR     => 4,
-		WC_Logger::CRITICAL  => 5,
-		WC_Logger::ALERT     => 6,
-		WC_Logger::EMERGENCY => 7,
-	);
-
-	/**
 	 * Constructor for log handler.
 	 *
 	 * @param array $args {
@@ -53,7 +32,7 @@ abstract class WC_Log_Handler {
 	public function __construct( $args = array() ) {
 
 		$args = wp_parse_args( $args, array(
-			'threshold' => WC_Logger::DEBUG,
+			'threshold' => WC_Log_Levels::DEBUG,
 		) );
 
 		$this->set_threshold( $args['threshold'] );
@@ -78,22 +57,7 @@ abstract class WC_Log_Handler {
 	 */
 	public function set_threshold( $level ) {
 		$level = apply_filters( 'woocommerce_log_handler_set_threshold', $level, get_class( $this ) );
-		$this->threshold = $this->get_level_severity( $level );
-	}
-
-	/**
-	 * Decode level string into integer.
-	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @return int 0 (debug) - 7 (emergency) or -1 if level is not valid
-	 */
-	public static function get_level_severity( $level ) {
-		if ( array_key_exists( $level, self::$log_levels ) ) {
-			$severity = self::$log_levels[ $level ];
-		} else {
-			$severity = -1;
-		}
-		return $severity;
+		$this->threshold = WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
@@ -103,7 +67,7 @@ abstract class WC_Log_Handler {
 	 * @return bool True if the log should be handled.
 	 */
 	public function should_handle( $level ) {
-		return $this->threshold <= $this->get_level_severity( $level );
+		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
