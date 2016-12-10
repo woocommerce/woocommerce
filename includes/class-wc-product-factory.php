@@ -29,7 +29,6 @@ class WC_Product_Factory {
 		if ( ! $product_id ) {
 			return false;
 		}
-
 		$product_type = $this->get_product_type( $product_id );
 		$classname    = $this->get_classname_from_product_type( $product_type );
 
@@ -46,7 +45,15 @@ class WC_Product_Factory {
 		}
 
 		try {
-			return new $classname( $product_id );
+			// Try to get from cache, otherwise create a new object,
+			$product = wp_cache_get( 'product-' . $product_id, 'products' );
+
+			if ( ! is_a( $product, 'WC_Product' ) ) {
+				$product = new $classname( $product_id );
+				wp_cache_set( 'product-' . $product_id, $product, 'products' );
+			}
+
+			return $product;
 		} catch ( Exception $e ) {
 			return false;
 		}
@@ -64,6 +71,7 @@ class WC_Product_Factory {
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
 			$post_type = get_post_type( $product_id );
+
 			if ( 'product_variation' === $post_type ) {
 				return 'variation';
 			} elseif ( 'product' === $post_type ) {

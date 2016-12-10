@@ -66,7 +66,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) );
 
 		$this->read_product_data( $product );
-		$product->read_meta_data();
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		// Set object_read true once all data is read.

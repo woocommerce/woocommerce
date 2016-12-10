@@ -373,6 +373,11 @@ class WC_Install {
 				'exclude-from-catalog',
 				'featured',
 				'outofstock',
+				'rated-1',
+				'rated-2',
+				'rated-3',
+				'rated-4',
+				'rated-5',
 			),
 		);
 

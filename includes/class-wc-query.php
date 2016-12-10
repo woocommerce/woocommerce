@@ -533,62 +533,8 @@ class WC_Query {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-
 		$meta_query['price_filter']  = $this->price_filter_meta_query();
-		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
-
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
-	}
-
-	/**
-	 * Return a meta query for filtering by price.
-	 * @return array
-	 */
-	private function price_filter_meta_query() {
-		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$meta_query = wc_get_min_max_price_meta_query( $_GET );
-			$meta_query['price_filter'] = true;
-
-			return $meta_query;
-		}
-
-		return array();
-	}
-
-	/**
-	 * Return a meta query for filtering by rating.
-	 * @return array
-	 */
-	public function rating_filter_meta_query() {
-		return isset( $_GET['min_rating'] ) ? array(
-			'key'           => '_wc_average_rating',
-			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
-			'compare'       => '>=',
-			'type'          => 'DECIMAL',
-			'rating_filter' => true,
-		) : array();
-	}
-
-	/**
-	 * Returns a meta query to handle product visibility.
-	 *
-	 * @deprecated 2.7.0 Replaced with taxonomy.
-	 * @param string $compare (default: 'IN')
-	 * @return array
-	 */
-	public function visibility_meta_query( $compare = 'IN' ) {
-		return array();
-	}
-
-	/**
-	 * Returns a meta query to handle product stock status.
-	 *
-	 * @deprecated 2.7.0 Replaced with taxonomy.
-	 * @param string $status (default: 'instock')
-	 * @return array
-	 */
-	public function stock_status_meta_query( $status = 'instock' ) {
-		return array();
 	}
 
 	/**
@@ -615,21 +561,92 @@ class WC_Query {
 			}
 		}
 
-		$product_visibility_not_in = array( is_search() && $main_query ? 'exclude-from-search' : 'exclude-from-catalog' );
+		$product_visibility_terms   = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+		$product_visibility_in     = array();
 
 		// Hide out of stock products.
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = 'outofstock';
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
 		}
 
-		$tax_query[] = array(
-			'taxonomy' => 'product_visibility',
-			'field'    => 'name',
-			'terms'    => $product_visibility_not_in,
-			'operator' => 'NOT IN',
-		);
+		// Filter by rating.
+		if ( isset( $_GET['rating_filter'] ) ) {
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
+			$rating_terms  = array();
+			for ( $i = 1; $i <= 5; $i ++ ) {
+				if ( in_array( $i, $rating_filter ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
+					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
+				}
+			}
+			if ( ! empty( $rating_terms ) ) {
+				$tax_query[] = array(
+					'taxonomy'      => 'product_visibility',
+					'field'         => 'term_taxonomy_id',
+					'terms'         => $rating_terms,
+					'operator'      => 'IN',
+					'rating_filter' => true,
+				);
+			}
+		}
+
+		if ( ! empty( $product_visibility_not_in ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			);
+		}
 
 		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
+	}
+
+	/**
+	 * Return a meta query for filtering by price.
+	 * @return array
+	 */
+	private function price_filter_meta_query() {
+		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
+			$meta_query = wc_get_min_max_price_meta_query( $_GET );
+			$meta_query['price_filter'] = true;
+
+			return $meta_query;
+		}
+
+		return array();
+	}
+
+	/**
+	 * Return a meta query for filtering by rating.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @return array
+	 */
+	public function rating_filter_meta_query() {
+		return array();
+	}
+
+	/**
+	 * Returns a meta query to handle product visibility.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @param string $compare (default: 'IN')
+	 * @return array
+	 */
+	public function visibility_meta_query( $compare = 'IN' ) {
+		return array();
+	}
+
+	/**
+	 * Returns a meta query to handle product stock status.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @param string $status (default: 'instock')
+	 * @return array
+	 */
+	public function stock_status_meta_query( $status = 'instock' ) {
+		return array();
 	}
 
 	/**
