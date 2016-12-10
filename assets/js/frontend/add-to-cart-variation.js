@@ -269,6 +269,8 @@
 				current_settings       = {},
 				$form                  = $( this );
 
+			$form.trigger( 'update_variation_values' );
+
 			$attribute_selects.each( function() {
 				var attribute_name = $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' );
 				var value          = $( this ).val() || '';
@@ -298,11 +300,8 @@
 					window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
 				}
 
-				$form.trigger( 'update_variation_values', [ matching_variations, current_settings ] );
-
 			} else {
 
-				$form.trigger( 'update_variation_values', [ matching_variations, current_settings ] );
 				$form.trigger( 'reset_data' );
 				$single_variation.slideUp( 200 ).trigger( 'hide_variation' );
 			}
@@ -317,10 +316,19 @@
 		} )
 
 		// Disable option fields that are unavaiable for current set of attributes
-		.on( 'update_variation_values', function( event, matching_variations, current_settings ) {
+		.on( 'update_variation_values', function( event ) {
 			if ( $use_ajax ) {
 				return;
 			}
+
+			// Collect current settings.
+			var current_settings = {};
+
+			$attribute_selects.each( function( setts_index, setts_el ) {
+				var attribute_name = $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ),
+					value          = $( this ).val() || '';
+				current_settings[ attribute_name ] = value;
+			} );
 
 			// Loop through selects and disable/enable options based on selections
 			$attribute_selects.each( function( index, el ) {
