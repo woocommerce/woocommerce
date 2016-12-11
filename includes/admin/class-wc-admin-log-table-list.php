@@ -103,7 +103,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_level( $log ) {
-		$level_key = $log['level'];
+		$level_key = WC_Log_Levels::get_severity_level( $log['level'] );
 		$levels    = array(
 			'emergency' => _x( 'Emergency', 'Log level', 'woocommerce' ),
 			'alert'     => _x( 'Alert', 'Log level', 'woocommerce' ),
@@ -187,7 +187,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$level_filter = '';
 		if ( ! empty( $_REQUEST['level'] ) ) {
-			$level_filter = $wpdb->prepare( 'AND level = %s', array( $_REQUEST['level'] ) );
+			$level_filter = $wpdb->prepare(
+				'AND level >= %d',
+				array( WC_Log_Levels::get_level_severity( $_REQUEST['level'] ) )
+			);
 		}
 
 		$search = '';
@@ -198,24 +201,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
 			switch ( $_REQUEST['orderby'] ) {
 
-				// Level requires special case to order Emergency -> Debug
-				case 'level':
-					$order_by = 'CASE level '
-						. "WHEN 'emergency' THEN 8 "
-						. "WHEN 'alert' THEN 7 "
-						. "WHEN 'critical' THEN 6 "
-						. "WHEN 'error' THEN 5 "
-						. "WHEN 'warning' THEN 4 "
-						. "WHEN 'notice' THEN 3 "
-						. "WHEN 'info' THEN 2 "
-						. "WHEN 'debug' THEN 1 "
-						. 'ELSE 0 '
-						. 'END';
-					break;
-
 				// Intentional cascade, these are valid values.
 				case 'timestamp':
 				case 'tag':
+				case 'level':
 					$order_by = $_REQUEST['orderby'];
 					break;
 

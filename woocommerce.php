@@ -275,6 +275,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );

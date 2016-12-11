@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Log_Handler' ) ) {
-	include_once( dirname( dirname( __FILE__ ) ) . '/abstracts/abstract-wc-log-handler.php' );
-}
-
 /**
  * Handles log entries by writing to database.
  *
@@ -30,13 +26,9 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 *     @type string $tag Optional. Tag will be available in log table. Default '';
 	 * }
 	 *
-	 * @return bool Log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-
-		if ( ! $this->should_handle( $level ) ) {
-			return true;
-		}
 
 		if ( isset( $context['tag'] ) && $context['tag'] ) {
 			$tag = $context['tag'];
@@ -44,8 +36,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			$tag = '';
 		}
 
-		// Bubble if add is NOT successful
-		return ! $this->add( $timestamp, $level, $message, $tag, $context );
+		return $this->add( $timestamp, $level, $message, $tag, $context );
 	}
 
 	/**
@@ -66,16 +57,24 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$insert = array(
 			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
-			'level' => $level,
+			'level' => WC_Log_Levels::get_level_severity( $level ),
 			'message' => $message,
 			'tag' => $tag,
+		);
+
+		$format = array(
+			'%s',
+			'%d',
+			'%s',
+			'%s',
+			'%s', // possible serialized context
 		);
 
 		if ( ! empty( $context ) ) {
 			$insert['context'] = serialize( $context );
 		}
 
-		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert );
+		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert, $format );
 	}
 
 	/**

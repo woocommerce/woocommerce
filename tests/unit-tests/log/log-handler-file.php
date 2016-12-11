@@ -59,7 +59,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_clear() {
-		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler = new WC_Log_Handler_File();
 		$log_name = '_test_clear';
 		$handler->handle( time(), 'debug', 'debug', array( 'tag' => $log_name ) );
 		$handler->clear( $log_name );
@@ -72,7 +72,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_remove() {
-		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler = new WC_Log_Handler_File();
 		$log_name = '_test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'tag' => $log_name ) );
 		$handler->remove( $log_name );
@@ -85,7 +85,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_writes_file() {
-		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler = new WC_Log_Handler_File();
 		$time = time();
 
 		$handler->handle( $time, 'debug', 'debug', array() );
@@ -107,7 +107,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_log_file_tag() {
-		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler = new WC_Log_Handler_File();
 		$time = time();
 		$context_tag = array( 'tag' => 'unit-tests' );
 
@@ -130,8 +130,8 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_multiple_handlers() {
-		$handler_a = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
-		$handler_b = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+		$handler_a = new WC_Log_Handler_File();
+		$handler_b = new WC_Log_Handler_File();
 		$time = time();
 		$context_tag = array( 'tag' => 'unit-tests' );
 
@@ -152,31 +152,38 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	/**
 	 * Test log_rotate()
 	 *
+	 * Ensure logs are rotated correctly when limit is surpassed.
+	 *
 	 * @since 2.8
 	 */
 	public function test_log_rotate() {
-		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
+
+		// Handler with log size limit of 5mb
+		$handler = new WC_Log_Handler_File( 5 * 1024 * 1024 );
 		$time = time();
 		$log_name = '_test_log_rotate';
 		$base_log_file = wc_get_log_file_path( $log_name );
 
-		// Create log file larger than limit (5mb) to ensure log is rotated
+		// Create log file larger than 5mb to ensure log is rotated
 		$handle = fopen( $base_log_file, 'w' );
-		fseek( $handle, 6 * 1024 * 1024 );
+		fseek( $handle, 5 * 1024 * 1024 );
 		fwrite( $handle, '_base_log_file_contents_' );
 		fclose( $handle );
 
+		// Write some files to ensure they've rotated correctly
 		for ( $i = 0; $i < 10; $i++ ) {
 			file_put_contents( wc_get_log_file_path( $log_name . ".{$i}" ), $i );
 		}
 
 		$context_tag = array( 'tag' => $log_name );
-
 		$handler->handle( $time, 'emergency', 'emergency', $context_tag );
 
 		$this->assertFileExists( wc_get_log_file_path( $log_name ) );
+
+		// Ensure the handled log is correct
 		$this->assertStringEndsWith( 'EMERGENCY emergency' . PHP_EOL, $this->read_content( $log_name ) );
 
+		// Ensure other logs have rotated correctly
 		$this->assertEquals( '_base_log_file_contents_', trim( $this->read_content( $log_name . '.0' ) ) );
 		for ( $i = 1; $i < 10; $i++ ) {
 			$this->assertEquals( $i - 1, $this->read_content( $log_name . ".{$i}" ) );

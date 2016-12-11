@@ -584,7 +584,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
 CREATE TABLE {$wpdb->prefix}woocommerce_log (
   log_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
-  level varchar(255) NOT NULL,
+  level smallint(4) NOT NULL,
   tag varchar(255) NOT NULL,
   message longtext NOT NULL,
   context longtext NULL,

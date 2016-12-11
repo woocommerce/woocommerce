@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -16,20 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Logger {
 
 	/**
-	 * Log Levels
-	 *
-	 * @see @link {https://tools.ietf.org/html/rfc5424}
-	 */
-	const DEBUG     = 'debug';
-	const INFO      = 'info';
-	const NOTICE    = 'notice';
-	const WARNING   = 'warning';
-	const ERROR     = 'error';
-	const CRITICAL  = 'critical';
-	const ALERT     = 'alert';
-	const EMERGENCY = 'emergency';
-
-	/**
 	 * Stores registered log handlers.
 	 *
 	 * @var array
@@ -37,23 +22,45 @@ class WC_Logger {
 	 */
 	private $handlers;
 
-	private static $valid_levels = array(
-		self::DEBUG,
-		self::INFO,
-		self::NOTICE,
-		self::WARNING,
-		self::ERROR,
-		self::CRITICAL,
-		self::ALERT,
-		self::EMERGENCY,
-	);
+	/**
+	 * Minimum log level this handler will process.
+	 *
+	 * @var int Integer representation of minimum log level to handle.
+	 * @access private
+	 */
+	protected $threshold;
 
 	/**
 	 * Constructor for the logger.
+	 *
+	 * @param array $handlers Optional. Array of log handlers. If $handlers is not provided,
+	 *     the filter 'woocommerce_register_log_handlers' will be used to define the handlers.
+	 *     If $handlers is provided, the filter will not be applied and the handlers will be
+	 *     used directly.
+	 * @param string $threshold Optional. Define an explicit threshold. Defaults to the global
+	 *     setting 'woocommerce_log_threshold' or 'notice' if the setting is not configured.
 	 */
-	public function __construct() {
-		$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+	public function __construct( $handlers = null, $threshold = null ) {
+		if ( null === $handlers ) {
+			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+		}
+
+		if ( null === $threshold ) {
+			$threshold = get_option( 'woocommerce_log_threshold', 'notice' );
+		}
+
 		$this->handlers = $handlers;
+		$this->threshold = WC_Log_Levels::get_level_severity( $threshold );
+	}
+
+	/**
+	 * Determine whether handler should handle log.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @return bool True if the log should be handled.
+	 */
+	public function should_handle( $level ) {
+		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
@@ -69,7 +76,7 @@ class WC_Logger {
 	public function add( $handle, $message ) {
 		_deprecated_function( 'WC_Logger::add', '2.8', 'WC_Logger::log' );
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-		$this->log( self::INFO, $message, array( 'tag' => $handle, '_legacy' => true ) );
+		$this->log( WC_Log_Levels::INFO, $message, array( 'tag' => $handle, '_legacy' => true ) );
 		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.8', 'This action has been deprecated with no alternative.' );
 		return true;
 	}
@@ -78,99 +85,127 @@ class WC_Logger {
 	 * Add a log entry.
 	 *
 	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level One of the following:
+	 *     'emergency': System is unusable.
+	 *     'alert': Action must be taken immediately.
+	 *     'critical': Critical conditions.
+	 *     'error': Error conditions.
+	 *     'warning': Warning conditions.
+	 *     'notice': Normal but significant condition.
+	 *     'informational': Informational messages.
+	 *     'debug': Debug-level messages.
 	 * @param string $message Log message.
 	 * @param array $context Optional. Additional information for log handlers.
 	 */
 	public function log( $level, $message, $context = array() ) {
-		if ( ! in_array( $level, self::$valid_levels ) ) {
+		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
 			$class = __CLASS__;
 			$method = __FUNCTION__;
 			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
 		}
 
-		$timestamp = current_time( 'timestamp' );
+		if ( $this->should_handle( $level ) ) {
+			$timestamp = current_time( 'timestamp' );
 
-		foreach ( $this->handlers as $handler ) {
-			$continue = $handler->handle( $timestamp, $level, $message, $context );
-
-			if ( false === $continue ) {
-				break;
+			foreach ( $this->handlers as $handler ) {
+				$handler->handle( $timestamp, $level, $message, $context );
 			}
 		}
-
 	}
 
 	/**
 	 * Adds an emergency level message.
 	 *
+	 * System is unusable.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function emergency( $message, $context = array() ) {
-		$this->log( self::EMERGENCY, $message, $context );
+		$this->log( WC_Log_Levels::EMERGENCY, $message, $context );
 	}
 
 	/**
 	 * Adds an alert level message.
 	 *
+	 * Action must be taken immediately.
+	 * Example: Entire website down, database unavailable, etc.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function alert( $message, $context = array() ) {
-		$this->log( self::ALERT, $message, $context );
+		$this->log( WC_Log_Levels::ALERT, $message, $context );
 	}
 
 	/**
 	 * Adds a critical level message.
 	 *
+	 * Critical conditions.
+	 * Example: Application component unavailable, unexpected exception.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function critical( $message, $context = array() ) {
-		$this->log( self::CRITICAL, $message, $context );
+		$this->log( WC_Log_Levels::CRITICAL, $message, $context );
 	}
 
 	/**
 	 * Adds an error level message.
 	 *
+	 * Runtime errors that do not require immediate action but should typically be logged
+	 * and monitored.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function error( $message, $context = array() ) {
-		$this->log( self::ERROR, $message, $context );
+		$this->log( WC_Log_Levels::ERROR, $message, $context );
 	}
 
 	/**
 	 * Adds a warning level message.
 	 *
+	 * Exceptional occurrences that are not errors.
+	 *
+	 * Example: Use of deprecated APIs, poor use of an API, undesirable things that are not
+	 * necessarily wrong.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function warning( $message, $context = array() ) {
-		$this->log( self::WARNING, $message, $context );
+		$this->log( WC_Log_Levels::WARNING, $message, $context );
 	}
 
 	/**
 	 * Adds a notice level message.
 	 *
+	 * Normal but significant events.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function notice( $message, $context = array() ) {
-		$this->log( self::NOTICE, $message, $context );
+		$this->log( WC_Log_Levels::NOTICE, $message, $context );
 	}
 
 	/**
 	 * Adds a info level message.
 	 *
+	 * Interesting events.
+	 * Example: User logs in, SQL logs.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function info( $message, $context = array() ) {
-		$this->log( self::INFO, $message, $context );
+		$this->log( WC_Log_Levels::INFO, $message, $context );
 	}
 
 	/**
 	 * Adds a debug level message.
 	 *
+	 * Detailed debug information.
+	 *
 	 * @see WC_Logger::log
 	 */
 	public function debug( $message, $context = array() ) {
-		$this->log( self::DEBUG, $message, $context );
+		$this->log( WC_Log_Levels::DEBUG, $message, $context );
 	}
 
 	/**

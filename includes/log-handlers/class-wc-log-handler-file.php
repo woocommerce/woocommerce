@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Log_Handler' ) ) {
-	include_once( dirname( dirname( __FILE__ ) ) . '/abstracts/abstract-wc-log-handler.php' );
-}
-
 /**
  * Handles log entries by writing to a file.
  *
@@ -37,21 +33,15 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Constructor for the logger.
 	 *
-	 * @param $args additional args. {
-	 *     Optional. @see WC_Log_Handler::__construct.
-	 *
-	 *     @type int $log_size_limit Optional. Size limit for log files. Default 5mb.
-	 * }
+	 * @param int $log_size_limit Optional. Size limit for log files. Default 5mb.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( $log_size_limit = null ) {
 
-		$args = wp_parse_args( $args, array(
-			'log_size_limit' => 5 * 1024 * 1024,
-		) );
+		if ( null === $log_size_limit ) {
+			$log_size_limit = 5 * 1024 * 1024;
+		}
 
-		parent::__construct( $args );
-
-		$this->log_size_limit = $args['log_size_limit'];
+		$this->log_size_limit = $log_size_limit;
 	}
 
 	/**
@@ -79,13 +69,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *     @type string $tag Optional. Determines log file to write to. Default 'log'.
 	 * }
 	 *
-	 * @return bool Log entry should bubble to further loggers.
+	 * @return bool True on success.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-
-		if ( ! $this->should_handle( $level ) ) {
-			return true;
-		}
 
 		if ( isset( $context['tag'] ) && $context['tag'] ) {
 			$handle = $context['tag'];
@@ -95,8 +81,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		$entry = $this->format_entry( $timestamp, $level, $message, $context );
 
-		// Bubble if add is NOT successful
-		return ! $this->add( $entry, $handle );
+		return $this->add( $entry, $handle );
 	}
 
 	/**

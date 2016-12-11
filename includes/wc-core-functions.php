@@ -1434,13 +1434,12 @@ function wc_get_logger() {
 function wc_safe_dump( $expression ) {
 	$alternatives = array(
 		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
-		array( 'func' => 'var_dump', 'args' => array( $expression, true ) ),
 		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
 		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
 		array( 'func' => 'serialize', 'args' => array( $expression ) ),
 	);
 
-	$alternatives = apply_filters( 'woocommerce_safe_sump_alternatives', $alternatives, $expression );
+	$alternatives = apply_filters( 'woocommerce_safe_dump_alternatives', $alternatives, $expression );
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {

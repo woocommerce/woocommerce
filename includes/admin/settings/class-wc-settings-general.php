@@ -136,12 +136,31 @@ class WC_Settings_General extends WC_Settings_Page {
 			array(
 				'title'    => __( 'Default log handler', 'woocommerce' ),
 				'id'       => 'woocommerce_default_log_handler',
-				'default'  => 'geolocation',
+				'default'  => 'file',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
 				'options'  => array(
 					'file' => __( 'File system log handler', 'woocommerce' ),
 					'db'   => __( 'Database log handler', 'woocommerce' ),
+				),
+			),
+
+			array(
+				'title'    => __( 'Log level threshold', 'woocommerce' ),
+				'id'       => 'woocommerce_log_threshold',
+				'desc_tip' => __( 'This setting defines the minimum level that will be handled by the logger. Anything belew this level will be ignored. Recommended setting for live sites: notice', 'woocommerce' ),
+				'default'  => 'notice',
+				'type'     => 'select',
+				'class'    => 'wc-enhanced-select',
+				'options'  => array(
+					WC_Log_Levels::EMERGENCY => __( 'Emergency: system is unusable', 'woocommerce' ),
+					WC_Log_Levels::ALERT     => __( 'Alert: action must be taken immediately' ),
+					WC_Log_Levels::CRITICAL  => __( 'Critical: critical conditions' ),
+					WC_Log_Levels::ERROR     => __( 'Error: error conditions' ),
+					WC_Log_Levels::WARNING   => __( 'Warning: warning conditions' ),
+					WC_Log_Levels::NOTICE    => __( 'Notice: normal but significant condition' ),
+					WC_Log_Levels::INFO      => __( 'Informational: informational messages' ),
+					WC_Log_Levels::DEBUG     => __( 'Debug: debug-level messages' ),
 				),
 			),
 

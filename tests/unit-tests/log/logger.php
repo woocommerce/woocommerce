@@ -4,8 +4,6 @@
  * Class WC_Tests_Logger
  * @package WooCommerce\Tests\Log
  * @since 2.3
- *
- * @todo isolate test
  */
 class WC_Tests_Logger extends WC_Unit_Test_Case {
 
@@ -33,15 +31,25 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_add() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
-		$log = wc_get_logger();
+		$time = time();
+		$handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$handler
+			->expects( $this->once() )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'info' ),
+				$this->equalTo( 'this is a message' ),
+				$this->equalTo( array( 'tag' => 'unit-tests', '_legacy' => true ) )
+			);
+		$log = new WC_Logger( array( $handler ), 'debug' );
 
 		$log->add( 'unit-tests', 'this is a message' );
 
-		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
-		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
 		$this->setExpectedDeprecated( 'WC_Logger::add' );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
 	}
 
 	/**
@@ -50,7 +58,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 		$log->clear( 'log' );
 		$this->setExpectedDeprecated( 'WC_Logger::clear' );
 	}
@@ -61,7 +69,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_bad_level() {
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 		$log->log( 'this-is-an-invalid-level', '' );
 		$this->setExpectedIncorrectUsage( 'WC_Logger::log' );
 	}
@@ -72,31 +80,43 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_log() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
-		$log = wc_get_logger();
-		$log->log( 'debug', 'debug' );
-		$log->log( 'info', 'info' );
-		$log->log( 'notice', 'notice' );
-		$log->log( 'warning', 'warning' );
-		$log->log( 'error', 'error' );
-		$log->log( 'critical', 'critical' );
-		$log->log( 'alert', 'alert' );
-		$log->log( 'emergency', 'emergency' );
-
-		$log_content = $this->read_content( 'log' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		$handler = $this->create_mock_handler();
+		$log = new WC_Logger( array( $handler ), 'debug' );
+		$log->log( 'debug', 'debug message' );
+		$log->log( 'info', 'info message' );
+		$log->log( 'notice', 'notice message' );
+		$log->log( 'warning', 'warning message' );
+		$log->log( 'error', 'error message' );
+		$log->log( 'critical', 'critical message' );
+		$log->log( 'alert', 'alert message' );
+		$log->log( 'emergency', 'emergency message' );
 	}
 
 	/**
-	 * Test consumed logs do not bubble.
+	 * Test logs passed to all handlers.
 	 *
 	 * @since 2.8
 	 */
-	public function test_log_entry_is_consumed() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_consume_error_handlers' ) );
+	public function test_log_handlers() {
+		$false_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( false ) );
 
-		$log = wc_get_logger();
+		$true_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( true ) );
+
+		$final_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$final_handler->expects( $this->exactly( 8 ) )->method( 'handle' );
+
+		$log = new WC_Logger( array( $false_handler, $true_handler, $final_handler ), 'debug' );
 
 		$log->debug( 'debug' );
 		$log->info( 'info' );
@@ -106,27 +126,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log->critical( 'critical' );
 		$log->alert( 'alert' );
 		$log->emergency( 'emergency' );
-	}
-
-	/**
-	 * Test unconsumed logs bubble.
-	 *
-	 * @since 2.8
-	 */
-	public function test_log_entry_bubbles() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_bubble_required_handlers' ) );
-
-		$log = wc_get_logger();
-
-		$log->debug( 'debug' );
-		$log->info( 'info' );
-		$log->notice( 'notice' );
-		$log->warning( 'warning' );
-		$log->error( 'error' );
-		$log->critical( 'critical' );
-		$log->alert( 'alert' );
-		$log->emergency( 'emergency' );
-
 	}
 
 	/**
@@ -135,9 +134,26 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_level_methods() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
-		$log = wc_get_logger();
+		$handler = $this->create_mock_handler();
+		$log = new WC_Logger( array( $handler ), 'debug' );
+		$log->debug( 'debug message' );
+		$log->info( 'info message' );
+		$log->notice( 'notice message' );
+		$log->warning( 'warning message' );
+		$log->error( 'error message' );
+		$log->critical( 'critical message' );
+		$log->alert( 'alert message' );
+		$log->emergency( 'emergency message' );
+	}
 
+	/**
+	 * Test 'woocommerce_register_log_handlers' filter.
+	 *
+	 * @since 2.8
+	 */
+	public function test_woocommerce_register_log_handlers_filter() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
+		$log = new WC_Logger( null, 'debug' );
 		$log->debug( 'debug' );
 		$log->info( 'info' );
 		$log->notice( 'notice' );
@@ -146,93 +162,144 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log->critical( 'critical' );
 		$log->alert( 'alert' );
 		$log->emergency( 'emergency' );
-
-		$log_content = $this->read_content( 'log' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, '_return_file_log_handler' ) );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 	}
 
 	/**
-	 * Test conversion to string level to integers.
+	 * Test default threshold 'notice' or read from option.
 	 *
 	 * @since 2.8
 	 */
-	public function test_get_level_severity() {
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'debug' ), 0 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'info' ), 1 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'notice' ), 2 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'warning' ), 3 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'error' ), 4 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'critical' ), 5 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'alert' ), 6 );
-		$this->assertEquals( WC_Log_Handler::get_level_severity( 'emergency' ), 7 );
+	public function test_threshold_defaults() {
+		$time = time();
+
+		// Test option setting.
+		update_option( 'woocommerce_log_threshold', 'alert' );
+		$handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$handler
+			->expects( $this->once() )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'alert' ),
+				$this->equalTo( 'alert message' ),
+				$this->equalTo( array() )
+			);
+		$log = new WC_Logger( array( $handler ) );
+		$log->critical( 'critical message' );
+		$log->alert( 'alert message' );
+
+		// Test 'notice' default when option is not set.
+		delete_option( 'woocommerce_log_threshold' );
+		$handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$handler
+			->expects( $this->once() )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'notice' ),
+				$this->equalTo( 'notice message' ),
+				$this->equalTo( array() )
+			);
+		$log = new WC_Logger( array( $handler ) );
+		$log->info( 'info message' );
+		$log->notice( 'notice message' );
 	}
 
 	/**
-	 * Helper for log handler consume test.
+	 * Helper for 'woocommerce_register_log_handlers' filter test.
 	 *
-	 * Returns an array of 2 mocked log handlers.
-	 * The first handler always bubbles.
-	 * The second handler expects to receive exactly 8 messages (1 for each level).
+	 * Returns an array of 1 mocked handler.
+	 * The handler expects to receive exactly 8 messages (1 for each level).
 	 *
 	 * @since 2.8
 	 *
-	 * @return WC_Log_Handler[] array of mocked log handlers
+	 * @return WC_Log_Handler[] array of mocked handlers.
 	 */
-	public function _return_bubble_required_handlers() {
-		$bubble = $this
+	public function return_assertion_handlers() {
+		$handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
-		$bubble->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( true ) );
+		$handler->expects( $this->exactly( 8 ) )->method( 'handle' );
 
-		$required = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-
-		$required->expects( $this->exactly( 8 ) )->method( 'handle' );
-
-		return array( $bubble, $required );
+		return array( $handler );
 	}
 
 	/**
-	 * Helper for log handler consume test.
+	 * Mock handler that expects sequential calls to each level.
 	 *
-	 * Returns an array of 2 mocked log handlers.
-	 * The first handler never bubbles.
-	 * The second handler expects to never be called.
+	 * Calls should have the message '[level] message'
 	 *
 	 * @since 2.8
 	 *
-	 * @return WC_Log_Handler[] array of mocked log handlers
+	 * @return WC_Log_Handler mock object
 	 */
-	public function _return_consume_error_handlers() {
-		$consume = $this
+	public function create_mock_handler() {
+		$time = time();
+		$handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
-
-		$consume->expects( $this->any() )->method( 'handle' )->will( $this->returnValue( false ) );
-
-		$error = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-
-		$error->expects( $this->never() )->method( 'handle' );
-
-		return array( $consume, $error );
-	}
-
-	/**
-	 * Filter callback to register file log handler.
-	 *
-	 * @since 2.8
-	 *
-	 * @return Array with instantiated file log handler.
-	 */
-	public function _return_file_log_handler( $handlers ) {
-		return array( new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
+		$handler
+			->expects( $this->exactly( 8 ) )
+			->method( 'handle' )
+			->withConsecutive(
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'debug' ),
+					$this->equalTo( 'debug message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'info' ),
+					$this->equalTo( 'info message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'notice' ),
+					$this->equalTo( 'notice message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'warning' ),
+					$this->equalTo( 'warning message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'error' ),
+					$this->equalTo( 'error message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'critical' ),
+					$this->equalTo( 'critical message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'alert' ),
+					$this->equalTo( 'alert message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'emergency' ),
+					$this->equalTo( 'emergency message' ),
+					$this->equalTo( array() ),
+				)
+			);
+		return $handler;
 	}
 }
