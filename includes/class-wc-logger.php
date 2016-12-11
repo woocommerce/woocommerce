@@ -37,18 +37,15 @@ class WC_Logger {
 	 *     the filter 'woocommerce_register_log_handlers' will be used to define the handlers.
 	 *     If $handlers is provided, the filter will not be applied and the handlers will be
 	 *     used directly.
-	 * @param string $threshold Optional. Define an explicit threshold. Defaults to global
-	 *     setting 'woocommerce_log_threshold'. If WP_DUBUG is true, $threshold will be set
-	 *     to 'debug'.
+	 * @param string $threshold Optional. Define an explicit threshold. Defaults to the global
+	 *     setting 'woocommerce_log_threshold' or 'notice' if the setting is not configured.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
 		}
 
-		if ( WP_DEBUG ) {
-			$threshold = 'debug';
-		} elseif ( null === $threshold ) {
+		if ( null === $threshold ) {
 			$threshold = get_option( 'woocommerce_log_threshold', 'notice' );
 		}
 
