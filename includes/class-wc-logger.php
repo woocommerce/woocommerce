@@ -23,11 +23,47 @@ class WC_Logger {
 	private $handlers;
 
 	/**
-	 * Constructor for the logger.
+	 * Minimum log level this handler will process.
+	 *
+	 * @var int Integer representation of minimum log level to handle.
+	 * @access private
 	 */
-	public function __construct() {
-		$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+	protected $threshold;
+
+	/**
+	 * Constructor for the logger.
+	 *
+	 * @param array $handlers Optional. Array of log handlers. If $handlers is not provided,
+	 *     the filter 'woocommerce_register_log_handlers' will be used to define the handlers.
+	 *     If $handlers is provided, the filter will not be applied and the handlers will be
+	 *     used directly.
+	 * @param string $threshold Optional. Define an explicit threshold. Defaults to global
+	 *     setting 'woocommerce_log_threshold'. If WP_DUBUG is true, $threshold will be set
+	 *     to 'debug'.
+	 */
+	public function __construct( $handlers = null, $threshold = null ) {
+		if ( null === $handlers ) {
+			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+		}
+
+		if ( WP_DEBUG ) {
+			$threshold = 'debug';
+		} elseif ( null === $threshold ) {
+			$threshold = get_option( 'woocommerce_log_threshold', 'notice' );
+		}
+
 		$this->handlers = $handlers;
+		$this->threshold = WC_Log_Levels::get_level_severity( $threshold );
+	}
+
+	/**
+	 * Determine whether handler should handle log.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @return bool True if the log should be handled.
+	 */
+	public function should_handle( $level ) {
+		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
@@ -71,12 +107,13 @@ class WC_Logger {
 			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
 		}
 
-		$timestamp = current_time( 'timestamp' );
+		if ( $this->should_handle( $level ) ) {
+			$timestamp = current_time( 'timestamp' );
 
-		foreach ( $this->handlers as $handler ) {
-			$handler->handle( $timestamp, $level, $message, $context );
+			foreach ( $this->handlers as $handler ) {
+				$handler->handle( $timestamp, $level, $message, $context );
+			}
 		}
-
 	}
 
 	/**
