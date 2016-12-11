@@ -57,16 +57,24 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$insert = array(
 			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
-			'level' => $level,
+			'level' => WC_Log_Levels::get_level_severity( $level ),
 			'message' => $message,
 			'tag' => $tag,
+		);
+
+		$format = array(
+			'%s',
+			'%d',
+			'%s',
+			'%s',
+			'%s', // possible serialized context
 		);
 
 		if ( ! empty( $context ) ) {
 			$insert['context'] = serialize( $context );
 		}
 
-		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert );
+		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert, $format );
 	}
 
 	/**
