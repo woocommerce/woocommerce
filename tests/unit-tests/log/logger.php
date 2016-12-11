@@ -89,10 +89,26 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.8
 	 */
-	public function test_log_() {
-		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
+	public function test_log_handlers() {
+		$false_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( false ) );
 
-		$log = new WC_Logger( null, 'debug' );
+		$true_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( true ) );
+
+		$final_handler = $this
+			->getMockBuilder( 'WC_Log_Handler' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$final_handler->expects( $this->exactly( 8 ) )->method( 'handle' );
+
+		$log = new WC_Logger( array( $false_handler, $true_handler, $final_handler ), 'debug' );
 
 		$log->debug( 'debug' );
 		$log->info( 'info' );
@@ -102,8 +118,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log->critical( 'critical' );
 		$log->alert( 'alert' );
 		$log->emergency( 'emergency' );
-
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 	}
 
 	/**
@@ -128,37 +142,42 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper for log handler test.
+	 * Test 'woocommerce_register_log_handlers' filter.
 	 *
-	 * Returns an array of 3 mocked log handlers.
-	 * The first handler always returns false.
-	 * The second handler always returns true.
-	 * All handlers expects to receive exactly 8 messages (1 for each level).
+	 * @since 2.8
+	 */
+	public function test_woocommerce_register_log_handlers_filter() {
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
+		$log = new WC_Logger( null, 'debug' );
+		$log->debug( 'debug' );
+		$log->info( 'info' );
+		$log->notice( 'notice' );
+		$log->warning( 'warning' );
+		$log->error( 'error' );
+		$log->critical( 'critical' );
+		$log->alert( 'alert' );
+		$log->emergency( 'emergency' );
+		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
+	}
+
+	/**
+	 * Helper for 'woocommerce_register_log_handlers' filter test.
+	 *
+	 * Returns an array of 1 mocked handler.
+	 * The handler expects to receive exactly 8 messages (1 for each level).
 	 *
 	 * @since 2.8
 	 *
-	 * @return WC_Log_Handler[] array of mocked log handlers.
+	 * @return WC_Log_Handler[] array of mocked handlers.
 	 */
 	public function return_assertion_handlers() {
-		$false_handler = $this
+		$handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
-		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( false ) );
+		$handler->expects( $this->exactly( 8 ) )->method( 'handle' );
 
-		$true_handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( true ) );
-
-		$final_handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-		$final_handler->expects( $this->exactly( 8 ) )->method( 'handle' );
-
-		return array( $false_handler, $true_handler, $final_handler );
+		return array( $handler );
 	}
 
 }
