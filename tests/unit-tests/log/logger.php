@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Log
  * @since 2.3
  *
- * @todo isolate test
+ * @todo isolate tests from file handler
  */
 class WC_Tests_Logger extends WC_Unit_Test_Case {
 
@@ -34,7 +34,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_add() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 
 		$log->add( 'unit-tests', 'this is a message' );
 
@@ -50,7 +50,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 		$log->clear( 'log' );
 		$this->setExpectedDeprecated( 'WC_Logger::clear' );
 	}
@@ -61,7 +61,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_bad_level() {
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 		$log->log( 'this-is-an-invalid-level', '' );
 		$this->setExpectedIncorrectUsage( 'WC_Logger::log' );
 	}
@@ -73,7 +73,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_log() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 		$log->log( 'debug', 'debug' );
 		$log->log( 'info', 'info' );
 		$log->log( 'notice', 'notice' );
@@ -96,7 +96,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	public function test_log_() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 
 		$log->debug( 'debug' );
 		$log->info( 'info' );
@@ -117,7 +117,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_level_methods() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_file_log_handler' ) );
-		$log = wc_get_logger();
+		$log = new WC_Logger( null, 'debug' );
 
 		$log->debug( 'debug' );
 		$log->info( 'info' );
