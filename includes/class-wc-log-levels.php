@@ -30,14 +30,14 @@ abstract class WC_Log_Levels {
 	 *
 	 * @see @link {https://tools.ietf.org/html/rfc5424}
 	 */
-	const DEBUG     = 'debug';
-	const INFO      = 'info';
-	const NOTICE    = 'notice';
-	const WARNING   = 'warning';
-	const ERROR     = 'error';
-	const CRITICAL  = 'critical';
-	const ALERT     = 'alert';
 	const EMERGENCY = 'emergency';
+	const ALERT     = 'alert';
+	const CRITICAL  = 'critical';
+	const ERROR     = 'error';
+	const WARNING   = 'warning';
+	const NOTICE    = 'notice';
+	const INFO      = 'info';
+	const DEBUG     = 'debug';
 
 	/**
 	 * Level strings mapped to integer severity.
@@ -46,14 +46,14 @@ abstract class WC_Log_Levels {
 	 * @access protected
 	 */
 	protected static $level_severity = array(
-		self::DEBUG     => 100,
-		self::INFO      => 200,
-		self::NOTICE    => 300,
-		self::WARNING   => 400,
-		self::ERROR     => 500,
-		self::CRITICAL  => 600,
-		self::ALERT     => 700,
 		self::EMERGENCY => 800,
+		self::ALERT     => 700,
+		self::CRITICAL  => 600,
+		self::ERROR     => 500,
+		self::WARNING   => 400,
+		self::NOTICE    => 300,
+		self::INFO      => 200,
+		self::DEBUG     => 100,
 	);
 
 	/**
