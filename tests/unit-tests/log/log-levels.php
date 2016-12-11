@@ -25,6 +25,24 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get_severity_level().
+	 *
+	 * @since 2.8
+	 */
+	public function test_get_severity_level() {
+		$this->assertFalse( WC_Log_Levels::get_severity_level( 0 ) );
+		$this->assertEquals( 'debug', WC_Log_Levels::get_severity_level( 100 ) );
+		$this->assertEquals( 'info', WC_Log_Levels::get_severity_level( 200 ) );
+		$this->assertEquals( 'notice', WC_Log_Levels::get_severity_level( 300 ) );
+		$this->assertEquals( 'warning', WC_Log_Levels::get_severity_level( 400 ) );
+		$this->assertEquals( 'error', WC_Log_Levels::get_severity_level( 500 ) );
+		$this->assertEquals( 'critical', WC_Log_Levels::get_severity_level( 600 ) );
+		$this->assertEquals( 'alert', WC_Log_Levels::get_severity_level( 700 ) );
+		$this->assertEquals( 'emergency', WC_Log_Levels::get_severity_level( 800 ) );
+	}
+
+
+	/**
 	 * Test is_valid_level().
 	 *
 	 * @since 2.8

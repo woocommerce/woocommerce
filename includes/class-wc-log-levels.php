@@ -45,7 +45,7 @@ abstract class WC_Log_Levels {
 	 * @var array
 	 * @access protected
 	 */
-	protected static $level_severity = array(
+	protected static $level_to_severity = array(
 		self::EMERGENCY => 800,
 		self::ALERT     => 700,
 		self::CRITICAL  => 600,
@@ -57,13 +57,33 @@ abstract class WC_Log_Levels {
 	);
 
 	/**
+	 * Severity integers mapped to level strings.
+	 *
+	 * This is the inverse of $level_severity.
+	 *
+	 * @var array
+	 * @access protected
+	 */
+	protected static $severity_to_level = array(
+		800 => self::EMERGENCY,
+		700 => self::ALERT,
+		600 => self::CRITICAL,
+		500 => self::ERROR,
+		400 => self::WARNING,
+		300 => self::NOTICE,
+		200 => self::INFO,
+		100 => self::DEBUG,
+	);
+
+
+	/**
 	 * Validate a level string.
 	 *
 	 * @param string $level
 	 * @return bool True if $level is a valid level.
 	 */
 	public static function is_valid_level( $level ) {
-		return array_key_exists( $level, self::$level_severity );
+		return array_key_exists( $level, self::$level_to_severity );
 	}
 
 	/**
@@ -74,11 +94,25 @@ abstract class WC_Log_Levels {
 	 */
 	public static function get_level_severity( $level ) {
 		if ( self::is_valid_level( $level ) ) {
-			$severity = self::$level_severity[ $level ];
+			$severity = self::$level_to_severity[ $level ];
 		} else {
 			$severity = 0;
 		}
 		return $severity;
+	}
+
+	/**
+	 * Translate severity integer to level string.
+	 *
+	 * @param int $severity
+	 * @return bool|string False if not recognized. Otherwise string representation of level.
+	 */
+	public static function get_severity_level( $severity ) {
+		if ( array_key_exists( $severity, self::$severity_to_level ) ) {
+			return self::$severity_to_level[ $severity ];
+		} else {
+			return false;
+		}
 	}
 
 }
