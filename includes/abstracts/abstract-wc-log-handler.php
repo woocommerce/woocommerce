@@ -13,30 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WC_Log_Handler {
 
-	/**
-	 * Minimum log level this handler will process.
-	 *
-	 * @var int 0-7 minimum level severity for handling log entry.
-	 * @access private
-	 */
-	protected $threshold;
-
-	/**
-	 * Constructor for log handler.
-	 *
-	 * @param array $args {
-	 *     @type string $threshold Optional. Default 'emergency'. Sets the log severity threshold.
-	 *         emergency|alert|critical|error|warning|notice|info|debug
-	 * }
-	 */
-	public function __construct( $args = array() ) {
-
-		$args = wp_parse_args( $args, array(
-			'threshold' => WC_Log_Levels::DEBUG,
-		) );
-
-		$this->set_threshold( $args['threshold'] );
-	}
 
 	/**
 	 * Handle a log entry.
@@ -49,26 +25,6 @@ abstract class WC_Log_Handler {
 	 * @return bool True on success.
 	 */
 	abstract public function handle( $timestamp, $level, $message, $context );
-
-	/**
-	 * Set handler severity threshold.
-	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 */
-	public function set_threshold( $level ) {
-		$level = apply_filters( 'woocommerce_log_handler_set_threshold', $level, get_class( $this ) );
-		$this->threshold = WC_Log_Levels::get_level_severity( $level );
-	}
-
-	/**
-	 * Determine whether handler should handle log.
-	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @return bool True if the log should be handled.
-	 */
-	public function should_handle( $level ) {
-		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
-	}
 
 	/**
 	 * Formats a timestamp for use in log messages.

@@ -23,15 +23,15 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_handle() {
-		$handler = new WC_Log_Handler_Email( array( 'threshold' => 'debug' ) );
+		$handler = new WC_Log_Handler_Email();
 		$time = time();
 
-		$handler->handle( $time, 'debug', 'msg_debug', array() );
+		$handler->handle( $time, 'emergency', 'msg_emergency', array() );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 
 		$this->assertEquals(
-			'You have recieved the following WooCommerce log message:' . PHP_EOL . PHP_EOL . date( 'c', $time ) . ' DEBUG msg_debug' . PHP_EOL,
+			'You have recieved the following WooCommerce log message:' . PHP_EOL . PHP_EOL . date( 'c', $time ) . ' EMERGENCY msg_emergency' . PHP_EOL,
 			$mailer->get_sent()->body
 		);
 	}

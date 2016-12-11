@@ -19,39 +19,61 @@ if ( ! class_exists( 'WC_Log_Handler' ) ) {
 class WC_Log_Handler_Email extends WC_Log_Handler {
 
 	/**
+	 * Minimum log level this handler will process.
+	 *
+	 * @var int Integer representation of minimum log level to handle.
+	 * @access private
+	 */
+	protected $threshold;
+
+	/**
 	 * Stores email recipients.
 	 *
 	 * @var array
 	 * @access private
 	 */
-	private $to = array();
+	private $recipients = array();
 
 	/**
-	 * Constructor for the logger.
+	 * Constructor for log handler.
 	 *
-	 * @param $args additional args. {
-	 *     Optional. @see WC_Log_Handler::__construct.
-	 *
-	 *     @type string|array $to Optional. Email or emails to recieve log messages. Default site admin.
-	 * }
+	 * @param string|array $recipients Optional. Email(s) to receive log messages. Defaults to site admin email.
+	 * @param string $threshold Optional. Minimum level that should receive log messages.
+	 *     Default 'alert'. One of: emergency|alert|critical|error|warning|notice|info|debug
 	 */
-	public function __construct( $args = array() ) {
-
-		$args = wp_parse_args( $args, array(
-			'threshold' => 'critical',
-			'to' => get_option( 'admin_email' ),
-		) );
-
-		parent::__construct( $args );
-
-		if ( is_array( $args['to'] ) ) {
-			foreach ( $args['to'] as $to ) {
-				$this->add_email( $to );
-			}
-		} else {
-			$this->add_email( $args['to'] );
+	public function __construct( $recipients = null, $threshold = 'alert' ) {
+		if ( null === $recipients ) {
+			$recipients = get_option( 'admin_email' );
 		}
 
+		if ( is_array( $recipients ) ) {
+			foreach ( $recipients as $recipient ) {
+				$this->add_email( $recipient );
+			}
+		} else {
+			$this->add_email( $recipients );
+		}
+
+		$this->set_threshold( $threshold );
+	}
+
+	/**
+	 * Set handler severity threshold.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 */
+	public function set_threshold( $level ) {
+		$this->threshold = WC_Log_Levels::get_level_severity( $level );
+	}
+
+	/**
+	 * Determine whether handler should handle log.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @return bool True if the log should be handled.
+	 */
+	public function should_handle( $level ) {
+		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
@@ -69,7 +91,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 		if ( $this->should_handle( $level ) ) {
 			$subject = $this->get_subject( $timestamp, $level, $message, $context );
 			$body = $this->get_body( $timestamp, $level, $message, $context );
-			return wp_mail( $this->to, $subject, $body );
+			return wp_mail( $this->recipients, $subject, $body );
 		}
 
 		return true;
@@ -112,6 +134,6 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string email Email address to add
 	 */
 	public function add_email( $email ) {
-		array_push( $this->to, $email );
+		array_push( $this->recipients, $email );
 	}
 }
