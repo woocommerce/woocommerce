@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Log_Handler' ) ) {
-	include_once( dirname( dirname( __FILE__ ) ) . '/abstracts/abstract-wc-log-handler.php' );
-}
-
 /**
  * Handles log entries by writing to a file.
  *
