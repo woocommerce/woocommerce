@@ -34,10 +34,6 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
-		if ( ! $this->should_handle( $level ) ) {
-			return true;
-		}
-
 		if ( isset( $context['tag'] ) && $context['tag'] ) {
 			$tag = $context['tag'];
 		} else {
