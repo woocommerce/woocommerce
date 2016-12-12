@@ -292,8 +292,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children( 'edit' );
-		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
+		$children            = $product->get_visible_children( 'edit' );
+		$oufofstock_children = $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+		return $children > $oufofstock_children;
 	}
 
 	/**
