@@ -156,7 +156,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'discount_type'                => $coupon->type,
 			'description'                  => $post->post_excerpt,
 			'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
-			'expiry_date'                  => wc_rest_prepare_date_response( $coupon->expiry_date ),
+			'expiry_date'                  => $coupon->expiry_date ? wc_rest_prepare_date_response( date( 'Y-m-d', $coupon->expiry_date ) ) : null,
 			'usage_count'                  => (int) $coupon->usage_count,
 			'individual_use'               => ( 'yes' === $coupon->individual_use ),
 			'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
@@ -283,10 +283,9 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return string
 	 */
 	protected function get_coupon_expiry_date( $expiry_date ) {
-		if ( '' != $expiry_date ) {
+		if ( '' !== $expiry_date ) {
 			return date( 'Y-m-d', strtotime( $expiry_date ) );
 		}
-
 		return '';
 	}
 

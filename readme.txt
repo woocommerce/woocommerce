@@ -158,6 +158,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix API coupon expiry date.
+
 = 2.6.9 - 2016/12/07 =
 * Theme - Added support for Twenty Seventeen Theme.
 * Fix - Excluded webhook delivery logs from comments count.
