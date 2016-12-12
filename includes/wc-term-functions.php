@@ -562,11 +562,11 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 	if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
-		$count_query .= "AND term_taxonomy_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
+		$count_query .= " AND term_taxonomy_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
 	}
 
 	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
-		$count_query .= "AND term_taxonomy_id !=" . $product_visibility_term_ids['outofstock'];
+		$count_query .= " AND term_taxonomy_id !=" . $product_visibility_term_ids['outofstock'];
 	}
 
 	// Pre-process term taxonomy ids
@@ -610,7 +610,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		}
 
 		// Generate term query
-		$term_query = 'AND term_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
+		$term_query = ' AND term_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
 
 		// Get the count
 		$count = $wpdb->get_var( $count_query . $term_query );
