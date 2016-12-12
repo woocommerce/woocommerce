@@ -188,35 +188,4 @@ class WC_Product_External extends WC_Product {
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text(), $this );
 	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD methods
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Read post data.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function read_product_data() {
-		parent::read_product_data();
-
-		$this->set_props( array(
-			'product_url' => get_post_meta( $this->get_id(), '_product_url', true ),
-			'button_text' => get_post_meta( $this->get_id(), '_button_text', true ) ? get_post_meta( $this->get_id(), '_button_text', true ) : __( 'Buy product', 'woocommerce' ),
-		) );
-	}
-
-	/**
-	 * Helper method that updates all the post meta for an external product.
-	 *
-	 * @since 2.7.0
-	 */
-	protected function update_post_meta() {
-		parent::update_post_meta();
-		update_post_meta( $this->get_id(), '_product_url', $this->get_product_url() );
-		update_post_meta( $this->get_id(), '_button_text', $this->get_button_text() );
-	}
 }
