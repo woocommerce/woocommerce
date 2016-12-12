@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Added security section in system status report.
 * Add image_url setting to PayPal Standard.
 * Fixed attribute registration. Attributes are non-hierarchical by default (parent is not supported).
+* Add sort parameter to checkout fields to aid with sorting per locale.
 * Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
 * Performance - Converted rating filters to visibility terms.
 * Performance - Added visibility term for outofstock products to speed those queries up also.
