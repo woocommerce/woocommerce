@@ -68,7 +68,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$order->set_id( $id );
-			$this->update_post_meta( $order );
+			$this->update_post_meta( $order, true );
 			$order->save_meta_data();
 			$order->apply_changes();
 			$this->clear_caches( $order );
@@ -204,9 +204,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
+	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$order ) {
+	protected function update_post_meta( &$order, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = array_keys( $order->get_changes() );
 		$meta_key_to_props = array(
@@ -221,7 +222,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'_prices_include_tax' => 'prices_include_tax',
 		);
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) ) {
+			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
 				continue;
 			}
 			$value = $order->{"get_$prop"}( 'edit' );

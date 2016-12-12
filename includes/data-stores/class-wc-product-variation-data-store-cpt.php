@@ -97,7 +97,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product );
+			$this->update_post_meta( $product, true );
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
 			$product->save_meta_data();
@@ -250,9 +250,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
+	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 */
-	public function update_post_meta( &$product ) {
+	public function update_post_meta( &$product, $force = false ) {
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
-		parent::update_post_meta( $product );
+		parent::update_post_meta( $product, $force );
 	}
 }

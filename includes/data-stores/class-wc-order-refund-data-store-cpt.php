@@ -54,10 +54,11 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
+	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$refund ) {
-		parent::update_post_meta( $refund );
+	protected function update_post_meta( &$refund, $force = false ) {
+		parent::update_post_meta( $refund, $force );
 
 		$updated_props     = array();
 		$changed_props     = $refund->get_changes();
@@ -68,7 +69,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! array_key_exists( $prop, $changed_props ) ) {
+			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
 				continue;
 			}
 			$value = $refund->{"get_$prop"}( 'edit' );

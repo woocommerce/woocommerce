@@ -88,7 +88,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product );
+			$this->update_post_meta( $product, true );
 			$this->update_terms( $product );
 			$this->update_visibility( $product );
 			$this->update_attributes( $product );
@@ -358,9 +358,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
+	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$product ) {
+	protected function update_post_meta( &$product, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = array_keys( $product->get_changes() );
 		$meta_key_to_props = array(
@@ -397,7 +398,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) ) {
+			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
 				continue;
 			}
 			$value = $product->{"get_$prop"}( 'edit' );
@@ -451,7 +452,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $product->get_extra_data_keys() as $key ) {
 				$function = 'get_' . $key;
-				if ( in_array( $key, $changed_props ) && is_callable( array( $product, $function ) ) ) {
+				if ( ( $force || in_array( $key, $changed_props ) ) && is_callable( array( $product, $function ) ) ) {
 					update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) );
 				}
 			}

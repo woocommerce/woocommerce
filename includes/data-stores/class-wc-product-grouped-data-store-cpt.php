@@ -16,9 +16,10 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * Helper method that updates all the post meta for a grouped product.
 	 *
 	 * @param WC_Product
+	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$product ) {
+	protected function update_post_meta( &$product, $force = false ) {
 		if ( update_post_meta( $product->get_id(), '_children', $product->get_children( 'edit' ) ) ) {
 			$child_prices = array();
 			foreach ( $product->get_children( 'edit' ) as $child_id ) {
@@ -38,7 +39,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			$this->extra_data_saved = true;
 		}
 
-		parent::update_post_meta( $product );
+		parent::update_post_meta( $product, $force );
 	}
 
 	/**
