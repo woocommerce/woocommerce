@@ -205,6 +205,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					break;
 				case 'product_ids' :
 				case 'excluded_product_ids' :
+					$updated = update_post_meta( $coupon->get_id(), $meta_key, implode( ',', array_filter( array_map( 'intval', $value ) ) ) );
+					break;
 				case 'product_categories' :
 				case 'excluded_product_categories' :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'intval', $value ) ) );
