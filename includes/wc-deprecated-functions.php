@@ -611,17 +611,19 @@ $wc_map_deprecated_filters = array(
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
-	add_filter( $new, 'woocommerce_deprecated_filter_mapping' );
+	add_filter( $new, 'woocommerce_deprecated_filter_mapping', 10, 100 );
 }
 
-function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '', $arg_3 = '' ) {
+function woocommerce_deprecated_filter_mapping() {
 	global $wc_map_deprecated_filters;
 
 	$filter = current_filter();
+	$args   = func_get_args();
+	$data   = $args[0];
 
 	if ( isset( $wc_map_deprecated_filters[ $filter ] ) ) {
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
-			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
+			$data = apply_filters_ref_array( $wc_map_deprecated_filters[ $filter ], $args );
 		}
 	}
 
