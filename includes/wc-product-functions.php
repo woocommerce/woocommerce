@@ -640,7 +640,7 @@ function wc_get_product_cat_ids( $product_id ) {
  * @param object|bool $product
  * @return array
  */
-function wc_get_product_attachment_props( $attachment_id, $product = false ) {
+function wc_get_product_attachment_props( $attachment_id = null, $product = false ) {
 	$props = array(
 		'title'   => '',
 		'caption' => '',
@@ -650,8 +650,7 @@ function wc_get_product_attachment_props( $attachment_id, $product = false ) {
 		'srcset'  => false,
 		'sizes'   => false,
 	);
-	if ( $attachment_id ) {
-		$attachment       = get_post( $attachment_id );
+	if ( $attachment = get_post( $attachment_id ) ) {
 		$props['title']   = trim( strip_tags( $attachment->post_title ) );
 		$props['caption'] = trim( strip_tags( $attachment->post_excerpt ) );
 		$props['url']     = wp_get_attachment_url( $attachment_id );
