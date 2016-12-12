@@ -929,6 +929,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @since 2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		// Explicitly clear the event.
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
+
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once( ABSPATH . 'wp-admin/includes/file.php' );
 			require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
