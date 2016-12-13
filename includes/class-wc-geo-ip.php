@@ -1632,8 +1632,8 @@ class WC_Geo_IP {
 	 * @return int|bool
 	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
-		if ( defined( 'AF_INET6' ) ) {
-			$this->log( 'GEOIP (geoip_country_id_by_addr_v6): PHP was compiled without --disable-ipv6 option' );
+		if ( ! defined( 'AF_INET6' ) ) {
+			$this->log( 'GEOIP (geoip_country_id_by_addr_v6): PHP was compiled with --disable-ipv6 option' );
 			return false;
 		}
 		$ipnum = inet_pton( $addr );
