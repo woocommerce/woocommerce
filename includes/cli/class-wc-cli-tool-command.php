@@ -15,7 +15,7 @@ class WC_CLI_Tool_Command {
 	 * since we only want to enable certain actions on the system status
 	 * tools endpoints.
 	 */
-	public static function register_tool_commands() {
+	public static function register_commands() {
 		global $wp_rest_server;
 
 		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
@@ -86,7 +86,6 @@ class WC_CLI_Tool_Command {
 				'when'		    => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
 				'before_invoke' => $before_invoke,
 			) );
-
 		}
 	}
 
