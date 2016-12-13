@@ -1,4 +1,5 @@
 /*global wc_add_to_cart_variation_params, wc_cart_fragments_params */
+/*jshint loopfunc: true */
 /*!
  * Variations Plugin
  */
@@ -170,13 +171,11 @@
 
 		// Upon gaining focus
 		.on( 'focusin touchstart', '.variations select', function() {
-			if ( 'ontouchstart' in window || navigator.maxTouchPoints ) {
-				$( this ).find( 'option:selected' ).attr( 'selected', 'selected' );
+			$( this ).find( 'option:selected' ).attr( 'selected', 'selected' );
 
-				if ( ! $use_ajax ) {
-					$form.trigger( 'woocommerce_variation_select_focusin' );
-					$form.trigger( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
-				}
+			if ( ! $use_ajax ) {
+				$form.trigger( 'woocommerce_variation_select_focusin' );
+				$form.trigger( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
 			}
 		} )
 
@@ -317,6 +316,7 @@
 					$single_variation.slideUp( 200 ).trigger( 'hide_variation' );
 				}
 			}
+
 			if ( some_attributes_chosen ) {
 				if ( $reset_variations.css( 'visibility' ) === 'hidden' ) {
 					$reset_variations.css( 'visibility', 'visible' ).hide().fadeIn();
@@ -326,71 +326,63 @@
 			}
 		} )
 
-		// Disable option fields that are unavaiable for current set of attributes
+		// Disable option fields that are unavaiable for current set of attributes.
 		.on( 'update_variation_values', function( event, variations ) {
 			if ( $use_ajax ) {
 				return;
 			}
-			// Loop through selects and disable/enable options based on selections
+			// Loop through selects and disable/enable options based on selections.
 			$form.find( '.variations select' ).each( function( index, el ) {
+				var current_attr_name,
+					current_attr_select = $( el ),
+					show_option_none    = $( el ).data( 'show_option_none' ),
+					option_gt_filter    = 'no' === show_option_none ? '' : ':gt(0)';
 
-				var current_attr_name, current_attr_select = $( el ),
-					show_option_none                       = $( el ).data( 'show_option_none' ),
-					option_gt_filter                       = 'no' === show_option_none ? '' : ':gt(0)';
-
-				// Reset options
-				if ( ! current_attr_select.data( 'attribute_options' ) ) {
-					current_attr_select.data( 'attribute_options', current_attr_select.find( 'option' + option_gt_filter ).get() );
-				}
-
-				current_attr_select.find( 'option' + option_gt_filter ).remove();
-				current_attr_select.append( current_attr_select.data( 'attribute_options' ) );
-				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'attached' );
-				current_attr_select.find( 'option' + option_gt_filter ).removeClass( 'enabled' );
-				current_attr_select.find( 'option' + option_gt_filter ).removeAttr( 'disabled' );
-
-				// Get name from data-attribute_name, or from input name if it doesn't exist
+				// Get name from data-attribute_name, or from input name if it doesn't exist.
 				if ( typeof( current_attr_select.data( 'attribute_name' ) ) !== 'undefined' ) {
 					current_attr_name = current_attr_select.data( 'attribute_name' );
 				} else {
 					current_attr_name = current_attr_select.attr( 'name' );
 				}
 
-				// Loop through variations
+				// Get current options.
+				var attribute_options = current_attr_select.find( 'option' + option_gt_filter );
+
+				// Set data on all attribute_options.
+				attribute_options.data( 'attached', false );
+				attribute_options.removeClass( 'attached enabled' );
+
+				// Loop through variations.
 				for ( var num in variations ) {
-
 					if ( typeof( variations[ num ] ) !== 'undefined' ) {
-
 						var attributes = variations[ num ].attributes;
 
 						for ( var attr_name in attributes ) {
 							if ( attributes.hasOwnProperty( attr_name ) ) {
-								var attr_val = attributes[ attr_name ];
+								var attr_val         = attributes[ attr_name ];
+								var matching_options = false;
 
 								if ( attr_name === current_attr_name ) {
-
-									var variation_active = '';
-
-									if ( variations[ num ].variation_is_active ) {
-										variation_active = 'enabled';
-									}
-
 									if ( attr_val ) {
-
-										// Decode entities
+										// Decode entities and add slashes.
 										attr_val = $( '<div/>' ).html( attr_val ).text();
-
-										// Add slashes
 										attr_val = attr_val.replace( /'/g, '\\\'' );
 										attr_val = attr_val.replace( /"/g, '\\\"' );
 
-										// Compare the meerkat
-										current_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'attached ' + variation_active );
-
+										matching_options = attribute_options.filter( function() {
+											return attr_val === $( this ).val();
+										} );
 									} else {
+										matching_options = attribute_options;
+									}
 
-										current_attr_select.find( 'option' + option_gt_filter ).addClass( 'attached ' + variation_active );
+									matching_options.data( 'attached', true );
+									matching_options.addClass( 'attached' );
 
+									if ( variations[ num ].variation_is_active ) {
+										matching_options.addClass( 'enabled' );
+									} else {
+										matching_options.prop( 'disabled', true );
 									}
 								}
 							}
@@ -398,15 +390,23 @@
 					}
 				}
 
-				// Detach unattached
-				current_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
+				// We now have set data for each option which says if it's attached and enabled. Filter them out.
+				var removed_options = attribute_options.filter( function() {
+					return false === $( this ).data( 'attached' );
+				} );
 
-				// Grey out disabled
-				current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).attr( 'disabled', 'disabled' );
+				var valid_options = attribute_options.filter( function() {
+					return true === $( this ).data( 'attached' );
+				} );
 
+				removed_options.prop( 'hidden', true );
+				removed_options.prop( 'disabled', true );
+
+				valid_options.prop( 'hidden', false );
+				valid_options.prop( 'disabled', false );
 			});
 
-			// Custom event for when variations have been updated
+			// Custom event for when variations have been updated.
 			$form.trigger( 'woocommerce_update_variation_values' );
 		});
 

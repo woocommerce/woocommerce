@@ -48,6 +48,10 @@ p.demo_store {
 	clear: both;
 }
 
+option[hidden] {
+	display: none;
+}
+
 /**
  * Main WooCommerce styles
  */
