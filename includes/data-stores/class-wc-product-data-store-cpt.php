@@ -66,10 +66,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to create a new product in the database.
+	 *
 	 * @param WC_Product
 	 */
 	public function create( &$product ) {
-		$product->set_date_created( current_time( 'timestamp' ) );
+		if ( ! $product->get_date_created() ) {
+			$product->set_date_created( current_time( 'timestamp' ) );
+		}
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
 			'post_type'      => 'product',
