@@ -143,9 +143,15 @@ class WC_Admin_Meta_Boxes {
 	 * Remove bloat.
 	 */
 	public function remove_meta_boxes() {
+		global $post;
+
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
 		remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
-		remove_meta_box( 'pageparentdiv', 'product', 'side' );
+
+		if ( 'product' === $post->post_type && 0 === count( get_page_templates( $post ) ) ) {
+			remove_meta_box( 'pageparentdiv', 'product', 'side' );
+		}
+
 		remove_meta_box( 'commentsdiv', 'product', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'side' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'normal' );
