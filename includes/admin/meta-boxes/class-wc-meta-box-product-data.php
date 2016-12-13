@@ -320,6 +320,9 @@ class WC_Meta_Box_Product_Data {
 	public static function save_variations( $post_id, $post ) {
 		if ( isset( $_POST['variable_post_id'] ) ) {
 			$parent     = wc_get_product( $post_id );
+			$parent->set_default_attributes( self::prepare_set_attributes( $parent->get_attributes(), 'default_attribute_' ) );
+			$parent->save();
+
 			$max_loop   = max( array_keys( $_POST['variable_post_id'] ) );
 			$data_store = $parent->get_data_store();
 			$data_store->sort_all_product_variations( $parent->get_id() );
