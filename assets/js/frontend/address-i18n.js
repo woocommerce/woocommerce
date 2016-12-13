@@ -116,7 +116,7 @@ jQuery( function( $ ) {
 			var fieldsets = $('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-address-fields');
 
 			fieldsets.each( function( index, fieldset ) {
-				var rows    = $( fieldset ).find('.form-row');
+				var rows    = $( fieldset ).find( '.form-row' );
 				var wrapper = rows.first().parent();
 
 				// Before sorting, ensure all fields have a priority for bW compatibility.
@@ -130,7 +130,7 @@ jQuery( function( $ ) {
 				} );
 
 				// Sort the fields.
-				rows.sort(function( a, b ){
+				rows.sort( function( a, b ) {
 					var asort = $( a ).data('priority'),
 						bsort = $( b ).data('priority');
 
