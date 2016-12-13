@@ -1865,7 +1865,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'validate'          => array(),
 			'default'           => '',
 			'autofocus'         => '',
-			'sort'              => '',
+			'priority'          => '',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -1916,7 +1916,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		$field           = '';
 		$label_id        = $args['id'];
-		$sort            = $args['sort'] ? $args['sort'] : '';
+		$sort            = $args['priority'] ? $args['priority'] : '';
 		$field_container = '<p class="form-row %1$s" id="%2$s" data-sort="' . esc_attr( $sort ) . '">%3$s</p>';
 
 		switch ( $args['type'] ) {

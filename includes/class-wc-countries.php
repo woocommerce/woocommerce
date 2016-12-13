@@ -551,7 +551,7 @@ class WC_Countries {
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
 				'autofocus'    => true,
-				'sort'         => 10,
+				'priority'     => 10,
 			),
 			'last_name' => array(
 				'label'        => __( 'Last name', 'woocommerce' ),
@@ -559,13 +559,13 @@ class WC_Countries {
 				'class'        => array( 'form-row-last' ),
 				'clear'        => true,
 				'autocomplete' => 'family-name',
-				'sort'         => 20,
+				'priority'     => 20,
 			),
 			'company' => array(
 				'label'        => __( 'Company name', 'woocommerce' ),
 				'class'        => array( 'form-row-wide' ),
 				'autocomplete' => 'organization',
-				'sort'         => 30,
+				'priority'     => 30,
 			),
 			'country' => array(
 				'type'         => 'country',
@@ -573,7 +573,7 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 				'autocomplete' => 'country',
-				'sort'         => 40,
+				'priority'     => 40,
 			),
 			'address_1' => array(
 				'label'        => __( 'Address', 'woocommerce' ),
@@ -581,21 +581,21 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
-				'sort'         => 50,
+				'priority'     => 50,
 			),
 			'address_2' => array(
 				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc. (optional)', 'woocommerce' ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'required'     => false,
 				'autocomplete' => 'address-line2',
-				'sort'         => 60,
+				'priority'     => 60,
 			),
 			'city' => array(
 				'label'        => __( 'Town / City', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-level2',
-				'sort'         => 70,
+				'priority'     => 70,
 			),
 			'state' => array(
 				'type'         => 'state',
@@ -604,7 +604,7 @@ class WC_Countries {
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'validate'     => array( 'state' ),
 				'autocomplete' => 'address-level1',
-				'sort'         => 80,
+				'priority'     => 80,
 			),
 			'postcode' => array(
 				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
@@ -613,7 +613,7 @@ class WC_Countries {
 				'clear'        => true,
 				'validate'     => array( 'postcode' ),
 				'autocomplete' => 'postal-code',
-				'sort'         => 90,
+				'priority'     => 90,
 			),
 		);
 
@@ -658,7 +658,7 @@ class WC_Countries {
 				),
 				'AT' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -677,7 +677,7 @@ class WC_Countries {
 				),
 				'AX' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -693,7 +693,7 @@ class WC_Countries {
 				),
 				'BE' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required'    => false,
@@ -724,7 +724,7 @@ class WC_Countries {
 				),
 				'CH' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'label'       => __( 'Canton', 'woocommerce' ),
@@ -759,7 +759,7 @@ class WC_Countries {
 				),
 				'DE' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -767,7 +767,7 @@ class WC_Countries {
 				),
 				'DK' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -775,7 +775,7 @@ class WC_Countries {
 				),
 				'EE' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -783,7 +783,7 @@ class WC_Countries {
 				),
 				'FI' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -791,7 +791,7 @@ class WC_Countries {
 				),
 				'FR' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -829,7 +829,7 @@ class WC_Countries {
 				),
 				'IS' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -837,7 +837,7 @@ class WC_Countries {
 				),
 				'IL' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -845,7 +845,7 @@ class WC_Countries {
 				),
 				'IT' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required'    => true,
@@ -855,10 +855,10 @@ class WC_Countries {
 				'JP' => array(
 					'state' => array(
 						'label' => __( 'Prefecture', 'woocommerce' ),
-						'sort' => 66,
+						'priority' => 66,
 					),
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 				),
 				'KR' => array(
@@ -868,7 +868,7 @@ class WC_Countries {
 				),
 				'NL' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required'    => false,
@@ -886,7 +886,7 @@ class WC_Countries {
 				),
 				'NO' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -902,7 +902,7 @@ class WC_Countries {
 				),
 				'PL' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -925,7 +925,7 @@ class WC_Countries {
 				),
 				'SK' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -933,7 +933,7 @@ class WC_Countries {
 				),
 				'SI' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -941,7 +941,7 @@ class WC_Countries {
 				),
 				'ES' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -949,7 +949,7 @@ class WC_Countries {
 				),
 				'LI' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'label'       => __( 'Municipality', 'woocommerce' ),
@@ -963,7 +963,7 @@ class WC_Countries {
 				),
 				'SE' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'required' => false,
@@ -971,7 +971,7 @@ class WC_Countries {
 				),
 				'TR' => array(
 					'postcode' => array(
-						'sort' => 65,
+						'priority' => 65,
 					),
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -999,7 +999,7 @@ class WC_Countries {
 						'required' => false,
 					),
 					'postcode' => array(
-						'sort'     => 65,
+						'priority'     => 65,
 						'required' => false,
 						'hidden'   => false,
 					),
@@ -1079,17 +1079,10 @@ class WC_Countries {
 				'class'        => array( 'form-row-first' ),
 				'validate'     => array( 'phone' ),
 				'autocomplete' => 'tel',
-				'sort'         => 100,
+				'priority'     => 100,
 			);
 			$address_fields['billing_email'] = array(
-				'label'        => __( 'Email address', 'woocommerce' ),
-				'required'     => true,
-				'clear'        => true,
-				'type'         => 'email',
-				'class'        => array( 'form-row-last' ),
-				'validate'     => array( 'email' ),
-				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
-				'sort'         => 110,
+				'label'        => __( 'Email address', 'woocommerce' )
 			);
 		}
 

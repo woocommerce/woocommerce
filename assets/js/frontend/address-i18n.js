@@ -75,9 +75,9 @@ jQuery( function( $ ) {
 					}
 
 					if ( thislocale[ key ].sort ) {
-						field.data( 'sort', thislocale[ key ].sort );
+						field.data( 'priority', thislocale[ key ].sort );
 					} else if ( locale['default'][ key ].sort ) {
-						field.data( 'sort', locale['default'][ key ].sort );
+						field.data( 'priority', locale['default'][ key ].sort );
 					}
 
 				} else if ( locale['default'][ key ] ) {
@@ -107,7 +107,7 @@ jQuery( function( $ ) {
 					}
 
 					if ( locale['default'][ key ].sort ) {
-						field.data( 'sort', locale['default'][ key ].sort );
+						field.data( 'priority', locale['default'][ key ].sort );
 					}
 				}
 
@@ -116,15 +116,23 @@ jQuery( function( $ ) {
 			var fieldsets = $('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-address-fields');
 
 			fieldsets.each( function( index, fieldset ) {
-				var rows = $( fieldset ).find('.form-row');
+				var rows    = $( fieldset ).find('.form-row');
+				var wrapper = rows.first().parent();
 
-				rows.sort(function( a, b ){
-					var asort = $(a).data('sort'),
-						bsort = $(b).data('sort');
+				// Before sorting, ensure all fields have a priority for bW compatibility.
+				var last_priority = 0;
 
-					if ( ! asort || ! bsort ) {
-						return 0;
+				rows.each( function() {
+					if ( ! $( this ).data( 'priority' ) ) {
+						 $( this ).data( 'priority', last_priority + 1 )
 					}
+					last_priority = $( this ).data( 'priority' );
+				} );
+
+				// Sort the fields.
+				rows.sort(function( a, b ){
+					var asort = $( a ).data('priority'),
+						bsort = $( b ).data('priority');
 
 					if ( asort > bsort ) {
 						return 1;
@@ -135,7 +143,7 @@ jQuery( function( $ ) {
 					return 0;
 				});
 
-				rows.detach().prependTo( fieldset );
+				rows.detach().appendTo( wrapper );
 			} );
 		});
 });
