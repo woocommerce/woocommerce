@@ -77,6 +77,7 @@ class WC_Install {
 			'wc_update_270_grouped_products',
 			'wc_update_270_settings',
 			'wc_update_270_product_visibility',
+			'wc_update_270_db_version',
 		),
 	);
 
@@ -224,6 +225,16 @@ class WC_Install {
 	}
 
 	/**
+	 * Get list of DB update callbacks.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public static function get_db_update_callbacks() {
+		return self::$db_updates;
+	}
+
+	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
@@ -231,7 +242,7 @@ class WC_Install {
 		$logger             = wc_get_logger();
 		$update_queued      = false;
 
-		foreach ( self::$db_updates as $version => $update_callbacks ) {
+		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
 					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );

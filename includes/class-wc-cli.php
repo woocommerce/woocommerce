@@ -22,6 +22,7 @@ class WC_CLI {
 		require_once __DIR__ . '/cli/class-wc-cli-runner.php';
 		require_once __DIR__ . '/cli/class-wc-cli-rest-command.php';
 		require_once __DIR__ . '/cli/class-wc-cli-tool-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-update-command.php';
 	}
 
 	/**
@@ -29,6 +30,7 @@ class WC_CLI {
 	 */
 	private function hooks() {
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Runner::after_wp_load' );
-		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tool_Command::register_tool_commands' );
+		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tool_Command::register_commands' );
+		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Update_Command::register_commands' );
 	}
 }

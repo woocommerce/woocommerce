@@ -1070,3 +1070,10 @@ function wc_update_270_product_visibility() {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_id ) );
 	}
 }
+
+/**
+ * Update DB Version.
+ */
+function wc_update_270_db_version() {
+	WC_Install::update_db_version( '2.7.0' );
+}
