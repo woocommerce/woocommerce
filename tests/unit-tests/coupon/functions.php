@@ -30,7 +30,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_coupon_type() {
 
-		$this->assertEquals( 'Cart discount', wc_get_coupon_type( 'fixed_cart' ) );
+		$this->assertEquals( 'Fixed cart discount', wc_get_coupon_type( 'fixed_cart' ) );
 		$this->assertEmpty( wc_get_coupon_type( 'bogus_type' ) );
 	}
 
