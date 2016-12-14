@@ -403,53 +403,50 @@ class WC_Countries {
 
 	/**
 	 * Get country address formats.
+	 *
+	 * These define how addresses are formatted for display in various countries.
+	 *
 	 * @return array
 	 */
 	public function get_address_formats() {
 		if ( empty( $this->address_formats ) ) {
-
-			// Common formats
-			$postcode_before_city = "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}";
-
-			// Define address formats
 			$this->address_formats = apply_filters( 'woocommerce_localisation_address_formats', array(
 				'default' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}",
 				'AU' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
-				'AT' => $postcode_before_city,
-				'BE' => $postcode_before_city,
+				'AT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'BE' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'CA' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
-				'CH' => $postcode_before_city,
+				'CH' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'CL' => "{company}\n{name}\n{address_1}\n{address_2}\n{state}\n{postcode} {city}\n{country}",
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
-				'CZ' => $postcode_before_city,
-				'DE' => $postcode_before_city,
-				'EE' => $postcode_before_city,
-				'FI' => $postcode_before_city,
-				'DK' => $postcode_before_city,
+				'CZ' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'DE' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'EE' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'FI' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'DK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IN' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} - {postcode}\n{state}, {country}",
-				'IS' => $postcode_before_city,
+				'IS' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
 				'JP' => "{postcode}\n{state}{city}{address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
 				'TW' => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
-				'LI' => $postcode_before_city,
-				'NL' => $postcode_before_city,
+				'LI' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'NL' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
-				'NO' => $postcode_before_city,
-				'PL' => $postcode_before_city,
-				'PT' => $postcode_before_city,
-				'SK' => $postcode_before_city,
-				'SI' => $postcode_before_city,
+				'NO' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'PL' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'PT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'SK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'SI' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'ES' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}",
-				'SE' => $postcode_before_city,
+				'SE' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 				'TR' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city} {state}\n{country}",
 				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state_code} {postcode}\n{country}",
 				'VN' => "{name}\n{company}\n{address_1}\n{city}\n{country}",
-			));
+			) );
 		}
-
 		return $this->address_formats;
 	}
 
@@ -554,6 +551,7 @@ class WC_Countries {
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
 				'autofocus'    => true,
+				'priority'     => 10,
 			),
 			'last_name' => array(
 				'label'        => __( 'Last name', 'woocommerce' ),
@@ -561,11 +559,13 @@ class WC_Countries {
 				'class'        => array( 'form-row-last' ),
 				'clear'        => true,
 				'autocomplete' => 'family-name',
+				'priority'     => 20,
 			),
 			'company' => array(
 				'label'        => __( 'Company name', 'woocommerce' ),
 				'class'        => array( 'form-row-wide' ),
 				'autocomplete' => 'organization',
+				'priority'     => 30,
 			),
 			'country' => array(
 				'type'         => 'country',
@@ -573,6 +573,7 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 				'autocomplete' => 'country',
+				'priority'     => 40,
 			),
 			'address_1' => array(
 				'label'        => __( 'Address', 'woocommerce' ),
@@ -580,34 +581,39 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
+				'priority'     => 50,
 			),
 			'address_2' => array(
 				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc. (optional)', 'woocommerce' ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'required'     => false,
 				'autocomplete' => 'address-line2',
+				'priority'     => 60,
 			),
 			'city' => array(
 				'label'        => __( 'Town / City', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-level2',
+				'priority'     => 70,
 			),
 			'state' => array(
 				'type'         => 'state',
 				'label'        => __( 'State / County', 'woocommerce' ),
 				'required'     => true,
-				'class'        => array( 'form-row-first', 'address-field' ),
+				'class'        => array( 'form-row-wide', 'address-field' ),
 				'validate'     => array( 'state' ),
 				'autocomplete' => 'address-level1',
+				'priority'     => 80,
 			),
 			'postcode' => array(
 				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'     => true,
-				'class'        => array( 'form-row-last', 'address-field' ),
+				'class'        => array( 'form-row-wide', 'address-field' ),
 				'clear'        => true,
 				'validate'     => array( 'postcode' ),
 				'autocomplete' => 'postal-code',
+				'priority'     => 90,
 			),
 		);
 
@@ -631,12 +637,13 @@ class WC_Countries {
 
 	/**
 	 * Get country locale settings.
+	 *
+	 * These locales override the default country selections after a country is chosen.
+	 *
 	 * @return array
 	 */
 	public function get_country_locale() {
 		if ( empty( $this->locale ) ) {
-
-			// Locale information used by the checkout
 			$this->locale = apply_filters( 'woocommerce_get_country_locale', array(
 				'AE' => array(
 					'postcode' => array(
@@ -650,7 +657,9 @@ class WC_Countries {
 					),
 				),
 				'AT' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
@@ -667,7 +676,9 @@ class WC_Countries {
 					),
 				),
 				'AX' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
@@ -681,7 +692,9 @@ class WC_Countries {
 					),
 				),
 				'BE' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required'    => false,
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -710,7 +723,9 @@ class WC_Countries {
 					),
 				),
 				'CH' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'label'       => __( 'Canton', 'woocommerce' ),
 						'required'    => false,
@@ -743,31 +758,41 @@ class WC_Countries {
 					),
 				),
 				'DE' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'DK' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'EE' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'FI' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'FR' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
@@ -803,19 +828,25 @@ class WC_Countries {
 					),
 				),
 				'IS' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'IL' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'IT' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required'    => true,
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -824,6 +855,10 @@ class WC_Countries {
 				'JP' => array(
 					'state' => array(
 						'label' => __( 'Prefecture', 'woocommerce' ),
+						'priority' => 66,
+					),
+					'postcode' => array(
+						'priority' => 65,
 					),
 				),
 				'KR' => array(
@@ -832,7 +867,9 @@ class WC_Countries {
 					),
 				),
 				'NL' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required'    => false,
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -848,7 +885,9 @@ class WC_Countries {
 					),
 				),
 				'NO' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
@@ -862,7 +901,9 @@ class WC_Countries {
 					),
 				),
 				'PL' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
@@ -883,25 +924,33 @@ class WC_Countries {
 					),
 				),
 				'SK' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'SI' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'ES' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
 					),
 				),
 				'LI' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'label'       => __( 'Municipality', 'woocommerce' ),
 						'required'    => false,
@@ -913,13 +962,17 @@ class WC_Countries {
 					),
 				),
 				'SE' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'required' => false,
 					),
 				),
 				'TR' => array(
-					'postcode_before_city' => true,
+					'postcode' => array(
+						'priority' => 65,
+					),
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
 					),
@@ -942,11 +995,11 @@ class WC_Countries {
 					),
 				),
 				'VN' => array(
-					'postcode_before_city' => true,
 					'state' => array(
 						'required' => false,
 					),
 					'postcode' => array(
+						'priority'     => 65,
 						'required' => false,
 						'hidden'   => false,
 					),
@@ -976,8 +1029,7 @@ class WC_Countries {
 
 			$this->locale = array_intersect_key( $this->locale, array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() ) );
 
-			// Default Locale Can be filtered to override fields in get_address_fields().
-			// Countries with no specific locale will use default.
+			// Default Locale Can be filtered to override fields in get_address_fields(). Countries with no specific locale will use default.
 			$this->locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
 
 			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout
@@ -1027,15 +1079,10 @@ class WC_Countries {
 				'class'        => array( 'form-row-first' ),
 				'validate'     => array( 'phone' ),
 				'autocomplete' => 'tel',
+				'priority'     => 100,
 			);
 			$address_fields['billing_email'] = array(
-				'label'        => __( 'Email address', 'woocommerce' ),
-				'required'     => true,
-				'clear'        => true,
-				'type'         => 'email',
-				'class'        => array( 'form-row-last' ),
-				'validate'     => array( 'email' ),
-				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
+				'label'        => __( 'Email address', 'woocommerce' )
 			);
 		}
 
@@ -1045,8 +1092,6 @@ class WC_Countries {
 		 * on country selection. If you want to change things like the required status of an
 		 * address field, filter woocommerce_default_address_fields instead.
 		 */
-		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
-
-		return $address_fields;
+		return apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 	}
 }
