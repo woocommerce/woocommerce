@@ -365,7 +365,7 @@
 				attached_options_count = new_attr_select.find( 'option.attached' ).length;
 
 				// Check if current selection is in attached options.
-				if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached[value="' + selected_attr_val + '"]' ).length === 0 ) ) {
+				if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + selected_attr_val + '"]' ).length === 0 ) ) {
 					selected_attr_val_valid = false;
 				}
 
