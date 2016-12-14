@@ -131,8 +131,8 @@ jQuery( function( $ ) {
 
 				// Sort the fields.
 				rows.sort( function( a, b ) {
-					var asort = $( a ).data('priority'),
-						bsort = $( b ).data('priority');
+					var asort = $( a ).data( 'priority' ),
+						bsort = $( b ).data( 'priority' );
 
 					if ( asort > bsort ) {
 						return 1;
