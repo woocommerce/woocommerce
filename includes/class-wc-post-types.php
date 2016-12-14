@@ -306,11 +306,12 @@ class WC_Post_types {
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'label'        => __( 'Variations', 'woocommerce' ),
-					'public'       => false,
-					'hierarchical' => false,
-					'supports'     => false,
+					'label'           => __( 'Variations', 'woocommerce' ),
+					'public'          => false,
+					'hierarchical'    => false,
+					'supports'        => false,
 					'capability_type' => 'product',
+					'rewrite'         => false,
 				)
 			)
 		);
@@ -372,6 +373,7 @@ class WC_Post_types {
 					'exclude_from_order_reports'       => false,
 					'exclude_from_order_sales_reports' => true,
 					'class_name'                       => 'WC_Order_Refund',
+					'rewrite'                          => false,
 				)
 			)
 		);
