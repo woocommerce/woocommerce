@@ -124,7 +124,7 @@ jQuery( function( $ ) {
 
 				rows.each( function() {
 					if ( ! $( this ).data( 'priority' ) ) {
-						 $( this ).data( 'priority', last_priority + 1 )
+						 $( this ).data( 'priority', last_priority + 1 );
 					}
 					last_priority = $( this ).data( 'priority' );
 				} );
