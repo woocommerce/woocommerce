@@ -5,7 +5,7 @@
 	 */
 	var wc_variation_form = {
 		$form               : false,
-		$$attributeFields   : false,
+		$attributeFields    : false,
 		$singleVariation    : false,
 		$singleVariationWrap: false,
 		$product            : false,
