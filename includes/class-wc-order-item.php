@@ -252,6 +252,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $offset
 	 */
 	public function offsetUnset( $offset ) {
+		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
 			$this->meta_data = array();
 			return;
@@ -270,6 +272,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
+		$this->maybe_read_meta_data();
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
@@ -282,6 +285,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
+		$this->maybe_read_meta_data();
 		if ( 'item_meta_array' === $offset ) {
 			$return = array();
 
