@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing price by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -49,9 +49,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
-							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'4' => __( 'Set to regular price decreased by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
