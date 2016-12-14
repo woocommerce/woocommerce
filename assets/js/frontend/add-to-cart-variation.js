@@ -314,7 +314,7 @@
 				// Reference options set
 				if ( ! current_attr_select.data( 'attribute_options' ) ) {
 					var ref_attr_select = current_attr_select.clone();
-					ref_attr_select.find( 'option' ).removeClass( 'attached enabled' ).prop( 'disabled', false ).prop( 'selected', false );
+					ref_attr_select.find( 'option' ).removeClass( 'attached enabled' ).removeAttr( 'disabled' ).removeAttr( 'selected' );
 					current_attr_select.data( 'attribute_options', ref_attr_select.html() );
 				}
 
@@ -382,21 +382,19 @@
 				// Detach unattached.
 				new_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
 
-				// Grey out disabled.
-				new_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).prop( 'disabled', true );
+				// Finally, copy to DOM and set value.
+				current_attr_select.html( new_attr_select.html() );
+				current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).prop( 'disabled', true );
 
 				// Choose selected.
 				if ( selected_attr_val ) {
 					// If the previously selected value is no longer available, fall back to the placeholder (it's going to be there).
 					if ( selected_attr_val_valid ) {
-						new_attr_select.find( 'option[value="' + selected_attr_val + '"]' ).prop( 'selected', true );
+						current_attr_select.val( selected_attr_val );
 					} else {
-						new_attr_select.find( 'option:eq(0)' ).prop( 'selected', true );
+						current_attr_select.val( '' );
 					}
 				}
-
-				// Finally, copy to DOM.
-				current_attr_select.html( new_attr_select.html() );
 			});
 
 			// Custom event for when variations have been updated.
