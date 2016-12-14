@@ -37,7 +37,7 @@ Scenario: CRUD a coupon
 	When I run `wp wc shop_coupon create --user=admin --code='coupon code' --discount_type='fixed_product' --amount='5.00'  --porcelain`
 	Then save STDOUT as {COUPON_ID}
 
-	When I run `wp wc shop_coupon update {COUPON_ID} --user=admin --discount_type="percent_product" --amount='2' --porcelain`
+	When I run `wp wc shop_coupon update {COUPON_ID} --user=admin --discount_type="percent" --amount='2' --porcelain`
 	Then STDOUT should be a number
 
 	When I run `wp wc shop_coupon get {COUPON_ID} --user=admin`
@@ -47,7 +47,7 @@ Scenario: CRUD a coupon
 		"""
 	And STDOUT should contain:
 		"""
-		percent_product
+		percent
 		"""
 
 	When I run `wp wc shop_coupon get {COUPON_ID} --user=admin --field=amount`
