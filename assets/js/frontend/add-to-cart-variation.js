@@ -393,7 +393,7 @@
 					if ( selected_attr_val_valid ) {
 						current_attr_select.val( selected_attr_val );
 					} else {
-						current_attr_select.val( '' );
+						current_attr_select.val( '' ).change();
 					}
 				}
 			});
