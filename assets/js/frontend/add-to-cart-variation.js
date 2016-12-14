@@ -71,6 +71,7 @@
 			var form           = event.data.variationForm;
 			form.variationData = form.$form.data( 'product_variations' );
 			form.useAjax       = false === form.variationData;
+			form.$form.trigger( 'check_variations' );
 		},
 
 		/**
