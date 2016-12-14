@@ -966,32 +966,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Exclude sale items from cart.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_cart_excluded_sale_items() {
-		if ( $this->get_exclude_sale_items() ) {
-			$valid_for_cart = true;
-			$product_ids_on_sale = wc_get_product_ids_on_sale();
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( ! empty( $cart_item['variation_id'] ) ) {
-						if ( in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
-							$valid_for_cart = false;
-						}
-					} elseif ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) ) {
-						$valid_for_cart = false;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
-			}
-		}
-	}
-
-	/**
 	 * Check if a coupon is valid.
 	 *
 	 * @return boolean validity
