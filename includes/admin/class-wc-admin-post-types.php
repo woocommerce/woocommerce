@@ -1094,6 +1094,7 @@ class WC_Admin_Post_Types {
 	 * @param WC_Product $product
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
+		$data_store        = $product->get_data_store();
 		$old_regular_price = $product->get_regular_price();
 		$old_sale_price    = $product->get_sale_price();
 
