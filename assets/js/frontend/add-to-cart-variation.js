@@ -253,7 +253,7 @@
 
 				if ( attributes.count === attributes.chosenCount ) {
 					form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
-					data.$product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
+					data.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 					data.custom_data = form.$form.data( 'custom_data' );
 					form.xhr         = $.ajax( {
 						url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
