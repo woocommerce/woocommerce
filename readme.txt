@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix API coupon expiry date.
+* Fix missing attributes when an option is chosen by default on variations.
 
 = 2.6.9 - 2016/12/07 =
 * Theme - Added support for Twenty Seventeen Theme.
