@@ -62,7 +62,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="create-account">
 
-				<p><?php _e( 'Create an account by entering the information below. If you are a returning customer please login at the top of the page.', 'woocommerce' ); ?></p>
+				<p>
+					<?php
+					_e( 'Create an account by entering the information below.', 'woocommerce' );
+					if( 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ) ){
+						_e( 'If you are a returning customer please login at the top of the page.', 'woocommerce' );
+					}
+					?>
+				</p>
 
 				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
 
