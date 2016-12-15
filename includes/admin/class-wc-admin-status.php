@@ -111,9 +111,16 @@ class WC_Admin_Status {
 	 */
 	public static function status_logs_db() {
 
+		// Flush
 		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
 			self::flush_db_logs();
 		}
+
+		// Bulk actions
+		if ( isset( $_GET['action'] ) && isset( $_GET['log'] ) ) {
+			self::log_table_bulk_actions();
+		}
+
 		$log_table_list = new WC_Admin_Log_Table_List();
 		$log_table_list->prepare_items();
 
@@ -288,14 +295,33 @@ class WC_Admin_Status {
 	 *
 	 * @since 2.8
 	 */
-	public static function flush_db_logs() {
-		check_admin_referer( 'flush-logs' );
-
-		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
-			WC_Log_Handler_DB::flush();
+	private static function flush_db_logs() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
+
+		WC_Log_Handler_DB::flush();
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 		exit();
+	}
+
+	/**
+	 * Bulk actions.
+	 *
+	 * @since 2.8
+	 */
+	private static function log_table_bulk_actions() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
+		$log_ids = array_map( 'absint', (array) $_GET['log'] );
+
+		if ( 'delete' === $_GET['action'] ) {
+			WC_Log_Handler_DB::delete( $log_ids );
+			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+			exit();
+		}
 	}
 }
