@@ -405,7 +405,11 @@ class WC_Admin_Attributes {
 													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 													if ( taxonomy_exists( $taxonomy ) ) {
-														$terms = get_terms( $taxonomy, 'hide_empty=0' );
+														if ( 'menu_order' === wc_attribute_orderby( $taxonomy ) ) {
+															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=ASC' );
+														} else {
+															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=false' );
+														}
 
 														switch ( $tax->attribute_orderby ) {
 															case 'name_num' :

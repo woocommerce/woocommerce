@@ -143,7 +143,6 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $args );
 }
 
-
 /**
  * Sort by name (numeric).
  * @param  WP_POST object $a
@@ -156,6 +155,7 @@ function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
 	}
 	return ( $a->name + 0 < $b->name + 0 ) ? -1 : 1;
 }
+
 /**
  * Sort by parent.
  * @param  WP_POST object $a
@@ -464,7 +464,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
 	// No sorting when menu_order is false.
-	if ( isset( $args['menu_order'] ) && false == $args['menu_order'] ) {
+	if ( isset( $args['menu_order'] ) && ( false === $args['menu_order'] || 'false' === $args['menu_order'] ) ) {
 		return $clauses;
 	}
 
