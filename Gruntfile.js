@@ -248,6 +248,7 @@ module.exports = function( grunt ) {
 					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
 					'!includes/libraries/**',                                    // Exclude libraries/
 					'!node_modules/**',                                          // Exclude node_modules/
+					'!tests/cli/**',                                             // Exclude tests/cli/
 					'!tmp/**',                                                   // Exclude tmp/
 					'!vendor/**'                                                 // Exclude vendor/
 				]

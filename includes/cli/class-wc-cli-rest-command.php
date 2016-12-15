@@ -66,7 +66,7 @@ class WC_CLI_REST_Command {
 
 		$this->resource_identifier = $resource_id;
 		if ( in_array( $name, $this->routes_with_parent_id ) ) {
-			$is_singular = $resource_id === substr( $this->route, - strlen( $resource_id ) );
+			$is_singular = substr( $this->route, - strlen( $resource_id ) ) === $resource_id;
 			if ( ! $is_singular ) {
 				$this->resource_identifier = $first_match[0];
 			}
@@ -208,7 +208,7 @@ class WC_CLI_REST_Command {
 		if ( in_array( $method, array( 'POST', 'PUT' ) ) ) {
 			$request->set_body_params( $assoc_args );
 		} else {
-			foreach( $assoc_args as $key => $value ) {
+			foreach ( $assoc_args as $key => $value ) {
 				$request->set_param( $key, $value );
 			}
 		}
@@ -218,13 +218,13 @@ class WC_CLI_REST_Command {
 		$response = rest_do_request( $request );
 		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 			$performed_queries = array();
-			foreach( (array) $GLOBALS['wpdb']->queries as $key => $query ) {
+			foreach ( (array) $GLOBALS['wpdb']->queries as $key => $query ) {
 				if ( in_array( $key, $original_queries ) ) {
 					continue;
 				}
 				$performed_queries[] = $query;
 			}
-			usort( $performed_queries, function( $a, $b ){
+			usort( $performed_queries, function( $a, $b ) {
 				if ( $a[1] === $b[1] ) {
 					return 0;
 				}
@@ -233,13 +233,13 @@ class WC_CLI_REST_Command {
 
 			$query_count = count( $performed_queries );
 			$query_total_time = 0;
-			foreach( $performed_queries as $query ) {
+			foreach ( $performed_queries as $query ) {
 				$query_total_time += $query[1];
 			}
 			$slow_query_message = '';
 			if ( $performed_queries && 'wc' === WP_CLI::get_config( 'debug' ) ) {
 				$slow_query_message .= '. Ordered by slowness, the queries are:' . PHP_EOL;
-				foreach( $performed_queries as $i => $query ) {
+				foreach ( $performed_queries as $i => $query ) {
 					$i++;
 					$bits = explode( ', ', $query[2] );
 					$backtrace = implode( ', ', array_slice( $bits, 13 ) );
@@ -295,7 +295,7 @@ EOT;
 	 */
 	private function get_context_fields( $context ) {
 		$fields = array();
-		foreach( $this->schema['properties'] as $key => $args ) {
+		foreach ( $this->schema['properties'] as $key => $args ) {
 			if ( empty( $args['context'] ) || in_array( $context, $args['context'] ) ) {
 				$fields[] = $key;
 			}
@@ -312,16 +312,16 @@ EOT;
 	private function get_filled_route( $args = array() ) {
 		$parent_id_matched = false;
 		$route             = $this->route;
-		if ( strpos( $route, '<customer_id>') !== false && ! empty( $args ) ) {
+		if ( strpos( $route, '<customer_id>' ) !== false && ! empty( $args ) ) {
 			$route             = str_replace( '(?P<customer_id>[\d]+)', $args[0], $route );
 			$parent_id_matched = true;
-		} elseif ( strpos( $this->route, '<product_id>') !== false && ! empty( $args ) ) {
+		} elseif ( strpos( $this->route, '<product_id>' ) !== false && ! empty( $args ) ) {
 			$route             = str_replace( '(?P<product_id>[\d]+)', $args[0], $route );
 			$parent_id_matched = true;
-		} elseif ( strpos( $this->route, '<order_id>') !== false && ! empty( $args ) ) {
+		} elseif ( strpos( $this->route, '<order_id>' ) !== false && ! empty( $args ) ) {
 			$route             = str_replace( '(?P<order_id>[\d]+)', $args[0], $route );
 			$parent_id_matched = true;
-		} elseif ( strpos( $this->route, '<refund_id>') !== false && ! empty( $args ) ) {
+		} elseif ( strpos( $this->route, '<refund_id>' ) !== false && ! empty( $args ) ) {
 			$route             = str_replace( '(?P<refund_id>[\d]+)', $args[0], $route );
 			$parent_id_matched = true;
 		}
@@ -354,7 +354,7 @@ EOT;
 	private function nested_line( $line, $change = false ) {
 		if ( 'add' == $change ) {
 			$label = '+ ';
-		} else if ( 'remove' == $change ) {
+		} elseif ( 'remove' == $change ) {
 			$label = '- ';
 		} else {
 			$label = false;

@@ -1082,7 +1082,7 @@ class WC_Countries {
 				'priority'     => 100,
 			);
 			$address_fields['billing_email'] = array(
-				'label'        => __( 'Email address', 'woocommerce' )
+				'label' => __( 'Email address', 'woocommerce' ),
 			);
 		}
 

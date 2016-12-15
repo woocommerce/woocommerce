@@ -237,7 +237,7 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	private function is_active_theme( $theme ) {
-		return $theme === get_template();
+		return get_template() === $theme;
 	}
 
 	/**

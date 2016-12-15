@@ -47,7 +47,7 @@ class WC_CLI_Runner {
 		}
 
 		// Loop through all of our endpoints and register any valid WC endpoints.
-		foreach( $response_data['routes'] as $route => $route_data ) {
+		foreach ( $response_data['routes'] as $route => $route_data ) {
 			// Only register WC endpoints
 			if ( substr( $route, 0, 4 ) !== '/wc/' ) {
 				continue;
@@ -80,7 +80,7 @@ class WC_CLI_Runner {
 	 * @param string $route
 	 * @param array  $route_data
 	 * @param array  $command_args
-	*/
+	 */
 	private static function register_route_commands( $rest_command, $route, $route_data, $command_args = array() ) {
 		$parent			 = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
@@ -91,7 +91,7 @@ class WC_CLI_Runner {
 			$first_match   = $matches[0];
 			$resource_id   = ! empty( $matches[0] ) ? array_pop( $matches[0] ) : null;
 			$trimmed_route = rtrim( $route );
-			$is_singular   = $resource_id === substr( $trimmed_route, - strlen( $resource_id ) );
+			$is_singular   = substr( $trimmed_route, - strlen( $resource_id ) ) === $resource_id;
 			if ( ! $is_singular ) {
 				$resource_id = $first_match;
 			}
@@ -119,11 +119,11 @@ class WC_CLI_Runner {
 			}
 		}
 
-		foreach( $supported_commands as $command => $endpoint_args ) {
+		foreach ( $supported_commands as $command => $endpoint_args ) {
 			$synopsis = array();
 			$arg_regs = array();
 
-			if ( strpos( $route, '<product_id>') !== false ) {
+			if ( strpos( $route, '<product_id>' ) !== false ) {
 				$synopsis[] = array(
 					'name'		  => 'product_id',
 					'type'		  => 'positional',
@@ -131,7 +131,7 @@ class WC_CLI_Runner {
 				);
 			}
 
-			if ( strpos( $route, '<customer_id>') !== false ) {
+			if ( strpos( $route, '<customer_id>' ) !== false ) {
 				$synopsis[] = array(
 					'name'		  => 'customer_id',
 					'type'		  => 'positional',
@@ -139,7 +139,7 @@ class WC_CLI_Runner {
 				);
 			}
 
-			if ( strpos( $route, '<order_id>') !== false ) {
+			if ( strpos( $route, '<order_id>' ) !== false ) {
 				$synopsis[] = array(
 					'name'		  => 'order_id',
 					'type'		  => 'positional',
@@ -147,7 +147,7 @@ class WC_CLI_Runner {
 				);
 			}
 
-			if ( strpos( $route, '<refund_id>') !== false ) {
+			if ( strpos( $route, '<refund_id>' ) !== false ) {
 				$synopsis[] = array(
 					'name'		  => 'refund_id',
 					'type'		  => 'positional',
