@@ -69,7 +69,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *     @type string $tag Optional. Determines log file to write to. Default 'log'.
 	 * }
 	 *
-	 * @return bool True on success.
+	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 

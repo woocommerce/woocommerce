@@ -80,7 +80,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $message Log message.
 	 * @param array $context Optional. Additional information for log handlers.
 	 *
-	 * @return bool True on success.
+	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
@@ -90,7 +90,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 			return wp_mail( $this->recipients, $subject, $body );
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
