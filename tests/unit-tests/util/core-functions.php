@@ -238,6 +238,20 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_logger().
+	 *
+	 * @since 2.8
+	 */
+	public function test_wc_get_logger() {
+		$log_a = wc_get_logger();
+		$log_b = wc_get_logger();
+
+		$this->assertInstanceOf( WC_Logger::class, $log_a );
+		$this->assertInstanceOf( WC_Logger::class, $log_b );
+		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
+	}
+
+	/**
 	 * Test wc_get_core_supported_themes().
 	 *
 	 * @since 2.2
