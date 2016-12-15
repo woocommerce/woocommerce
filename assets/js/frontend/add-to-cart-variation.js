@@ -528,7 +528,7 @@
 			$product_img_wrap = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0)' ),
 			$product_img      = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' );
 
-		if ( variation && variation.image && variation.image.src.length > 1 ) {
+		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image.src );
 			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
 			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
