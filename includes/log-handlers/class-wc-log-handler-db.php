@@ -26,7 +26,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 *     @type string $tag Optional. Tag will be available in log table. Default '';
 	 * }
 	 *
-	 * @return bool True on success.
+	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
