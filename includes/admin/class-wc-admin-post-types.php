@@ -56,7 +56,6 @@ class WC_Admin_Post_Types {
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
-		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
 		add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_shop_order_bulk_actions' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 
@@ -1306,35 +1305,6 @@ class WC_Admin_Post_Types {
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
-	}
-
-	/**
-	 * Process the new bulk actions for changing order status.
-	 *
-	 * @todo Remove when start require at least 4.7.
-	 */
-	public function bulk_action() {
-		global $wp_version;
-
-		if ( version_compare( $wp_version, '4.7-beta', '>=' ) || empty( $_REQUEST['post'] ) ) {
-			return;
-		}
-
-		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
-		$action        = $wp_list_table->current_action();
-		$ids           = wp_unslash( $_REQUEST['post'] );
-		$sendback      = $this->handle_shop_order_bulk_actions( '', $action, $ids );
-
-		if ( empty( $sendback ) ) {
-			return;
-		}
-
-		if ( isset( $_GET['post_status'] ) ) {
-			$sendback = add_query_arg( 'post_status', sanitize_text_field( $_GET['post_status'] ), $sendback );
-		}
-
-		wp_redirect( $sendback );
-		exit();
 	}
 
 	/**
