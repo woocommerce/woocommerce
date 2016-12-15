@@ -61,8 +61,9 @@ jQuery( function( $ ) {
 	 * Update the .woocommerce div with a string of html.
 	 *
 	 * @param {String} html_str The HTML string with which to replace the div.
+	 * @param {bool} preserve_notices Should notices be kept? False by default.
 	 */
-	var update_wc_div = function( html_str ) {
+	var update_wc_div = function( html_str, preserve_notices ) {
 		var $html       = $.parseHTML( html_str );
 		var $new_form   = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
@@ -75,7 +76,9 @@ jQuery( function( $ ) {
 		}
 
 		// Remove errors
-		$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+		if ( ! preserve_notices ) {
+			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+		}
 
 		if ( $new_form.length === 0 ) {
 			// If the checkout is also displayed on this page, trigger reload instead.
@@ -306,7 +309,7 @@ jQuery( function( $ ) {
 		/**
 		 * Update entire cart via ajax.
 		 */
-		update_cart: function() {
+		update_cart: function( preserve_notices ) {
 			var $form = $( '.woocommerce-cart-form' );
 
 			block( $form );
@@ -319,7 +322,7 @@ jQuery( function( $ ) {
 				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
-					update_wc_div( response );
+					update_wc_div( response, preserve_notices );
 				},
 				complete: function() {
 					unblock( $form );
@@ -439,7 +442,7 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $form );
 					$text_field.val( '' );
-					cart.update_cart_totals();
+					cart.update_cart( true );
 				}
 			} );
 		},
@@ -475,7 +478,7 @@ jQuery( function( $ ) {
 					unblock( $wrapper );
 				},
 				complete: function() {
-					cart.update_cart_totals();
+					cart.update_cart( true );
 				}
 			} );
 		},
