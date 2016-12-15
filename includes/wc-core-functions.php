@@ -1416,11 +1416,12 @@ function wc_get_rounding_precision() {
  * @return WC_Logger
  */
 function wc_get_logger() {
-	if ( ! class_exists( 'WC_Logger' ) ) {
-		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	static $logger = null;
+	if ( null === $logger ) {
+		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+		$logger = new $class;
 	}
-	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
-	return new $class;
+	return $logger;
 }
 
 /**
