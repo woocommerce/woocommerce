@@ -180,14 +180,9 @@ function wc_paying_customer( $order_id ) {
 	$customer_id = $order->get_customer_id();
 
 	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
-		update_user_meta( $customer_id, 'paying_customer', 1 );
-
-		$old_spent = absint( get_user_meta( $customer_id, '_money_spent', true ) );
-		update_user_meta( $customer_id, '_money_spent', $old_spent + $order->get_total( true ) );
-	}
-	if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
-		$old_count = absint( get_user_meta( $customer_id, '_order_count', true ) );
-		update_user_meta( $customer_id, '_order_count', $old_count + 1 );
+		$customer = new WC_Customer( $customer_id );
+		$customer->set_is_paying_customer( true );
+		$customer->save();
 	}
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
