@@ -16,12 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<input type="hidden" name="page" value="wc-status" />
 	<input type="hidden" name="tab" value="logs" />
 
-</form>
-<form method="post" action="">
-	<?php
-		wp_nonce_field( 'flush-logs' );
-		submit_button( __( 'Flush all logs', 'woocommerce' ), 'delete', 'flush-logs' );
-	?>
+	<?php submit_button( __( 'Flush all logs', 'woocommerce' ), 'delete', 'flush-logs' ); ?>
+	<?php wp_nonce_field( 'woocommerce-status-logs' ); ?>
 </form>
 <?php
 wc_enqueue_js( "

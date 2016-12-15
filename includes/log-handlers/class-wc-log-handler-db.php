@@ -88,4 +88,30 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_log" );
 	}
 
+	/**
+	 * Delete selected logs from DB.
+	 *
+	 * @param int|string|array Log ID or array of Log IDs to be deleted.
+	 *
+	 * @return bool
+	 */
+	public static function delete( $log_ids ) {
+		global $wpdb;
+
+		if ( ! is_array( $log_ids ) ) {
+			$log_ids = array( $log_ids );
+		}
+
+		$format = array_fill( 0, count( $log_ids ), '%d' );
+
+		$query_in = '(' . implode( ',', $format ) . ')';
+
+		$query = $wpdb->prepare(
+			"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}",
+			$log_ids
+		);
+
+		return $wpdb->query( $query );
+	}
+
 }

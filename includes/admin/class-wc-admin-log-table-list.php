@@ -5,7 +5,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.0.0
+ * @version  1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -148,7 +148,9 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
-		return array();
+		return array(
+			'delete' => __( 'Delete', 'woocommerce' ),
+		);
 	}
 
 	/**
