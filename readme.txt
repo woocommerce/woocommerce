@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.6.10 - X = 
 * Fix returned REST API coupon expiry date.
 * Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts. This is a larger change than we'd hope to do in 2.6, but once that was needed.
+* Dev - API - Throw error messages when product image ID is not a valid WordPress attachment ID.
 
 = 2.6.9 - 2016/12/07 =
 * Theme - Added support for Twenty Seventeen Theme.
