@@ -312,14 +312,17 @@
 					selected_attr_val       = current_attr_select.val() || '',
 					selected_attr_val_valid = true;
 
-				// Reference options set
-				if ( ! current_attr_select.data( 'attribute_options' ) ) {
-					var ref_attr_select = current_attr_select.clone();
-					ref_attr_select.find( 'option' ).removeClass( 'attached enabled' ).removeAttr( 'disabled' ).removeAttr( 'selected' );
-					current_attr_select.data( 'attribute_options', ref_attr_select.html() );
+				// Reference options set at first.
+				if ( ! current_attr_select.data( 'attribute_html' ) ) {
+					var refSelect = current_attr_select.clone();
+
+					refSelect.find( 'option' ).removeAttr( 'disabled attached' ).removeAttr( 'selected' );
+
+					current_attr_select.data( 'attribute_options', refSelect.find( 'option' + option_gt_filter ).get() ); // Legacy data attribute.
+					current_attr_select.data( 'attribute_html', refSelect.html() );
 				}
 
-				new_attr_select.html( current_attr_select.data( 'attribute_options' ) );
+				new_attr_select.html( current_attr_select.data( 'attribute_html' ) );
 
 				// The attribute of this select field should not be taken into account when calculating its matching variations:
 				// The constraints of this attribute are shaped by the values of the other attributes.
