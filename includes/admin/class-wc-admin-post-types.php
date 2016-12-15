@@ -55,10 +55,9 @@ class WC_Admin_Post_Types {
 		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
-		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
-		add_filter( 'handle_bulk_actions-edit-shop_order', 'handle_shop_order_bulk_actions', 10, 3 );
+		add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_shop_order_bulk_actions' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 
 		// Order Search
@@ -1307,38 +1306,6 @@ class WC_Admin_Post_Types {
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
-	}
-
-	/**
-	 * Add extra bulk action options to mark orders as complete or processing.
-	 * Fallback for old versions of WordPress.
-	 * See: https://core.trac.wordpress.org/ticket/16031.
-	 *
-	 * @todo Remove when start require at least 4.7.
-	 */
-	public function bulk_admin_footer() {
-		global $post_type, $wp_version;
-
-		if ( version_compare( $wp_version, '4.7-beta', '>=' ) ) {
-			return;
-		}
-
-		if ( 'shop_order' === $post_type ) {
-			?>
-			<script type="text/javascript">
-			jQuery( function( $ ) {
-				$( '<option>' ).val( 'mark_processing' ).text( '<?php _e( 'Mark processing', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
-				$( '<option>' ).val( 'mark_processing' ).text( '<?php _e( 'Mark processing', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
-
-				$( '<option>' ).val( 'mark_on-hold' ).text( '<?php _e( 'Mark on-hold', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
-				$( '<option>' ).val( 'mark_on-hold' ).text( '<?php _e( 'Mark on-hold', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
-
-				$( '<option>' ).val( 'mark_completed' ).text( '<?php _e( 'Mark complete', 'woocommerce' ); ?>' ).appendTo( 'select[name="action"]' );
-				$( '<option>' ).val( 'mark_completed' ).text( '<?php _e( 'Mark complete', 'woocommerce' ); ?>' ).appendTo( 'select[name="action2"]' );
-			});
-			</script>
-			<?php
-		}
 	}
 
 	/**
