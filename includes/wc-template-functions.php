@@ -788,7 +788,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
 
-		if ( 1 === $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
