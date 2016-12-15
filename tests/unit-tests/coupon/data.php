@@ -159,7 +159,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$standard_getters_and_setters = array(
 			'code' => 'test',
 			'description' => 'hello world',
-			'discount_type' => 'percent_product',
+			'discount_type' => 'percent',
 			'amount' => 10.50,
 			'date_expires' => time(),
 			'usage_count' => 5,

@@ -15,10 +15,9 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_coupon_types() {
 
 		$coupon_types = array(
-			'fixed_cart'      => 'Cart discount',
-			'percent'         => 'Cart % discount',
-			'fixed_product'   => 'Product discount',
-			'percent_product' => 'Product % discount',
+			'percent'       => __( 'Percentage discount', 'woocommerce' ),
+			'fixed_cart'    => __( 'Fixed cart discount', 'woocommerce' ),
+			'fixed_product' => __( 'Fixed product discount', 'woocommerce' ),
 		);
 
 		$this->assertEquals( $coupon_types, wc_get_coupon_types() );
@@ -31,7 +30,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_coupon_type() {
 
-		$this->assertEquals( 'Cart discount', wc_get_coupon_type( 'fixed_cart' ) );
+		$this->assertEquals( 'Fixed cart discount', wc_get_coupon_type( 'fixed_cart' ) );
 		$this->assertEmpty( wc_get_coupon_type( 'bogus_type' ) );
 	}
 

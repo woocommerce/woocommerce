@@ -106,7 +106,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function is_type( $type ) {
-		return ( $this->get_discount_type() == $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
+		return ( $this->get_discount_type() === $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
 	}
 
 	/**
@@ -359,7 +359,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$discount      = 0;
 		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
 
-		if ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
+		if ( $this->is_type( array( 'percent' ) ) ) {
 			$discount = $this->get_amount() * ( $discounting_amount / 100 );
 		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
 			/**
@@ -386,7 +386,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$discount = min( $discount, $discounting_amount );
 
 		// Handle the limit_usage_to_x_items option
-		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
+		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {
 			if ( $discounting_amount ) {
 				if ( ! $this->get_limit_usage_to_x_items() ) {
 					$limit_usage_qty = $cart_item_qty;
@@ -445,6 +445,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_type( $discount_type ) {
+		if ( 'percent_product' === $discount_type ) {
+			$discount_type = 'percent'; // Backwards compatibility.
+		}
 		if ( ! in_array( $discount_type, array_keys( wc_get_coupon_types() ) ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
 		}
@@ -867,7 +870,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_sale_items() {
-		if ( $this->get_exclude_sale_items() && $this->is_type( wc_get_product_coupon_types() ) ) {
+		if ( $this->get_exclude_sale_items() ) {
 			$valid_for_cart      = false;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
@@ -915,7 +918,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
 			$this->validate_cart_excluded_product_ids();
 			$this->validate_cart_excluded_product_categories();
-			$this->validate_cart_excluded_sale_items();
 		}
 	}
 
@@ -959,32 +961,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			}
 			if ( ! $valid_for_cart ) {
 				throw new Exception( self::E_WC_COUPON_EXCLUDED_CATEGORIES );
-			}
-		}
-	}
-
-	/**
-	 * Exclude sale items from cart.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_cart_excluded_sale_items() {
-		if ( $this->get_exclude_sale_items() ) {
-			$valid_for_cart = true;
-			$product_ids_on_sale = wc_get_product_ids_on_sale();
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( ! empty( $cart_item['variation_id'] ) ) {
-						if ( in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
-							$valid_for_cart = false;
-						}
-					} elseif ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) ) {
-						$valid_for_cart = false;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
 			}
 		}
 	}
