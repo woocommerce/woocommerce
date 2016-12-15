@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 2.6.9
+Stable tag: 2.6.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,8 +158,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-* Fix API coupon expiry date.
-* Fix missing attributes when an option is chosen by default on variations.
+= 2.6.10 - X = 
+* Fix returned REST API coupon expiry date.
+* Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts. This is a larger change than we'd hope to do in 2.6, but once that was needed.
 
 = 2.6.9 - 2016/12/07 =
 * Theme - Added support for Twenty Seventeen Theme.
