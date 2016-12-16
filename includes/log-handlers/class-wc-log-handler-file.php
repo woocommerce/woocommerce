@@ -79,7 +79,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$handle = 'log';
 		}
 
-		$entry = $this->format_entry( $timestamp, $level, $message, $context );
+		$entry = self::format_entry( $timestamp, $level, $message, $context );
 
 		return $this->add( $entry, $handle );
 	}
@@ -94,7 +94,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 * @return string Formatted log entry.
 	 */
-	public function format_entry( $timestamp, $level, $message, $context ) {
+	public static function format_entry( $timestamp, $level, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
 			if ( isset( $context['tag'] ) && $context['tag'] ) {
