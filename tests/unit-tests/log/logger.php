@@ -247,59 +247,80 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
+
 		$handler
-			->expects( $this->exactly( 8 ) )
+			->expects( $this->at( 0 ) )
 			->method( 'handle' )
-			->withConsecutive(
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'debug' ),
-					$this->equalTo( 'debug message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'info' ),
-					$this->equalTo( 'info message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'notice' ),
-					$this->equalTo( 'notice message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'warning' ),
-					$this->equalTo( 'warning message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'error' ),
-					$this->equalTo( 'error message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'critical' ),
-					$this->equalTo( 'critical message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'alert' ),
-					$this->equalTo( 'alert message' ),
-					$this->equalTo( array() ),
-				),
-				array(
-					$this->greaterThanOrEqual( $time ),
-					$this->equalTo( 'emergency' ),
-					$this->equalTo( 'emergency message' ),
-					$this->equalTo( array() ),
-				)
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'debug' ),
+				$this->equalTo( 'debug message' ),
+				$this->equalTo( array() )
 			);
+		$handler
+			->expects( $this->at( 1 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'info' ),
+				$this->equalTo( 'info message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 2 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'notice' ),
+				$this->equalTo( 'notice message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 3 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'warning' ),
+				$this->equalTo( 'warning message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 4 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'error' ),
+				$this->equalTo( 'error message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 5 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'critical' ),
+				$this->equalTo( 'critical message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 6 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'alert' ),
+				$this->equalTo( 'alert message' ),
+				$this->equalTo( array() )
+			);
+		$handler
+			->expects( $this->at( 7 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'emergency' ),
+				$this->equalTo( 'emergency message' ),
+				$this->equalTo( array() )
+			);
+
 		return $handler;
 	}
 }
