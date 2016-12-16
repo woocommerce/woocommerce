@@ -247,8 +247,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$log_a = wc_get_logger();
 		$log_b = wc_get_logger();
 
-		$this->assertInstanceOf( WC_Logger::class, $log_a );
-		$this->assertInstanceOf( WC_Logger::class, $log_b );
+		$this->assertInstanceOf( 'WC_Logger', $log_a );
+		$this->assertInstanceOf( 'WC_Logger', $log_b );
 		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
 	}
 
