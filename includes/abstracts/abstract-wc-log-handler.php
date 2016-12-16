@@ -46,8 +46,8 @@ abstract class WC_Log_Handler {
 	 *
 	 * @return string Formatted log entry.
 	 */
-	public function format_entry( $timestamp, $level, $message, $context ) {
-		$time_string = $this->format_time( $timestamp );
+	public static function format_entry( $timestamp, $level, $message, $context ) {
+		$time_string = self::format_time( $timestamp );
 		$level_string = strtoupper( $level );
 		$entry = "{$time_string} {$level_string} {$message}";
 
