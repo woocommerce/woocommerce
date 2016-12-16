@@ -706,7 +706,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Comment status.
-		if ( ! empty( $request['reviews_allowed'] ) ) {
+		if ( isset( $request['reviews_allowed'] ) ) {
 			$product->set_reviews_allowed( $request['reviews_allowed'] );
 		}
 
