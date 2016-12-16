@@ -28,15 +28,30 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$handler = new WC_Log_Handler_Email();
 		$time = time();
 		$handler->handle( $time, 'emergency', 'msg_emergency', array() );
+		$handler->handle( $time, 'emergency', 'msg_emergency 2', array() );
+		$handler->send_log_email();
 
 		$site_name = get_bloginfo( 'name' );
 
 		$this->assertEquals(
-			'You have received the following WooCommerce log message:' . PHP_EOL . PHP_EOL . date( 'c', $time ) . ' EMERGENCY msg_emergency' . PHP_EOL,
+			(
+				'You have received the following WooCommerce log messages:'
+				. PHP_EOL
+				. PHP_EOL
+				. date( 'c', $time ) . ' EMERGENCY msg_emergency'
+				. PHP_EOL
+				. date( 'c', $time ) . ' EMERGENCY msg_emergency 2'
+				. PHP_EOL
+				. PHP_EOL
+				. "Visit {$site_name} admin area:"
+				. PHP_EOL
+				. admin_url()
+				. PHP_EOL
+			),
 			$mailer->get_sent()->body
 		);
 		$this->assertEquals(
-			"[EMERGENCY] WooCommerce log message from {$site_name}",
+			"[{$site_name}] WooCommerce log messages",
 			$mailer->get_sent()->subject
 		);
 		$this->assertEquals( get_option( 'admin_email' ), $mailer->get_recipient( 'to' )->address );
@@ -56,6 +71,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 			'Second Recipient <second@test.com>',
 		) );
 		$handler->handle( time(), 'emergency', '', array() );
+		$handler->send_log_email();
 
 		$first_recipient  = $mailer->get_recipient( 'to', 0, 0 );
 		$second_recipient = $mailer->get_recipient( 'to', 0, 1 );
@@ -75,6 +91,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$handler = new WC_Log_Handler_Email( 'User <user@test.com>' );
 		$handler->handle( time(), 'emergency', '', array() );
+		$handler->send_log_email();
 
 		$recipient  = $mailer->get_recipient( 'to' );
 		$this->assertEquals( 'user@test.com', $recipient->address );
@@ -91,11 +108,13 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$handler = new WC_Log_Handler_Email( null, 'notice' );
 		$handler->handle( time(), 'info', '', array() );
+		$handler->send_log_email();
 
 		// Info should not be handled, get_sent is false
 		$this->assertFalse( $mailer->get_sent( 0 ) );
 
 		$handler->handle( time(), 'notice', '', array() );
+		$handler->send_log_email();
 		$this->assertObjectHasAttribute( 'body', $mailer->get_sent( 0 ) );
 	}
 
@@ -109,12 +128,70 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$handler = new WC_Log_Handler_Email( null, 'notice' );
 		$handler->handle( time(), 'info', '', array() );
+		$handler->send_log_email();
 
 		// Info should not be handled, get_sent is false
 		$this->assertFalse( $mailer->get_sent( 0 ) );
 
 		$handler->set_threshold( 'info' );
 		$handler->handle( time(), 'info', '', array() );
+		$handler->send_log_email();
+
 		$this->assertObjectHasAttribute( 'body', $mailer->get_sent( 0 ) );
 	}
+
+	/**
+	 * Test send_log_email clears logs.
+	 *
+	 * Send log email could be called multiple times during a request. The same log should not be
+	 * sent multiple times.
+	 *
+	 * @since 2.8
+	 */
+	public function test_multiple_send_log() {
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$handler = new WC_Log_Handler_Email();
+		$time = time();
+		$handler->handle( $time, 'emergency', 'message 1', array() );
+		$handler->send_log_email();
+		$handler->handle( $time, 'emergency', 'message 2', array() );
+		$handler->send_log_email();
+
+		$site_name = get_bloginfo( 'name' );
+
+		$this->assertEquals(
+			(
+				'You have received the following WooCommerce log messages:'
+				. PHP_EOL
+				. PHP_EOL
+				. date( 'c', $time ) . ' EMERGENCY message 1'
+				. PHP_EOL
+				. PHP_EOL
+				. "Visit {$site_name} admin area:"
+				. PHP_EOL
+				. admin_url()
+				. PHP_EOL
+			),
+			$mailer->get_sent( 0 )->body
+		);
+
+		$this->assertEquals(
+			(
+				'You have received the following WooCommerce log messages:'
+				. PHP_EOL
+				. PHP_EOL
+				. date( 'c', $time ) . ' EMERGENCY message 2'
+				. PHP_EOL
+				. PHP_EOL
+				. "Visit {$site_name} admin area:"
+				. PHP_EOL
+				. admin_url()
+				. PHP_EOL
+			),
+			$mailer->get_sent( 1 )->body
+		);
+	}
+
+
 }
