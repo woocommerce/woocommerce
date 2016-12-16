@@ -342,7 +342,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_order_number() {
-		return apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
+		return (string) apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
 	}
 
 	/**
