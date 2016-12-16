@@ -715,7 +715,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Comment status.
-		if ( ! empty( $request['reviews_allowed'] ) ) {
+		if ( isset( $request['reviews_allowed'] ) ) {
 			$data->comment_status = $request['reviews_allowed'] ? 'open' : 'closed';
 		}
 
