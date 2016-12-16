@@ -32,7 +32,6 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * Minimum log level this handler will process.
 	 *
 	 * @var int Integer representation of minimum log level to handle.
-	 * @access private
 	 */
 	protected $threshold;
 
@@ -40,17 +39,15 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * Stores email recipients.
 	 *
 	 * @var array
-	 * @access private
 	 */
-	private $recipients = array();
+	protected $recipients = array();
 
 	/**
 	 * Stores log messages.
 	 *
 	 * @var array
-	 * @access private
 	 */
-	private $logs = array();
+	protected $logs = array();
 
 	/**
 	 * Constructor for log handler.
@@ -91,7 +88,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @return bool True if the log should be handled.
 	 */
-	public function should_handle( $level ) {
+	protected function should_handle( $level ) {
 		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
@@ -138,7 +135,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 *
 	 * @return string subject
 	 */
-	public static function get_subject() {
+	protected static function get_subject() {
 		$site_name = get_bloginfo( 'name' );
 		return sprintf( __( '[%s] WooCommerce log messages', 'woocommerce' ), $site_name );
 	}
@@ -148,7 +145,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 *
 	 * @return string body
 	 */
-	public function get_body() {
+	protected function get_body() {
 		$site_name = get_bloginfo( 'name' );
 		$entries = implode( PHP_EOL, $this->logs );
 		return __( 'You have received the following WooCommerce log messages:', 'woocommerce' )

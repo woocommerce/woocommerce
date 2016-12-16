@@ -18,17 +18,15 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * Stores open file handles.
 	 *
 	 * @var array
-	 * @access private
 	 */
-	private $handles = array();
+	protected $handles = array();
 
 	/**
 	 * File size limit for log files in bytes.
 	 *
 	 * @var int
-	 * @access private
 	 */
-	private $log_size_limit;
+	protected $log_size_limit;
 
 	/**
 	 * Constructor for the logger.
@@ -94,7 +92,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 * @return string Formatted log entry.
 	 */
-	public static function format_entry( $timestamp, $level, $message, $context ) {
+	protected static function format_entry( $timestamp, $level, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
 			if ( isset( $context['tag'] ) && $context['tag'] ) {
@@ -175,7 +173,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 * @return bool True if write was successful.
 	 */
-	public function add( $entry, $handle ) {
+	protected function add( $entry, $handle ) {
 		$result = false;
 
 		if ( $this->should_rotate( $handle ) ) {

@@ -32,7 +32,7 @@ abstract class WC_Log_Handler {
 	 * @param int $timestamp Log timestamp.
 	 * @return string Formatted time for use in log entry.
 	 */
-	public static function format_time( $timestamp ) {
+	protected static function format_time( $timestamp ) {
 		return date( 'c', $timestamp );
 	}
 
@@ -46,7 +46,7 @@ abstract class WC_Log_Handler {
 	 *
 	 * @return string Formatted log entry.
 	 */
-	public static function format_entry( $timestamp, $level, $message, $context ) {
+	protected static function format_entry( $timestamp, $level, $message, $context ) {
 		$time_string = self::format_time( $timestamp );
 		$level_string = strtoupper( $level );
 		$entry = "{$time_string} {$level_string} {$message}";
