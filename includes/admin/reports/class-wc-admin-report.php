@@ -356,20 +356,32 @@ class WC_Admin_Report {
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
 
-		// Ensure all days (or months) have values first in this range
-		for ( $i = 0; $i <= $interval; $i ++ ) {
-			switch ( $group_by ) {
-				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
-				break;
-				case 'month' :
-				default :
-					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
-				break;
-			}
+		// Ensure all days (or months) have values in this range.
+		if ( 'day' === $group_by ) {
+			for ( $i = 0; $i <= $interval; $i ++ ) {
+				$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 
-			if ( ! isset( $prepared_data[ $time ] ) ) {
-				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				if ( ! isset( $prepared_data[ $time ] ) ) {
+					$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				}
+			}
+		} else {
+			$current_yearnum  = date( 'Y', $start_date );
+			$current_monthnum = date( 'm', $start_date );
+
+			for ( $i = 0; $i <= $interval; $i ++ ) {
+				$time = strtotime( $current_yearnum . str_pad( $current_monthnum, 2, '0', STR_PAD_LEFT ) . '01' ) . '000';
+
+				if ( ! isset( $prepared_data[ $time ] ) ) {
+					$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				}
+
+				$current_monthnum ++;
+
+				if ( $current_monthnum > 12 ) {
+					$current_monthnum = 1;
+					$current_yearnum  ++;
+				}
 			}
 		}
 
@@ -561,9 +573,9 @@ class WC_Admin_Report {
 			case 'month' :
 				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date)';
 				$this->chart_interval = 0;
-				$min_date             = $this->start_date;
+				$min_date             = strtotime( date( 'Y-m-01', $this->start_date ) );
 
-				while ( ( $min_date   = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
 					$this->chart_interval ++;
 				}
 
