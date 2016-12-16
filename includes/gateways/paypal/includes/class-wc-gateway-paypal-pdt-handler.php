@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		$transaction_result = $this->validate_transaction( $transaction );
 
-		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_safe_dump( $transaction_result ) );
+		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_print_r( $transaction_result, true ) );
 
 		update_post_meta( $order->get_id(), '_paypal_status', $status );
 		update_post_meta( $order->get_id(), '_transaction_id', $transaction );

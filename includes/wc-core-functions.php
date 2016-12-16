@@ -1425,16 +1425,19 @@ function wc_get_logger() {
 }
 
 /**
- * Dump an expression safely.
+ * Prints human-readable information about a variable.
  *
  * Some server environments blacklist some debugging functions. This function provides a safe way to
- * turn an expression into a printable, readable form while protecting from errors.
+ * turn an expression into a printable, readable form without calling blacklisted functions.
  *
  * @since 2.8
+ *
  * @param mixed $expression The expression to be printed.
- * @return string|bool Result of printing expression. False if no alternatives are available.
+ * @param bool $return Optional. Default false. Set to true to return the human-readable string.
+ * @return string|bool False if expression could not be printed. True if the expression was printed.
+ *     If $return is true, a string representation will be returned.
  */
-function wc_safe_dump( $expression ) {
+function wc_print_r( $expression, $return = false ) {
 	$alternatives = array(
 		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
 		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
@@ -1442,11 +1445,17 @@ function wc_safe_dump( $expression ) {
 		array( 'func' => 'serialize', 'args' => array( $expression ) ),
 	);
 
-	$alternatives = apply_filters( 'woocommerce_safe_dump_alternatives', $alternatives, $expression );
+	$alternatives = apply_filters( 'woocommerce_print_r_alternatives', $alternatives, $expression );
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {
-			return call_user_func_array( $alternative['func'], $alternative['args'] );
+			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			if ( $return ) {
+				return $res;
+			} else {
+				echo $res;
+				return true;
+			}
 		}
 	}
 
