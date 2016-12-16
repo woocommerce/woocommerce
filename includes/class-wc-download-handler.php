@@ -149,6 +149,13 @@ class WC_Download_Handler {
 			self::download_error( __( 'No file defined', 'woocommerce' ) );
 		}
 
+		//Check if file exists
+		$file_exists = self::check_external_file_exists( $file_path );
+		
+		if( ! $file_exists ){
+			self::download_error( __( 'File not exists', 'woocommerce' ) );
+		}
+
 		$filename = basename( $file_path );
 
 		if ( strstr( $filename, '?' ) ) {
@@ -395,6 +402,27 @@ class WC_Download_Handler {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
+	}
+
+	/**
+	 * check if an external file exist
+	 *
+	 * @param $file_path
+	 *
+	 * @return bool
+	 */
+	public static function check_external_file_exists( $file_path ) {
+		// curl_init requires PHP 4.0.2 or greater
+		if ( !function_exists( 'curl_init' ) )
+			return true;
+
+		$ch = curl_init( $file_path );
+		curl_setopt( $ch, CURLOPT_NOBODY, true );
+		curl_exec( $ch );
+		$retCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		curl_close( $ch );
+
+		return $retCode === 200;
 	}
 }
 
