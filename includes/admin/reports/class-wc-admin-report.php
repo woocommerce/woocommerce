@@ -325,7 +325,7 @@ class WC_Admin_Report {
 
 		if ( $debug ) {
 			echo '<pre>';
-			echo wc_safe_dump( $query );
+			wc_print_r( $query );
 			echo '</pre>';
 		}
 

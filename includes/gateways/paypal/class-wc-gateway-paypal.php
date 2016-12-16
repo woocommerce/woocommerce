@@ -297,7 +297,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
-		$this->log( 'Refund Result: ' . wc_safe_dump( $result ) );
+		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
 		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
@@ -328,7 +328,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				return;
 			}
 
-			$this->log( 'Capture Result: ' . wc_safe_dump( $result ) );
+			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {
