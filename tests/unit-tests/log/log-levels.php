@@ -48,15 +48,15 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 	 * @since 2.8
 	 */
 	public function test_is_valid_level() {
-		$this->assertEquals( false, WC_Log_Levels::get_level_severity( 'unrecognized level' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'debug' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'info' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'notice' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'warning' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'error' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'critical' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'alert' ) );
-		$this->assertEquals( true,  WC_Log_Levels::get_level_severity( 'emergency' ) );
+		$this->assertFalse( WC_Log_Levels::get_level_severity( 'unrecognized level' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'debug' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'info' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'notice' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'warning' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'error' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'critical' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'alert' ) );
+		$this->assertTrue( WC_Log_Levels::get_level_severity( 'emergency' ) );
 	}
 
 }
