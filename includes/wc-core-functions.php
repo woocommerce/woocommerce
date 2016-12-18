@@ -1469,9 +1469,9 @@ function wc_print_r( $expression, $return = false ) {
  */
 function wc_register_default_log_handler( $handlers ) {
 	if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
-		array_push( $handlers, new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) ) );
+		array_push( $handlers, new WC_Log_Handler_DB() );
 	} else {
-		array_push( $handlers, new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
+		array_push( $handlers, new WC_Log_Handler_File() );
 	}
 
 	return $handlers;
