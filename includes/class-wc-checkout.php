@@ -336,7 +336,7 @@ class WC_Checkout {
 			foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 				$packages = WC()->shipping->get_packages();
 				if ( isset( $item->package_key ) ) {
-					do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->package_key );
+					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $item->package_key );
 				}
 			}
 
