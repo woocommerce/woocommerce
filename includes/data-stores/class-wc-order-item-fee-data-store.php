@@ -32,6 +32,7 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 			'total'      => get_metadata( 'order_item', $item->get_id(), '_line_total', true ),
 			'taxes'      => get_metadata( 'order_item', $item->get_id(), '_line_tax_data', true ),
 		) );
+		$item->set_object_read( true );
 	}
 
 	/**

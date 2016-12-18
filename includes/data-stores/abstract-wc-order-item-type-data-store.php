@@ -111,7 +111,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			'type'     => $data->order_item_type,
 		) );
 		$item->read_meta_data();
-		$item->set_object_read( true );
 	}
 
 	/**
