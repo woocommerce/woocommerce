@@ -241,7 +241,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		if ( array_key_exists( $offset, $this->data ) ) {
-			$this->data[ $offset ] = $value;
+			$setter = "set_$offset";
+			if ( is_callable( array( $this, $setter ) ) ) {
+				$this->$setter( $value );
+			}
 		}
 
 		$this->update_meta_data( '_' . $offset, $value );
@@ -301,7 +304,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( 'item_meta' === $offset ) {
 			return $meta_values;
 		} elseif ( array_key_exists( $offset, $this->data ) ) {
-			return $this->data[ $offset ];
+			$getter = "get_$offset";
+			if ( is_callable( array( $this, $getter ) ) ) {
+				return $this->$getter();
+			}
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
 			return $meta_values[ '_' . $offset ];
