@@ -211,24 +211,24 @@ class WC_Logger {
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @deprecated since 2.0.0
+	 * @deprecated since 2.8
 	 *
 	 * @return bool
 	 */
 	public function clear() {
-		_deprecated_function( 'WC_Logger::clear', '2.8' );
+		_deprecated_function( 'WC_Logger::clear', '2.8', 'WC_Log_Handler_File::clear' );
 		return false;
 	}
 
 	/**
 	 * Remove/delete the chosen file.
 	 *
-	 * @deprecated since 2.0.0
+	 * @deprecated since 2.8
 	 *
 	 * @return bool
 	 */
 	public function remove() {
-		_deprecated_function( 'WC_Logger::remove', '2.8' );
+		_deprecated_function( 'WC_Logger::remove', '2.8', 'WC_Log_Handler_File::remove' );
 		return false;
 	}
 }
