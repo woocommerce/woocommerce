@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Standard log levels
  *
  * @class          WC_Log_Levels
- * @version        2.0.0
+ * @version        1.0.0
  * @package        WooCommerce/Classes
  * @category       Class
  * @author         WooThemes
@@ -43,7 +43,6 @@ abstract class WC_Log_Levels {
 	 * Level strings mapped to integer severity.
 	 *
 	 * @var array
-	 * @access protected
 	 */
 	protected static $level_to_severity = array(
 		self::EMERGENCY => 800,
@@ -62,7 +61,6 @@ abstract class WC_Log_Levels {
 	 * This is the inverse of $level_severity.
 	 *
 	 * @var array
-	 * @access protected
 	 */
 	protected static $severity_to_level = array(
 		800 => self::EMERGENCY,
