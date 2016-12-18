@@ -18,15 +18,13 @@ class WC_Logger {
 	 * Stores registered log handlers.
 	 *
 	 * @var array
-	 * @access private
 	 */
-	private $handlers;
+	protected $handlers;
 
 	/**
 	 * Minimum log level this handler will process.
 	 *
 	 * @var int Integer representation of minimum log level to handle.
-	 * @access private
 	 */
 	protected $threshold;
 
@@ -54,7 +52,7 @@ class WC_Logger {
 	}
 
 	/**
-	 * Determine whether handler should handle log.
+	 * Determine whether to handle or ignore log.
 	 *
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @return bool True if the log should be handled.
@@ -66,11 +64,10 @@ class WC_Logger {
 	/**
 	 * Add a log entry.
 	 *
-	 * @deprecated since 2.0.0
+	 * @deprecated since 2.8
 	 *
 	 * @param string $handle
 	 * @param string $message
-	 *
 	 * @return bool
 	 */
 	public function add( $handle, $message ) {
@@ -84,7 +81,6 @@ class WC_Logger {
 	/**
 	 * Add a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
 	 * @param string $level One of the following:
 	 *     'emergency': System is unusable.
 	 *     'alert': Action must be taken immediately.
