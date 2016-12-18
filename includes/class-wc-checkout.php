@@ -316,9 +316,35 @@ class WC_Checkout {
 			$order_id = $order->save();
 
 			// Let plugins add their own meta data.
+
+			foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+				$cart_items = WC()->cart->get_cart();
+				if ( isset( $item->cart_item_key ) && isset( $cart_items[ $item->cart_item_key ] ) ) {
+					$cart_item = $cart_items[ $item->cart_item_key ];
+					do_action( 'woocommerce_add_order_item_meta', $item_id, $cart_item, $item->cart_item_key );
+				}
+			}
+
+			foreach ( $order->get_items( 'fee' ) as $item_id => $item ) {
+				$fees = WC()->cart->get_fees();
+				if ( isset( $item->fee_key ) && isset( $fees[ $item->fee_key ] ) ) {
+					$fee = $fees[ $item->fee_key ];
+					do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $item->fee_key );
+				}
+			}
+
+			foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
+				$packages = WC()->shipping->get_packages();
+				if ( isset( $item->package_key ) && isset( $packages[ $item->package_key ] ) ) {
+					$package = $packages[ $item->package_key ];
+					do_action( 'woocommerce_add_shipping_order_item', $item_id, $item->package_key );
+				}
+			}
+
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
 			return $order_id;
+
 		} catch ( Exception $e ) {
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
@@ -347,9 +373,7 @@ class WC_Checkout {
 				'taxes'        => $values['line_tax_data'],
 			) );
 			$item->set_backorder_meta();
-			// Set this to pass to legacy actions.
-			$item->legacy_values        = $values;
-			$item->legacy_cart_item_key = $cart_item_key;
+			$item->cart_item_key = $cart_item_key;
 			$order->add_item( $item );
 		}
 	}
@@ -371,9 +395,7 @@ class WC_Checkout {
 					'total' => $fee->tax_data,
 				),
 			) );
-			// Set this to pass to legacy actions.
-			$item->legacy_fee     = $fee;
-			$item->legacy_fee_key = $fee_key;
+			$item->fee_key = $fee_key;
 			$order->add_item( $item );
 		}
 	}
@@ -397,8 +419,7 @@ class WC_Checkout {
 					'taxes'        => $shipping_rate->taxes,
 					'meta_data'    => $shipping_rate->get_meta_data(),
 				) );
-				// Set this to pass to legacy actions.
-				$item->legacy_package_key = $package_key;
+				$item->package_key = $package_key;
 				$order->add_item( $item );
 			}
 		}
