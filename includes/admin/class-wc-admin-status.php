@@ -307,7 +307,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Bulk actions.
+	 * Bulk DB log table actions.
 	 *
 	 * @since 2.8
 	 */
