@@ -64,17 +64,17 @@ class WC_Logger {
 	/**
 	 * Add a log entry.
 	 *
-	 * @deprecated since 2.8
+	 * @deprecated 2.7.0
 	 *
 	 * @param string $handle
 	 * @param string $message
 	 * @return bool
 	 */
 	public function add( $handle, $message ) {
-		_deprecated_function( 'WC_Logger::add', '2.8', 'WC_Logger::log' );
+		wc_deprecated_function( 'WC_Logger::add', '2.7', 'WC_Logger::log' );
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 		$this->log( WC_Log_Levels::NOTICE, $message, array( 'tag' => $handle, '_legacy' => true ) );
-		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.8', 'This action has been deprecated with no alternative.' );
+		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.7', 'This action has been deprecated with no alternative.' );
 		return true;
 	}
 
@@ -97,7 +97,7 @@ class WC_Logger {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
 			$class = __CLASS__;
 			$method = __FUNCTION__;
-			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
+			wc_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
 		}
 
 		if ( $this->should_handle( $level ) ) {
@@ -207,24 +207,24 @@ class WC_Logger {
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @deprecated since 2.8
+	 * @deprecated 2.7.0
 	 *
 	 * @return bool
 	 */
 	public function clear() {
-		_deprecated_function( 'WC_Logger::clear', '2.8', 'WC_Log_Handler_File::clear' );
+		wc_deprecated_function( 'WC_Logger::clear', '2.7', 'WC_Log_Handler_File::clear' );
 		return false;
 	}
 
 	/**
 	 * Remove/delete the chosen file.
 	 *
-	 * @deprecated since 2.8
+	 * @deprecated 2.7.0
 	 *
 	 * @return bool
 	 */
 	public function remove() {
-		_deprecated_function( 'WC_Logger::remove', '2.8', 'WC_Log_Handler_File::remove' );
+		wc_deprecated_function( 'WC_Logger::remove', '2.7', 'WC_Log_Handler_File::remove' );
 		return false;
 	}
 }

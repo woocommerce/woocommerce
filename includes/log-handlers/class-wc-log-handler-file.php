@@ -124,17 +124,21 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			return true;
 		}
 
-		if ( ! file_exists( wc_get_log_file_path( $handle ) ) ) {
-			$temphandle = @fopen( wc_get_log_file_path( $handle ), 'w+' );
-			@fclose( $temphandle );
+		$file = self::get_log_file_path( $handle );
 
-			if ( defined( 'FS_CHMOD_FILE' ) ) {
-				@chmod( wc_get_log_file_path( $handle ), FS_CHMOD_FILE );
+		if ( $file ) {
+			if ( ! file_exists( $file ) ) {
+				$temphandle = @fopen( $file, 'w+' );
+				@fclose( $temphandle );
+
+				if ( defined( 'FS_CHMOD_FILE' ) ) {
+					@chmod( $file, FS_CHMOD_FILE );
+				}
 			}
-		}
 
-		if ( $this->handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
-			return true;
+			if ( $this->handles[ $handle ] = @fopen( $file, $mode ) ) {
+				return true;
+			}
 		}
 
 		return false;
@@ -170,8 +174,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param string $handle Log entry handle
 	 * @param string $entry Log entry text
+	 * @param string $handle Log entry handle
 	 *
 	 * @return bool True if write was successful.
 	 */
@@ -224,18 +228,20 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function remove( $handle ) {
 		$removed = false;
-		$file    = wc_get_log_file_path( $handle );
+		$file    = self::get_log_file_path( $handle );
 
-		if ( is_file( $file ) && is_writable( $file ) ) {
-			// Close first to be certain no processes keep it alive after it is unlinked.
-			$this->close( $handle );
-			$removed = unlink( $file );
-		} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
-			$this->close( $handle );
-			$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
+		if ( $file ) {
+			if ( is_file( $file ) && is_writable( $file ) ) {
+				// Close first to be certain no processes keep it alive after it is unlinked.
+				$this->close( $handle );
+				$removed = unlink( $file );
+			} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
+				$this->close( $handle );
+				$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
+			}
+
+			do_action( 'woocommerce_log_remove', $handle, $removed );
 		}
-
-		do_action( 'woocommerce_log_remove', $handle, $removed );
 
 		return $removed;
 	}
@@ -249,12 +255,16 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool True if if should be rotated.
 	 */
 	protected function should_rotate( $handle ) {
-		$file = wc_get_log_file_path( $handle );
-		if ( $this->is_open( $handle ) ) {
-			$file_stat = fstat( $this->handles[ $handle ] );
-			return $file_stat['size'] > $this->log_size_limit;
-		} elseif ( file_exists( $file ) ) {
-			return filesize( $file ) > $this->log_size_limit;
+		$file = self::get_log_file_path( $handle );
+		if ( $file ) {
+			if ( $this->is_open( $handle ) ) {
+				$file_stat = fstat( $this->handles[ $handle ] );
+				return $file_stat['size'] > $this->log_size_limit;
+			} elseif ( file_exists( $file ) ) {
+				return filesize( $file ) > $this->log_size_limit;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
@@ -297,8 +307,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$next_suffix = '.' . ($number + 1);
 		}
 
-		$rename_from = wc_get_log_file_path( "{$handle}{$suffix}" );
-		$rename_to = wc_get_log_file_path( "{$handle}{$next_suffix}" );
+		$rename_from = self::get_log_file_path( "{$handle}{$suffix}" );
+		$rename_to = self::get_log_file_path( "{$handle}{$next_suffix}" );
 
 		if ( $this->is_open( $rename_from ) ) {
 			$this->close( $rename_from );
@@ -310,6 +320,19 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			return false;
 		}
 
+	}
+
+	/**
+	 * Get a log file path.
+	 *
+	 * @param string $handle Log name.
+	 * @return bool|string The log file path or false if path cannot be determined.
+	 */
+	public static function get_log_file_path( $handle ) {
+		if ( function_exists( 'wp_hash' ) ) {
+			return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+		}
+		return false;
 	}
 
 }
