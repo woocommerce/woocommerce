@@ -29,6 +29,16 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected $log_size_limit;
 
 	/**
+	 * Cache logs that could not be written.
+	 *
+	 * If a log is written too early in the request, pluggable functions may be unavailable. These
+	 * logs will be cached and written on 'plugins_loaded' action.
+	 *
+	 * @var array
+	 */
+	protected $cached_logs = array();
+
+	/**
 	 * Constructor for the logger.
 	 *
 	 * @param int $log_size_limit Optional. Size limit for log files. Default 5mb.
@@ -40,6 +50,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		}
 
 		$this->log_size_limit = $log_size_limit;
+
+		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
 	}
 
 	/**
@@ -188,6 +200,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		if ( $this->open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
 			$result = fwrite( $this->handles[ $handle ], $entry . PHP_EOL );
+		} else {
+			$this->cache_log( $entry, $handle );
 		}
 
 		return false !== $result;
@@ -333,6 +347,28 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
 		}
 		return false;
+	}
+
+	/**
+	 * Cache log to write later.
+	 *
+	 * @param string $entry Log entry text
+	 * @param string $handle Log entry handle
+	 */
+	protected function cache_log( $entry, $handle ) {
+		$this->cached_logs[] = array(
+			'entry' => $entry,
+			'handle' => $handle,
+		);
+	}
+
+	/**
+	 * Write cached logs.
+	 */
+	public function write_cached_logs() {
+		foreach ( $this->cached_logs as $log ) {
+			$this->add( $log['entry'], $log['handle'] );
+		}
 	}
 
 }
