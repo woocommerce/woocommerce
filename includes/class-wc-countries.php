@@ -1084,7 +1084,14 @@ class WC_Countries {
 				'priority'     => 100,
 			);
 			$address_fields['billing_email'] = array(
-				'label' => __( 'Email address', 'woocommerce' ),
+				'label'        => __( 'Email address', 'woocommerce' ),
+				'required'     => true,
+				'clear'        => true,
+				'type'         => 'email',
+				'class'        => array( 'form-row-last' ),
+				'validate'     => array( 'email' ),
+				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
+				'priority'     => 110,
 			);
 		}
 
