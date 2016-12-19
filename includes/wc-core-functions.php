@@ -754,17 +754,6 @@ function get_woocommerce_api_url( $path ) {
 }
 
 /**
- * Get a log file path.
- *
- * @since 2.2
- * @param string $handle name.
- * @return string the log file path.
- */
-function wc_get_log_file_path( $handle ) {
-	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
-}
-
-/**
  * Recursively get page children.
  * @param  int $page_id
  * @return int[]
@@ -1430,7 +1419,7 @@ function wc_get_logger() {
  * Some server environments blacklist some debugging functions. This function provides a safe way to
  * turn an expression into a printable, readable form without calling blacklisted functions.
  *
- * @since 2.8
+ * @since 2.7
  *
  * @param mixed $expression The expression to be printed.
  * @param bool $return Optional. Default false. Set to true to return the human-readable string.
@@ -1465,7 +1454,7 @@ function wc_print_r( $expression, $return = false ) {
 /**
  * Registers the default log handler.
  *
- * @since 2.8
+ * @since 2.7
  * @param array $handlers
  * @return array
  */

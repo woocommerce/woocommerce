@@ -236,12 +236,13 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
 
 		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
+		$this->setExpectedDeprecated( 'wc_get_log_file_path' );
 	}
 
 	/**
 	 * Test wc_get_logger().
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_wc_get_logger() {
 		$log_a = wc_get_logger();
@@ -304,7 +305,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_print_r()
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_wc_print_r() {
 		$arr = array( 1, 2, 'a', 'b', 'c' => 'd' );

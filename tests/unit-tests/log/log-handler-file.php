@@ -3,7 +3,7 @@
 /**
  * Class WC_Tests_Log_Handler_File
  * @package WooCommerce\Tests\Log
- * @since 2.8
+ * @since 2.7.0
  */
 class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
@@ -27,7 +27,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $log_files as $file ) {
-			$file_path = wc_get_log_file_path( $file );
+			$file_path = WC_Log_Handler_File::get_log_file_path( $file );
 			if ( file_exists( $file_path ) && is_writable( $file_path ) ) {
 				unlink( $file_path );
 			}
@@ -36,13 +36,13 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	}
 
 	public function read_content( $handle ) {
-		return file_get_contents( wc_get_log_file_path( $handle ) );
+		return file_get_contents( WC_Log_Handler_File::get_log_file_path( $handle ) );
 	}
 
 	/**
 	 * Test _legacy format.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_legacy_format() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
@@ -56,7 +56,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	/**
 	 * Test clear().
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_clear() {
 		$handler = new WC_Log_Handler_File();
@@ -69,20 +69,20 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	/**
 	 * Test remove().
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_remove() {
 		$handler = new WC_Log_Handler_File();
 		$log_name = '_test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'tag' => $log_name ) );
 		$handler->remove( $log_name );
-		$this->assertFileNotExists( wc_get_log_file_path( $log_name ) );
+		$this->assertFileNotExists( WC_Log_Handler_File::get_log_file_path( $log_name ) );
 	}
 
 	/**
 	 * Test handle writes to default file correctly.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_writes_file() {
 		$handler = new WC_Log_Handler_File();
@@ -104,7 +104,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	/**
 	 * Test 'tag' context determines log file.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_log_file_tag() {
 		$handler = new WC_Log_Handler_File();
@@ -127,7 +127,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	/**
 	 * Test multiple handlers don't conflict on log writing.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_multiple_handlers() {
 		$handler_a = new WC_Log_Handler_File();
@@ -154,7 +154,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 *
 	 * Ensure logs are rotated correctly when limit is surpassed.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_log_rotate() {
 
@@ -162,7 +162,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler = new WC_Log_Handler_File( 5 * 1024 * 1024 );
 		$time = time();
 		$log_name = '_test_log_rotate';
-		$base_log_file = wc_get_log_file_path( $log_name );
+		$base_log_file = WC_Log_Handler_File::get_log_file_path( $log_name );
 
 		// Create log file larger than 5mb to ensure log is rotated
 		$handle = fopen( $base_log_file, 'w' );
@@ -172,13 +172,13 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
 		// Write some files to ensure they've rotated correctly
 		for ( $i = 0; $i < 10; $i++ ) {
-			file_put_contents( wc_get_log_file_path( $log_name . ".{$i}" ), $i );
+			file_put_contents( WC_Log_Handler_File::get_log_file_path( $log_name . ".{$i}" ), $i );
 		}
 
 		$context_tag = array( 'tag' => $log_name );
 		$handler->handle( $time, 'emergency', 'emergency', $context_tag );
 
-		$this->assertFileExists( wc_get_log_file_path( $log_name ) );
+		$this->assertFileExists( WC_Log_Handler_File::get_log_file_path( $log_name ) );
 
 		// Ensure the handled log is correct
 		$this->assertStringEndsWith( 'EMERGENCY emergency' . PHP_EOL, $this->read_content( $log_name ) );
@@ -188,6 +188,17 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		for ( $i = 1; $i < 10; $i++ ) {
 			$this->assertEquals( $i - 1, $this->read_content( $log_name . ".{$i}" ) );
 		}
+	}
+
+	/**
+	 * Test get_log_file_path().
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_get_log_file_path() {
+		$log_dir   = trailingslashit( WC_LOG_DIR );
+		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );
 	}
 
 }

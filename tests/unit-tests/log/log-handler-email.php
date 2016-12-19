@@ -3,7 +3,7 @@
 /**
  * Class WC_Tests_Log_Handler_Email
  * @package WooCommerce\Tests\Log
- * @since 2.8
+ * @since 2.7.0
  */
 class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
@@ -20,7 +20,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	/**
 	 * Test handle sends email correctly.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_handle() {
 		$mailer = tests_retrieve_phpmailer_instance();
@@ -61,7 +61,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	/**
 	 * Test multiple recipients receive emails.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_multiple_recipients() {
 		$mailer = tests_retrieve_phpmailer_instance();
@@ -84,7 +84,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	/**
 	 * Test single recipient receives emails.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_single_recipient() {
 		$mailer = tests_retrieve_phpmailer_instance();
@@ -101,7 +101,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	/**
 	 * Test threshold.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_threshold() {
 		$mailer = tests_retrieve_phpmailer_instance();
@@ -121,7 +121,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	/**
 	 * Test set_threshold().
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_set_threshold() {
 		$mailer = tests_retrieve_phpmailer_instance();
@@ -146,7 +146,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 * Send log email could be called multiple times during a request. The same log should not be
 	 * sent multiple times.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	public function test_multiple_send_log() {
 		$mailer = tests_retrieve_phpmailer_instance();

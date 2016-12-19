@@ -293,7 +293,7 @@ class WC_Admin_Status {
 	/**
 	 * Clear DB log table.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	private static function flush_db_logs() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
@@ -309,7 +309,7 @@ class WC_Admin_Status {
 	/**
 	 * Bulk DB log table actions.
 	 *
-	 * @since 2.8
+	 * @since 2.7.0
 	 */
 	private static function log_table_bulk_actions() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
