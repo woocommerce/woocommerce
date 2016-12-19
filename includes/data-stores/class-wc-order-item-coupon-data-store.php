@@ -31,6 +31,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 			'discount'     => get_metadata( 'order_item', $item->get_id(), 'discount_amount', true ),
 			'discount_tax' => get_metadata( 'order_item', $item->get_id(), 'discount_amount_tax', true ),
 		) );
+		$item->set_object_read( true );
 	}
 
 	/**
