@@ -1451,6 +1451,28 @@ class WC_Cart {
 	}
 
 	/**
+	 * Filter items needing shipping callback.
+	 *
+	 * @since  2.7.0
+	 * @param  array $item
+	 * @return bool
+	 */
+	protected function filter_items_needing_shipping( $item ) {
+		$product = $item['data'];
+		return $product && $product->needs_shipping();
+	}
+
+	/**
+	 * Get only items that need shipping.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	protected function get_items_needing_shipping() {
+		return array_filter( $this->get_cart(), array( $this, 'filter_items_needing_shipping' ) );
+	}
+
+	/**
 	 * Get packages to calculate shipping for.
 	 *
 	 * This lets us calculate costs for carts that are shipped to multiple locations.
@@ -1464,29 +1486,26 @@ class WC_Cart {
 	 * @return array of cart items
 	 */
 	public function get_shipping_packages() {
-		// Packages array for storing 'carts'
-		$packages = array();
-
-		$packages[0]['contents']                 = $this->get_cart();		// Items in the package
-		$packages[0]['contents_cost']            = 0;						// Cost of items in the package, set below
-		$packages[0]['applied_coupons']          = $this->applied_coupons;
-		$packages[0]['user']['ID']               = get_current_user_id();
-		$packages[0]['destination']['country']   = WC()->customer->get_shipping_country();
-		$packages[0]['destination']['state']     = WC()->customer->get_shipping_state();
-		$packages[0]['destination']['postcode']  = WC()->customer->get_shipping_postcode();
-		$packages[0]['destination']['city']      = WC()->customer->get_shipping_city();
-		$packages[0]['destination']['address']   = WC()->customer->get_shipping_address();
-		$packages[0]['destination']['address_2'] = WC()->customer->get_shipping_address_2();
-
-		foreach ( $this->get_cart() as $item ) {
-			if ( $item['data']->needs_shipping() ) {
-				if ( isset( $item['line_total'] ) ) {
-					$packages[0]['contents_cost'] += $item['line_total'];
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_cart_shipping_packages', $packages );
+		return apply_filters( 'woocommerce_cart_shipping_packages',
+			array(
+				array(
+					'contents'        => $this->get_items_needing_shipping(),
+					'contents_cost'   => array_sum( wp_list_pluck( $this->get_items_needing_shipping(), 'line_total' ) ),
+					'applied_coupons' => $this->applied_coupons,
+					'user'            => array(
+						'ID' => get_current_user_id(),
+					),
+					'destination'     => array(
+						'country'   => WC()->customer->get_shipping_country(),
+						'state'     => WC()->customer->get_shipping_state(),
+						'postcode'  => WC()->customer->get_shipping_postcode(),
+						'city'      => WC()->customer->get_shipping_city(),
+						'address'   => WC()->customer->get_shipping_address(),
+						'address_2' => WC()->customer->get_shipping_address_2(),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -1495,17 +1514,14 @@ class WC_Cart {
 	 * @return bool whether or not the cart needs shipping
 	 */
 	public function needs_shipping() {
-		// If shipping is disabled or not yet configured, we can skip this.
 		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
 			return false;
 		}
-
 		$needs_shipping = false;
 
 		if ( ! empty( $this->cart_contents ) ) {
 			foreach ( $this->cart_contents as $cart_item_key => $values ) {
-				$product = $values['data'];
-				if ( $product->needs_shipping() ) {
+				if ( $values['data']->needs_shipping() ) {
 					$needs_shipping = true;
 				}
 			}
