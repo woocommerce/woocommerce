@@ -357,7 +357,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// Get results.
-		$orders = new WP_Query( $wp_query_args );
+		$orders = new WP_Query( apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $args, $this ) );
 
 		if ( 'objects' === $args['return'] ) {
 			$return = array_map( 'wc_get_order', $orders->posts );
