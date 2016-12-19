@@ -288,7 +288,6 @@ class WC_Checkout {
 			}
 
 			foreach ( $data as $key => $value ) {
-				// Use setters where available.
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
 
@@ -516,7 +515,8 @@ class WC_Checkout {
 	 * @return array of data and errors.
 	 */
 	protected function get_posted_data() {
-		$data = array(
+		$skipped = array();
+		$data    = array(
 			'terms'                              => (int) isset( $_POST['terms'] ),
 			'createaccount'                      => (int) ! empty( $_POST['createaccount'] ),
 			'payment_method'                     => isset( $_POST['payment_method'] ) ? wc_clean( $_POST['payment_method'] ) : '',
@@ -526,6 +526,7 @@ class WC_Checkout {
 		);
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
+				$skipped[] = $fieldset_key;
 				continue;
 			}
 			foreach ( $fieldset as $key => $field ) {
@@ -549,6 +550,13 @@ class WC_Checkout {
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
 			}
 		}
+
+		if ( in_array( 'shipping', $skipped ) && WC()->cart->needs_shipping_address() ) {
+			foreach ( $this->get_checkout_fields( 'shipping' ) as $key => $field ) {
+				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
+			}
+		}
+
 		return $data;
 	}
 
@@ -922,9 +930,9 @@ class WC_Checkout {
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
 		if ( 'billing' === $type || false === $this->posted_data['ship_to_different_address'] ) {
-			$return = isset( $this->posted_data[ 'billing_' . $key ] ) ? $this->posted_data[ 'billing_' . $key ] : '';
+			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
 		} else {
-			$return = isset( $this->posted_data[ 'shipping_' . $key ] ) ? $this->posted_data[ 'shipping_' . $key ] : '';
+			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
 		}
 		return $return;
 	}
