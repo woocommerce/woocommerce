@@ -313,9 +313,16 @@ class WC_Checkout {
 			$this->create_order_shipping_lines( $order );
 			$this->create_order_tax_lines( $order );
 			$this->create_order_coupon_lines( $order );
+
+			/**
+			 * Action hook to adjust order before save. To change $order, use a pointer (&$order) in your hooked function.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_create_order', $order, $data );
+
+			// Save the order.
 			$order_id = $order->save();
 
-			// Let plugins add their own meta data.
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
 			return $order_id;
@@ -331,8 +338,10 @@ class WC_Checkout {
 	 */
 	protected function create_order_line_items( &$order ) {
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-			$product = $values['data'];
-			$item    = new WC_Order_Item_Product();
+			$product                    = $values['data'];
+			$item                       = new WC_Order_Item_Product();
+			$item->legacy_values        = $values; // @deprecated For legacy actions.
+			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
 				'quantity'     => $values['quantity'],
 				'name'         => $product ? $product->get_name() : '',
@@ -347,9 +356,14 @@ class WC_Checkout {
 				'taxes'        => $values['line_tax_data'],
 			) );
 			$item->set_backorder_meta();
-			// Set this to pass to legacy actions.
-			$item->legacy_values        = $values;
-			$item->legacy_cart_item_key = $cart_item_key;
+
+			/**
+			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
+
+			// Add item to order and save.
 			$order->add_item( $item );
 		}
 	}
@@ -361,7 +375,9 @@ class WC_Checkout {
 	 */
 	protected function create_order_fee_lines( &$order ) {
 		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-			$item = new WC_Order_Item_Fee();
+			$item                 = new WC_Order_Item_Fee();
+			$item->legacy_fee     = $fee; // @deprecated For legacy actions.
+			$item->legacy_fee_key = $fee_key; // @deprecated For legacy actions.
 			$item->set_props( array(
 				'name'      => $fee->name,
 				'tax_class' => $fee->taxable ? $fee->tax_class : 0,
@@ -371,9 +387,14 @@ class WC_Checkout {
 					'total' => $fee->tax_data,
 				),
 			) );
-			// Set this to pass to legacy actions.
-			$item->legacy_fee     = $fee;
-			$item->legacy_fee_key = $fee_key;
+
+			/**
+			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
+
+			// Add item to order and save.
 			$order->add_item( $item );
 		}
 	}
@@ -388,8 +409,9 @@ class WC_Checkout {
 
 		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
-				$shipping_rate = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
-				$item = new WC_Order_Item_Shipping();
+				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
+				$item                     = new WC_Order_Item_Shipping();
+				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
 				$item->set_props( array(
 					'method_title' => $shipping_rate->label,
 					'method_id'    => $shipping_rate->id,
@@ -397,8 +419,14 @@ class WC_Checkout {
 					'taxes'        => $shipping_rate->taxes,
 					'meta_data'    => $shipping_rate->get_meta_data(),
 				) );
-				// Set this to pass to legacy actions.
-				$item->legacy_package_key = $package_key;
+
+				/**
+				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * @since 2.7.0
+				 */
+				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
+
+				// Add item to order and save.
 				$order->add_item( $item );
 			}
 		}
@@ -421,6 +449,14 @@ class WC_Checkout {
 					'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 					'compound'           => WC_Tax::is_compound( $tax_rate_id ),
 				) );
+
+				/**
+				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * @since 2.7.0
+				 */
+				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
+
+				// Add item to order and save.
 				$order->add_item( $item );
 			}
 		}
@@ -439,6 +475,14 @@ class WC_Checkout {
 				'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
 				'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
 			) );
+
+			/**
+			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
+
+			// Add item to order and save.
 			$order->add_item( $item );
 		}
 	}
