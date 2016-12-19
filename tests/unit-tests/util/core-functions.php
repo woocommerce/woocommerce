@@ -92,6 +92,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'INR' => 'Indian rupee',
 			'IQD' => 'Iraqi dinar',
 			'IRR' => 'Iranian rial',
+			'IRT' => 'Iranian Toman',
 			'ISK' => 'Icelandic kr&oacute;na',
 			'JEP' => 'Jersey pound',
 			'JMD' => 'Jamaican dollar',

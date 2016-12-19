@@ -340,7 +340,7 @@ function get_woocommerce_currencies() {
 				'IMP' => __( 'Manx pound', 'woocommerce' ),
 				'INR' => __( 'Indian rupee', 'woocommerce' ),
 				'IQD' => __( 'Iraqi dinar', 'woocommerce' ),
-			    'IRR' => __( 'Iranian rial', 'woocommerce' ),
+				'IRR' => __( 'Iranian rial', 'woocommerce' ),
 				'IRT' => __( 'Iranian Toman', 'woocommerce' ),
 				'ISK' => __( 'Icelandic kr&oacute;na', 'woocommerce' ),
 				'JEP' => __( 'Jersey pound', 'woocommerce' ),
