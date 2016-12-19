@@ -266,6 +266,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			unset( $this->data[ $offset ] );
 		}
 
+		if ( array_key_exists( $offset, $this->changes ) ) {
+			unset( $this->changes[ $offset ] );
+		}
+
 		$this->delete_meta_data( '_' . $offset );
 	}
 
