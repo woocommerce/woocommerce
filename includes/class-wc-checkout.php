@@ -288,8 +288,13 @@ class WC_Checkout {
 			}
 
 			foreach ( $data as $key => $value ) {
+				// Use setters where available.
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
+
+				// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
+				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+					$order->update_meta_data( '_' . $key, $value );
 				}
 			}
 
@@ -811,8 +816,13 @@ class WC_Checkout {
 			$customer->set_last_name( $data['billing_last_name'] );
 
 			foreach ( $data as $key => $value ) {
+				// Use setters where available.
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
 					$customer->{"set_{$key}"}( $value );
+
+				// Store custom fields prefixed with wither shipping_ or billing_.
+				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+					$customer->update_meta_data( $key, $value );
 				}
 			}
 			$customer->save();
@@ -923,7 +933,7 @@ class WC_Checkout {
 	 * Gets the value either from the posted data, or from the users meta data.
 	 *
 	 * @param string $input
-	 * @return string|null
+	 * @return string
 	 */
 	public function get_value( $input ) {
 		if ( ! empty( $_POST[ $input ] ) ) {
@@ -937,7 +947,7 @@ class WC_Checkout {
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
 				$value = WC()->customer->{"get_$input"}();
 			} else {
-				$value = null;
+				$value = WC()->customer->get_meta( $input, true );
 			}
 
 			return apply_filters( 'default_checkout_' . $input, $value, $input );
