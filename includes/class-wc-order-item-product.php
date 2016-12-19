@@ -412,6 +412,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$offset = 'total_tax';
 		} elseif ( 'line_tax_data' === $offset ) {
 			$offset = 'taxes';
+		} elseif ( 'qty' === $offset ) {
+			$offset = 'quantity';
 		}
 		return parent::offsetGet( $offset );
 	}
@@ -434,6 +436,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$offset = 'total_tax';
 		} elseif ( 'line_tax_data' === $offset ) {
 			$offset = 'taxes';
+		} elseif ( 'qty' === $offset ) {
+			$offset = 'quantity';
 		}
 		parent::offsetSet( $offset, $value );
 	}
@@ -445,7 +449,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta' ) ) ) {
+		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta', 'qty' ) ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );
