@@ -6145,7 +6145,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:449
 msgid ""
-"Attributes let you define extra product data, such as size or colour. You "
+"Attributes let you define extra product data, such as size or color. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
 msgstr ""
@@ -10561,39 +10561,39 @@ msgid "%s - Powered by WooCommerce"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:121
-msgid "Base colour"
+msgid "Base color"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:123
 #. translators: %s: default color
-msgid "The base colour for WooCommerce email templates. Default %s."
+msgid "The base color for WooCommerce email templates. Default %s."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:133
-msgid "Background colour"
+msgid "Background color"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:135
 #. translators: %s: default color
-msgid "The background colour for WooCommerce email templates. Default %s."
+msgid "The background color for WooCommerce email templates. Default %s."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:145
-msgid "Body background colour"
+msgid "Body background color"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:147
 #. translators: %s: default color
-msgid "The main body background colour. Default %s."
+msgid "The main body background color. Default %s."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:157
-msgid "Body text colour"
+msgid "Body text color"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:159
 #. translators: %s: default color
-msgid "The main body text colour. Default %s."
+msgid "The main body text color. Default %s."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:239

@@ -15,11 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
-	public $chart_colours = array();
+	public $chart_colors = array();
 
 	/**
 	 * Coupon codes.
@@ -107,14 +107,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		$legend[] = array(
 			/* translators: %s: discount ammount */
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
-			'color' => $this->chart_colours['discount_amount'],
+			'color' => $this->chart_colors['discount_amount'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
 			/* translators: %s: coupons ammount */
 			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
-			'color' => $this->chart_colours['coupon_count'],
+			'color' => $this->chart_colors['coupon_count'],
 			'highlight_series' => 0,
 		);
 
@@ -133,7 +133,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colours = array(
+		$this->chart_colors = array(
 			'discount_amount' => '#3498db',
 			'coupon_count'    => '#d4d9dc',
 		);
@@ -460,8 +460,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						{
 							label: "<?php echo esc_js( __( 'Number of coupons used', 'woocommerce' ) ) ?>",
 							data: order_data.order_coupon_counts,
-							color: '<?php echo $this->chart_colours['coupon_count']; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colours['coupon_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+							color: '<?php echo $this->chart_colors['coupon_count']; ?>',
+							bars: { fillColor: '<?php echo $this->chart_colors['coupon_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 							shadowSize: 0,
 							hoverable: false
 						},
@@ -469,7 +469,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Discount amount', 'woocommerce' ) ) ?>",
 							data: order_data.order_discount_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colours['discount_amount']; ?>',
+							color: '<?php echo $this->chart_colors['discount_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,

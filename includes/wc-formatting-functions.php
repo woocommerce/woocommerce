@@ -592,7 +592,7 @@ function wc_flatten_meta_callback( $value ) {
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @return string
@@ -614,7 +614,7 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -643,7 +643,7 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 if ( ! function_exists( 'wc_hex_lighter' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -673,7 +673,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 if ( ! function_exists( 'wc_light_or_dark' ) ) {
 
 	/**
-	 * Detect if we should use a light or dark colour on a background colour.
+	 * Detect if we should use a light or dark color on a background color.
 	 *
 	 * @param mixed $color
 	 * @param string $dark (default: '#000000')

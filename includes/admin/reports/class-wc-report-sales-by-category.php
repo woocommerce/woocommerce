@@ -15,11 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
-	public $chart_colours         = array();
+	public $chart_colors         = array();
 
 	/**
 	 * Categories ids.
@@ -95,7 +95,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$legend[] = array(
 				/* translators: 1: total items sold 2: category name */
 				'title'            => sprintf( __( '%1$s sales in %2$s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
-				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
+				'color'            => isset( $this->chart_colors[ $index ] ) ? $this->chart_colors[ $index ] : $this->chart_colors[0],
 				'highlight_series' => $index,
 			);
 
@@ -117,7 +117,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
+		$this->chart_colors = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
@@ -335,7 +335,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 							<?php
 								$index = 0;
 								foreach ( $chart_data as $data ) {
-									$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
+									$color  = isset( $this->chart_colors[ $index ] ) ? $this->chart_colors[ $index ] : $this->chart_colors[0];
 									$width  = $this->barwidth / sizeof( $chart_data );
 									$offset = ( $width * $index );
 									$series = $data['data'];
