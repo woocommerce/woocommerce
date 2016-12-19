@@ -96,14 +96,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->update_visibility( $product );
 			$this->update_attributes( $product );
 			$this->update_downloads( $product );
-			$product->save_meta_data();
-
-			do_action( 'woocommerce_new_product', $id );
-
-			$product->apply_changes();
 			$this->update_version_and_type( $product );
 			$this->update_term_counts( $product );
+			$product->save_meta_data();
+			$product->apply_changes();
 			$this->clear_caches( $product );
+
+			do_action( 'woocommerce_new_' . $post_type, $id );
 		}
 	}
 
@@ -162,14 +161,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_visibility( $product );
 		$this->update_attributes( $product );
 		$this->update_downloads( $product );
-		$product->save_meta_data();
-
-		do_action( 'woocommerce_update_product', $product->get_id() );
-
-		$product->apply_changes();
 		$this->update_version_and_type( $product );
 		$this->update_term_counts( $product );
+		$product->save_meta_data();
+		$product->apply_changes();
 		$this->clear_caches( $product );
+
+		do_action( 'woocommerce_update_' . $post_type, $product->get_id() );
 	}
 
 	/**
