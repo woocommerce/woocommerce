@@ -83,6 +83,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $data_store_name = 'order';
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order';
+
+	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
@@ -122,16 +128,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_type() {
 		return 'shop_order';
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_';
 	}
 
 	/**
@@ -176,6 +172,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {

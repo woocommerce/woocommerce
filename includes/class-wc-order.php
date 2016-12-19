@@ -215,6 +215,9 @@ class WC_Order extends WC_Abstract_Order {
 	public function save() {
 		$this->maybe_set_user_billing_email();
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {

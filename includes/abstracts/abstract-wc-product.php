@@ -22,6 +22,12 @@ include_once( 'abstract-wc-legacy-product.php' );
 class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'product';
+
+	/**
 	 * Post type.
 	 * @var string
 	 */
@@ -119,16 +125,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_product_get_';
 	}
 
 	/**
@@ -1320,6 +1316,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->validate_props();
 
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {

@@ -14,6 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Customer_Download extends WC_Data implements ArrayAccess {
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'customer_download';
+
+	/**
 	 * Download Data array.
 	 *
 	 * @since 2.7.0
@@ -58,16 +64,6 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 			$this->data_store->read( $this );
 		}
  	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_download_';
-	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -283,6 +279,9 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
