@@ -102,7 +102,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->apply_changes();
 			$this->clear_caches( $product );
 
-			do_action( 'woocommerce_new_' . $post_type, $id );
+			do_action( 'woocommerce_new_product', $id );
 		}
 	}
 
@@ -167,7 +167,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->apply_changes();
 		$this->clear_caches( $product );
 
-		do_action( 'woocommerce_update_' . $post_type, $product->get_id() );
+		do_action( 'woocommerce_update_product', $product->get_id() );
 	}
 
 	/**
