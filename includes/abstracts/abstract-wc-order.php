@@ -206,6 +206,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					if ( $item_id !== $item_key ) {
 						$this->items[ $item_group ][ $item_id ] = $item;
 						unset( $this->items[ $item_group ][ $item_key ] );
+
+						// Legacy action handler
+						switch ( $item_group ) {
+							case 'fee_lines' :
+								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+								}
+							break;
+							case 'shipping_lines' :
+								if ( isset( $item->legacy_package_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+								}
+							break;
+							case 'line_items' :
+								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+								}
+							break;
+						}
 					}
 				}
 			}
