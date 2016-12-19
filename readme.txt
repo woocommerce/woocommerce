@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 2.7.0 =
+= 2.7.0 - 20XX-XX-XX =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom.
 * Made the store notice dismissible on the frontend.
 * Improved structured product data by using JSON-LD instead of inline Microdata.
