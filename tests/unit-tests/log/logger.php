@@ -7,24 +7,6 @@
  */
 class WC_Tests_Logger extends WC_Unit_Test_Case {
 
-	public function tearDown() {
-		$log_files = array(
-			wc_get_log_file_path( 'unit-tests' ),
-			wc_get_log_file_path( 'log' ),
-		);
-
-		foreach ( $log_files as $file ) {
-			if ( file_exists( $file ) && is_writable( $file ) ) {
-				unlink( $file );
-			}
-		}
-		parent::tearDown();
-	}
-
-	public function read_content( $handle ) {
-		return file_get_contents( wc_get_log_file_path( $handle ) );
-	}
-
 	/**
 	 * Test add().
 	 *
