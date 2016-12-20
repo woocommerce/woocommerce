@@ -126,6 +126,15 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Method to update an order in the database.
+	 * @param WC_Order $order
+	 */
+	public function update( &$order ) {
+		parent::update( $order );
+		do_action( 'woocommerce_update_order', $order->get_id() );
+	}
+
+	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
