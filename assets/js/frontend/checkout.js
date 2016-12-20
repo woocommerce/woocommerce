@@ -560,7 +560,7 @@ jQuery( function( $ ) {
 			$( document.body ).on( 'click', 'a.showlogin', this.show_login_form );
 		},
 		show_login_form: function() {
-			$( 'form.woocommerce-form--login' ).slideToggle();
+			$( 'form.login, form.woocommerce-form--login' ).slideToggle();
 			return false;
 		}
 	};
