@@ -1,4 +1,4 @@
-/* global woocommerce_price_slider_params */
+/* global woocommerce_price_slider_params, accounting */
 jQuery( function( $ ) {
 
 	// woocommerce_price_slider_params is required to continue, ensure the object exists
@@ -24,27 +24,22 @@ jQuery( function( $ ) {
 	}
 
 	$( document.body ).bind( 'price_slider_create price_slider_slide', function( event, min, max ) {
-		if ( woocommerce_price_slider_params.currency_pos === 'left' ) {
 
-			$( '.price_slider_amount span.from' ).html( woocommerce_price_slider_params.currency_symbol + min );
-			$( '.price_slider_amount span.to' ).html( woocommerce_price_slider_params.currency_symbol + max );
+		$( '.price_slider_amount span.from' ).html( accounting.formatMoney( min, {
+			symbol:    woocommerce_price_slider_params.currency_format_symbol,
+			decimal:   woocommerce_price_slider_params.currency_format_decimal_sep,
+			thousand:  woocommerce_price_slider_params.currency_format_thousand_sep,
+			precision: woocommerce_price_slider_params.currency_format_num_decimals,
+			format:    woocommerce_price_slider_params.currency_format
+		} ) );
 
-		} else if ( woocommerce_price_slider_params.currency_pos === 'left_space' ) {
-
-			$( '.price_slider_amount span.from' ).html( woocommerce_price_slider_params.currency_symbol + ' ' + min );
-			$( '.price_slider_amount span.to' ).html( woocommerce_price_slider_params.currency_symbol + ' ' + max );
-
-		} else if ( woocommerce_price_slider_params.currency_pos === 'right' ) {
-
-			$( '.price_slider_amount span.from' ).html( min + woocommerce_price_slider_params.currency_symbol );
-			$( '.price_slider_amount span.to' ).html( max + woocommerce_price_slider_params.currency_symbol );
-
-		} else if ( woocommerce_price_slider_params.currency_pos === 'right_space' ) {
-
-			$( '.price_slider_amount span.from' ).html( min + ' ' + woocommerce_price_slider_params.currency_symbol );
-			$( '.price_slider_amount span.to' ).html( max + ' ' + woocommerce_price_slider_params.currency_symbol );
-
-		}
+		$( '.price_slider_amount span.to' ).html( accounting.formatMoney( max, {
+			symbol:    woocommerce_price_slider_params.currency_format_symbol,
+			decimal:   woocommerce_price_slider_params.currency_format_decimal_sep,
+			thousand:  woocommerce_price_slider_params.currency_format_thousand_sep,
+			precision: woocommerce_price_slider_params.currency_format_num_decimals,
+			format:    woocommerce_price_slider_params.currency_format
+		} ) );
 
 		$( document.body ).trigger( 'price_slider_updated', [ min, max ] );
 	});

@@ -33,13 +33,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			),
 		);
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2' );
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
-		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch' ), WC_VERSION, true );
+		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '',
+			'min_price'			           => isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
+			'max_price'			           => isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '',
+			'currency_format_num_decimals' => 0,
+			'currency_format_symbol'       => get_woocommerce_currency_symbol(),
+			'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
+			'currency_format_thousand_sep' => esc_attr( wc_get_price_thousand_separator() ),
+			'currency_format'              => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ),
 		) );
 		parent::__construct();
 	}
