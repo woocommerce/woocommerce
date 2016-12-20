@@ -21,10 +21,10 @@ class WC_Product_Factory {
 	 * Get a product.
 	 *
 	 * @param mixed $product_id (default: false)
-	 * @param array $deprecated
+	 * @param array $args
 	 * @return WC_Product|bool Product object or null if the product cannot be loaded.
 	 */
-	public function get_product( $product_id = false, $deprecated = array() ) {
+	public function get_product( $product_id = false, $args = array() ) {
 		$product_id = $this->get_product_id( $product_id );
 		if ( ! $product_id ) {
 			return false;
@@ -45,12 +45,17 @@ class WC_Product_Factory {
 		}
 
 		try {
-			// Try to get from cache, otherwise create a new object,
-			$product = wp_cache_get( 'product-' . $product_id, 'products' );
 
-			if ( ! is_a( $product, 'WC_Product' ) ) {
+			if ( isset( $args[ 'no_cache' ] ) && true === $args[ 'no_cache' ] ) {
 				$product = new $classname( $product_id );
-				wp_cache_set( 'product-' . $product_id, $product, 'products' );
+			} else {
+				// Try to get from cache, otherwise create a new object,
+				$product = wp_cache_get( 'product-' . $product_id, 'products' );
+
+				if ( ! is_a( $product, 'WC_Product' ) ) {
+					$product = new $classname( $product_id );
+					wp_cache_set( 'product-' . $product_id, $product, 'products' );
+				}
 			}
 
 			return $product;
