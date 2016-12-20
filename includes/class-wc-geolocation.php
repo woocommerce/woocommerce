@@ -130,9 +130,12 @@ class WC_Geolocation {
 			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
 			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
 				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
-			// VIP has a variable available also.
+			// WP.com VIP has a variable available.
 			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) {
 				$country_code = sanitize_text_field( strtoupper( $_SERVER['GEOIP_COUNTRY_CODE'] ) );
+			// VIP Go has a variable available also.
+			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) {
+				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_X_COUNTRY_CODE'] ) );
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
