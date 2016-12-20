@@ -3037,11 +3037,6 @@ img.help_tip {
 		margin: 0;
 		position: relative;
 
-		.select2-container {
-			display: block;
-			max-width: 350px;
-		}
-
 		.forminp-radio ul {
 			margin: 0;
 			li {
@@ -5466,5 +5461,12 @@ table.bar_chart {
 }
 .select2-container {
 	line-height: 1.85em;
-	font-size: 14px;
+	.select2-results__option {
+		margin: 0;
+	}
+}
+.woocommerce table.form-table {
+	.select2-container {
+		min-width: 400px !important;
+	}
 }
