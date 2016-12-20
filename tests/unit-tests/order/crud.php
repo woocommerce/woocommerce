@@ -88,7 +88,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$set_to = 'USD';
 		$object->set_prices_include_tax( 1 );
-		$this->assertEquals( true, $object->get_prices_include_tax() );
+		$this->assertTrue( $object->get_prices_include_tax() );
 	}
 
 	/**
@@ -130,7 +130,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_user() {
 		$object = new WC_Order();
-		$this->assertEquals( false, $object->get_user() );
+		$this->assertFalse( $object->get_user() );
 		$set_to = '1';
 		$object->set_customer_id( $set_to );
 		$this->assertInstanceOf( 'WP_User', $object->get_user() );

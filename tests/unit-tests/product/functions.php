@@ -258,18 +258,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( true, wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
+		$this->assertTrue( wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
 
 		$product_2 = WC_Helper_Product::create_simple_product();
 		// we need to manually set a sku, because WC_Product now uses wc_product_has_unique_sku before setting
 		// so we need to manually set it to test the functionality.
 		update_post_meta( $product_2->get_id(), '_sku', $product_1->get_sku() );
 
-		$this->assertEquals( false, wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
+		$this->assertFalse( wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
 
 		WC_Helper_Product::delete_product( $product_1->get_id() );
 
-		$this->assertEquals( true, wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
+		$this->assertTrue( wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
 
 		WC_Helper_Product::delete_product( $product_2->get_id() );
 	}
