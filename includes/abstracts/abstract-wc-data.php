@@ -40,6 +40,12 @@ abstract class WC_Data {
 	protected $object_read = false;
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'data';
+
+	/**
 	 * Extra data for this object. Name value pairs (name + default value).
 	 * Used as a standard way for sub classes (like product types) to add
 	 * additional information to an inherited class.
@@ -120,6 +126,9 @@ abstract class WC_Data {
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -501,7 +510,7 @@ abstract class WC_Data {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_';
+		return 'woocommerce_get_' . $this->object_type . '_';
 	}
 
 	/**

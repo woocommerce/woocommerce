@@ -47,6 +47,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $meta_type = 'order_item';
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order_item';
+
+	/**
 	 * Constructor.
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item Object
 	 */
@@ -67,16 +73,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_item_';
 	}
 
 	/*

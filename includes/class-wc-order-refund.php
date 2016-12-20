@@ -22,6 +22,12 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	protected $data_store_name = 'order-refund';
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order_refund';
+
+	/**
 	 * Stores product data.
 	 *
 	 * @var array
@@ -48,16 +54,6 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	public function get_type() {
 		return 'shop_order_refund';
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_refund_';
 	}
 
 	/**

@@ -24,6 +24,12 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	protected $id = null;
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'shipping_zone';
+
+	/**
 	 * Zone Data
 	 * @var array
 	 */
@@ -54,16 +60,6 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		if ( false === $this->get_object_read() ) {
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_shipping_zone_';
 	}
 
 	/*
@@ -248,11 +244,13 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @return int
 	 */
 	public function save() {
-		$name = $this->get_zone_name();
-		if ( empty( $name ) ) {
+		if ( ! $this->get_zone_name() ) {
 			$this->set_zone_name( $this->generate_zone_name() );
 		}
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( null === $this->get_id() ) {
 				$this->data_store->create( $this );
 			} else {
