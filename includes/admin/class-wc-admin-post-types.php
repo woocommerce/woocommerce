@@ -1965,7 +1965,7 @@ class WC_Admin_Post_Types {
 				break;
 			}
 
-			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .wrap .subsubsub  { display: none; } </style></div>';
+			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions, .wrap .subsubsub  { display: none; } </style></div>';
 		}
 	}
 
