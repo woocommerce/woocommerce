@@ -722,9 +722,14 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		$user_id       = absint( $_POST['user_id'] );
-		$customer      = new WC_Customer( $user_id );
-		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer->get_data(), $user_id );
+		$user_id  = absint( $_POST['user_id'] );
+		$customer = new WC_Customer( $user_id );
+
+		if ( has_filter( 'woocommerce_found_customer_details' ) ) {
+			wc_deprecated_function( 'The woocommerce_found_customer_details filter', '2.7', 'woocommerce_found_customer_details' );
+		}
+
+		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $customer->get_data(), $customer, $user_id );
 		wp_send_json( $customer_data );
 	}
 
