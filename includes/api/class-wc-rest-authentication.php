@@ -336,23 +336,24 @@ class WC_REST_Authentication {
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
 		unset( $params['oauth_signature'] );
 
-		// Sort parameters.
-		if ( ! uksort( $params, 'strcmp' ) ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - failed to sort parameters.', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
 		// Normalize parameter key/values.
 		$params           = $this->normalize_parameters( $params );
 		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
 			if ( is_array( $param_value ) ) {
-				foreach ( $param_value as $param_key_inner => $param_value_inner ) {
-					$query_parameters[] = $param_key . '%255B' . $param_key_inner . '%255D%3D' . $param_value_inner;
+				foreach ( self::flatten_value( $param_value ) as $param_key_inner => $param_value_inner ) {
+					$query_parameters[] = $param_key . $param_key_inner . '%3D' . $param_value_inner;
 				}
 			} else {
 				$query_parameters[] = $param_key . '%3D' . $param_value; // Join with equals sign.
 			}
 		}
+
+		// Sort parameters.
+		if ( ! usort( $query_parameters, 'strcmp' ) ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - failed to sort parameters.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
 		$query_string   = implode( '%26', $query_parameters ); // Join with ampersand.
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
@@ -370,6 +371,19 @@ class WC_REST_Authentication {
 
 		return true;
 	}
+
+
+	private static function flatten_value( $value ) {
+		$ret = array();
+		foreach ( $value as $k => $v )
+			if ( is_array( $v ) )
+				foreach ( self::flatten_value( $v ) as $x => $y )
+					$ret[ '%255B' . $k . '%255D' . $x ] = $y;
+			else
+				$ret[ '%255B' . $k . '%255D' ] = $v;
+		return $ret;
+	}
+
 
 	/**
 	 * Normalize each parameter by assuming each parameter may have already been
