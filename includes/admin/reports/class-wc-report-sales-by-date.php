@@ -19,7 +19,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 *
 	 * @var array
 	 */
-	public $chart_colors = array();
+	public $chart_colours = array();
 
 	/**
 	 * The report data.
@@ -387,13 +387,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'<strong>' . wc_price( $data->total_sales ) . '</strong>'
 			),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and including shipping and taxes.', 'woocommerce' ),
-			'color'            => $this->chart_colors['sales_amount'],
+			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 6,
 		);
 		if ( $data->average_total_sales > 0 ) {
 			$legend[] = array(
 				'title' => $average_total_sales_title,
-				'color' => $this->chart_colors['average'],
+				'color' => $this->chart_colours['average'],
 				'highlight_series' => 2,
 			);
 		}
@@ -405,13 +405,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'<strong>' . wc_price( $data->net_sales ) . '</strong>'
 			),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and excluding shipping and taxes.', 'woocommerce' ),
-			'color'            => $this->chart_colors['net_sales_amount'],
+			'color'            => $this->chart_colours['net_sales_amount'],
 			'highlight_series' => 7,
 		);
 		if ( $data->average_sales > 0 ) {
 			$legend[] = array(
 				'title' => $average_sales_title,
-				'color' => $this->chart_colors['net_average'],
+				'color' => $this->chart_colours['net_average'],
 				'highlight_series' => 3,
 			);
 		}
@@ -422,7 +422,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				__( '%s orders placed', 'woocommerce' ),
 				'<strong>' . $data->total_orders . '</strong>'
 			),
-			'color' => $this->chart_colors['order_count'],
+			'color' => $this->chart_colours['order_count'],
 			'highlight_series' => 1,
 		);
 
@@ -432,7 +432,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				__( '%s items purchased', 'woocommerce' ),
 				'<strong>' . $data->total_items . '</strong>'
 			),
-			'color' => $this->chart_colors['item_count'],
+			'color' => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
 		);
 		$legend[] = array(
@@ -443,7 +443,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				$this->report_data->total_refunded_orders,
 				$this->report_data->refunded_order_items
 			),
-			'color' => $this->chart_colors['refund_amount'],
+			'color' => $this->chart_colours['refund_amount'],
 			'highlight_series' => 8,
 		);
 		$legend[] = array(
@@ -452,7 +452,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				__( '%s charged for shipping', 'woocommerce' ),
 				'<strong>' . wc_price( $data->total_shipping ) . '</strong>'
 			),
-			'color' => $this->chart_colors['shipping_amount'],
+			'color' => $this->chart_colours['shipping_amount'],
 			'highlight_series' => 5,
 		);
 		$legend[] = array(
@@ -461,7 +461,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				__( '%s worth of coupons used', 'woocommerce' ),
 				'<strong>' . wc_price( $data->total_coupons ) . '</strong>'
 			),
-			'color' => $this->chart_colors['coupon_amount'],
+			'color' => $this->chart_colours['coupon_amount'],
 			'highlight_series' => 4,
 		);
 
@@ -479,7 +479,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colors = array(
+		$this->chart_colours = array(
 			'sales_amount'     => '#b1d4ea',
 			'net_sales_amount' => '#3498db',
 			'average'          => '#b1d4ea',
@@ -599,16 +599,16 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 						{
 							label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ) ?>",
 							data: order_data.order_item_counts,
-							color: '<?php echo $this->chart_colors['item_count']; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colors['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+							color: '<?php echo $this->chart_colours['item_count']; ?>',
+							bars: { fillColor: '<?php echo $this->chart_colours['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 							shadowSize: 0,
 							hoverable: false
 						},
 						{
 							label: "<?php echo esc_js( __( 'Number of orders', 'woocommerce' ) ) ?>",
 							data: order_data.order_counts,
-							color: '<?php echo $this->chart_colors['order_count']; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colors['order_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+							color: '<?php echo $this->chart_colours['order_count']; ?>',
+							bars: { fillColor: '<?php echo $this->chart_colours['order_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 							shadowSize: 0,
 							hoverable: false
 						},
@@ -616,7 +616,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Average gross sales amount', 'woocommerce' ) ) ?>",
 							data: [ [ <?php echo min( array_keys( $data['order_amounts'] ) ); ?>, <?php echo $this->report_data->average_total_sales; ?> ], [ <?php echo max( array_keys( $data['order_amounts'] ) ); ?>, <?php echo $this->report_data->average_total_sales; ?> ] ],
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['average']; ?>',
+							color: '<?php echo $this->chart_colours['average']; ?>',
 							points: { show: false },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
@@ -626,7 +626,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Average net sales amount', 'woocommerce' ) ) ?>",
 							data: [ [ <?php echo min( array_keys( $data['order_amounts'] ) ); ?>, <?php echo $this->report_data->average_sales; ?> ], [ <?php echo max( array_keys( $data['order_amounts'] ) ); ?>, <?php echo $this->report_data->average_sales; ?> ] ],
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['net_average']; ?>',
+							color: '<?php echo $this->chart_colours['net_average']; ?>',
 							points: { show: false },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
@@ -636,7 +636,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Coupon amount', 'woocommerce' ) ) ?>",
 							data: order_data.coupon_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['coupon_amount']; ?>',
+							color: '<?php echo $this->chart_colours['coupon_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
@@ -646,7 +646,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ) ?>",
 							data: order_data.shipping_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['shipping_amount']; ?>',
+							color: '<?php echo $this->chart_colours['shipping_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
@@ -656,7 +656,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Gross sales amount', 'woocommerce' ) ) ?>",
 							data: order_data.gross_order_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['sales_amount']; ?>',
+							color: '<?php echo $this->chart_colours['sales_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
@@ -666,7 +666,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Net sales amount', 'woocommerce' ) ) ?>",
 							data: order_data.net_order_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['net_sales_amount']; ?>',
+							color: '<?php echo $this->chart_colours['net_sales_amount']; ?>',
 							points: { show: true, radius: 6, lineWidth: 4, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 5, fill: false },
 							shadowSize: 0,
@@ -676,7 +676,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							label: "<?php echo esc_js( __( 'Refund amount', 'woocommerce' ) ) ?>",
 							data: order_data.refund_amounts,
 							yaxis: 2,
-							color: '<?php echo $this->chart_colors['refund_amount']; ?>',
+							color: '<?php echo $this->chart_colours['refund_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,

@@ -19,7 +19,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 *
 	 * @var array
 	 */
-	public $chart_colors      = array();
+	public $chart_colours      = array();
 
 	/**
 	 * Product ids.
@@ -105,14 +105,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		$legend[] = array(
 			/* translators: %s: total items sold */
 			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
-			'color' => $this->chart_colors['sales_amount'],
+			'color' => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
 			/* translators: %s: total items purchased */
 			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
-			'color' => $this->chart_colors['item_count'],
+			'color' => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
 		);
 
@@ -131,7 +131,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colors = array(
+		$this->chart_colours = array(
 			'sales_amount' => '#3498db',
 			'item_count'   => '#d4d9dc',
 		);
@@ -493,8 +493,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							{
 								label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ) ?>",
 								data: order_data.order_item_counts,
-								color: '<?php echo $this->chart_colors['item_count']; ?>',
-								bars: { fillColor: '<?php echo $this->chart_colors['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+								color: '<?php echo $this->chart_colours['item_count']; ?>',
+								bars: { fillColor: '<?php echo $this->chart_colours['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 								shadowSize: 0,
 								hoverable: false
 							},
@@ -502,7 +502,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 								label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>",
 								data: order_data.order_item_amounts,
 								yaxis: 2,
-								color: '<?php echo $this->chart_colors['sales_amount']; ?>',
+								color: '<?php echo $this->chart_colours['sales_amount']; ?>',
 								points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 								lines: { show: true, lineWidth: 4, fill: false },
 								shadowSize: 0,
