@@ -145,33 +145,37 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Add shipping class costs
-		$found_shipping_classes = $this->find_shipping_classes( $package );
-		$highest_class_cost     = 0;
+		$shipping_classes = WC()->shipping->get_shipping_classes();
 
-		foreach ( $found_shipping_classes as $shipping_class => $products ) {
-			// Also handles BW compatibility when slugs were used instead of ids
-			$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
-			$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+		if ( ! empty( $shipping_classes ) ) {
+			$found_shipping_classes = $this->find_shipping_classes( $package );
+			$highest_class_cost     = 0;
 
-			if ( $class_cost_string === '' ) {
-				continue;
+			foreach ( $found_shipping_classes as $shipping_class => $products ) {
+				// Also handles BW compatibility when slugs were used instead of ids
+				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
+				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+
+				if ( $class_cost_string === '' ) {
+					continue;
+				}
+
+				$has_costs  = true;
+				$class_cost = $this->evaluate_cost( $class_cost_string, array(
+					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				) );
+
+				if ( $this->type === 'class' ) {
+					$rate['cost'] += $class_cost;
+				} else {
+					$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
+				}
 			}
 
-			$has_costs  = true;
-			$class_cost = $this->evaluate_cost( $class_cost_string, array(
-				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
-			) );
-
-			if ( $this->type === 'class' ) {
-				$rate['cost'] += $class_cost;
-			} else {
-				$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
+			if ( $this->type === 'order' && $highest_class_cost ) {
+				$rate['cost'] += $highest_class_cost;
 			}
-		}
-
-		if ( $this->type === 'order' && $highest_class_cost ) {
-			$rate['cost'] += $highest_class_cost;
 		}
 
 		// Add the rate

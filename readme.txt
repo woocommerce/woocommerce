@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.10 - X =
+* Fix flat rate no class costs when no shipping classes exist.
 * Fix returned REST API coupon expiry date.
 * Fix reviews_allowed being set to false in Rest API.
 * Fix sales date series for some custom ranges.
