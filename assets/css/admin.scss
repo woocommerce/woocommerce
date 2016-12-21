@@ -326,9 +326,6 @@
 				min-height: 220px;
 				overflow: hidden;
 				background: #f5f5f5;
-				-webkit-box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.2),
-					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 				box-shadow:
 					inset 0 1px 0 rgba(255, 255, 255, 0.2),
 					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
@@ -761,19 +758,6 @@ ul.wc_coupon_list_block {
 	&::after {
 		@include icon_dashicons( '\f345' );
 		line-height: 28px;
-	}
-}
-
-.tablenav {
-	.actions {
-		overflow: visible;
-	}
-	.select2-container {
-		float: left;
-		max-width: 200px;
-		font-size: 14px;
-		vertical-align: middle;
-		margin: 1px 6px 1px 1px;
 	}
 }
 
@@ -5448,25 +5432,57 @@ table.bar_chart {
 }
 
 /**
- * Select2
+ * Select2 elements.
  */
 .select2-drop {
 	z-index: 999999 !important;
 }
-.select2-container-multi .select2-choices .select2-search-field input {
-	font-family: inherit;
-	font-size: inherit;
-	font-weight: inherit;
-	padding: 3px 5px;
-}
-.select2-container {
-	line-height: 1.85em;
-	.select2-results__option {
+.select2-results {
+	line-height: 1.5em;
+	.select2-results__option, .select2-results__group {
 		margin: 0;
+		padding: 8px;
+	}
+}
+.select2-dropdown--below {
+	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+.select2-dropdown--above {
+	box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.2);
+}
+.select2-container--default {
+	.select2-selection--multiple  {
+		min-height: 28px;
+		li {
+			margin: 0;
+		}
+		.select2-selection__choice {
+			padding: 2px 6px;
+		}
+	}
+	.select2-search--inline {
+		.select2-search__field {
+			font-family: inherit;
+			font-size: inherit;
+			font-weight: inherit;
+			padding: 3px 0;
+		}
 	}
 }
 .woocommerce table.form-table {
 	.select2-container {
 		min-width: 400px !important;
+	}
+}
+.tablenav {
+	.actions {
+		overflow: visible;
+	}
+	.select2-container {
+		float: left;
+		max-width: 200px;
+		font-size: 14px;
+		vertical-align: middle;
+		margin: 1px 6px 1px 1px;
 	}
 }
