@@ -50,6 +50,13 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	protected $logs = array();
 
 	/**
+	 * Stores integer representation of maximum logged level.
+	 *
+	 * @var int
+	 */
+	protected $max_severity = null;
+
+	/**
 	 * Constructor for log handler.
 	 *
 	 * @param string|array $recipients Optional. Email(s) to receive log messages. Defaults to site admin email.
@@ -135,9 +142,22 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 *
 	 * @return string subject
 	 */
-	protected static function get_subject() {
+	protected function get_subject() {
 		$site_name = get_bloginfo( 'name' );
-		return sprintf( __( '[%s] WooCommerce log messages', 'woocommerce' ), $site_name );
+		$max_level = strtoupper( WC_Log_Levels::get_severity_level( $this->max_severity ) );
+		$log_count = count( $this->logs );
+
+		return sprintf(
+			_n(
+				'[%1$s] %2$s: %3$s WooCommerce log message',
+				'[%1$s] %2$s: %3$s WooCommerce log messages',
+				$log_count,
+				'woocommerce'
+			),
+			$site_name,
+			$max_level,
+			$log_count
+		);
 	}
 
 	/**
@@ -148,6 +168,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	protected function get_body() {
 		$site_name = get_bloginfo( 'name' );
 		$entries = implode( PHP_EOL, $this->logs );
+		$log_count = count( $this->logs );
 		return __( 'You have received the following WooCommerce log messages:', 'woocommerce' )
 			. PHP_EOL
 			. PHP_EOL
@@ -173,6 +194,11 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 */
 	protected function add_log( $timestamp, $level, $message, $context ) {
 		$this->logs[] = $this->format_entry( $timestamp, $level, $message, $context );
+
+		$log_severity = WC_Log_Levels::get_level_severity( $level );
+		if ( $this->max_severity < $log_severity ) {
+			$this->max_severity = $log_severity;
+		}
 	}
 
 	/**
