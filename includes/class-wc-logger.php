@@ -64,16 +64,16 @@ class WC_Logger {
 	/**
 	 * Add a log entry.
 	 *
-	 * @deprecated 2.7.0
+	 * This is not the preferred method for adding log messages. Please use log() or any one of
+	 * the level methods (debug(), info(), etc.). This method may be deprecated in the future.
 	 *
 	 * @param string $handle
 	 * @param string $message
 	 * @return bool
 	 */
-	public function add( $handle, $message ) {
-		wc_deprecated_function( 'WC_Logger::add', '2.7', 'WC_Logger::log' );
+	public function add( $handle, $message, $level=WC_Log_Levels::NOTICE ) {
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-		$this->log( WC_Log_Levels::NOTICE, $message, array( 'source' => $handle, '_legacy' => true ) );
+		$this->log( $level, $message, array( 'source' => $handle, '_legacy' => true ) );
 		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.7', 'This action has been deprecated with no alternative.' );
 		return true;
 	}
