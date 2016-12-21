@@ -90,9 +90,9 @@ jQuery( function( $ ) {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
 						quietMillis: 250,
-						data: function( term ) {
+						data: function( params ) {
 							return {
-								term:     term,
+								term:     params.term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 								security: wc_enhanced_select_params.search_products_nonce,
 								exclude:  $( this ).data( 'exclude' ),
@@ -100,7 +100,8 @@ jQuery( function( $ ) {
 								limit:    $( this ).data( 'limit' )
 							};
 						},
-						results: function( data ) {
+						processResults: function( data ) {
+							window.console.log(data);
 							var terms = [];
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -115,34 +116,6 @@ jQuery( function( $ ) {
 					}
 				};
 
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
-
-						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push({
-								id: val,
-								text: data[ val ]
-							});
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {
-							id: element.val(),
-							text: element.attr( 'data-selected' )
-						};
-						return callback( data );
-					};
-				}
-
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
@@ -156,8 +129,6 @@ jQuery( function( $ ) {
 				}
 
 			});
-
-
 
 			// Ajax customer search boxes
 			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
@@ -195,33 +166,6 @@ jQuery( function( $ ) {
 						cache: true
 					}
 				};
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
-
-						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push({
-								id: val,
-								text: data[ val ]
-							});
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {
-							id: element.val(),
-							text: element.attr( 'data-selected' )
-						};
-						return callback( data );
-					};
-				}
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 

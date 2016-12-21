@@ -1078,32 +1078,6 @@ ul.wc_coupon_list_block {
 		}
 	}
 
-	.wc-order-add-item {
-		background: #fff;
-		vertical-align: top;
-		border-top: none;
-
-		.add_item_id,
-		.select2-container {
-			vertical-align: top;
-			.search-field input {
-				min-width: 100px;
-			}
-		}
-
-		.select2-container {
-			width: 400px !important;
-			text-align: left;
-		}
-
-		.cancel-action,
-		.save-action,
-		.calculate-action {
-			float: left;
-			margin-right: 2px;
-		}
-	}
-
 	.wc-used-coupons {
 		float: left;
 		width: 50%;
@@ -2565,11 +2539,6 @@ table.wc_shipping {
 				li {
 					margin: 0 4px 4px 0;
 				}
-			}
-		}
-		.select2-container-active {
-			.select2-choices {
-				border-color: #777;
 			}
 		}
 	}
@@ -5317,6 +5286,10 @@ table.bar_chart {
 			min-width: 500px;
 		}
 	}
+
+	.select2-container {
+		width: 100% !important;
+	}
 }
 
 .wc-backbone-modal-backdrop {
@@ -5434,7 +5407,8 @@ table.bar_chart {
 /**
  * Select2 elements.
  */
-.select2-drop {
+.select2-drop,
+.select2-dropdown {
 	z-index: 999999 !important;
 }
 .select2-results {
@@ -5457,6 +5431,9 @@ table.bar_chart {
 	.select2-selection {
 		border-color: #ddd;
 	}
+	.select2-search__field {
+		min-width: 150px;
+	}
 	.select2-selection--single {
 		height: 32px;
 		.select2-selection__rendered {
@@ -5468,10 +5445,10 @@ table.bar_chart {
 			height: 30px;
 		}
 	}
-}
-.select2-container--default {
 	.select2-selection--multiple  {
 		min-height: 28px;
+		border-radius: 0;
+		line-height: 1.5;
 		li {
 			margin: 0;
 		}
