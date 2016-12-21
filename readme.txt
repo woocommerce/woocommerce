@@ -158,15 +158,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.10 - X =
+= 2.6.10 - 2016-12-21 =
 * Fix flat rate no class costs when no shipping classes exist.
 * Fix returned REST API coupon expiry date.
 * Fix reviews_allowed being set to false in Rest API.
 * Fix sales date series for some custom ranges.
 * Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts. This is a larger change than we'd hope to do in 2.6, but once that was needed.
+* Updated Geo IP API services.
+* Added support for WP VIP/VIP GO GEO IP headers.
 * Dev - API - Throw error messages when product image ID is not a valid WordPress attachment ID.
 
-= 2.6.9 - 2016/12/07 =
+= 2.6.9 - 2016-12-07 =
 * Theme - Added support for Twenty Seventeen Theme.
 * Fix - Excluded webhook delivery logs from comments count.
 * Fix - Included password strength meter in "Lost Password" page.
@@ -184,23 +186,23 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - API - Only update categories menu order and display if defined.
 * Dev - Fixed when should deliver wp_trash_post webhooks.
 
-= 2.6.8 - 10/11/16 =
+= 2.6.8 - 2016-11-10 =
 * Fix - REQUEST_URI was missing a trailing slash when being compared in the cache prevention functions.
 * Fix - Prevent issues when sending empty prices to PayPal.
 * Fix - Invalid email check.
 * Tweak - New extensions screen.
 
-= 2.6.7 - 26/10/16 =
+= 2.6.7 - 2016-10-26 =
 * Fix - Use FLOOR and CEIL to get price filter values. Fixes the issue where max price is capped at 99.
 * Fix - Hide "Sales this month" information from Dashboard widget for users that don't have `view_woocommerce_reports` capability.
 * Fix - Remove notices only once on cart so subsequent notices do not remove older notices.
 * Tweak - Improve credit card fields for better mobile experience.
 
-= 2.6.6 - 20/10/16 =
+= 2.6.6 - 2016-10-20 =
 * Fix - Conflict with Local Pickup Plus extension due to 2.7.x code in has_shipping_method().
 * Fix - Shipping method display order on frontend.
 
-= 2.6.5 - 19/10/16 =
+= 2.6.5 - 2016-10-19 =
 * Fix - Shipping classes URL in admin.
 * Fix - Notice in reports when using custom date ranges.
 * Fix - When checking needs_shipping, ignore anything after : in the method ID.
@@ -243,7 +245,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Password reset now uses WP functions.
 * Tweak - Format US 9-digit postcodes.
 
-= 2.6.4 - 26/07/16 =
+= 2.6.4 - 2016-07-26 =
 * Fix - Security - Only allow image MIME type upload via REST APIs.
 * Fix - Shipping method title display in COD settings.
 * Fix - Order date input in Edge browser.
@@ -256,7 +258,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - CLI - Explode tags and category IDs to allow multiple comma separated values.
 * Dev - add $order arg to woocommerce_admin_order_item_class and woocommerce_admin_html_order_item_class filters.
 
-= 2.6.3 - 19/07/16 =
+= 2.6.3 - 2016-07-19 =
 * Fix - Security - Escape captions in product-thumbnail and product-image templates (template versions have been bumped).
 * Fix - Fixed how we calculate shipping tax rates when using more than one tax class.
 * Fix - When duplicating product variations, set title, name, and guid.
@@ -289,7 +291,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Updated all URLs from WooThemes.com to WooCommerce.com.
 * Tweak - Cache the result of WC_Comments::wp_count_comments() in a transient (improves performance).
 
-= 2.6.2 - 30/06/16 =
+= 2.6.2 - 2016-06-30 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
 * Fix - wc_add_to_cart_message() when non-array is passed.
@@ -326,7 +328,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improve wc_orders_count() performance by running a query to count only posts of the given status.
 * Tweak - To allow my account page tabs to be disabled without code, you can now set the endpoint value to a blank string.
 
-= 2.6.1 - 16/06/16 =
+= 2.6.1 - 2016-06-16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
 * Fix - Improved the hour and time fields validation pattern on the orders screen.
 * Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
@@ -346,7 +348,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allow max_fee in addition to min_fee in flat rate costs fields.
 * Tweak - Wrap order_schema_markup() output in hidden div in case script tag is stripped.
 
-= 2.6.0 - 14/06/16 =
+= 2.6.0 - 2016-06-14 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
 * Feature - Tabbed "My Account" area.
 * Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options).
