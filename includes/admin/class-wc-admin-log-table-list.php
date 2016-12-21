@@ -93,7 +93,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_timestamp( $log ) {
-		return esc_html( mysql2date( 'c', $log['timestamp'] ) );
+		return esc_html( mysql2date(
+			get_option( 'date_format' ) . ' ' . get_option( 'time_format' ),
+			$log['timestamp']
+		) );
 	}
 
 	/**
