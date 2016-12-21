@@ -30,8 +30,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log = new WC_Logger( array( $handler ), 'debug' );
 
 		$log->add( 'unit-tests', 'this is a message' );
-
-		$this->setExpectedDeprecated( 'WC_Logger::add' );
 	}
 
 	/**
