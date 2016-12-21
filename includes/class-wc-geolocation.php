@@ -185,7 +185,7 @@ class WC_Geolocation {
 		$logger = wc_get_logger();
 
 		if ( ! is_callable( 'gzopen' ) ) {
-			$logger->notice( 'Server does not support gzopen', array( 'tag' => 'geolocation' ) );
+			$logger->notice( 'Server does not support gzopen', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
@@ -208,13 +208,13 @@ class WC_Geolocation {
 					gzclose( $gzhandle );
 					fclose( $handle );
 				} else {
-					$logger->notice( 'Unable to open database file', array( 'tag' => 'geolocation' ) );
+					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
 				}
 				@unlink( $tmp_database_path );
 			} else {
 				$logger->notice(
 					'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
-					array( 'tag' => 'geolocation' )
+					array( 'source' => 'geolocation' )
 				);
 			}
 		}

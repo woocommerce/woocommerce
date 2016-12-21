@@ -72,7 +72,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'timestamp' => __( 'Timestamp', 'woocommerce' ),
 			'level'     => __( 'Level',     'woocommerce' ),
 			'message'   => __( 'Message',   'woocommerce' ),
-			'tag'       => __( 'Tag',       'woocommerce' ),
+			'source'    => __( 'Source',       'woocommerce' ),
 		);
 	}
 
@@ -133,13 +133,13 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Tag column.
+	 * Source column.
 	 *
 	 * @param  array $log
 	 * @return string
 	 */
-	public function column_tag( $log ) {
-		return esc_html( $log['tag'] );
+	public function column_source( $log ) {
+		return esc_html( $log['source'] );
 	}
 
 	/**
@@ -162,7 +162,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		return array(
 			'timestamp' => array( 'timestamp', true ),
 			'level'     => array( 'level',     true ),
-			'tag'       => array( 'tag',       true ),
+			'source'    => array( 'source',       true ),
 		);
 	}
 
@@ -197,7 +197,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$search = '';
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			$search = "AND tag LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
+			$search = "AND source LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
@@ -205,7 +205,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 				// Intentional cascade, these are valid values.
 				case 'timestamp':
-				case 'tag':
+				case 'source':
 				case 'level':
 					$order_by = $_REQUEST['orderby'];
 					break;
@@ -226,7 +226,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		}
 
 		$this->items = $wpdb->get_results(
-			"SELECT log_id, timestamp, level, message, tag
+			"SELECT log_id, timestamp, level, message, source
 				FROM {$wpdb->prefix}woocommerce_log
 				WHERE 1 = 1 {$level_filter} {$search}
 				ORDER BY {$order_by} {$order_order} " .
