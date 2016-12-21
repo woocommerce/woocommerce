@@ -190,4 +190,10 @@ jQuery( function( $ ) {
 
 		.trigger( 'wc-enhanced-select-init' );
 
+	$( 'html' ).on( 'click', function( event ) {
+		if ( this === event.target ) {
+			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( ".select2-hidden-accessible" ).select2( 'close' );
+		}
+	} );
+
 });
