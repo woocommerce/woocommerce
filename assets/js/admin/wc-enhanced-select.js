@@ -101,7 +101,6 @@ jQuery( function( $ ) {
 							};
 						},
 						processResults: function( data ) {
-							window.console.log(data);
 							var terms = [];
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -143,15 +142,15 @@ jQuery( function( $ ) {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
 						quietMillis: 250,
-						data: function( term ) {
+						data: function( params ) {
 							return {
-								term:     term,
+								term:     params.term,
 								action:   'woocommerce_json_search_customers',
 								security: wc_enhanced_select_params.search_customers_nonce,
 								exclude:  $( this ).data( 'exclude' )
 							};
 						},
-						results: function( data ) {
+						processResults: function( data ) {
 							var terms = [];
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -161,7 +160,9 @@ jQuery( function( $ ) {
 									});
 								});
 							}
-							return { results: terms };
+							return {
+								results: terms
+							};
 						},
 						cache: true
 					}

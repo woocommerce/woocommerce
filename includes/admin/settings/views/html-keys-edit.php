@@ -38,7 +38,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$user->user_email
 						);
 					?>
-					<input type="hidden" class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true" />
+					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+						<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo $user_string; ?><option>
+					</select>
 				</td>
 			</tr>
 			<tr valign="top">

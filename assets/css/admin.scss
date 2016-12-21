@@ -5474,15 +5474,22 @@ table.bar_chart {
 		min-width: 400px !important;
 	}
 }
-.tablenav {
-	.actions {
-		overflow: visible;
-	}
-	.select2-container {
-		float: left;
-		max-width: 200px;
-		font-size: 14px;
-		vertical-align: middle;
-		margin: 1px 6px 1px 1px;
+.post-type-shop_order {
+	.tablenav {
+		.actions {
+			overflow: visible;
+		}
+		select,
+		input {
+			line-height: 32px;
+			height: 32px;
+		}
+		.select2-container {
+			float: left;
+			width: 200px !important;
+			font-size: 14px;
+			vertical-align: middle;
+			margin: 1px 6px 4px 1px;
+		}
 	}
 }
