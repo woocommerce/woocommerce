@@ -23,20 +23,20 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 * @param array $context {
 	 *     Additional information for log handlers.
 	 *
-	 *     @type string $tag Optional. Tag will be available in log table. Default '';
+	 *     @type string $source Optional. Source will be available in log table. Default '';
 	 * }
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
-		if ( isset( $context['tag'] ) && $context['tag'] ) {
-			$tag = $context['tag'];
+		if ( isset( $context['source'] ) && $context['source'] ) {
+			$source = $context['source'];
 		} else {
-			$tag = '';
+			$source = '';
 		}
 
-		return $this->add( $timestamp, $level, $message, $tag, $context );
+		return $this->add( $timestamp, $level, $message, $source, $context );
 	}
 
 	/**
@@ -45,21 +45,21 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
-	 * @param string $tag Log tag. Useful for filtering and sorting.
+	 * @param string $source Log source. Useful for filtering and sorting.
 	 * @param array $context {
 	 *     Context will be serialized and stored in database.
 	 * }
 	 *
 	 * @return bool True if write was successful.
 	 */
-	protected static function add( $timestamp, $level, $message, $tag, $context ) {
+	protected static function add( $timestamp, $level, $message, $source, $context ) {
 		global $wpdb;
 
 		$insert = array(
 			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
 			'level' => WC_Log_Levels::get_level_severity( $level ),
 			'message' => $message,
-			'tag' => $tag,
+			'source' => $source,
 		);
 
 		$format = array(

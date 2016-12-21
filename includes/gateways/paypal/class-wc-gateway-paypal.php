@@ -84,7 +84,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->log( $level, $message, array( 'tag' => 'paypal' ) );
+			self::$log->log( $level, $message, array( 'source' => 'paypal' ) );
 		}
 	}
 

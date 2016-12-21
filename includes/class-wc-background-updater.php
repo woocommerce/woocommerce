@@ -41,7 +41,7 @@ class WC_Background_Updater extends WP_Background_Process {
 		if ( is_wp_error( $dispatched ) ) {
 			$logger->error(
 				sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ),
-				array( 'tag' => 'wc_db_updates' )
+				array( 'source' => 'wc_db_updates' )
 			);
 		}
 	}
@@ -105,11 +105,11 @@ class WC_Background_Updater extends WP_Background_Process {
 		include_once( dirname( __FILE__ ) . '/wc-update-functions.php' );
 
 		if ( is_callable( $callback ) ) {
-			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'tag' => 'wc_db_updates' ) );
+			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 			call_user_func( $callback );
-			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'tag' => 'wc_db_updates' ) );
+			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		} else {
-			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'tag' => 'wc_db_updates' ) );
+			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
 		return false;
@@ -123,7 +123,7 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	protected function complete() {
 		$logger = wc_get_logger();
-		$logger->info( 'Data update complete', array( 'tag' => 'wc_db_updates' ) );
+		$logger->info( 'Data update complete', array( 'source' => 'wc_db_updates' ) );
 		WC_Install::update_db_version();
 		parent::complete();
 	}

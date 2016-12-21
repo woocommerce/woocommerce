@@ -234,7 +234,7 @@ class WC_Install {
 				foreach ( $update_callbacks as $update_callback ) {
 					$logger->info(
 						sprintf( 'Queuing %s - %s', $version, $update_callback ),
-						array( 'tag' => 'wc_db_updates' )
+						array( 'source' => 'wc_db_updates' )
 					);
 					self::$background_updater->push_to_queue( $update_callback );
 					$update_queued = true;
@@ -585,7 +585,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   log_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
   level smallint(4) NOT NULL,
-  tag varchar(255) NOT NULL,
+  source varchar(255) NOT NULL,
   message longtext NOT NULL,
   context longtext NULL,
   PRIMARY KEY (log_id),

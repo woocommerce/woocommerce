@@ -24,18 +24,18 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 		$time = time();
 		$context = array( 1, 2, 'a', 'b', 'key' => 'value' );
 
-		$handler->handle( $time, 'debug', 'msg_debug', array( 'tag' => 'tag_debug' ) );
-		$handler->handle( $time, 'info', 'msg_info', array( 'tag' => 'tag_info' ) );
-		$handler->handle( $time, 'notice', 'msg_notice', array( 'tag' => 'tag_notice' ) );
-		$handler->handle( $time, 'warning', 'msg_warning', array( 'tag' => 'tag_warning' ) );
-		$handler->handle( $time, 'error', 'msg_error', array( 'tag' => 'tag_error' ) );
-		$handler->handle( $time, 'critical', 'msg_critical', array( 'tag' => 'tag_critical' ) );
-		$handler->handle( $time, 'alert', 'msg_alert', array( 'tag' => 'tag_alert' ) );
-		$handler->handle( $time, 'emergency', 'msg_emergency', array( 'tag' => 'tag_emergency' ) );
+		$handler->handle( $time, 'debug', 'msg_debug', array( 'source' => 'source_debug' ) );
+		$handler->handle( $time, 'info', 'msg_info', array( 'source' => 'source_info' ) );
+		$handler->handle( $time, 'notice', 'msg_notice', array( 'source' => 'source_notice' ) );
+		$handler->handle( $time, 'warning', 'msg_warning', array( 'source' => 'source_warning' ) );
+		$handler->handle( $time, 'error', 'msg_error', array( 'source' => 'source_error' ) );
+		$handler->handle( $time, 'critical', 'msg_critical', array( 'source' => 'source_critical' ) );
+		$handler->handle( $time, 'alert', 'msg_alert', array( 'source' => 'source_alert' ) );
+		$handler->handle( $time, 'emergency', 'msg_emergency', array( 'source' => 'source_emergency' ) );
 
 		$handler->handle( $time, 'debug', 'context_test', $context );
 
-		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, tag, context FROM {$wpdb->prefix}woocommerce_log", ARRAY_A );
+		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source, context FROM {$wpdb->prefix}woocommerce_log", ARRAY_A );
 
 		$expected_ts = date( 'Y-m-d H:i:s', $time );
 		$expected = array(
@@ -43,63 +43,63 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'debug' ),
 				'message' => 'msg_debug',
-				'tag' => 'tag_debug',
-				'context' => serialize( array( 'tag' => 'tag_debug' ) ),
+				'source' => 'source_debug',
+				'context' => serialize( array( 'source' => 'source_debug' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'info' ),
 				'message' => 'msg_info',
-				'tag' => 'tag_info',
-				'context' => serialize( array( 'tag' => 'tag_info' ) ),
+				'source' => 'source_info',
+				'context' => serialize( array( 'source' => 'source_info' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'notice' ),
 				'message' => 'msg_notice',
-				'tag' => 'tag_notice',
-				'context' => serialize( array( 'tag' => 'tag_notice' ) ),
+				'source' => 'source_notice',
+				'context' => serialize( array( 'source' => 'source_notice' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'warning' ),
 				'message' => 'msg_warning',
-				'tag' => 'tag_warning',
-				'context' => serialize( array( 'tag' => 'tag_warning' ) ),
+				'source' => 'source_warning',
+				'context' => serialize( array( 'source' => 'source_warning' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'error' ),
 				'message' => 'msg_error',
-				'tag' => 'tag_error',
-				'context' => serialize( array( 'tag' => 'tag_error' ) ),
+				'source' => 'source_error',
+				'context' => serialize( array( 'source' => 'source_error' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'critical' ),
 				'message' => 'msg_critical',
-				'tag' => 'tag_critical',
-				'context' => serialize( array( 'tag' => 'tag_critical' ) ),
+				'source' => 'source_critical',
+				'context' => serialize( array( 'source' => 'source_critical' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'alert' ),
 				'message' => 'msg_alert',
-				'tag' => 'tag_alert',
-				'context' => serialize( array( 'tag' => 'tag_alert' ) ),
+				'source' => 'source_alert',
+				'context' => serialize( array( 'source' => 'source_alert' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'emergency' ),
 				'message' => 'msg_emergency',
-				'tag' => 'tag_emergency',
-				'context' => serialize( array( 'tag' => 'tag_emergency' ) ),
+				'source' => 'source_emergency',
+				'context' => serialize( array( 'source' => 'source_emergency' ) ),
 			),
 			array(
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'debug' ),
 				'message' => 'context_test',
-				'tag' => '',
+				'source' => '',
 				'context' => serialize( $context ),
 			),
 		);
@@ -121,12 +121,12 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 
 		$handler->handle( $time, 'debug', '', array() );
 
-		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, tag FROM {$wpdb->prefix}woocommerce_log" );
+		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source FROM {$wpdb->prefix}woocommerce_log" );
 		$this->assertCount( 1, $log_entries );
 
 		WC_Log_Handler_DB::flush();
 
-		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, tag FROM {$wpdb->prefix}woocommerce_log" );
+		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source FROM {$wpdb->prefix}woocommerce_log" );
 		$this->assertCount( 0, $log_entries );
 	}
 

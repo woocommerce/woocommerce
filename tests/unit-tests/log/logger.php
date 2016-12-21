@@ -25,7 +25,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 				$this->greaterThanOrEqual( $time ),
 				$this->equalTo( 'notice' ),
 				$this->equalTo( 'this is a message' ),
-				$this->equalTo( array( 'tag' => 'unit-tests', '_legacy' => true ) )
+				$this->equalTo( array( 'source' => 'unit-tests', '_legacy' => true ) )
 			);
 		$log = new WC_Logger( array( $handler ), 'debug' );
 

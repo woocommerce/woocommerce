@@ -1173,7 +1173,7 @@ class WC_Geo_IP {
 		if ( empty( self::$log ) ) {
 			self::$log = wc_get_logger();
 		}
-		self::$log->log( $level, $message, array( 'tag' => 'geoip' ) );
+		self::$log->log( $level, $message, array( 'source' => 'geoip' ) );
 	}
 
 	/**

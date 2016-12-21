@@ -76,7 +76,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @param array $context {
 	 *     Additional information for log handlers.
 	 *
-	 *     @type string $tag Optional. Determines log file to write to. Default 'log'.
+	 *     @type string $source Optional. Determines log file to write to. Default 'log'.
 	 *     @type bool $_legacy Optional. Default false. True to use outdated log format
 	 *         orignally used in deprecated WC_Logger::add calls.
 	 * }
@@ -85,8 +85,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
-		if ( isset( $context['tag'] ) && $context['tag'] ) {
-			$handle = $context['tag'];
+		if ( isset( $context['source'] ) && $context['source'] ) {
+			$handle = $context['source'];
 		} else {
 			$handle = 'log';
 		}
@@ -109,8 +109,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected static function format_entry( $timestamp, $level, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
-			if ( isset( $context['tag'] ) && $context['tag'] ) {
-				$handle = $context['tag'];
+			if ( isset( $context['source'] ) && $context['source'] ) {
+				$handle = $context['source'];
 			} else {
 				$handle = 'log';
 			}
