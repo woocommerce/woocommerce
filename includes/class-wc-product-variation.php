@@ -44,7 +44,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_product_variation_get_';
+		return 'woocommerce_get_product_variation_';
 	}
 
 	/**
