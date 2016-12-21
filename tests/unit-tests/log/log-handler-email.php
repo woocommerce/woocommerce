@@ -24,14 +24,13 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 */
 	public function test_handle() {
 		$mailer = tests_retrieve_phpmailer_instance();
+		$time = time();
+		$site_name = get_bloginfo( 'name' );
 
 		$handler = new WC_Log_Handler_Email();
-		$time = time();
 		$handler->handle( $time, 'emergency', 'msg_emergency', array() );
 		$handler->handle( $time, 'emergency', 'msg_emergency 2', array() );
 		$handler->send_log_email();
-
-		$site_name = get_bloginfo( 'name' );
 
 		$this->assertEquals(
 			(
@@ -48,15 +47,45 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent()->body
+			$mailer->get_sent( 0 )->body
 		);
 		$this->assertEquals(
-			"[{$site_name}] WooCommerce log messages",
-			$mailer->get_sent()->subject
+			"[{$site_name}] EMERGENCY: 2 WooCommerce log messages",
+			$mailer->get_sent( 0 )->subject
 		);
 		$this->assertEquals( get_option( 'admin_email' ), $mailer->get_recipient( 'to' )->address );
 	}
 
+
+	/**
+	 * Test email subject
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_email_subject() {
+		$mailer = tests_retrieve_phpmailer_instance();
+		$time = time();
+		$site_name = get_bloginfo( 'name' );
+
+		$handler = new WC_Log_Handler_Email( null, WC_Log_Levels::DEBUG );
+		$handler->handle( $time, 'debug', '', array() );
+		$handler->send_log_email();
+
+		$handler->handle( $time, 'alert', '', array() );
+		$handler->handle( $time, 'critical', '', array() );
+		$handler->handle( $time, 'debug', '', array() );
+		$handler->send_log_email();
+
+		$this->assertEquals(
+			"[{$site_name}] DEBUG: 1 WooCommerce log message",
+			$mailer->get_sent( 0 )->subject
+		);
+
+		$this->assertEquals(
+			"[{$site_name}] ALERT: 3 WooCommerce log messages",
+			$mailer->get_sent( 1 )->subject
+		);
+	}
 
 	/**
 	 * Test multiple recipients receive emails.
