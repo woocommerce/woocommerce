@@ -71,7 +71,7 @@ class WC_Logger {
 	 * @param string $message
 	 * @return bool
 	 */
-	public function add( $handle, $message, $level=WC_Log_Levels::NOTICE ) {
+	public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 		$this->log( $level, $message, array( 'source' => $handle, '_legacy' => true ) );
 		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.7', 'This action has been deprecated with no alternative.' );
