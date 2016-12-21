@@ -33,9 +33,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_order_status() {
-
-		$this->assertEquals( true,  wc_is_order_status( 'wc-pending' ) );
-		$this->assertEquals( false, wc_is_order_status( 'wc-another-status' ) );
+		$this->assertTrue(  wc_is_order_status( 'wc-pending' ) );
+		$this->assertFalse( wc_is_order_status( 'wc-another-status' ) );
 	}
 
 	/**
@@ -80,10 +79,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$default = get_option( 'woocommerce_ship_to_destination' );
 
 		update_option( 'woocommerce_ship_to_destination', 'shipping' );
-		$this->assertEquals( false, wc_ship_to_billing_address_only() );
+		$this->assertFalse( wc_ship_to_billing_address_only() );
 
 		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
-		$this->assertEquals( true, wc_ship_to_billing_address_only() );
+		$this->assertTrue( wc_ship_to_billing_address_only() );
 
 		update_option( 'woocommerce_ship_to_destination', $default );
 	}
