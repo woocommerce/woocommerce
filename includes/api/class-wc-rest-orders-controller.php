@@ -530,6 +530,21 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Maybe set item meta if posted.
+	 * @param WC_Order_Item $item
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_meta_data( $item, $posted ) {
+		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
+			foreach ( $posted['meta_data'] as $meta ) {
+				if ( isset( $meta['key'], $meta['value'] ) ) {
+					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Create or update a line item.
 	 *
 	 * @param array $posted Line item data.
@@ -551,6 +566,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -572,6 +588,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -593,6 +610,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -614,6 +632,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
