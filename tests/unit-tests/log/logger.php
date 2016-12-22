@@ -146,50 +146,47 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test default threshold 'notice' or read from option.
+	 * Test no filtering by default
 	 *
 	 * @since 2.7.0
 	 */
 	public function test_threshold_defaults() {
 		$time = time();
 
-		// Test option setting.
-		update_option( 'woocommerce_log_threshold', 'alert' );
-		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-		$handler
-			->expects( $this->once() )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'alert' ),
-				$this->equalTo( 'alert message' ),
-				$this->equalTo( array() )
-			);
-		$log = new WC_Logger( array( $handler ) );
-		$log->critical( 'critical message' );
-		$log->alert( 'alert message' );
-
-		// Test 'notice' default when option is not set.
+		// Test no filtering by default
 		delete_option( 'woocommerce_log_threshold' );
 		$handler = $this
 			->getMockBuilder( 'WC_Log_Handler' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler
-			->expects( $this->once() )
+			->expects( $this->at( 0 ) )
 			->method( 'handle' )
 			->with(
 				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'notice' ),
-				$this->equalTo( 'notice message' ),
+				$this->equalTo( 'bad-level' ),
+				$this->equalTo( 'bad-level message' ),
 				$this->equalTo( array() )
 			);
+		$handler
+			->expects( $this->at( 1 ) )
+			->method( 'handle' )
+			->with(
+				$this->greaterThanOrEqual( $time ),
+				$this->equalTo( 'debug' ),
+				$this->equalTo( 'debug message' ),
+				$this->equalTo( array() )
+			);
+
 		$log = new WC_Logger( array( $handler ) );
-		$log->info( 'info message' );
-		$log->notice( 'notice message' );
+
+		// An invalid level has the minimum severity, but should not be filtered.
+		$log->log( 'bad-level', 'bad-level message' );
+		// Bad level also complains.
+		$this->setExpectedIncorrectUsage( 'WC_Logger::log' );
+
+		// Debug is lowest recognized level
+		$log->debug( 'debug message' );
 	}
 
 	/**
