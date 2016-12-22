@@ -54,6 +54,26 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 			$mailer->get_sent( 0 )->subject
 		);
 		$this->assertEquals( get_option( 'admin_email' ), $mailer->get_recipient( 'to' )->address );
+
+
+		$handler->handle( $time, 'emergency', 'msg_emergency', array() );
+		$handler->send_log_email();
+		$this->assertEquals(
+			(
+				'You have received the following WooCommerce log message:'
+				. PHP_EOL
+				. PHP_EOL
+				. date( 'c', $time ) . ' EMERGENCY msg_emergency'
+				. PHP_EOL
+				. PHP_EOL
+				. "Visit {$site_name} admin area:"
+				. PHP_EOL
+				. admin_url()
+				. PHP_EOL
+			),
+			$mailer->get_sent( 1 )->body
+		);
+
 	}
 
 
@@ -191,7 +211,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$this->assertEquals(
 			(
-				'You have received the following WooCommerce log messages:'
+				'You have received the following WooCommerce log message:'
 				. PHP_EOL
 				. PHP_EOL
 				. date( 'c', $time ) . ' EMERGENCY message 1'
@@ -207,7 +227,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$this->assertEquals(
 			(
-				'You have received the following WooCommerce log messages:'
+				'You have received the following WooCommerce log message:'
 				. PHP_EOL
 				. PHP_EOL
 				. date( 'c', $time ) . ' EMERGENCY message 2'
