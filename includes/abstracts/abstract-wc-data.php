@@ -126,7 +126,7 @@ abstract class WC_Data {
 	 */
 	public function save() {
 		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			// Trigger action before saving to the DB. Allows you to adjust object props before save.
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 			if ( $this->get_id() ) {
