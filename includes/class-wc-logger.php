@@ -35,20 +35,24 @@ class WC_Logger {
 	 *     the filter 'woocommerce_register_log_handlers' will be used to define the handlers.
 	 *     If $handlers is provided, the filter will not be applied and the handlers will be
 	 *     used directly.
-	 * @param string $threshold Optional. Define an explicit threshold. Defaults to the global
-	 *     setting 'woocommerce_log_threshold' or 'notice' if the setting is not configured.
+	 * @param string $threshold Optional. Define an explicit threshold. May be configured
+	 *     via  WC_LOG_THRESHOLD. By default, all logs will be processed.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
 		}
 
-		if ( null === $threshold ) {
-			$threshold = get_option( 'woocommerce_log_threshold', 'notice' );
+		if ( null !== $threshold ) {
+			$threshold = WC_Log_Levels::get_level_severity( $threshold );
+		} elseif ( defined( 'WC_LOG_THRESHOLD' ) && WC_Log_Levels::is_valid_level( WC_LOG_THRESHOLD ) ) {
+			$threshold = WC_Log_Levels::get_level_severity( WC_LOG_THRESHOLD );
+		} else {
+			$threshold = null;
 		}
 
-		$this->handlers = $handlers;
-		$this->threshold = WC_Log_Levels::get_level_severity( $threshold );
+		$this->handlers  = $handlers;
+		$this->threshold = $threshold;
 	}
 
 	/**
@@ -58,6 +62,9 @@ class WC_Logger {
 	 * @return bool True if the log should be handled.
 	 */
 	public function should_handle( $level ) {
+		if ( null === $this->threshold ) {
+			return true;
+		}
 		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 

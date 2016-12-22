@@ -1457,15 +1457,19 @@ function wc_print_r( $expression, $return = false ) {
  * @return array
  */
 function wc_register_default_log_handler( $handlers ) {
-	if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
-		array_push( $handlers, new WC_Log_Handler_DB() );
+
+	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
+		$handler_class = WC_LOG_HANDLER;
+		$default_handler = new $handler_class();
 	} else {
-		array_push( $handlers, new WC_Log_Handler_File() );
+		$default_handler = new WC_Log_Handler_File();
 	}
+
+	array_push( $handlers, $default_handler );
 
 	return $handlers;
 }
-add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler', 0 );
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
 
 /**
  * Store user agents. Used for tracker.

@@ -77,7 +77,7 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-		if ( 'db' === get_option( 'woocommerce_default_log_handler' ) ) {
+		if ( defined( 'WC_LOG_HANDLER' ) && 'WC_Log_Handler_DB' === WC_LOG_HANDLER ) {
 			self::status_logs_db();
 		} else {
 			self::status_logs_file();
