@@ -596,10 +596,14 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$active_plugins_data = array();
 		foreach ( $active_plugins as $plugin ) {
-			$data                 = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$dirname              = dirname( $plugin );
-			$theme_version_latest = '';
-			if ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) {
+			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$dirname        = dirname( $plugin );
+			$version_latest = '';
+			$slug           = explode( '/', $plugin );
+			$slug           = explode( '.', end( $slug ) );
+			$slug           = $slug[0];
+
+			if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
 				if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
@@ -616,12 +620,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						}
 					}
 				}
-				$theme_version_latest = $version_data['version'];
+				$version_latest = $version_data['version'];
 			} else {
 				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-				$slug = explode( '/', $plugin );
-				$slug = explode( '.', end( $slug ) );
-				$slug = $slug[0];
 
 				$api = plugins_api( 'plugin_information', array(
 					'slug'     => $slug,
@@ -631,8 +632,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					),
 				) );
 
-				if ( is_object( $api ) && ! is_wp_error( $api ) ) {
-					$theme_version_latest = $api->version;
+				if ( is_object( $api ) && ! is_wp_error( $api ) && ! empty( $api->version ) ) {
+					$version_latest = $api->version;
 				}
 			}
 
@@ -641,7 +642,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				'plugin'            => $plugin,
 				'name'              => $data['Name'],
 				'version'           => $data['Version'],
-				'version_latest'    => $theme_version_latest,
+				'version_latest'    => $version_latest,
 				'url'               => $data['PluginURI'],
 				'author_name'       => $data['AuthorName'],
 				'author_url'        => esc_url_raw( $data['AuthorURI'] ),
