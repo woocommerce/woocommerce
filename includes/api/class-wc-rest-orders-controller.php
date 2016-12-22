@@ -535,7 +535,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @param array $posted Request data.
 	 */
 	protected function maybe_set_item_meta_data( $item, $posted ) {
-		if ( ! empty( $posted['meta_data'] && is_array( $posted['meta_data'] ) ) ) {
+		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
 			foreach ( $posted['meta_data'] as $meta ) {
 				if ( isset( $meta['key'], $meta['value'] ) ) {
 					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
