@@ -157,6 +157,20 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Extra controls to be displayed between bulk actions and pagination.
+	 *
+	 * @param string $which
+	 */
+	protected function extra_tablenav( $which ) {
+		if ( 'top' === $which ) {
+			echo '<div class="alignleft actions">';
+				$this->source_dropdown();
+				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter-action', false );
+			echo '</div>';
+		}
+	}
+
+	/**
 	 * Get a list of sortable columns.
 	 *
 	 * @return array
@@ -165,12 +179,57 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		return array(
 			'timestamp' => array( 'timestamp', true ),
 			'level'     => array( 'level',     true ),
-			'source'    => array( 'source',       true ),
+			'source'    => array( 'source',    true ),
 		);
 	}
 
 	/**
+	 * Display source dropdown
+	 *
+	 * @global wpdb $wpdb
+	 */
+	protected function source_dropdown() {
+		global $wpdb;
+
+		$sources = $wpdb->get_col( "
+			SELECT DISTINCT source
+			FROM {$wpdb->prefix}woocommerce_log
+			WHERE source != ''
+			ORDER BY source ASC
+		" );
+
+		$source_count = count( $sources );
+
+		if ( !$source_count ) {
+			return;
+		}
+
+		$logger = wc_get_logger();
+		$logger->debug( wc_print_r( $sources, 1 ) ) ;
+
+		$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
+		?>
+			<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
+			<select name="source" id="filter-by-source">
+				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All', 'woocommerce' ); ?></option>
+				<?php
+					foreach ( $sources as $s ) {
+						$logger->debug($s);
+						printf( '<option%1$s value="%2$s">%3$s</option>',
+							selected( $selected_source, $s, false ),
+							esc_attr( $s ),
+							esc_html( $s )
+						);
+					}
+				?>
+			</select>
+		<?php
+	}
+
+	/**
 	 * Prepare table list items.
+	 *
+	 * @global wpdb $wpdb
 	 */
 	public function prepare_items() {
 		global $wpdb;
@@ -180,7 +239,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
 
-		// Column headers
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
 		$current_page = $this->get_pagenum();
@@ -190,37 +248,24 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$offset = 0;
 		}
 
-		$level_filter = '';
+		$where_conditions = array();
+		$where_values     = array();
 		if ( ! empty( $_REQUEST['level'] ) && WC_Log_Levels::is_valid_level( $_REQUEST['level'] ) ) {
-			$level_filter = $wpdb->prepare(
-				'AND level >= %d',
-				array( WC_Log_Levels::get_level_severity( $_REQUEST['level'] ) )
-			);
+			$where_conditions[] = 'level >= %d';
+			$where_values[]     = WC_Log_Levels::get_level_severity( $_REQUEST['level'] );
+		}
+		if ( ! empty( $_REQUEST['source'] ) ) {
+			$where_conditions[] = 'source = %s';
+			$where_values[]     = $_REQUEST['source'];
 		}
 
-		$search = '';
-		if ( ! empty( $_REQUEST['s'] ) ) {
-			$search = "AND source LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( $_REQUEST['s'] ) ) ) . "%' ";
-		}
-
-		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			switch ( $_REQUEST['orderby'] ) {
-
-				// Intentional cascade, these are valid values.
-				case 'timestamp':
-				case 'source':
-				case 'level':
-					$order_by = $_REQUEST['orderby'];
-					break;
-
-				// Invalid $_REQUEST orderby, use default
-				default:
-					$order_by = 'log_id';
-					break;
-			}
+		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
+		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
+			$order_by = $_REQUEST['orderby'];
 		} else {
 			$order_by = 'log_id';
 		}
+		$order_by = esc_sql( $order_by );
 
 		if ( ! empty( $_REQUEST['order'] ) && 'asc' === strtolower( $_REQUEST['order'] ) ) {
 			$order_order = 'ASC';
@@ -228,22 +273,28 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$order_order = 'DESC';
 		}
 
-		$this->items = $wpdb->get_results(
-			"SELECT log_id, timestamp, level, message, source
-				FROM {$wpdb->prefix}woocommerce_log
-				WHERE 1 = 1 {$level_filter} {$search}
-				ORDER BY {$order_by} {$order_order} " .
-				$wpdb->prepare( "LIMIT %d OFFSET %d", $per_page, $offset ),
-			ARRAY_A
-		);
+		$select = 'SELECT log_id, timestamp, level, message, source';
+		$from = "FROM {$wpdb->prefix}woocommerce_log";
+		$where = ! empty( $where_conditions )
+			? $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values )
+			: '';
+		$order = "ORDER BY {$order_by} {$order_order}";
+		$limit_offset = $wpdb->prepare( 'LIMIT %d OFFSET %d', $per_page, $offset );
 
-		$count = $wpdb->get_var( "SELECT COUNT(log_id) FROM {$wpdb->prefix}woocommerce_log WHERE 1 = 1 {$level_filter} {$search};" );
+		$query = "{$select} {$from} {$where} {$order} {$limit_offset}";
+		$query_count = "SELECT COUNT(log_id) {$from} {$where}";
 
-		// Set the pagination
+		$logger = wc_get_logger();
+		$logger->debug( wc_print_r( $query, 1 ), array( 'source' => 'wc-logger' ) );
+		$logger->debug( wc_print_r( $query_count, 1 ), array( 'source' => 'wc-logger' ) );
+
+		$this->items = $wpdb->get_results( $query, ARRAY_A );
+		$total_items = $wpdb->get_var( $query_count );
+
 		$this->set_pagination_args( array(
-			'total_items' => $count,
+			'total_items' => $total_items,
 			'per_page'    => $per_page,
-			'total_pages' => ceil( $count / $per_page ),
+			'total_pages' => ceil( $total_items / $per_page ),
 		) );
 	}
 }
