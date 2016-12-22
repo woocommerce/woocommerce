@@ -169,7 +169,12 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 		$site_name = get_bloginfo( 'name' );
 		$entries = implode( PHP_EOL, $this->logs );
 		$log_count = count( $this->logs );
-		return __( 'You have received the following WooCommerce log messages:', 'woocommerce' )
+		return _n(
+				'You have received the following WooCommerce log message:',
+				'You have received the following WooCommerce log messages:',
+				$log_count,
+				'woocommerce'
+			)
 			. PHP_EOL
 			. PHP_EOL
 			. $entries
