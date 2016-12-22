@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		$transaction_result = $this->validate_transaction( $transaction );
 
-		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . print_r( $transaction_result, true ) );
+		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_print_r( $transaction_result, true ) );
 
 		update_post_meta( $order->get_id(), '_paypal_status', $status );
 		update_post_meta( $order->get_id(), '_transaction_id', $transaction );
@@ -96,7 +96,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		if ( $transaction_result ) {
 	 		if ( 'completed' === $status ) {
 				if ( $order->get_total() != $amount ) {
-					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')' );
+					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 				} else {
 					$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );

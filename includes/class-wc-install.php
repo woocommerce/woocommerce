@@ -245,7 +245,10 @@ class WC_Install {
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );
+					$logger->info(
+						sprintf( 'Queuing %s - %s', $version, $update_callback ),
+						array( 'source' => 'wc_db_updates' )
+					);
 					self::$background_updater->push_to_queue( $update_callback );
 					$update_queued = true;
 				}
@@ -601,6 +604,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   PRIMARY KEY  (meta_id),
   KEY payment_token_id (payment_token_id),
   KEY meta_key (meta_key($max_index_length))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_log (
+  log_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  level smallint(4) NOT NULL,
+  source varchar(255) NOT NULL,
+  message longtext NOT NULL,
+  context longtext NULL,
+  PRIMARY KEY (log_id),
+  KEY level (level)
 ) $collate;
 		";
 
