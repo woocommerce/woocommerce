@@ -163,7 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix returned REST API coupon expiry date.
 * Fix reviews_allowed being set to false in Rest API.
 * Fix sales date series for some custom ranges.
-* Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts. This is a larger change than we'd hope to do in 2.6, but once that was needed.
+* Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts.
 * Updated Geo IP API services.
 * Added support for WP VIP/VIP GO GEO IP headers.
 * Dev - API - Throw error messages when product image ID is not a valid WordPress attachment ID.
