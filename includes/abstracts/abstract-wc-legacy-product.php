@@ -31,26 +31,30 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		return
-			in_array( $key, array_merge( array(
-				'id',
+		$valid = array(
+			'id',
+			'product_attributes',
+			'visibility',
+			'sale_price_dates_from',
+			'sale_price_dates_to',
+			'post',
+			'download_type',
+			'product_image_gallery',
+			'variation_shipping_class',
+			'shipping_class',
+			'total_stock',
+			'crosssell_ids',
+			'parent',
+		);
+		if ( $this->is_type( 'variation' ) ) {
+			$valid = array_merge( $valid, array(
 				'variation_id',
 				'variation_data',
 				'variation_has_stock',
 				'variation_shipping_class_id',
-				'product_attributes',
-				'visibility',
-				'sale_price_dates_from',
-				'sale_price_dates_to',
-				'post',
-				'download_type',
-				'product_image_gallery',
-				'variation_shipping_class',
-				'shipping_class',
-				'total_stock',
-				'crosssell_ids',
-				'parent',
-			), array_keys( $this->data ) ) ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) || metadata_exists( 'post', $this->get_parent_id(), '_' . $key );
+			) );
+		}
+		return in_array( $key, array_merge( $valid, array_keys( $this->data ) ) ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) || metadata_exists( 'post', $this->get_parent_id(), '_' . $key );
 	}
 
 	/**
@@ -70,9 +74,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		switch ( $key ) {
 			case 'id' :
 				$value = $this->is_type( 'variation' ) ? $this->get_parent_id() : $this->get_id();
-				break;
-			case 'variation_id' :
-				$value = $this->get_id();
 				break;
 			case 'product_attributes' :
 				$value = isset( $this->data['attributes'] ) ? $this->data['attributes'] : '';
@@ -118,14 +119,17 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'parent' :
 				$value = wc_get_product( $this->get_parent_id() );
 				break;
+			case 'variation_id' :
+				$value = $this->is_type( 'variation' ) ? $this->get_id() : '';
+				break;
 			case 'variation_data' :
-				$value = wc_get_product_variation_attributes( $this->get_id() );
+				$value = $this->is_type( 'variation' ) ? wc_get_product_variation_attributes( $this->get_id() ) : '';
 				break;
 			case 'variation_has_stock' :
-				$value = $this->managing_stock();
+				$value = $this->is_type( 'variation' ) ? $this->managing_stock() : '';
 				break;
 			case 'variation_shipping_class_id' :
-				$value = $this->get_shipping_class_id();
+				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_id() : '';
 				break;
 			default :
 				if ( in_array( $key, array_keys( $this->data ) ) ) {
