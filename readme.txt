@@ -159,7 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.11 - 2016-12-22 =
-* Fix - Variation form compatibility with quotes in attribute values.
+* Fix - Variation form compatibility with quotes in attribute values, and initial variation image fadeIn on certain configs.
 
 = 2.6.10 - 2016-12-22 =
 * Fix flat rate no class costs when no shipping classes exist.
