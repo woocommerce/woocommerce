@@ -287,7 +287,7 @@
 		string = string.replace( /'/g, '\\\'' );
 		string = string.replace( /"/g, '\\\"' );
 		return string;
-	}
+	};
 
 	/**
 	 * Updates attributes in the DOM to show valid values.
