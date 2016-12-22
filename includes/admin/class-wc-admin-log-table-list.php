@@ -204,9 +204,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			return;
 		}
 
-		$logger = wc_get_logger();
-		$logger->debug( wc_print_r( $sources, 1 ) ) ;
-
 		$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
 		?>
 			<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
@@ -214,7 +211,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $sources as $s ) {
-						$logger->debug($s);
 						printf( '<option%1$s value="%2$s">%3$s</option>',
 							selected( $selected_source, $s, false ),
 							esc_attr( $s ),
@@ -283,10 +279,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$query = "{$select} {$from} {$where} {$order} {$limit_offset}";
 		$query_count = "SELECT COUNT(log_id) {$from} {$where}";
-
-		$logger = wc_get_logger();
-		$logger->debug( wc_print_r( $query, 1 ), array( 'source' => 'wc-logger' ) );
-		$logger->debug( wc_print_r( $query_count, 1 ), array( 'source' => 'wc-logger' ) );
 
 		$this->items = $wpdb->get_results( $query, ARRAY_A );
 		$total_items = $wpdb->get_var( $query_count );
