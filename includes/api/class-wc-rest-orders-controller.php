@@ -673,6 +673,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		// Prepare item data
 		$item = $this->$method( $posted, $action );
 
+		/**
+		 * Action hook to adjust item before save.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
+
 		// Save or add to order
 		if ( 'create' === $action ) {
 			$order->add_item( $item );
