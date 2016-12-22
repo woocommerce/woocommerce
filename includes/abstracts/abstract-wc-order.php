@@ -138,6 +138,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_data() {
 		return array_merge(
+			array(
+				'id' => $this->get_id(),
+			),
 			$this->data,
 			array(
 				'meta_data'      => $this->get_meta_data(),
