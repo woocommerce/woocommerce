@@ -362,7 +362,7 @@ class WC_Checkout {
 			$item->set_backorder_meta();
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
@@ -393,7 +393,7 @@ class WC_Checkout {
 			) );
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
@@ -425,7 +425,7 @@ class WC_Checkout {
 				) );
 
 				/**
-				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
@@ -455,7 +455,7 @@ class WC_Checkout {
 				) );
 
 				/**
-				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
@@ -481,7 +481,7 @@ class WC_Checkout {
 			) );
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
