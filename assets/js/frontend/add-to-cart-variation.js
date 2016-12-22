@@ -149,6 +149,9 @@
 			form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 		}
 
+		// added to get around variation image flicker issue
+		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
+
 		form.toggleResetLink( attributes.chosenCount > 0 );
 	};
 
