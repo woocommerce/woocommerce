@@ -269,8 +269,8 @@ class WC_Meta_Box_Product_Data {
 			'virtual'            => isset( $_POST['_virtual'] ),
 			'featured'           => isset( $_POST['_featured'] ),
 			'catalog_visibility' => wc_clean( $_POST['_visibility'] ),
-			'tax_status'         => wc_clean( $_POST['_tax_status'] ),
-			'tax_class'          => wc_clean( $_POST['_tax_class'] ),
+			'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( $_POST['_tax_status'] ) : null,
+			'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( $_POST['_tax_class'] ) : null,
 			'weight'             => wc_clean( $_POST['_weight'] ),
 			'length'             => wc_clean( $_POST['_length'] ),
 			'width'              => wc_clean( $_POST['_width'] ),
@@ -363,7 +363,7 @@ class WC_Meta_Box_Product_Data {
 					'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] )   : '',
 					'height'            => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
 					'shipping_class_id' => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
-					'tax_class'         => wc_clean( $_POST['variable_tax_class'][ $i ] ),
+					'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? wc_clean( $_POST['variable_tax_class'][ $i ] ) : null,
 				) );
 
 				if ( is_wp_error( $errors ) ) {
