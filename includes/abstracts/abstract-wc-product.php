@@ -872,6 +872,10 @@ class WC_Product {
 			$price = $this->get_price();
 		}
 
+		if ( ! $price ) {
+			$price = 0;
+		}
+
 		if ( $this->is_taxable() ) {
 
 			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
@@ -930,6 +934,10 @@ class WC_Product {
 
 		if ( $price === '' ) {
 			$price = $this->get_price();
+		}
+
+		if ( ! $price ) {
+			$price = 0;
 		}
 
 		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
