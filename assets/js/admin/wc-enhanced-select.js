@@ -120,13 +120,23 @@ jQuery( function( $ ) {
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
 				if ( $( this ).data( 'sortable' ) ) {
-					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-						containment: 'parent',
-						start: function() { $( this ).select2( 'onSortStart' ); },
-						update: function() { $( this ).select2( 'onSortEnd' ); }
+					var $select = $(this);
+					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
+
+					$list.sortable({
+						placeholder : 'ui-state-highlight select2-selection__choice',
+						forcePlaceholderSize: true,
+						items       : 'li:not(.select2-search__field)',
+						tolerance   : 'pointer',
+						stop: function() {
+							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+								var id     = $( this ).data( 'data' ).id;
+								var option = $select.find( 'option[value="' + id + '"]' )[0];
+								$select.prepend( option );
+							} );
+						}
 					});
 				}
-
 			});
 
 			// Ajax customer search boxes
@@ -173,26 +183,36 @@ jQuery( function( $ ) {
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
 				if ( $( this ).data( 'sortable' ) ) {
-					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-						containment: 'parent',
-						start: function() { $( this ).select2( 'onSortStart' ); },
-						update: function() { $( this ).select2( 'onSortEnd' ); }
+					var $select = $(this);
+					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
+
+					$list.sortable({
+						placeholder : 'ui-state-highlight select2-selection__choice',
+						forcePlaceholderSize: true,
+						items       : 'li:not(.select2-search__field)',
+						tolerance   : 'pointer',
+						stop: function() {
+							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+								var id     = $( this ).data( 'data' ).id;
+								var option = $select.find( 'option[value="' + id + '"]' )[0];
+								$select.prepend( option );
+							} );
+						}
 					});
 				}
-
 			});
 		})
 
 		// WooCommerce Backbone Modal
 		.on( 'wc_backbone_modal_before_remove', function() {
-			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( ".select2-hidden-accessible" ).select2( 'close' );
+			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
 		})
 
 		.trigger( 'wc-enhanced-select-init' );
 
 	$( 'html' ).on( 'click', function( event ) {
 		if ( this === event.target ) {
-			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( ".select2-hidden-accessible" ).select2( 'close' );
+			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
 		}
 	} );
 
