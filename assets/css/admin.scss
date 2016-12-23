@@ -580,6 +580,21 @@ table.wc_status_table {
 	}
 }
 
+// Adjust log table columns only when table is not collapsed
+@media screen and ( min-width: 783px ) {
+	.wp-list-table.logs {
+		.column-timestamp {
+			width: 20%;
+		}
+		.column-level {
+			width: 13%;
+		}
+		.column-source {
+			width: 15%;
+		}
+	}
+}
+
 #log-viewer-select {
 	padding: 10px 0 8px;
 	line-height: 28px;
