@@ -420,7 +420,9 @@ class WC_Checkout {
 					'method_title' => $shipping_rate->label,
 					'method_id'    => $shipping_rate->id,
 					'total'        => wc_format_decimal( $shipping_rate->cost ),
-					'taxes'        => $shipping_rate->taxes,
+					'taxes'        => array(
+						'total' => $shipping_rate->taxes,
+					),
 					'meta_data'    => $shipping_rate->get_meta_data(),
 				) );
 
