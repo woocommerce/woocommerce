@@ -129,6 +129,10 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$sql .= ' AND ' . $search;
+		}
+
 		return absint( $wpdb->get_var( $sql ) );
 	}
 

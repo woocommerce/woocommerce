@@ -165,6 +165,10 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					AND price_meta.meta_value > '' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$sql .= ' AND ' . $search;
+		}
+
 		return $wpdb->get_row( $sql );
 	}
 }
