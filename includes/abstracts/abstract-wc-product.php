@@ -1686,7 +1686,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$identifier = '#' . $this->get_id();
 		}
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() );
 	}
 
 	/**

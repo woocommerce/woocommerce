@@ -166,7 +166,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function prepare_children() {
-		return isset( $_POST['grouped_products'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['grouped_products'] ) ) ) : array();
+		return isset( $_POST['grouped_products'] ) ? array_filter( array_map( 'intval', (array) $_POST['grouped_products'] ) ) : array();
 	}
 
 	/**
@@ -277,8 +277,8 @@ class WC_Meta_Box_Product_Data {
 			'height'             => wc_clean( $_POST['_height'] ),
 			'shipping_class_id'  => absint( $_POST['product_shipping_class'] ),
 			'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
-			'upsell_ids'         => array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ),
-			'cross_sell_ids'     => array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ),
+			'upsell_ids'         => array_map( 'intval', (array) $_POST['upsell_ids'] ),
+			'cross_sell_ids'     => array_map( 'intval', (array) $_POST['crosssell_ids'] ),
 			'regular_price'      => wc_clean( $_POST['_regular_price'] ),
 			'sale_price'         => wc_clean( $_POST['_sale_price'] ),
 			'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
