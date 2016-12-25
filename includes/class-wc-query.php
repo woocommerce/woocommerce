@@ -129,7 +129,7 @@ class WC_Query {
 			break;
 		}
 
-		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title );
+		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint );
 	}
 
 	/**
