@@ -582,14 +582,67 @@ table.wc_status_table {
 	}
 }
 
-// Adjust log table columns only when table is not collapsed
-@media screen and ( min-width: 783px ) {
-	.wp-list-table.logs {
+
+/**
+ * DB log viewer
+ */
+.wp-list-table.logs {
+
+	.log-level {
+		display: inline;
+		padding: .2em .6em .3em;
+		font-size: 80%;
+		font-weight: bold;
+		line-height: 1;
+		color: #fff;
+		text-align: center;
+		white-space: nowrap;
+		vertical-align: baseline;
+		border-radius: .2em;
+
+		&:empty {
+			display: none;
+		}
+	}
+
+	/**
+	 * Add color to levels
+	 *
+	 * Descending severity:
+	 *   emergency, alert -> red
+	 *   critical, error  -> orange
+	 *   warning, notice  -> yellow
+	 *   info             -> blue
+	 *   debug            -> gree
+	 */
+
+	.log-level--emergency,
+	.log-level--alert {
+		background-color: #ff4136;
+	}
+	.log-level--critical,
+	.log-level--error {
+		background-color: #ff851b;
+	}
+	.log-level--warning,
+	.log-level--notice {
+		color: #222;
+		background-color: #ffdc00;
+	}
+	.log-level--info {
+		background-color: #0074d9;
+	}
+	.log-level--debug {
+		background-color: #3d9970;
+	}
+
+	// Adjust log table columns only when table is not collapsed
+	@media screen and ( min-width: 783px ) {
 		.column-timestamp {
-			width: 20%;
+			width: 18%;
 		}
 		.column-level {
-			width: 13%;
+			width: 14%;
 		}
 		.column-source {
 			width: 15%;
