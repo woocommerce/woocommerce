@@ -319,7 +319,7 @@ class WC_Checkout {
 			$this->create_order_coupon_lines( $order );
 
 			/**
-			 * Action hook to adjust order before save. To change $order, use a pointer (&$order) in your hooked function.
+			 * Action hook to adjust order before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
@@ -420,7 +420,9 @@ class WC_Checkout {
 					'method_title' => $shipping_rate->label,
 					'method_id'    => $shipping_rate->id,
 					'total'        => wc_format_decimal( $shipping_rate->cost ),
-					'taxes'        => $shipping_rate->taxes,
+					'taxes'        => array(
+						'total' => $shipping_rate->taxes,
+					),
 					'meta_data'    => $shipping_rate->get_meta_data(),
 				) );
 

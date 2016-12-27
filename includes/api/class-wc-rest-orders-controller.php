@@ -559,7 +559,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$total = $product->get_price() * ( isset( $posted['quantity'] ) ? $posted['quantity'] : 1 );
+				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
+				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
@@ -672,6 +673,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		// Prepare item data
 		$item = $this->$method( $posted, $action );
+
+		/**
+		 * Action hook to adjust item before save.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
 		// Save or add to order
 		if ( 'create' === $action ) {

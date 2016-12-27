@@ -149,6 +149,9 @@
 			form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 		}
 
+		// added to get around variation image flicker issue
+		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
+
 		form.toggleResetLink( attributes.chosenCount > 0 );
 	};
 
@@ -279,6 +282,17 @@
 	};
 
 	/**
+	 * Escape quotes in a string.
+	 * @param {string} string
+	 * @return {string}
+	 */
+	VariationForm.prototype.addSlashes = function( string ) {
+		string = string.replace( /'/g, '\\\'' );
+		string = string.replace( /"/g, '\\\"' );
+		return string;
+	};
+
+	/**
 	 * Updates attributes in the DOM to show valid values.
 	 */
 	VariationForm.prototype.onUpdateAttributes = function( event ) {
@@ -339,11 +353,9 @@
 								if ( attr_val ) {
 									// Decode entities and add slashes.
 									attr_val = $( '<div/>' ).html( attr_val ).text();
-									attr_val = attr_val.replace( /'/g, '\\\'' );
-									attr_val = attr_val.replace( /"/g, '\\\"' );
 
 									// Attach.
-									new_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'attached ' + variation_active );
+									new_attr_select.find( 'option[value="' + form.addSlashes( attr_val ) + '"]' ).addClass( 'attached ' + variation_active );
 								} else {
 									// Attach all apart from placeholder.
 									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
@@ -358,7 +370,7 @@
 			attached_options_count = new_attr_select.find( 'option.attached' ).length;
 
 			// Check if current selection is in attached options.
-			if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + selected_attr_val + '"]' ).length === 0 ) ) {
+			if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + form.addSlashes( selected_attr_val ) + '"]' ).length === 0 ) ) {
 				selected_attr_val_valid = false;
 			}
 
