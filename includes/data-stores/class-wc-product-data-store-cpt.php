@@ -1152,13 +1152,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		if ( is_numeric( $term ) ) {
+
 			$post_id   = absint( $term );
 			$post_type = get_post_type( $post_id );
 
 			if ( $post_type ) {
-				if ( 'product_variation' === $post_type && $include_variations ) {
-					$product_ids[] = $post_id;
+				if ( 'product_variation' === $post_type ) {
+
+					if ( $include_variations ) {
+						$product_ids[] = $post_id;
+					}
+
 					$product_ids[] = wp_get_post_parent_id( $post_id );
+
 				} elseif ( 'product' === $post_type ) {
 					$product_ids[] = $post_id;
 				}
