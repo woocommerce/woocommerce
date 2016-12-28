@@ -1153,7 +1153,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( is_numeric( $term ) ) {
 			$product_ids[] = absint( $term );
-			$product_ids[] = get_post_parent( $term );
+			$product_ids[] = wp_get_post_parent_id( $term );
 		}
 
 		return wp_parse_id_list( $product_ids );
