@@ -318,7 +318,7 @@ class WC_Admin_Status {
 
 		$log_ids = array_map( 'absint', (array) $_GET['log'] );
 
-		if ( 'delete' === $_GET['action'] ) {
+		if ( 'delete' === $_GET['action'] || 'delete' === $_GET['action2'] ) {
 			WC_Log_Handler_DB::delete( $log_ids );
 			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 			exit();
