@@ -72,7 +72,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'timestamp' => __( 'Timestamp', 'woocommerce' ),
 			'level'     => __( 'Level',     'woocommerce' ),
 			'message'   => __( 'Message',   'woocommerce' ),
-			'source'    => __( 'Source',       'woocommerce' ),
+			'source'    => __( 'Source',    'woocommerce' ),
 		);
 	}
 
@@ -202,7 +202,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$source_count = count( $sources );
 
-		if ( !$source_count ) {
+		if ( ! $source_count ) {
 			return;
 		}
 
@@ -211,15 +211,13 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
 			<select name="source" id="filter-by-source">
 				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All', 'woocommerce' ); ?></option>
-				<?php
-					foreach ( $sources as $s ) {
-						printf( '<option%1$s value="%2$s">%3$s</option>',
-							selected( $selected_source, $s, false ),
-							esc_attr( $s ),
-							esc_html( $s )
-						);
-					}
-				?>
+				<?php foreach ( $sources as $s ) {
+					printf( '<option%1$s value="%2$s">%3$s</option>',
+						selected( $selected_source, $s, false ),
+						esc_attr( $s ),
+						esc_html( $s )
+					);
+				} ?>
 			</select>
 		<?php
 	}
@@ -232,19 +230,100 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$per_page = apply_filters( 'woocommerce_status_log_items_per_page', 10 );
-		$columns  = $this->get_columns();
-		$hidden   = array();
-		$sortable = $this->get_sortable_columns();
+		$this->prepare_column_headers();
 
-		$this->_column_headers = array( $columns, $hidden, $sortable );
+		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
 
+		$where  = $this->get_items_query_where();
+		$order  = $this->get_items_query_order();
+		$limit  = $this->get_items_query_limit();
+		$offset = $this->get_items_query_offset();
+
+		$query_items = "
+			SELECT log_id, timestamp, level, message, source
+			FROM {$wpdb->prefix}woocommerce_log
+			{$where} {$order} {$limit} {$offset}
+		";
+
+		$this->items = $wpdb->get_results( $query_items, ARRAY_A );
+
+		$query_count = "SELECT COUNT(log_id) FROM {$wpdb->prefix}woocommerce_log {$where}";
+		$total_items = $wpdb->get_var( $query_count );
+
+		$this->set_pagination_args( array(
+			'total_items' => $total_items,
+			'per_page'    => $per_page,
+			'total_pages' => ceil( $total_items / $per_page ),
+		) );
+	}
+
+	/**
+	 * Get prepared LIMIT clause for items query
+	 *
+	 * @global wpdb $wpdb
+	 *
+	 * @return string Prepared LIMIT clasue for items query.
+	 */
+	protected function get_items_query_limit() {
+		global $wpdb;
+
+		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
+		return $wpdb->prepare( 'LIMIT %d', $per_page );
+	}
+
+	/**
+	 * Get prepared OFFSET clause for items query
+	 *
+	 * @global wpdb $wpdb
+	 *
+	 * @return string Prepared OFFSET clasue for items query.
+	 */
+	protected function get_items_query_offset() {
+		global $wpdb;
+
+		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
 		$current_page = $this->get_pagenum();
 		if ( 1 < $current_page ) {
 			$offset = $per_page * ( $current_page - 1 );
 		} else {
 			$offset = 0;
 		}
+
+		return $wpdb->prepare( 'OFFSET %d', $offset );
+	}
+
+	/**
+	 * Get prepared ORDER BY clause for items query
+	 *
+	 * @return string Prepared ORDERY BY clause for items query.
+	 */
+	protected function get_items_query_order() {
+		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
+		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
+			$by = $_REQUEST['orderby'];
+		} else {
+			$by = 'log_id';
+		}
+		$by = esc_sql( $by );
+
+		if ( ! empty( $_REQUEST['order'] ) && 'asc' === strtolower( $_REQUEST['order'] ) ) {
+			$order = 'ASC';
+		} else {
+			$order = 'DESC';
+		}
+
+		return "ORDER BY {$by} {$order}";
+	}
+
+	/**
+	 * Get prepared WHERE clause for items query
+	 *
+	 * @global wpdb $wpdb
+	 *
+	 * @return string Prepared WHERE clasue for items query.
+	 */
+	protected function get_items_query_where() {
+		global $wpdb;
 
 		$where_conditions = array();
 		$where_values     = array();
@@ -257,38 +336,21 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$where_values[]     = $_REQUEST['source'];
 		}
 
-		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
-		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
-			$order_by = $_REQUEST['orderby'];
+		if ( ! empty( $where_conditions ) ) {
+			return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );
 		} else {
-			$order_by = 'log_id';
+			return '';
 		}
-		$order_by = esc_sql( $order_by );
+	}
 
-		if ( ! empty( $_REQUEST['order'] ) && 'asc' === strtolower( $_REQUEST['order'] ) ) {
-			$order_order = 'ASC';
-		} else {
-			$order_order = 'DESC';
-		}
-
-		$select = 'SELECT log_id, timestamp, level, message, source';
-		$from = "FROM {$wpdb->prefix}woocommerce_log";
-		$where = ! empty( $where_conditions )
-			? $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values )
-			: '';
-		$order = "ORDER BY {$order_by} {$order_order}";
-		$limit_offset = $wpdb->prepare( 'LIMIT %d OFFSET %d', $per_page, $offset );
-
-		$query = "{$select} {$from} {$where} {$order} {$limit_offset}";
-		$query_count = "SELECT COUNT(log_id) {$from} {$where}";
-
-		$this->items = $wpdb->get_results( $query, ARRAY_A );
-		$total_items = $wpdb->get_var( $query_count );
-
-		$this->set_pagination_args( array(
-			'total_items' => $total_items,
-			'per_page'    => $per_page,
-			'total_pages' => ceil( $total_items / $per_page ),
-		) );
+	/**
+	 * Set _column_headers property for table list
+	 */
+	protected function prepare_column_headers() {
+		$this->_column_headers = array(
+			$this->get_columns(),
+			array(),
+			$this->get_sortable_columns(),
+		);
 	}
 }
