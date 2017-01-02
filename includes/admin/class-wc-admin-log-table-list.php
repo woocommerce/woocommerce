@@ -262,7 +262,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 *
 	 * @global wpdb $wpdb
 	 *
-	 * @return string Prepared LIMIT clasue for items query.
+	 * @return string Prepared LIMIT clause for items query.
 	 */
 	protected function get_items_query_limit() {
 		global $wpdb;
@@ -276,7 +276,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 *
 	 * @global wpdb $wpdb
 	 *
-	 * @return string Prepared OFFSET clasue for items query.
+	 * @return string Prepared OFFSET clause for items query.
 	 */
 	protected function get_items_query_offset() {
 		global $wpdb;
@@ -295,7 +295,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Get prepared ORDER BY clause for items query
 	 *
-	 * @return string Prepared ORDERY BY clause for items query.
+	 * @return string Prepared ORDER BY clause for items query.
 	 */
 	protected function get_items_query_order() {
 		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
@@ -320,7 +320,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 *
 	 * @global wpdb $wpdb
 	 *
-	 * @return string Prepared WHERE clasue for items query.
+	 * @return string Prepared WHERE clause for items query.
 	 */
 	protected function get_items_query_where() {
 		global $wpdb;
