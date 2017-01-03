@@ -135,7 +135,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Get downloads_remaining.
 	 *
 	 * @param  string $context
-	 * @return integer
+	 * @return integer|string
 	 */
 	public function get_downloads_remaining( $context = 'view' ) {
 		return $this->get_prop( 'downloads_remaining', $context );
@@ -233,10 +233,10 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get downloads_remaining.
 	 *
-	 * @param int $value
+	 * @param integer|string $value
 	 */
 	public function set_downloads_remaining( $value ) {
-		$this->set_prop( 'downloads_remaining', absint( $value ) );
+		$this->set_prop( 'downloads_remaining', '' === $value ? '' : absint( $value ) );
 	}
 
 	/**

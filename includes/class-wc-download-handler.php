@@ -98,7 +98,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_downloads_remaining( $download ) {
-		if ( 0 >= $download->get_downloads_remaining() ) {
+		if ( '' !== $download->get_downloads_remaining() && 0 >= $download->get_downloads_remaining() ) {
 			self::download_error( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ), '', 403 );
 		}
 	}
