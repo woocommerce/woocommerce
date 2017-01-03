@@ -33,7 +33,7 @@ class WC_Shortcode_Order_Tracking {
 			return;
 		}
 
-		extract( shortcode_atts( array(), $atts ) );
+		extract( shortcode_atts( array(), $atts, 'woocommerce_order_tracking' ) );
 
 		global $post;
 
