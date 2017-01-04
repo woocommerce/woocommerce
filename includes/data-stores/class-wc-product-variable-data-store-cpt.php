@@ -26,11 +26,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	protected function read_product_data( &$product ) {
 		parent::read_product_data( $product );
-		$this->read_children( $product );
 
 		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
-		$this->read_price_data( $product );
-	 	$this->read_price_data( $product, true );
+		$this->read_children( $product );
 		$this->read_variation_attributes( $product );
 	}
 
@@ -136,8 +134,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since  2.7.0
 	 * @param  WC_Product
 	 * @param  bool $include_taxes If taxes should be calculated or not.
+	 * @return array of prices
 	 */
-	private function read_price_data( &$product, $include_taxes = false ) {
+	public function read_price_data( &$product, $include_taxes = false ) {
 		global $wp_filter;
 
 		/**
@@ -171,17 +170,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
 		 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
 		 */
-		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
-			if ( $include_taxes ) {
-				$product->set_variation_prices_including_taxes( $this->prices_array[ $price_hash ] );
-			} else {
-				$product->set_variation_prices( $this->prices_array[ $price_hash ] );
-			}
-		/**
-		 * No locally cached value? Get the data from the transient or generate it.
-		 */
-		} else {
-			// Get value of transient
+		if ( empty( $this->prices_array[ $price_hash ] ) ) {
 			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
 			// If the product version has changed since the transient was last saved, reset the transient cache.
@@ -248,13 +237,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			 * This value may differ from the transient cache. It is filtered once before storing locally.
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $include_taxes );
-
-			if ( $include_taxes ) {
-				$product->set_variation_prices_including_taxes( $this->prices_array[ $price_hash ] );
-			} else {
-				$product->set_variation_prices( $this->prices_array[ $price_hash ] );
-			}
 		}
+		return $this->prices_array[ $price_hash ];
 	}
 
 	/**
