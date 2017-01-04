@@ -498,7 +498,7 @@ abstract class WC_Abstract_Order {
 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
 		// Update total
-		$this->set_total( $this->order_shipping + wc_format_decimal( $shipping_rate->cost ), 'shipping' );
+		$this->set_total( (float) $this->order_shipping + (float) wc_format_decimal( $shipping_rate->cost ), 'shipping' );
 
 		return $item_id;
 	}
