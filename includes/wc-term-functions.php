@@ -483,7 +483,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		return $clauses;
 	}
 
-	// Wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
+	// WordPress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
 	$found = false;
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) {
@@ -503,7 +503,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'];
+	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'] . ', tm.meta_value';
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
