@@ -31,7 +31,7 @@
 		$form.on( 'reload_product_variations', { variationForm: this }, this.onReload );
 		$form.on( 'hide_variation', { variationForm: this }, this.onHide );
 		$form.on( 'show_variation', { variationForm: this }, this.onShow );
-		$form.on( 'click', 'single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
+		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
 		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
 		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
 		$form.on( 'change', '.variations select', { variationForm: this }, this.onChange );
@@ -391,7 +391,7 @@
 			current_attr_select.html( new_attr_select.html() );
 			current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).prop( 'disabled', true );
 
-			// Choose selected.
+			// Choose selected value.
 			if ( selected_attr_val ) {
 				// If the previously selected value is no longer available, fall back to the placeholder (it's going to be there).
 				if ( selected_attr_val_valid ) {
@@ -399,6 +399,8 @@
 				} else {
 					current_attr_select.val( '' ).change();
 				}
+			} else {
+				current_attr_select.val( '' ); // No change event to prevent infinite loop.
 			}
 		});
 
