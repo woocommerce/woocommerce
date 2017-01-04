@@ -523,7 +523,7 @@ class WC_AJAX {
 			foreach ( $variation_ids as $variation_id ) {
 				if ( 'product_variation' === get_post_type( $variation_id ) ) {
 					$variation = wc_get_product( $variation_id );
-					$variation->delete();
+					$variation->delete( true );
 				}
 			}
 		}
@@ -1457,7 +1457,7 @@ class WC_AJAX {
 			if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
 				$refund   = wc_get_order( $refund_id );
 				$order_id = $refund->get_parent_id();
-				$refund->delete();
+				$refund->delete( true );
 				do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
 			}
 		}
@@ -1819,7 +1819,7 @@ class WC_AJAX {
 		if ( isset( $data['allowed'] ) && 'true' === $data['allowed'] ) {
 			foreach ( $variations as $variation_id ) {
 				$variation = wc_get_product( $variation_id );
-				$variation->delete();
+				$variation->delete( true );
 			}
 		}
 	}
