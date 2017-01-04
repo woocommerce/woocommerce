@@ -340,6 +340,9 @@ dl.variation {
 			padding-top: .72em;
 			padding-bottom: .72em;
 		}
+		.button.disabled {
+			opacity: 0.2;
+		}
 	}
 }
 
