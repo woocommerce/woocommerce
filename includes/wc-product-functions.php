@@ -840,8 +840,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price = max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty   = $args['qty'] ? $args['qty'] : 1;
+	$price = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
+	$qty   = (int) $args['qty'] ? $args['qty'] : 1;
 
 	if ( ! $product->is_taxable() ) {
 		$price = $price * $qty;
@@ -888,8 +888,8 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price = max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty   = $args['qty'] ? $args['qty'] : 1;
+	$price = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
+	$qty   = (int) $args['qty'] ? $args['qty'] : 1;
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );

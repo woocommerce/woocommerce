@@ -592,7 +592,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
-		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
 	/**
@@ -603,7 +603,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_cart_tax( $value ) {
 		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
-		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
 	/**
