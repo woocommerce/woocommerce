@@ -308,6 +308,10 @@ class WC_Meta_Box_Product_Data {
 
 		$product->save();
 
+		if ( $product->is_type( 'variable' ) ) {
+			$product->get_data_store()->sync_variation_names( $product, wc_clean( $_POST['original_post_title'] ), wc_clean( $_POST['post_title'] ) );
+		}
+
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 	}
 
