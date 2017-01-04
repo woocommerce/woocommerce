@@ -933,11 +933,11 @@ function wc_format_stock_for_display( $stock_amount, $show_backorder_notificatio
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount' :
 			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $stock_amount );
+				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount ) );
 			}
 		break;
 		case '' :
-			$display = sprintf( __( '%s in stock', 'woocommerce' ), $stock_amount );
+			$display = sprintf( __( '%s in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount ) );
 		break;
 	}
 
@@ -946,6 +946,16 @@ function wc_format_stock_for_display( $stock_amount, $show_backorder_notificatio
 	}
 
 	return $display;
+}
+
+/**
+ * Format the stock quantity ready for display.
+ * @since  2.7.0
+ * @param  int  $stock_quantity
+ * @return string
+ */
+function wc_format_stock_quantity_for_display( $stock_quantity ) {
+	return apply_filters( 'woocommerce_format_stock_quantity', $stock_quantity );
 }
 
 /**
