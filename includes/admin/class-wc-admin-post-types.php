@@ -31,6 +31,9 @@ class WC_Admin_Post_Types {
 		// Disable Auto Save
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
+		// Extra post data.
+		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
+
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
 		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
 		add_filter( 'manage_shop_coupon_posts_columns', array( $this, 'shop_coupon_columns' ) );
@@ -1758,6 +1761,14 @@ class WC_Admin_Post_Types {
 		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
+	}
+
+	/**
+	 * Output extra data on post forms.
+	 * @param  WP_Post $post
+	 */
+	public function edit_form_top( $post ) {
+		echo '<input type="hidden" id="original_post_title" name="original_post_title" value="' . esc_attr( $post->post_title ) . '" />';
 	}
 
 	/**

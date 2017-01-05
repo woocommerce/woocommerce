@@ -338,12 +338,17 @@ class WC_Product_Variable extends WC_Product {
 			// Trigger action before saving to the DB. Allows you to adjust object props before save.
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
+			// Get names before save.
+			$previous_name = $this->data['name'];
+			$new_name      = $this->get_name( 'edit' );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
 				$this->data_store->create( $this );
 			}
 
+			$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
 			$this->data_store->sync_managed_variation_stock_status( $this );
 
 			return $this->get_id();

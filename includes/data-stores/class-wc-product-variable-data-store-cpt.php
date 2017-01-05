@@ -282,6 +282,32 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	}
 
 	/**
+	 * Syncs all variation names if the parent name is changed.
+	 *
+	 * @param WC_Product $product
+	 * @param string $previous_name
+	 * @param string $new_name
+	 * @since 2.7.0
+	 */
+	public function sync_variation_names( &$product, $previous_name = '', $new_name = '' ) {
+		if ( $new_name !== $previous_name ) {
+			global $wpdb;
+
+			$wpdb->query( $wpdb->prepare(
+				"
+					UPDATE {$wpdb->posts}
+					SET post_title = REPLACE( post_title, %s, %s )
+					WHERE post_type = 'product_variation'
+					AND post_parent = %d
+				",
+				$previous_name,
+				$new_name,
+				$product->get_id()
+			 ) );
+		}
+	}
+
+	/**
 	 * Stock managed at the parent level - update children being managed by this product.
 	 * This sync function syncs downwards (from parent to child) when the variable product is saved.
 	 *
