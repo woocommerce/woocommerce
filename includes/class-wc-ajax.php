@@ -542,9 +542,12 @@ class WC_AJAX {
 		}
 
 		parse_str( $_POST['data'], $data );
-		$post_id    = absint( $_POST['post_id'] );
-		$product    = wc_get_product( $post_id );
-		$attributes = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+
+		$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+		$product_id   = absint( $_POST['post_id'] );
+		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( $_POST['product_type'] ) : 'simple';
+		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
+		$product      = new $classname( $product_id );
 
 		$product->set_attributes( $attributes );
 		$product->save();

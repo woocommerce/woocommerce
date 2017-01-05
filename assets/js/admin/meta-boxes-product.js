@@ -439,10 +439,11 @@ jQuery( function( $ ) {
 		});
 
 		var data = {
-			post_id:  woocommerce_admin_meta_boxes.post_id,
-			data:     $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
-			action:   'woocommerce_save_attributes',
-			security: woocommerce_admin_meta_boxes.save_attributes_nonce
+			post_id     : woocommerce_admin_meta_boxes.post_id,
+			product_type: $( '#product-type' ).val(),
+			data        : $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			action      : 'woocommerce_save_attributes',
+			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
