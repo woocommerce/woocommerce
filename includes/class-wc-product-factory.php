@@ -21,18 +21,27 @@ class WC_Product_Factory {
 	 * Get a product.
 	 *
 	 * @param mixed $product_id (default: false)
-	 * @param array $deprecated
+	 * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
 	 * @return WC_Product|bool Product object or null if the product cannot be loaded.
 	 */
 	public function get_product( $product_id = false, $deprecated = array() ) {
-		$product_id = $this->get_product_id( $product_id );
-		if ( ! $product_id ) {
+		if ( ! $product_id = $this->get_product_id( $product_id ) ) {
 			return false;
 		}
+
 		$product_type = $this->get_product_type( $product_id );
 		$classname    = $this->get_classname_from_product_type( $product_type );
 
-		// backwards compat filter
+		// Backwards compatibility.
+		if ( ! empty( $deprecated ) ) {
+			wc_deprecated_argument( 'args', '2.7', 'Passing args to the product factory is deprecated. If you need to force a type, construct the product class directly.' );
+
+			if ( isset( $deprecated['product_type'] ) ) {
+				$product_type = $this->get_classname_from_product_type( $deprecated['product_type'] );
+			}
+		}
+
+		// Backwards compatibility filter.
 		$post_type = 'variation' === $product_type ? 'product_variation' : 'product';
 		$classname = apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
 
@@ -49,7 +58,7 @@ class WC_Product_Factory {
 			$product = wp_cache_get( 'product-' . $product_id, 'products' );
 
 			if ( ! is_a( $product, 'WC_Product' ) ) {
-				$product = new $classname( $product_id );
+				$product = new $classname( $product_id, $deprecated );
 				wp_cache_set( 'product-' . $product_id, $product, 'products' );
 			}
 
