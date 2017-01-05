@@ -505,7 +505,7 @@ function wc_disable_author_archives_for_customers() {
 		$user = get_user_by( 'id', $author );
 
 		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
-			wp_redirect( wc_get_page_permalink( 'shop' ) );
+			wp_redirect( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) );
 		}
 	}
 }

@@ -882,7 +882,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_before_checkout_process' );
 
 			if ( WC()->cart->is_empty() ) {
-				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'shop' ) ) ) );
+				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) ) );
 			}
 
 			do_action( 'woocommerce_checkout_process' );
