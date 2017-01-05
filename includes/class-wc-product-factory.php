@@ -30,7 +30,6 @@ class WC_Product_Factory {
 		}
 
 		$product_type = $this->get_product_type( $product_id );
-		$classname    = $this->get_classname_from_product_type( $product_type );
 
 		// Backwards compatibility.
 		if ( ! empty( $deprecated ) ) {
@@ -41,17 +40,7 @@ class WC_Product_Factory {
 			}
 		}
 
-		// Backwards compatibility filter.
-		$post_type = 'variation' === $product_type ? 'product_variation' : 'product';
-		$classname = apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
-
-		if ( ! $classname ) {
-			return false;
-		}
-
-		if ( ! class_exists( $classname ) ) {
-			$classname = 'WC_Product_Simple';
-		}
+		$classname = $this->get_product_classname( $product_id, $product_type );
 
 		try {
 			// Try to get from cache, otherwise create a new object,
@@ -66,6 +55,23 @@ class WC_Product_Factory {
 		} catch ( Exception $e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * Gets a product classname and allows filtering. Returns WC_Product_Simple if the class does not exist.
+	 *
+	 * @since  2.7.0
+	 * @param  string $product_type
+	 * @return string
+	 */
+	public static function get_product_classname( $product_id, $product_type ) {
+		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id );
+
+		if ( ! $classname || ! class_exists( $classname ) ) {
+			$classname = 'WC_Product_Simple';
+		}
+
+		return $classname;
 	}
 
 	/**
@@ -96,6 +102,7 @@ class WC_Product_Factory {
 
 	/**
 	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class.
+	 *
 	 * @param  string $product_type
 	 * @return string|false
 	 */
