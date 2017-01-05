@@ -68,6 +68,47 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_method',
 	);
 
+	private $meta_key_to_props = array(
+		'_order_key'            => 'order_key',
+		'_customer_user'        => 'customer_id',
+		'_payment_method'       => 'payment_method',
+		'_payment_method_title' => 'payment_method_title',
+		'_transaction_id'       => 'transaction_id',
+		'_customer_ip_address'  => 'customer_ip_address',
+		'_customer_user_agent'  => 'customer_user_agent',
+		'_created_via'          => 'created_via',
+		'_completed_date'       => 'date_completed',
+		'_paid_date'            => 'date_paid',
+		'_cart_hash'            => 'cart_hash',
+	);
+
+	protected $address_props = array(
+		'billing' => array(
+			'_billing_first_name' => 'billing_first_name',
+			'_billing_last_name'  => 'billing_last_name',
+			'_billing_company'    => 'billing_company',
+			'_billing_address_1'  => 'billing_address_1',
+			'_billing_address_2'  => 'billing_address_2',
+			'_billing_city'       => 'billing_city',
+			'_billing_state'      => 'billing_state',
+			'_billing_postcode'   => 'billing_postcode',
+			'_billing_country'    => 'billing_country',
+			'_billing_email'      => 'billing_email',
+			'_billing_phone'      => 'billing_phone',
+		),
+		'shipping' => array(
+			'_shipping_first_name' => 'shipping_first_name',
+			'_shipping_last_name'  => 'shipping_last_name',
+			'_shipping_company'    => 'shipping_company',
+			'_shipping_address_1'  => 'shipping_address_1',
+			'_shipping_address_2'  => 'shipping_address_2',
+			'_shipping_city'       => 'shipping_city',
+			'_shipping_state'      => 'shipping_state',
+			'_shipping_postcode'   => 'shipping_postcode',
+			'_shipping_country'    => 'shipping_country',
+		)
+	);
+
 	/**
 	 * Method to create a new order in the database.
 	 * @param WC_Order $order
@@ -144,19 +185,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	protected function update_post_meta( &$order, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = $order->get_changes();
-		$meta_key_to_props = array(
-			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_id',
-			'_payment_method'       => 'payment_method',
-			'_payment_method_title' => 'payment_method_title',
-			'_transaction_id'       => 'transaction_id',
-			'_customer_ip_address'  => 'customer_ip_address',
-			'_customer_user_agent'  => 'customer_user_agent',
-			'_created_via'          => 'created_via',
-			'_completed_date'       => 'date_completed',
-			'_paid_date'            => 'date_paid',
-			'_cart_hash'            => 'cart_hash',
-		);
+		$meta_key_to_props = $this->meta_keys_to_props;
+		$address_props     = $this->address_props;
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
@@ -168,33 +198,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$updated_props[] = $prop;
 			}
 		}
-
-		$address_props = array(
-			'billing' => array(
-				'_billing_first_name' => 'billing_first_name',
-				'_billing_last_name'  => 'billing_last_name',
-				'_billing_company'    => 'billing_company',
-				'_billing_address_1'  => 'billing_address_1',
-				'_billing_address_2'  => 'billing_address_2',
-				'_billing_city'       => 'billing_city',
-				'_billing_state'      => 'billing_state',
-				'_billing_postcode'   => 'billing_postcode',
-				'_billing_country'    => 'billing_country',
-				'_billing_email'      => 'billing_email',
-				'_billing_phone'      => 'billing_phone',
-			),
-			'shipping' => array(
-				'_shipping_first_name' => 'shipping_first_name',
-				'_shipping_last_name'  => 'shipping_last_name',
-				'_shipping_company'    => 'shipping_company',
-				'_shipping_address_1'  => 'shipping_address_1',
-				'_shipping_address_2'  => 'shipping_address_2',
-				'_shipping_city'       => 'shipping_city',
-				'_shipping_state'      => 'shipping_state',
-				'_shipping_postcode'   => 'shipping_postcode',
-				'_shipping_country'    => 'shipping_country',
-			),
-		);
 
 		foreach ( $address_props as $props_key => $props ) {
 			foreach ( $props as $meta_key => $prop ) {
@@ -457,7 +460,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param  string $term
 	 * @return array of ids
 	 */
-	public function search_orders( $term ) {
+	public function search_orders_by_term( $term ) {
 		global $wpdb;
 
 		/**
@@ -497,6 +500,76 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $order_ids;
+	}
+
+	protected function get_prop_mappings() {
+		$parent_mappings  = parent::get_prop_mappings();
+		$mappings         = array();
+		$mappings['meta'] = array_merge( $parent_mappings['meta'], array_flip( $this->meta_key_to_props ) );
+		unset( $parent_mappings['meta'] );
+		return array_merge( $mappings, $parent_mappings );
+	}
+
+	/**
+	 * Search orders.
+	 * Provides a layer of abstraction between WP_Query & Orders.
+	 *
+	 * @param array $args Arguments to use for the search query.
+	 * @param string $return_type Return IDs or Objects. default: ids
+	 * @todo support billing/shipping fields, support pagination, add tests.
+	 * @return array
+	 */
+	public function search( $args, $return_type = 'ids' ) {
+		$mappings   = $this->get_prop_mappings();
+		$query_args = array( 'post_type'  => 'shop_order' );
+
+		foreach ( $args as $key => $value ) {
+			if ( array_key_exists( $key, $mappings ) ) {
+				// The field being searched is stored in a the core posts table.
+				if ( 'date_modified' === $key || 'date_created' === $key ) {
+					// If searching by date, whitelist what fields can be used. Default to equals comparison.
+					$compare = ! empty( $value['compare'] ) ? $value['compare'] : '=';
+					$allowed_date_keys = array( 'year', 'month', 'week', 'hour', 'minute', 'second' );
+					$date_query = array();
+					foreach ( $allowed_date_keys as $date_key ) {
+						if ( ! empty( $value[ $date_key ] ) ) {
+							$date_query[ $date_key ] = $value[ $date_key ];
+						}
+					}
+					$query_args['date_query'][] = array_merge( array(
+						'column'  => $mappings[ $key ],
+						'compare' => $compare,
+					), $date_query );
+				} else {
+					// Search the field by it's WP field name.
+					$query_args[ $mappings[ $key ] ] = ( 'status' === $key ? 'wc-' : '' ) . $value;
+				}
+			} else {
+				// Is this one of our props stored in post meta? If so, grab the actual meta key.
+				// Otherwise the passed key will be treated as custom meta and passed to WP_Query's
+				// meta query directly.
+				if ( array_key_exists( $key, $mappings['meta'] ) ) {
+					$key = $mappings['meta'][ $key ];
+				}
+				$compare = '=';
+				// A value can either be passed as a string (search for a specific string in a field)
+				// or passed with a comparison operator.
+				if ( is_array( $value ) ) {
+					$compare = $value['compare'];
+					$value   = $value['value'];
+				}
+				$query_args['meta_query'][] = array(
+						'key'     => $key,
+						'value'   => $value,
+						'compare' => $compare,
+				);
+			}
+		}
+
+		$wp_query = new WP_Query( $query_args );
+
+		error_log( print_r( $wp_query ) );
+		// @todo return results
 	}
 
 	/**
