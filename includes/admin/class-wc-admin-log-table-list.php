@@ -200,26 +200,22 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			ORDER BY source ASC
 		" );
 
-		$source_count = count( $sources );
-
-		if ( ! $source_count ) {
-			return;
+		if ( ! empty( $sources ) ) {
+			$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
+			?>
+				<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
+				<select name="source" id="filter-by-source">
+					<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All sources', 'woocommerce' ); ?></option>
+					<?php foreach ( $sources as $s ) {
+						printf( '<option%1$s value="%2$s">%3$s</option>',
+							selected( $selected_source, $s, false ),
+							esc_attr( $s ),
+							esc_html( $s )
+						);
+					} ?>
+				</select>
+			<?php
 		}
-
-		$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
-		?>
-			<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
-			<select name="source" id="filter-by-source">
-				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All sources', 'woocommerce' ); ?></option>
-				<?php foreach ( $sources as $s ) {
-					printf( '<option%1$s value="%2$s">%3$s</option>',
-						selected( $selected_source, $s, false ),
-						esc_attr( $s ),
-						esc_html( $s )
-					);
-				} ?>
-			</select>
-		<?php
 	}
 
 	/**
