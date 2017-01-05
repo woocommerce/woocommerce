@@ -210,7 +210,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		?>
 			<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
 			<select name="source" id="filter-by-source">
-				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All', 'woocommerce' ); ?></option>
+				<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All sources', 'woocommerce' ); ?></option>
 				<?php foreach ( $sources as $s ) {
 					printf( '<option%1$s value="%2$s">%3$s</option>',
 						selected( $selected_source, $s, false ),
