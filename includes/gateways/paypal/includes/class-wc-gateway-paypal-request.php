@@ -45,7 +45,7 @@ class WC_Gateway_Paypal_Request {
 	public function get_request_url( $order, $sandbox = false ) {
 		$paypal_args = http_build_query( array_filter( $this->get_paypal_args( $order ) ), '', '&' );
 
-		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . print_r( $paypal_args, true ) );
+		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . wc_safe_dump( $paypal_args ) );
 
 		if ( $sandbox ) {
 			return 'https://www.sandbox.paypal.com/cgi-bin/webscr?test_ipn=1&' . $paypal_args;

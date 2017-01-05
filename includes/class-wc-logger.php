@@ -5,10 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Allows log files to be written to for debugging purposes
+ * Provides logging capabilities for debugging purposes.
  *
  * @class          WC_Logger
- * @version        1.6.4
+ * @version        2.0.0
  * @package        WooCommerce/Classes
  * @category       Class
  * @author         WooThemes
@@ -16,78 +16,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Logger {
 
 	/**
-	 * Stores open file _handles.
+	 * Log Levels
+	 *
+	 * @see @link {https://tools.ietf.org/html/rfc5424}
+	 */
+	const DEBUG     = 'debug';
+	const INFO      = 'info';
+	const NOTICE    = 'notice';
+	const WARNING   = 'warning';
+	const ERROR     = 'error';
+	const CRITICAL  = 'critical';
+	const ALERT     = 'alert';
+	const EMERGENCY = 'emergency';
+
+	/**
+	 * Stores registered log handlers.
 	 *
 	 * @var array
 	 * @access private
 	 */
-	private $_handles;
+	private $handlers;
+
+	private static $valid_levels = array(
+		self::DEBUG,
+		self::INFO,
+		self::NOTICE,
+		self::WARNING,
+		self::ERROR,
+		self::CRITICAL,
+		self::ALERT,
+		self::EMERGENCY,
+	);
 
 	/**
 	 * Constructor for the logger.
 	 */
 	public function __construct() {
-		$this->_handles = array();
+		$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+		$this->handlers = $handlers;
 	}
 
 	/**
-	 * Destructor.
-	 */
-	public function __destruct() {
-		foreach ( $this->_handles as $handle ) {
-			if ( is_resource( $handle ) ) {
-				fclose( $handle );
-			}
-		}
-	}
-
-	/**
-	 * Open log file for writing.
+	 * Add a log entry.
 	 *
-	 * @param string $handle
-	 * @param string $mode
-	 * @return bool success
-	 */
-	protected function open( $handle, $mode = 'a' ) {
-		if ( isset( $this->_handles[ $handle ] ) ) {
-			return true;
-		}
-
-		if ( ! file_exists( wc_get_log_file_path( $handle ) ) ) {
-			$temphandle = @fopen( wc_get_log_file_path( $handle ), 'w+' );
-			@fclose( $temphandle );
-
-			if ( defined( 'FS_CHMOD_FILE' ) ) {
-				@chmod( wc_get_log_file_path( $handle ), FS_CHMOD_FILE );
-			}
-		}
-
-		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), $mode ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Close a handle.
-	 *
-	 * @param string $handle
-	 * @return bool success
-	 */
-	protected function close( $handle ) {
-		$result = false;
-
-		if ( is_resource( $this->_handles[ $handle ] ) ) {
-			$result = fclose( $this->_handles[ $handle ] );
-			unset( $this->_handles[ $handle ] );
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Add a log entry to chosen file.
+	 * @deprecated since 2.0.0
 	 *
 	 * @param string $handle
 	 * @param string $message
@@ -95,67 +67,133 @@ class WC_Logger {
 	 * @return bool
 	 */
 	public function add( $handle, $message ) {
-		$result = false;
+		_deprecated_function( 'WC_Logger::add', '2.8', 'WC_Logger::log' );
+		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
+		$this->log( self::INFO, $message, array( 'tag' => $handle, '_legacy' => true ) );
+		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.8', 'This action has been deprecated with no alternative.' );
+		return true;
+	}
 
-		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
-		    $message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
-			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+	/**
+	 * Add a log entry.
+	 *
+	 * @param int $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $message Log message.
+	 * @param array $context Optional. Additional information for log handlers.
+	 */
+	public function log( $level, $message, $context = array() ) {
+		if ( ! in_array( $level, self::$valid_levels ) ) {
+			$class = __CLASS__;
+			$method = __FUNCTION__;
+			_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.8' );
 		}
 
-		do_action( 'woocommerce_log_add', $handle, $message );
+		$timestamp = current_time( 'timestamp' );
 
-		return false !== $result;
+		foreach ( $this->handlers as $handler ) {
+			$continue = $handler->handle( $timestamp, $level, $message, $context );
+
+			if ( false === $continue ) {
+				break;
+			}
+		}
+
+	}
+
+	/**
+	 * Adds an emergency level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function emergency( $message, $context = array() ) {
+		$this->log( self::EMERGENCY, $message, $context );
+	}
+
+	/**
+	 * Adds an alert level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function alert( $message, $context = array() ) {
+		$this->log( self::ALERT, $message, $context );
+	}
+
+	/**
+	 * Adds a critical level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function critical( $message, $context = array() ) {
+		$this->log( self::CRITICAL, $message, $context );
+	}
+
+	/**
+	 * Adds an error level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function error( $message, $context = array() ) {
+		$this->log( self::ERROR, $message, $context );
+	}
+
+	/**
+	 * Adds a warning level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function warning( $message, $context = array() ) {
+		$this->log( self::WARNING, $message, $context );
+	}
+
+	/**
+	 * Adds a notice level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function notice( $message, $context = array() ) {
+		$this->log( self::NOTICE, $message, $context );
+	}
+
+	/**
+	 * Adds a info level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function info( $message, $context = array() ) {
+		$this->log( self::INFO, $message, $context );
+	}
+
+	/**
+	 * Adds a debug level message.
+	 *
+	 * @see WC_Logger::log
+	 */
+	public function debug( $message, $context = array() ) {
+		$this->log( self::DEBUG, $message, $context );
 	}
 
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @param string $handle
+	 * @deprecated since 2.0.0
 	 *
 	 * @return bool
 	 */
-	public function clear( $handle ) {
-		$result = false;
-
-		// Close the file if it's already open.
-		$this->close( $handle );
-
-		/**
-		 * $this->open( $handle, 'w' ) == Open the file for writing only. Place the file pointer at the beginning of the file,
-		 * and truncate the file to zero length.
-		 */
-		if ( $this->open( $handle, 'w' ) && is_resource( $this->_handles[ $handle ] ) ) {
-			$result = true;
-		}
-
-		do_action( 'woocommerce_log_clear', $handle );
-
-		return $result;
+	public function clear() {
+		_deprecated_function( 'WC_Logger::clear', '2.8' );
+		return false;
 	}
 
 	/**
 	 * Remove/delete the chosen file.
 	 *
-	 * @param string $handle
+	 * @deprecated since 2.0.0
 	 *
 	 * @return bool
 	 */
-	public function remove( $handle ) {
-		$removed = false;
-		$file    = wc_get_log_file_path( $handle );
-
-		if ( is_file( $file ) && is_writable( $file ) ) {
-			// Close first to be certain no processes keep it alive after it is unlinked.
-			$this->close( $handle );
-			$removed = unlink( $file );
-		} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
-			$this->close( $handle );
-			$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
-		}
-
-		do_action( 'woocommerce_log_remove', $handle, $removed );
-
-		return $removed;
+	public function remove() {
+		_deprecated_function( 'WC_Logger::remove', '2.8' );
+		return false;
 	}
 }

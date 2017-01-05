@@ -1424,6 +1424,54 @@ function wc_get_logger() {
 }
 
 /**
+ * Dump an expression safely.
+ *
+ * Some server environments blacklist some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form while protecting from errors.
+ *
+ * @since 2.8
+ * @param mixed $expression The expression to be printed.
+ * @return string|bool Result of printing expression. False if no alternatives are available.
+ */
+function wc_safe_dump( $expression ) {
+	$alternatives = array(
+		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
+		array( 'func' => 'var_dump', 'args' => array( $expression, true ) ),
+		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
+		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
+		array( 'func' => 'serialize', 'args' => array( $expression ) ),
+	);
+
+	$alternatives = apply_filters( 'woocommerce_safe_sump_alternatives', $alternatives, $expression );
+
+	foreach ( $alternatives as $alternative ) {
+		if ( function_exists( $alternative['func'] ) ) {
+			return call_user_func_array( $alternative['func'], $alternative['args'] );
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Registers the included file log handler with threshold 'debug'.
+ *
+ * @since 2.8
+ * @param array $handlers
+ * @return array
+ */
+function wc_register_file_log_handler( $handlers ) {
+	if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
+		include_once( dirname( __FILE__ ) . '/log-handlers/class-wc-log-handler-file.php' );
+	}
+
+	array_push( $handlers, new WC_Log_Handler_File( array( 'threshold' => 'debug' ) ) );
+
+	return $handlers;
+}
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_file_log_handler', 0 );
+
+/**
  * Store user agents. Used for tracker.
  * @since 2.7.0
  */

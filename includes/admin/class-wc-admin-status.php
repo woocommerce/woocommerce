@@ -96,6 +96,22 @@ class WC_Admin_Status {
 	}
 
 	/**
+	 * Show db logs
+	 *
+	 * @todo Make woocommerce base logger configurable, and show page based on configuration.
+	 */
+	public static function status_logs_db() {
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+			self::flush_db_logs();
+		}
+		$log_table_list = new WC_Admin_Log_Table_List();
+		$log_table_list->prepare_items();
+
+		include_once( 'views/html-admin-page-status-logs-db.php' );
+	}
+
+	/**
 	 * Retrieve metadata from a file. Based on WP Core's get_file_data function.
 	 * @since  2.1.1
 	 * @param  string $file Path to the file
@@ -250,11 +266,37 @@ class WC_Admin_Status {
 		}
 
 		if ( ! empty( $_REQUEST['handle'] ) ) {
-			$logger = wc_get_logger();
-			$logger->remove( $_REQUEST['handle'] );
+
+			if ( ! class_exists( 'WC_Log_Handler_File' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-file.php' );
+			}
+
+			$log_handler = new WC_Log_Handler_File();
+			$log_handler->remove( $_REQUEST['handle'] );
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+		exit();
+	}
+
+	/**
+	 * Clear DB log table.
+	 *
+	 * @since 2.8
+	 */
+	public static function flush_db_logs() {
+		check_admin_referer( 'flush-logs' );
+
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+
+			if ( ! class_exists( 'WC_Log_Handler_DB' ) ) {
+				include_once( dirname( dirname( __FILE__ ) ) . '/log-handlers/class-wc-log-handler-db.php' );
+			}
+
+			WC_Log_Handler_DB::flush();
+		}
+
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs-db' ) ) );
 		exit();
 	}
 }

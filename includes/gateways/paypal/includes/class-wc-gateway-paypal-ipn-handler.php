@@ -91,8 +91,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
-		WC_Gateway_Paypal::log( 'IPN Request: ' . print_r( $params, true ) );
-		WC_Gateway_Paypal::log( 'IPN Response: ' . print_r( $response, true ) );
+		WC_Gateway_Paypal::log( 'IPN Request: ' . wc_safe_dump( $params ) );
+		WC_Gateway_Paypal::log( 'IPN Response: ' . wc_safe_dump( $response ) );
 
 		// Check to see if the request was valid.
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
