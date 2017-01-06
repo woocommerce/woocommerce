@@ -526,10 +526,11 @@
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
 		var $form             = this,
-			$product          = $form.closest('.product'),
+			$product          = $form.closest( '.product' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
-			$product_img_wrap = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0)' ),
-			$product_img      = $product.find( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' );
+			$gallery_wrapper  = $product.find( '.woocommerce-product-gallery__wrapper ' ),
+			$product_img_wrap = $gallery_wrapper.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
+			$product_img      = $product_img_wrap.find( '.wp-post-image' );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image.src );
