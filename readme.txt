@@ -158,6 +158,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Make images shown up on pageload when using ajax variations.
+* Fix - Allow variations options to be deselected in IE11.
+* Fix - Disabled-button and pagination styling in 2017.
+* Fix - PHP 7.1 compatibility issues with non-numeric math operations.
+* Fix - Fix notices in abstract class when price is empty.
+
 = 2.6.11 - 2016-12-22 =
 * Fix - Variation form compatibility with quotes in attribute values, and initial variation image fadeIn on certain configs.
 
