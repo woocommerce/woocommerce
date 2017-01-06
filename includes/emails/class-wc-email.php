@@ -580,7 +580,7 @@ class WC_Email extends WC_Settings_API {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
 			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
-			$code   = stripslashes( $template_code );
+			$code   = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );

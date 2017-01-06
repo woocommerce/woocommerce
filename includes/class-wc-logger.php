@@ -143,15 +143,16 @@ class WC_Logger {
 	 */
 	public function remove( $handle ) {
 		$removed = false;
+		$handle  = wc_clean( $handle );
 		$file    = wc_get_log_file_path( $handle );
 
 		if ( is_file( $file ) && is_writable( $file ) ) {
 			// Close first to be certain no processes keep it alive after it is unlinked.
 			$this->close( $handle );
 			$removed = unlink( $file );
-		} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
+		} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '.log' ) ) && is_writable( trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '.log' ) ) ) {
 			$this->close( $handle );
-			$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
+			$removed = unlink( trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '.log' ) );
 		}
 
 		do_action( 'woocommerce_log_remove', $handle, $removed );

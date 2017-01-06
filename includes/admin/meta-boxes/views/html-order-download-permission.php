@@ -8,9 +8,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3 class="fixed">
 		<button type="button" data-permission_id="<?php echo esc_attr( $download->get_id() ); ?>" rel="<?php echo esc_attr( $download->get_product_id() ) . ',' . esc_attr( $download->get_download_id() ); ?>" class="revoke_access button"><?php _e( 'Revoke access', 'woocommerce' ); ?></button>
 		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<strong>
-			<?php echo '#' . esc_html( $product->get_id() ) . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_name(), $download->get_product_id(), $download->get_order_id(), $download->get_order_key(), $download->get_download_id() ) . ' &mdash; ' . esc_html( $file_count ) . ': ' . wc_get_filename_from_url( $product->get_file_download_path( $download->get_download_id() ) ) . ' &mdash; ' . sprintf( _n( 'Downloaded %s time', 'Downloaded %s times', $download->get_download_count(), 'woocommerce' ), $download->get_download_count() ); ?>
-		</strong>
+		<strong><?php
+			printf(
+				'#%s &mdash; %s &mdash; %s: %s &mdash; ',
+				esc_html( $product->get_id() ),
+				esc_html( apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_name(), $download->get_product_id(), $download->get_order_id(), $download->get_order_key(), $download->get_download_id() ) ),
+				esc_html( $file_count ),
+				esc_html( wc_get_filename_from_url( $product->get_file_download_path( $download->get_download_id() ) ) )
+			);
+			printf( _n( 'Downloaded %s time', 'Downloaded %s times', $download->get_download_count(), 'woocommerce' ), $download->get_download_count() )
+		?></strong>
 	</h3>
 	<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 		<tbody>

@@ -84,10 +84,10 @@ class WC_Report_Stock extends WP_List_Table {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {
-					echo $sku . ' - ';
+					echo esc_html( $sku ) . ' - ';
 				}
 
-				echo $product->get_name();
+				echo esc_html( $product->get_name() );
 
 				// Get variation data
 				if ( $product->is_type( 'variation' ) ) {
@@ -120,7 +120,7 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_level' :
-				echo $product->get_stock_quantity();
+				echo esc_html( $product->get_stock_quantity() );
 			break;
 
 			case 'wc_actions' :
