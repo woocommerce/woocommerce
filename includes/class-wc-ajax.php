@@ -542,9 +542,12 @@ class WC_AJAX {
 		}
 
 		parse_str( $_POST['data'], $data );
-		$post_id    = absint( $_POST['post_id'] );
-		$product    = wc_get_product( $post_id );
-		$attributes = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+
+		$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+		$product_id   = absint( $_POST['post_id'] );
+		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( $_POST['product_type'] ) : 'simple';
+		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
+		$product      = new $classname( $product_id );
 
 		$product->set_attributes( $attributes );
 		$product->save();
@@ -598,43 +601,40 @@ class WC_AJAX {
 
 		$variations = array();
 		$product    = wc_get_product( $post_id );
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
 
-		if ( $product->is_type( 'variable' ) ) {
-			$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		if ( ! empty( $attributes ) ) {
+			// Get existing variations so we don't create duplicates.
+			$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+			$existing_attributes = array();
 
-			if ( ! empty( $attributes ) ) {
-				// Get existing variations so we don't create duplicates.
-				$existing_variations = array_map( 'wc_get_product', $product->get_children() );
-				$existing_attributes = array();
-
-				foreach ( $existing_variations as $existing_variation ) {
-					$existing_attributes[] = $existing_variation->get_attributes();
-				}
-
-				$added               = 0;
-				$possible_attributes = wc_array_cartesian( $attributes );
-
-				foreach ( $possible_attributes as $possible_attribute ) {
-					if ( in_array( $possible_attribute, $existing_attributes ) ) {
-						continue;
-					}
-					$variation = new WC_Product_Variation();
-					$variation->set_parent_id( $post_id );
-					$variation->set_attributes( $possible_attribute );
-
-					do_action( 'product_variation_linked', $variation->save() );
-
-					if ( ( $added ++ ) > WC_MAX_LINKED_VARIATIONS ) {
-						break;
-					}
-				}
-
-				echo $added;
+			foreach ( $existing_variations as $existing_variation ) {
+				$existing_attributes[] = $existing_variation->get_attributes();
 			}
 
-			$data_store = $product->get_data_store();
-			$data_store->sort_all_product_variations( $product->get_id() );
+			$added               = 0;
+			$possible_attributes = wc_array_cartesian( $attributes );
+
+			foreach ( $possible_attributes as $possible_attribute ) {
+				if ( in_array( $possible_attribute, $existing_attributes ) ) {
+					continue;
+				}
+				$variation = new WC_Product_Variation();
+				$variation->set_parent_id( $post_id );
+				$variation->set_attributes( $possible_attribute );
+
+				do_action( 'product_variation_linked', $variation->save() );
+
+				if ( ( $added ++ ) > WC_MAX_LINKED_VARIATIONS ) {
+					break;
+				}
+			}
+
+			echo $added;
 		}
+
+		$data_store = $product->get_data_store();
+		$data_store->sort_all_product_variations( $product->get_id() );
 		die();
 	}
 

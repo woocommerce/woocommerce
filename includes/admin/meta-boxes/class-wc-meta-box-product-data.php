@@ -254,15 +254,10 @@ class WC_Meta_Box_Product_Data {
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.
 		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname    = WC_Product_Factory::get_classname_from_product_type( $product_type );
-
-		if ( ! class_exists( $classname ) ) {
-			$classname = 'WC_Product_Simple';
-		}
-
-		$product    = new $classname( $post_id );
-		$attributes = self::prepare_attributes();
-		$errors     = $product->set_props( array(
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type );
+		$product      = new $classname( $post_id );
+		$attributes   = self::prepare_attributes();
+		$errors       = $product->set_props( array(
 			'sku'                => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
 			'purchase_note'      => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
 			'downloadable'       => isset( $_POST['_downloadable'] ),
