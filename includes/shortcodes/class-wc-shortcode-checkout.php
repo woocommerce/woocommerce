@@ -148,7 +148,7 @@ class WC_Shortcode_Checkout {
 						<li class="method">
 							<?php _e( 'Payment method:', 'woocommerce' ); ?>
 							<strong><?php
-								echo $order->get_payment_method_title();
+								echo wp_kses_post( $order->get_payment_method_title() );
 							?></strong>
 						</li>
 						<?php endif; ?>

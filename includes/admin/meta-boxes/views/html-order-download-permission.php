@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				esc_html( $file_count ),
 				esc_html( wc_get_filename_from_url( $product->get_file_download_path( $download->get_download_id() ) ) )
 			);
-			printf( _n( 'Downloaded %s time', 'Downloaded %s times', $download->get_download_count(), 'woocommerce' ), $download->get_download_count() )
+			printf( _n( 'Downloaded %s time', 'Downloaded %s times', $download->get_download_count(), 'woocommerce' ), esc_html( $download->get_download_count() ) )
 		?></strong>
 	</h3>
 	<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
