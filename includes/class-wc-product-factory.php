@@ -61,6 +61,7 @@ class WC_Product_Factory {
 	 * Gets a product classname and allows filtering. Returns WC_Product_Simple if the class does not exist.
 	 *
 	 * @since  2.7.0
+	 * @param  int    $product_id
 	 * @param  string $product_type
 	 * @return string
 	 */
