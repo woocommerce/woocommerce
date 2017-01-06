@@ -124,35 +124,57 @@
 	 * Looks for matching variations for current selected attributes.
 	 */
 	VariationForm.prototype.onFindVariation = function( event ) {
-		var form = event.data.variationForm;
-
-		if ( form.useAjax ) {
-			return;
-		}
-
-		form.$form.trigger( 'update_variation_values' );
-
-		var attributes          = form.getChosenAttributes(),
-			matching_variations = form.findMatchingVariations( form.variationData, attributes.data );
+		var form              = event.data.variationForm,
+			attributes        = form.getChosenAttributes(),
+			currentAttributes = attributes.data;
 
 		if ( attributes.count === attributes.chosenCount ) {
-			var variation = matching_variations.shift();
-
-			if ( variation ) {
-				form.$form.trigger( 'found_variation', [ variation ] );
+			if ( form.useAjax ) {
+				if ( form.xhr ) {
+					form.xhr.abort();
+				}
+				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
+				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
+				currentAttributes.custom_data = form.$form.data( 'custom_data' );
+				form.xhr                      = $.ajax( {
+					url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
+					type: 'POST',
+					data: currentAttributes,
+					success: function( variation ) {
+						if ( variation ) {
+							form.$form.trigger( 'found_variation', [ variation ] );
+						} else {
+							form.$form.trigger( 'reset_data' );
+							form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
+							form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+						}
+					},
+					complete: function() {
+						form.$form.unblock();
+					}
+				} );
 			} else {
-				window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
-				form.$form.trigger( 'reset_data' );
+				form.$form.trigger( 'update_variation_values' );
+
+				var matching_variations = form.findMatchingVariations( form.variationData, currentAttributes ),
+					variation           = matching_variations.shift();
+
+				if ( variation ) {
+					form.$form.trigger( 'found_variation', [ variation ] );
+				} else {
+					window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
+					form.$form.trigger( 'reset_data' );
+				}
 			}
 		} else {
 			form.$form.trigger( 'reset_data' );
-			form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 		}
+
+		// Show reset link.
+		form.toggleResetLink( attributes.chosenCount > 0 );
 
 		// added to get around variation image flicker issue
 		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
-
-		form.toggleResetLink( attributes.chosenCount > 0 );
 	};
 
 	/**
@@ -237,45 +259,12 @@
 		form.$form.find( '.wc-no-matching-variations' ).remove();
 
 		if ( form.useAjax ) {
-			if ( form.xhr ) {
-				form.xhr.abort();
-			}
-			var attributes = form.getChosenAttributes(),
-				data       = attributes.data;
-
-			if ( attributes.count === attributes.chosenCount ) {
-				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
-				data.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
-				data.custom_data = form.$form.data( 'custom_data' );
-				form.xhr         = $.ajax( {
-					url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
-					type: 'POST',
-					data: data,
-					success: function( variation ) {
-						if ( variation ) {
-							form.$form.trigger( 'found_variation', [ variation ] );
-						} else {
-							form.$form.trigger( 'reset_data' );
-							form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
-							form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
-						}
-					},
-					complete: function() {
-						form.$form.unblock();
-					}
-				} );
-			} else {
-				form.$form.trigger( 'reset_data' );
-			}
-			form.toggleResetLink( attributes.chosenCount > 0 );
+			form.$form.trigger( 'check_variations' );
 		} else {
 			form.$form.trigger( 'woocommerce_variation_select_change' );
 			form.$form.trigger( 'check_variations' );
 			$( this ).blur();
 		}
-
-		// added to get around variation image flicker issue
-		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
 
 		// Custom event for when variation selection has been changed
 		form.$form.trigger( 'woocommerce_variation_has_changed' );
