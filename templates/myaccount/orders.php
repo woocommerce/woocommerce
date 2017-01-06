@@ -40,7 +40,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				$order      = wc_get_order( $customer_order );
 				$item_count = $order->get_item_count();
 				?>
-				<tr class="order">
+				<tr class="order <?php echo 'woocommerce-'.esc_attr(strtolower( wc_get_order_status_name( $order->get_status() ) ) ); ?>">
 					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) : ?>
 						<td class="<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
