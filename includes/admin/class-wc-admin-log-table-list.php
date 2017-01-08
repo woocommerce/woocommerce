@@ -83,7 +83,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $log ) {
-		return sprintf( '<input type="checkbox" name="log[]" value="%1$s" />', $log['log_id'] );
+		return sprintf( '<input type="checkbox" name="log[]" value="%1$s" />', esc_attr( $log['log_id'] ) );
 	}
 
 	/**
@@ -296,7 +296,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	protected function get_items_query_order() {
 		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
-			$by = $_REQUEST['orderby'];
+			$by = wc_clean( $_REQUEST['orderby'] );
 		} else {
 			$by = 'log_id';
 		}
@@ -329,7 +329,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		}
 		if ( ! empty( $_REQUEST['source'] ) ) {
 			$where_conditions[] = 'source = %s';
-			$where_values[]     = $_REQUEST['source'];
+			$where_values[]     = wc_clean( $_REQUEST['source'] );
 		}
 
 		if ( ! empty( $where_conditions ) ) {
