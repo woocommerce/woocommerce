@@ -6,6 +6,10 @@
  * @since 2.7.0
  */
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
+	public function setUp() {
+		parent::setUp();
+		WC_Log_Handler_DB::flush();
+	}
 
 	public function tearDown() {
 		WC_Log_Handler_DB::flush();
@@ -99,7 +103,7 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 				'timestamp' => $expected_ts,
 				'level' => WC_Log_Levels::get_level_severity( 'debug' ),
 				'message' => 'context_test',
-				'source' => '',
+				'source' => pathinfo( __FILE__, PATHINFO_FILENAME ),
 				'context' => serialize( $context ),
 			),
 		);
