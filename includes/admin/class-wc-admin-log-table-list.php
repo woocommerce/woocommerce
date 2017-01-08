@@ -294,11 +294,11 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return string Prepared ORDER BY clause for items query.
 	 */
 	protected function get_items_query_order() {
-		$valid_orders = array( 'log_id', 'level', 'source', 'timestamp' );
+		$valid_orders = array( 'level', 'source', 'timestamp' );
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
 			$by = wc_clean( $_REQUEST['orderby'] );
 		} else {
-			$by = 'log_id';
+			$by = 'timestamp';
 		}
 		$by = esc_sql( $by );
 
