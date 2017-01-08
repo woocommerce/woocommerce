@@ -23,8 +23,11 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 * @param array $context {
 	 *     Additional information for log handlers.
 	 *
-	 *     @type string $source Optional. Source will be available in log table. Default '';
+	 *     @type string $source Optional. Source will be available in log table.
+	 *                  If no source is provided, attempt to provide sensible default.
 	 * }
+	 *
+	 * @see WC_Log_Handler_DB::get_log_source() for default source.
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
@@ -33,7 +36,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		if ( isset( $context['source'] ) && $context['source'] ) {
 			$source = $context['source'];
 		} else {
-			$source = '';
+			$source = $this->get_log_source();
 		}
 
 		return $this->add( $timestamp, $level, $message, $source, $context );
@@ -112,6 +115,39 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		);
 
 		return $wpdb->query( $query );
+	}
+
+	/**
+	 * Get appropriate source based on file name.
+	 *
+	 * Try to provide an appropriate source in case none is provided.
+	 *
+	 * @return string Text to use as log source. "" (empty string) if none is found.
+	 */
+	protected static function get_log_source() {
+		static $ignore_files = array( 'class-wc-log-handler-db', 'class-wc-logger' );
+
+		/**
+		 * PHP < 5.3.6 correct behavior
+		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
+		 */
+		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
+			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS;
+		} else {
+			$debug_backtrace_arg = false;
+		}
+
+		$trace = debug_backtrace( $debug_backtrace_arg );
+		foreach ( $trace as $t ) {
+			if ( isset( $t['file'] ) ) {
+				$filename = pathinfo( $t['file'], PATHINFO_FILENAME );
+				if ( ! in_array( $filename, $ignore_files ) ) {
+					return $filename;
+				}
+			}
+		}
+
+		return '';
 	}
 
 }

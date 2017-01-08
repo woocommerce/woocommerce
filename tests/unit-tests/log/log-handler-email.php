@@ -55,7 +55,6 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( get_option( 'admin_email' ), $mailer->get_recipient( 'to' )->address );
 
-
 		$handler->handle( $time, 'emergency', 'msg_emergency', array() );
 		$handler->send_log_email();
 		$this->assertEquals(
