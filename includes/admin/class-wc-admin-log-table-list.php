@@ -30,35 +30,37 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get list views.
+	 * Display level dropdown
 	 *
-	 * @return array Views.
+	 * @global wpdb $wpdb
 	 */
-	public function get_views() {
-
-		$current = ! empty( $_REQUEST['level'] ) ? $_REQUEST['level'] : false;
-
-		$views = array();
+	public function level_dropdown() {
 
 		$levels = array(
-			array( 'query_arg' => false,       'label' => __( 'All levels', 'woocommerce' ) ),
-			array( 'query_arg' => 'emergency', 'label' => __( 'Emergency',  'woocommerce' ) ),
-			array( 'query_arg' => 'alert',     'label' => __( 'Alert',      'woocommerce' ) ),
-			array( 'query_arg' => 'critical',  'label' => __( 'Critical',   'woocommerce' ) ),
-			array( 'query_arg' => 'error',     'label' => __( 'Error',      'woocommerce' ) ),
-			array( 'query_arg' => 'warning',   'label' => __( 'Warning',    'woocommerce' ) ),
-			array( 'query_arg' => 'notice',    'label' => __( 'Notice',     'woocommerce' ) ),
-			array( 'query_arg' => 'info',      'label' => __( 'Info',       'woocommerce' ) ),
-			array( 'query_arg' => 'debug',     'label' => __( 'Debug',      'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::EMERGENCY, 'label' => __( 'Emergency', 'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::ALERT,     'label' => __( 'Alert',     'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::CRITICAL,  'label' => __( 'Critical',  'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::ERROR,     'label' => __( 'Error',     'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::WARNING,   'label' => __( 'Warning',   'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::NOTICE,    'label' => __( 'Notice',    'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::INFO,      'label' => __( 'Info',      'woocommerce' ) ),
+			array( 'value' => WC_Log_Levels::DEBUG,     'label' => __( 'Debug',     'woocommerce' ) ),
 		);
 
-		foreach ( $levels as $level ) {
-			$url = esc_url( add_query_arg( 'level', $level['query_arg'] ) );
-			$class = $current === $level['query_arg'] ? ' class="current"' : '';
-			$views[] = sprintf( '<a href="%1$s"%2$s>%3$s</a>', $url, $class, esc_html( $level['label'] ) );
-		}
-
-		return $views;
+		$selected_level = isset( $_REQUEST['level'] ) ? $_REQUEST['level'] : '';
+		?>
+			<label for="filter-by-level" class="screen-reader-text"><?php _e( 'Filter by level', 'woocommerce' ); ?></label>
+			<select name="level" id="filter-by-level">
+				<option<?php selected( $selected_level, '' ); ?> value=""><?php _e( 'All levels', 'woocommerce' ); ?></option>
+				<?php foreach ( $levels as $l ) {
+					printf( '<option%1$s value="%2$s">%3$s</option>',
+						selected( $selected_level, $l['value'], false ),
+						esc_attr( $l['value'] ),
+						esc_html( $l['label'] )
+					);
+				} ?>
+			</select>
+		<?php
 	}
 
 	/**
@@ -166,6 +168,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		if ( 'top' === $which ) {
 			echo '<div class="alignleft actions">';
+				$this->level_dropdown();
 				$this->source_dropdown();
 				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter-action', false );
 			echo '</div>';

@@ -9,7 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <form method="get" id="mainform" action="">
 
-	<?php $log_table_list->views(); ?>
 	<?php $log_table_list->display(); ?>
 
 	<input type="hidden" name="page" value="wc-status" />
