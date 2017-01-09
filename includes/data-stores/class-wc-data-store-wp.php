@@ -164,4 +164,52 @@ class WC_Data_Store_WP {
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys );
 	}
 
+	/**
+	 * Builds part of a WP_Query call by accepting an array of table fields and
+	 * meta fields. Used by the search functionality of different data types
+	 * like orders and products.
+	 *
+	 * @since  2.7.0
+	 * @param  array $fields Fields that are a part of the core table (wp_posts)
+	 * @param  array $meta   Fields that are a part of the meta table (wp_postmeta)
+	 * @return array WP_Query part with meta_query and core fields.
+	 */
+	protected function build_wp_query( $fields = array(), $meta = array() ) {
+		$wp_query = array();
+		foreach ( $fields as $key => $value ) {
+			if ( 'date_' === substr( $key, 0, 5 ) ) {
+				$compare           = ! empty( $value['compare'] ) ? $value['compare'] : '=';
+				$allowed_date_keys = array( 'year', 'month', 'week', 'hour', 'minute', 'second' );
+				$date_query        = array();
+				foreach ( $allowed_date_keys as $date_key ) {
+					if ( ! empty( $value[ $date_key ] ) ) {
+						$date_query[ $date_key ] = $value[ $date_key ];
+					}
+				}
+				$wp_query['date_query'][] = array_merge( array(
+					'column'   => $key,
+					'compare'  => $compare,
+				), $date_query );
+			} else {
+				$wp_query[ $key ] = $value;
+			}
+		}
+
+		foreach( $meta as $key => $value ) {
+			$compare  = '=';
+			// A value can either be passed as a string or passed with a comparison operator.
+			if ( is_array( $value ) ) {
+				$compare  = ! empty( $value['compare'] ) ? $value['compare'] : $compare;
+				$value    = $value['value'];
+			}
+			$wp_query['meta_query'][] = array(
+					'key'      => $key,
+					'value'    => $value,
+					'compare'  => $compare,
+			);
+		}
+
+		return $wp_query;
+	}
+
 }

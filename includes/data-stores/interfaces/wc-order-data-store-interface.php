@@ -78,32 +78,40 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Search orders.
 	 *
-	 * Any args passed to the search function are used to
-	 * build a complex query. For example, a CPT implementation
-	 * searches the posts table and postmeta tables using WP_Query,
-	 * but you could also override the datastore and pass searches to
-	 * another engine.
+	 * Run complex searches based on the props passed.
 	 *
 	 * This function should handle all props supported by WC_Order/Abstract WC_Order.
-	 * Look at the data property of WC_Order and Abstract WC_Order or the CPT data
-	 * store's example `get_prop_mappings` for how to support all of these.
-	 * Anything passed to $args that is NOT a data prop, should be passed so the
-	 * data store can treat it as custom data. In the CPT implementation this is
-	 * treated as custom post meta.
+	 * (see the data array in WC_Order & Abstract WC_Order or the CPT `get_prop_mappings`
+	 * for an example of these.
+	 *
+	 * Anything that is not a valid prop should still be passed along, and assumed a custom field supported
+	 * by an extension.
 	 *
 	 * Example:
 	 * ->search( array( 'parent_id' => 2, 'customer_id' => 1, 'test_field' => 5 ) )
 	 *
 	 * parent_id and customer_id are both props and are searched according to the logic
-	 * of the datastore. test_field is not a prop, but the datastore should handle it
-	 * as custom data. The CPT will search postmeta.
-	 * @todo this explanation should be edited and posted as part of the dev docs -- putting it here for now to explain the PR POC.
+	 * of the datastore. test_field is not a prop, but the datastore can handle it
+	 * as custom data.
+	 *
+	 * When implementing a search engine, your $props code should be able to handle the following:
+	 * $props = array(
+	 *     'customer_id' => 1, // Simple direct searching
+	 *	   'customer_id' => array( 'value' => 1', 'compare' => '!= ' ), // Comparison operators. See what WP_Query supports to see valid operators. Default for simple searching is =.
+	 * );
+	 *
+	 * $args = array(
+	 *     'limit'    => 5, // Limit clause
+	 *     'offset'   => 1, // Offset clause
+	 *     'relation' => 'OR', // OR or AND relation
+	 *     'return'   => 'objects', // ids or objects (return an array of IDs or an array of order objects)
+	 * );
 	 *
 	 * @param array $args Arguments to use for the search query.
 	 * @param string $return_type Return IDs or Objects. default: ids
 	 * @return array
 	 */
-	 public function search( $args, $return_type = 'ids' );
+	 public function search( $props, $args );
 
 	/**
 	 * Gets information about whether permissions were generated yet.

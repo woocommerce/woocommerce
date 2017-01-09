@@ -38,6 +38,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		'_payment_tokens',
 	);
 
+	/**
+	 * A mapping of meta keys to their prop name.
+	 * @since 2.7.0
+	 * @var array
+	 */
 	private $meta_key_to_props = array(
 		'_order_currency'     => 'currency',
 		'_cart_discount'      => 'discount_total',
@@ -313,14 +318,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
 	}
 
+	/**
+	 * Returns a mapping of properties to their table or meta keys.
+	 * Meta keys are stored in 'meta'.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
 	protected function get_prop_mappings() {
 		$meta_mappings = array_flip( $this->meta_key_to_props );
 		$core_mappings = array(
-			'parent_id'            => 'post_parent',
-			'status'               => 'post_status',
-			'date_created'         => 'post_date',
-			'date_modified'        => 'post_modified',
+			'parent_id'     => 'post_parent',
+			'status'        => 'post_status',
+			'date_created'  => 'post_date',
+			'date_modified' => 'post_modified',
 		);
 		return array_merge( array( 'meta' => $meta_mappings ), $core_mappings );
 	}
+
 }

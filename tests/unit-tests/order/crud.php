@@ -1431,4 +1431,53 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 4, $object->get_remaining_refund_items() );
 	}
+
+	/**
+	 * Tests multiple types of searches.
+	 */
+	function test_search_orders() {
+		$time = time();
+
+		$order_total_400 = new WC_Order();
+		$order_total_400->set_customer_id( 1 );
+		$order_total_400->set_total( 400 );
+		$order_total_400->save();
+
+		$order_cancelled = new WC_Order();
+		$order_cancelled->set_customer_id( 1 );
+		$order_cancelled->set_total( 100 );
+		$order_cancelled->set_status( 'cancelled' );
+		$order_cancelled->save();
+
+		$order_custom_meta = new WC_Order();
+		$order_custom_meta->set_total( 400 );
+		$order_custom_meta->set_customer_id( 1 );
+		$order_custom_meta->save();
+		update_post_meta( $order_custom_meta->get_id(), '_test_custom_meta_key', $time );
+
+		$order_other_customer = new WC_Order();
+		$order_other_customer->set_total( 100 );
+		$order_other_customer->set_customer_id( 2 );
+		$order_other_customer->save();
+
+		$meta_search    = wc_search_orders( array( 'total' => '400.00' ) );
+		$meta_search_2  = wc_search_orders( array( 'total' => array( 'value' => '400.00', 'compare' => '!=' ) ) );
+		$field_search   = wc_search_orders( array( 'status' => 'cancelled' ) );
+		$search_OR      = wc_search_orders( array( 'total' => '400.00', 'customer_id' => 2 ), array( 'relation' => 'OR' ) );
+		$offset         = wc_search_orders( array( 'customer_id' => 1, 'total' => '400.00' ), array( 'limit' => 1 ) );
+		$offset_2       = wc_search_orders( array( 'customer_id' => 1, 'total' => '400.00' ), array( 'limit' => 1, 'offset' => 1 ) );
+		$custom_search  = wc_search_orders( array( '_test_custom_meta_key' => $time ) );
+		$returns_search = wc_search_orders( array( '_test_custom_meta_key' => $time ), array( 'return' => 'objects' ) );
+		$date_search    = wc_search_orders( array( 'date_created' => array( 'year' => '2016' ) ) );
+
+		$this->assertEquals( array( $order_total_400->get_id(), $order_custom_meta->get_id() ), $meta_search['results'] );
+		$this->assertEquals( array( $order_cancelled->get_id(), $order_other_customer->get_id() ), $meta_search_2['results'] );
+		$this->assertEquals( array( $order_cancelled->get_id() ), $field_search['results'] );
+		$this->assertEquals( 3, count( $search_OR['results'] ) );
+		$this->assertEquals( array( $order_total_400->get_id() ), $offset['results'] );
+		$this->assertEquals( array( $order_custom_meta->get_id() ), $offset_2['results'] );
+		$this->assertEquals( array( $order_custom_meta->get_id() ), $custom_search['results'] );
+		$this->assertEquals( $order_custom_meta->get_id(), $returns_search['results'][0]->get_id() );
+		$this->assertEquals( 4, count( $date_search['results'] ) );
+	}
 }

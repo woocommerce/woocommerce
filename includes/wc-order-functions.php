@@ -635,9 +635,9 @@ function wc_order_search( $term ) {
  * @param string $return_type Return IDs or Objects. default: ids
  * @return array List of orders.
  */
-function wc_search_orders( $args, $return_type = 'ids' ) {
+function wc_search_orders( $props, $args = array() ) {
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search( $args, $return_type );
+	return $data_store->search( $props, $args );
 }
 
 /**

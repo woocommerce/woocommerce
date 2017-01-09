@@ -68,6 +68,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_method',
 	);
 
+	/**
+	 * A mapping of meta keys to their prop name.
+	 * @since 2.7.0
+	 * @var array
+	 */
 	private $meta_key_to_props = array(
 		'_order_key'            => 'order_key',
 		'_customer_user'        => 'customer_id',
@@ -82,6 +87,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_cart_hash'            => 'cart_hash',
 	);
 
+	/**
+	 * A mapping of address keys to their prop name, separated by billing and
+	 * shipping type.
+	 * @since 2.7.0
+	 * @var array
+	 */
 	protected $address_props = array(
 		'billing' => array(
 			'_billing_first_name' => 'billing_first_name',
@@ -185,7 +196,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	protected function update_post_meta( &$order, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = $order->get_changes();
-		$meta_key_to_props = $this->meta_keys_to_props;
+		$meta_key_to_props = $this->meta_key_to_props;
 		$address_props     = $this->address_props;
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
@@ -502,10 +513,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		return $order_ids;
 	}
 
+	/**
+	 * Returns a mapping of properties to their table or meta keys.
+	 * Meta keys are stored in 'meta'.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
 	protected function get_prop_mappings() {
 		$parent_mappings  = parent::get_prop_mappings();
 		$mappings         = array();
-		$mappings['meta'] = array_merge( $parent_mappings['meta'], array_flip( $this->meta_key_to_props ) );
+		$mappings['meta'] = array_merge(
+			$parent_mappings['meta'],
+			array_flip( $this->meta_key_to_props ),
+			array_flip( $this->address_props['billing'] ),
+			array_flip( $this->address_props['shipping'] )
+		);
 		unset( $parent_mappings['meta'] );
 		return array_merge( $mappings, $parent_mappings );
 	}
@@ -514,62 +537,59 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Search orders.
 	 * Provides a layer of abstraction between WP_Query & Orders.
 	 *
-	 * @param array $args Arguments to use for the search query.
-	 * @param string $return_type Return IDs or Objects. default: ids
-	 * @todo support billing/shipping fields, support pagination, add tests.
-	 * @return array
+	 * @since  2.7.0
+	 * @param  array  $props Props to use for the search query.
+	 * @param  array  $args  Accepts return (objects or ids, default ids), limit (default get_option( 'posts_per_page' ) ), offset, and relation (AND or OR).
+	 * @todo   add tests.
+	 * @return array Array containing results, total results, and number of pages.
 	 */
-	public function search( $args, $return_type = 'ids' ) {
-		$mappings   = $this->get_prop_mappings();
-		$query_args = array( 'post_type'  => 'shop_order' );
-
-		foreach ( $args as $key => $value ) {
+	public function search( $props, $args = array() ) {
+		$mappings = $this->get_prop_mappings();
+		$fields   = $meta = array();
+		foreach ( $props as $key => $value ) {
 			if ( array_key_exists( $key, $mappings ) ) {
 				// The field being searched is stored in a the core posts table.
-				if ( 'date_modified' === $key || 'date_created' === $key ) {
-					// If searching by date, whitelist what fields can be used. Default to equals comparison.
-					$compare = ! empty( $value['compare'] ) ? $value['compare'] : '=';
-					$allowed_date_keys = array( 'year', 'month', 'week', 'hour', 'minute', 'second' );
-					$date_query = array();
-					foreach ( $allowed_date_keys as $date_key ) {
-						if ( ! empty( $value[ $date_key ] ) ) {
-							$date_query[ $date_key ] = $value[ $date_key ];
-						}
-					}
-					$query_args['date_query'][] = array_merge( array(
-						'column'  => $mappings[ $key ],
-						'compare' => $compare,
-					), $date_query );
-				} else {
-					// Search the field by it's WP field name.
-					$query_args[ $mappings[ $key ] ] = ( 'status' === $key ? 'wc-' : '' ) . $value;
-				}
+				$key            = $mappings[ $key ];
+				$fields[ $key ] = $value;
 			} else {
-				// Is this one of our props stored in post meta? If so, grab the actual meta key.
-				// Otherwise the passed key will be treated as custom meta and passed to WP_Query's
-				// meta query directly.
+				// Otherwise, the property is stored in meta.
 				if ( array_key_exists( $key, $mappings['meta'] ) ) {
 					$key = $mappings['meta'][ $key ];
 				}
-				$compare = '=';
-				// A value can either be passed as a string (search for a specific string in a field)
-				// or passed with a comparison operator.
-				if ( is_array( $value ) ) {
-					$compare = $value['compare'];
-					$value   = $value['value'];
-				}
-				$query_args['meta_query'][] = array(
-						'key'     => $key,
-						'value'   => $value,
-						'compare' => $compare,
-				);
+				$meta[ $key ] = $value;
 			}
 		}
 
-		$wp_query = new WP_Query( $query_args );
+		// Clean up status
+		if ( ! empty(  $fields['post_status'] ) && is_array( $fields['post_status'] ) ) {
+			$fields['post_status']['value'] = 'wc-' . $fields['post_status']['value'];
+		} else {
+			if ( empty( $fields['post_status'] ) ) {
+				$fields['post_status'] = array_keys( wc_get_order_statuses() );
+			} else {
+				$fields['post_status'] = 'wc-' . $fields['post_status'];
+			}
+		}
 
-		error_log( print_r( $wp_query ) );
-		// @todo return results
+		$wp_query                           = $this->build_wp_query( $fields, $meta );
+		$wp_query['post_type']              = 'shop_order';
+		$wp_query['meta_query']['relation'] = ! empty( $args['relation'] ) ? $args['relation'] : 'AND';
+		$wp_query['fields']                 = 'ids';
+		$wp_query['posts_per_page']         = ! empty( $args['limit'] ) ? $args['limit'] : get_option( 'posts_per_page' );
+		$wp_query['offset']                 = ! empty( $args['offset'] ) ? $args['offset'] : null;
+
+		$wp_query = new WP_Query( $wp_query );
+		if ( ! empty( $args['return'] ) && 'objects' === $args['return'] ) {
+			$results = array_map( 'wc_get_order', $wp_query->posts );
+		} else {
+			$results = $wp_query->posts;
+		}
+
+		return array(
+			'results'       => $results,
+			'total'         => (int) $wp_query->found_posts,
+			'max_num_pages' => (int) $wp_query->max_num_pages,
+		);
 	}
 
 	/**
