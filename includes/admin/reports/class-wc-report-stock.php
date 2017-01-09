@@ -89,16 +89,9 @@ class WC_Report_Stock extends WP_List_Table {
 
 				echo esc_html( $product->get_name() );
 
-				// Get variation data
+				// Get variation data.
 				if ( $product->is_type( 'variation' ) ) {
-					$list_attributes = array();
-					$attributes = $product->get_variation_attributes();
-
-					foreach ( $attributes as $name => $attribute ) {
-						$list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
-					}
-
-					echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';
+					echo '<div class="description">' . wc_get_formatted_variation( $product, true ) . '</div>';
 				}
 			break;
 
