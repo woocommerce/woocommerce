@@ -1075,6 +1075,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['paged'] = absint( $args['page'] );
 		}
 
+		if ( ! empty( $args['include'] ) ) {
+			$wp_query_args['post__in'] = array_map( 'absint', $args['include'] );
+		}
+
 		if ( ! empty( $args['exclude'] ) ) {
 			$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 		}
