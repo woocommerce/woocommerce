@@ -61,6 +61,7 @@ function wc_get_products( $args ) {
 		'limit'          => get_option( 'posts_per_page' ),
 		'offset'         => null,
 		'page'           => 1,
+		'include'        => array(),
 		'exclude'        => array(),
 		'orderby'        => 'date',
 		'order'          => 'DESC',
