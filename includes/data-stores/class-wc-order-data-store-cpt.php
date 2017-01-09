@@ -540,7 +540,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @since  2.7.0
 	 * @param  array  $props Props to use for the search query.
 	 * @param  array  $args  Accepts return (objects or ids, default ids), limit (default get_option( 'posts_per_page' ) ), offset, and relation (AND or OR).
-	 * @todo   add tests.
 	 * @return array Array containing results, total results, and number of pages.
 	 */
 	public function search( $props, $args = array() ) {
