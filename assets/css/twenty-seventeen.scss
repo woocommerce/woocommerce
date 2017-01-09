@@ -757,6 +757,23 @@ table.variations {
 	}
 }
 
+#shipping_method {
+	list-style: none;
+	margin-top: 1em;
+
+	li {
+		margin-bottom: .5em;
+		
+		input {
+			float: left;
+		}
+
+		label {
+			line-height: 1.15;
+		}
+	}
+}
+
 .checkout-button {
 	display: block;
 	padding: 1em 2em;
