@@ -35,6 +35,7 @@ class WC_Post_Data {
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
 
 		add_action( 'edit_term', array( __CLASS__, 'edit_term' ), 10, 3 );
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
@@ -114,6 +115,22 @@ class WC_Post_Data {
 				OR `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%')
 				OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')
 			" );
+		}
+	}
+
+	/**
+	 * Handle type changes.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product $product
+	 * @param string $from
+	 * @param string $to
+	 */
+	public static function product_type_changed( $product, $from, $to ) {
+		if ( 'variable' === $from ) {
+			// If the product is no longer variable, we should ensure all variations are removed.
+			$data_store = WC_Data_Store::load( 'product-variable' );
+			$data_store->delete_variations( $product );
 		}
 	}
 
