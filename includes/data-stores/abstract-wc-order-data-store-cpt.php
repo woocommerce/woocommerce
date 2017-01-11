@@ -82,7 +82,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read( &$order ) {
 		$order->set_defaults();
 
-		if ( ! $order->get_id() || ! ( $post_object = get_post( $order->get_id() ) ) ) {
+		if ( ! $order->get_id() || ! ( $post_object = get_post( $order->get_id() ) ) || 'shop_order' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 

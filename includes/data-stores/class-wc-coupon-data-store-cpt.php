@@ -85,7 +85,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	public function read( &$coupon ) {
 		$coupon->set_defaults();
 
-		if ( ! $coupon->get_id() || ! ( $post_object = get_post( $coupon->get_id() ) ) ) {
+		if ( ! $coupon->get_id() || ! ( $post_object = get_post( $coupon->get_id() ) ) || 'shop_coupon' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid coupon.', 'woocommerce' ) );
 		}
 
