@@ -119,7 +119,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		}
 	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
 		// wp_get_post_terms doesn't let us use custom sort order.
-		$args['include'] = wc_get_object_terms( $product_id, $taxonomy, 'id' );
+		$args['include'] = wc_get_object_terms( $product_id, $taxonomy, 'term_id' );
 
 		if ( empty( $args['include'] ) ) {
 			$terms = array();
