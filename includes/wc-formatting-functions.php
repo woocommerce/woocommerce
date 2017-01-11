@@ -929,7 +929,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
  */
 function wc_format_stock_for_display( $product ) {
 	$display      = __( 'In stock', 'woocommerce' );
-	$stock_amount = $product->get_stock_quantity()
+	$stock_amount = $product->get_stock_quantity();
 
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount' :
