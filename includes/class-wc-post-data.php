@@ -249,7 +249,7 @@ class WC_Post_Data {
 	 * @param mixed $id ID of post being deleted
 	 */
 	public static function delete_post( $id ) {
-		global $woocommerce, $wpdb;
+		global $wpdb;
 
 		if ( ! current_user_can( 'delete_posts' ) ) {
 			return;
