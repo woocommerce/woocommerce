@@ -283,7 +283,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
 		$children            = $product->get_visible_children( 'edit' );
-		$oufofstock_children = $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" );
+		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : 0;
 		return $children > $oufofstock_children;
 	}
 
@@ -378,18 +378,52 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Delete variations of a product.
 	 *
-	 * @param WC_Product
 	 * @since 2.7.0
+	 * @param int $product_id
+	 * @param $force_delete False to trash.
 	 */
-	public function delete_variations( &$product ) {
-		$variations = $this->read_children( $product );
+	public function delete_variations( $product_id, $force_delete = false ) {
+		$variation_ids = wp_parse_id_list( get_posts( array(
+			'post_parent' => $product_id,
+			'post_type'   => 'product_variation',
+			'fields'      => 'ids',
+			'post_status' => 'any',
+			'numberposts' => -1,
+		) ) );
 
-		if ( ! empty( $variations['all'] ) ) {
-			foreach ( $variations['all'] as $variation_id ) {
-				wp_delete_post( $variation_id, true );
+		if ( ! empty( $variation_ids ) ) {
+			foreach ( $variation_ids as $variation_id ) {
+				if ( $force_delete ) {
+					wp_delete_post( $variation_id, true );
+				} else {
+					wp_trash_post( $variation_id );
+				}
 			}
 		}
 
-		delete_transient( 'wc_product_children_' . $product->get_id() );
+		delete_transient( 'wc_product_children_' . $product_id );
+	}
+
+	/**
+	 * Untrash variations.
+	 *
+	 * @param int $product_id
+	 */
+	public function untrash_variations( $product_id ) {
+		$variation_ids = wp_parse_id_list( get_posts( array(
+			'post_parent' => $product_id,
+			'post_type'   => 'product_variation',
+			'fields'      => 'ids',
+			'post_status' => 'trash',
+			'numberposts' => -1,
+		) ) );
+
+		if ( ! empty( $variation_ids ) ) {
+			foreach ( $variation_ids as $variation_id ) {
+				wp_untrash_post( $variation_id );
+			}
+		}
+
+		delete_transient( 'wc_product_children_' . $product_id );
 	}
 }

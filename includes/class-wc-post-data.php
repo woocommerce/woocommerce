@@ -256,7 +256,6 @@ class WC_Post_Data {
 				break;
 			}
 		}
-
 		return $data;
 	}
 
@@ -266,56 +265,35 @@ class WC_Post_Data {
 	 * @param mixed $id ID of post being deleted
 	 */
 	public static function delete_post( $id ) {
-		global $woocommerce, $wpdb;
-
-		if ( ! current_user_can( 'delete_posts' ) ) {
+		if ( ! current_user_can( 'delete_posts' ) || ! $id ) {
 			return;
 		}
 
-		if ( $id > 0 ) {
+		$post_type = get_post_type( $id );
 
-			$post_type = get_post_type( $id );
+		switch ( $post_type ) {
+			case 'product' :
+				$data_store = WC_Data_Store::load( 'product-variable' );
+				$data_store->delete_variations( $id, true );
 
-			switch ( $post_type ) {
-				case 'product' :
-
-					$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
-
-					if ( ! empty( $child_product_variations ) ) {
-						foreach ( $child_product_variations as $child ) {
-							wp_delete_post( $child->ID, true );
-						}
-					}
-
-					$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
-
-					if ( ! empty( $child_products ) ) {
-						foreach ( $child_products as $child ) {
-							$child_post                = array();
-							$child_post['ID']          = $child->ID;
-							$child_post['post_parent'] = 0;
-							wp_update_post( $child_post );
-						}
-					}
-
-					if ( $parent_id = wp_get_post_parent_id( $id ) ) {
-						wc_delete_product_transients( $parent_id );
-					}
-
+				if ( $parent_id = wp_get_post_parent_id( $id ) ) {
+					wc_delete_product_transients( $parent_id );
+				}
 				break;
-				case 'product_variation' :
-					wc_delete_product_transients( wp_get_post_parent_id( $id ) );
+			case 'product_variation' :
+				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				break;
-				case 'shop_order' :
-					$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+			case 'shop_order' :
+				global $wpdb;
 
-					if ( ! is_null( $refunds ) ) {
-						foreach ( $refunds as $refund ) {
-							wp_delete_post( $refund->ID, true );
-						}
+				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+				if ( ! is_null( $refunds ) ) {
+					foreach ( $refunds as $refund ) {
+						wp_delete_post( $refund->ID, true );
 					}
+				}
 				break;
-			}
 		}
 	}
 
@@ -325,22 +303,28 @@ class WC_Post_Data {
 	 * @param mixed $id
 	 */
 	public static function trash_post( $id ) {
-		global $wpdb;
+		if ( ! $id ) {
+			return;
+		}
 
-		if ( $id > 0 ) {
+		$post_type = get_post_type( $id );
 
-			$post_type = get_post_type( $id );
+		// If this is an order, trash any refunds too.
+		if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+			global $wpdb;
 
-			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
-				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+			$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
-				foreach ( $refunds as $refund ) {
-					$wpdb->update( $wpdb->posts, array( 'post_status' => 'trash' ), array( 'ID' => $refund->ID ) );
-				}
-
-				delete_transient( 'woocommerce_processing_order_count' );
-				wc_delete_shop_order_transients( $id );
+			foreach ( $refunds as $refund ) {
+				$wpdb->update( $wpdb->posts, array( 'post_status' => 'trash' ), array( 'ID' => $refund->ID ) );
 			}
+
+			wc_delete_shop_order_transients( $id );
+
+		// If this is a product, trash children variations.
+		} elseif ( 'product' === $post_type ) {
+			$data_store = WC_Data_Store::load( 'product-variable' );
+			$data_store->delete_variations( $id, false );
 		}
 	}
 
@@ -350,32 +334,28 @@ class WC_Post_Data {
 	 * @param mixed $id
 	 */
 	public static function untrash_post( $id ) {
-		global $wpdb;
+		if ( ! $id ) {
+			return;
+		}
 
-		if ( $id > 0 ) {
+		$post_type = get_post_type( $id );
 
-			$post_type = get_post_type( $id );
+		if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+			global $wpdb;
 
-			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+			$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
-				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
-
-				foreach ( $refunds as $refund ) {
-					$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-completed' ), array( 'ID' => $refund->ID ) );
-				}
-
-				delete_transient( 'woocommerce_processing_order_count' );
-				wc_delete_shop_order_transients( $id );
-			} elseif ( 'product' === $post_type ) {
-				// Check if SKU is valid before untrash the product.
-				$sku = get_post_meta( $id, '_sku', true );
-
-				if ( ! empty( $sku ) ) {
-					if ( ! wc_product_has_unique_sku( $id, $sku ) ) {
-						update_post_meta( $id, '_sku', '' );
-					}
-				}
+			foreach ( $refunds as $refund ) {
+				$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-completed' ), array( 'ID' => $refund->ID ) );
 			}
+
+			wc_delete_shop_order_transients( $id );
+
+		} elseif ( 'product' === $post_type ) {
+			$data_store = WC_Data_Store::load( 'product-variable' );
+			$data_store->untrash_variations( $id );
+
+			wc_product_force_unique_sku( $id );
 		}
 	}
 
