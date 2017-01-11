@@ -442,7 +442,7 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_coupon_columns( $column ) {
-		global $post, $woocommerce;
+		global $post;
 
 		switch ( $column ) {
 			case 'coupon_code' :
@@ -512,7 +512,7 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_order_columns( $column ) {
-		global $post, $woocommerce, $the_order;
+		global $post, $the_order;
 
 		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
 			$the_order = wc_get_order( $post->ID );

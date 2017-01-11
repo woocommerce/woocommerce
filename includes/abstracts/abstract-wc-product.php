@@ -1869,7 +1869,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
 			$availability = __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
-			$availability = wc_format_stock_for_display( $this->get_stock_quantity(), $this->backorders_allowed() && $this->backorders_require_notification() );
+			$availability = wc_format_stock_for_display( $this );
 		} else {
 			$availability = '';
 		}

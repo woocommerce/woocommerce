@@ -30,7 +30,7 @@ if [ $1 == 'before' ]; then
 elif [ $1 == 'during' ]; then
 
 	## Only run on 7.0 box.
-	if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then
+	if [ $TRAVIS_PHP_VERSION == "7.0" ]; then
 		# WordPress Coding Standards.
 		# @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
 		# @link http://pear.php.net/package/PHP_CodeSniffer/
@@ -50,8 +50,7 @@ elif [ $1 == 'during' ]; then
 elif [ $1 == 'after' ]; then
 
 	## Only run on 7.0 box.
-	if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then
-		# Get scrutinizer ocular and run it
+	if [ $TRAVIS_PHP_VERSION == "7.0" ]; then
 		wget https://scrutinizer-ci.com/ocular.phar
 		chmod +x ocular.phar
 		php ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
