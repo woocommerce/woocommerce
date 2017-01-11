@@ -255,7 +255,7 @@ class WC_Admin_Duplicate_Product {
 			$post_terms_count = sizeof( $post_terms );
 
 			for ( $i = 0; $i < $post_terms_count; $i++ ) {
-				wp_set_object_terms( $new_id, $post_terms[ $i ]->slug, $taxonomy, true );
+				wp_set_object_terms( $new_id, (int) $post_terms[ $i ]->term_id, $taxonomy, true );
 			}
 		}
 	}
