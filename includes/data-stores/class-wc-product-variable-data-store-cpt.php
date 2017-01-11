@@ -28,17 +28,22 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		parent::read_product_data( $product );
 
 		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
-		$this->read_children( $product );
-		$this->read_variation_attributes( $product );
+		$children             = $this->read_children( $product );
+		$variation_attributes = $this->read_variation_attributes( $product );
+
+		$product->set_children( $children['all']  );
+		$product->set_visible_children( $children['visible'] );
+		$product->set_variation_attributes( $variation_attributes );
 	}
 
 	/**
 	 * Loads variation child IDs.
+	 *
 	 * @param  WC_Product
 	 * @param  bool $force_read True to bypass the transient.
-	 * @return WC_Product
+	 * @return array
 	 */
-	public function read_children( &$product, $force_read = false ) {
+	private function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
 
@@ -65,14 +70,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			set_transient( $children_transient_name, $children, DAY_IN_SECONDS * 30 );
 		}
 
-		$product->set_children( wp_parse_id_list( (array) $children['all'] ) );
-		$product->set_visible_children( wp_parse_id_list( (array) $children['visible'] ) );
+		$children['all']     = wp_parse_id_list( (array) $children['all'] );
+		$children['visible'] = wp_parse_id_list( (array) $children['visible'] );
+
+		return $children;
 	}
 
 	/**
 	 * Loads an array of attributes used for variations, as well as their possible values.
 	 *
 	 * @param WC_Product
+	 * @return array
 	 */
 	private function read_variation_attributes( &$product ) {
 		global $wpdb;
@@ -122,7 +130,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		$product->set_variation_attributes( $variation_attributes );
+		return $variation_attributes;
 	}
 
 	/**
@@ -328,7 +336,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				}
 			}
 			if ( $changed ) {
-				$this->read_children( $product, true );
+				$children = $this->read_children( $product, true );
+				$product->set_children( $children['all']  );
+				$product->set_visible_children( $children['visible'] );
 			}
 		}
 	}
@@ -365,5 +375,23 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function sync_stock_status( &$product ) {
 		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+	}
+
+	/**
+	 * Delete variations of a product.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	public function delete_variations( &$product ) {
+		$variations = $this->read_children( $product );
+
+		if ( ! empty( $variations['all'] ) ) {
+			foreach ( $variations['all'] as $variation_id ) {
+				wp_delete_post( $variation_id, true );
+			}
+		}
+
+		delete_transient( 'wc_product_children_' . $product->get_id() );
 	}
 }

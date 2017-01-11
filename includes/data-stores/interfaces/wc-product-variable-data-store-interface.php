@@ -61,4 +61,11 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * @param WC_Product|int $product
 	 */
 	public function sync_price( &$product );
+
+	/**
+	 * Delete variations of a product.
+	 *
+	 * @param WC_Product
+	 */
+	public function delete_variations( &$product );
 }
