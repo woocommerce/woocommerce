@@ -535,8 +535,6 @@ function wc_get_product_types() {
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
-	global $wpdb;
-
 	$data_store = WC_Data_Store::load( 'product' );
 	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
@@ -545,6 +543,47 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Force a unique SKU.
+ *
+ * @since  2.7.0
+ * @param  integer $product_id
+ */
+function wc_product_force_unique_sku( $product_id ) {
+	$product = wc_get_product( $product_id );
+
+	if ( $product ) {
+		try {
+			$current_sku = $product->get_sku();
+			$new_sku     = wc_product_generate_unique_sku( $product_id, $current_sku );
+
+			if ( $current_sku !== $new_sku ) {
+				$product->set_sku( $new_sku );
+				$product->save();
+			}
+		} catch ( Exception $e ) {}
+	}
+}
+
+/**
+ * Recursively appends a suffix until a unique SKU is found.
+ *
+ * @since  2.7.0
+ * @param  integer $product_id
+ * @param  string  $sku
+ * @param  integer $index
+ * @return string
+ */
+function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
+	$generated_sku = 0 < $index ? $sku . '-' . $index : $sku;
+
+	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku ) ) {
+		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ) );
+	}
+
+	return $generated_sku;
 }
 
 /**

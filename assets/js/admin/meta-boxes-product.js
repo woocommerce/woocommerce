@@ -114,12 +114,6 @@ jQuery( function( $ ) {
 
 	}).change();
 
-	$( document.body ).on( 'woocommerce-product-type-change', function( e, select_val ) {
-		if ( 'variable' !== select_val && 0 < $( '#variable_product_options' ).find( 'input[name^=variable_sku]' ).length && $( document.body ).triggerHandler( 'woocommerce-display-product-type-alert', select_val ) !== false ) {
-			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
-		}
-	});
-
 	$( 'input#_downloadable, input#_virtual' ).change( function() {
 		show_and_hide_panels();
 	});
