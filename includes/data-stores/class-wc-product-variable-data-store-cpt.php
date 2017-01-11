@@ -28,12 +28,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		parent::read_product_data( $product );
 
 		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
-		$children             = $this->read_children( $product );
-		$variation_attributes = $this->read_variation_attributes( $product );
-
-		$product->set_children( $children['all']  );
+		$children = $this->read_children( $product );
+		$product->set_children( $children['all'] );
 		$product->set_visible_children( $children['visible'] );
-		$product->set_variation_attributes( $variation_attributes );
+		$product->set_variation_attributes( $this->read_variation_attributes( $product ) );
 	}
 
 	/**
