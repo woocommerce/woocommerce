@@ -335,7 +335,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 			if ( $changed ) {
 				$children = $this->read_children( $product, true );
-				$product->set_children( $children['all']  );
+				$product->set_children( $children['all'] );
 				$product->set_visible_children( $children['visible'] );
 			}
 		}
