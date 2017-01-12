@@ -51,7 +51,7 @@ class WC_Admin_Attributes {
 		}
 
 		if ( is_wp_error( $result ) ) {
-			echo '<div id="woocommerce_errors" class="error"><p>' . $result->get_error_message() . '</p></div>';
+			echo '<div id="woocommerce_errors" class="error"><p>' . wp_kses_post( $result->get_error_message() ) . '</p></div>';
 		}
 
 		// Show admin interface
@@ -94,7 +94,7 @@ class WC_Admin_Attributes {
 	 * @return bool|WP_error result
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
-		if ( strlen( $attribute_name ) >= 28 ) {
+		if ( strlen( $attribute_name ) > 28 ) {
 			/* translators: %s: attribute name */
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
@@ -290,7 +290,7 @@ class WC_Admin_Attributes {
 								</th>
 								<td>
 									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -405,7 +405,11 @@ class WC_Admin_Attributes {
 													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 													if ( taxonomy_exists( $taxonomy ) ) {
-														$terms = get_terms( $taxonomy, 'hide_empty=0' );
+														if ( 'menu_order' === wc_attribute_orderby( $taxonomy ) ) {
+															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=ASC' );
+														} else {
+															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=false' );
+														}
 
 														switch ( $tax->attribute_orderby ) {
 															case 'name_num' :
@@ -442,7 +446,7 @@ class WC_Admin_Attributes {
 					<div class="col-wrap">
 						<div class="form-wrap">
 							<h2><?php _e( 'Add new attribute', 'woocommerce' ); ?></h2>
-							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
+							<p><?php _e( 'Attributes let you define extra product data, such as size or color. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
 
@@ -455,7 +459,7 @@ class WC_Admin_Attributes {
 								<div class="form-field">
 									<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
 									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
-									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">

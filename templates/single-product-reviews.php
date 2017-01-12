@@ -31,7 +31,7 @@ if ( ! comments_open() ) {
 		<h2 class="woocommerce-Reviews-title"><?php
 			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_review_count() ) ) {
 				/* translators: 1: reviews count 2: product name */
-				printf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $count, 'woocommerce' ) ), $count, '<span>' . get_the_title() . '</span>' );
+				printf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $count, 'woocommerce' ) ), esc_html( $count ), '<span>' . get_the_title() . '</span>' );
 			} else {
 				_e( 'Reviews', 'woocommerce' );
 			}
@@ -60,7 +60,7 @@ if ( ! comments_open() ) {
 		<?php endif; ?>
 	</div>
 
-	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->id ) ) : ?>
+	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) : ?>
 
 		<div id="review_form_wrapper">
 			<div id="review_form">

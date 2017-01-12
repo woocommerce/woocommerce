@@ -114,8 +114,8 @@
 			$( document.body ).trigger( 'wc_backbone_modal_before_update', this._target );
 
 			$.each( $( 'form', this.$el ).serializeArray(), function( index, item ) {
-				item.name = item.name.replace( '[]', '' );
-				if ( data.hasOwnProperty( item.name ) ) {
+				if ( item.name.indexOf( '[]' ) !== -1 ) {
+					item.name = item.name.replace( '[]', '' );
 					data[ item.name ] = $.makeArray( data[ item.name ] );
 					data[ item.name ].push( item.value );
 				} else {

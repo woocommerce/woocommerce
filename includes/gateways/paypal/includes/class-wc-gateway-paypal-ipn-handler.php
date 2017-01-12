@@ -75,8 +75,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
-		$validate_ipn = array( 'cmd' => '_notify-validate' );
-		$validate_ipn += wp_unslash( $_POST );
+		$validate_ipn        = wp_unslash( $_POST );
+		$validate_ipn['cmd'] = '_notify-validate';
 
 		// Send back post vars to paypal
 		$params = array(
@@ -186,6 +186,10 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$this->save_paypal_meta_data( $order, $posted );
 
 		if ( 'completed' === $posted['payment_status'] ) {
+			if ( $order->has_status( 'cancelled' ) ) {
+				$this->payment_status_paid_cancelled_order( $order, $posted );
+			}
+
 			$this->payment_complete( $order, ( ! empty( $posted['txn_id'] ) ? wc_clean( $posted['txn_id'] ) : '' ), __( 'IPN payment completed', 'woocommerce' ) );
 
 			if ( ! empty( $posted['mc_fee'] ) ) {
@@ -244,6 +248,19 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_status_voided( $order, $posted ) {
 		$this->payment_status_failed( $order, $posted );
+	}
+
+	/**
+	 * When a user cancelled order is marked paid.
+	 *
+	 * @param WC_Order $order
+	 * @param array $posted
+	 */
+	protected function payment_status_paid_cancelled_order( $order, $posted ) {
+		$this->send_ipn_email_notification(
+			sprintf( __( 'Payment for cancelled order %s received', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
+			sprintf( __( 'Order #%1$s has been marked paid by PayPal IPN, but was previously cancelled. Admin handling required.', 'woocommerce' ), $order->get_order_number() )
+		);
 	}
 
 	/**

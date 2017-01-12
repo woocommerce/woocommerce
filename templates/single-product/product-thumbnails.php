@@ -20,8 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-global $post, $product, $woocommerce;
-$attachment_ids = $product->get_gallery_attachment_ids();
+global $post, $product;
+
+$attachment_ids = $product->get_gallery_image_ids();
 
 if ( $attachment_ids ) {
 	foreach ( $attachment_ids as $attachment_id ) {

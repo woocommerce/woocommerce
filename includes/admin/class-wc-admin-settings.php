@@ -87,7 +87,7 @@ class WC_Admin_Settings {
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		do_action( 'woocommerce_flush_rewrite_rules' );
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 
 		do_action( 'woocommerce_settings_saved' );
 	}
@@ -737,7 +737,7 @@ class WC_Admin_Settings {
 			 * @deprecated 2.4.0 - doesn't allow manipulation of values!
 			 */
 			if ( has_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ) ) ) {
-				_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
+				wc_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
 				do_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ), $option );
 				continue;
 			}

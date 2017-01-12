@@ -59,7 +59,7 @@ foreach ( $items as $item_id => $item ) :
 		<?php
 	}
 
-	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) : ?>
+	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = $product->get_purchase_note() ) ) : ?>
 		<tr>
 			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 		</tr>

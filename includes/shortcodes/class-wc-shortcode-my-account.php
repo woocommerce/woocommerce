@@ -82,7 +82,7 @@ class WC_Shortcode_My_Account {
 					}
 	 			}
 
-				_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
+				wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
 			}
 
 			// Send output buffer
@@ -98,7 +98,7 @@ class WC_Shortcode_My_Account {
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
 			'order_count' => 15, // @deprecated 2.6.0. Keep for backward compatibility.
-		), $atts ) );
+		), $atts, 'woocommerce_my_account' ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
 			'current_user' => get_user_by( 'id', get_current_user_id() ),

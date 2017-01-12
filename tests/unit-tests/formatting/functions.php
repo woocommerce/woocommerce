@@ -4,8 +4,6 @@
  * Class Functions.
  * @package WooCommerce\Tests\Formatting
  * @since 2.2
- *
- * @todo Split formatting class into smaller classes
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 

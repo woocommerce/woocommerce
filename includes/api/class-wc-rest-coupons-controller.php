@@ -125,7 +125,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		if ( ! empty( $request['code'] ) ) {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['code'] ) );
+			$id = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
 		}
 
@@ -140,11 +140,16 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$code           = wc_get_coupon_code_by_id( $post->ID );
-		$coupon         = new WC_Coupon( $code );
+		$coupon         = new WC_Coupon( (int) $post->ID );
 		$data           = $coupon->get_data();
+
+		// The API returns 'expiry_date' and 'exclude_product_ids' instead of date_expires and 'excluded_product_ids'.
+		$data['expiry_date']         = $data['date_expires'];
+		$data['exclude_product_ids'] = $data['excluded_product_ids'];
+		unset( $data['excluded_product_ids'], $data['date_expires'] );
+
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
+		$format_date    = array( 'date_created', 'date_modified', 'expiry_date' );
 		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
 
 		// Format decimal values.
@@ -351,6 +356,11 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	public function save_coupon( $request ) {
 		try {
 			$coupon = $this->prepare_item_for_database( $request );
+
+			if ( is_wp_error( $coupon ) ) {
+				return $coupon;
+			}
+
 			$coupon->save();
 			return $coupon->get_id();
 		} catch ( WC_Data_Exception $e ) {
@@ -411,7 +421,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'date_expires' => array(
+				'expiry_date' => array(
 					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -433,7 +443,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'excluded_product_ids' => array(
+				'exclude_product_ids' => array(
 					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -500,22 +510,25 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Order meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'int',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'key' => array(
-							'description' => __( 'Meta key.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'value' => array(
-							'description' => __( 'Meta value.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key' => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),

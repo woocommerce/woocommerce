@@ -173,7 +173,7 @@ class WC_Structured_Data {
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
 		$markup['url']   = $markup['@id'];
-		$markup['name']  = $product->get_title();
+		$markup['name']  = $product->get_name();
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
@@ -202,7 +202,7 @@ class WC_Structured_Data {
 					'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 					'sku'           => $_product->get_sku(),
 					'image'         => wp_get_attachment_url( $_product->get_image_id() ),
-					'description'   => $is_variable ? $_product->get_variation_description() : '',
+					'description'   => $_product->get_description(),
 					'seller'        => array(
 						'@type' => 'Organization',
 						'name'  => $shop_name,

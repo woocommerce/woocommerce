@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Representation of a payment token for credit cards.
  *
  * @class 		WC_Payment_Token_CC
+ * @version     2.7.0
  * @since		2.6.0
  * @category 	PaymentTokens
  * @package 	WooCommerce/PaymentTokens
@@ -18,6 +19,15 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/** @protected string Token Type String. */
 	protected $type = 'CC';
+
+	/**
+	 * Hook prefix
+	 *
+	 * @since 2.7.0
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_payment_token_cc_get_';
+	}
 
 	/**
 	 * Validate credit card payment tokens.
@@ -36,27 +46,27 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( ! $this->get_last4() ) {
+		if ( ! $this->get_last4( 'edit' ) ) {
 			return false;
 		}
 
-		if ( ! $this->get_expiry_year() ) {
+		if ( ! $this->get_expiry_year( 'edit' ) ) {
 			return false;
 		}
 
-		if ( ! $this->get_expiry_month() ) {
+		if ( ! $this->get_expiry_month( 'edit' ) ) {
 			return false;
 		}
 
-		if ( ! $this->get_card_type() ) {
+		if ( ! $this->get_card_type( 'edit' ) ) {
 			return false;
 		}
 
-		if ( 4 !== strlen( $this->get_expiry_year() ) ) {
+		if ( 4 !== strlen( $this->get_expiry_year( 'edit' ) ) ) {
 			return false;
 		}
 
-		if ( 2 !== strlen( $this->get_expiry_month() ) ) {
+		if ( 2 !== strlen( $this->get_expiry_month( 'edit' ) ) ) {
 			return false;
 		}
 
@@ -65,27 +75,32 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Get type to display to user.
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_display_name() {
+	public function get_display_name( $context = 'view' ) {
 		/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
 		$display = sprintf(
 			__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce' ),
-			wc_get_credit_card_type_label( $this->get_card_type() ),
-			$this->get_last4(),
-			$this->get_expiry_month(),
-			substr( $this->get_expiry_year(), 2 )
+			wc_get_credit_card_type_label( $this->get_card_type( $context ) ),
+			$this->get_last4( $context ),
+			$this->get_expiry_month( $context ),
+			substr( $this->get_expiry_year( $context ), 2 )
 		);
 		return $display;
 	}
 
 	/**
 	 * Returns the card type (mastercard, visa, ...).
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Card type
 	 */
-	public function get_card_type() {
-		return $this->get_meta( 'card_type' );
+	public function get_card_type( $context = 'view' ) {
+		return $this->get_meta( 'card_type', true, $context );
 	}
 
 	/**
@@ -99,11 +114,13 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Returns the card expiration year (YYYY).
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Expiration year
 	 */
-	public function get_expiry_year() {
-		return $this->get_meta( 'expiry_year' );
+	public function get_expiry_year( $context = 'view' ) {
+		return $this->get_meta( 'expiry_year', true, $context );
 	}
 
 	/**
@@ -117,11 +134,13 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Returns the card expiration month (MM).
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Expiration month
 	 */
-	public function get_expiry_month() {
-		return $this->get_meta( 'expiry_month' );
+	public function get_expiry_month( $context = 'view' ) {
+		return $this->get_meta( 'expiry_month', true, $context );
 	}
 
 	/**
@@ -135,11 +154,13 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Returns the last four digits.
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Last 4 digits
 	 */
-	public function get_last4() {
-		return $this->get_meta( 'last4' );
+	public function get_last4( $context = 'view' ) {
+		return $this->get_meta( 'last4', true, $context );
 	}
 
 	/**

@@ -180,14 +180,9 @@ function wc_paying_customer( $order_id ) {
 	$customer_id = $order->get_customer_id();
 
 	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
-		update_user_meta( $customer_id, 'paying_customer', 1 );
-
-		$old_spent = absint( get_user_meta( $customer_id, '_money_spent', true ) );
-		update_user_meta( $customer_id, '_money_spent', $old_spent + $order->get_total( true ) );
-	}
-	if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
-		$old_count = absint( get_user_meta( $customer_id, '_order_count', true ) );
-		update_user_meta( $customer_id, '_order_count', $old_count + 1 );
+		$customer = new WC_Customer( $customer_id );
+		$customer->set_is_paying_customer( true );
+		$customer->save();
 	}
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
@@ -360,30 +355,8 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
  * @return array
  */
 function wc_get_customer_download_permissions( $customer_id ) {
-	global $wpdb;
-
-	return apply_filters( 'woocommerce_permission_list', $wpdb->get_results(
-		$wpdb->prepare( "
-			SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
-			WHERE user_id = %d
-			AND permissions.order_id > 0
-			AND
-				(
-					permissions.downloads_remaining > 0
-					OR permissions.downloads_remaining = ''
-				)
-			AND
-				(
-					permissions.access_expires IS NULL
-					OR permissions.access_expires >= %s
-					OR permissions.access_expires = '0000-00-00 00:00:00'
-				)
-			ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
-			",
-			$customer_id,
-			date( 'Y-m-d', current_time( 'timestamp' ) )
-		)
-	), $customer_id );
+	$data_store = WC_Data_Store::load( 'customer-download' );
+	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id );
 }
 
 /**
@@ -421,7 +394,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$product_id = intval( $result->product_id );
 
-			if ( ! $_product || $_product->id != $product_id ) {
+			if ( ! $_product || $_product->get_id() != $product_id ) {
 				// new product
 				$file_number = 0;
 				$_product    = wc_get_product( $product_id );
@@ -437,7 +410,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
-				$_product->get_title() . ' &ndash; ' . $download_file['name'],
+				$_product->get_name() . ' &ndash; ' . $download_file['name'],
 				$_product,
 				$result->download_id,
 				$file_number
@@ -454,8 +427,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					home_url( '/' )
 				),
 				'download_id'           => $result->download_id,
-				'product_id'            => $_product->id,
-				'product_name'          => $_product->get_title(),
+				'product_id'            => $_product->get_id(),
+				'product_name'          => $_product->get_name(),
 				'download_name'         => $download_name,
 				'order_id'              => $order->get_id(),
 				'order_key'             => $order->get_order_key(),

@@ -36,6 +36,11 @@ class WC_Post_types {
 	 * Register core taxonomies.
 	 */
 	public static function register_taxonomies() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( taxonomy_exists( 'product_type' ) ) {
 			return;
 		}
@@ -47,6 +52,18 @@ class WC_Post_types {
 		register_taxonomy( 'product_type',
 			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_type', array(
+				'hierarchical'      => false,
+				'show_ui'           => false,
+				'show_in_nav_menus' => false,
+				'query_var'         => is_admin(),
+				'rewrite'           => false,
+				'public'            => false,
+			) )
+		);
+
+		register_taxonomy( 'product_visibility',
+			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
+			apply_filters( 'woocommerce_taxonomy_args_product_visibility', array(
 				'hierarchical'      => false,
 				'show_ui'           => false,
 				'show_in_nav_menus' => false,
@@ -173,7 +190,7 @@ class WC_Post_types {
 					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					$wc_product_attributes[ $name ] = $tax;
 					$taxonomy_data                  = array(
-						'hierarchical'          => true,
+						'hierarchical'          => false,
 						'update_count_callback' => '_update_post_term_count',
 						'labels'                => array(
 								'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
@@ -226,6 +243,11 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( post_type_exists( 'product' ) ) {
 			return;
 		}
@@ -273,7 +295,7 @@ class WC_Post_types {
 					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
 					'rewrite'             => $product_permalink ? array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
-					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes', 'publicize', 'wpcom-markdown' ),
+					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'publicize', 'wpcom-markdown' ),
 					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
@@ -284,11 +306,12 @@ class WC_Post_types {
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'label'        => __( 'Variations', 'woocommerce' ),
-					'public'       => false,
-					'hierarchical' => false,
-					'supports'     => false,
+					'label'           => __( 'Variations', 'woocommerce' ),
+					'public'          => false,
+					'hierarchical'    => false,
+					'supports'        => false,
 					'capability_type' => 'product',
+					'rewrite'         => false,
 				)
 			)
 		);
@@ -350,6 +373,7 @@ class WC_Post_types {
 					'exclude_from_order_reports'       => false,
 					'exclude_from_order_sales_reports' => true,
 					'class_name'                       => 'WC_Order_Refund',
+					'rewrite'                          => false,
 				)
 			)
 		);

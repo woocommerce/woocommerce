@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = $order->get_payment_method() ? $order->get_payment_method() : '';
+		$payment_method = $order->get_payment_method();
 
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -228,18 +228,18 @@ class WC_Meta_Box_Order_Data {
 							<?php
 								$statuses = wc_get_order_statuses();
 								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status(), false ) . '>' . esc_html( $status_name ) . '</option>';
+									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
 								}
 							?>
 						</select></p>
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( $order->get_user_id() ) {
+								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->get_user_id() ),
+										'_customer_user' => $order->get_user_id( 'edit' ),
 									);
 									printf( '<a href="%s">%s</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -262,7 +262,9 @@ class WC_Meta_Box_Order_Data {
 								);
 							}
 							?>
-							<input type="hidden" class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
+							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?><option>
+							</select>
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
@@ -270,7 +272,9 @@ class WC_Meta_Box_Order_Data {
 						<h3>
 							<?php _e( 'Billing details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-							<a href="#" class="tips load_customer_billing" data-tip="<?php esc_attr_e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+							<span>
+								<a href="#" class="load_customer_billing" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+							</span>
 						</h3>
 						<?php
 							// Display values
@@ -290,8 +294,12 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'billing_' . $key;
 
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
+										$field_value = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field_value = $order->get_meta( '_' . $field_name );
 									}
+
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 								}
 
 							echo '</div>';
@@ -354,8 +362,10 @@ class WC_Meta_Box_Order_Data {
 						<h3>
 							<?php _e( 'Shipping details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-							<a href="#" class="tips billing-same-as-shipping" data-tip="<?php esc_attr_e( 'Copy from billing', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Copy from billing', 'woocommerce' ); ?></a>
-							<a href="#" class="tips load_customer_shipping" data-tip="<?php esc_attr_e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
+							<span>
+								<a href="#" class="load_customer_shipping" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
+								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php _e( 'Copy billing address', 'woocommerce' ); ?></a>
+							</span>
 						</h3>
 						<?php
 							// Display values
@@ -376,8 +386,12 @@ class WC_Meta_Box_Order_Data {
 										$field_name = 'shipping_' . $key;
 
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( call_user_func( array( $order, 'get_' . $field_name ) ) ) ) . '</p>';
+											$field_value = $order->{"get_$field_name"}( 'edit' );
+										} else {
+											$field_value = $order->get_meta( '_' . $field_name );
 										}
+
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
 									}
 								}
 
@@ -465,7 +479,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_billing_' . $key;
 				}
 
-				$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
+					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 
@@ -476,7 +494,11 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_shipping_' . $key;
 				}
 
-				$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
+					$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+				} else {
+					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				}
 			}
 		}
 

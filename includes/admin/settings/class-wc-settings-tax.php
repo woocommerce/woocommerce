@@ -72,13 +72,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-		$tax_classes     = WC_Tax::get_tax_classes();
-		$classes_options = array();
-
-		foreach ( $tax_classes as $class ) {
-			$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-		}
-
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
 	}
 

@@ -131,33 +131,32 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$variation = wc_get_product( $post );
-		$post_data = get_post( $variation->get_variation_id() );
 		$data      = array(
-			'id'                 => $variation->get_variation_id(),
-			'date_created'       => wc_rest_prepare_date_response( $post_data->post_date_gmt ),
-			'date_modified'      => wc_rest_prepare_date_response( $post_data->post_modified_gmt ),
-			'description'        => $variation->get_variation_description(),
+			'id'                 => $variation->get_id(),
+			'date_created'       => wc_rest_prepare_date_response( $variation->get_date_created() ),
+			'date_modified'      => wc_rest_prepare_date_response( $variation->get_date_modified() ),
+			'description'        => $variation->get_description(),
 			'permalink'          => $variation->get_permalink(),
 			'sku'                => $variation->get_sku(),
 			'price'              => $variation->get_price(),
 			'regular_price'      => $variation->get_regular_price(),
 			'sale_price'         => $variation->get_sale_price(),
-			'date_on_sale_from'  => $variation->sale_price_dates_from ? date( 'Y-m-d', $variation->sale_price_dates_from ) : '',
-			'date_on_sale_to'    => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
+			'date_on_sale_from'  => $variation->get_date_on_sale_from() ? date( 'Y-m-d', $variation->get_date_on_sale_from() ) : '',
+			'date_on_sale_to'    => $variation->get_date_on_sale_to() ? date( 'Y-m-d', $variation->get_date_on_sale_to() ) : '',
 			'on_sale'            => $variation->is_on_sale(),
 			'visible'            => $variation->is_visible(),
 			'purchasable'        => $variation->is_purchasable(),
 			'virtual'            => $variation->is_virtual(),
 			'downloadable'       => $variation->is_downloadable(),
 			'downloads'          => $this->get_downloads( $variation ),
-			'download_limit'     => '' !== $variation->download_limit ? (int) $variation->download_limit : -1,
-			'download_expiry'    => '' !== $variation->download_expiry ? (int) $variation->download_expiry : -1,
+			'download_limit'     => '' !== $variation->get_download_limit() ? (int) $variation->get_download_limit() : -1,
+			'download_expiry'    => '' !== $variation->get_download_expiry() ? (int) $variation->get_download_expiry() : -1,
 			'tax_status'         => $variation->get_tax_status(),
 			'tax_class'          => $variation->get_tax_class(),
 			'manage_stock'       => $variation->managing_stock(),
 			'stock_quantity'     => $variation->get_stock_quantity(),
 			'in_stock'           => $variation->is_in_stock(),
-			'backorders'         => $variation->backorders,
+			'backorders'         => $variation->get_backorders(),
 			'backorders_allowed' => $variation->backorders_allowed(),
 			'backordered'        => $variation->is_on_backorder(),
 			'weight'             => $variation->get_weight(),
@@ -200,27 +199,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$data = new stdClass;
-
-		// ID.
 		if ( isset( $request['id'] ) ) {
-			$data->ID = absint( $request['id'] );
+			$variation = wc_get_product( absint( $request['id'] ) );
+		} else {
+			$variation = new WC_Product_Variation();
 		}
 
-		// Post content.
-		if ( isset( $request['description'] ) ) {
-			$data->post_content = wp_filter_post_kses( $request['description'] );
-		}
-
-		$data->post_parent = $request['product_id'];
-		$data->post_author = get_current_user_id();
-		$data->post_status = 'publish';
-
-		// Only when creating
-		if ( empty( $request['id'] ) ) {
-			$data->post_type = $this->post_type;
-			$data->ping_status = 'closed';
-		}
+		$variation->set_parent_id( absint( $request['product_id'] ) );
 
 		/**
 		 * Filter the query_vars used in `get_items` for the constructed query.
@@ -228,11 +213,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for insertion.
 		 *
-		 * @param stdClass        $data An object representing a single item prepared
-		 *                                       for inserting or updating the database.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param WC_Product_Variation $variation An object representing a single item prepared
+		 *                                        for inserting or updating the database.
+		 * @param WP_REST_Request      $request   Request object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $variation, $request );
 	}
 
 	/**
@@ -245,7 +230,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected function update_post_meta_fields( $post, $request ) {
 		try {
 			$variable_product = wc_get_product( $post );
-			$product          = $variable_product->parent;
+			$product          = wc_get_product( $variable_product->get_parent_id() );
 			$this->save_variations_data( $product, $request, true );
 			return true;
 		} catch ( WC_REST_Exception $e ) {
@@ -263,7 +248,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected function add_post_meta_fields( $post, $request ) {
 		try {
 			$variable_product = wc_get_product( $post->ID );
-			$product          = $variable_product->parent;
+			$product          = wc_get_product( $variable_product->get_parent_id() );
 			$request['id']    = $post->ID;
 			$this->save_variations_data( $product, $request, true );
 			return true;
@@ -395,7 +380,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				'visible' => array(
 					'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
 					'type'        => 'boolean',
-					'default'     => false,
+					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'purchasable' => array(
@@ -420,22 +405,25 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'File MD5 hash.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'name' => array(
-							'description' => __( 'File name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'file' => array(
-							'description' => __( 'File URL.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'File MD5 hash.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'name' => array(
+								'description' => __( 'File name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'file' => array(
+								'description' => __( 'File URL.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),
@@ -507,7 +495,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'dimensions' => array(
 					'description' => __( 'Variation dimensions.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
@@ -543,7 +531,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'image' => array(
 					'description' => __( 'Variation image data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(
@@ -590,21 +578,24 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'List of attributes.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Attribute ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'name' => array(
-							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'option' => array(
-							'description' => __( 'Selected attribute term name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Attribute ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'name' => array(
+								'description' => __( 'Attribute name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'option' => array(
+								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),
@@ -626,7 +617,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		$base       = str_replace( '(?P<product_id>[\d]+)', $product_id, $this->rest_base );
 		$links      = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $variation->get_variation_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $variation->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),

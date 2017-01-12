@@ -25,9 +25,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_coupon( $code = array(), $discount = 0, $discount_tax = 0 ) {
-		_deprecated_function( 'WC_Order::add_coupon', '2.7', 'Create new WC_Order_Item_Coupon object and add to order with WC_Order::add_item()' );
+		wc_deprecated_function( 'WC_Order::add_coupon', '2.7', 'Create new WC_Order_Item_Coupon object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Coupon( array(
+		$item = new WC_Order_Item_Coupon();
+		$item->set_props( array(
 			'code'         => $code,
 			'discount'     => $discount,
 			'discount_tax' => $discount_tax,
@@ -48,9 +49,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
-		_deprecated_function( 'WC_Order::add_tax', '2.7', 'Create new WC_Order_Item_Tax object and add to order with WC_Order::add_item()' );
+		wc_deprecated_function( 'WC_Order::add_tax', '2.7', 'Create new WC_Order_Item_Tax object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Tax( array(
+		$item = new WC_Order_Item_Tax();
+		$item->set_props( array(
 			'rate_id'            => $tax_rate_id,
 			'tax_total'          => $tax_amount,
 			'shipping_tax_total' => $shipping_tax_amount,
@@ -70,9 +72,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_shipping( $shipping_rate ) {
-		_deprecated_function( 'WC_Order::add_shipping', '2.7', 'Create new WC_Order_Item_Shipping object and add to order with WC_Order::add_item()' );
+		wc_deprecated_function( 'WC_Order::add_shipping', '2.7', 'Create new WC_Order_Item_Shipping object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Shipping( array(
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props( array(
 			'method_title' => $shipping_rate->label,
 			'method_id'    => $shipping_rate->id,
 			'total'        => wc_format_decimal( $shipping_rate->cost ),
@@ -94,9 +97,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_fee( $fee ) {
-		_deprecated_function( 'WC_Order::add_fee', '2.7', 'Create new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
+		wc_deprecated_function( 'WC_Order::add_fee', '2.7', 'Create new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
 
-		$item = new WC_Order_Item_Fee( array(
+		$item = new WC_Order_Item_Fee();
+		$item->set_props( array(
 			'name'      => $fee->name,
 			'tax_class' => $fee->taxable ? $fee->tax_class : 0,
 			'total'     => $fee->amount,
@@ -124,7 +128,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	 public function update_product( $item, $product, $args ) {
-		_deprecated_function( 'WC_Order::update_product', '2.7', 'Interact with WC_Order_Item_Product class' );
+		wc_deprecated_function( 'WC_Order::update_product', '2.7', 'Interact with WC_Order_Item_Product class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -151,10 +155,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handly qty if set
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_stock_quantity() ), true );
 			}
-			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : $product->get_price_excluding_tax( $args['qty'] );
-			$args['total']	= $args['total'] ? $args['total'] : $product->get_price_excluding_tax( $args['qty'] );
+			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
+			$args['total']	= $args['total'] ? $args['total'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
 		}
 
 		$item->set_order_id( $this->get_id() );
@@ -173,7 +177,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function update_coupon( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_coupon', '2.7', 'Interact with WC_Order_Item_Coupon class' );
+		wc_deprecated_function( 'WC_Order::update_coupon', '2.7', 'Interact with WC_Order_Item_Coupon class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -212,7 +216,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function update_shipping( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_shipping', '2.7', 'Interact with WC_Order_Item_Shipping class' );
+		wc_deprecated_function( 'WC_Order::update_shipping', '2.7', 'Interact with WC_Order_Item_Shipping class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -249,7 +253,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function update_fee( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_fee', '2.7', 'Interact with WC_Order_Item_Fee class' );
+		wc_deprecated_function( 'WC_Order::update_fee', '2.7', 'Interact with WC_Order_Item_Fee class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -280,7 +284,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function update_tax( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_tax', '2.7', 'Interact with WC_Order_Item_Tax class' );
+		wc_deprecated_function( 'WC_Order::update_tax', '2.7', 'Interact with WC_Order_Item_Tax class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -393,7 +397,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.7' );
 
 		if ( 'completed_date' === $key ) {
 			return $this->get_date_completed();
@@ -407,8 +411,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 			return $this->get_id();
 		} elseif ( 'post' === $key ) {
 			return get_post( $this->get_id() );
-		} elseif ( 'status' === $key || 'post_status' === $key ) {
+		} elseif ( 'status' === $key ) {
 			return $this->get_status();
+		} elseif ( 'post_status' === $key ) {
+			return 'wc-' . $this->get_status();
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
 			return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
@@ -453,7 +459,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function has_meta( $order_item_id ) {
 		global $wpdb;
 
-		_deprecated_function( 'has_meta', '2.7', 'WC_Order_item::get_meta_data' );
+		wc_deprecated_function( 'has_meta', '2.7', 'WC_Order_item::get_meta_data' );
 
 		return $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id, order_item_id
 			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
@@ -465,7 +471,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param  array $item
 	 */
 	public function display_item_meta( $item ) {
-		_deprecated_function( 'display_item_meta', '2.7', 'wc_display_item_meta' );
+		wc_deprecated_function( 'display_item_meta', '2.7', 'wc_display_item_meta' );
 		$product   = $item->get_product();
 		$item_meta = new WC_Order_Item_Meta( $item, $product );
 		$item_meta->display();
@@ -476,7 +482,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param  array $item
 	 */
 	public function display_item_downloads( $item ) {
-		_deprecated_function( 'display_item_downloads', '2.7', 'wc_display_item_downloads' );
+		wc_deprecated_function( 'display_item_downloads', '2.7', 'wc_display_item_downloads' );
 		$product   = $item->get_product();
 
 		if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
@@ -502,7 +508,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return string
 	 */
 	public function get_download_url( $product_id, $download_id ) {
-		_deprecated_function( 'get_download_url', '2.7', 'WC_Order_Item_Product::get_item_download_url' );
+		wc_deprecated_function( 'get_download_url', '2.7', 'WC_Order_Item_Product::get_item_download_url' );
 		return add_query_arg( array(
 			'download_file' => $product_id,
 			'order'         => $this->get_order_key(),
@@ -518,7 +524,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array
 	 */
 	public function get_item_downloads( $item ) {
-		_deprecated_function( 'get_item_downloads', '2.7', 'WC_Order_Item_Product::get_item_downloads' );
+		wc_deprecated_function( 'get_item_downloads', '2.7', 'WC_Order_Item_Product::get_item_downloads' );
 		return $item->get_item_downloads();
 	}
 
@@ -540,7 +546,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array|string
 	 */
 	public function get_item_meta( $order_item_id, $key = '', $single = false ) {
-		_deprecated_function( 'get_item_meta', '2.7', 'wc_get_order_item_meta' );
+		wc_deprecated_function( 'get_item_meta', '2.7', 'wc_get_order_item_meta' );
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
@@ -551,7 +557,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array of objects
 	 */
 	public function get_item_meta_array( $order_item_id ) {
-		_deprecated_function( 'get_item_meta_array', '2.7', 'WC_Order_Item::get_meta_data() (note the format has changed)' );
+		wc_deprecated_function( 'get_item_meta_array', '2.7', 'WC_Order_Item::get_meta_data() (note the format has changed)' );
 		$item            = $this->get_item( $order_item_id );
 		$meta_data       = $item->get_meta_data();
 		$item_meta_array = array();
@@ -571,7 +577,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return array
 	 */
 	public function expand_item_meta( $item ) {
-		_deprecated_function( 'expand_item_meta', '2.7', '' );
+		wc_deprecated_function( 'expand_item_meta', '2.7' );
 		return $item;
 	}
 
@@ -581,7 +587,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param int|object|WC_Order $order Order to init.
 	 */
 	protected function init( $order ) {
-		_deprecated_function( 'init', '2.7', 'Logic moved to constructor' );
+		wc_deprecated_function( 'init', '2.7', 'Logic moved to constructor' );
 		if ( is_numeric( $order ) ) {
 			$this->read( $order );
 		} elseif ( $order instanceof WC_Order ) {
@@ -598,7 +604,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return bool
 	 */
 	public function get_order( $id = 0 ) {
-		_deprecated_function( 'get_order', '2.7', 'read' );
+		wc_deprecated_function( 'get_order', '2.7', 'read' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -615,7 +621,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param mixed $result
 	 */
 	public function populate( $result ) {
-		_deprecated_function( 'populate', '2.7', 'read' );
+		wc_deprecated_function( 'populate', '2.7', 'read' );
 		$this->read( $result->ID );
 	}
 
@@ -625,7 +631,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param string $note (default: '') Optional note to add.
 	 */
 	public function cancel_order( $note = '' ) {
-		_deprecated_function( 'cancel_order', '2.7', 'update_status' );
+		wc_deprecated_function( 'cancel_order', '2.7', 'update_status' );
 		WC()->session->set( 'order_awaiting_payment', false );
 		$this->update_status( 'cancelled', $note );
 	}
@@ -635,7 +641,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0
 	 */
 	public function record_product_sales() {
-		_deprecated_function( 'record_product_sales', '2.7', 'wc_update_total_sales_counts' );
+		wc_deprecated_function( 'record_product_sales', '2.7', 'wc_update_total_sales_counts' );
 		wc_update_total_sales_counts( $this->get_id() );
 	}
 
@@ -644,7 +650,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0
 	 */
 	public function increase_coupon_usage_counts() {
-		_deprecated_function( 'increase_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
+		wc_deprecated_function( 'increase_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
 		wc_update_coupon_usage_counts( $this->get_id() );
 	}
 
@@ -653,7 +659,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0
 	 */
 	public function decrease_coupon_usage_counts() {
-		_deprecated_function( 'decrease_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
+		wc_deprecated_function( 'decrease_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
 		wc_update_coupon_usage_counts( $this->get_id() );
 	}
 
@@ -662,7 +668,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0
 	 */
 	public function reduce_order_stock() {
-		_deprecated_function( 'reduce_order_stock', '2.7', 'wc_reduce_stock_levels' );
+		wc_deprecated_function( 'reduce_order_stock', '2.7', 'wc_reduce_stock_levels' );
 		wc_reduce_stock_levels( $this->get_id() );
 	}
 
@@ -671,7 +677,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0 No longer needs to be called directly.
 	 */
 	public function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
-		_deprecated_function( 'send_stock_notifications', '2.7' );
+		wc_deprecated_function( 'send_stock_notifications', '2.7' );
 	}
 
 	/**
@@ -681,7 +687,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return string
 	 */
 	public function email_order_items_table( $args = array() ) {
-		_deprecated_function( 'email_order_items_table', '2.7', 'wc_get_email_order_items' );
+		wc_deprecated_function( 'email_order_items_table', '2.7', 'wc_get_email_order_items' );
 		return wc_get_email_order_items( $this, $args );
 	}
 
@@ -690,7 +696,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @deprecated 2.7.0
 	 */
 	public function get_order_currency() {
-		_deprecated_function( 'get_order_currency', '2.7', 'get_currency' );
+		wc_deprecated_function( 'get_order_currency', '2.7', 'get_currency' );
 		return apply_filters( 'woocommerce_get_order_currency', $this->get_currency(), $this );
 	}
 }

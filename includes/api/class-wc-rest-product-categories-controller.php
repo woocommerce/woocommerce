@@ -113,8 +113,13 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
 
-		update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
-		update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
+		if ( isset( $request['display'] ) ) {
+			update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
+		}
+
+		if ( isset( $request['menu_order'] ) ) {
+			update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
+		}
 
 		if ( isset( $request['image'] ) ) {
 			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
@@ -205,7 +210,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				),
 				'image' => array(
 					'description' => __( 'Image data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id' => array(

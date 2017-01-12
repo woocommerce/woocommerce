@@ -158,6 +158,7 @@ return array(
 			'BG',
 			'BY',
 			'CH',
+			'CY',
 			'CZ',
 			'DE',
 			'DK',

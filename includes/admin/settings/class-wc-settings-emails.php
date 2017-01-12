@@ -118,9 +118,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Base colour', 'woocommerce' ),
+				'title'    => __( 'Base color', 'woocommerce' ),
 				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The base colour for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
+				'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
 				'id'       => 'woocommerce_email_base_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -130,9 +130,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Background colour', 'woocommerce' ),
+				'title'    => __( 'Background color', 'woocommerce' ),
 				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The background colour for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#f7f7f7</code>' ),
+				'desc'     => sprintf( __( 'The background color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#f7f7f7</code>' ),
 				'id'       => 'woocommerce_email_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -142,9 +142,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Body background colour', 'woocommerce' ),
+				'title'    => __( 'Body background color', 'woocommerce' ),
 				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The main body background colour. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
+				'desc'     => sprintf( __( 'The main body background color. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
 				'id'       => 'woocommerce_email_body_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -154,9 +154,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Body text colour', 'woocommerce' ),
+				'title'    => __( 'Body text color', 'woocommerce' ),
 				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The main body text colour. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
+				'desc'     => sprintf( __( 'The main body text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
 				'id'       => 'woocommerce_email_text_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',

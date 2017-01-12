@@ -384,8 +384,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -428,8 +428,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -472,8 +472,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -528,8 +528,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -574,8 +574,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -622,8 +622,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -668,8 +668,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -719,8 +719,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -886,7 +886,7 @@ abstract class WC_Settings_API {
 	 * @deprecated 2.6.0 No longer used
 	 */
 	public function validate_settings_fields( $form_fields = array() ) {
-		_deprecated_function( 'validate_settings_fields', '2.6' );
+		wc_deprecated_function( 'validate_settings_fields', '2.6' );
 	}
 
 	/**
@@ -896,7 +896,7 @@ abstract class WC_Settings_API {
 	 * @return array
 	 */
 	public function format_settings( $value ) {
-		_deprecated_function( 'format_settings', '2.6' );
+		wc_deprecated_function( 'format_settings', '2.6' );
 		return $value;
 	}
 }

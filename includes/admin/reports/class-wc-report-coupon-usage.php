@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */

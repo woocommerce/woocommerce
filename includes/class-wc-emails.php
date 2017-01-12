@@ -45,7 +45,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -54,7 +54,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -399,7 +399,7 @@ class WC_Emails {
 		$message = sprintf(
 			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
 			html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-			html_entity_decode( strip_tags( $product->get_total_stock() ) )
+			html_entity_decode( strip_tags( $product->get_stock_quantity() ) )
 		);
 
 		wp_mail(
@@ -472,7 +472,7 @@ class WC_Emails {
 	 * @param bool $plain_text (default: false)
 	 */
 	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
+		wc_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
 
 		WC()->structured_data->generate_order_data( $order, $sent_to_admin, $plain_text );
 		WC()->structured_data->output_structured_data();

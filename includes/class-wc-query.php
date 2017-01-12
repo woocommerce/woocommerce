@@ -125,11 +125,11 @@ class WC_Query {
 				$title = __( 'Lost password', 'woocommerce' );
 			break;
 			default :
-				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
+				$title = '';
 			break;
 		}
 
-		return $title;
+		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint );
 	}
 
 	/**
@@ -390,8 +390,8 @@ class WC_Query {
 		}
 
 		// Query vars that affect posts shown
-		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ) ) );
-		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
+		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
+		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
@@ -508,7 +508,7 @@ class WC_Query {
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
+		wc_deprecated_function( 'order_by_rating_post_clauses', '2.7' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -526,19 +526,80 @@ class WC_Query {
 	 * Appends meta queries to an array.
 	 *
 	 * @param  array $meta_query
+	 * @param  bool $main_query
 	 * @return array
 	 */
-	public function get_meta_query( $meta_query = array() ) {
+	public function get_meta_query( $meta_query = array(), $main_query = false ) {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-
-		$meta_query['visibility']    = $this->visibility_meta_query();
-		$meta_query['stock_status']  = $this->stock_status_meta_query();
 		$meta_query['price_filter']  = $this->price_filter_meta_query();
-		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
-
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
+	}
+
+	/**
+	 * Appends tax queries to an array.
+	 * @param array $tax_query
+	 * @param bool  $main_query
+	 * @return array
+	 */
+	public function get_tax_query( $tax_query = array(), $main_query = false ) {
+		if ( ! is_array( $tax_query ) ) {
+			$tax_query = array( 'relation' => 'AND' );
+		}
+
+		// Layered nav filters on terms.
+		if ( $main_query && ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) ) {
+			foreach ( $_chosen_attributes as $taxonomy => $data ) {
+				$tax_query[] = array(
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false,
+				);
+			}
+		}
+
+		$product_visibility_terms   = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+		$product_visibility_in     = array();
+
+		// Hide out of stock products.
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+		}
+
+		// Filter by rating.
+		if ( isset( $_GET['rating_filter'] ) ) {
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
+			$rating_terms  = array();
+			for ( $i = 1; $i <= 5; $i ++ ) {
+				if ( in_array( $i, $rating_filter ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
+					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
+				}
+			}
+			if ( ! empty( $rating_terms ) ) {
+				$tax_query[] = array(
+					'taxonomy'      => 'product_visibility',
+					'field'         => 'term_taxonomy_id',
+					'terms'         => $rating_terms,
+					'operator'      => 'IN',
+					'rating_filter' => true,
+				);
+			}
+		}
+
+		if ( ! empty( $product_visibility_not_in ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			);
+		}
+
+		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
 	}
 
 	/**
@@ -558,70 +619,34 @@ class WC_Query {
 
 	/**
 	 * Return a meta query for filtering by rating.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
 	 * @return array
 	 */
 	public function rating_filter_meta_query() {
-		return isset( $_GET['min_rating'] ) ? array(
-			'key'           => '_wc_average_rating',
-			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
-			'compare'       => '>=',
-			'type'          => 'DECIMAL',
-			'rating_filter' => true,
-		) : array();
+		return array();
 	}
 
 	/**
 	 * Returns a meta query to handle product visibility.
+	 *
+	 * @deprecated 2.7.0 Replaced with taxonomy.
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
-		return array(
-			'key'     => '_visibility',
-			'value'   => is_search() ? array( 'visible', 'search' ) : array( 'visible', 'catalog' ),
-			'compare' => $compare,
-		);
+		return array();
 	}
 
 	/**
 	 * Returns a meta query to handle product stock status.
 	 *
-	 * @access public
+	 * @deprecated 2.7.0 Replaced with taxonomy.
 	 * @param string $status (default: 'instock')
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
-		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
-			'key' 		=> '_stock_status',
-			'value' 	=> $status,
-			'compare' 	=> '=',
-		) : array();
-	}
-
-	/**
-	 * Appends tax queries to an array.
-	 * @param array $tax_query
-	 * @return array
-	 */
-	public function get_tax_query( $tax_query = array() ) {
-		if ( ! is_array( $tax_query ) ) {
-			$tax_query = array();
-		}
-
-		// Layered nav filters on terms
-		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
-			foreach ( $_chosen_attributes as $taxonomy => $data ) {
-				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'slug',
-					'terms'    => $data['terms'],
-					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
-					'include_children' => false,
-				);
-			}
-		}
-
-		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
+		return array();
 	}
 
 	/**
@@ -631,32 +656,7 @@ class WC_Query {
 	public static function get_main_tax_query() {
 		global $wp_the_query;
 
-		$args      = $wp_the_query->query_vars;
-		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
-
-		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
-			$tax_query[ $args['taxonomy'] ] = array(
-				'taxonomy' => $args['taxonomy'],
-				'terms'    => array( $args['term'] ),
-				'field'    => 'slug',
-			);
-		}
-
-		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query['product_cat'] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => array( $args['product_cat'] ),
-				'field'    => 'slug',
-			);
-		}
-
-		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query['product_tag'] = array(
-				'taxonomy' => 'product_tag',
-				'terms'    => array( $args['product_tag'] ),
-				'field'    => 'slug',
-			);
-		}
+		$tax_query = isset( $wp_the_query->tax_query, $wp_the_query->tax_query->queries ) ? $wp_the_query->tax_query->queries : array();
 
 		return $tax_query;
 	}
@@ -738,7 +738,7 @@ class WC_Query {
 	 * @deprecated 2.6.0
 	 */
 	public function layered_nav_init() {
-		_deprecated_function( 'layered_nav_init', '2.6', '' );
+		wc_deprecated_function( 'layered_nav_init', '2.6' );
 	}
 
 	/**
@@ -746,7 +746,7 @@ class WC_Query {
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {
-		_deprecated_function( 'get_products_in_view', '2.6', '' );
+		wc_deprecated_function( 'get_products_in_view', '2.6' );
 	}
 
 	/**
@@ -754,6 +754,6 @@ class WC_Query {
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		_deprecated_function( 'layered_nav_query', '2.6', '' );
+		wc_deprecated_function( 'layered_nav_query', '2.6' );
 	}
 }

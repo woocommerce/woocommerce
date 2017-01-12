@@ -21,8 +21,10 @@ include( 'wc-user-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
 include( 'wc-order-functions.php' );
+include( 'wc-order-item-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
+include( 'wc-stock-functions.php' );
 include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
@@ -47,6 +49,19 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+
+/**
+ * Define a constant if it is not already defined.
+ *
+ * @since  2.7.0
+ * @param  string $name
+ * @param  string $value
+ */
+function wc_maybe_define_constant( $name, $value ) {
+	if ( ! defined( $name ) ) {
+		define( $name, $value );
+	}
+}
 
 /**
  * Create a new order programmatically.
@@ -174,7 +189,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	if ( ! file_exists( $located ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
 		return;
 	}
 
@@ -326,6 +341,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian rupee', 'woocommerce' ),
 				'IQD' => __( 'Iraqi dinar', 'woocommerce' ),
 				'IRR' => __( 'Iranian rial', 'woocommerce' ),
+				'IRT' => __( 'Iranian toman', 'woocommerce' ),
 				'ISK' => __( 'Icelandic kr&oacute;na', 'woocommerce' ),
 				'JEP' => __( 'Jersey pound', 'woocommerce' ),
 				'JMD' => __( 'Jamaican dollar', 'woocommerce' ),
@@ -503,6 +519,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'INR' => '&#8377;',
 		'IQD' => '&#x639;.&#x62f;',
 		'IRR' => '&#xfdfc;',
+		'IRT' => '&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;',
 		'ISK' => 'kr.',
 		'JEP' => '&pound;',
 		'JMD' => '&#36;',
@@ -744,7 +761,7 @@ function get_woocommerce_api_url( $path ) {
  * @return string the log file path.
  */
 function wc_get_log_file_path( $handle ) {
-	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+	return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle ) . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
 }
 
 /**
@@ -878,7 +895,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * @return string[]
  */
 function wc_get_core_supported_themes() {
-	return array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
 
 /**
@@ -920,7 +937,6 @@ function wc_format_country_state_string( $country_string ) {
 /**
  * Get the store's base location.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
  */
@@ -936,8 +952,6 @@ function wc_get_base_location() {
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
- * @todo deprecate woocommerce_customer_default_location and support an array filter only to cover all cases.
  * @since 2.3.0
  * @return array
  */
@@ -1363,7 +1377,7 @@ function wc_set_time_limit( $limit = 0 ) {
  * @since 2.6.0
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	if ( $a['position'] == $b['position'] ) {
+	if ( $a['position'] === $b['position'] ) {
 		return 0;
 	}
 	return ( $a['position'] < $b['position'] ) ? -1 : 1;
@@ -1410,21 +1424,6 @@ function wc_get_logger() {
 }
 
 /**
- * Runs a deprecated action with notice only if used.
- * @since  2.7.0
- * @param  string $action
- * @param  array $args
- * @param  string $deprecated_in
- * @param  string $replacement
- */
-function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
-	if ( has_action( $action ) ) {
-		_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
-		do_action_ref_array( $action, $args );
-	}
-}
-
-/**
  * Store user agents. Used for tracker.
  * @since 2.7.0
  */
@@ -1436,3 +1435,45 @@ function wc_maybe_store_user_agent( $user_login, $user ) {
 	}
 }
 add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
+
+/**
+ * Based on wp_list_pluck, this calls a method instead of returning a property.
+ *
+ * @since 2.7.0
+ * @param array      $list      List of objects or arrays
+ * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
+ * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
+ *                              Default null.
+ * @return array Array of values.
+ */
+function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
+	// Use wp_list_pluck if this isn't a callback
+	$first_el = current( $list );
+	if ( ! is_object( $first_el ) || ! is_callable( array( $first_el, $callback_or_field ) ) ) {
+		return wp_list_pluck( $list, $callback_or_field, $index_key );
+	}
+	if ( ! $index_key ) {
+		/*
+		 * This is simple. Could at some point wrap array_column()
+		 * if we knew we had an array of arrays.
+		 */
+		foreach ( $list as $key => $value ) {
+			$list[ $key ] = $value->{$callback_or_field}();
+		}
+		return $list;
+	}
+
+	/*
+	 * When index_key is not set for a particular item, push the value
+	 * to the end of the stack. This is how array_column() behaves.
+	 */
+	$newlist = array();
+	foreach ( $list as $value ) {
+		if ( isset( $value->$index_key ) ) {
+			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
+		} else {
+			$newlist[] = $value->{$callback_or_field}();
+		}
+	}
+	return $newlist;
+}

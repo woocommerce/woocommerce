@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing price by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -49,9 +49,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
-							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'4' => __( 'Set to regular price decreased by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -218,12 +218,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
 				<?php
-					$options = array(
-						''           => __( '— No change —', 'woocommerce' ),
-						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' ),
-					);
-					foreach ( $options as $key => $value ) {
+					echo '<option value="">' . __( '— No Change —', 'woocommerce' ) . '</option>';
+
+					foreach ( wc_get_product_stock_status_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
@@ -277,13 +274,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="input-text-wrap">
 					<select class="backorders" name="_backorders">
 					<?php
-						$options = array(
-							''       => __( '— No change —', 'woocommerce' ),
-							'no'     => __( 'Do not allow', 'woocommerce' ),
-							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-							'yes'    => __( 'Allow', 'woocommerce' ),
-						);
-						foreach ( $options as $key => $value ) {
+						echo '<option value="">' . __( '— No Change —', 'woocommerce' ) . '</option>';
+
+						foreach ( wc_get_product_backorder_options() as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>

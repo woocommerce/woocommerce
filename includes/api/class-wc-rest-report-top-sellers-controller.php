@@ -80,7 +80,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 
 			if ( $product ) {
 				$top_sellers[] = array(
-					'name'      => $product->get_title(),
+					'name'      => $product->get_name(),
 					'product_id' => (int) $item->product_id,
 					'quantity'   => wc_stock_amount( $item->order_item_qty ),
 				);

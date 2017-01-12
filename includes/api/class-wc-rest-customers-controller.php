@@ -311,7 +311,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$customer->set_username( $request['username'] );
 			$customer->set_password( $request['password'] );
 			$customer->set_email( $request['email'] );
-			$customer->create();
+			$customer->save();
 
 			if ( ! $customer->get_id() ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
@@ -320,7 +320,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$this->update_customer_meta_fields( $customer, $request );
 			$customer->save();
 
-			$user_data = get_user_by( 'id', $customer->get_id() );
+			$user_data = get_userdata( $customer->get_id() );
 			$this->update_additional_fields_for_object( $user_data, $request );
 
 			/**
@@ -402,6 +402,10 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 
 			$user_data = get_userdata( $customer->get_id() );
 			$this->update_additional_fields_for_object( $user_data, $request );
+
+			if ( ! is_user_member_of_blog( $user_data->ID ) ) {
+				$user_data->add_role( 'customer' );
+			}
 
 			/**
 			 * Fires after a customer is created or updated via the REST API.
@@ -495,9 +499,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
 		}
 
-		// Remove unwanted CRUD data.
-		unset( $data['role'] );
-
 		// Additional non-crud data.
 		$data['orders_count'] = $customer->get_order_count();
 		$data['total_spent']  = $customer->get_total_spent();
@@ -532,7 +533,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['meta_data'] ) ) {
 			if ( is_array( $request['meta_data'] ) ) {
 				foreach ( $request['meta_data'] as $meta ) {
-					$coupon->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
+					$customer->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
 				}
 			}
 		}
@@ -551,7 +552,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['billing'] ) ) {
 			foreach ( array_keys( $schema['properties']['billing']['properties'] ) as $field ) {
 				if ( isset( $request['billing'][ $field ] ) && is_callable( array( $customer, "set_billing_{$field}" ) ) ) {
-					$customer->{"set_billing_{$field}"}( $request['billing'][ $field ]  );
+					$customer->{"set_billing_{$field}"}( $request['billing'][ $field ] );
 				}
 			}
 		}
@@ -560,7 +561,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		if ( isset( $request['shipping'] ) ) {
 			foreach ( array_keys( $schema['properties']['shipping']['properties'] ) as $field ) {
 				if ( isset( $request['shipping'][ $field ] ) && is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
-					$customer->{"set_shipping_{$field}"}( $request['shipping'][ $field ]  );
+					$customer->{"set_shipping_{$field}"}( $request['shipping'][ $field ] );
 				}
 			}
 		}
@@ -636,6 +637,12 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'role' => array(
+					'description' => __( 'Customer role.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'username' => array(
 					'description' => __( 'Customer login name.', 'woocommerce' ),
 					'type'        => 'string',
@@ -669,7 +676,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'billing' => array(
 					'description' => __( 'List of billing address data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(
@@ -732,7 +739,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'shipping' => array(
 					'description' => __( 'List of shipping address data.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(
@@ -792,22 +799,25 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 					'description' => __( 'Order meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'int',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'key' => array(
-							'description' => __( 'Meta key.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'value' => array(
-							'description' => __( 'Meta value.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key' => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),

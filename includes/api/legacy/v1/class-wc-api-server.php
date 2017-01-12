@@ -661,9 +661,17 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param int|string $timestamp unix timestamp or MySQL datetime
 	 * @param bool $convert_to_utc
+	 * @param bool $convert_to_gmt Use GMT timezone.
 	 * @return string RFC3339 datetime
 	 */
-	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+	public function format_datetime( $timestamp, $convert_to_utc = false, $convert_to_gmt = false ) {
+		if ( $convert_to_gmt ) {
+			if ( is_numeric( $timestamp ) ) {
+				$timestamp = date( 'Y-m-d H:i:s', $timestamp );
+			}
+
+			$timestamp = get_gmt_from_date( $timestamp );
+		}
 
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );

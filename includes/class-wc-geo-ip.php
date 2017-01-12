@@ -1629,9 +1629,13 @@ class WC_Geo_IP {
 	 * Country ID by addr IPv6.
 	 *
 	 * @param  string $addr
-	 * @return int
+	 * @return int|bool
 	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
+		if ( ! defined( 'AF_INET6' ) ) {
+			$this->log( 'GEOIP (geoip_country_id_by_addr_v6): PHP was compiled with --disable-ipv6 option' );
+			return false;
+		}
 		$ipnum = inet_pton( $addr );
 		return $this->_geoip_seek_country_v6( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
 	}

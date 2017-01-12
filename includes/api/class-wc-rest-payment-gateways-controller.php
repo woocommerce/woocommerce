@@ -191,10 +191,23 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 		// Update if this method is enabled or not.
 		if ( isset( $request['enabled'] ) ) {
-			$settings        = $gateway->settings;
-			$gateway->enabled = $settings['enabled'] = (bool) $request['enabled'];
+			$settings         = $gateway->settings;
+			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
 			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
-			$gateway->settings = $settings;
+		}
+
+		// Update title.
+		if ( isset( $request['title'] ) ) {
+			$settings         = $gateway->settings;
+			$gateway->title   = $settings['title'] = $request['title'];
+			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
+		}
+
+		// Update description.
+		if ( isset( $request['description'] ) ) {
+			$settings              = $gateway->settings;
+			$gateway->description  = $settings['description'] = $request['description'];
+			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -324,7 +337,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'id' => array(
 					'description' => __( 'Payment gateway ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Payment gateway title on checkout.', 'woocommerce' ),
@@ -352,16 +366,18 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'method_title' => array(
 					'description' => __( 'Payment gateway method title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_description' => array(
 					'description' => __( 'Payment gateway method description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'settings' => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 				),
 			),

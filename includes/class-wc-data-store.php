@@ -27,7 +27,26 @@ class WC_Data_Store {
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
 	 */
-	private $stores = array();
+	private $stores = array(
+		'coupon'              => 'WC_Coupon_Data_Store_CPT',
+		'customer'            => 'WC_Customer_Data_Store',
+		'customer-download'   => 'WC_Customer_Download_Data_Store',
+		'customer-session'    => 'WC_Customer_Data_Store_Session',
+		'order'               => 'WC_Order_Data_Store_CPT',
+		'order-refund'        => 'WC_Order_Refund_Data_Store_CPT',
+		'order-item'          => 'WC_Order_Item_Data_Store',
+		'order-item-coupon'   => 'WC_Order_Item_Coupon_Data_Store',
+		'order-item-fee'      => 'WC_Order_Item_Fee_Data_Store',
+		'order-item-product'  => 'WC_Order_Item_Product_Data_Store',
+		'order-item-shipping' => 'WC_Order_Item_Shipping_Data_Store',
+		'order-item-tax'      => 'WC_Order_Item_Tax_Data_Store',
+		'payment-token'       => 'WC_Payment_Token_Data_Store',
+		'product'             => 'WC_Product_Data_Store_CPT',
+		'product-grouped'     => 'WC_Product_Grouped_Data_Store_CPT',
+		'product-variable'    => 'WC_Product_Variable_Data_Store_CPT',
+		'product-variation'   => 'WC_Product_Variation_Data_Store_CPT',
+		'shipping-zone'       => 'WC_Shipping_Zone_Data_Store',
+	);
 
 	/**
 	 * Contains the name of the current data store's class name.
@@ -44,9 +63,9 @@ class WC_Data_Store {
 		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
 		// If this object type can't be found, check to see if we can load one
-		// level up (so if product_type isn't found, we try product).
+		// level up (so if product-type isn't found, we try product).
 		if ( ! array_key_exists( $object_type, $this->stores ) ) {
-			$pieces = explode( '_', $object_type );
+			$pieces = explode( '-', $object_type );
 			$object_type = $pieces[0];
 		}
 
@@ -121,10 +140,26 @@ class WC_Data_Store {
 	 *
 	 * @since 2.7.0
 	 * @param WC_Data
-	 * @param bool $force_delete True to permently delete, false to trash.
+	 * @param array $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$data, $force_delete = false ) {
-		$this->instance->delete( $data, $force_delete );
+	public function delete( &$data, $args = array() ) {
+		$this->instance->delete( $data, $args );
+	}
+
+	/**
+	 * Data stores can define additional functions (for example, coupons have
+	 * some helper methods for increasing or decreasing usage). This passes
+	 * through to the instance if that function exists.
+	 *
+	 * @since 2.7.0
+	 * @param $method
+	 * @param $parameters
+	 */
+	public function __call( $method, $parameters ) {
+		if ( is_callable( array( $this->instance, $method ) ) ) {
+			$object = array_shift( $parameters );
+			return call_user_func_array( array( $this->instance, $method ), array_merge( array( &$object ), $parameters ) );
+		}
 	}
 
 }

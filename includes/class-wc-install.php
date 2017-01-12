@@ -74,6 +74,10 @@ class WC_Install {
 		),
 		'2.7.0' => array(
 			'wc_update_270_webhooks',
+			'wc_update_270_grouped_products',
+			'wc_update_270_settings',
+			'wc_update_270_product_visibility',
+			'wc_update_270_db_version',
 		),
 	);
 
@@ -136,6 +140,10 @@ class WC_Install {
 	 */
 	public static function install() {
 		global $wpdb;
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
 			define( 'WC_INSTALLING', true );
@@ -217,6 +225,16 @@ class WC_Install {
 	}
 
 	/**
+	 * Get list of DB update callbacks.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public static function get_db_update_callbacks() {
+		return self::$db_updates;
+	}
+
+	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
@@ -224,7 +242,7 @@ class WC_Install {
 		$logger             = wc_get_logger();
 		$update_queued      = false;
 
-		foreach ( self::$db_updates as $version => $update_callbacks ) {
+		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
 					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );
@@ -361,11 +379,22 @@ class WC_Install {
 				'variable',
 				'external',
 			),
+			'product_visibility' => array(
+				'exclude-from-search',
+				'exclude-from-catalog',
+				'featured',
+				'outofstock',
+				'rated-1',
+				'rated-2',
+				'rated-3',
+				'rated-4',
+				'rated-5',
+			),
 		);
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
 			foreach ( $terms as $term ) {
-				if ( ! get_term_by( 'slug', sanitize_title( $term ), $taxonomy ) ) {
+				if ( ! get_term_by( 'name', $term, $taxonomy ) ) {
 					wp_insert_term( $term, $taxonomy );
 				}
 			}
@@ -911,6 +940,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @since 2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		// Explicitly clear the event.
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
+
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once( ABSPATH . 'wp-admin/includes/file.php' );
 			require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );

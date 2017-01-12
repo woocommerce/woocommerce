@@ -92,6 +92,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'INR' => 'Indian rupee',
 			'IQD' => 'Iraqi dinar',
 			'IRR' => 'Iranian rial',
+			'IRT' => 'Iranian toman',
 			'ISK' => 'Icelandic kr&oacute;na',
 			'JEP' => 'Jersey pound',
 			'JMD' => 'Jamaican dollar',
@@ -244,7 +245,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_core_supported_themes() {
 
-		$expected_themes = array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+		$expected_themes = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}

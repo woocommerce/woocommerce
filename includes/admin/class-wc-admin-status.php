@@ -196,6 +196,8 @@ class WC_Admin_Status {
 	 * @return string Version number if found.
 	 */
 	public static function get_latest_theme_version( $theme ) {
+		include_once( ABSPATH . 'wp-admin/includes/theme.php' );
+
 		$api = themes_api( 'theme_information', array(
 			'slug'     => $theme->get_stylesheet(),
 			'fields'   => array(

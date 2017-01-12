@@ -1,4 +1,4 @@
-/*global wc_single_product_params, flexslider_options, PhotoSwipe, PhotoSwipeUI_Default */
+/*global wc_single_product_params, PhotoSwipe, PhotoSwipeUI_Default */
 jQuery( function( $ ) {
 
 	// wc_single_product_params is required to continue, ensure the object exists
@@ -118,12 +118,12 @@ jQuery( function( $ ) {
 		init_flexslider: function() {
 			$( '.woocommerce-product-gallery' ).flexslider({
 				selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
-				animation:      flexslider_options.animation,
-				smoothHeight:   flexslider_options.smoothHeight,
-				directionNav:   flexslider_options.directionNav,
-				controlNav:     flexslider_options.controlNav,
-				slideshow:      flexslider_options.slideshow,
-				animationSpeed: flexslider_options.animationSpeed,
+				animation:      wc_single_product_params.flexslider.animation,
+				smoothHeight:   wc_single_product_params.flexslider.smoothHeight,
+				directionNav:   wc_single_product_params.flexslider.directionNav,
+				controlNav:     wc_single_product_params.flexslider.controlNav,
+				slideshow:      wc_single_product_params.flexslider.slideshow,
+				animationSpeed: wc_single_product_params.flexslider.animationSpeed,
 				animationLoop:  false // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
 			});
 		},
@@ -132,10 +132,12 @@ jQuery( function( $ ) {
 		 * Init zoom.
 		 */
 		init_zoom: function() {
-			// But only zoom if the img is larger than its container and the visitor is not on a touch device.
-			if ( ( $( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) && ( ! wc_product_gallery.is_touch_device() ) ) {
-				$( '.woocommerce-product-gallery__image' ).trigger('zoom.destroy');
-				$( '.woocommerce-product-gallery__image' ).zoom();
+			// But only zoom if the img is larger than its container.
+			if ( ( $( '.woocommerce-product-gallery__image img' ).attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) ) {
+				$( '.woocommerce-product-gallery__image' ).trigger( 'zoom.destroy' );
+				$( '.woocommerce-product-gallery__image' ).zoom({
+					touch: false
+				});
 			}
 		},
 

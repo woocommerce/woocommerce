@@ -1001,3 +1001,79 @@ function wc_update_270_comment_type_index() {
 
 	$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 }
+
+function wc_update_270_grouped_products() {
+	global $wpdb;
+	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
+	foreach ( $parents as $parent_id ) {
+		$parent = wc_get_product( $parent_id );
+		if ( $parent && $parent->is_type( 'grouped' ) ) {
+			$children_ids = get_posts( array(
+				'post_parent'    => $parent_id,
+				'posts_per_page' => -1,
+				'post_type'      => 'product',
+				'fields'         => 'ids',
+			) );
+			add_post_meta( $parent_id, '_children', $children_ids, true );
+		}
+	}
+}
+
+function wc_update_270_settings() {
+	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+	if ( '' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+	} elseif ( 'standard' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', '' );
+	}
+}
+
+/**
+ * Convert meta values into term for product visibility.
+ */
+function wc_update_270_product_visibility() {
+	global $wpdb;
+
+	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
+	}
+
+	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_id ) );
+	}
+
+	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
+	}
+
+	if ( $outofstock_term = get_term_by( 'name', 'out-of-stock', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IN 'outofstock';", $outofstock_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_id ) );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_270_db_version() {
+	WC_Install::update_db_version( '2.7.0' );
+}

@@ -37,9 +37,9 @@ class WC_Geolocation {
 
 	/** @var array API endpoints for geolocating an IP address */
 	private static $geoip_apis = array(
-		'freegeoip'        => 'https://freegeoip.net/json/%s',
-		'telize'           => 'http://www.telize.com/geoip/%s',
-		'geoip-api.meteor' => 'http://geoip-api.meteor.com/lookup/%s',
+		'freegeoip'  => 'https://freegeoip.net/json/%s',
+		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
+		'ip-api.com' => 'http://ip-api.com/json/%s',
 	);
 
 	/**
@@ -130,6 +130,12 @@ class WC_Geolocation {
 			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
 			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
 				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
+			// WP.com VIP has a variable available.
+			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) {
+				$country_code = sanitize_text_field( strtoupper( $_SERVER['GEOIP_COUNTRY_CODE'] ) );
+			// VIP Go has a variable available also.
+			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) {
+				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_X_COUNTRY_CODE'] ) );
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
@@ -257,12 +263,15 @@ class WC_Geolocation {
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
-						case 'geoip-api.meteor' :
+						case 'ipinfo.io' :
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
 						break;
+						case 'ip-api.com' :
+							$data         = json_decode( $response['body'] );
+							$country_code = isset( $data->countryCode ) ? $data->countryCode : '';
+						break;
 						case 'freegeoip' :
-						case 'telize' :
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country_code ) ? $data->country_code : '';
 						break;

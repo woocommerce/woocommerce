@@ -15,17 +15,9 @@ $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
 if ( wc_tax_enabled() ) {
-	$order_taxes         = $order->get_taxes();
-	$tax_classes         = WC_Tax::get_tax_classes();
-	$classes_options     = array();
-	$classes_options[''] = __( 'Standard', 'woocommerce' );
-
-	if ( ! empty( $tax_classes ) ) {
-		foreach ( $tax_classes as $class ) {
-			$classes_options[ sanitize_title( $class ) ] = $class;
-		}
-	}
-
+	$order_taxes      = $order->get_taxes();
+	$tax_classes      = WC_Tax::get_tax_classes();
+	$classes_options  = wc_get_product_tax_class_options();
 	$show_tax_columns = sizeof( $order_taxes ) === 1;
 }
 ?>
@@ -179,7 +171,7 @@ if ( wc_tax_enabled() ) {
 			<td class="total">
 				<div class="view"><?php echo $order->get_formatted_order_total(); ?></div>
 				<div class="edit" style="display: none;">
-					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $order->get_total( true ) ) ); ?>" />
+					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $order->get_total( 'edit' ) ) ); ?>" />
 					<div class="clear"></div>
 				</div>
 			</td>
@@ -291,7 +283,7 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<input type="hidden" id="add_item_id" name="add_order_items" class="wc-product-search" style="width: 100%;" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-multiple="true" />
+						<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="add_item_id" name="add_order_items" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>"></select>
 					</form>
 				</article>
 				<footer>

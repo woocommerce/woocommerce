@@ -205,8 +205,9 @@ function wc_cart_totals_shipping_html() {
 
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
-				$product_names[] = $values['data']->get_title() . ' &times;' . $values['quantity'];
+				$product_names[ $item_id ] = $values['data']->get_name() . ' &times;' . $values['quantity'];
 			}
+			$product_names = apply_filters( 'woocommerce_shipping_package_details_array', $product_names, $package );
 		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
