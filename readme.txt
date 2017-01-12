@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 2.6.11
+Stable tag: 2.6.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,6 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.12 - 2017-01-12 =
 * Fix - Make images shown up on pageload when using ajax variations.
 * Fix - Allow variations options to be deselected in IE11.
 * Fix - Disabled-button and pagination styling in 2017.
@@ -168,13 +169,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Variation form compatibility with quotes in attribute values, and initial variation image fadeIn on certain configs.
 
 = 2.6.10 - 2016-12-22 =
-* Fix flat rate no class costs when no shipping classes exist.
-* Fix returned REST API coupon expiry date.
-* Fix reviews_allowed being set to false in Rest API.
-* Fix sales date series for some custom ranges.
-* Fix missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts.
-* Updated Geo IP API services.
-* Added support for WP VIP/VIP GO GEO IP headers.
+* Fix - Flat rate no class costs when no shipping classes exist.
+* Fix - Returned REST API coupon expiry date.
+* Fix - reviews_allowed being set to false in Rest API.
+* Fix - Sales date series for some custom ranges.
+* Fix - Missing attributes when an option is chosen by default on variations. This was the result of a Firefox 50 compatibility fix. In order to support both Firefox, Chrome, IE, and Edge we've done some refactoring of the variation add to cart scripts.
+* Tweak - Updated Geo IP API services.
+* Dev - Added support for WP VIP/VIP GO GEO IP headers.
 * Dev - API - Throw error messages when product image ID is not a valid WordPress attachment ID.
 
 = 2.6.9 - 2016-12-07 =
