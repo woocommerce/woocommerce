@@ -78,7 +78,7 @@ And there’s plenty more where they came from. Visit our [extensions page](http
 
 When you download WooCommerce, you join a community of more than a million store owners, developers, and WordPress enthusiasts. We’re one of the fastest-growing open source communities online, and whether you’re a n00b or a Ninja, we’d love to have you!
 
-If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce) to find out how you can pitch in.
+If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woocommerce/woocommerce) to find out how you can pitch in.
 
 Want to add a new language to WooCommerce? Swell! You can contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce).
 
@@ -125,7 +125,7 @@ For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.c
 
 If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
-For help with premium extensions from WooThemes, use [our helpdesk](https://support.woothemes.com/).
+For help with premium extensions from WooCommerce.com, use [our helpdesk](https://woocommerce.com/my-account/tickets/).
 
 = Will WooCommerce work with my theme? =
 
@@ -137,15 +137,15 @@ You can vote on and request new features and extensions in our [WooIdeas board](
 
 = Where can I report bugs or contribute to the project? =
 
-Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woothemes/woocommerce/issues).
+Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woocommerce/woocommerce/issues).
 
 = Where can I find the REST API documentation? =
 
-You can find the documentation of our REST API on the [WooCommerce REST API Docs](https://woothemes.github.io/woocommerce-rest-api-docs/).
+You can find the documentation of our REST API on the [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/).
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/woocommerce/) :)
+Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/woocommerce/) :)
 
 == Screenshots ==
 
@@ -403,9 +403,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allow failed orders to be edited.
 * Tweak - If there are no shipping methods setup, don’t prompt for shipping at checkout.
 * Tweak - Allowed country exclusion, rather than just inclusion, in ‘sell to’ setting.
-* Lots, lots more - [see the comparison here](https://github.com/woothemes/woocommerce/compare/2.5.5...2.6.0).
+* Lots, lots more - [see the comparison here](https://github.com/woocommerce/woocommerce/compare/2.5.5...2.6.0).
 
-[See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 
