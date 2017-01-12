@@ -867,18 +867,3 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 		update_post_meta( $product_id, '_sale_price_dates_to', '' );
 	}
 }
-
-/**
- * Get a log file path.
- *
- * @since 2.2
- * @deprecated 2.7.0
- *
- * @param string $handle name.
- * @return string the log file path.
- */
-function wc_get_log_file_path( $handle ) {
-	wc_deprecated_function( 'wc_get_log_file_path', '2.7', 'WC_Log_Handler_File::get_log_file_path' );
-	return WC_Log_Handler_File::get_log_file_path( $handle );
-}
-

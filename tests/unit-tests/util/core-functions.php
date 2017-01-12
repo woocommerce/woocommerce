@@ -236,7 +236,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
 
 		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
-		$this->setExpectedDeprecated( 'wc_get_log_file_path' );
 	}
 
 	/**
