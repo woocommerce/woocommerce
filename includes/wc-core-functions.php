@@ -757,11 +757,12 @@ function get_woocommerce_api_url( $path ) {
  * Get a log file path.
  *
  * @since 2.2
+ *
  * @param string $handle name.
  * @return string the log file path.
  */
 function wc_get_log_file_path( $handle ) {
-	return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle ) . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+	return WC_Log_Handler_File::get_log_file_path( $handle );
 }
 
 /**
@@ -1416,12 +1417,73 @@ function wc_get_rounding_precision() {
  * @return WC_Logger
  */
 function wc_get_logger() {
-	if ( ! class_exists( 'WC_Logger' ) ) {
-		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	static $logger = null;
+	if ( null === $logger ) {
+		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+		$logger = new $class;
 	}
-	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
-	return new $class;
+	return $logger;
 }
+
+/**
+ * Prints human-readable information about a variable.
+ *
+ * Some server environments blacklist some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form without calling blacklisted functions.
+ *
+ * @since 2.7
+ *
+ * @param mixed $expression The expression to be printed.
+ * @param bool $return Optional. Default false. Set to true to return the human-readable string.
+ * @return string|bool False if expression could not be printed. True if the expression was printed.
+ *     If $return is true, a string representation will be returned.
+ */
+function wc_print_r( $expression, $return = false ) {
+	$alternatives = array(
+		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
+		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
+		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
+		array( 'func' => 'serialize', 'args' => array( $expression ) ),
+	);
+
+	$alternatives = apply_filters( 'woocommerce_print_r_alternatives', $alternatives, $expression );
+
+	foreach ( $alternatives as $alternative ) {
+		if ( function_exists( $alternative['func'] ) ) {
+			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			if ( $return ) {
+				return $res;
+			} else {
+				echo $res;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Registers the default log handler.
+ *
+ * @since 2.7
+ * @param array $handlers
+ * @return array
+ */
+function wc_register_default_log_handler( $handlers ) {
+
+	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
+		$handler_class = WC_LOG_HANDLER;
+		$default_handler = new $handler_class();
+	} else {
+		$default_handler = new WC_Log_Handler_File();
+	}
+
+	array_push( $handlers, $default_handler );
+
+	return $handlers;
+}
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
 
 /**
  * Store user agents. Used for tracker.
