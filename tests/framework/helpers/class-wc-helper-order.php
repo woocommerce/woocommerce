@@ -30,14 +30,20 @@ class WC_Helper_Order {
 	/**
 	 * Create a order.
 	 *
-	 * @since 2.4
+	 * @since   2.4
+	 * @version 2.7 New parameter $product.
 	 *
-	 * @return WC_Order Order object.
+	 * @param int        $customer_id
+	 * @param WC_Product $product
+	 *
+	 * @return WC_Order
 	 */
-	public static function create_order( $customer_id = 1 ) {
+	public static function create_order( $customer_id = 1, $product = null ) {
 
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = WC_Helper_Product::create_simple_product();
+		}
+
 		WC_Helper_Shipping::create_simple_flat_rate();
 
 		$order_data = array(

@@ -835,6 +835,13 @@ class WC_Checkout {
 					$customer->update_meta_data( $key, $value );
 				}
 			}
+
+			/**
+			 * Action hook to adjust customer before save.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_update_customer', $customer, $data );
+
 			$customer->save();
 		}
 

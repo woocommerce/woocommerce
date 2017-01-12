@@ -497,6 +497,7 @@ function wc_create_refund( $args = array() ) {
 		if ( 0 > $args['amount'] ) {
 			$args['amount'] = 0;
 		}
+		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
@@ -544,7 +545,17 @@ function wc_create_refund( $args = array() ) {
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
+
+		/**
+		 * Action hook to adjust refund before save.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_create_refund', $refund, $args );
+
 		$refund->save();
+
+		// Backwards compatibility hook.
+		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
 
 	} catch ( Exception $e ) {
 		return new WP_Error( 'error', $e->getMessage() );

@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || '1' === $string );
+	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string );
 }
 
 /**
@@ -922,30 +922,43 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 
 /**
  * Format the stock amount ready for display based on settings.
+ *
  * @since  2.7.0
- * @param  int  $stock_amount
- * @param  boolean $show_backorder_notification
+ * @param  WC_Product $product Product object for which the stock you need to format.
  * @return string
  */
-function wc_format_stock_for_display( $stock_amount, $show_backorder_notification = false ) {
-	$display = __( 'In stock', 'woocommerce' );
+function wc_format_stock_for_display( $product ) {
+	$display      = __( 'In stock', 'woocommerce' );
+	$stock_amount = $product->get_stock_quantity();
 
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount' :
 			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $stock_amount );
+				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 			}
 		break;
 		case '' :
-			$display = sprintf( __( '%s in stock', 'woocommerce' ), $stock_amount );
+			$display = sprintf( __( '%s in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 		break;
 	}
 
-	if ( $show_backorder_notification ) {
+	if ( $product->backorders_allowed() && $product->backorders_require_notification() ) {
 		$display .= ' ' . __( '(can be backordered)', 'woocommerce' );
 	}
 
 	return $display;
+}
+
+/**
+ * Format the stock quantity ready for display.
+ *
+ * @since  2.7.0
+ * @param  int  $stock_quantity
+ * @param  WC_Product $product so that we can pass through the filters.
+ * @return string
+ */
+function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
+	return apply_filters( 'woocommerce_format_stock_quantity', $stock_quantity, $product );
 }
 
 /**

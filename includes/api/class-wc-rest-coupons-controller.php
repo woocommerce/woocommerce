@@ -142,8 +142,14 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	public function prepare_item_for_response( $post, $request ) {
 		$coupon         = new WC_Coupon( (int) $post->ID );
 		$data           = $coupon->get_data();
+
+		// The API returns 'expiry_date' and 'exclude_product_ids' instead of date_expires and 'excluded_product_ids'.
+		$data['expiry_date']         = $data['date_expires'];
+		$data['exclude_product_ids'] = $data['excluded_product_ids'];
+		unset( $data['excluded_product_ids'], $data['date_expires'] );
+
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
+		$format_date    = array( 'date_created', 'date_modified', 'expiry_date' );
 		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
 
 		// Format decimal values.
@@ -415,7 +421,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'date_expires' => array(
+				'expiry_date' => array(
 					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -437,7 +443,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'excluded_product_ids' => array(
+				'exclude_product_ids' => array(
 					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),

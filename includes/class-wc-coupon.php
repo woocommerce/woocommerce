@@ -360,7 +360,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
 
 		if ( $this->is_type( array( 'percent' ) ) ) {
-			$discount = $this->get_amount() * ( $discounting_amount / 100 );
+			$discount = (float) $this->get_amount() * ( $discounting_amount / 100 );
 		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
 			/**
 			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
@@ -376,14 +376,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			} else {
 				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
 			}
-			$discount = ( $this->get_amount() * $discount_percent ) / $cart_item_qty;
+			$discount = ( (float) $this->get_amount() * $discount_percent ) / $cart_item_qty;
 
 		} elseif ( $this->is_type( 'fixed_product' ) ) {
 			$discount = min( $this->get_amount(), $discounting_amount );
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
-		$discount = min( $discount, $discounting_amount );
+		$discount = (float) min( $discount, $discounting_amount );
 
 		// Handle the limit_usage_to_x_items option
 		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {

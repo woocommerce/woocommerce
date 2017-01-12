@@ -113,7 +113,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
@@ -186,11 +186,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $product->get_id() );
 			$product->set_id( 0 );
+			do_action( 'woocommerce_delete_' . $post_type, $id );
 		} else {
 			wp_trash_post( $product->get_id() );
 			$product->set_status( 'trash' );
+			do_action( 'woocommerce_trash_' . $post_type, $id );
 		}
-		do_action( 'woocommerce_delete_' . $post_type, $id );
 	}
 
 	/*
@@ -585,8 +586,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_version_and_type( &$product ) {
-		wp_set_object_terms( $product->get_id(), $product->get_type(), 'product_type' );
+		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
+		$new_type = $product->get_type();
+
+		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+
+		// Action for the transition.
+		if ( $old_type !== $new_type ) {
+			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
+		}
 	}
 
 	/**
@@ -1074,6 +1083,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['paged'] = absint( $args['page'] );
 		}
 
+		if ( ! empty( $args['include'] ) ) {
+			$wp_query_args['post__in'] = array_map( 'absint', $args['include'] );
+		}
+
 		if ( ! empty( $args['exclude'] ) ) {
 			$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 		}
@@ -1152,8 +1165,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		if ( is_numeric( $term ) ) {
-			$product_ids[] = absint( $term );
-			$product_ids[] = wp_get_post_parent_id( $term );
+			$post_id   = absint( $term );
+			$post_type = get_post_type( $post_id );
+
+			if ( 'product_variation' === $post_type && $include_variations ) {
+				$product_ids[] = $post_id;
+			} elseif ( 'product' === $post_type ) {
+				$product_ids[] = $post_id;
+			}
+
+			$product_ids[] = wp_get_post_parent_id( $post_id );
 		}
 
 		return wp_parse_id_list( $product_ids );

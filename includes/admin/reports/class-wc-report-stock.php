@@ -84,21 +84,14 @@ class WC_Report_Stock extends WP_List_Table {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {
-					echo $sku . ' - ';
+					echo esc_html( $sku ) . ' - ';
 				}
 
-				echo $product->get_name();
+				echo esc_html( $product->get_name() );
 
-				// Get variation data
+				// Get variation data.
 				if ( $product->is_type( 'variation' ) ) {
-					$list_attributes = array();
-					$attributes = $product->get_variation_attributes();
-
-					foreach ( $attributes as $name => $attribute ) {
-						$list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
-					}
-
-					echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';
+					echo '<div class="description">' . wc_get_formatted_variation( $product, true ) . '</div>';
 				}
 			break;
 
@@ -120,7 +113,7 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_level' :
-				echo $product->get_stock_quantity();
+				echo esc_html( $product->get_stock_quantity() );
 			break;
 
 			case 'wc_actions' :

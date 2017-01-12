@@ -16,27 +16,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Variable extends WC_Product {
 
 	/**
-	 * Stores product data.
+	 * Array of children variation IDs. Determined by children.
 	 *
 	 * @var array
 	 */
-	protected $extra_data = array(
-		'children'                         => array(),
-		'visible_children'                 => array(),
-		'variation_prices'                 => array(),
-		'variation_prices_including_taxes' => array(),
-		'variation_attributes'             => array(),
-	);
+	protected $children = array();
 
 	/**
-	 * Merges variable product data into the parent object.
+	 * Array of visible children variation IDs. Determined by children.
 	 *
-	 * @param int|WC_Product|object $product Product to init.
+	 * @var array
 	 */
-	public function __construct( $product = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
-		parent::__construct( $product );
-	}
+	protected $visible_children = array();
+
+	/**
+	 * Array of variation attributes IDs. Determined by children.
+	 *
+	 * @var array
+	 */
+	protected $variation_attributes = array();
 
 	/**
 	 * Get internal type.
@@ -54,69 +52,23 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Return a products child ids.
+	 * Get the add to cart button text.
 	 *
-	 * @param  string $context
-	 * @return array Children ids
+	 * @return string
 	 */
-	public function get_children( $context = 'view' ) {
-		if ( is_bool( $context ) ) {
-			wc_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
-			return $context ? $this->get_visible_children() : $this->get_children();
-		}
-		if ( has_filter( 'woocommerce_get_children' ) ) {
-			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
-		}
-		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'children', $context ), $this, false );
-	}
-
-	/**
-	 * Return a products child ids - visible only.
-	 *
-	 * @since 2.7.0
-	 * @param  string $context
-	 * @return array Children ids
-	 */
-	public function get_visible_children( $context = 'view' ) {
-		if ( has_filter( 'woocommerce_get_children' ) ) {
-			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
-		}
-		return apply_filters( 'woocommerce_get_children', $this->get_prop( 'visible_children', $context ), $this, true );
-	}
-
-	/**
-	 * Return an array of attributes used for variations, as well as their possible values.
-	 *
-	 * @param  string $context
-	 * @return array Attributes and their available values
-	 */
-	public function get_variation_attributes( $context = 'view' ) {
-		return $this->get_prop( 'variation_attributes', $context );
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
 	}
 
 	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
-	 * @param  string $context
+	 * @param  bool $include_taxes Should taxes be included in the prices.
 	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
-	public function get_variation_prices( $context = 'view' ) {
-		if ( is_bool( $context ) ) {
-			wc_deprecated_argument( 'display', '2.7', 'Use WC_Product_Variable::get_variation_prices_including_taxes' );
-			return $context ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
-		}
-		return $this->get_prop( 'variation_prices', $context );
-	}
-
-	/**
-	 * Get an array of all sale and regular prices from all variations, includes taxes.
-	 *
-	 * @since  2.7.0
-	 * @param  string $context
-	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
-	 */
-	public function get_variation_prices_including_taxes( $context = 'view' ) {
-		return $this->get_prop( 'variation_prices_including_taxes', $context );
+	public function get_variation_prices( $include_taxes = false ) {
+		$data_store = $this->get_data_store();
+		return $data_store->read_price_data( $this, $include_taxes );
 	}
 
 	/**
@@ -127,7 +79,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $include_taxes ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
+		$prices = $this->get_variation_prices( $include_taxes );
 		$price  = 'min' === $min_or_max ? current( $prices['regular_price'] ) : end( $prices['regular_price'] );
 		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $include_taxes );
 	}
@@ -140,7 +92,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_sale_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $include_taxes ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
+		$prices = $this->get_variation_prices( $include_taxes );
 		$price  = 'min' === $min_or_max ? current( $prices['sale_price'] ) : end( $prices['sale_price'] );
 		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $include_taxes );
 	}
@@ -153,7 +105,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $include_taxes ? $this->get_variation_prices_including_taxes() : $this->get_variation_prices();
+		$prices = $this->get_variation_prices( $include_taxes );
 		$price  = 'min' === $min_or_max ? current( $prices['price'] ) : end( $prices['price'] );
 		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $include_taxes );
 	}
@@ -165,7 +117,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
-		$prices = $this->get_variation_prices_including_taxes();
+		$prices = $this->get_variation_prices( true );
 
 		if ( empty( $prices['price'] ) ) {
 			return apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
@@ -180,6 +132,44 @@ class WC_Product_Variable extends WC_Product {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
 		}
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Return a products child ids.
+	 *
+	 * @return array Children ids
+	 */
+	public function get_children( $visible_only = '' ) {
+		if ( is_bool( $visible_only ) ) {
+			wc_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
+			return $visible_only ? $this->get_visible_children() : $this->get_children();
+		}
+		if ( has_filter( 'woocommerce_get_children' ) ) {
+			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+		}
+		return apply_filters( 'woocommerce_get_children', $this->children, $this, false );
+	}
+
+	/**
+	 * Return a products child ids - visible only.
+	 *
+	 * @since 2.7.0
+	 * @return array Children ids
+	 */
+	public function get_visible_children() {
+		if ( has_filter( 'woocommerce_get_children' ) ) {
+			wc_deprecated_function( 'The woocommerce_get_children filter', '', 'woocommerce_product_get_children or woocommerce_product_get_visible_children' );
+		}
+		return apply_filters( 'woocommerce_get_children', $this->visible_children, $this, true );
+	}
+
+	/**
+	 * Return an array of attributes used for variations, as well as their possible values.
+	 *
+	 * @return array Attributes and their available values
+	 */
+	public function get_variation_attributes() {
+		return $this->variation_attributes;
 	}
 
 	/**
@@ -278,33 +268,13 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Sets an array of variation prices.
-	 *
-	 * @since 2.7.0
-	 * @param array
-	 */
-	public function set_variation_prices( $variation_prices ) {
-		$this->set_prop( 'variation_prices', $variation_prices );
-	}
-
-	/**
-	 * Sets an array of variation prices, including taxes.
-	 *
-	 * @since 2.7.0
-	 * @param array
-	 */
-	public function set_variation_prices_including_taxes( $variation_prices_including_taxes ) {
-		$this->set_prop( 'variation_prices_including_taxes', $variation_prices_including_taxes );
-	}
-
-	/**
-	 * Sets an array of variation attributes
+	 * Sets an array of variation attributes.
 	 *
 	 * @since 2.7.0
 	 * @param array
 	 */
 	public function set_variation_attributes( $variation_attributes ) {
-		$this->set_prop( 'variation_attributes', $variation_attributes );
+		$this->variation_attributes = $variation_attributes;
 	}
 
 	/**
@@ -314,7 +284,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param array
 	 */
 	public function set_children( $children ) {
-		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
+		$this->children = array_filter( wp_parse_id_list( (array) $children ) );
 	}
 
 	/**
@@ -324,7 +294,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param array
 	 */
 	public function set_visible_children( $visible_children ) {
-		$this->set_prop( 'visible_children', array_filter( wp_parse_id_list( (array) $visible_children ) ) );
+		$this->visible_children = array_filter( wp_parse_id_list( (array) $visible_children ) );
 	}
 
 	/*
@@ -368,12 +338,17 @@ class WC_Product_Variable extends WC_Product {
 			// Trigger action before saving to the DB. Allows you to adjust object props before save.
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
+			// Get names before save.
+			$previous_name = $this->data['name'];
+			$new_name      = $this->get_name( 'edit' );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
 				$this->data_store->create( $this );
 			}
 
+			$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
 			$this->data_store->sync_managed_variation_stock_status( $this );
 
 			return $this->get_id();
@@ -391,8 +366,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		$data_store = WC_Data_Store::load( 'product-variable' );
-		$prices = $data_store->read_price_data( $this );
+		$prices = $this->get_variation_prices();
 		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
 	}
 
@@ -457,21 +431,6 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function has_weight() {
 		return parent::has_weight() || $this->child_has_weight();
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Non-CRUD Getters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Get the add to cart button text.
-	 *
-	 * @return string
-	 */
-	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
 	}
 
 	/*

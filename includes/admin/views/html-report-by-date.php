@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			/* translators: 1: start date 2: end date */
 			printf(
 				esc_html__( 'From %1$s to %2$s', 'woocommerce' ),
-				wc_clean( $_GET['start_date'] ),
-				wc_clean( $_GET['end_date'] )
+				esc_html( wc_clean( $_GET['start_date'] ) ),
+				esc_html( wc_clean( $_GET['end_date'] ) )
 			);
 		?></h3>
 	<?php else : ?>

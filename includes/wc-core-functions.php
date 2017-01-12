@@ -341,7 +341,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian rupee', 'woocommerce' ),
 				'IQD' => __( 'Iraqi dinar', 'woocommerce' ),
 				'IRR' => __( 'Iranian rial', 'woocommerce' ),
-				'IRT' => __( 'Iranian Toman', 'woocommerce' ),
+				'IRT' => __( 'Iranian toman', 'woocommerce' ),
 				'ISK' => __( 'Icelandic kr&oacute;na', 'woocommerce' ),
 				'JEP' => __( 'Jersey pound', 'woocommerce' ),
 				'JMD' => __( 'Jamaican dollar', 'woocommerce' ),

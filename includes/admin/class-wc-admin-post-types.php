@@ -31,6 +31,9 @@ class WC_Admin_Post_Types {
 		// Disable Auto Save
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
+		// Extra post data.
+		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
+
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
 		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
 		add_filter( 'manage_shop_coupon_posts_columns', array( $this, 'shop_coupon_columns' ) );
@@ -339,32 +342,32 @@ class WC_Admin_Post_Types {
 
 				/* Custom inline data for woocommerce. */
 				echo '
-					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
-						<div class="menu_order">' . $the_product->get_menu_order() . '</div>
-						<div class="sku">' . $the_product->get_sku() . '</div>
-						<div class="regular_price">' . $the_product->get_regular_price() . '</div>
-						<div class="sale_price">' . $the_product->get_sale_price() . '</div>
-						<div class="weight">' . $the_product->get_weight() . '</div>
-						<div class="length">' . $the_product->get_length() . '</div>
-						<div class="width">' . $the_product->get_width() . '</div>
-						<div class="height">' . $the_product->get_height() . '</div>
-						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
-						<div class="visibility">' . $the_product->get_catalog_visibility() . '</div>
-						<div class="stock_status">' . $the_product->get_stock_status() . '</div>
-						<div class="stock">' . $the_product->get_stock_quantity() . '</div>
-						<div class="manage_stock">' . $the_product->get_manage_stock() . '</div>
-						<div class="featured">' . $the_product->get_featured() . '</div>
-						<div class="product_type">' . $the_product->get_type() . '</div>
-						<div class="product_is_virtual">' . $the_product->get_virtual() . '</div>
-						<div class="tax_status">' . $the_product->get_tax_status() . '</div>
-						<div class="tax_class">' . $the_product->get_tax_class() . '</div>
-						<div class="backorders">' . $the_product->get_backorders() . '</div>
+					<div class="hidden" id="woocommerce_inline_' . absint( $post->ID ) . '">
+						<div class="menu_order">' . absint( $the_product->get_menu_order() ) . '</div>
+						<div class="sku">' . esc_html( $the_product->get_sku() ) . '</div>
+						<div class="regular_price">' . esc_html( $the_product->get_regular_price() ) . '</div>
+						<div class="sale_price">' . esc_html( $the_product->get_sale_price() ) . '</div>
+						<div class="weight">' . esc_html( $the_product->get_weight() ) . '</div>
+						<div class="length">' . esc_html( $the_product->get_length() ) . '</div>
+						<div class="width">' . esc_html( $the_product->get_width() ) . '</div>
+						<div class="height">' . esc_html( $the_product->get_height() ) . '</div>
+						<div class="shipping_class">' . esc_html( $the_product->get_shipping_class() ) . '</div>
+						<div class="visibility">' . esc_html( $the_product->get_catalog_visibility() ) . '</div>
+						<div class="stock_status">' . esc_html( $the_product->get_stock_status() ) . '</div>
+						<div class="stock">' . esc_html( $the_product->get_stock_quantity() ) . '</div>
+						<div class="manage_stock">' . esc_html( $the_product->get_manage_stock() ) . '</div>
+						<div class="featured">' . esc_html( $the_product->get_featured() ) . '</div>
+						<div class="product_type">' . esc_html( $the_product->get_type() ) . '</div>
+						<div class="product_is_virtual">' . esc_html( $the_product->get_virtual() ) . '</div>
+						<div class="tax_status">' . esc_html( $the_product->get_tax_status() ) . '</div>
+						<div class="tax_class">' . esc_html( $the_product->get_tax_class() ) . '</div>
+						<div class="backorders">' . esc_html( $the_product->get_backorders() ) . '</div>
 					</div>
 				';
 
 			break;
 			case 'sku' :
-				echo $the_product->get_sku() ? $the_product->get_sku() : '<span class="na">&ndash;</span>';
+				echo $the_product->get_sku() ? esc_html( $the_product->get_sku() ) : '<span class="na">&ndash;</span>';
 				break;
 			case 'product_type' :
 				if ( $the_product->is_type( 'grouped' ) ) {
@@ -439,7 +442,7 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_coupon_columns( $column ) {
-		global $post, $woocommerce;
+		global $post;
 
 		switch ( $column ) {
 			case 'coupon_code' :
@@ -509,7 +512,7 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_order_columns( $column ) {
-		global $post, $woocommerce, $the_order;
+		global $post, $the_order;
 
 		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
@@ -1758,6 +1761,14 @@ class WC_Admin_Post_Types {
 		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
+	}
+
+	/**
+	 * Output extra data on post forms.
+	 * @param  WP_Post $post
+	 */
+	public function edit_form_top( $post ) {
+		echo '<input type="hidden" id="original_post_title" name="original_post_title" value="' . esc_attr( $post->post_title ) . '" />';
 	}
 
 	/**
