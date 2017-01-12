@@ -538,7 +538,6 @@
 			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
 			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
 			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
-			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
 			$product_img.wc_set_variation_attr( 'title', variation.image.title );
 			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
