@@ -225,19 +225,4 @@ class WC_Logger {
 		$handler = new WC_Log_Handler_File();
 		return $handler->clear( $handle );
 	}
-
-	/**
-	 * Remove/delete the chosen file.
-	 *
-	 * @deprecated 2.7.0
-	 *
-	 * @param string $handle
-	 *
-	 * @return bool
-	 */
-	public function remove( $handle ) {
-		wc_deprecated_function( 'WC_Logger::remove', '2.7', 'WC_Log_Handler_File::remove' );
-		$handler = new WC_Log_Handler_File();
-		return $handler->remove( $handle );
-	}
 }

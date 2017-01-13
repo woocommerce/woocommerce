@@ -47,20 +47,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test remove().
-	 *
-	 * @since 2.7
-	 */
-	public function test_remove() {
-		$file = wc_get_log_file_path( 'unit-tests' );
-		touch( $file );
-		$log = new WC_Logger();
-		$log->remove( 'unit-tests' );
-		$this->assertFileNotExists( $file );
-		$this->setExpectedDeprecated( 'WC_Logger::remove' );
-	}
-
-	/**
 	 * Test log() complains for bad levels.
 	 *
 	 * @since 2.7.0
