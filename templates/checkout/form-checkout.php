@@ -48,7 +48,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 			</div>
 		</div>
 
-		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
+		<?php do_action( 'woocommerce_checkout_after_customer_details', $checkout ); ?>
 
 	<?php endif; ?>
 
