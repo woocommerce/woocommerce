@@ -216,22 +216,13 @@ class WC_Logger {
 	 *
 	 * @deprecated 2.7.0
 	 *
+	 * @param string $handle
+	 *
 	 * @return bool
 	 */
-	public function clear() {
+	public function clear( $handle ) {
 		wc_deprecated_function( 'WC_Logger::clear', '2.7', 'WC_Log_Handler_File::clear' );
-		return false;
-	}
-
-	/**
-	 * Remove/delete the chosen file.
-	 *
-	 * @deprecated 2.7.0
-	 *
-	 * @return bool
-	 */
-	public function remove() {
-		wc_deprecated_function( 'WC_Logger::remove', '2.7', 'WC_Log_Handler_File::remove' );
-		return false;
+		$handler = new WC_Log_Handler_File();
+		return $handler->clear( $handle );
 	}
 }

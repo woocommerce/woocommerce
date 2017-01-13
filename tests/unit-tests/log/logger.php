@@ -38,8 +38,11 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$log = new WC_Logger( null, 'debug' );
-		$log->clear( 'log' );
+		$file = wc_get_log_file_path( 'unit-tests' );
+		file_put_contents( $file, 'Test file content.' );
+		$log = new WC_Logger();
+		$log->clear( 'unit-tests' );
+		$this->assertEquals( '', file_get_contents( $file ) );
 		$this->setExpectedDeprecated( 'WC_Logger::clear' );
 	}
 
