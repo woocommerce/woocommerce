@@ -244,12 +244,27 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_wc_get_logger() {
+		// This filter should have no effect because the class does not implement WC_Logger_Interface
+		add_filter( 'woocommerce_logging_class', array( $this, 'return_bad_logger' ) );
+
+		$this->setExpectedIncorrectUsage( 'wc_get_logger' );
 		$log_a = wc_get_logger();
 		$log_b = wc_get_logger();
 
 		$this->assertInstanceOf( 'WC_Logger', $log_a );
 		$this->assertInstanceOf( 'WC_Logger', $log_b );
 		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
+	}
+
+	/**
+	 * Return class which does not implement WC_Logger_Interface
+	 *
+	 * This is a helper function to test woocommerce_logging_class filter and wc_get_logger.
+	 *
+	 * @return string Class name
+	 */
+	public function return_bad_logger() {
+		return __CLASS__;
 	}
 
 	/**

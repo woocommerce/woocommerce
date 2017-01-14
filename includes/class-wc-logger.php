@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category       Class
  * @author         WooThemes
  */
-class WC_Logger {
+class WC_Logger implements WC_Logger_Interface {
 
 	/**
 	 * Stores registered log handlers.
