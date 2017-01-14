@@ -76,7 +76,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				// Expiry date
 				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => esc_attr__( 'YYYY-MM-DD', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => 'YYYY-MM-DD', 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 				do_action( 'woocommerce_coupon_options' );
 
