@@ -1412,15 +1412,33 @@ function wc_get_rounding_precision() {
 }
 
 /**
- * Returns a new instance of a WC Logger.
- * Use woocommerce_logging_class filter to change the logging class.
+ * Get a shared logger instance.
+ *
+ * Use the woocommerce_logging_class filter to change the logging class. The provided class *must*
+ * implement WC_Logger_Interface.
+ *
+ * @see WC_Logger_Interface
+ *
  * @return WC_Logger
  */
 function wc_get_logger() {
 	static $logger = null;
 	if ( null === $logger ) {
 		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
-		$logger = new $class;
+		$implements = class_implements( $class );
+		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
+			$logger = new $class;
+		} else {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
+					esc_html( $class )
+				),
+				'2.7'
+			);
+			$logger = new WC_Logger();
+		}
 	}
 	return $logger;
 }
