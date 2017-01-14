@@ -3,6 +3,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! interface_exists( 'WC_Logger_Interface' ) ) {
+	include_once( dirname( __FILE__ ) . '/interfaces/wc-logger-interface.php' );
+}
+
 /**
  * Provides logging capabilities for debugging purposes.
  *
@@ -12,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category       Class
  * @author         WooThemes
  */
-class WC_Logger {
+class WC_Logger implements WC_Logger_Interface {
 
 	/**
 	 * Stores registered log handlers.
