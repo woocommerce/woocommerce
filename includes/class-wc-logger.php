@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! interface_exists( 'WC_Logger_Interface' ) ) {
-	include_once( dirname( __FILE__ ) . '/interfaces/wc-logger-interface.php' );
-}
-
 /**
  * Provides logging capabilities for debugging purposes.
  *
