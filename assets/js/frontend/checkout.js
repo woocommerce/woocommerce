@@ -290,6 +290,20 @@ jQuery( function( $ ) {
 
 					var termsCheckBoxChecked = $( '#terms' ).prop( 'checked' );
 
+					// Save payment details to a temporary object
+					var paymentDetails = {};
+					$( '.payment_box input' ).each( function() {
+						var ID = $( this ).attr( 'id' );
+
+						if ( ID ) {
+							if ( 'checkbox' === $( this ).attr( 'type' ) ) {
+								paymentDetails[ ID ] = $( this ).prop( 'checked' );
+							} else {
+								paymentDetails[ ID ] = $( this ).val();
+							}
+						}
+					});
+
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -301,6 +315,21 @@ jQuery( function( $ ) {
 					// Recheck the terms and conditions box, if needed
 					if ( termsCheckBoxChecked ) {
 						$( '#terms' ).prop( 'checked', true );
+					}
+
+					// Fill in the payment details if possible
+					if ( ! $.isEmptyObject( paymentDetails ) ) {
+						$( '.payment_box input' ).each( function() {
+							var ID = $( this ).attr( 'id' );
+
+							if ( ID ) {
+								if ( 'checkbox' === $( this ).attr( 'type' ) && paymentDetails[ ID ] ) {
+									$( this ).prop( 'checked', true );
+								} else {
+									$( this ).val( paymentDetails[ ID ] );
+								}
+							}
+						});
 					}
 
 					// Check for error
