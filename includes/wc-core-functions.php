@@ -1414,8 +1414,10 @@ function wc_get_rounding_precision() {
 /**
  * Get a shared logger instance.
  *
- * Use the woocommerce_logging_class filter to change the logging class. The provided class *must*
- * implement WC_Logger_Interface.
+ * Use the woocommerce_logging_class filter to change the logging class. You may provide one of the following:
+ *     - a class name which will be instantiated as `new $class` with no arguments
+ *     - an instance which will be used directly as the logger
+ * In either case, the class or instance *must* implement WC_Logger_Interface.
  *
  * @see WC_Logger_Interface
  *
@@ -1427,13 +1429,17 @@ function wc_get_logger() {
 		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
 		$implements = class_implements( $class );
 		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
-			$logger = new $class;
+			if ( is_object( $class ) ) {
+				$logger = $class;
+			} else {
+				$logger = new $class;
+			}
 		} else {
 			wc_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
 					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
-					esc_html( $class )
+					esc_html( is_object( $class ) ? get_class( $class ) : $class )
 				),
 				'2.7'
 			);
