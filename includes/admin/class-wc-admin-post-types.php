@@ -1271,7 +1271,7 @@ class WC_Admin_Post_Types {
 			$manage_stock = $was_managing_stock;
 		}
 
-		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_change_stock'] ) ? wc_stock_amount( $_REQUEST['_change_stock'] ) : '';
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
