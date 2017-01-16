@@ -1454,7 +1454,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$onsale = false;
 		}
-		return 'view' === $content ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
 	}
 
 	/**
