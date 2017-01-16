@@ -40,7 +40,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
 		add_action( 'add_meta_boxes', array( $this, 'rename_meta_boxes' ), 20 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 30 );
-		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
+		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 3 );
 
 		/**
 		 * Save Order Meta Boxes.
@@ -185,13 +185,18 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Check if we're saving, the trigger an action based on the post type.
 	 *
-	 * @param  int $post_id
+	 * @param  int    $post_id
 	 * @param  object $post
+	 * @param  bool   $update
 	 */
-	public function save_meta_boxes( $post_id, $post ) {
+	public function save_meta_boxes( $post_id, $post, $update ) {
 		// $post_id and $post are required
 		if ( empty( $post_id ) || empty( $post ) || self::$saved_meta_boxes ) {
 			return;
+		}
+
+		if ( ! $update ) {
+			update_post_meta( $post_id, '_woocommerce_force_meta_update', true );
 		}
 
 		// Dont' save meta boxes for revisions or autosaves

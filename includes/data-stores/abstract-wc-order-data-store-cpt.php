@@ -222,6 +222,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'_order_version'      => 'version',
 			'_prices_include_tax' => 'prices_include_tax',
 		);
+
+		if ( false === $force ) {
+			$force = (bool) get_post_meta( $order->get_id(), '_woocommerce_force_meta_update', true );
+		}
+
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
 				continue;

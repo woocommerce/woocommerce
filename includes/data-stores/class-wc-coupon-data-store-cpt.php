@@ -173,6 +173,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$updated_props     = array();
 		$changed_props     = array_keys( $coupon->get_changes() );
 
+		if ( false === $force ) {
+			$force = (bool) get_post_meta( $coupon->get_id(), '_woocommerce_force_meta_update', true );
+		}
+
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
