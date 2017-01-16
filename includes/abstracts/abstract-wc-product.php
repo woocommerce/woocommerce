@@ -1440,21 +1440,21 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @return bool
 	 */
-	public function is_on_sale() {
-		if ( '' !== (string) $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
+	public function is_on_sale( $context = 'view' ) {
+		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
 			$onsale = true;
 
-			if ( '' !== (string) $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== (string) $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context ) > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				$onsale = false;
 			}
 
-			if ( '' !== (string) $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== (string) $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				$onsale = false;
 			}
 		} else {
 			$onsale = false;
 		}
-		return apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this );
+		return 'view' === $content ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
 	}
 
 	/**
