@@ -1438,6 +1438,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param string $context
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
@@ -1454,7 +1455,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$onsale = false;
 		}
-		return 'view' === $content ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
 	}
 
 	/**
