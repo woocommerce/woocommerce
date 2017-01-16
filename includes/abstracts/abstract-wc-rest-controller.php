@@ -139,9 +139,17 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				$_response = $this->create_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
+					$data = $_response->get_error_data();
+
+					if ($_response->get_error_code() == 'woocommerce_rest_product_sku_already_exists')
+					{
+						$product_id = wc_get_product_id_by_sku( wc_clean( $item['sku'] ) );
+						$data['conflict_item_id'] = intval($product_id);
+					}
+
 					$response['create'][] = array(
 						'id'    => 0,
-						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
+						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $data ),
 					);
 				} else {
 					$response['create'][] = $wp_rest_server->response_to_data( $_response, '' );
