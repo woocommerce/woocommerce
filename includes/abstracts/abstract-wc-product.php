@@ -1438,23 +1438,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
 		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
-			$onsale = true;
+			$on_sale = true;
 
 			if ( '' !== (string) $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context ) > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+				$on_sale = false;
 			}
 
 			if ( '' !== (string) $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+				$on_sale = false;
 			}
 		} else {
-			$onsale = false;
+			$on_sale = false;
 		}
-		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this ) : $onsale;
+
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 
 	/**
