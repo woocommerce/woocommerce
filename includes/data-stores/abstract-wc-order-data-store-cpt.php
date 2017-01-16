@@ -38,6 +38,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		'_payment_tokens',
 	);
 
+	private $meta_key_to_props = array(
+		'_order_currency'     => 'currency',
+		'_cart_discount'      => 'discount_total',
+		'_cart_discount_tax'  => 'discount_tax',
+		'_order_shipping'     => 'shipping_total',
+		'_order_shipping_tax' => 'shipping_tax',
+		'_order_tax'          => 'cart_tax',
+		'_order_total'        => 'total',
+		'_order_version'      => 'version',
+		'_prices_include_tax' => 'prices_include_tax',
+	);
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -211,17 +223,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function update_post_meta( &$order, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = array_keys( $order->get_changes() );
-		$meta_key_to_props = array(
-			'_order_currency'     => 'currency',
-			'_cart_discount'      => 'discount_total',
-			'_cart_discount_tax'  => 'discount_tax',
-			'_order_shipping'     => 'shipping_total',
-			'_order_shipping_tax' => 'shipping_tax',
-			'_order_tax'          => 'cart_tax',
-			'_order_total'        => 'total',
-			'_order_version'      => 'version',
-			'_prices_include_tax' => 'prices_include_tax',
-		);
+		$meta_key_to_props = $this->meta_key_to_props;
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
 				continue;
@@ -309,5 +311,16 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
+	}
+
+	protected function get_prop_mappings() {
+		$meta_mappings = array_flip( $this->meta_key_to_props );
+		$core_mappings = array(
+			'parent_id'            => 'post_parent',
+			'status'               => 'post_status',
+			'date_created'         => 'post_date',
+			'date_modified'        => 'post_modified',
+		);
+		return array_merge( array( 'meta' => $meta_mappings ), $core_mappings );
 	}
 }

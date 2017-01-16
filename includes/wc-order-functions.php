@@ -627,7 +627,7 @@ function wc_order_fully_refunded( $order_id ) {
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
 /**
- * Search orders.
+ * Search orders by term.
  *
  * @since  2.6.0
  * @param  string $term Term to search.
@@ -635,7 +635,20 @@ add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
  */
 function wc_order_search( $term ) {
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search_orders( str_replace( 'Order #', '', wc_clean( $term ) ) );
+	return $data_store->search_orders_by_term( str_replace( 'Order #', '', wc_clean( $term ) ) );
+}
+
+/**
+ * Search orders.
+ *
+ * @since 2.7.0
+ * @param array $args Arguments to search with.
+ * @param string $return_type Return IDs or Objects. default: ids
+ * @return array List of orders.
+ */
+function wc_search_orders( $args, $return_type = 'ids' ) {
+	$data_store = WC_Data_Store::load( 'order' );
+	return $data_store->search( $args, $return_type );
 }
 
 /**

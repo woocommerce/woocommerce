@@ -73,7 +73,37 @@ interface WC_Order_Data_Store_Interface {
 	 * @param  string $term
 	 * @return array of ids
 	 */
-	public function search_orders( $term );
+	public function search_orders_by_term( $term );
+
+	/**
+	 * Search orders.
+	 *
+	 * Any args passed to the search function are used to
+	 * build a complex query. For example, a CPT implementation
+	 * searches the posts table and postmeta tables using WP_Query,
+	 * but you could also override the datastore and pass searches to
+	 * another engine.
+	 *
+	 * This function should handle all props supported by WC_Order/Abstract WC_Order.
+	 * Look at the data property of WC_Order and Abstract WC_Order or the CPT data
+	 * store's example `get_prop_mappings` for how to support all of these.
+	 * Anything passed to $args that is NOT a data prop, should be passed so the
+	 * data store can treat it as custom data. In the CPT implementation this is
+	 * treated as custom post meta.
+	 *
+	 * Example:
+	 * ->search( array( 'parent_id' => 2, 'customer_id' => 1, 'test_field' => 5 ) )
+	 *
+	 * parent_id and customer_id are both props and are searched according to the logic
+	 * of the datastore. test_field is not a prop, but the datastore should handle it
+	 * as custom data. The CPT will search postmeta.
+	 * @todo this explanation should be edited and posted as part of the dev docs -- putting it here for now to explain the PR POC.
+	 *
+	 * @param array $args Arguments to use for the search query.
+	 * @param string $return_type Return IDs or Objects. default: ids
+	 * @return array
+	 */
+	 public function search( $args, $return_type = 'ids' );
 
 	/**
 	 * Gets information about whether permissions were generated yet.
