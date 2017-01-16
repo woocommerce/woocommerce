@@ -1438,6 +1438,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param string $context
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
