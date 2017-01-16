@@ -432,12 +432,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
-			if ( $product->is_on_sale() ) {
-				update_post_meta( $product->get_id(), '_price', $product->get_sale_price() );
-				$product->set_price( $product->get_sale_price() );
+			if ( $product->is_on_sale( 'edit' ) ) {
+				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
+				$product->set_price( $product->get_sale_price( 'edit' ) );
 			} else {
-				update_post_meta( $product->get_id(), '_price', $product->get_regular_price() );
-				$product->set_price( $product->get_regular_price() );
+				update_post_meta( $product->get_id(), '_price', $product->get_regular_price( 'edit' ) );
+				$product->set_price( $product->get_regular_price( 'edit' ) );
 			}
 		}
 
