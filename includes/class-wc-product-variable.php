@@ -363,11 +363,15 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Returns whether or not the product is on sale.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
-	public function is_on_sale() {
-		$prices = $this->get_variation_prices();
-		return apply_filters( 'woocommerce_product_is_on_sale', $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'], $this );
+	public function is_on_sale( $context = 'view' ) {
+		$prices  = $this->get_variation_prices();
+		$on_sale = $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'];
+
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 
 	/**
