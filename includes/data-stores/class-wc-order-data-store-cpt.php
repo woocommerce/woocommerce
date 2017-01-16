@@ -69,6 +69,58 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	);
 
 	/**
+	 * A mapping of meta keys to their prop name.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	private $meta_key_to_props = array(
+		'_order_key'            => 'order_key',
+		'_customer_user'        => 'customer_id',
+		'_payment_method'       => 'payment_method',
+		'_payment_method_title' => 'payment_method_title',
+		'_transaction_id'       => 'transaction_id',
+		'_customer_ip_address'  => 'customer_ip_address',
+		'_customer_user_agent'  => 'customer_user_agent',
+		'_created_via'          => 'created_via',
+		'_completed_date'       => 'date_completed',
+		'_paid_date'            => 'date_paid',
+		'_cart_hash'            => 'cart_hash',
+	);
+
+	/**
+	 * A mapping of address keys to their prop name, separated by billing and
+	 * shipping type.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $address_props = array(
+		'billing' => array(
+			'_billing_first_name' => 'billing_first_name',
+			'_billing_last_name'  => 'billing_last_name',
+			'_billing_company'    => 'billing_company',
+			'_billing_address_1'  => 'billing_address_1',
+			'_billing_address_2'  => 'billing_address_2',
+			'_billing_city'       => 'billing_city',
+			'_billing_state'      => 'billing_state',
+			'_billing_postcode'   => 'billing_postcode',
+			'_billing_country'    => 'billing_country',
+			'_billing_email'      => 'billing_email',
+			'_billing_phone'      => 'billing_phone',
+		),
+		'shipping' => array(
+			'_shipping_first_name' => 'shipping_first_name',
+			'_shipping_last_name'  => 'shipping_last_name',
+			'_shipping_company'    => 'shipping_company',
+			'_shipping_address_1'  => 'shipping_address_1',
+			'_shipping_address_2'  => 'shipping_address_2',
+			'_shipping_city'       => 'shipping_city',
+			'_shipping_state'      => 'shipping_state',
+			'_shipping_postcode'   => 'shipping_postcode',
+			'_shipping_country'    => 'shipping_country',
+		)
+	);
+
+	/**
 	 * Method to create a new order in the database.
 	 * @param WC_Order $order
 	 */
@@ -144,19 +196,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	protected function update_post_meta( &$order, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = $order->get_changes();
-		$meta_key_to_props = array(
-			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_id',
-			'_payment_method'       => 'payment_method',
-			'_payment_method_title' => 'payment_method_title',
-			'_transaction_id'       => 'transaction_id',
-			'_customer_ip_address'  => 'customer_ip_address',
-			'_customer_user_agent'  => 'customer_user_agent',
-			'_created_via'          => 'created_via',
-			'_completed_date'       => 'date_completed',
-			'_paid_date'            => 'date_paid',
-			'_cart_hash'            => 'cart_hash',
-		);
+		$meta_key_to_props = $this->meta_key_to_props;
+		$address_props     = $this->address_props;
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
@@ -168,33 +209,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$updated_props[] = $prop;
 			}
 		}
-
-		$address_props = array(
-			'billing' => array(
-				'_billing_first_name' => 'billing_first_name',
-				'_billing_last_name'  => 'billing_last_name',
-				'_billing_company'    => 'billing_company',
-				'_billing_address_1'  => 'billing_address_1',
-				'_billing_address_2'  => 'billing_address_2',
-				'_billing_city'       => 'billing_city',
-				'_billing_state'      => 'billing_state',
-				'_billing_postcode'   => 'billing_postcode',
-				'_billing_country'    => 'billing_country',
-				'_billing_email'      => 'billing_email',
-				'_billing_phone'      => 'billing_phone',
-			),
-			'shipping' => array(
-				'_shipping_first_name' => 'shipping_first_name',
-				'_shipping_last_name'  => 'shipping_last_name',
-				'_shipping_company'    => 'shipping_company',
-				'_shipping_address_1'  => 'shipping_address_1',
-				'_shipping_address_2'  => 'shipping_address_2',
-				'_shipping_city'       => 'shipping_city',
-				'_shipping_state'      => 'shipping_state',
-				'_shipping_postcode'   => 'shipping_postcode',
-				'_shipping_country'    => 'shipping_country',
-			),
-		);
 
 		foreach ( $address_props as $props_key => $props ) {
 			foreach ( $props as $meta_key => $prop ) {
@@ -457,7 +471,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param  string $term
 	 * @return array of ids
 	 */
-	public function search_orders( $term ) {
+	public function search_orders_by_term( $term ) {
 		global $wpdb;
 
 		/**
@@ -497,6 +511,84 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $order_ids;
+	}
+
+	/**
+	 * Returns a mapping of properties to their table or meta keys.
+	 * Meta keys are stored in 'meta'.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	protected function get_prop_mappings() {
+		$parent_mappings  = parent::get_prop_mappings();
+		$mappings         = array();
+		$mappings['meta'] = array_merge(
+			$parent_mappings['meta'],
+			array_flip( $this->meta_key_to_props ),
+			array_flip( $this->address_props['billing'] ),
+			array_flip( $this->address_props['shipping'] )
+		);
+		unset( $parent_mappings['meta'] );
+		return array_merge( $mappings, $parent_mappings );
+	}
+
+	/**
+	 * Search orders.
+	 * Provides a layer of abstraction between WP_Query & Orders.
+	 *
+	 * @since  2.7.0
+	 * @param  array  $props Props to use for the search query.
+	 * @param  array  $args  Accepts return (objects or ids, default ids), limit (default get_option( 'posts_per_page' ) ), offset, and relation (AND or OR).
+	 * @return array Array containing results, total results, and number of pages.
+	 */
+	public function search( $props, $args = array() ) {
+		$mappings = $this->get_prop_mappings();
+		$fields   = $meta = array();
+		foreach ( $props as $key => $value ) {
+			if ( array_key_exists( $key, $mappings ) ) {
+				// The field being searched is stored in a the core posts table.
+				$key            = $mappings[ $key ];
+				$fields[ $key ] = $value;
+			} else {
+				// Otherwise, the property is stored in meta.
+				if ( array_key_exists( $key, $mappings['meta'] ) ) {
+					$key = $mappings['meta'][ $key ];
+				}
+				$meta[ $key ] = $value;
+			}
+		}
+
+		// Clean up status
+		if ( ! empty(  $fields['post_status'] ) && is_array( $fields['post_status'] ) ) {
+			$fields['post_status']['value'] = 'wc-' . $fields['post_status']['value'];
+		} else {
+			if ( empty( $fields['post_status'] ) ) {
+				$fields['post_status'] = array_keys( wc_get_order_statuses() );
+			} else {
+				$fields['post_status'] = 'wc-' . $fields['post_status'];
+			}
+		}
+
+		$wp_query                           = $this->build_wp_query( $fields, $meta );
+		$wp_query['post_type']              = 'shop_order';
+		$wp_query['meta_query']['relation'] = ! empty( $args['relation'] ) ? $args['relation'] : 'AND';
+		$wp_query['fields']                 = 'ids';
+		$wp_query['posts_per_page']         = ! empty( $args['limit'] ) ? $args['limit'] : get_option( 'posts_per_page' );
+		$wp_query['offset']                 = ! empty( $args['offset'] ) ? $args['offset'] : null;
+
+		$wp_query = new WP_Query( $wp_query );
+		if ( ! empty( $args['return'] ) && 'objects' === $args['return'] ) {
+			$results = array_map( 'wc_get_order', $wp_query->posts );
+		} else {
+			$results = $wp_query->posts;
+		}
+
+		return array(
+			'results'       => $results,
+			'total'         => (int) $wp_query->found_posts,
+			'max_num_pages' => (int) $wp_query->max_num_pages,
+		);
 	}
 
 	/**

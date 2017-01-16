@@ -73,7 +73,45 @@ interface WC_Order_Data_Store_Interface {
 	 * @param  string $term
 	 * @return array of ids
 	 */
-	public function search_orders( $term );
+	public function search_orders_by_term( $term );
+
+	/**
+	 * Search orders.
+	 *
+	 * Run complex searches based on the props passed.
+	 *
+	 * This function should handle all props supported by WC_Order/Abstract WC_Order.
+	 * (see the data array in WC_Order & Abstract WC_Order or the CPT `get_prop_mappings`
+	 * for an example of these.
+	 *
+	 * Anything that is not a valid prop should still be passed along, and assumed a custom field supported
+	 * by an extension.
+	 *
+	 * Example:
+	 * ->search( array( 'parent_id' => 2, 'customer_id' => 1, 'test_field' => 5 ) )
+	 *
+	 * parent_id and customer_id are both props and are searched according to the logic
+	 * of the datastore. test_field is not a prop, but the datastore can handle it
+	 * as custom data.
+	 *
+	 * When implementing a search engine, your $props code should be able to handle the following:
+	 * $props = array(
+	 *     'customer_id' => 1, // Simple direct searching
+	 *	   'customer_id' => array( 'value' => 1', 'compare' => '!= ' ), // Comparison operators. See what WP_Query supports to see valid operators. Default for simple searching is =.
+	 * );
+	 *
+	 * $args = array(
+	 *     'limit'    => 5, // Limit clause
+	 *     'offset'   => 1, // Offset clause
+	 *     'relation' => 'OR', // OR or AND relation
+	 *     'return'   => 'objects', // ids or objects (return an array of IDs or an array of order objects)
+	 * );
+	 *
+	 * @param array $args Arguments to use for the search query.
+	 * @param string $return_type Return IDs or Objects. default: ids
+	 * @return array
+	 */
+	 public function search( $props, $args );
 
 	/**
 	 * Gets information about whether permissions were generated yet.
