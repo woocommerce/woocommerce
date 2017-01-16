@@ -4,16 +4,16 @@
 if [ $1 == 'before' ]; then
 
 	# Composer install fails in PHP 5.2
-	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	[[ ${TRAVIS_PHP_VERSION} == '5.2' ]] && exit;
 
 	# No Xdebug and therefore no coverage in PHP 5.3
-	[ $TRAVIS_PHP_VERSION == '5.3' ] && exit;
+	[[ ${TRAVIS_PHP_VERSION} == '5.3' ]] && exit;
 
 	composer self-update
 	composer install --no-interaction
 
-	## Only run on 7.0 box.
-	if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then
+	## Only run on latest stable PHP box (defined in .travis.yml).
+	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		# Install CodeSniffer for WordPress Coding Standards checks. Only check once.
 		git clone -b master --depth 1 https://github.com/squizlabs/PHP_CodeSniffer.git /tmp/phpcs
 		# Install WordPress Coding Standards.
@@ -29,8 +29,8 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'during' ]; then
 
-	## Only run on 7.0 box.
-	if [ $TRAVIS_PHP_VERSION == "7.0" ]; then
+	## Only run on latest stable PHP box (defined in .travis.yml).
+	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		# WordPress Coding Standards.
 		# @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
 		# @link http://pear.php.net/package/PHP_CodeSniffer/
@@ -49,8 +49,8 @@ elif [ $1 == 'during' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	## Only run on 7.0 box.
-	if [ $TRAVIS_PHP_VERSION == "7.0" ]; then
+	## Only run on latest stable PHP box (defined in .travis.yml).
+	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		wget https://scrutinizer-ci.com/ocular.phar
 		chmod +x ocular.phar
 		php ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
