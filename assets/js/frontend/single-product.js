@@ -175,7 +175,7 @@ jQuery( function( $ ) {
 		 * Init PhotoSwipe.
 		 */
 		init_photoswipe: function() {
-			$( '.woocommerce-product-gallery' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+			$( '.woocommerce-product-gallery--with-images' ).prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
 		},
 
 		/**
