@@ -355,10 +355,10 @@ class WC_Admin_Post_Types {
 						<div class="visibility">' . esc_html( $the_product->get_catalog_visibility() ) . '</div>
 						<div class="stock_status">' . esc_html( $the_product->get_stock_status() ) . '</div>
 						<div class="stock">' . esc_html( $the_product->get_stock_quantity() ) . '</div>
-						<div class="manage_stock">' . esc_html( $the_product->get_manage_stock() ) . '</div>
-						<div class="featured">' . esc_html( $the_product->get_featured() ) . '</div>
+						<div class="manage_stock">' . esc_html( wc_bool_to_string( $the_product->get_manage_stock() ) ) . '</div>
+						<div class="featured">' . esc_html( wc_bool_to_string( $the_product->get_featured() ) ) . '</div>
 						<div class="product_type">' . esc_html( $the_product->get_type() ) . '</div>
-						<div class="product_is_virtual">' . esc_html( $the_product->get_virtual() ) . '</div>
+						<div class="product_is_virtual">' . esc_html( wc_bool_to_string( $the_product->get_virtual() ) ) . '</div>
 						<div class="tax_status">' . esc_html( $the_product->get_tax_status() ) . '</div>
 						<div class="tax_class">' . esc_html( $the_product->get_tax_class() ) . '</div>
 						<div class="backorders">' . esc_html( $the_product->get_backorders() ) . '</div>
