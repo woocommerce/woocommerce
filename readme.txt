@@ -158,6 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+* Fix - Demo store banner styling in 2017.
 * Fix - Make variation options update on first load.
 
 = 2.6.12 - 2017-01-12 =
