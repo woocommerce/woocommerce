@@ -113,7 +113,7 @@
 						view        = this;
 
 					// Set name.
-					$('.wc-shipping-zone-name').text( zone_name );
+					$('.wc-shipping-zone-name').text( zone_name ? zone_name : data.strings.default_zone_name );
 
 					// Blank out the contents.
 					this.$el.empty();

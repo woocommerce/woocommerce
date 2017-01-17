@@ -52,7 +52,6 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		} elseif ( 0 === $zone || "0" === $zone ) {
 			$this->set_id( 0 );
 		} else {
-			$this->set_zone_name( __( 'Zone', 'woocommerce' ) );
 			$this->set_object_read( true );
 		}
 

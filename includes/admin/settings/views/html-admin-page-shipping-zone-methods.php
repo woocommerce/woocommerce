@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2>
 	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping' ); ?>"><?php _e( 'Shipping zones', 'woocommerce' ); ?></a> &gt;
-	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ); ?></span>
+	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
 <?php do_action( 'woocommerce_shipping_zone_before_methods_table' ); ?>
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
-					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name() ); ?>" placeholder="<?php _e( 'Zone name', 'woocommerce' ); ?>">
+					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name( 'edit' ) ); ?>" placeholder="<?php _e( 'Zone name', 'woocommerce' ); ?>">
 				</td>
 			</tr>
 			<tr valign="top" class="">
