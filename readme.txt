@@ -158,6 +158,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+* Fix - Make variation options update on first load.
+
 = 2.6.12 - 2017-01-12 =
 * Fix - Make images shown up on pageload when using ajax variations.
 * Fix - Allow variations options to be deselected in IE11.
