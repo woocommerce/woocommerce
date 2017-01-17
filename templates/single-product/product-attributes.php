@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<th><?php echo wc_attribute_label( $attribute->get_name() ); ?></th>
 			<td><?php
-				$values = $attribute->is_taxonomy() ? wc_get_object_terms( $product->get_id(), $attribute->get_name(), 'name' ) : $attribute->get_options();
+				$values = $attribute->is_taxonomy() ? wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'names' ) ) : $attribute->get_options();
 				echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 			?></td>
 		</tr>
