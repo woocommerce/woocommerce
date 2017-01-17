@@ -55,6 +55,35 @@
 /**
  * Global elements
  */
+.woocommerce-demo-store {
+	padding-top: 3.5em;
+}
+
+p.demo_store {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+	width: 100%;
+	font-size: 1em;
+	padding: 1em 0;
+	text-align: center;
+	background-color: #767676;
+	color: #fff;
+	z-index: 99998;
+	box-shadow: 0 1px 1em rgba(0,0,0,0.2);
+	a {
+		color: #fff;
+	}
+}
+
+.admin-bar {
+	p.demo_store {
+		top: 32px;
+	}
+}
+
 .woocommerce-breadcrumb {
 	padding-bottom: 2em;
 	margin-bottom: 4em;
