@@ -112,7 +112,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 		<td class="wc-shipping-zone-method-type">{{ data.method_title }}</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
-		<td class="wc-shipping-zone-method-description">{{ data.method_description }}</td>
+		<td class="wc-shipping-zone-method-description">{{{ data.method_description }}}</td>
 	</tr>
 </script>
 
@@ -170,8 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 										if ( ! $method->supports( 'shipping-zones' ) ) {
 											continue;
 										}
-
-										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+										echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
 									}
 								?>
 							</select>
