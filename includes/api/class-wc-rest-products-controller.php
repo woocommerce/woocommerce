@@ -180,9 +180,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
+			}
+
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'   => '_sku',
-				'value' => $request['sku'],
+				'key'     => '_sku',
+				'value'   => $skus,
+				'compare' => 'IN'
 			) );
 		}
 
