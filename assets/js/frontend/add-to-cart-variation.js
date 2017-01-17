@@ -167,6 +167,7 @@
 				}
 			}
 		} else {
+			form.$form.trigger( 'update_variation_values' );
 			form.$form.trigger( 'reset_data' );
 		}
 
