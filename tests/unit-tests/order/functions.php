@@ -158,11 +158,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order->set_date_created( '2015-01-01 05:20:30' );
 		$order->save();
 		$order_1 = $order->get_id();
-		$order = WC_Helper_Order::create_order();
+		$order   = WC_Helper_Order::create_order();
 		$order->set_date_created( '2017-01-01' );
 		$order->save();
 		$order_2 = $order->get_id();
-		$order = WC_Helper_Order::create_order();
+		$order   = WC_Helper_Order::create_order();
 		$order->set_date_created( '2017-01-01' );
 		$order->save();
 		$order_3 = $order->get_id();
