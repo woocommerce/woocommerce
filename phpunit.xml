@@ -15,7 +15,7 @@
 		</testsuite>
 	</testsuites>
 	<filter>
-		<whitelist>
+		<whitelist addUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">.</directory>
 			<exclude>
 				<directory suffix=".php">./apigen/</directory>
