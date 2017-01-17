@@ -156,7 +156,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		wp_update_post( $post_data );
 
-		$this->update_post_meta( $product );
+		$this->update_post_meta( $product, $this->should_force_meta_update( $product ) );
 		$this->update_terms( $product );
 		$this->update_visibility( $product );
 		$this->update_attributes( $product );
@@ -398,10 +398,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_rating_count'       => 'rating_counts',
 			'_wc_review_count'       => 'review_count',
 		);
-
-		if ( false === $force ) {
-			$force = (bool) get_post_meta( $product->get_id(), '_woocommerce_force_meta_update', true );
-		}
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) && ! $force ) {

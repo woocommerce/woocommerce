@@ -164,4 +164,21 @@ class WC_Data_Store_WP {
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys );
 	}
 
+	/**
+	 * If the `_woocommerce_force_meta_update` meta is present, meta should be
+	 * forced to update to make sure all props are present as meta keys.
+	 * Get the value of the meta, and delete it since we only want to force the update once.
+	 * This value is passed to update_post_meta for orders, products, and coupons.
+	 *
+	 * @param  object $meta
+	 * @return bool
+	 */
+	protected function should_force_meta_update( $object ) {
+		$force = (bool) get_post_meta( $object->get_id(), '_woocommerce_force_meta_update', true );
+		if ( $force ) {
+			delete_post_meta( $object->get_id(), '_woocommerce_force_meta_update' );
+		}
+		return $force;
+	}
+
 }
