@@ -34,7 +34,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		// Define user set variables
 		$this->title        = $this->get_option( 'title' );
 		$this->description  = $this->get_option( 'description' );
-		$this->instructions = $this->get_option( 'instructions', $this->description );
+		$this->instructions = $this->get_option( 'instructions' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
