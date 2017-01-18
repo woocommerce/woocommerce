@@ -303,6 +303,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( 'item_meta' === $offset ) {
 			return $meta_values;
+		} elseif ( 'type' === $offset ) {
+			return $this->get_type();
 		} elseif ( array_key_exists( $offset, $this->data ) ) {
 			$getter = "get_$offset";
 			if ( is_callable( array( $this, $getter ) ) ) {
