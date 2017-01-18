@@ -367,6 +367,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
+		if ( ! empty( $args['date_before'] ) ) {
+			$wp_query_args['date_query']['before'] = $args['date_before'];
+		}
+
+		if ( ! empty( $args['date_after'] ) ) {
+			$wp_query_args['date_query']['after'] = $args['date_after'];
+		}
+
 		// Get results.
 		$orders = new WP_Query( apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $args, $this ) );
 
