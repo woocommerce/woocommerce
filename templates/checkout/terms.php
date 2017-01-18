@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $terms_page_id = wc_get_page_id( 'terms' );
 $terms         = get_post( $terms_page_id );
-$terms_content = apply_filters( 'the_content', $terms->post_content );
+$terms_content = wc_format_content( $terms->post_content );
 
 if ( $terms_page_id > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) : ?>
 	<?php
