@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					foreach ( $attribute_values as $attribute_value ) :
 						if ( $attribute_taxonomy->attribute_public ) :
-							$values[] = '<a href="'. esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $attribute_value->name . '</a>';
+							$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $attribute_value->name . '</a>';
 						else:
 							$values[] = $attribute_value->name;
 						endif;
