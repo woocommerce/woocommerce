@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 2.6.12
+Stable tag: 2.6.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,8 +158,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 2.6.13 - 2017-01-18 =
 * Fix - Demo store banner styling in 2017.
-* Fix - Make variation options update on first load.
+* Fix - Removed default instructions from COD, BACS and Cheque gateways so displayed messages can be unset.
+* Fix - Made variation options update on first load.
+* Localisation - Added Romanian locale to the installer.
 
 = 2.6.12 - 2017-01-12 =
 * Fix - Make images shown up on pageload when using ajax variations.
