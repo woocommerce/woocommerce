@@ -158,3 +158,8 @@ function wc_get_order_item_meta( $item_id, $key, $single = true ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	return $data_store->get_metadata( $item_id, $key, $single );
 }
+
+function wc_get_order_id_by_order_item_id( $item_id ) {
+	$data_store = WC_Data_Store::load( 'order-item' );
+	return $data_store->get_order_id_by_order_item_id( $item_id );
+}

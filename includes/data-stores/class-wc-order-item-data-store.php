@@ -119,4 +119,19 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		return get_metadata( 'order_item', $item_id, $key, $single );
 	}
 
+	/**
+	 * Get order ID by order item ID.
+	 *
+	 * @since 2.7.0
+	 * @param  mixed $item_id
+	 * @return int
+	 */
+	function get_order_id_by_order_item_id( $item_id ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare(
+			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+			$item_id
+		) );
+	}
+
 }

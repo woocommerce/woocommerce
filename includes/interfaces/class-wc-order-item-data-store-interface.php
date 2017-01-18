@@ -74,4 +74,11 @@ interface WC_Order_Item_Data_Store_Interface {
 	 * @return mixed
 	 */
 	function get_metadata( $item_id, $key, $single = true );
+
+	/**
+	 * Get order ID by order item ID.
+	 * @param  mixed $item_id
+	 * @return int
+	 */
+	function get_order_id_by_order_item_id( $item_id );
 }
