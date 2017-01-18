@@ -189,7 +189,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'     => '_sku',
 				'value'   => $skus,
-				'compare' => 'IN'
+				'compare' => 'IN',
 			) );
 		}
 

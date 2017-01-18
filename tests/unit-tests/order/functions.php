@@ -33,7 +33,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_order_status() {
-		$this->assertTrue(  wc_is_order_status( 'wc-pending' ) );
+		$this->assertTrue( wc_is_order_status( 'wc-pending' ) );
 		$this->assertFalse( wc_is_order_status( 'wc-another-status' ) );
 	}
 

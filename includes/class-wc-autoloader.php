@@ -87,7 +87,6 @@ class WC_Autoloader {
 			$path = $this->include_path . 'log-handlers/';
 		}
 
-
 		if ( empty( $path ) || ( ! $this->load_file( $path . $file ) && strpos( $class, 'wc_' ) === 0 ) ) {
 			$this->load_file( $this->include_path . $file );
 		}
