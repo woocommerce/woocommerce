@@ -207,7 +207,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				'key'           => $meta->key,
 				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
 			);
 		}
 

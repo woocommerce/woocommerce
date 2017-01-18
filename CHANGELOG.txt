@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.6.13 - 2017-01-18 =
+* Fix - Demo store banner styling in 2017.
+* Fix - Removed default instructions from COD, BACS and Cheque gateways so displayed messages can be unset.
+* Fix - Made variation options update on first load.
+* Localisation - Added Romanian locale to the installer.
+
 = 2.6.12 - 2017-01-12 =
 * Fix - Make images shown up on pageload when using ajax variations.
 * Fix - Allow variations options to be deselected in IE11.
