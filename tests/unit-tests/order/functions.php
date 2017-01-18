@@ -147,4 +147,45 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}
+
+	/**
+	 * Test the before and after date parameters for wc_get_orders.
+	 *
+	 * @since 2.7
+	 */
+	public function test_wc_get_orders_date_params() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_created( '2015-01-01 05:20:30' );
+		$order->save();
+		$order_1 = $order->get_id();
+		$order   = WC_Helper_Order::create_order();
+		$order->set_date_created( '2017-01-01' );
+		$order->save();
+		$order_2 = $order->get_id();
+		$order   = WC_Helper_Order::create_order();
+		$order->set_date_created( '2017-01-01' );
+		$order->save();
+		$order_3 = $order->get_id();
+
+		$orders   = wc_get_orders( array( 'date_before' => '2017-01-15', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_before' => '2017-01-01', 'return' => 'ids' ) );
+		$expected = array( $order_1 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_before' => '2016-12-31', 'return' => 'ids' ) );
+		$expected = array( $order_1 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_after' => '2015-01-01 00:00:00', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_after' => '2016-01-01', 'return' => 'ids' ) );
+		$expected = array( $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+	}
 }
