@@ -1405,7 +1405,7 @@ class WC_AJAX {
 						$old_stock    = wc_stock_amount( $_product->stock );
 						$new_quantity = $_product->increase_stock( $qty );
 
-						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %1$s to %2$s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
+						$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
 
 						do_action( 'woocommerce_restock_refunded_item', $_product->get_id(), $old_stock, $new_quantity, $order, $_product );
 					}
