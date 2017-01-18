@@ -295,7 +295,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @return array
  */
 function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
-	if ( ! $post_id || 'product' !== get_post_type( $post_id ) ) {
+	if ( ! $post_id || !in_array(get_post_type( $post_id ), apply_filters('product_post_class_post_types', array('product'))) ) {
 		return $classes;
 	}
 
