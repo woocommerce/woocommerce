@@ -68,9 +68,9 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Update term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
 	 * @param  string $prev_value (default: '')
 	 * @return bool
 	 */
@@ -82,11 +82,11 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Add term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
-	 * @param  bool $unique (default: false)
-	 * @return int New row ID or 0
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
+	 * @param  bool   $unique (default: false)
+	 * @return int    New row ID or 0
 	 */
 	function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
 		return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
@@ -96,10 +96,10 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Delete term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
+	 * @param  int    $item_id
+	 * @param  string $meta_key
 	 * @param  string $meta_value (default: '')
-	 * @param  bool $delete_all (default: false)
+	 * @param  bool   $delete_all (default: false)
 	 * @return bool
 	 */
 	function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
@@ -110,9 +110,9 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Get term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $key
-	 * @param  bool $single (default: true)
+	 * @param  int    $item_id
+	 * @param  string $key
+	 * @param  bool   $single (default: true)
 	 * @return mixed
 	 */
 	function get_metadata( $item_id, $key, $single = true ) {
@@ -123,12 +123,12 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Get order ID by order item ID.
 	 *
 	 * @since 2.7.0
-	 * @param  mixed $item_id
+	 * @param  int $item_id
 	 * @return int
 	 */
 	function get_order_id_by_order_item_id( $item_id ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare(
+		return (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
 			$item_id
 		) );

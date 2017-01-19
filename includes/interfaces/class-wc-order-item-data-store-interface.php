@@ -17,7 +17,7 @@ interface WC_Order_Item_Data_Store_Interface {
 	 * Add an order item to an order.
 	 * @param  int   $order_id
 	 * @param  array $item. order_item_name and order_item_type.
-	 * @return int Order Item ID
+	 * @return int   Order Item ID
 	 */
 	public function add_order_item( $order_id, $item );
 
@@ -37,9 +37,9 @@ interface WC_Order_Item_Data_Store_Interface {
 
 	/**
 	 * Update term meta.
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
 	 * @param  string $prev_value (default: '')
 	 * @return bool
 	 */
@@ -47,37 +47,37 @@ interface WC_Order_Item_Data_Store_Interface {
 
 	/**
 	 * Add term meta.
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
-	 * @param  bool $unique (default: false)
-	 * @return int New row ID or 0
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
+	 * @param  bool   $unique (default: false)
+	 * @return int    New row ID or 0
 	 */
 	function add_metadata( $item_id, $meta_key, $meta_value, $unique = false );
 
 
 	/**
 	 * Delete term meta.
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
+	 * @param  int    $item_id
+	 * @param  string $meta_key
 	 * @param  string $meta_value (default: '')
-	 * @param  bool $delete_all (default: false)
+	 * @param  bool   $delete_all (default: false)
 	 * @return bool
 	 */
 	function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false );
 
 	/**
 	 * Get term meta.
-	 * @param  mixed $item_id
-	 * @param  mixed $key
-	 * @param  bool $single (default: true)
+	 * @param  int    $item_id
+	 * @param  string $key
+	 * @param  bool   $single (default: true)
 	 * @return mixed
 	 */
 	function get_metadata( $item_id, $key, $single = true );
 
 	/**
 	 * Get order ID by order item ID.
-	 * @param  mixed $item_id
+	 * @param  int $item_id
 	 * @return int
 	 */
 	function get_order_id_by_order_item_id( $item_id );
