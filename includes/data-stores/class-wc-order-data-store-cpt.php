@@ -312,14 +312,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Return count of orders with type.
+	 * Return count of orders with a specific status.
 	 *
-	 * @param  string $type
+	 * @param  string $status
 	 * @return int
 	 */
-	public function get_order_count( $type ) {
+	public function get_order_count( $status ) {
 		global $wpdb;
-		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $type ) ) );
+		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $status ) ) );
 	}
 
 	/**
