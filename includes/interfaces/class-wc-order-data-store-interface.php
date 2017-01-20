@@ -46,11 +46,11 @@ interface WC_Order_Data_Store_Interface {
 	public function get_order_id_by_order_key( $order_key );
 
 	/**
-	 * Return count of orders with type.
-	 * @param  string $type
+	 * Return count of orders with a specific status.
+	 * @param  string $status
 	 * @return int
 	 */
-	public function get_order_count( $type );
+	public function get_order_count( $status );
 
 	/**
 	 * Get all orders matching the passed in args.
