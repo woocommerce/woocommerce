@@ -17,7 +17,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @var array
 	 */
-	private $prices_array = array();
+	protected $prices_array = array();
 
 	/**
 	 * Read product data.
@@ -41,7 +41,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param  bool $force_read True to bypass the transient.
 	 * @return array
 	 */
-	private function read_children( &$product, $force_read = false ) {
+	protected function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
 
@@ -80,7 +80,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product
 	 * @return array
 	 */
-	private function read_variation_attributes( &$product ) {
+	protected function read_variation_attributes( &$product ) {
 		global $wpdb;
 
 		$variation_attributes = array();
