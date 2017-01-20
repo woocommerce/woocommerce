@@ -179,7 +179,7 @@ function wc_paying_customer( $order_id ) {
 	$order       = wc_get_order( $order_id );
 	$customer_id = $order->get_customer_id();
 
-	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
+	if ( $customer_id > 0 && 'shop_order_refund' !== $order->get_type() ) {
 		$customer = new WC_Customer( $customer_id );
 		$customer->set_is_paying_customer( true );
 		$customer->save();
