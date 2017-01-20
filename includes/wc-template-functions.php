@@ -1921,7 +1921,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$field           = '';
 		$label_id        = $args['id'];
 		$sort            = $args['priority'] ? $args['priority'] : '';
-		$field_container = '<p class="form-row %1$s" id="%2$s" data-sort="' . esc_attr( $sort ) . '">%3$s</p>';
+		$field_container = apply_filters( 'woocommerce_form_field_container', '<p class="form-row %1$s" id="%2$s" data-sort="' . esc_attr( $sort ) . '">%3$s</p>', $key, $args, $value );
 
 		switch ( $args['type'] ) {
 			case 'country' :
@@ -2036,6 +2036,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 		}
+
+		$field = apply_filters( 'woocommerce_form_field_before_container_' . $args['type'], $field, $key, $args, $value );
 
 		if ( ! empty( $field ) ) {
 			$field_html = '';
