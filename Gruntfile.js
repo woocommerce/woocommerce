@@ -128,6 +128,20 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Generate RTL .css files
+		rtlcss: {
+			woocommerce: {
+				expand: true,
+				cwd: '<%= dirs.css %>',
+				src: [
+					'*.css',
+					'!*-rtl.css'
+				],
+				dest: '<%= dirs.css %>/',
+				ext: '-rtl.css'
+			}
+		},
+
 		// Minify all .css files.
 		cssmin: {
 			minify: {
@@ -259,6 +273,7 @@ module.exports = function( grunt ) {
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
+	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
@@ -284,6 +299,7 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'css', [
 		'sass',
+		'rtlcss',
 		'cssmin'
 	]);
 
