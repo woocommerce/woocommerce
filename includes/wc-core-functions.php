@@ -1261,7 +1261,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	$formatted_postcode = wc_format_postcode( $postcode, $country );
-	$length             = strlen( $formatted_postcode );
+	$length             = function_exists( 'mb_strlen' ) ? mb_strlen( $formatted_postcode ) : strlen( $formatted_postcode );
 	$postcodes          = array(
 		$postcode,
 		$formatted_postcode,
@@ -1269,7 +1269,7 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	);
 
 	for ( $i = 0; $i < $length; $i ++ ) {
-		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
+		$postcodes[] = ( function_exists( 'mb_substr' ) ? mb_substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) : substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) ) . '*';
 	}
 
 	return $postcodes;
