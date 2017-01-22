@@ -253,9 +253,10 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
-	// Remove locale from string
+	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = preg_replace( '/[^0-9\.,]/', '', $number );
 	}
 
 	if ( false !== $dp ) {
