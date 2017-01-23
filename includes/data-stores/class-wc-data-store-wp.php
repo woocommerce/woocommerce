@@ -178,23 +178,11 @@ class WC_Data_Store_WP {
 		$props_to_update = array();
 		$changed_props   = $object->get_changes();
 
-		// Normalize billing / shipping / other keys that might be part of a sub array.
-		$subs = array( 'shipping', 'billing' );
-		foreach ( $subs as $sub ) {
-			if ( ! empty( $changed_props[ $sub ] ) ) {
-				foreach ( $changed_props[ $sub ] as $sub_prop => $value ) {
-					$changed_props[ $sub . '_' . $sub_prop ] = $value;
-				}
-				unset( $changed_props[ $sub ] );
-			}
-		}
+		error_log( print_r( $changed_props, 1 ) );
 
 		// Props should be updated if they are a part of the $changed array or don't exist yet.
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( array_key_exists( $prop, $changed_props ) ) {
-				$props_to_update[ $meta_key ] = $prop;
-			}
-			if ( ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
+			if ( array_key_exists( $prop, $changed_props ) || ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
 				$props_to_update[ $meta_key ] = $prop;
 			}
 		}
