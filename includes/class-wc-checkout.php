@@ -413,6 +413,7 @@ class WC_Checkout {
 
 		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
+				/** @var WC_Shipping_Rate $shipping_rate */
 				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
 				$item                     = new WC_Order_Item_Shipping();
 				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
@@ -423,8 +424,11 @@ class WC_Checkout {
 					'taxes'        => array(
 						'total' => $shipping_rate->taxes,
 					),
-					'meta_data'    => $shipping_rate->get_meta_data(),
 				) );
+
+				foreach( $shipping_rate->get_meta_data() as $key => $value ) {
+					$item->add_meta_data( $key, $value, true );
+				}
 
 				/**
 				 * Action hook to adjust item before save.
