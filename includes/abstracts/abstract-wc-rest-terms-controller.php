@@ -378,15 +378,15 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		$term = wp_insert_term( $name, $taxonomy, $args );
 		if ( is_wp_error( $term ) ) {
+			$error_data = array( 'status' => 400 );
 
-			// If we're going to inform the client that the term exists, give them the identifier
-			// they can actually use.
-			if ( ( $term_id = $term->get_error_data( 'term_exists' ) ) ) {
-				$existing_term = get_term( $term_id, $taxonomy );
-				$term->add_data( $existing_term->term_id, 'term_exists' );
+			// If we're going to inform the client that the term exists,
+			// give them the identifier they can actually use.
+			if ( $term_id = $term->get_error_data( 'term_exists' ) ) {
+				$error_data['resource_id'] = $term_id;
 			}
 
-			return $term;
+			return new WP_Error( $term->get_error_code(), $term->get_error_message(), $error_data );
 		}
 
 		$term = get_term( $term['term_id'], $taxonomy );
