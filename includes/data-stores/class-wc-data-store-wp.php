@@ -178,8 +178,6 @@ class WC_Data_Store_WP {
 		$props_to_update = array();
 		$changed_props   = $object->get_changes();
 
-		error_log( print_r( $changed_props, 1 ) );
-
 		// Props should be updated if they are a part of the $changed array or don't exist yet.
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( array_key_exists( $prop, $changed_props ) || ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
