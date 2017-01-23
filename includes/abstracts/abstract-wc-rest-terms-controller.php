@@ -471,13 +471,19 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$parent = get_term( (int) $request['parent'], $taxonomy );
+			$parent_id = (int) $request['parent'];
 
-			if ( ! $parent ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( 0 === $parent_id ) {
+				$prepared_args['parent'] = $parent_id;
+			} else {
+				$parent = get_term( $parent_id, $taxonomy );
+
+				if ( ! $parent ) {
+					return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$prepared_args['parent'] = $parent->term_id;
 			}
-
-			$prepared_args['parent'] = $parent->term_id;
 		}
 
 		// Only update the term if we haz something to update.
