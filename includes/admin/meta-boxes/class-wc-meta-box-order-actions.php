@@ -109,17 +109,20 @@ class WC_Meta_Box_Order_Actions {
 
 			if ( strstr( $action, 'send_email_' ) ) {
 
+				// Switch back to the site locale.
+				if ( function_exists( 'switch_to_locale' ) ) {
+					switch_to_locale( get_locale() );
+				}
+
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
-				// Ensure gateways are loaded in case they need to insert data into the emails
+				// Ensure gateways are loaded in case they need to insert data into the emails.
 				WC()->payment_gateways();
 				WC()->shipping();
 
-				// Load mailer
+				// Load mailer.
 				$mailer = WC()->mailer();
-
 				$email_to_send = str_replace( 'send_email_', '', $action );
-
 				$mails = $mailer->get_emails();
 
 				if ( ! empty( $mails ) ) {
@@ -133,7 +136,12 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
-				// Change the post saved message
+				// Restore user locale.
+				if ( function_exists( 'restore_current_locale' ) ) {
+					restore_current_locale();
+				}
+
+				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
 
 			} elseif ( 'regenerate_download_permissions' === $action ) {
