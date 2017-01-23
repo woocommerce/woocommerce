@@ -128,6 +128,7 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
 	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		self::$styles[] = $handle;
@@ -148,6 +149,7 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
 	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		if ( ! in_array( $handle, self::$styles ) && $path ) {
