@@ -80,9 +80,11 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 			'method_id'    => $shipping_rate->id,
 			'total'        => wc_format_decimal( $shipping_rate->cost ),
 			'taxes'        => $shipping_rate->taxes,
-			'meta_data'    => $shipping_rate->get_meta_data(),
 			'order_id'     => $this->get_id(),
 		) );
+		foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$item->save();
 		$this->add_item( $item );
 		wc_do_deprecated_action( 'woocommerce_order_add_shipping', array( $this->get_id(), $item->get_id(), $shipping_rate ), '2.7', 'Use woocommerce_new_order_item action instead.' );

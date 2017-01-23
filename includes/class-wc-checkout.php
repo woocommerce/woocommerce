@@ -426,7 +426,7 @@ class WC_Checkout {
 					),
 				) );
 
-				foreach( $shipping_rate->get_meta_data() as $key => $value ) {
+				foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
 					$item->add_meta_data( $key, $value, true );
 				}
 

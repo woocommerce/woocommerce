@@ -346,8 +346,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 		$object->save();
 		$this->assertCount( 1, $object->get_shipping_methods() );
@@ -365,8 +367,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 		$object->save();
 		$this->assertEquals( 'Flat rate shipping', $object->get_shipping_method() );
@@ -378,8 +382,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 		$object->save();
 		$this->assertEquals( 'Flat rate shipping, Flat rate shipping 2', $object->get_shipping_method() );
@@ -490,16 +496,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item_1->add_meta_data( $key, $value, true );
+		}
 		$item_2 = new WC_Order_Item_Shipping();
 		$item_2->set_props( array(
 			'method_title' => $rate->label,
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
 		$object->save();
@@ -536,8 +546,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		)  );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 
 		$object->calculate_taxes();
@@ -578,8 +590,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 
 		$object->calculate_totals();
@@ -618,8 +632,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$object->add_item( $item );
 		$object->save();
 
