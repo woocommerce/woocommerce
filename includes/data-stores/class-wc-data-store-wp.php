@@ -131,6 +131,7 @@ class WC_Data_Store_WP {
 		// Figure out our field names.
 		if ( 'user' === $this->meta_type ) {
 			$meta_id_field = 'umeta_id';
+			$table         = $wpdb->usermeta;
 		}
 
 		if ( ! empty( $this->object_id_field_for_meta ) ) {

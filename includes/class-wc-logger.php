@@ -61,7 +61,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @return bool True if the log should be handled.
 	 */
-	public function should_handle( $level ) {
+	protected function should_handle( $level ) {
 		if ( null === $this->threshold ) {
 			return true;
 		}
