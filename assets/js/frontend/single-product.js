@@ -124,7 +124,7 @@ jQuery( function( $ ) {
 				controlNav:     wc_single_product_params.flexslider.controlNav,
 				slideshow:      wc_single_product_params.flexslider.slideshow,
 				animationSpeed: wc_single_product_params.flexslider.animationSpeed,
-				animationLoop:  false // Breaks photoswipe pagination if true. It's hard disabled because we don't need it anyway (no next/prev enabled in flex).
+				animationLoop:  wc_single_product_params.flexslider.animationLoop // Breaks photoswipe pagination if true.
 			});
 		},
 

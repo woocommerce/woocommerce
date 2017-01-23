@@ -431,6 +431,7 @@ class WC_Frontend_Scripts {
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
 						'animationSpeed' => 500,
+						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
 				);
 			break;
