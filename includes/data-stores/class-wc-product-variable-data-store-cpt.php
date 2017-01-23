@@ -143,7 +143,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return array of prices
 	 */
 	public function read_price_data( &$product, $include_taxes = false ) {
-		global $wp_filter;
 
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
@@ -151,26 +150,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 */
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 
-		/**
-		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
-		 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
-		 * @var string
-		 */
-		$price_hash   = $include_taxes ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
-		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
-
-		foreach ( $filter_names as $filter_name ) {
-			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = array();
-
-				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
-					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
-				}
-			}
-		}
-
-		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $include_taxes ) ) );
+		$price_hash = $this->get_price_hash( $product, $include_taxes );
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -245,6 +225,37 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $include_taxes );
 		}
 		return $this->prices_array[ $price_hash ];
+	}
+
+	/**
+	 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
+	 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Product
+	 * @param  bool $include_taxes If taxes should be calculated or not.
+	 * @return string
+	 */
+	protected function get_price_hash( &$product, $include_taxes = false ) {
+		global $wp_filter;
+
+		$price_hash   = $include_taxes ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
+		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+
+		foreach ( $filter_names as $filter_name ) {
+			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
+			}
+		}
+
+		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $include_taxes ) ) );
+
+		return $price_hash;
 	}
 
 	/**
