@@ -38,8 +38,6 @@ if ( $attachment_ids ) {
 			'data-large-image-height' => $full_size_image[2],
 		);
 
-		echo '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image">';
-			echo wp_get_attachment_image( $attachment_id, 'shop_single', false, $attributes );
-		echo '</figure>';
+		echo apply_filters( 'woocommerce_single_product_image_additional_thumbnail_html', '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image">' . wp_get_attachment_image( $attachment_id, 'shop_single', false, $attributes ) . '</figure>' );
 	}
 }
