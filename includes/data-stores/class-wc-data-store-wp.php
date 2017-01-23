@@ -165,4 +165,41 @@ class WC_Data_Store_WP {
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys );
 	}
 
+	/**
+	 * Gets a list of props and meta keys that need updated based on change state
+	 * or if they are present in the database or not.
+	 *
+	 * @param  WC_Data $object              The WP_Data object (WC_Coupon for coupons, etc).
+	 * @param  array   $meta_key_to_props   A mapping of meta keys => prop names.
+	 * @param  string  $meta_type           The internal WP meta type (post, user, etc).
+	 * @return array                        A mapping of meta keys => prop names, filtered by ones that should be updated.
+	 */
+	protected function get_props_to_update( $object, $meta_key_to_props, $meta_type = 'post' ) {
+		$props_to_update = array();
+		$changed_props   = $object->get_changes();
+
+		// Normalize billing / shipping / other keys that might be part of a sub array.
+		$subs = array( 'shipping', 'billing' );
+		foreach ( $subs as $sub ) {
+			if ( ! empty( $changed_props[ $sub ] ) ) {
+				foreach ( $changed_props[ $sub ] as $sub_prop => $value ) {
+					$changed_props[ $sub . '_' . $sub_prop ] = $value;
+				}
+				unset( $changed_props[ $sub ] );
+			}
+		}
+
+		// Props should be updated if they are a part of the $changed array or don't exist yet.
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			if ( array_key_exists( $prop, $changed_props ) ) {
+				$props_to_update[ $meta_key ] = $prop;
+			}
+			if ( ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
+				$props_to_update[ $meta_key ] = $prop;
+			}
+		}
+
+		return $props_to_update;
+	}
+
 }
