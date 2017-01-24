@@ -294,6 +294,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-product-variable-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php' );
+		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php' );
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
