@@ -218,6 +218,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_coupdon_object_updated_props', $coupon, $updated_props );
 	}
 
 	/**
