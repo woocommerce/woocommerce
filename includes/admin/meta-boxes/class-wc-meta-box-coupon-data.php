@@ -76,7 +76,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				// Expiry date
 				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => esc_attr__( 'YYYY-MM-DD', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => 'YYYY-MM-DD', 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 				do_action( 'woocommerce_coupon_options' );
 
@@ -102,37 +102,35 @@ class WC_Meta_Box_Coupon_Data {
 				// Product ids
 				?>
 				<p class="form-field"><label><?php _e( 'Products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
-					$product_ids = $coupon->get_product_ids();
-					$json_ids    = array();
+				<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
+					<?php
+						$product_ids = $coupon->get_product_ids();
 
-					foreach ( $product_ids as $product_id ) {
-						$product = wc_get_product( $product_id );
-						if ( is_object( $product ) ) {
-							$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						foreach ( $product_ids as $product_id ) {
+							$product = wc_get_product( $product_id );
+							if ( is_object( $product ) ) {
+								echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
+							}
 						}
-					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-					?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ); ?></p>
+					?>
+				</select> <?php echo wc_help_tip( __( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				// Exclude Product ids
 				?>
 				<p class="form-field"><label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
-					$product_ids = $coupon->get_excluded_product_ids();
-					$json_ids    = array();
+				<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="exclude_product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
+					<?php
+						$product_ids = $coupon->get_excluded_product_ids();
 
-					foreach ( $product_ids as $product_id ) {
-						$product = wc_get_product( $product_id );
-						if ( is_object( $product ) ) {
-							$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						foreach ( $product_ids as $product_id ) {
+							$product = wc_get_product( $product_id );
+							if ( is_object( $product ) ) {
+								echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
+							}
 						}
-					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_help_tip( __( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ); ?></p>
+					?>
+				</select> <?php echo wc_help_tip( __( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				echo '</div><div class="options_group">';
@@ -279,8 +277,8 @@ class WC_Meta_Box_Coupon_Data {
 			'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
 			'date_expires'                => wc_clean( $_POST['expiry_date'] ),
 			'individual_use'              => isset( $_POST['individual_use'] ),
-			'product_ids'                 => array_filter( array_map( 'intval', explode( ',', $_POST['product_ids'] ) ) ),
-			'excluded_product_ids'        => array_filter( array_map( 'intval', explode( ',', $_POST['exclude_product_ids'] ) ) ),
+			'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) : array(),
+			'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval', (array) $_POST['exclude_product_ids'] ) ) : array(),
 			'usage_limit'                 => absint( $_POST['usage_limit'] ),
 			'usage_limit_per_user'        => absint( $_POST['usage_limit_per_user'] ),
 			'limit_usage_to_x_items'      => absint( $_POST['limit_usage_to_x_items'] ),

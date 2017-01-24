@@ -341,7 +341,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian rupee', 'woocommerce' ),
 				'IQD' => __( 'Iraqi dinar', 'woocommerce' ),
 				'IRR' => __( 'Iranian rial', 'woocommerce' ),
-				'IRT' => __( 'Iranian Toman', 'woocommerce' ),
+				'IRT' => __( 'Iranian toman', 'woocommerce' ),
 				'ISK' => __( 'Icelandic kr&oacute;na', 'woocommerce' ),
 				'JEP' => __( 'Jersey pound', 'woocommerce' ),
 				'JMD' => __( 'Jamaican dollar', 'woocommerce' ),
@@ -757,11 +757,12 @@ function get_woocommerce_api_url( $path ) {
  * Get a log file path.
  *
  * @since 2.2
+ *
  * @param string $handle name.
  * @return string the log file path.
  */
 function wc_get_log_file_path( $handle ) {
-	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+	return WC_Log_Handler_File::get_log_file_path( $handle );
 }
 
 /**
@@ -1260,7 +1261,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	$formatted_postcode = wc_format_postcode( $postcode, $country );
-	$length             = strlen( $formatted_postcode );
+	$length             = function_exists( 'mb_strlen' ) ? mb_strlen( $formatted_postcode ) : strlen( $formatted_postcode );
 	$postcodes          = array(
 		$postcode,
 		$formatted_postcode,
@@ -1268,7 +1269,7 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	);
 
 	for ( $i = 0; $i < $length; $i ++ ) {
-		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
+		$postcodes[] = ( function_exists( 'mb_substr' ) ? mb_substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) : substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) ) . '*';
 	}
 
 	return $postcodes;
@@ -1411,17 +1412,102 @@ function wc_get_rounding_precision() {
 }
 
 /**
- * Returns a new instance of a WC Logger.
- * Use woocommerce_logging_class filter to change the logging class.
+ * Get a shared logger instance.
+ *
+ * Use the woocommerce_logging_class filter to change the logging class. You may provide one of the following:
+ *     - a class name which will be instantiated as `new $class` with no arguments
+ *     - an instance which will be used directly as the logger
+ * In either case, the class or instance *must* implement WC_Logger_Interface.
+ *
+ * @see WC_Logger_Interface
+ *
  * @return WC_Logger
  */
 function wc_get_logger() {
-	if ( ! class_exists( 'WC_Logger' ) ) {
-		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	static $logger = null;
+	if ( null === $logger ) {
+		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+		$implements = class_implements( $class );
+		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
+			if ( is_object( $class ) ) {
+				$logger = $class;
+			} else {
+				$logger = new $class;
+			}
+		} else {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
+					esc_html( is_object( $class ) ? get_class( $class ) : $class )
+				),
+				'2.7'
+			);
+			$logger = new WC_Logger();
+		}
 	}
-	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
-	return new $class;
+	return $logger;
 }
+
+/**
+ * Prints human-readable information about a variable.
+ *
+ * Some server environments blacklist some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form without calling blacklisted functions.
+ *
+ * @since 2.7
+ *
+ * @param mixed $expression The expression to be printed.
+ * @param bool $return Optional. Default false. Set to true to return the human-readable string.
+ * @return string|bool False if expression could not be printed. True if the expression was printed.
+ *     If $return is true, a string representation will be returned.
+ */
+function wc_print_r( $expression, $return = false ) {
+	$alternatives = array(
+		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
+		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
+		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
+		array( 'func' => 'serialize', 'args' => array( $expression ) ),
+	);
+
+	$alternatives = apply_filters( 'woocommerce_print_r_alternatives', $alternatives, $expression );
+
+	foreach ( $alternatives as $alternative ) {
+		if ( function_exists( $alternative['func'] ) ) {
+			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			if ( $return ) {
+				return $res;
+			} else {
+				echo $res;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Registers the default log handler.
+ *
+ * @since 2.7
+ * @param array $handlers
+ * @return array
+ */
+function wc_register_default_log_handler( $handlers ) {
+
+	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
+		$handler_class = WC_LOG_HANDLER;
+		$default_handler = new $handler_class();
+	} else {
+		$default_handler = new WC_Log_Handler_File();
+	}
+
+	array_push( $handlers, $default_handler );
+
+	return $handlers;
+}
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
 
 /**
  * Store user agents. Used for tracker.

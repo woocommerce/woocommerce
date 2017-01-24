@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      limit int Maximum of orders to retrieve.
  *      offset int Offset of orders to retrieve.
  *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ *      date_before string Get orders before a certain date ( strtotime() compatibile string )
+ *      date_after string Get orders after a certain date ( strtotime() compatibile string )
  *      exclude array Order IDs to exclude from the query.
  *      orderby string Order by date, title, id, modified, rand etc
  *      order string ASC or DESC
@@ -46,19 +48,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_orders( $args ) {
 	$args = wp_parse_args( $args, array(
-		'status'   => array_keys( wc_get_order_statuses() ),
-		'type'     => wc_get_order_types( 'view-orders' ),
-		'parent'   => null,
-		'customer' => null,
-		'email'    => '',
-		'limit'    => get_option( 'posts_per_page' ),
-		'offset'   => null,
-		'page'     => 1,
-		'exclude'  => array(),
-		'orderby'  => 'date',
-		'order'    => 'DESC',
-		'return'   => 'objects',
-		'paginate' => false,
+		'status'      => array_keys( wc_get_order_statuses() ),
+		'type'        => wc_get_order_types( 'view-orders' ),
+		'parent'      => null,
+		'customer'    => null,
+		'email'       => '',
+		'limit'       => get_option( 'posts_per_page' ),
+		'offset'      => null,
+		'page'        => 1,
+		'exclude'     => array(),
+		'orderby'     => 'date',
+		'order'       => 'DESC',
+		'return'      => 'objects',
+		'paginate'    => false,
+		'date_before' => '',
+		'date_after'  => '',
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
@@ -497,6 +501,7 @@ function wc_create_refund( $args = array() ) {
 		if ( 0 > $args['amount'] ) {
 			$args['amount'] = 0;
 		}
+		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
@@ -544,7 +549,17 @@ function wc_create_refund( $args = array() ) {
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
+
+		/**
+		 * Action hook to adjust refund before save.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_create_refund', $refund, $args );
+
 		$refund->save();
+
+		// Backwards compatibility hook.
+		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
 
 	} catch ( Exception $e ) {
 		return new WP_Error( 'error', $e->getMessage() );

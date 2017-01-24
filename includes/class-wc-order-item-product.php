@@ -357,17 +357,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$order   = $this->get_order();
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
-			$data_store   = WC_Data_Store::load( 'customer-download' );
-			$download_ids = $data_store->get_downloads( array(
+			$data_store         = WC_Data_Store::load( 'customer-download' );
+			$customer_downloads = $data_store->get_downloads( array(
 				'user_email' => $order->get_billing_email(),
 				'order_id'   => $order->get_id(),
 				'product_id' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
-				'return'     => 'ids',
 			) );
+			foreach ( $customer_downloads as $customer_download ) {
+				$download_id = $customer_download->get_download_id();
 
-			foreach ( $download_ids as $download_id ) {
 				if ( $product->has_file( $download_id ) ) {
-					$files[ $download_id ]                 = $product->get_file( $download_id );
+					$file                                  = $product->get_file( $download_id );
+					$files[ $download_id ]                 = $file->get_data();
 					$files[ $download_id ]['download_url'] = $this->get_item_download_url( $download_id );
 				}
 			}

@@ -40,8 +40,9 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
 	if ( is_ajax() ) {
+		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
-		$log_string .= $replacement ? "Replace with {$replacement}." : '';
+		$log_string .= $replacement ? " Replace with {$replacement}." : '';
 		error_log( $log_string );
 	} else {
 		_deprecated_function( $function, $version, $replacement );
@@ -59,6 +60,7 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  */
 function wc_doing_it_wrong( $function, $message, $version ) {
 	if ( is_ajax() ) {
+		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
 		_doing_it_wrong( $function, $message, $version );
@@ -75,6 +77,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( is_ajax() ) {
+		do_action( 'deprecated_argument_run', $function, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
 		_deprecated_argument( $argument, $version, $message );

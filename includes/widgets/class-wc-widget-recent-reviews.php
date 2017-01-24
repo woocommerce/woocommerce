@@ -77,9 +77,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
-				echo $_product->get_image();
-
-				echo $_product->get_name() . '</a>';
+				echo $_product->get_image() . wp_kses_post( $_product->get_name() ) . '</a>';
 
 				echo $rating_html;
 

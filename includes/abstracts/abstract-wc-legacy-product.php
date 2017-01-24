@@ -253,7 +253,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		wc_deprecated_function( 'WC_Product::get_price_html_from_text', '2.7', 'wc_get_price_from_prefix' );
+		wc_deprecated_function( 'WC_Product::get_price_html_from_text', '2.7', 'wc_get_price_html_from_text' );
 		return wc_get_price_html_from_text();
 	}
 
@@ -266,8 +266,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		wc_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_sale_price' );
-		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_sale_price( $from, $to ), $from, $to, $this );
+		wc_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_price_range' );
+		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_price_range( $from, $to ), $from, $to, $this );
 	}
 
 	/**

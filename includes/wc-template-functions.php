@@ -2188,7 +2188,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( ! empty( $options ) ) {
 			if ( $product && taxonomy_exists( $attribute ) ) {
 				// Get terms if this is a taxonomy - ordered. We need the names too.
-				$terms = wc_get_object_terms( $product->get_id(), $attribute );
+				$terms = wc_get_product_terms( $product->get_id(), $attribute, array( 'fields' => 'all' ) );
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {

@@ -100,7 +100,7 @@ function wc_reduce_stock_levels( $order_id ) {
 					}
 
 					if ( $new_stock < 0 ) {
-						do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
+						do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty ) );
 					}
 				}
 			}

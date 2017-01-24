@@ -109,6 +109,8 @@ function woocommerce_wp_textarea_input( $field ) {
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['rows']          = isset( $field['rows'] ) ? $field['rows'] : 2;
+	$field['cols']          = isset( $field['cols'] ) ? $field['cols'] : 20;
 
 	// Custom attribute handling
 	$custom_attributes = array();
@@ -127,7 +129,7 @@ function woocommerce_wp_textarea_input( $field ) {
 		echo wc_help_tip( $field['description'] );
 	}
 
-	echo '<textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="' . esc_attr( $field['rows'] ) . '" cols="' . esc_attr( $field['cols'] ) . '" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
 
 	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
 		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';

@@ -326,9 +326,6 @@
 				min-height: 220px;
 				overflow: hidden;
 				background: #f5f5f5;
-				-webkit-box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.2),
-					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 				box-shadow:
 					inset 0 1px 0 rgba(255, 255, 255, 0.2),
 					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
@@ -583,6 +580,74 @@ table.wc_status_table {
 	}
 }
 
+
+/**
+ * DB log viewer
+ */
+.wp-list-table.logs {
+
+	.log-level {
+		display: inline;
+		padding: .2em .6em .3em;
+		font-size: 80%;
+		font-weight: bold;
+		line-height: 1;
+		color: #fff;
+		text-align: center;
+		white-space: nowrap;
+		vertical-align: baseline;
+		border-radius: .2em;
+
+		&:empty {
+			display: none;
+		}
+	}
+
+	/**
+	 * Add color to levels
+	 *
+	 * Descending severity:
+	 *   emergency, alert -> red
+	 *   critical, error  -> orange
+	 *   warning, notice  -> yellow
+	 *   info             -> blue
+	 *   debug            -> gree
+	 */
+
+	.log-level--emergency,
+	.log-level--alert {
+		background-color: #ff4136;
+	}
+	.log-level--critical,
+	.log-level--error {
+		background-color: #ff851b;
+	}
+	.log-level--warning,
+	.log-level--notice {
+		color: #222;
+		background-color: #ffdc00;
+	}
+	.log-level--info {
+		background-color: #0074d9;
+	}
+	.log-level--debug {
+		background-color: #3d9970;
+	}
+
+	// Adjust log table columns only when table is not collapsed
+	@media screen and ( min-width: 783px ) {
+		.column-timestamp {
+			width: 18%;
+		}
+		.column-level {
+			width: 14%;
+		}
+		.column-source {
+			width: 15%;
+		}
+	}
+}
+
 #log-viewer-select {
 	padding: 10px 0 8px;
 	line-height: 28px;
@@ -761,19 +826,6 @@ ul.wc_coupon_list_block {
 	&::after {
 		@include icon_dashicons( '\f345' );
 		line-height: 28px;
-	}
-}
-
-.tablenav {
-	.actions {
-		overflow: visible;
-	}
-	.select2-container {
-		float: left;
-		max-width: 200px;
-		font-size: 14px;
-		vertical-align: middle;
-		margin: 1px 6px 1px 1px;
 	}
 }
 
@@ -1091,32 +1143,6 @@ ul.wc_coupon_list_block {
 			.tips {
 				display: inline-block;
 			}
-		}
-	}
-
-	.wc-order-add-item {
-		background: #fff;
-		vertical-align: top;
-		border-top: none;
-
-		.add_item_id,
-		.select2-container {
-			vertical-align: top;
-			.search-field input {
-				min-width: 100px;
-			}
-		}
-
-		.select2-container {
-			width: 400px !important;
-			text-align: left;
-		}
-
-		.cancel-action,
-		.save-action,
-		.calculate-action {
-			float: left;
-			margin-right: 2px;
 		}
 	}
 
@@ -2583,11 +2609,6 @@ table.wc_shipping {
 				}
 			}
 		}
-		.select2-container-active {
-			.select2-choices {
-				border-color: #777;
-			}
-		}
 	}
 	.wc-shipping-zone-postcodes-toggle {
 		margin: 0;
@@ -3037,11 +3058,6 @@ img.help_tip {
 		margin: 0;
 		position: relative;
 
-		.select2-container {
-			display: block;
-			max-width: 350px;
-		}
-
 		.forminp-radio ul {
 			margin: 0;
 			li {
@@ -3056,7 +3072,7 @@ img.help_tip {
 		}
 
 		input.regular-input {
-			width: 25em;
+			width: 400px;
 		}
 
 		textarea.wide-input {
@@ -3093,7 +3109,7 @@ img.help_tip {
 
 		th img.help_tip,
 		th .woocommerce-help-tip {
-			margin: 0 -24px 0 0;
+			margin: 2px -24px 0 0;
 			float: right;
 		}
 
@@ -5338,6 +5354,10 @@ table.bar_chart {
 			min-width: 500px;
 		}
 	}
+
+	.select2-container {
+		width: 100% !important;
+	}
 }
 
 .wc-backbone-modal-backdrop {
@@ -5453,18 +5473,94 @@ table.bar_chart {
 }
 
 /**
- * Select2
+ * Select2 elements.
  */
-.select2-drop {
+.select2-drop,
+.select2-dropdown {
 	z-index: 999999 !important;
 }
-.select2-container-multi .select2-choices .select2-search-field input {
-	font-family: inherit;
-	font-size: inherit;
-	font-weight: inherit;
-	padding: 3px 5px;
+.select2-results {
+	line-height: 1.5em;
+	.select2-results__option, .select2-results__group {
+		margin: 0;
+		padding: 8px;
+	}
+}
+.select2-dropdown {
+	border-color: #ddd;
+}
+.select2-dropdown--below {
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+.select2-dropdown--above {
+	box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1);
+}
+.select2-selection__rendered.ui-sortable li {
+	cursor: move;
 }
 .select2-container {
-	line-height: 1.85em;
-	font-size: 14px;
+	.select2-selection {
+		border-color: #ddd;
+	}
+	.select2-search__field {
+		min-width: 150px;
+	}
+	.select2-selection--single {
+		height: 32px;
+		.select2-selection__rendered {
+			line-height: 32px;
+			padding-right: 24px;
+		}
+		.select2-selection__arrow {
+			right: 3px;
+			height: 30px;
+		}
+	}
+	.select2-selection--multiple  {
+		min-height: 28px;
+		border-radius: 0;
+		line-height: 1.5;
+		li {
+			margin: 0;
+		}
+		.select2-selection__choice {
+			padding: 2px 6px;
+		}
+	}
+	.select2-selection__clear {
+		color: #999;
+		margin-top: -1px;
+	}
+	.select2-search--inline {
+		.select2-search__field {
+			font-family: inherit;
+			font-size: inherit;
+			font-weight: inherit;
+			padding: 3px 0;
+		}
+	}
+}
+.woocommerce table.form-table {
+	.select2-container {
+		min-width: 400px !important;
+	}
+}
+.post-type-shop_order {
+	.tablenav {
+		.actions {
+			overflow: visible;
+		}
+		select,
+		input {
+			line-height: 32px;
+			height: 32px;
+		}
+		.select2-container {
+			float: left;
+			width: 200px !important;
+			font-size: 14px;
+			vertical-align: middle;
+			margin: 1px 6px 4px 1px;
+		}
+	}
 }

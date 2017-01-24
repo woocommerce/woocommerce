@@ -61,6 +61,7 @@ function wc_get_products( $args ) {
 		'limit'          => get_option( 'posts_per_page' ),
 		'offset'         => null,
 		'page'           => 1,
+		'include'        => array(),
 		'exclude'        => array(),
 		'orderby'        => 'date',
 		'order'          => 'DESC',
@@ -93,7 +94,7 @@ function wc_get_products( $args ) {
  * @since 2.2.0
  *
  * @param mixed $the_product Post object or post ID of the product.
- * @param array $deprecated
+ * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
  * @return WC_Product|null
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
@@ -101,7 +102,10 @@ function wc_get_product( $the_product = false, $deprecated = array() ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
 		return false;
 	}
-	return WC()->product_factory->get_product( $the_product );
+	if ( ! empty( $deprecated ) ) {
+		wc_deprecated_argument( 'args', '2.7', 'Passing args to wc_get_product is deprecated. If you need to force a type, construct the product class directly.' );
+	}
+	return WC()->product_factory->get_product( $the_product, $deprecated );
 }
 
 /**
@@ -531,8 +535,6 @@ function wc_get_product_types() {
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
-	global $wpdb;
-
 	$data_store = WC_Data_Store::load( 'product' );
 	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
@@ -541,6 +543,47 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Force a unique SKU.
+ *
+ * @since  2.7.0
+ * @param  integer $product_id
+ */
+function wc_product_force_unique_sku( $product_id ) {
+	$product = wc_get_product( $product_id );
+
+	if ( $product ) {
+		try {
+			$current_sku = $product->get_sku();
+			$new_sku     = wc_product_generate_unique_sku( $product_id, $current_sku );
+
+			if ( $current_sku !== $new_sku ) {
+				$product->set_sku( $new_sku );
+				$product->save();
+			}
+		} catch ( Exception $e ) {}
+	}
+}
+
+/**
+ * Recursively appends a suffix until a unique SKU is found.
+ *
+ * @since  2.7.0
+ * @param  integer $product_id
+ * @param  string  $sku
+ * @param  integer $index
+ * @return string
+ */
+function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
+	$generated_sku = 0 < $index ? $sku . '-' . $index : $sku;
+
+	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku ) ) {
+		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ) );
+	}
+
+	return $generated_sku;
 }
 
 /**
@@ -840,8 +883,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price = max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty   = $args['qty'] ? $args['qty'] : 1;
+	$price = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
+	$qty   = (int) $args['qty'] ? $args['qty'] : 1;
 
 	if ( ! $product->is_taxable() ) {
 		$price = $price * $qty;
@@ -888,8 +931,8 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price = max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty   = $args['qty'] ? $args['qty'] : 1;
+	$price = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
+	$qty   = (int) $args['qty'] ? $args['qty'] : 1;
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );

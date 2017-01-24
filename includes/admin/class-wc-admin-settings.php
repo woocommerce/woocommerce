@@ -87,7 +87,7 @@ class WC_Admin_Settings {
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		do_action( 'woocommerce_flush_rewrite_rules' );
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 
 		do_action( 'woocommerce_settings_saved' );
 	}

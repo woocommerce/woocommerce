@@ -804,7 +804,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
-			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
+			$sku_found = wc_get_product_id_by_sku( $sku );
+
+			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
 		}
 		$this->set_prop( 'sku', $sku );
 	}
@@ -1438,23 +1440,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
-	public function is_on_sale() {
-		if ( '' !== (string) $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
-			$onsale = true;
+	public function is_on_sale( $context = 'view' ) {
+		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
+			$on_sale = true;
 
-			if ( '' !== (string) $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+			if ( '' !== (string) $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context ) > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$on_sale = false;
 			}
 
-			if ( '' !== (string) $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+			if ( '' !== (string) $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$on_sale = false;
 			}
 		} else {
-			$onsale = false;
+			$on_sale = false;
 		}
-		return apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this );
+
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 
 	/**
@@ -1686,7 +1690,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$identifier = '#' . $this->get_id();
 		}
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() );
 	}
 
 	/**
@@ -1769,7 +1773,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			return '';
 		}
-		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_object_terms( $this->get_id(), $attribute_object->get_name(), 'name' ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
 	/**
@@ -1869,7 +1873,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
 			$availability = __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
-			$availability = wc_format_stock_for_display( $this->get_stock_quantity(), $this->backorders_allowed() && $this->backorders_require_notification() );
+			$availability = wc_format_stock_for_display( $this );
 		} else {
 			$availability = '';
 		}

@@ -76,6 +76,7 @@
 
 	ul.page-numbers {
 		padding: 0;
+		display: block;
 	}
 
 	span.page-numbers,
@@ -338,6 +339,9 @@ dl.variation {
 		.button {
 			padding-top: .72em;
 			padding-bottom: .72em;
+		}
+		.button.disabled {
+			opacity: 0.2;
 		}
 	}
 }
@@ -749,6 +753,23 @@ table.variations {
 	.quantity {
 		input {
 			width: 4em;
+		}
+	}
+}
+
+#shipping_method {
+	list-style: none;
+	margin-top: 1em;
+
+	li {
+		margin-bottom: .5em;
+		
+		input {
+			float: left;
+		}
+
+		label {
+			line-height: 1.15;
 		}
 	}
 }

@@ -180,9 +180,16 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
+			}
+
 			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'   => '_sku',
-				'value' => $request['sku'],
+				'key'     => '_sku',
+				'value'   => $skus,
+				'compare' => 'IN',
 			) );
 		}
 
@@ -380,7 +387,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}
@@ -759,7 +766,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			return $response;
 		} catch ( WC_Data_Exception $e ) {
 			$this->delete_post( $product_id );
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			$this->delete_post( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -798,7 +805,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return rest_ensure_response( $response );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -823,7 +830,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @param array      $images  Images data.
 	 * @return WC_Product
 	 */
-	protected function save_product_images( $product, $images ) {
+	protected function set_product_images( $product, $images ) {
 		if ( is_array( $images ) ) {
 			$gallery = array();
 
@@ -1042,7 +1049,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Request data.
 	 * @return WC_Product
 	 */
-	protected function save_product_meta( $product, $request ) {
+	protected function set_product_meta( $product, $request ) {
 		global $wpdb;
 
 		// Virtual.
@@ -1321,6 +1328,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$product = $this->save_default_attributes( $product, $request );
 		}
 
+		$product->save();
+
 		return $product;
 	}
 
@@ -1377,7 +1386,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$image['position'] = 0;
 				}
 
-				$variation = $this->save_product_images( $variation, array( $image ) );
+				$variation = $this->set_product_images( $variation, array( $image ) );
 			}
 
 			// Virtual variation.
@@ -1526,23 +1535,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
-		$product = wc_get_product( $post );
-
-		// Check for featured/gallery images, upload it and set it.
-		if ( isset( $request['images'] ) ) {
-			$product = $this->save_product_images( $product, $request['images'] );
-		}
-
-		// Save product meta fields.
-		$product = $this->save_product_meta( $product, $request );
-		$product->save();
-
-		// Save variations.
-		if ( isset( $request['type'] ) && 'variable' === $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-			$this->save_variations_data( $product, $request );
-		}
-
-		return true;
+		return $this->update_post_meta_fields( $post, $request );
 	}
 
 	/**
@@ -1557,23 +1550,25 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
-			$product = $this->save_product_images( $product, $request['images'] );
+			$product = $this->set_product_images( $product, $request['images'] );
 		}
 
 		// Save product meta fields.
-		$product = $this->save_product_meta( $product, $request );
+		$product = $this->set_product_meta( $product, $request );
+
+		// Save the product data.
+		$product->save();
 
 		// Save variations.
 		if ( $product->is_type( 'variable' ) ) {
 			if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
 				$this->save_variations_data( $product, $request );
-			} else {
-				// Just sync variations.
-				$product = WC_Product_Variable::sync( $product, false );
 			}
 		}
 
-		$product->save();
+		// Clear caches here so in sync with any new variations/children.
+		wc_delete_product_transients( $product->get_id() );
+		wp_cache_delete( 'product-' . $product->get_id(), 'products' );
 
 		return true;
 	}

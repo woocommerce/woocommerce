@@ -113,7 +113,7 @@
 						view        = this;
 
 					// Set name.
-					$('.wc-shipping-zone-name').text( zone_name );
+					$('.wc-shipping-zone-name').text( zone_name ? zone_name : data.strings.default_zone_name );
 
 					// Blank out the contents.
 					this.$el.empty();
@@ -362,7 +362,7 @@
 				onChangeShippingMethodSelector: function() {
 					var description = $( this ).find( 'option:selected' ).data( 'description' );
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
-					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
+					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
 					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				},
 				onTogglePostcodes: function( event ) {

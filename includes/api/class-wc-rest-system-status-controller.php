@@ -83,6 +83,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$response[ $section ] = $values;
 		}
 
+		$response = $this->prepare_item_for_response( $response, $request );
+
 		return rest_ensure_response( $response );
 	}
 
@@ -847,5 +849,28 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
+	}
+
+	/**
+	 * Prepare the system status response
+	 *
+	 * @param array $system_status
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $system_status, $request ) {
+		$data = $this->add_additional_fields_to_object( $system_status, $request );
+		$data = $this->filter_response_by_context( $data, 'view' );
+
+		$response = rest_ensure_response( $data );
+
+		/**
+		 * Filter the system status returned from the REST API.
+		 *
+		 * @param WP_REST_Response   $response The response object.
+		 * @param mixed              $system_status System status
+		 * @param WP_REST_Request    $request  Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_system_status', $response, $system_status, $request );
 	}
 }

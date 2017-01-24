@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-global $post, $product, $woocommerce;
+global $post, $product;
 
 $attachment_ids = $product->get_gallery_image_ids();
 

@@ -378,15 +378,15 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		$term = wp_insert_term( $name, $taxonomy, $args );
 		if ( is_wp_error( $term ) ) {
+			$error_data = array( 'status' => 400 );
 
-			// If we're going to inform the client that the term exists, give them the identifier
-			// they can actually use.
-			if ( ( $term_id = $term->get_error_data( 'term_exists' ) ) ) {
-				$existing_term = get_term( $term_id, $taxonomy );
-				$term->add_data( $existing_term->term_id, 'term_exists' );
+			// If we're going to inform the client that the term exists,
+			// give them the identifier they can actually use.
+			if ( $term_id = $term->get_error_data( 'term_exists' ) ) {
+				$error_data['resource_id'] = $term_id;
 			}
 
-			return $term;
+			return new WP_Error( $term->get_error_code(), $term->get_error_message(), $error_data );
 		}
 
 		$term = get_term( $term['term_id'], $taxonomy );
@@ -471,13 +471,19 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$parent = get_term( (int) $request['parent'], $taxonomy );
+			$parent_id = (int) $request['parent'];
 
-			if ( ! $parent ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( 0 === $parent_id ) {
+				$prepared_args['parent'] = $parent_id;
+			} else {
+				$parent = get_term( $parent_id, $taxonomy );
+
+				if ( ! $parent ) {
+					return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$prepared_args['parent'] = $parent->term_id;
 			}
-
-			$prepared_args['parent'] = $parent->term_id;
 		}
 
 		// Only update the term if we haz something to update.
