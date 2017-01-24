@@ -132,7 +132,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_excerpt' => $coupon->get_description(),
 		);
 		wp_update_post( $post_data );
-		$this->update_post_meta( $coupon );
+		$this->update_post_meta( $coupon, $this->should_force_meta_update( $coupon ) );
 		$coupon->save_meta_data();
 		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
@@ -172,7 +172,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	private function update_post_meta( &$coupon, $force = false ) {
 		$updated_props     = array();
 		$changed_props     = array_keys( $coupon->get_changes() );
-
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',

@@ -156,7 +156,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		wp_update_post( $post_data );
 
-		$this->update_post_meta( $product );
+		$this->update_post_meta( $product, $this->should_force_meta_update( $product ) );
 		$this->update_terms( $product );
 		$this->update_visibility( $product );
 		$this->update_attributes( $product );

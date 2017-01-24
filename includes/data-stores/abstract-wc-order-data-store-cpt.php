@@ -114,7 +114,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'post_excerpt'  => $this->get_post_excerpt( $order ),
 		) );
 
-		$this->update_post_meta( $order );
+		$this->update_post_meta( $order, $this->should_force_meta_update( $order ) );
 		$order->save_meta_data();
 		$order->apply_changes();
 		$this->clear_caches( $order );
@@ -222,6 +222,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'_order_version'      => 'version',
 			'_prices_include_tax' => 'prices_include_tax',
 		);
+
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
 				continue;
