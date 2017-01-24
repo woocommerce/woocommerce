@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author         WooThemes
  */
 interface WC_Log_Handler_Interface {
+
 	/**
 	 * Handle a log entry.
 	 *
