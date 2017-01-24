@@ -27,6 +27,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
+		'name'           => '',
 		'sku'            => '',
 		'manage_stock'   => '',
 		'stock_quantity' => '',
@@ -62,15 +63,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_stock_managed_by_id() {
 		return 'parent' === $this->get_manage_stock() ? $this->get_parent_id() : $this->get_id();
-	}
-
-	/**
-	 * Get the product's title. For variations this is the parent product name.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
 	}
 
 	/**
@@ -118,6 +110,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$variation_data = array_map( 'urlencode', $this->get_variation_attributes() );
 		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
+	}
+
+	/**
+	 * Get product name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		if ( 'view' === $context ) {
+			return $this->parent_data['name'];
+		} else {
+			return $this->get_prop( 'name', $context );
+		}
 	}
 
 	/**

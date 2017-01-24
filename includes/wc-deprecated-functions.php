@@ -595,6 +595,7 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_product_get_gallery_image_ids' => 'woocommerce_product_gallery_attachment_ids',
 	'woocommerce_product_get_review_count'      => 'woocommerce_product_review_count',
 	'woocommerce_product_get_downloads'         => 'woocommerce_product_files',
+	'woocommerce_product_get_name'             => 'woocommerce_product_title',
 	'woocommerce_order_get_currency'            => 'woocommerce_get_currency',
 	'woocommerce_order_get_discount_total'      => 'woocommerce_order_amount_discount_total',
 	'woocommerce_order_get_discount_tax'        => 'woocommerce_order_amount_discount_tax',
