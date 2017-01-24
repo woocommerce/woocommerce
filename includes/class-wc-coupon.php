@@ -116,7 +116,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_coupon_';
+		return 'woocommerce_coupon_get_';
 	}
 
 	/*
