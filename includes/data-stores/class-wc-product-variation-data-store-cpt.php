@@ -250,10 +250,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 */
-	public function update_post_meta( &$product, $force = false ) {
+	public function update_post_meta( &$product ) {
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
-		parent::update_post_meta( $product, $force );
+		parent::update_post_meta( $product );
 	}
 }
