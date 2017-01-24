@@ -136,6 +136,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_downloads( $product );
 		$this->read_visibility( $product );
 		$this->read_product_data( $product );
+		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 	}
 
@@ -260,9 +261,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
+	}
 
-		// Gets extra data associated with the product.
-		// Like button text or product URL for external products.
+	/**
+	 * Read extra data associated with the product, like button text or product URL for external products.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $product, $function ) ) ) {
