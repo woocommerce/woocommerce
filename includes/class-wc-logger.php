@@ -119,9 +119,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
-			$class = __CLASS__;
-			$method = __FUNCTION__;
-			wc_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
+			wc_doing_it_wrong( __METHOD__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
 		}
 
 		if ( $this->should_handle( $level ) ) {
