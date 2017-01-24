@@ -510,7 +510,7 @@ abstract class WC_Data {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_' . $this->object_type . '_';
+		return 'woocommerce_' . $this->object_type . '_get_';
 	}
 
 	/**
