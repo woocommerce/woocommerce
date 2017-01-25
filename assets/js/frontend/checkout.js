@@ -324,7 +324,7 @@ jQuery( function( $ ) {
 
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
-										$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
+									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
 								} else {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
