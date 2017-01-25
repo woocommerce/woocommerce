@@ -41,7 +41,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_class( $value ) {
-		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
+		if ( $value && ! in_array( $value, WC_Tax::get_tax_class_slugs() ) ) {
 			$this->error( 'order_item_fee_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
