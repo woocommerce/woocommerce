@@ -690,7 +690,7 @@ class WC_Tax {
 
 	/**
 	 * Get store tax classes.
-	 * @return array
+	 * @return array Array of class names ("Reduced rate", "Zero rate", etc).
 	 */
 	public static function get_tax_classes() {
 		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
@@ -700,7 +700,7 @@ class WC_Tax {
 	 * Get store tax classes as slugs.
 	 *
 	 * @since  2.7.0
-	 * @return array
+	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
 		return array_map( 'sanitize_title', self::get_tax_classes() );
