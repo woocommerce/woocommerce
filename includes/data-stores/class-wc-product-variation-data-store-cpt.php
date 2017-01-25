@@ -70,19 +70,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->read_product_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
-		error_log( print_r( $product_name, 1 ) );
-
-		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) ) {
-			error_log( 'clean up' );
-			error_log( print_r( $product_name, 1 ) );
+		// Clean up old variation titles.
+		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $product_name ) {
 			$parent_data = $product->get_parent_data();
-			$new_title = $parent_data['name'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
+			$new_title   = $parent_data['name'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
 			$product->set_name( $new_title );
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
 				'post_title'     => $new_title,
 			) );
-			error_log( print_r( $new_title, 1 ) );
 		}
 
 		// Set object_read true once all data is read.
