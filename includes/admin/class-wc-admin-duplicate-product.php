@@ -98,19 +98,27 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_id( 0 );
 		$duplicate->save();
 
-		if ( $product->is_type( 'variable' ) ||  $product->is_type( 'grouped' ) ) {
+		$sku = $duplicate->get_sku();
+		if ( '' !== $duplicate->get_sku() ) {
+			wc_product_force_unique_sku( $duplicate->get_id() );
+		}
+
+		if ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) {
 			foreach( $product->get_children() as $child_id ) {
 				$child = wc_get_product( $child_id );
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
 				$child_duplicate->save();
+				if ( '' !== $child_duplicate->get_sku() ) {
+					wc_product_force_unique_sku( $child_duplicate->get_id() );
+				}
 			}
 		}
 
 		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
 		// New hook returns new id and old id.
-		do_action( 'woocommerce_product_duplicate', $duplicate->get_id(), $product_id );
+		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
 		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '2.7', 'Use woocommerce_product_duplicate action instead.' );
 
 		// Redirect to the edit screen for the new draft page
