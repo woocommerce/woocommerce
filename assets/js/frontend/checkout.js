@@ -296,7 +296,7 @@ jQuery( function( $ ) {
 						var ID = $( this ).attr( 'id' );
 
 						if ( ID ) {
-							if ( 'checkbox' === $( this ).attr( 'type' ) ) {
+							if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 								paymentDetails[ ID ] = $( this ).prop( 'checked' );
 							} else {
 								paymentDetails[ ID ] = $( this ).val();
@@ -323,8 +323,8 @@ jQuery( function( $ ) {
 							var ID = $( this ).attr( 'id' );
 
 							if ( ID ) {
-								if ( 'checkbox' === $( this ).attr( 'type' ) && paymentDetails[ ID ] ) {
-									$( this ).prop( 'checked', true ).change();
+								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
+										$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
 								} else {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
