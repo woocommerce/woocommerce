@@ -70,7 +70,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->read_product_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
-		// Clean up old variation titles.
+		/**
+		 * Clean up old variation titles.
+		 * The "Product #" text is intentionally not wrapped in translation functions for a faster comparision. It was not inserted as a translated string:
+		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
+		 */
 		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $product_name ) {
 			$parent_data = $product->get_parent_data();
 			$new_title   = $parent_data['name'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
