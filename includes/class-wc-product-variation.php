@@ -27,7 +27,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'name'           => '',
 		'sku'            => '',
 		'manage_stock'   => '',
 		'stock_quantity' => '',
@@ -119,11 +118,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
-		if ( 'view' === $context ) {
-			return $this->parent_data['name'];
-		} else {
-			return $this->get_prop( 'name', $context );
-		}
+		return $this->get_prop( 'name', $context );
 	}
 
 	/**
@@ -303,6 +298,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function set_parent_data( $parent_data ) {
 		$this->parent_data = $parent_data;
+	}
+
+	/**
+	 * Get the parent data array for this variation.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public function get_parent_data() {
+		return $this->parent_data;
 	}
 
 	/**
