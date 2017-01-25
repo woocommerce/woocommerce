@@ -254,6 +254,26 @@ return array(
 			)
 		)
 	),
+	'FI' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'FI',
+					'state'    => '',
+					'rate'     => '24.0000',
+					'name'     => 'ALV',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'FR' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right',
