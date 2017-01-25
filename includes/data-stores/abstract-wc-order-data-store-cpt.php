@@ -229,6 +229,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
 	/**

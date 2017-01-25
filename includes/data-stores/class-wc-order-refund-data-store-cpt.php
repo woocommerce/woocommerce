@@ -73,6 +73,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 			update_post_meta( $refund->get_id(), $meta_key, $value );
 			$updated_props[] = $prop;
 		}
+
+		do_action( 'woocommerce_order_refund_object_updated_props', $refund, $updated_props );
 	}
 
 	/**

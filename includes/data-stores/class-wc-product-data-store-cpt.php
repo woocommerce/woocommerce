@@ -458,8 +458,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
-		// Update extra data associated with the product.
-		// Like button text or product URL for external products.
+		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $extra_data_keys as $key ) {
 				if ( ! array_key_exists( $key, $props_to_update ) ) {
@@ -467,10 +466,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 				$function = 'get_' . $key;
 				if ( is_callable( array( $product, $function ) ) ) {
-					update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) );
+					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+						$updated_props[] = $key;
+					}
 				}
 			}
 		}
+
+		do_action( 'woocommerce_product_object_updated_props', $product, $updated_props );
 	}
 
 	/**
