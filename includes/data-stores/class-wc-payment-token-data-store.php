@@ -71,18 +71,23 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 
 		global $wpdb;
 
-		$payment_token_data = array(
-			'gateway_id' => $token->get_gateway_id( 'edit' ),
-			'token'      => $token->get_token( 'edit' ),
-			'user_id'    => $token->get_user_id( 'edit' ),
-			'type'       => $token->get_type( 'edit' ),
-		);
+		$updated_props      = array();
+		$payment_token_data = array();
+		$props              = array( 'gateway_id', 'token', 'user_id', 'type' );
+		$changed_props      = array_keys( $token->get_changes() );
 
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_payment_tokens',
-			$payment_token_data,
-			array( 'token_id' => $token->get_id( 'edit' ) )
-		);
+		foreach ( $changed_props as $prop ) {
+			$updated_props[]             = $prop;
+			$payment_token_data[ $prop ] = $token->{"get_" . $prop}( 'edit' );
+		}
+
+		if ( ! empty( $payment_token_data ) ) {
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_payment_tokens',
+				$payment_token_data,
+				array( 'token_id' => $token->get_id( 'edit' ) )
+			);
+		}
 
 		$token->save_meta_data();
 		$token->apply_changes();
@@ -92,6 +97,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			WC_Payment_Tokens::set_users_default( $token->get_user_id(), $token->get_id() );
 		}
 
+		do_action( 'woocommerce_payment_token_object_updated_props', $token, $updated_props );
 		do_action( 'woocommerce_payment_token_updated', $token->get_id() );
 	}
 
