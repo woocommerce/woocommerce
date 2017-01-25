@@ -146,23 +146,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
-	 * Get all class data in array format.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return array_merge(
-			array(
-				'id' => $this->get_id(),
-			),
-			$this->data,
-			array(
-				'meta_data' => $this->get_meta_data(),
-			)
-		);
-	}
-
-	/**
 	 * Get product name.
 	 *
 	 * @since 2.7.0
