@@ -324,9 +324,9 @@ jQuery( function( $ ) {
 
 							if ( ID ) {
 								if ( 'checkbox' === $( this ).attr( 'type' ) && paymentDetails[ ID ] ) {
-									$( this ).prop( 'checked', true );
+									$( this ).prop( 'checked', true ).change();
 								} else {
-									$( this ).val( paymentDetails[ ID ] );
+									$( this ).val( paymentDetails[ ID ] ).change();
 								}
 							}
 						});
