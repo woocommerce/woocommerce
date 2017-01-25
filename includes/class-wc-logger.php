@@ -43,6 +43,23 @@ class WC_Logger implements WC_Logger_Interface {
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
 		}
 
+		$register_handlers = array();
+		foreach ( $handlers as $handler ) {
+			$implements = class_implements( $handler );
+			if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements ) ) {
+				$register_handlers[] = $handler;
+			} else {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						__( 'The provided handler <code>%s</code> does not implement WC_Log_Handler_Interface.', 'woocommerce' ),
+						esc_html( is_object( $handler ) ? get_class( $handler ) : $handler )
+					),
+					'2.7'
+				);
+			}
+		}
+
 		if ( null !== $threshold ) {
 			$threshold = WC_Log_Levels::get_level_severity( $threshold );
 		} elseif ( defined( 'WC_LOG_THRESHOLD' ) && WC_Log_Levels::is_valid_level( WC_LOG_THRESHOLD ) ) {
@@ -51,7 +68,7 @@ class WC_Logger implements WC_Logger_Interface {
 			$threshold = null;
 		}
 
-		$this->handlers  = $handlers;
+		$this->handlers  = $register_handlers;
 		$this->threshold = $threshold;
 	}
 
@@ -102,9 +119,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
-			$class = __CLASS__;
-			$method = __FUNCTION__;
-			wc_doing_it_wrong( "{$class}::{$method}", sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
+			wc_doing_it_wrong( __METHOD__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
 		}
 
 		if ( $this->should_handle( $level ) ) {
