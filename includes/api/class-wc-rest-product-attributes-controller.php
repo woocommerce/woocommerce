@@ -94,7 +94,8 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
 					'force' => array(
-						'default'     => false,
+						'default'     => true,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),

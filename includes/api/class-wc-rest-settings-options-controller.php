@@ -34,6 +34,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
+			'args' => array(
+				'group' => array(
+					'description' => __( 'Settings group ID.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -43,6 +49,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/batch', array(
+			'args' => array(
+				'group' => array(
+					'description' => __( 'Settings group ID.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'batch_items' ),
@@ -54,6 +66,10 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<id>[\w-]+)', array(
 			'args' => array(
+				'group' => array(
+					'description' => __( 'Settings group ID.', 'woocommerce' ),
+					'type'        => 'string',
+				),
 				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',

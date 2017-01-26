@@ -100,7 +100,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
 					'force' => array(
-						'default'     => false,
+						'default'     => true,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 					'reassign' => array(),

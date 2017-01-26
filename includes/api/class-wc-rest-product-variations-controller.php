@@ -56,6 +56,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -72,8 +78,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the variation.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -98,6 +108,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 					'reassign' => array(),
@@ -106,6 +117,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'batch_items' ),
