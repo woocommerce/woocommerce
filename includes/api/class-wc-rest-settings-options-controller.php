@@ -520,10 +520,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 				),
 				'options'          => array(
 					'description' => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce' ),
-					'type'        => 'array',
-					'items'       => array(
-						'type'    => 'array',
-					),
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
