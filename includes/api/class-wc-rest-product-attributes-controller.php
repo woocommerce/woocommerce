@@ -300,7 +300,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	public function get_item( $request ) {
 		global $wpdb;
 
-		$attribute = $this->get_attribute( $request['id'] );
+		$attribute = $this->get_attribute( (int) $request['id'] );
 
 		if ( is_wp_error( $attribute ) ) {
 			return $attribute;
@@ -406,7 +406,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$attribute = $this->get_attribute( $request['id'] );
+		$attribute = $this->get_attribute( (int) $request['id'] );
 
 		if ( is_wp_error( $attribute ) ) {
 			return $attribute;
