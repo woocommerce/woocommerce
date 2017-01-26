@@ -124,7 +124,23 @@ jQuery( function( $ ) {
 				controlNav:     wc_single_product_params.flexslider.controlNav,
 				slideshow:      wc_single_product_params.flexslider.slideshow,
 				animationSpeed: wc_single_product_params.flexslider.animationSpeed,
-				animationLoop:  wc_single_product_params.flexslider.animationLoop // Breaks photoswipe pagination if true.
+				animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
+				start: function() {
+					var $images = $( '.woocommerce-product-gallery__image' );
+					var largest_height = 0;
+
+					$images.each( function() {
+						var height = $( this ).height();
+
+						if ( height > largest_height ) {
+							largest_height = height;
+						}
+					});
+
+					$images.each( function() {
+						$( this ).css( 'min-height', largest_height );
+					});
+				}
 			});
 		},
 
