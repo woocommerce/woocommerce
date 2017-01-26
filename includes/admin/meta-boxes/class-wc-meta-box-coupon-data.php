@@ -228,7 +228,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'                => 'usage_limit_per_user',
 					'label'             => __( 'Usage limit per user', 'woocommerce' ),
 					'placeholder'       => esc_attr__( 'Unlimited usage', 'woocommerce' ),
-					'description'       => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ),
+					'description'       => __( 'How many times this coupon can be used by an individual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ),
 					'desc_tip'          => true,
 					'class'             => 'short',
 					'type'              => 'number',
