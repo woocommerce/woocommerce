@@ -2181,17 +2181,26 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'related_ids' => array(
 					'description' => __( 'List of related products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'upsell_ids' => array(
 					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'cross_sell_ids' => array(
 					'description' => __( 'List of cross-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id' => array(
@@ -2665,6 +2674,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'grouped_products' => array(
 					'description' => __( 'List of grouped products ID.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

@@ -60,7 +60,9 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'name' => array(
-						'required' => true,
+						'description' => __( 'Name for the resource.', 'woocommerce' ),
+						'type'        => 'string',
+						'required'    => true,
 					),
 				) ),
 			),

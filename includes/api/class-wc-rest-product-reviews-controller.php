@@ -41,17 +41,53 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the variation.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'review' => array(
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Review content.', 'woocommerce' ),
+					),
+					'name' => array(
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Name of the reviewer.', 'woocommerce' ),
+					),
+					'email' => array(
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Email of the reviewer.', 'woocommerce' ),
+					),
+				) ),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
 				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
@@ -85,6 +121,25 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+<<<<<<< HEAD
+=======
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
+>>>>>>> 82d7fe6... Added more missing args and types
 	}
 
 	/**

@@ -54,12 +54,18 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'email' => array(
 						'required' => true,
+						'type'     => 'string',
+						'description' => __( 'New user email address.', 'woocommerce' ),
 					),
 					'username' => array(
 						'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
+						'description' => __( 'New user username.', 'woocommerce' ),
+						'type'     => 'string',
 					),
 					'password' => array(
 						'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
+						'description' => __( 'New user password.', 'woocommerce' ),
+						'type'     => 'string',
 					),
 				) ),
 			),
@@ -97,7 +103,11 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
-					'reassign' => array(),
+					'reassign' => array(
+						'default'     => 0,
+						'type'        => 'integer',
+						'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
+					),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
