@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fixed attribute registration. Attributes are non-hierarchical by default (parent is not supported).
 * Add sort parameter to checkout fields to aid with sorting per locale.
 * Merged percent and percent product coupon types (they provide the same discount).
+* Prevent payment details being cleared after update_checkout events.
 * Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
 * Includes product attributes archives links in "Additional Information" tab.
 * Performance - Converted rating filters to visibility terms.
