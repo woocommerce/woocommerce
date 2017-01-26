@@ -364,7 +364,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			$coupon->save();
 			return $coupon->get_id();
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

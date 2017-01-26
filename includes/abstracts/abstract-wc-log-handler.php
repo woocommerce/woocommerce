@@ -11,20 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category       Abstract Class
  * @author         WooThemes
  */
-abstract class WC_Log_Handler {
-
-
-	/**
-	 * Handle a log entry.
-	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
-	 * @param string $message Log message.
-	 * @param array $context Additional information for log handlers.
-	 *
-	 * @return bool False if value was not handled and true if value was handled.
-	 */
-	abstract public function handle( $timestamp, $level, $message, $context );
+abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 
 	/**
 	 * Formats a timestamp for use in log messages.

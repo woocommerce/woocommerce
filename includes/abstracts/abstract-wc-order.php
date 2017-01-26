@@ -1038,11 +1038,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Inherit tax class from items
 			if ( 'inherit' === $shipping_tax_class ) {
 				$tax_rates         = array();
-				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
 				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
-					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
 							'country'   => $args['country'],

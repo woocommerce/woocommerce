@@ -550,10 +550,9 @@ class WC_Tax {
 
 				// If multiple classes are found, use the first one found unless a standard rate item is found. This will be the first listed in the 'additonal tax class' section.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
-					$tax_classes = self::get_tax_classes();
+					$tax_classes = self::get_tax_class_slugs();
 
 					foreach ( $tax_classes as $tax_class ) {
-						$tax_class = sanitize_title( $tax_class );
 						if ( in_array( $tax_class, $cart_tax_classes ) ) {
 							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
@@ -691,10 +690,20 @@ class WC_Tax {
 
 	/**
 	 * Get store tax classes.
-	 * @return array
+	 * @return array Array of class names ("Reduced rate", "Zero rate", etc).
 	 */
 	public static function get_tax_classes() {
 		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+	}
+
+	/**
+	 * Get store tax classes as slugs.
+	 *
+	 * @since  2.7.0
+	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
+	 */
+	public static function get_tax_class_slugs() {
+		return array_map( 'sanitize_title', self::get_tax_classes() );
 	}
 
 	/**
@@ -759,9 +768,9 @@ class WC_Tax {
 	 * @return string
 	 */
 	public static function format_tax_rate_class( $class ) {
-		$class = sanitize_title( $class );
-		$sanitized_classes = array_map( 'sanitize_title', self::get_tax_classes() );
-		if ( ! in_array( $class, $sanitized_classes ) ) {
+		$class   = sanitize_title( $class );
+		$classes = self::get_tax_class_slugs();
+		if ( ! in_array( $class, $classes ) ) {
 			$class = '';
 		}
 		return ( 'standard' === $class ) ? '' : $class;

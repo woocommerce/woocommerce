@@ -341,6 +341,22 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Expands the shipping and billing information in the changes array.
+	 */
+	public function get_changes() {
+		$changed_props = parent::get_changes();
+		$subs          = array( 'shipping', 'billing' );
+		foreach ( $subs as $sub ) {
+			if ( ! empty( $changed_props[ $sub ] ) ) {
+				foreach ( $changed_props[ $sub ] as $sub_prop => $value ) {
+					$changed_props[ $sub . '_' . $sub_prop ] = $value;
+				}
+			}
+		}
+		return $changed_props;
+	}
+
+	/**
 	 * get_order_number function.
 	 *
 	 * Gets the order number for display (by default, order ID).

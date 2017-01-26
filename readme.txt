@@ -1,5 +1,5 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, iCaleb
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, claudiulodro, woothemes, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 = 2.7.0 - 20XX-XX-XX =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom.
 * Made the store notice dismissible on the frontend.
+* Variable products no longer show striked out prices in combination with ranges for clarity when on sale.
 * Improved structured product data by using JSON-LD instead of inline Microdata.
 * Improved downloads list layout (template file).
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
@@ -192,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fixed attribute registration. Attributes are non-hierarchical by default (parent is not supported).
 * Add sort parameter to checkout fields to aid with sorting per locale.
 * Merged percent and percent product coupon types (they provide the same discount).
+* Prevent payment details being cleared after update_checkout events.
 * Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
 * Includes product attributes archives links in "Additional Information" tab.
 * Performance - Converted rating filters to visibility terms.

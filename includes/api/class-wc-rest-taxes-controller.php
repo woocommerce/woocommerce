@@ -626,7 +626,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'standard',
-					'enum'        => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
+					'enum'        => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 			),
@@ -684,7 +684,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		);
 		$params['class'] = array(
 			'description'        => __( 'Sort by tax class.', 'woocommerce' ),
-			'enum'               => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
+			'enum'               => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 			'sanitize_callback'  => 'sanitize_title',
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',

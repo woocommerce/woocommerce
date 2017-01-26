@@ -91,7 +91,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product, true );
+			$this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_visibility( $product );
 			$this->update_attributes( $product );
@@ -136,6 +136,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_downloads( $product );
 		$this->read_visibility( $product );
 		$this->read_product_data( $product );
+		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 	}
 
@@ -260,9 +261,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
+	}
 
-		// Gets extra data associated with the product.
-		// Like button text or product URL for external products.
+	/**
+	 * Read extra data associated with the product, like button text or product URL for external products.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $product, $function ) ) ) {
@@ -360,12 +367,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$product, $force = false ) {
+	protected function update_post_meta( &$product ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $product->get_changes() );
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -399,10 +404,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_review_count'       => 'review_count',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		// Make sure to take extra data (like product url or text for external products) into account.
+		$extra_data_keys = $product->get_extra_data_keys();
+		foreach ( $extra_data_keys as $key ) {
+			$meta_key_to_props[ '_' . $key ] = $key;
+		}
+
+		$props_to_update = $this->get_props_to_update( $product, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'virtual' :
@@ -449,16 +458,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
-		// Update extra data associated with the product.
-		// Like button text or product URL for external products.
+		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
-			foreach ( $product->get_extra_data_keys() as $key ) {
+			foreach ( $extra_data_keys as $key ) {
+				if ( ! array_key_exists( $key, $props_to_update ) ) {
+					continue;
+				}
 				$function = 'get_' . $key;
-				if ( ( $force || in_array( $key, $changed_props ) ) && is_callable( array( $product, $function ) ) ) {
-					update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) );
+				if ( is_callable( array( $product, $function ) ) ) {
+					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+						$updated_props[] = $key;
+					}
 				}
 			}
 		}
+
+		do_action( 'woocommerce_product_object_updated_props', $product, $updated_props );
 	}
 
 	/**
