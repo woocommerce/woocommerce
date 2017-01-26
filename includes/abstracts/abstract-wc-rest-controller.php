@@ -200,16 +200,25 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'description' => __( 'List of created resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'object',
+					),
 				),
 				'update' => array(
 					'description' => __( 'List of updated resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'object',
+					),
 				),
 				'delete' => array(
 					'description' => __( 'List of delete resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'object',
+					),
 				),
 			),
 		);
