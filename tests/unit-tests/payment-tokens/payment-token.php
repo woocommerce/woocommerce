@@ -122,10 +122,12 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$this->assertEquals( __FUNCTION__, $token->get_extra() );
 		$token->set_extra( ':)' );
+		$token->set_user_id( 2 );
 		$token->save();
 
 		$token = new WC_Payment_Token_Stub( $token->get_id() );
 		$this->assertEquals( ':)', $token->get_extra() );
+		$this->assertEquals( 2, $token->get_user_id() );
 	}
 
 	/**
