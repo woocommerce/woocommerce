@@ -624,16 +624,22 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
@@ -663,23 +669,34 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
+
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
 				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
 				'type'              => 'array',
+				'items'             => array(
+					'type'          => 'integer',
+				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
 				'description'       => __( 'Limit result set to all items except those of a particular parent id.', 'woocommerce' ),
 				'type'              => 'array',
+				'items'             => array(
+					'type'          => 'integer',
+				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 		}
 
 		$params['filter'] = array(
+			'type'        => 'array',
 			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
+			'items'       => array(
+				'type'    => 'mixed',
+			),
 		);
 
 		return $params;
