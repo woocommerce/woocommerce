@@ -107,7 +107,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),

@@ -111,7 +111,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
