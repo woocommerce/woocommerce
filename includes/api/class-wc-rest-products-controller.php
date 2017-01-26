@@ -766,7 +766,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			return $response;
 		} catch ( WC_Data_Exception $e ) {
 			$this->delete_post( $product_id );
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			$this->delete_post( $product_id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -805,7 +805,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return rest_ensure_response( $response );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -2622,7 +2622,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$params['tax_class'] = array(
 				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce' ),
 				'type'              => 'string',
-				'enum'              => array_map( 'sanitize_title', array_merge( array( 'standard' ), WC_Tax::get_tax_classes() ) ),
+				'enum'              => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			);

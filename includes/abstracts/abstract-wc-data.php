@@ -510,7 +510,7 @@ abstract class WC_Data {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_' . $this->object_type . '_';
+		return 'woocommerce_' . $this->object_type . '_get_';
 	}
 
 	/**
@@ -539,11 +539,14 @@ abstract class WC_Data {
 
 	/**
 	 * When invalid data is found, throw an exception unless reading from the DB.
-	 * @param string $error_code Error code.
-	 * @param string $error_message Error message.
+	 *
 	 * @throws WC_Data_Exception
+	 * @param string $code             Error code.
+	 * @param string $message          Error message.
+	 * @param int    $http_status_code HTTP status code.
+	 * @param array  $data             Extra error data.
 	 */
-	protected function error( $error_code, $error_message ) {
-		throw new WC_Data_Exception( $error_code, $error_message );
+	protected function error( $code, $message, $http_status_code = 400, $data = array() ) {
+		throw new WC_Data_Exception( $code, $message, $http_status_code, $data );
 	}
 }

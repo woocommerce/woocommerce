@@ -37,7 +37,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product_variation' !== $post_object->post_type ) {
 			return;
 		}
 
@@ -66,6 +66,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) );
 
 		$this->read_product_data( $product );
+		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		// Set object_read true once all data is read.
@@ -250,10 +251,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 */
-	public function update_post_meta( &$product, $force = false ) {
+	public function update_post_meta( &$product ) {
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
-		parent::update_post_meta( $product, $force );
+		parent::update_post_meta( $product );
 	}
 }

@@ -69,7 +69,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
-			$this->update_post_meta( $coupon, true );
+			$this->update_post_meta( $coupon );
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
@@ -166,13 +166,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 *
 	 * @param WC_Coupon
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	private function update_post_meta( &$coupon, $force = false ) {
+	private function update_post_meta( &$coupon ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $coupon->get_changes() );
-
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
@@ -193,10 +190,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'customer_email'             => 'email_restrictions',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $coupon->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'individual_use' :
@@ -223,6 +218,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
 	}
 
 	/**
