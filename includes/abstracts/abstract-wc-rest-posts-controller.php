@@ -692,11 +692,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		}
 
 		$params['filter'] = array(
-			'type'        => 'array',
+			'type'        => 'object',
 			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
-			'items'       => array(
-				'type'    => 'mixed',
-			),
 		);
 
 		return $params;
