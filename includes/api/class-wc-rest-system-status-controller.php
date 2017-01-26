@@ -282,6 +282,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Database tables', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 					),
 				),
@@ -289,6 +292,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'description' => __( 'Active plugins', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 				'theme' => array(
 					'description' => __( 'Theme', 'woocommerce' ),
@@ -340,6 +346,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Template overrides', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 						'parent_name' => array(
 							'description' => __( 'Parent theme name', 'woocommerce' ),
@@ -413,6 +422,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Taxonomy terms for product/order statuses', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 					),
 				),
@@ -437,6 +449,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'description' => __( 'WooCommerce pages', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 			),
 		);
