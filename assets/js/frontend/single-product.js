@@ -104,15 +104,6 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Detect if the visitor is using a touch device.
-		 *
-		 * @return bool
-		 */
-		is_touch_device: function() {
-			return 'ontouchstart' in window || navigator.maxTouchPoints;
-		},
-
-		/**
 		 * Initialize flexSlider.
 		 */
 		init_flexslider: function() {
