@@ -1627,6 +1627,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
+	 * Get the product's title. For products this is the product name.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return apply_filters( 'woocommerce_product_title', $this->get_name(), $this );
+	}
+
+	/**
 	 * Product permalink.
 	 * @return string
 	 */

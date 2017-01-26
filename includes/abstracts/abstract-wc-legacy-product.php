@@ -165,22 +165,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * Get the product's title.
-	 *
-	 * @deprecated 2.7.0
-	 * @return string
-	 */
-	public function get_title() {
-		wc_deprecated_function( 'WC_Product::get_title', '2.7', 'WC_Product::get_name' );
-
-		if ( $this->is_type( 'variation' ) ) {
-			return apply_filters( 'woocommerce_product_title', $this->parent_data['name'], $this );
-		}
-
-		return apply_filters( 'woocommerce_product_title', $this->get_name(), $this );
-	}
-
-	/**
 	 * Set stock level of the product.
 	 *
 	 * @deprecated 2.7.0

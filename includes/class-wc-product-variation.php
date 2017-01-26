@@ -65,6 +65,15 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Get the product's title. For variations this is the parent product name.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
+	}
+
+	/**
 	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @return array of attributes and their values for this variation

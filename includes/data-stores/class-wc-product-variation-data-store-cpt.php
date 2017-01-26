@@ -77,7 +77,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 */
 		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $product_name ) {
 			$parent_data = $product->get_parent_data();
-			$new_title   = $parent_data['name'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
+			$new_title   = $parent_data['title'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
 			$product->set_name( $new_title );
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
@@ -215,7 +215,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_parent_data( array(
-			'name'           => get_the_title( $product->get_parent_id() ),
+			'title'          => get_the_title( $product->get_parent_id() ),
 			'sku'            => get_post_meta( $product->get_parent_id(), '_sku', true ),
 			'manage_stock'   => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 			'backorders'     => get_post_meta( $product->get_parent_id(), '_backorders', true ),
