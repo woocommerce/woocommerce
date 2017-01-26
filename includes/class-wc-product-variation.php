@@ -121,16 +121,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get product name.
-	 *
-	 * @param  string $context
-	 * @return string
-	 */
-	public function get_name( $context = 'view' ) {
-		return $this->get_prop( 'name', $context );
-	}
-
-	/**
 	 * Get SKU (Stock-keeping unit) - product unique ID.
 	 *
 	 * @param  string $context
