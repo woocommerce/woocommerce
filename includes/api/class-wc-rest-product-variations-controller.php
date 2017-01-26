@@ -264,7 +264,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		$request['id'] = is_array( $request['id'] ) ? $request['id']['id'] : $request['id'];
+		$request['id'] = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
 		return parent::delete_item( $request );
 	}
 
