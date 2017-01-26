@@ -38,7 +38,7 @@ function wc_get_product( $the_product = false, $args = array() ) {
 function wc_update_product_stock( $product_id, $new_stock_level ) {
 	$product = wc_get_product( $product_id );
 
-	if ( ! metadata_exists( 'post', $product_id, '_stock' ) || $product->get_stock_quantity() !== $new_stock_level ) {
+	if ( $product && ( ! metadata_exists( 'post', $product_id, '_stock' ) || $product->get_stock_quantity() !== $new_stock_level ) ) {
 		$product->set_stock( $new_stock_level );
 	}
 }
