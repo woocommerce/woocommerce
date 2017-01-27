@@ -27,8 +27,14 @@ $full_size_image   = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
 $thumbnail_post    = get_post( $post_thumbnail_id );
 $image_title       = $thumbnail_post->post_content;
 $placeholder       = has_post_thumbnail() ? 'with-images' : 'without-images';
+$wrapper_classes   = apply_filters( 'woocommerce_single_product_image_gallery_classes', array(
+	'woocommerce-product-gallery',
+	'woocommerce-product-gallery--' . $placeholder,
+	'woocommerce-product-gallery--columns-' . absint( $columns ),
+	'images',
+) );
 ?>
-<div class="<?php echo apply_filters( 'woocommerce_single_product_image_gallery_classes', 'woocommerce-product-gallery woocommerce-product-gallery--' . $placeholder . ' woocommerce-product-gallery--columns-' . sanitize_html_class( $columns ) . ' columns-' . sanitize_html_class( $columns ) . ' images' ); ?>" data-columns="<?php echo sanitize_html_class( $columns ); ?>">
+<div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>">
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
 		$attributes = array(
