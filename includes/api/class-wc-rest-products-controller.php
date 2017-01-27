@@ -72,6 +72,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -94,8 +100,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'force' => array(
 						'default'     => false,
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						'type'        => 'boolean',
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -2043,17 +2049,26 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'related_ids' => array(
 					'description' => __( 'List of related products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'upsell_ids' => array(
 					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'cross_sell_ids' => array(
 					'description' => __( 'List of cross-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id' => array(
@@ -2533,6 +2548,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'grouped_products' => array(
 					'description' => __( 'List of grouped products ID.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
