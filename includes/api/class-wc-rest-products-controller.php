@@ -855,7 +855,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
+				if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
 					$product->set_image_id( $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
