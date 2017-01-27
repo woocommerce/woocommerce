@@ -67,7 +67,9 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'code' => array(
-						'required' => true,
+						'description' => __( 'Coupon code.', 'woocommerce' ),
+						'required'    => true,
+						'type'        => 'string',
 					),
 				) ),
 			),
@@ -75,6 +77,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -96,6 +104,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 				),
@@ -441,11 +450,17 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'product_ids' => array(
 					'description' => __( "List of product ID's the coupon can be used on.", 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'exclude_product_ids' => array(
 					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_limit' => array(
@@ -472,11 +487,17 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'product_categories' => array(
 					'description' => __( "List of category ID's the coupon applies to.", 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'excluded_product_categories' => array(
 					'description' => __( "List of category ID's the coupon does not apply to.", 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'exclude_sale_items' => array(
@@ -498,11 +519,17 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'email_restrictions' => array(
 					'description' => __( 'List of email addresses that can use this coupon.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'string',
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'used_by' => array(
 					'description' => __( 'List of user IDs who have used the coupon.', 'woocommerce' ),
 					'type'        => 'array',
+					'items'       => array(
+						'type'    => 'integer',
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
