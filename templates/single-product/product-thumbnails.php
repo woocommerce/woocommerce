@@ -38,9 +38,9 @@ if ( $attachment_ids ) {
 			'data-large-image-height' => $full_size_image[2],
 		);
 
-		$html  = '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image">';
+		$html  = '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';
 		$html .= wp_get_attachment_image( $attachment_id, 'shop_single', false, $attributes );
- 		$html .= '</figure>';
+ 		$html .= '</a></figure>';
 
 		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id );
 	}

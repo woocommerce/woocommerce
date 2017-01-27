@@ -39,16 +39,16 @@ $placeholder       = has_post_thumbnail() ? 'with-images' : 'without-images';
 		);
 
 		if ( has_post_thumbnail() ) {
-			$main_thumbnail  = '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image">';
-			$main_thumbnail .= get_the_post_thumbnail( $post->ID, 'shop_single', $attributes );
-	 		$main_thumbnail .= '</figure>';
+			$html  = '<figure data-thumb="' . get_the_post_thumbnail_url( $post->ID, 'shop_thumbnail' ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';
+			$html .= get_the_post_thumbnail( $post->ID, 'shop_single', $attributes );
+			$html .= '</a></figure>';
 		} else {
-			$main_thumbnail  = '<figure class="woocommerce-product-gallery__image--placeholder">';
-			$main_thumbnail .= sprintf( '<img src="%s" alt="%s" class="wp-post-image" />', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
-			$main_thumbnail .= '</figure>';
+			$html  = '<figure class="woocommerce-product-gallery__image--placeholder">';
+			$html .= sprintf( '<img src="%s" alt="%s" class="wp-post-image" />', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+			$html .= '</figure>';
 		}
 
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $main_thumbnail, get_post_thumbnail_id( $post->ID ) );
+		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, get_post_thumbnail_id( $post->ID ) );
 
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
