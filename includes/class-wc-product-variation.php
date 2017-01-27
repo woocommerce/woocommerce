@@ -300,6 +300,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Get the parent data array for this variation.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public function get_parent_data() {
+		return $this->parent_data;
+	}
+
+	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name value pairs.
 	 * @param array $raw_attributes
