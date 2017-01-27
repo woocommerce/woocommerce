@@ -1677,7 +1677,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return true;
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		}
 	}
 
@@ -1713,7 +1713,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			return true;
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		}
 	}
 
