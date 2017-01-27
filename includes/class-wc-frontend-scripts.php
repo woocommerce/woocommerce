@@ -47,7 +47,7 @@ class WC_Frontend_Scripts {
 
 	/**
 	 * Get styles for the frontend.
-	 * @access private
+	 *
 	 * @return array
 	 */
 	public static function get_styles() {
@@ -354,13 +354,22 @@ class WC_Frontend_Scripts {
 		if ( is_lost_password_page() ) {
 			self::enqueue_script( 'wc-lost-password' );
 		}
+
+		// Load gallery scripts on product pages only if supported.
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
-			self::enqueue_script( 'flexslider' );
-			self::enqueue_script( 'photoswipe-ui-default' );
-			self::enqueue_style( 'photoswipe-default-skin' );
-			self::enqueue_script( 'zoom' );
+			if ( get_theme_support( 'wc-product-gallery-zoom' ) ) {
+				self::enqueue_script( 'zoom' );
+			}
+			if ( get_theme_support( 'wc-product-gallery-slider' ) ) {
+				self::enqueue_script( 'flexslider' );
+			}
+			if ( get_theme_support( 'wc-product-gallery-lightbox' ) ) {
+				self::enqueue_script( 'photoswipe-ui-default' );
+				self::enqueue_style( 'photoswipe-default-skin' );
+			}
 			self::enqueue_script( 'wc-single-product' );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			$ua = wc_get_user_agent(); // Exclude common bots from geolocation by user agent.
 
@@ -433,6 +442,9 @@ class WC_Frontend_Scripts {
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
+					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
+					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
+					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
 				);
 			break;
 			case 'wc-checkout' :

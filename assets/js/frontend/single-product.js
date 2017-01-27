@@ -84,21 +84,14 @@ jQuery( function( $ ) {
 		 * Initialize gallery actions and events.
 		 */
 		init: function() {
-			// Init FlexSlider if present.
-			if ( $.isFunction( $.fn.flexslider ) ) {
+			if ( $.isFunction( $.fn.flexslider ) && wc_single_product_params.flexslider_enabled ) {
 				this.init_flexslider();
 			}
-
-			// Init Zoom if present.
-			if ( $.isFunction( $.fn.zoom ) ) {
+			if ( $.isFunction( $.fn.zoom ) && wc_single_product_params.zoom_enabled ) {
 				this.init_zoom();
 			}
-
-			// Init PhotoSwipe if present.
-			if ( typeof PhotoSwipe !== 'undefined' ) {
+			if ( typeof PhotoSwipe !== 'undefined' && wc_single_product_params.photoswipe_enabled ) {
 				this.init_photoswipe();
-
-				// Trigger photoswipe.
 				$( document ).on( 'click', '.woocommerce-product-gallery__trigger', this.trigger_photoswipe );
 			}
 		},
