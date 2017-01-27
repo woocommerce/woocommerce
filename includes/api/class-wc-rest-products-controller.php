@@ -965,7 +965,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $product->id, $new_sku );
 					if ( ! $unique_sku ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
+						$sku_found = wc_get_product_id_by_sku( $sku );
+
+						throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
 					} else {
 						update_post_meta( $product->id, '_sku', $new_sku );
 					}
