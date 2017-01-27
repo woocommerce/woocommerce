@@ -769,7 +769,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_ĩnvalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
+				if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
 					set_post_thumbnail( $product_id, $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
@@ -1387,7 +1387,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
+					if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
 						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
