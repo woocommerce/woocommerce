@@ -54,12 +54,18 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'email' => array(
 						'required' => true,
+						'type'     => 'string',
+						'description' => __( 'New user email address.', 'woocommerce' ),
 					),
 					'username' => array(
 						'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
+						'description' => __( 'New user username.', 'woocommerce' ),
+						'type'     => 'string',
 					),
 					'password' => array(
 						'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
+						'description' => __( 'New user password.', 'woocommerce' ),
+						'type'     => 'string',
 					),
 				) ),
 			),
@@ -67,6 +73,12 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -88,9 +100,14 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
-					'reassign' => array(),
+					'reassign' => array(
+						'default'     => 0,
+						'type'        => 'integer',
+						'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
+					),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -848,16 +865,22 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific IDs.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),

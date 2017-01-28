@@ -27,6 +27,12 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods', array(
+			'args' => array(
+				'zone_id' => array(
+					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -42,6 +48,16 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods/(?P<instance_id>[\d-]+)', array(
+			'args' => array(
+				'zone_id' => array(
+					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'instance_id' => array(
+					'description' => __( 'Unique ID for the instance.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -60,6 +76,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 				),

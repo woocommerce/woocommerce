@@ -38,17 +38,23 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
-        register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
-                'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -64,15 +70,15 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		) );
 	}
 
-    /**
+	/**
 	 * Check whether a given request has permission to view system status tools.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-        if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-        	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -122,10 +128,10 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'delete_orphaned_variations' => array(
-                'name'      => __( 'Orphaned variations', 'woocommerce' ),
-                'button'    => __( 'Delete orphaned variations', 'woocommerce' ),
-                'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
-            ),
+				'name'      => __( 'Orphaned variations', 'woocommerce' ),
+				'button'    => __( 'Delete orphaned variations', 'woocommerce' ),
+				'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+			),
 			'recount_terms' => array(
 				'name'    => __( 'Term counts', 'woocommerce' ),
 				'button'  => __( 'Recount terms', 'woocommerce' ),
@@ -173,7 +179,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
 
-    /**
+	/**
 	 * Get a list of system status tools.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -260,7 +266,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		return $response;
 	}
 
-    /**
+	/**
 	 * Get the system status tools schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -393,8 +399,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			break;
 			case 'delete_orphaned_variations' :
 				/**
-	 			* Delete orphans
-	 			*/
+				 * Delete orphans
+				 */
 				$result = absint( $wpdb->query( "DELETE products
 					FROM {$wpdb->posts} products
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent

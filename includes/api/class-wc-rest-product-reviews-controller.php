@@ -41,6 +41,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the variation.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -53,13 +63,19 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'review' => array(
-						'required' => true,
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Review content.', 'woocommerce' ),
 					),
 					'name' => array(
-						'required' => true,
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Name of the reviewer.', 'woocommerce' ),
 					),
 					'email' => array(
-						'required' => true,
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Email of the reviewer.', 'woocommerce' ),
 					),
 				) ),
 			),
@@ -67,6 +83,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -88,6 +114,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 				),
@@ -96,6 +123,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			'args' => array(
+				'product_id' => array(
+					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'batch_items' ),
@@ -352,8 +385,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		$product_review_id = is_array( $request['id'] ) ? $request['id']['id'] : $request['id'];
-		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+		$product_review_id = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
+		$force             = isset( $request['force'] ) ? (bool) $request['force']     : false;
 
 		$product_review = get_comment( $product_review_id );
 		if ( empty( $product_review_id ) || empty( $product_review->comment_ID ) || empty( $product_review->comment_post_ID ) ) {

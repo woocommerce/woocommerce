@@ -57,6 +57,12 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -78,6 +84,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),
@@ -646,16 +653,22 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific IDs.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),

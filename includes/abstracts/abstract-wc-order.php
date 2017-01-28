@@ -213,17 +213,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						switch ( $item_group ) {
 							case 'fee_lines' :
 								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_fee_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_fee_item action instead' );
 								}
 							break;
 							case 'shipping_lines' :
 								if ( isset( $item->legacy_package_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'Use CRUD woocommerce_checkout_create_order_shipping_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'CRUD woocommerce_checkout_create_order_shipping_item action instead' );
 								}
 							break;
 							case 'line_items' :
 								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_line_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_line_item action instead' );
 								}
 							break;
 						}
@@ -890,7 +890,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 		$item->save();
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'woocommerce_new_order_item action instead' );
 		return $item->get_id();
 	}
 
