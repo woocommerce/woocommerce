@@ -210,9 +210,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) );
 
 		if ( $product->is_on_sale() ) {
-			$product->set_price( $product->get_sale_price() );
+			$product->set_price( $product->get_sale_price( 'edit' ) );
 		} else {
-			$product->set_price( $product->get_regular_price() );
+			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
 		$product->set_parent_data( array(
