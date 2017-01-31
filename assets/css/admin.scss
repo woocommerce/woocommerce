@@ -3463,6 +3463,11 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				span {
+					margin-left: 0.618em;
+					margin-right: 0.618em;
+				}
+
 				&::before {
 					@include iconbeforedashicons( '\f107' );
 				}
