@@ -209,7 +209,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
 		) );
 
-		if ( $product->is_on_sale() ) {
+		if ( $product->is_on_sale( 'edit' ) ) {
 			$product->set_price( $product->get_sale_price( 'edit' ) );
 		} else {
 			$product->set_price( $product->get_regular_price( 'edit' ) );
