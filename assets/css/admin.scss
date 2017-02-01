@@ -3556,6 +3556,10 @@ img.help_tip {
  * Shipping
  */
 .woocommerce_page_wc-settings {
+	input[type=url], input[type=email] {
+		direction: ltr;
+	}
+
 	.shippingrows {
 		th.check-column {
 			padding-top: 20px;
