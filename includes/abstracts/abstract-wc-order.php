@@ -197,7 +197,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 		$this->items_to_delete = array();
 
-		// Add/save items
+		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -835,8 +835,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID
-		if ( $item->get_id() ) {
-			$this->items[ $items_key ][ $item->get_id() ] = $item;
+		if ( $item_id = $item->get_id() ) {
+			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
 			$this->items[ $items_key ][ 'new:' . sizeof( $this->items[ $items_key ] ) ] = $item;
 		}

@@ -527,7 +527,7 @@ abstract class WC_Data {
 	protected function get_prop( $prop, $context = 'view' ) {
 		$value = null;
 
-		if ( array_key_exists( $prop, $this->data ) ) {
+		if ( isset( $this->data[ $prop ] ) ) {
 			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {

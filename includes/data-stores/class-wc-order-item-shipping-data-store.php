@@ -43,11 +43,16 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		$id = $item->get_id();
-		update_metadata( 'order_item', $id, 'method_id', $item->get_method_id( 'edit' ) );
-		update_metadata( 'order_item', $id, 'cost', $item->get_total( 'edit' ) );
-		update_metadata( 'order_item', $id, 'total_tax', $item->get_total_tax( 'edit' ) );
-		update_metadata( 'order_item', $id, 'taxes', $item->get_taxes( 'edit' ) );
+		$id          = $item->get_id();
+		$save_values = array(
+			'method_id' => $item->get_method_id( 'edit' ),
+			'cost'      => $item->get_total( 'edit' ),
+			'total_tax' => $item->get_total_tax( 'edit' ),
+			'taxes'     => $item->get_taxes( 'edit' ),
+		);
+		foreach ( $save_values as $key => $value ) {
+			update_metadata( 'order_item', $id, $key, $value );
+		}
 		$this->clear_cache( $item );
 	}
 }
