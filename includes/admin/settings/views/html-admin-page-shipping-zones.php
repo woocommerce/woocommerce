@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2>
+<h2 class="wc-shipping-zones-heading">
 	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
 	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
 </h2>
