@@ -1056,8 +1056,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return WC_Product
 	 */
 	protected function set_product_meta( $product, $request ) {
-		global $wpdb;
-
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
 			$product->set_virtual( $request['virtual'] );
@@ -1222,7 +1220,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
 				$product->set_stock_quantity( '' );
-				$product->set_stock_status( $status );
+				$product->set_stock_status( $stock_status );
 			} elseif ( $product->is_type( 'external' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
@@ -1595,7 +1593,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function delete_post( $id ) {
 		if ( ! empty( $id->ID ) ) {
-			$id = $post->ID;
+			$id = $id->ID;
 		} elseif ( ! is_numeric( $id ) || 0 >= $id ) {
 			return;
 		}
