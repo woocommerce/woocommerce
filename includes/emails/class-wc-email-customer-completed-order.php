@@ -36,7 +36,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		$this->template_plain = 'emails/plain/customer-completed-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Other settings
 		$this->heading_downloadable = $this->get_option( 'heading_downloadable', __( 'Your order is complete - download your files', 'woocommerce' ) );
@@ -50,11 +50,11 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * Trigger.
 	 *
 	 * @param int $order_id
+	 * @param WC_Order $order
 	 */
-	public function trigger( $order_id ) {
-
-		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
+	public function trigger( $order_id, $order ) {
+		if ( $order ) {
+			$this->object                  = $order;
 			$this->recipient               = $this->object->get_billing_email();
 
 			$this->find['order-date']      = '{order_date}';
