@@ -46,10 +46,11 @@ class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 */
 	public function save_item_data( &$item ) {
 		$id = $item->get_id();
-		wc_update_order_item_meta( $id, 'rate_id', $item->get_rate_id( 'edit' ) );
-		wc_update_order_item_meta( $id, 'label', $item->get_label( 'edit' ) );
-		wc_update_order_item_meta( $id, 'compound', $item->get_compound( 'edit' ) );
-		wc_update_order_item_meta( $id, 'tax_amount', $item->get_tax_total( 'edit' ) );
-		wc_update_order_item_meta( $id, 'shipping_tax_amount', $item->get_shipping_tax_total( 'edit' ) );
+		update_metadata( 'order_item', $id, 'rate_id', $item->get_rate_id( 'edit' ) );
+		update_metadata( 'order_item', $id, 'label', $item->get_label( 'edit' ) );
+		update_metadata( 'order_item', $id, 'compound', $item->get_compound( 'edit' ) );
+		update_metadata( 'order_item', $id, 'tax_amount', $item->get_tax_total( 'edit' ) );
+		update_metadata( 'order_item', $id, 'shipping_tax_amount', $item->get_shipping_tax_total( 'edit' ) );
+		$this->clear_cache( $item );
 	}
 }

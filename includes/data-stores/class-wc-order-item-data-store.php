@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Order Item Coupon Data Store: Misc Order Item Data functions.
+ * WC Order Item Data Store: Misc Order Item Data functions.
  *
  * @version  2.7.0
  * @category Class
@@ -65,6 +65,21 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	}
 
 	/**
+	 * Get order ID by order item ID.
+	 *
+	 * @since 2.7.0
+	 * @param  int $item_id
+	 * @return int
+	 */
+	public function get_order_id_by_order_item_id( $item_id ) {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+			$item_id
+		) );
+	}
+
+	/**
 	 * Update term meta.
 	 *
 	 * @since  2.7.0
@@ -74,7 +89,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  string $prev_value (default: '')
 	 * @return bool
 	 */
-	function update_metadata( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	public function update_metadata( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
 		return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
 	}
 
@@ -88,7 +103,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  bool   $unique (default: false)
 	 * @return int    New row ID or 0
 	 */
-	function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
+	public function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
 		return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
 	}
 
@@ -102,7 +117,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  bool   $delete_all (default: false)
 	 * @return bool
 	 */
-	function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	public function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
 		return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
 	}
 
@@ -115,23 +130,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  bool   $single (default: true)
 	 * @return mixed
 	 */
-	function get_metadata( $item_id, $key, $single = true ) {
+	public function get_metadata( $item_id, $key, $single = true ) {
 		return get_metadata( 'order_item', $item_id, $key, $single );
 	}
-
-	/**
-	 * Get order ID by order item ID.
-	 *
-	 * @since 2.7.0
-	 * @param  int $item_id
-	 * @return int
-	 */
-	function get_order_id_by_order_item_id( $item_id ) {
-		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
-			$item_id
-		) );
-	}
-
 }

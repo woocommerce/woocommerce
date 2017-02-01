@@ -121,4 +121,11 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {}
+
+	/**
+	 * Clear meta cachce.
+	 */
+	public function clear_cache( &$item ) {
+		WC_Cache_Helper::incr_cache_prefix( 'orders' );
+	}
 }
