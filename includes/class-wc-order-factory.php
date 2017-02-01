@@ -45,7 +45,15 @@ class WC_Order_Factory {
 		}
 
 		try {
-			return new $classname( $order_id );
+			// Try to get from cache, otherwise create a new object,
+			$order = wp_cache_get( 'order-' . $order_id, 'orders' );
+
+			if ( ! is_a( $order, 'WC_Order' ) ) {
+				$order = new $classname( $order_id );
+				wp_cache_set( 'order-' . $order_id, $order, 'orders' );
+			}
+
+			return $order;
 		} catch ( Exception $e ) {
 			return false;
 		}
@@ -97,7 +105,15 @@ class WC_Order_Factory {
 			}
 			if ( $classname ) {
 				try {
-					return new $classname( $id );
+					// Try to get from cache, otherwise create a new object,
+					$item = wp_cache_get( 'order-item-' . $id, 'order-items' );
+
+					if ( ! is_a( $item, 'WC_Order_Item' ) ) {
+						$item = new $classname( $id );
+						wp_cache_set( 'order-item-' . $id, $item, 'order-items' );
+					}
+
+					return $item;
 				} catch ( Exception $e ) {
 					return false;
 				}

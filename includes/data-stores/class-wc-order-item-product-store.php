@@ -62,7 +62,6 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 		foreach ( $save_values as $key => $value ) {
 			update_metadata( 'order_item', $id, $key, $value );
 		}
-		$this->clear_cache( $item );
 	}
 
 	/**

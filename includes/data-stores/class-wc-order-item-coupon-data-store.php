@@ -51,6 +51,5 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 		foreach ( $save_values as $key => $value ) {
 			update_metadata( 'order_item', $id, $key, $value );
 		}
-		$this->clear_cache( $item );
 	}
 }
