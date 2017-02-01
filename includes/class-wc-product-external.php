@@ -27,15 +27,6 @@ class WC_Product_External extends WC_Product {
 	);
 
 	/**
-	 * Merges external product data into the parent object.
-	 * @param int|WC_Product|object $product Product to init.
-	 */
-	public function __construct( $product = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
-		parent::__construct( $product );
-	}
-
-	/**
 	 * Get internal type.
 	 * @return string
 	 */
