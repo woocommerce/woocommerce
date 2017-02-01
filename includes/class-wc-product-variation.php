@@ -44,7 +44,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_product_variation_';
+		return 'woocommerce_product_variation_get_';
 	}
 
 	/**
@@ -297,6 +297,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function set_parent_data( $parent_data ) {
 		$this->parent_data = $parent_data;
+	}
+
+	/**
+	 * Get the parent data array for this variation.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public function get_parent_data() {
+		return $this->parent_data;
 	}
 
 	/**

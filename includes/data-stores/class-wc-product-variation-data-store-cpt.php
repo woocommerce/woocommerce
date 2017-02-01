@@ -37,7 +37,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product_variation' !== $post_object->post_type ) {
 			return;
 		}
 
@@ -55,8 +55,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			throw new Exception( sprintf( 'Invalid parent for variation #%d', $product->get_id() ), 422 );
 		}
 
+		$product_name = get_the_title( $post_object );
+
 		$product->set_props( array(
-			'name'              => get_the_title( $post_object ),
+			'name'              => $product_name,
 			'slug'              => $post_object->post_name,
 			'date_created'      => $post_object->post_date,
 			'date_modified'     => $post_object->post_modified,
@@ -66,7 +68,23 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) );
 
 		$this->read_product_data( $product );
+		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
+
+		/**
+		 * Clean up old variation titles.
+		 * The "Product #" text is intentionally not wrapped in translation functions for a faster comparision. It was not inserted as a translated string:
+		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
+		 */
+		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $product_name ) {
+			$parent_data = $product->get_parent_data();
+			$new_title   = $parent_data['title'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
+			$product->set_name( $new_title );
+			wp_update_post( array(
+				'ID'             => $product->get_id(),
+				'post_title'     => $new_title,
+			) );
+		}
 
 		// Set object_read true once all data is read.
 		$product->set_object_read( true );
@@ -191,10 +209,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
 		) );
 
-		if ( $product->is_on_sale() ) {
-			$product->set_price( $product->get_sale_price() );
+		if ( $product->is_on_sale( 'edit' ) ) {
+			$product->set_price( $product->get_sale_price( 'edit' ) );
 		} else {
-			$product->set_price( $product->get_regular_price() );
+			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
 		$product->set_parent_data( array(
@@ -250,10 +268,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 */
-	public function update_post_meta( &$product, $force = false ) {
+	public function update_post_meta( &$product ) {
 		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
-		parent::update_post_meta( $product, $force );
+		parent::update_post_meta( $product );
 	}
 }

@@ -77,7 +77,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( is_ajax() ) {
-		do_action( 'deprecated_argument_run', $function, $message, $version );
+		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
 		_deprecated_argument( $argument, $version, $message );

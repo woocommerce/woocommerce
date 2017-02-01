@@ -146,23 +146,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	*/
 
 	/**
-	 * Get all class data in array format.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return array_merge(
-			array(
-				'id' => $this->get_id(),
-			),
-			$this->data,
-			array(
-				'meta_data' => $this->get_meta_data(),
-			)
-		);
-	}
-
-	/**
 	 * Get product name.
 	 *
 	 * @since 2.7.0
@@ -804,7 +787,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
-			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
+			$sku_found = wc_get_product_id_by_sku( $sku );
+
+			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
 		}
 		$this->set_prop( 'sku', $sku );
 	}

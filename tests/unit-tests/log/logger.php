@@ -15,7 +15,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	public function test_add() {
 		$time = time();
 		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler
@@ -82,19 +82,19 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_log_handlers() {
 		$false_handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( false ) );
 
 		$true_handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$false_handler->expects( $this->exactly( 8 ) )->method( 'handle' )->will( $this->returnValue( true ) );
 
 		$final_handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$final_handler->expects( $this->exactly( 8 ) )->method( 'handle' );
@@ -159,7 +159,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		// Test no filtering by default
 		delete_option( 'woocommerce_log_threshold' );
 		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler
@@ -193,6 +193,24 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the logger validates handlers
+	 *
+	 * If a handler does not implement WC_Log_Handler_Interface, WC_Logger should complain
+	 * (wc_doing_it_wrong) and not register the handler. This handler should receive no messages.
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_validate_handler_interface() {
+		$handler = $this
+			->getMockBuilder( 'stdClass' )
+			->setMethods( array( 'handle' ) )
+			->getMock();
+		$handler->expects( $this->never() )->method( 'handle' );
+		new WC_Logger( array( $handler ) );
+		$this->setExpectedIncorrectUsage( 'WC_Logger::__construct' );
+	}
+
+	/**
 	 * Helper for 'woocommerce_register_log_handlers' filter test.
 	 *
 	 * Returns an array of 1 mocked handler.
@@ -204,7 +222,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function return_assertion_handlers() {
 		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler->expects( $this->exactly( 8 ) )->method( 'handle' );
@@ -224,7 +242,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	public function create_mock_handler() {
 		$time = time();
 		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler' )
+			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 

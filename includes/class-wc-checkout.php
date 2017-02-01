@@ -961,8 +961,11 @@ class WC_Checkout {
 			return wc_clean( $_POST[ $input ] );
 
 		} else {
-			if ( has_filter( 'woocommerce_checkout_get_value' ) ) {
-				return apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			if ( $value !== null ) {
+				return $value;
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {

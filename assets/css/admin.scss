@@ -2611,9 +2611,10 @@ table.wc_shipping {
 		}
 	}
 	.wc-shipping-zone-postcodes-toggle {
-		margin: 0;
+		margin: 0.5em 0 0;
 		font-size: 0.9em;
 		text-decoration: underline;
+		display: block;
 	}
 	.wc-shipping-zone-postcodes-toggle + .wc-shipping-zone-postcodes {
 		display:none;
@@ -2627,6 +2628,9 @@ table.wc_shipping {
 			color: #999;
 		}
 	}
+}
+.wc-shipping-zone-settings + p.submit {
+	margin-top: 0;
 }
 table {
 	tr, tr:hover {
@@ -2676,6 +2680,13 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		position: relative;
 		padding: 7.5em 7.5% !important;
 		border-bottom: 2px solid #eee2ec;
+
+		&.wc-shipping-zone-method-blank-state {
+			padding: 2em !important;
+			p {
+				margin-bottom: 0;
+			}
+		}
 		p, li {
 			color: #a46497;
 			font-size: 1.5em;
@@ -2845,7 +2856,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		}
 	}
 	.wc-shipping-zone-method-title {
-		width: 33%;
+		width: 25%;
 		.wc-shipping-zone-method-delete {
 			color: red;
 		}
@@ -2860,6 +2871,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		.woocommerce-input-toggle {
 			margin-top: 3px;
 		}
+	}
+	.wc-shipping-zone-method-type {
+		display: block;
 	}
 	tfoot {
 		input, select {

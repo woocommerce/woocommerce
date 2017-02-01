@@ -86,7 +86,7 @@ If WooCommerce is already 100% translated for your language, join the team anywa
 
 ### Translating Video Tutorials
 
-Another valuable way to help is by translating our growing library of WooCommerce video tutorials. Check out our [Video SRTs project](https://www.transifex.com/projects/p/video-srts/) and join the team for your language. If there isn't one, please request the new language and we will add it for you.
+Another valuable way to help is by translating our growing library of WooCommerce video tutorials. Check out the [Translating  Our Videos](https://docs.woocommerce.com/document/translating-our-videos/) doc and join in!
 
 By translating video tutorials you'll be helping non-English speaking users and people affected by disabilities to get to grips with using WooCommerce for the first time, and to go on and create their businesses and make a living! That's something to be proud of and if you choose to dive into this area, we salute you.
 
