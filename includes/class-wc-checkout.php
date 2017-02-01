@@ -348,10 +348,6 @@ class WC_Checkout {
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
 				'quantity'     => $values['quantity'],
-				'name'         => $product ? $product->get_name() : '',
-				'tax_class'    => $product ? $product->get_tax_class() : '',
-				'product_id'   => $product ? ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) : 0,
-				'variation_id' => $product && $product->is_type( 'variation' ) ? $product->get_id() : 0,
 				'variation'    => $values['variation'],
 				'subtotal'     => $values['line_subtotal'],
 				'total'        => $values['line_total'],
@@ -359,6 +355,14 @@ class WC_Checkout {
 				'total_tax'    => $values['line_tax'],
 				'taxes'        => $values['line_tax_data'],
 			) );
+			if ( $product ) {
+				$item->set_props( array(
+					'name'         => $product->get_name(),
+					'tax_class'    => $product->get_tax_class(),
+					'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+					'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
+				) );
+			}
 			$item->set_backorder_meta();
 
 			/**
