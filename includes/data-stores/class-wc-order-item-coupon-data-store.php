@@ -27,9 +27,10 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
+		$id = $item->get_id();
 		$item->set_props( array(
-			'discount'     => get_metadata( 'order_item', $item->get_id(), 'discount_amount', true ),
-			'discount_tax' => get_metadata( 'order_item', $item->get_id(), 'discount_amount_tax', true ),
+			'discount'     => get_metadata( 'order_item', $id, 'discount_amount', true ),
+			'discount_tax' => get_metadata( 'order_item', $id, 'discount_amount_tax', true ),
 		) );
 		$item->set_object_read( true );
 	}
@@ -42,7 +43,8 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {
-		wc_update_order_item_meta( $item->get_id(), 'discount_amount', $item->get_discount( 'edit' ) );
-		wc_update_order_item_meta( $item->get_id(), 'discount_amount_tax', $item->get_discount_tax( 'edit' ) );
+		$id = $item->get_id();
+		wc_update_order_item_meta( $id, 'discount_amount', $item->get_discount( 'edit' ) );
+		wc_update_order_item_meta( $id, 'discount_amount_tax', $item->get_discount_tax( 'edit' ) );
 	}
 }

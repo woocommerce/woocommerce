@@ -142,6 +142,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
+		$id                = $order->get_id();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_id',
@@ -159,7 +160,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-			update_post_meta( $order->get_id(), $meta_key, $value );
+			update_post_meta( $id, $meta_key, $value );
 			$updated_props[] = $prop;
 		}
 
@@ -194,7 +195,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$props_to_update = $this->get_props_to_update( $order, $props );
 			foreach ( $props_to_update as $meta_key => $prop ) {
 				$value = $order->{"get_$prop"}( 'edit' );
-				update_post_meta( $order->get_id(), $meta_key, $value );
+				update_post_meta( $id, $meta_key, $value );
 				$updated_props[] = $prop;
 				$updated_props[] = $props_key;
 			}
@@ -203,17 +204,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		parent::update_post_meta( $order );
 
 		// If address changed, store concatinated version to make searches faster.
-		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_billing_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
+		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
+			update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
 		}
-		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_shipping_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
+		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
+			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
 		// If customer changed, update any downloadable permissions.
 		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
 			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
+			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
 
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
