@@ -1767,7 +1767,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_rating_count( $value = null ) {
 		$counts = $this->get_rating_counts();
 
-		if ( is_array( $value ) ) {
+		if ( is_null( $value ) ) {
 			return array_sum( $counts );
 		} elseif ( isset( $counts[ $value ] ) ) {
 			return absint( $counts[ $value ] );
