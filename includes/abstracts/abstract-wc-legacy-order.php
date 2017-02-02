@@ -428,7 +428,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} elseif ( 'display_cart_ex_tax' === $key ) {
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'cart_discount' === $key ) {
-			return $this->get_discount();
+			return $this->get_total_discount();
 		} elseif ( 'cart_discount_tax' === $key ) {
 			return $this->get_discount_tax();
 		} elseif ( 'order_tax' === $key ) {
