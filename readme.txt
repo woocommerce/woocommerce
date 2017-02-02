@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 2.6.13
+Stable tag: 2.6.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.6.14 - 2017-02-02 =
+* Fix - Ensure product exists in wc_update_product_stock.
+* Fix - Send emails using the site language.
+* Fix - Remove tilde typo.
+* Fix - Fixed notice in get_rating_count.
+* Tweak - Define arg and return data types, added extra descriptions, and correctly cast IDs in the Rest API.
+* Tweak - Handle custom error data in WC_REST_Exception.
+* Tweak - Display conflicted product ID when using a duplicate SKU via the API.
+* Localisation - Add Finnish defaults to the installer.
 
 = 2.6.13 - 2017-01-18 =
 * Fix - Demo store banner styling in 2017.
