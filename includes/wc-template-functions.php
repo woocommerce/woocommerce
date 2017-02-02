@@ -2370,9 +2370,9 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		wc_get_template( $template, array(
 			'order'               => $order,
 			'items'               => $order->get_items(),
-			'show_download_links' => $order->is_download_permitted(),
+			'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
 			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $order->is_paid(),
+			'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
 			'plain_text'          => $args['plain_text'],
