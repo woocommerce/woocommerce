@@ -1119,7 +1119,7 @@ class WC_Product {
 			$this->sync_rating_count( $this->id );
 		}
 
-		$counts = get_post_meta( $this->id, '_wc_rating_count', true );
+		$counts = array_filter( (array) get_post_meta( $this->id, '_wc_rating_count', true ) );
 
 		if ( is_null( $value ) ) {
 			return array_sum( $counts );
