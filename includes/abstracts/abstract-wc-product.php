@@ -1121,7 +1121,7 @@ class WC_Product {
 
 		$counts = get_post_meta( $this->id, '_wc_rating_count', true );
 
-		if ( is_array( $value ) ) {
+		if ( is_null( $value ) ) {
 			return array_sum( $counts );
 		} else {
 			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
