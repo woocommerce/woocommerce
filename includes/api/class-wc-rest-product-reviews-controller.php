@@ -121,25 +121,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
-<<<<<<< HEAD
-=======
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
-			'args' => array(
-				'product_id' => array(
-					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
->>>>>>> 82d7fe6... Added more missing args and types
 	}
 
 	/**
