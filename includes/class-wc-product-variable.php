@@ -459,7 +459,7 @@ class WC_Product_Variable extends WC_Product {
 				$product->save();
 			}
 
-			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $save );
+			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children(), $save );
 		}
 		return $product;
 	}
