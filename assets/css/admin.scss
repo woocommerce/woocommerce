@@ -4387,11 +4387,10 @@ img.tips {
 	display: none;
 	position: absolute;
 	top: 0;
+	/*rtl:ignore*/
 	left: 0;
 	z-index: 9999999;
-}
 
-#tiptip_holder {
 	&.tip_top {
 		padding-bottom: 5px;
 
@@ -4460,6 +4459,13 @@ img.tips {
 	height: 0;
 	width: 0;
 }
+
+/*rtl:raw:
+#tiptip_arrow {
+	margin-right: 79.5px!important;
+	margin-left: 0!important;
+}
+*/
 
 .wc_error_tip {
 	max-width: 20em;
