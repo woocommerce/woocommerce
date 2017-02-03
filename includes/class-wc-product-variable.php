@@ -455,11 +455,11 @@ class WC_Product_Variable extends WC_Product {
 			$data_store->sync_stock_status( $product );
 			self::sync_attributes( $product ); // Legacy update of attributes.
 
-			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $save );
-
 			if ( $save ) {
 				$product->save();
 			}
+
+			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $save );
 		}
 		return $product;
 	}
