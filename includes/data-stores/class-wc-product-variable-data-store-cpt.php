@@ -267,7 +267,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_weight( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 	}
 
@@ -280,7 +280,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 	}
 
@@ -293,7 +293,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
-		$children            = $product->get_visible_children( 'edit' );
+		$children            = $product->get_visible_children();
 		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : 0;
 		return $children > $oufofstock_children;
 	}
@@ -361,7 +361,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function sync_price( &$product ) {
 		global $wpdb;
 
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
 
 		delete_post_meta( $product->get_id(), '_price' );
