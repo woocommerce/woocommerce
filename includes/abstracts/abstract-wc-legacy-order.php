@@ -402,13 +402,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		wc_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.7' );
 
 		if ( 'completed_date' === $key ) {
-			return $this->get_date_completed();
+			return date( 'Y-m-d H:i:s', $this->get_date_completed() );
 		} elseif ( 'paid_date' === $key ) {
 			return $this->get_date_paid();
 		} elseif ( 'modified_date' === $key ) {
-			return $this->get_date_modified();
+			return date( 'Y-m-d H:i:s', $this->get_date_modified() );
 		} elseif ( 'order_date' === $key ) {
-			return $this->get_date_created();
+			return date( 'Y-m-d H:i:s', $this->get_date_created() );
 		} elseif ( 'id' === $key ) {
 			return $this->get_id();
 		} elseif ( 'post' === $key ) {
