@@ -17,30 +17,40 @@ abstract class WC_Data {
 
 	/**
 	 * ID for this object.
+	 *
+	 * @since 2.7.0
 	 * @var int
 	 */
 	protected $id = 0;
 
 	/**
 	 * Core data for this object. Name value pairs (name + default value).
+	 *
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $data = array();
 
 	/**
 	 * Core data changes for this object.
+	 *
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $changes = array();
 
 	/**
 	 * This is false until the object is read from the DB.
+	 *
+	 * @since 2.7.0
 	 * @var bool
 	 */
 	protected $object_read = false;
 
 	/**
 	 * This is the name of this object type.
+	 *
+	 * @since 2.7.0
 	 * @var string
 	 */
 	protected $object_type = 'data';
@@ -49,18 +59,24 @@ abstract class WC_Data {
 	 * Extra data for this object. Name value pairs (name + default value).
 	 * Used as a standard way for sub classes (like product types) to add
 	 * additional information to an inherited class.
+	 *
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $extra_data = array();
 
 	/**
 	 * Set to _data on construct so we can track and reset data if needed.
+	 *
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $default_data = array();
 
 	/**
 	 * Contains a reference to the data store for this class.
+	 *
+	 * @since 2.7.0
 	 * @var object
 	 */
 	protected $data_store;
@@ -68,18 +84,23 @@ abstract class WC_Data {
 	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
+	 *
+	 * @since 2.7.0
 	 * @var string
 	 */
 	protected $cache_group = '';
 
 	/**
 	 * Stores additonal meta data.
+	 *
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $meta_data = null;
 
 	/**
 	 * Default constructor.
+	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $read = 0 ) {
@@ -92,7 +113,7 @@ abstract class WC_Data {
 	/**
 	 * Get the data store.
 	 *
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @return object
 	 */
 	public function get_data_store() {
@@ -101,6 +122,8 @@ abstract class WC_Data {
 
 	/**
 	 * Returns the unique ID for this object.
+	 *
+	 * @since  2.6.0
 	 * @return int
 	 */
 	public function get_id() {
@@ -110,6 +133,7 @@ abstract class WC_Data {
 	/**
 	 * Delete an object, set the ID to 0, and return result.
 	 *
+	 * @since  2.6.0
 	 * @param  bool $force_delete
 	 * @return bool result
 	 */
@@ -125,6 +149,7 @@ abstract class WC_Data {
 	/**
 	 * Save should create or update based on object existance.
 	 *
+	 * @since  2.6.0
 	 * @return int
 	 */
 	public function save() {
@@ -143,6 +168,8 @@ abstract class WC_Data {
 
 	/**
 	 * Change data to JSON format.
+	 *
+	 * @since  2.6.0
 	 * @return string Data in JSON format.
 	 */
 	public function __toString() {
@@ -151,6 +178,8 @@ abstract class WC_Data {
 
 	/**
 	 * Returns all data for this object.
+	 *
+	 * @since  2.6.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -160,7 +189,7 @@ abstract class WC_Data {
 	/**
 	 * Returns array of expected data keys for this object.
 	 *
-	 * @since 2.7.0
+	 * @since   2.7.0
 	 * @return array
 	 */
 	public function get_data_keys() {
@@ -170,7 +199,7 @@ abstract class WC_Data {
 	/**
 	 * Returns all "extra" data keys for an object (for sub objects like product types).
 	 *
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_extra_data_keys() {
@@ -179,6 +208,8 @@ abstract class WC_Data {
 
 	/**
 	 * Filter null meta values from array.
+	 *
+	 * @since  2.7.0
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -187,6 +218,7 @@ abstract class WC_Data {
 
 	/**
 	 * Get All Meta Data.
+	 *
 	 * @since 2.6.0
 	 * @return array
 	 */
@@ -197,6 +229,7 @@ abstract class WC_Data {
 
 	/**
 	 * Get Meta Data by Key.
+	 *
 	 * @since  2.6.0
 	 * @param  string $key
 	 * @param  bool $single return first found meta with key, or all with $key
@@ -225,6 +258,7 @@ abstract class WC_Data {
 
 	/**
 	 * Set all meta data from array.
+	 *
 	 * @since 2.6.0
 	 * @param array $data Key/Value pairs
 	 */
@@ -246,6 +280,7 @@ abstract class WC_Data {
 
 	/**
 	 * Add meta data.
+	 *
 	 * @since 2.6.0
 	 * @param string $key Meta key
 	 * @param string $value Meta value
@@ -264,7 +299,8 @@ abstract class WC_Data {
 
 	/**
 	 * Update meta data by key or ID, if provided.
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
 	 * @param  string $key
 	 * @param  string $value
 	 * @param  int $meta_id
@@ -284,6 +320,7 @@ abstract class WC_Data {
 
 	/**
 	 * Delete meta data.
+	 *
 	 * @since 2.6.0
 	 * @param array $key Meta key
 	 */
@@ -298,6 +335,7 @@ abstract class WC_Data {
 
 	/**
 	 * Delete meta data.
+	 *
 	 * @since 2.6.0
 	 * @param int $mid Meta ID
 	 */
@@ -374,6 +412,7 @@ abstract class WC_Data {
 
 	/**
 	 * Update Meta Data in the database.
+	 *
 	 * @since 2.6.0
 	 */
 	public function save_meta_data() {
@@ -402,6 +441,8 @@ abstract class WC_Data {
 
 	/**
 	 * Set ID.
+	 *
+	 * @since 2.7.0
 	 * @param int $id
 	 */
 	public function set_id( $id ) {
@@ -410,6 +451,8 @@ abstract class WC_Data {
 
 	/**
 	 * Set all props to default values.
+	 *
+	 * @since 2.7.0
 	 */
 	public function set_defaults() {
 		$this->data        = $this->default_data;
@@ -419,6 +462,8 @@ abstract class WC_Data {
 
 	/**
 	 * Set object read property.
+	 *
+	 * @since 2.7.0
 	 * @param boolean $read
 	 */
 	public function set_object_read( $read = true ) {
@@ -427,6 +472,8 @@ abstract class WC_Data {
 
 	/**
 	 * Get object read property.
+	 *
+	 * @since  2.7.0
 	 * @return boolean
 	 */
 	public function get_object_read() {
@@ -437,7 +484,8 @@ abstract class WC_Data {
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 *
-	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @since  2.7.0
+	 * @param  array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
 	public function set_props( $props, $context = 'set' ) {
@@ -544,6 +592,7 @@ abstract class WC_Data {
 	 * When invalid data is found, throw an exception unless reading from the DB.
 	 *
 	 * @throws WC_Data_Exception
+	 * @since 2.7.0
 	 * @param string $code             Error code.
 	 * @param string $message          Error message.
 	 * @param int    $http_status_code HTTP status code.
