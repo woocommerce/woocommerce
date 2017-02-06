@@ -39,16 +39,6 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	);
 
 	/**
-	 * Extend the abstract _data properties and then read the order object.
-	 *
-	 * @param int|object|WC_Order $read Order to init.
-	 */
-	 public function __construct( $read = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
-		parent::__construct( $read );
-	}
-
-	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */
