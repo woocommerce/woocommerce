@@ -41,7 +41,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<th><?php echo wc_attribute_label( $attribute->get_name() ); ?></th>
 			<td><?php
-				$values = $attribute->is_taxonomy() ? wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'names' ) ) : $attribute->get_options();
+				$values = array();
+
+				if ( $attribute->is_taxonomy() ) {
+
+					$attribute_taxonomy = $attribute->get_taxonomy_object();
+					$attribute_values = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) );
+
+					foreach ( $attribute_values as $attribute_value ) {
+
+						$value_name = esc_html( $attribute_value->name );
+
+						if ( $attribute_taxonomy->attribute_public ) {
+							$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+						} else {
+							$values[] = $value_name;
+						}
+
+					}
+
+				} else {
+
+					$values = $attribute->get_options();
+
+					foreach ( $values as &$value ) {
+						$value = esc_html( $value );
+					}
+
+				}
+
 				echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 			?></td>
 		</tr>

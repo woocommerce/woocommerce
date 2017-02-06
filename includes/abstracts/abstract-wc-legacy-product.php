@@ -417,7 +417,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return bool
 	 */
 	public function has_default_attributes() {
-		wc_deprecated_function( 'WC_Product_Variable::has_default_attributes', '2.7', 'Check WC_Product::get_default_attributes directly' );
+		wc_deprecated_function( 'WC_Product_Variable::has_default_attributes', '2.7', 'a check against WC_Product::get_default_attributes directly' );
 		if ( ! $this->get_default_attributes() ) {
 			return true;
 		}
@@ -431,7 +431,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return int
 	 */
 	public function get_variation_id() {
-		wc_deprecated_function( 'WC_Product::get_variation_id', '2.7', 'WC_Product::get_id() will always be the variation ID if this is a variation.' );
+		wc_deprecated_function( 'WC_Product::get_variation_id', '2.7', 'WC_Product::get_id(). It will always be the variation ID if this is a variation.' );
 		return $this->get_id();
 	}
 
@@ -453,7 +453,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return boolean
 	 */
 	public function has_all_attributes_set() {
-		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7', 'Use array filter on get_variation_attributes for a quick solution.' );
+		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7', 'an array filter on get_variation_attributes for a quick solution.' );
 		$set = true;
 
 		// undefined attributes have null strings as array values
@@ -484,7 +484,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return int
 	 */
 	public function get_total_stock() {
-		wc_deprecated_function( 'WC_Product::get_total_stock', '2.7', 'Use get_stock_quantity on each child. Beware of performance issues in doing so.' );
+		wc_deprecated_function( 'WC_Product::get_total_stock', '2.7', 'get_stock_quantity on each child. Beware of performance issues in doing so.' );
 		if ( sizeof( $this->get_children() ) > 0 ) {
 			$total_stock = max( 0, $this->get_stock_quantity() );
 

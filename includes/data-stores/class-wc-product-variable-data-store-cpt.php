@@ -17,7 +17,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @var array
 	 */
-	private $prices_array = array();
+	protected $prices_array = array();
 
 	/**
 	 * Read product data.
@@ -41,7 +41,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param  bool $force_read True to bypass the transient.
 	 * @return array
 	 */
-	private function read_children( &$product, $force_read = false ) {
+	protected function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
 
@@ -80,7 +80,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product
 	 * @return array
 	 */
-	private function read_variation_attributes( &$product ) {
+	protected function read_variation_attributes( &$product ) {
 		global $wpdb;
 
 		$variation_attributes = array();
@@ -143,7 +143,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return array of prices
 	 */
 	public function read_price_data( &$product, $include_taxes = false ) {
-		global $wp_filter;
 
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
@@ -151,26 +150,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 */
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 
-		/**
-		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
-		 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
-		 * @var string
-		 */
-		$price_hash   = $include_taxes ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
-		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
-
-		foreach ( $filter_names as $filter_name ) {
-			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = array();
-
-				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
-					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
-				}
-			}
-		}
-
-		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $include_taxes ) ) );
+		$price_hash = $this->get_price_hash( $product, $include_taxes );
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -248,6 +228,37 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	}
 
 	/**
+	 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
+	 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Product
+	 * @param  bool $include_taxes If taxes should be calculated or not.
+	 * @return string
+	 */
+	protected function get_price_hash( &$product, $include_taxes = false ) {
+		global $wp_filter;
+
+		$price_hash   = $include_taxes ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
+		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+
+		foreach ( $filter_names as $filter_name ) {
+			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
+			}
+		}
+
+		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $include_taxes ) ) );
+
+		return $price_hash;
+	}
+
+	/**
 	 * Does a child have a weight set?
 	 *
 	 * @since 2.7.0
@@ -256,7 +267,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_weight( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 	}
 
@@ -269,7 +280,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		return $children ? $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : false;
 	}
 
@@ -282,7 +293,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
-		$children            = $product->get_visible_children( 'edit' );
+		$children            = $product->get_visible_children();
 		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : 0;
 		return $children > $oufofstock_children;
 	}
@@ -350,7 +361,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function sync_price( &$product ) {
 		global $wpdb;
 
-		$children = $product->get_visible_children( 'edit' );
+		$children = $product->get_visible_children();
 		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) ) : array();
 
 		delete_post_meta( $product->get_id(), '_price' );

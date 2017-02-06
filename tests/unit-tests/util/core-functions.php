@@ -395,4 +395,18 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		return array_slice( $alternatives, $skip++ );
 	}
 
+	/**
+	 * Test wc_get_wildcard_postcodes
+	 */
+	public function test_wc_get_wildcard_postcodes() {
+		$postcode  = 'cb23 6as';
+		$country   = 'GB';
+		$wildcards = array( 'cb23 6as', 'CB23 6AS', 'CB23 6AS*', 'CB23 6A*', 'CB23 6*', 'CB23 *', 'CB23*', 'CB2*', 'CB*', 'C*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
+
+		$postcode  = 'GIJóN';
+		$country   = '';
+		$wildcards = array( 'GIJóN', 'GIJÓN', 'GIJÓN*', 'GIJÓ*', 'GIJ*', 'GI*', 'G*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
+	}
 }

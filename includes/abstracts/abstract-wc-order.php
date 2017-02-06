@@ -213,17 +213,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						switch ( $item_group ) {
 							case 'fee_lines' :
 								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_fee_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_fee_item action instead' );
 								}
 							break;
 							case 'shipping_lines' :
 								if ( isset( $item->legacy_package_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'Use CRUD woocommerce_checkout_create_order_shipping_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'CRUD woocommerce_checkout_create_order_shipping_item action instead' );
 								}
 							break;
 							case 'line_items' :
 								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_line_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_line_item action instead' );
 								}
 							break;
 						}
@@ -447,6 +447,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return apply_filters( 'woocommerce_order_get_tax_totals', $tax_totals, $this );
 	}
 
+	/**
+	 * Get all valid statuses for this order
+	 *
+	 * @since 2.7.0
+	 * @return array Internal status keys e.g. 'wc-processing'
+	 */
+	protected function get_valid_statuses() {
+		return array_keys( wc_get_order_statuses() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -484,14 +494,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
 		// Only allow valid new status
-		if ( ! in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) ) {
+		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) ) {
 			$new_status = 'pending';
 		}
 
 		$this->set_prop( 'status', $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) ) {
 			$old_status = 'pending';
 		}
 
@@ -890,7 +900,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 		$item->save();
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'woocommerce_new_order_item action instead' );
 		return $item->get_id();
 	}
 
@@ -1038,11 +1048,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Inherit tax class from items
 			if ( 'inherit' === $shipping_tax_class ) {
 				$tax_rates         = array();
-				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
 				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
-					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
 							'country'   => $args['country'],

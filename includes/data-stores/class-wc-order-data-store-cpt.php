@@ -138,12 +138,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$order, $force = false ) {
+	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
-		$changed_props     = $order->get_changes();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_id',
@@ -158,15 +156,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_cart_hash'            => 'cart_hash',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-
-			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
-			}
+			update_post_meta( $order->get_id(), $meta_key, $value );
+			$updated_props[] = $prop;
 		}
 
 		$address_props = array(
@@ -197,21 +191,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		foreach ( $address_props as $props_key => $props ) {
-			foreach ( $props as $meta_key => $prop ) {
-				$prop_key = substr( $prop, 8 );
-				if ( ! $force && ( ! isset( $changed_props[ $props_key ] ) || ! array_key_exists( $prop_key, $changed_props[ $props_key ] ) ) ) {
-					continue;
-				}
+			$props_to_update = $this->get_props_to_update( $order, $props );
+			foreach ( $props_to_update as $meta_key => $prop ) {
 				$value = $order->{"get_$prop"}( 'edit' );
-
-				if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-					$updated_props[] = $prop;
-					$updated_props[] = $props_key;
-				}
+				update_post_meta( $order->get_id(), $meta_key, $value );
+				$updated_props[] = $prop;
+				$updated_props[] = $props_key;
 			}
 		}
 
-		parent::update_post_meta( $order, $force );
+		parent::update_post_meta( $order );
 
 		// If address changed, store concatinated version to make searches faster.
 		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_billing_address_index' ) ) {
@@ -226,6 +215,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
 		}
+
+		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
 	/**

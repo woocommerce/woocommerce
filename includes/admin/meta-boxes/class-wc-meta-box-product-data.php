@@ -301,6 +301,11 @@ class WC_Meta_Box_Product_Data {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
 
+		/**
+		 * @since 2.7.0 to set props before save.
+		 */
+		do_action( 'woocommerce_admin_process_product_object', $product );
+
 		$product->save();
 
 		if ( $product->is_type( 'variable' ) ) {
