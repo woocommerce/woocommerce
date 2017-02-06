@@ -304,9 +304,16 @@
 
 		.form-row-first,
 		.form-row-last {
-			float: left;
 			width: 47%;
 			overflow: visible;
+		}
+
+		.form-row-first {
+			float: left;
+
+			/*rtl:raw:
+			float: right;
+			*/
 		}
 
 		.form-row-last {
