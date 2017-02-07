@@ -268,8 +268,9 @@ class WC_Checkout {
 		}
 
 		try {
-			$order_id  = absint( WC()->session->get( 'order_awaiting_payment' ) );
-			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			$cart_hash          = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -305,7 +306,7 @@ class WC_Checkout {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
-			$order->set_payment_method( $data['payment_method'] );
+			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ]  : $data['payment_method'] );
 			$order->set_shipping_total( WC()->cart->shipping_total );
 			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
 			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
