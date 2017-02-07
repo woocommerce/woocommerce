@@ -191,7 +191,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
-			'shipping_class_id' => current( $this->get_term_ids( $product, 'product_shipping_class' ) ),
+			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
 			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
 			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
@@ -216,17 +216,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_parent_data( array(
-			'title'          => get_the_title( $product->get_parent_id() ),
-			'sku'            => get_post_meta( $product->get_parent_id(), '_sku', true ),
-			'manage_stock'   => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
-			'backorders'     => get_post_meta( $product->get_parent_id(), '_backorders', true ),
-			'stock_quantity' => get_post_meta( $product->get_parent_id(), '_stock', true ),
-			'weight'         => get_post_meta( $product->get_parent_id(), '_weight', true ),
-			'length'         => get_post_meta( $product->get_parent_id(), '_length', true ),
-			'width'          => get_post_meta( $product->get_parent_id(), '_width', true ),
-			'height'         => get_post_meta( $product->get_parent_id(), '_height', true ),
-			'tax_class'      => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
-			'image_id'       => get_post_thumbnail_id( $product->get_parent_id() ),
+			'title'             => get_the_title( $product->get_parent_id() ),
+			'sku'               => get_post_meta( $product->get_parent_id(), '_sku', true ),
+			'manage_stock'      => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
+			'backorders'        => get_post_meta( $product->get_parent_id(), '_backorders', true ),
+			'stock_quantity'    => get_post_meta( $product->get_parent_id(), '_stock', true ),
+			'weight'            => get_post_meta( $product->get_parent_id(), '_weight', true ),
+			'length'            => get_post_meta( $product->get_parent_id(), '_length', true ),
+			'width'             => get_post_meta( $product->get_parent_id(), '_width', true ),
+			'height'            => get_post_meta( $product->get_parent_id(), '_height', true ),
+			'tax_class'         => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
+			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
+			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
 		) );
 	}
 

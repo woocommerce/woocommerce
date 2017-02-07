@@ -41,12 +41,17 @@ class WC_Data_Store_WP {
 	 * Get and store terms from a taxonomy.
 	 *
 	 * @since  2.7.0
-	 * @param  WC_Data
+	 * @param  WC_Data|integer $object
 	 * @param  string $taxonomy Taxonomy name e.g. product_cat
 	 * @return array of terms
 	 */
 	protected function get_term_ids( $object, $taxonomy ) {
-		$terms = get_the_terms( $object->get_id(), $taxonomy );
+		if ( is_numeric( $object ) ) {
+			$object_id = $object;
+		} else {
+			$object_id = $object->get_id();
+		}
+		$terms = get_the_terms( $object_id, $taxonomy );
 		if ( false === $terms || is_wp_error( $terms ) ) {
 			return array();
 		}
