@@ -389,6 +389,7 @@ final class WooCommerce {
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
 		$this->countries       = new WC_Countries();                            // Countries class
 		$this->integrations    = new WC_Integrations();                         // Integrations class
+		$this->structured_data = new WC_Structured_Data();                      // Structured Data class, generates and handles structured data
 
 		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
@@ -399,7 +400,6 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents
-			$this->structured_data = new WC_Structured_Data();                       // Structured Data class, generates and handles structured data
 			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );          // Customer should be saved during shutdown.
 		}
