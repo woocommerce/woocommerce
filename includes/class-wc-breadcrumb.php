@@ -95,7 +95,7 @@ class WC_Breadcrumb {
 	 * Prepend the shop page to shop breadcrumbs.
 	 */
 	private function prepend_shop_page() {
-		$permalinks   = get_option( 'woocommerce_permalinks' );
+		$permalinks   = wc_get_permalink_structure();
 		$shop_page_id = wc_get_page_id( 'shop' );
 		$shop_page    = get_post( $shop_page_id );
 

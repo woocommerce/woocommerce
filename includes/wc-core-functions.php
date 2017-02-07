@@ -809,11 +809,10 @@ add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
 function wc_fix_rewrite_rules( $rules ) {
 	global $wp_rewrite;
 
-	$permalinks        = get_option( 'woocommerce_permalinks' );
-	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+	$permalinks = wc_get_permalink_structure();
 
 	// Fix the rewrite rules when the product permalink have %product_cat% flag.
-	if ( preg_match( '`/(.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
+	if ( preg_match( '`/(.+)(/%product_cat%)`' , $permalinks['product_rewrite_slug'], $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
 			if ( preg_match( '`^' . preg_quote( $matches[1], '`' ) . '/\(`', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
 				unset( $rules[ $rule ] );
@@ -822,7 +821,7 @@ function wc_fix_rewrite_rules( $rules ) {
 	}
 
 	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
-	if ( ! empty( $permalinks['use_verbose_page_rules'] ) && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
+	if ( $permalinks['use_verbose_page_rules'] && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
 		$page_rewrite_rules = array();
 		$subpages           = wc_get_page_children( $shop_page_id );
 
@@ -857,9 +856,8 @@ function wc_fix_product_attachment_link( $link, $post_id ) {
 
 	$post = get_post( $post_id );
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
-		$permalinks        = get_option( 'woocommerce_permalinks' );
-		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+		$permalinks = wc_get_permalink_structure();
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $permalinks['product_rewrite_slug'], $matches ) ) {
 			$link = home_url( '/?attachment_id=' . $post->ID );
 		}
 	}
@@ -1562,4 +1560,36 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 		}
 	}
 	return $newlist;
+}
+
+/**
+ * Get permalink settings for WooCommerce independent of the user locale.
+ *
+ * @since  2.7.0
+ * @return array
+ */
+function wc_get_permalink_structure() {
+	if ( function_exists( 'switch_to_locale' ) ) {
+		switch_to_locale( get_locale() );
+	}
+
+	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
+		'product_base'           => '',
+		'category_base'          => '',
+		'tag_base'               => '',
+		'attribute_base'         => '',
+		'use_verbose_page_rules' => false,
+	) );
+
+	// Ensure rewrite slugs are set.
+	$permalinks['product_rewrite_slug']   = untrailingslashit( empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' )             : $permalinks['product_base'] );
+	$permalinks['category_rewrite_slug']  = untrailingslashit( empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' )   : $permalinks['category_base'] );
+	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
+	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
+
+	if ( function_exists( 'restore_current_locale' ) ) {
+		restore_current_locale();
+	}
+
+	return $permalinks;
 }
