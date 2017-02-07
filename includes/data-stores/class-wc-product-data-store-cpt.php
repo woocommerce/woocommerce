@@ -661,7 +661,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_on_sale_products() {
 		global $wpdb;
-		return $wpdb->get_results( "
+
+		$on_sale_posts = $wpdb->get_results( "
 			SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 			LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
@@ -674,6 +675,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
 			GROUP BY post.ID;
 		" );
+
+		$products_on_sale = array();
+
+		// Simple products that were previously variable retain any variation data that wasn't deleted.
+		// If any previous variations have a sale price, the now-simple product will errantly show as "on sale".
+		foreach ( $on_sale_posts as $idx => $on_sale_post ) {
+			if ( 0 < $on_sale_post->parent_id ) {
+				$parent_product = wc_get_product( $on_sale_post->parent_id );
+
+				if ( ! $parent_product->is_type( 'variable' ) ) {
+					unset( $on_sale_posts[ $idx ] );
+				}
+			}
+		}
+
+		return $on_sale_posts;
 	}
 
 	/**
