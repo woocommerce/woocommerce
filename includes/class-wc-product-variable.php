@@ -461,7 +461,7 @@ class WC_Product_Variable extends WC_Product {
 				$product->save();
 			}
 
-			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children(), $save );
+			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_before_save' );
 		}
 		return $product;
 	}
