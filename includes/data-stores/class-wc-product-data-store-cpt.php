@@ -671,7 +671,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND meta2.meta_key = '_price'
 				AND CAST( meta.meta_value AS DECIMAL ) >= 0
 				AND CAST( meta.meta_value AS CHAR ) != ''
-				AND CAST( meta.meta_value AS DECIMAL(10,2) ) = CAST( meta2.meta_value AS DECIMAL(10,2) )
+				AND CAST( meta.meta_value AS DECIMAL( 10, 2 ) ) = CAST( meta2.meta_value AS DECIMAL( 10, 2 ) )
 			GROUP BY post.ID;
 		" );
 	}
