@@ -383,8 +383,8 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Updated review.', $data['update'][0]['review'] );
 		$this->assertEquals( 'New review.', $data['create'][0]['review'] );
-		$this->assertEquals( $review_2_id, $data['delete'][0] );
-		$this->assertEquals( $review_3_id, $data['delete'][1] );
+		$this->assertEquals( $review_2_id, $data['delete'][0]['id'] );
+		$this->assertEquals( $review_3_id, $data['delete'][1]['id'] );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/reviews' );
 		$response = $this->server->dispatch( $request );
