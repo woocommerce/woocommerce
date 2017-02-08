@@ -99,10 +99,26 @@ jQuery( function ( $ ) {
 
 		edit_address: function( e ) {
 			e.preventDefault();
-			$( this ).hide();
-			$( this ).parent().find( 'a:not(.edit_address)' ).show();
-			$( this ).closest( '.order_data_column' ).find( 'div.address' ).hide();
-			$( this ).closest( '.order_data_column' ).find( 'div.edit_address' ).show();
+
+			var $this          = $( this ),
+				$wrapper       = $this.closest( '.order_data_column' ),
+				$edit_address  = $wrapper.find( 'div.edit_address' ),
+				$address       = $wrapper.find( 'div.address' ),
+				$country_input = $edit_address.find( '.js_field-country' ),
+				$state_input   = $edit_address.find( '.js_field-state' );
+
+			$address.hide();
+			$this.parent().find( 'a' ).toggle();
+
+			if ( ! $country_input.val() ) {
+				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).change();
+			}
+
+			if ( ! $state_input.val() ) {
+				$state_input.val( woocommerce_admin_meta_boxes_order.default_state ).change();
+			}
+
+			$edit_address.show();
 		},
 
 		change_customer_user: function() {
