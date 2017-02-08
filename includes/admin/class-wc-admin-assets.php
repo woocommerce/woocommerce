@@ -45,6 +45,12 @@ class WC_Admin_Assets {
 		wp_register_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 		wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), WC_VERSION, 'print' );
 
+		// Add RTL support for admin styles
+		wp_style_add_data( 'woocommerce_admin_menu_styles', 'rtl', 'replace' );
+		wp_style_add_data( 'woocommerce_admin_styles', 'rtl', 'replace' );
+		wp_style_add_data( 'woocommerce_admin_dashboard_styles', 'rtl', 'replace' );
+		wp_style_add_data( 'woocommerce_admin_print_reports_styles', 'rtl', 'replace' );
+
 		// Sitewide menu CSS
 		wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 

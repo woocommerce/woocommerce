@@ -2648,6 +2648,9 @@ table {
 		}
 	}
 }
+.wc-shipping-zones-heading .page-title-action {
+	display: inline-block;	
+}
 table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-classes {
 	td, th {
 		vertical-align: top;
@@ -3477,6 +3480,11 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				span {
+					margin-left: 0.618em;
+					margin-right: 0.618em;
+				}
+
 				&::before {
 					@include iconbeforedashicons( '\f107' );
 				}
@@ -3562,6 +3570,10 @@ img.help_tip {
  * Shipping
  */
 .woocommerce_page_wc-settings {
+	input[type=url], input[type=email] {
+		direction: ltr;
+	}
+
 	.shippingrows {
 		th.check-column {
 			padding-top: 20px;
@@ -4310,7 +4322,7 @@ img.help_tip {
 		}
 
 		input[type=checkbox] {
-			margin: -3px 0 0 .5em;
+			margin: 0 5px 0 .5em!important;
 			vertical-align: middle;
 		}
 	}
@@ -4389,11 +4401,10 @@ img.tips {
 	display: none;
 	position: absolute;
 	top: 0;
+	/*rtl:ignore*/
 	left: 0;
 	z-index: 9999999;
-}
 
-#tiptip_holder {
 	&.tip_top {
 		padding-bottom: 5px;
 
@@ -4462,6 +4473,13 @@ img.tips {
 	height: 0;
 	width: 0;
 }
+
+/*rtl:raw:
+#tiptip_arrow {
+	margin-right: 79.5px!important;
+	margin-left: 0!important;
+}
+*/
 
 .wc_error_tip {
 	max-width: 20em;
