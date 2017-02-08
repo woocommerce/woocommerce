@@ -678,6 +678,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
+		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $request['type'] ) ) {
 			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
@@ -686,9 +688,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$classname = 'WC_Product_Simple';
 			}
 
-			$product = new $classname( absint( $request['id'] ) );
+			$product = new $classname( $id );
 		} elseif ( isset( $request['id'] ) ) {
-			$product = wc_get_product( absint( $request['id'] ) );
+			$product = wc_get_product( $id );
 		} else {
 			$product = new WC_Product_Simple();
 		}
