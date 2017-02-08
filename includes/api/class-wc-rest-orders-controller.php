@@ -466,7 +466,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping'], $request['fee'], $request['coupon'] ) ) {
+			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping_lines'], $request['fee_lines'], $request['coupon_lines'] ) ) {
 				$order->calculate_totals();
 			}
 
