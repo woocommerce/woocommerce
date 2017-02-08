@@ -292,7 +292,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
-		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
+		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
 
 		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
