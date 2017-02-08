@@ -57,7 +57,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item Object
 	 */
 	public function __construct( $item = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
 		parent::__construct( $item );
 
 		if ( $item instanceof WC_Order_Item ) {

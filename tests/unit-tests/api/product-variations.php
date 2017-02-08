@@ -304,9 +304,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				),
 			),
 			'delete' => array(
-				array(
-					'id' => $children[1],
-				),
+				$children[1],
 			),
 			'create' => array(
 				array(
@@ -323,7 +321,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertContains( 'Updated description.', $data['update'][0]['description'] );
 		$this->assertEquals( 'DUMMY SKU VARIABLE MEDIUM', $data['create'][0]['sku'] );
 		$this->assertEquals( 'medium', $data['create'][0]['attributes'][0]['option'] );
-		$this->assertEquals( $children[1], $data['delete'][0]['id'] );
+		$this->assertEquals( $children[1], $data['delete'][0] );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' );
 		$response = $this->server->dispatch( $request );
