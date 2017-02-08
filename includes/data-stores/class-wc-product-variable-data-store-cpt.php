@@ -205,10 +205,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					}
 				}
 
-				asort( $prices );
-				asort( $regular_prices );
-				asort( $sale_prices );
-
 				$transient_cached_prices_array[ $price_hash ] = array(
 					'price'         => $prices,
 					'regular_price' => $regular_prices,
