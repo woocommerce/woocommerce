@@ -1469,11 +1469,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
-		$this->refunds = wc_get_orders( array(
-			'type'   => 'shop_order_refund',
-			'parent' => $this->get_id(),
-			'limit'  => -1,
-		) );
+		if ( empty( $this->refunds ) ) {
+			$this->refunds = wc_get_orders( array(
+				'type'   => 'shop_order_refund',
+				'parent' => $this->get_id(),
+				'limit'  => -1,
+			) );
+		}
 		return $this->refunds;
 	}
 

@@ -1365,73 +1365,24 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_tax'] = array_map( 'wc_format_decimal', $tax_totals );
 			}
 
-			// Create the refund object
+			// Create the refund object.
 			$refund = wc_create_refund( array(
-				'amount'     => $refund_amount,
-				'reason'     => $refund_reason,
-				'order_id'   => $order_id,
-				'line_items' => $line_items,
+				'amount'         => $refund_amount,
+				'reason'         => $refund_reason,
+				'order_id'       => $order_id,
+				'line_items'     => $line_items,
+				'refund_payment' => $api_refund,
+				'restock_items'  => $restock_refunded_items,
 			) );
 
 			if ( is_wp_error( $refund ) ) {
 				throw new Exception( $refund->get_error_message() );
 			}
 
-			// Refund via API
-			if ( $api_refund ) {
-				if ( WC()->payment_gateways() ) {
-					$payment_gateways = WC()->payment_gateways->payment_gateways();
-				}
-				if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund_amount, $refund_reason );
-
-					do_action( 'woocommerce_refund_processed', $refund, $result );
-
-					if ( is_wp_error( $result ) ) {
-						throw new Exception( $result->get_error_message() );
-					} elseif ( ! $result ) {
-						throw new Exception( __( 'Refund failed', 'woocommerce' ) );
-					}
-				}
-			}
-
-			// restock items
-			foreach ( $line_item_qtys as $item_id => $qty ) {
-				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
-					$order_item = $order_items[ $item_id ];
-					$_product = $order_item->get_product();
-
-					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
-						$old_stock    = wc_stock_amount( $_product->stock );
-						$new_quantity = $_product->increase_stock( $qty );
-
-						$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
-
-						do_action( 'woocommerce_restock_refunded_item', $_product->get_id(), $old_stock, $new_quantity, $order, $_product );
-					}
-				}
-			}
-
-			// Trigger notifications and status changes
-			if ( $order->get_remaining_refund_amount() > 0 || ( $order->has_free_item() && $order->get_remaining_refund_items() > 0 ) ) {
-				/**
-				 * woocommerce_order_partially_refunded.
-				 *
-				 * @since 2.4.0
-				 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3.
-				 */
-				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->get_id(), $refund->get_id() );
-			} else {
-				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->get_id() );
-
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->get_id() ) );
+			if ( did_action( 'woocommerce_order_fully_refunded' ) ) {
 				$response_data['status'] = 'fully_refunded';
 			}
 
-			do_action( 'woocommerce_order_refunded', $order_id, $refund->get_id() );
-
-			// Clear transients
-			wc_delete_shop_order_transients( $order_id );
 			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
