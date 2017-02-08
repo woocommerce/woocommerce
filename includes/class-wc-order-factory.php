@@ -59,7 +59,7 @@ class WC_Order_Factory {
 		global $wpdb;
 
 		if ( is_numeric( $item_id ) ) {
-			$item_type = WC_Data_Store::load( 'order' )->get_order_item_type( $item_id );
+			$item_type = WC_Data_Store::load( 'order-item' )->get_order_item_type( $item_id );
 			$id        = $item_id;
 		} elseif ( $item_id instanceof WC_Order_Item ) {
 			$item_type = $item_id->get_type();

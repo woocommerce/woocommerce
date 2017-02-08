@@ -596,17 +596,4 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_order_type( $order_id ) {
 		return get_post_type( $order_id );
 	}
-
-	/**
-	 * Get the order item type based on Item ID.
-	 *
-	 * @since 2.7.0
-	 * @param int $item_id
-	 * @return string
-	 */
-	public function get_order_item_type( $item_id ) {
-		global $wpdb;
-		$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
-		return $item_data->order_item_type;
-	}
 }
