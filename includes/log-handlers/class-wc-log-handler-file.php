@@ -246,14 +246,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		if ( $file ) {
 			if ( is_file( $file ) && is_writable( $file ) ) {
-				// Close first to be certain no processes keep it alive after it is unlinked.
-				$this->close( $handle );
+				$this->close( $handle ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file );
-			} elseif ( is_file( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) && is_writable( trailingslashit( WC_LOG_DIR ) . $handle . '.log' ) ) {
-				$this->close( $handle );
-				$removed = unlink( trailingslashit( WC_LOG_DIR ) . $handle . '.log' );
 			}
-
 			do_action( 'woocommerce_log_remove', $handle, $removed );
 		}
 
@@ -344,7 +339,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public static function get_log_file_path( $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
-			return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+			return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
 		} else {
 			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '2.7' );
 			return false;

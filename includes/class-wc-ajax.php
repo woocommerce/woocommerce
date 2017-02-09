@@ -943,7 +943,7 @@ class WC_AJAX {
 			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
 			}
-			echo implode( ', ', $return );
+			echo wp_kses_post( implode( ', ', $return ) );
 		}
 		wp_die();
 	}
@@ -983,7 +983,7 @@ class WC_AJAX {
 			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
 			}
-			echo implode( ', ', $return );
+			echo wp_kses_post( implode( ', ', $return ) );
 		}
 		wp_die();
 	}

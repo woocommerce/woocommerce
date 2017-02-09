@@ -91,7 +91,7 @@ class WC_Report_Stock extends WP_List_Table {
 
 				// Get variation data.
 				if ( $product->is_type( 'variation' ) ) {
-					echo '<div class="description">' . wc_get_formatted_variation( $product, true ) . '</div>';
+					echo '<div class="description">' . wp_kses_post( wc_get_formatted_variation( $product, true ) ) . '</div>';
 				}
 			break;
 
