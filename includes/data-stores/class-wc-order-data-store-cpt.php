@@ -585,4 +585,15 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
 	}
+
+	/**
+	 * Get the order type based on Order ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $order_id
+	 * @return string
+	 */
+	public function get_order_type( $order_id ) {
+		return get_post_type( $order_id );
+	}
 }

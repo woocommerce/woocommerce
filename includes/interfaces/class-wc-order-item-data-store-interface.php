@@ -81,4 +81,11 @@ interface WC_Order_Item_Data_Store_Interface {
 	 * @return int
 	 */
 	function get_order_id_by_order_item_id( $item_id );
+
+	/**
+	 * Get the order item type based on Item ID.
+	 * @param  int $item_id
+	 * @return string
+	 */
+	public function get_order_item_type( $item_id );
 }

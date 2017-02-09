@@ -134,4 +134,16 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		) );
 	}
 
+	/**
+	 * Get the order item type based on Item ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $item_id
+	 * @return string
+	 */
+	public function get_order_item_type( $item_id ) {
+		global $wpdb;
+		$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
+		return $item_data->order_item_type;
+	}
 }
