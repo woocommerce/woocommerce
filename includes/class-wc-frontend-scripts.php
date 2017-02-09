@@ -43,11 +43,25 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'setup_theme', array( __CLASS__, 'add_default_theme_support' ) );
+	}
+
+	/**
+	 * Add theme support for default WP themes.
+	 *
+	 * @since 2.7.0
+	 */
+	public static function add_default_theme_support() {
+		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+			add_theme_support( 'wc-product-gallery-zoom' );
+			add_theme_support( 'wc-product-gallery-lightbox' );
+			add_theme_support( 'wc-product-gallery-slider' );
+		}
 	}
 
 	/**
 	 * Get styles for the frontend.
-	 * @access private
+	 *
 	 * @return array
 	 */
 	public static function get_styles() {
@@ -367,13 +381,22 @@ class WC_Frontend_Scripts {
 		if ( is_lost_password_page() ) {
 			self::enqueue_script( 'wc-lost-password' );
 		}
+
+		// Load gallery scripts on product pages only if supported.
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
-			self::enqueue_script( 'flexslider' );
-			self::enqueue_script( 'photoswipe-ui-default' );
-			self::enqueue_style( 'photoswipe-default-skin' );
-			self::enqueue_script( 'zoom' );
+			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
+				self::enqueue_script( 'zoom' );
+			}
+			if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
+				self::enqueue_script( 'flexslider' );
+			}
+			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+				self::enqueue_script( 'photoswipe-ui-default' );
+				self::enqueue_style( 'photoswipe-default-skin' );
+			}
 			self::enqueue_script( 'wc-single-product' );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			$ua = wc_get_user_agent(); // Exclude common bots from geolocation by user agent.
 
@@ -443,13 +466,16 @@ class WC_Frontend_Scripts {
 					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
-						'smoothHeight'   => true,
+						'smoothHeight'   => false,
 						'directionNav'   => false,
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
+					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
+					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
+					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
 				);
 			break;
 			case 'wc-checkout' :
