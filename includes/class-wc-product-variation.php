@@ -27,14 +27,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'sku'            => '',
-		'manage_stock'   => '',
-		'stock_quantity' => '',
-		'weight'         => '',
-		'length'         => '',
-		'width'          => '',
-		'height'         => '',
-		'tax_class'      => '',
+		'title'             => '',
+		'sku'               => '',
+		'manage_stock'      => '',
+		'backorders'        => '',
+		'stock_quantity'    => '',
+		'weight'            => '',
+		'length'            => '',
+		'width'             => '',
+		'height'            => '',
+		'tax_class'         => '',
+		'shipping_class_id' => '',
+		'image_id'          => '',
 	);
 
 	/**
