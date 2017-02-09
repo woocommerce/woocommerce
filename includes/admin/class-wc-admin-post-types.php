@@ -291,7 +291,6 @@ class WC_Admin_Post_Types {
 		$columns['cb']               = $existing_columns['cb'];
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
-		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
 		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
@@ -514,27 +513,16 @@ class WC_Admin_Post_Types {
 	public function render_shop_order_columns( $column ) {
 		global $post, $the_order;
 
-		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
+		if ( empty( $the_order ) || $the_order->get_id() !== $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
 		}
 
 		switch ( $column ) {
 			case 'order_status' :
-
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
-
 			break;
 			case 'order_date' :
-
-				if ( '0000-00-00 00:00:00' == $post->post_date ) {
-					$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				} else {
-					$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
-				}
-
-				echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
-
+				printf( '<time datetime="%s">%s</time>', date( 'c', $the_order->get_date_created() ), date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -543,40 +531,6 @@ class WC_Admin_Post_Types {
 					echo '<span class="na">&ndash;</span>';
 				}
 
-			break;
-			case 'order_items' :
-
-				/* translators: %d: order items count */
-				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
-
-				if ( sizeof( $the_order->get_items() ) > 0 ) {
-
-					echo '<table class="order_items" cellspacing="0">';
-
-					foreach ( $the_order->get_items() as $item ) {
-						$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
-						$item_meta      = new WC_Order_Item_Meta( $item, $product );
-						$item_meta_html = $item_meta->display( true, true );
-						?>
-						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
-							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
-							<td class="name">
-								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->get_id() ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
-								<?php else : ?>
-									<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>
-								<?php endif; ?>
-								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<?php echo wc_help_tip( $item_meta_html ); ?>
-								<?php endif; ?>
-							</td>
-						</tr>
-						<?php
-					}
-
-					echo '</table>';
-
-				} else echo '&ndash;';
 			break;
 			case 'billing_address' :
 
@@ -642,32 +596,18 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				if ( $the_order->get_user_id() ) {
-					$user_info = get_userdata( $the_order->get_user_id() );
-				}
-
-				if ( ! empty( $user_info ) ) {
-
-					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
-
-					if ( $user_info->first_name || $user_info->last_name ) {
-						/* translators: 1: first name 2: last name */
-						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
-					} else {
-						$username .= esc_html( ucfirst( $user_info->display_name ) );
-					}
-
+				if ( $the_order->get_customer_id() ) {
+					$user     = get_user_by( 'id', $the_order->get_customer_id() );
+					$username = '<a href="user-edit.php?user_id=' . absint( $the_order->get_customer_id() ) . '">';
+					$username .= esc_html( ucwords( $user->display_name ) );
 					$username .= '</a>';
-
+				} elseif ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
+					/* translators: 1: first name 2: last name */
+					$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
+				} elseif ( $the_order->get_billing_company() ) {
+					$username = trim( $the_order->get_billing_company() );
 				} else {
-					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
-						/* translators: 1: first name 2: last name */
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-					} elseif ( $the_order->get_billing_company() ) {
-						$username = trim( $the_order->get_billing_company() );
-					} else {
-						$username = __( 'Guest', 'woocommerce' );
-					}
+					$username = __( 'Guest', 'woocommerce' );
 				}
 
 				/* translators: 1: order and number (i.e. Order #13) 2: user name */
