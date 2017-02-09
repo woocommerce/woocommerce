@@ -1569,7 +1569,7 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( function_exists( 'switch_to_locale' ) ) {
+	if ( function_exists( 'switch_to_locale' ) && did_action( 'init' ) ) {
 		switch_to_locale( get_locale() );
 	}
 
@@ -1587,9 +1587,8 @@ function wc_get_permalink_structure() {
 	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
 	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
 
-	if ( function_exists( 'restore_current_locale' ) ) {
+	if ( function_exists( 'restore_current_locale' ) && did_action( 'init' ) ) {
 		restore_current_locale();
 	}
-
 	return $permalinks;
 }
