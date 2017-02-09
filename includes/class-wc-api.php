@@ -141,7 +141,6 @@ class WC_API extends WC_Legacy_API {
 		// Abstract controllers.
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-posts-controller.php' );
-		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
 

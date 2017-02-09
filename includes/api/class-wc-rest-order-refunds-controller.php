@@ -29,7 +29,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
