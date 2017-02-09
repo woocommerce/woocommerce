@@ -373,7 +373,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$future_sale_product->save();
 
 		$sale_products = $product_store->get_on_sale_products();
-		$sale_product_ids = array_map( function( $product ){ return $product->id; }, $sale_products );
+		$sale_product_ids = wp_list_pluck( $sale_products, 'id' );
 
 		$this->assertContains( $sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $not_sale_product->get_id(), $sale_product_ids );
