@@ -43,8 +43,6 @@ foreach ( $items as $item_id => $item ) :
 				// allow other plugins to add additional product information here
 				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
-				wc_display_item_meta( $item );
-
 				if ( $show_download_links ) {
 					wc_display_item_downloads( $item );
 				}
