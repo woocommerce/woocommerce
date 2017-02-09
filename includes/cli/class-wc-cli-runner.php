@@ -82,6 +82,17 @@ class WC_CLI_Runner {
 	 * @param array  $command_args
 	 */
 	private static function register_route_commands( $rest_command, $route, $route_data, $command_args = array() ) {
+		// Define IDs that we are looking for in the routes (in addition to id)
+		// so that we can pass it to the rest command, and use it here to generate documentation.
+		$supported_ids = array(
+				'product_id'   => __( 'Product ID.', 'woocommerce' ),
+				'customer_id'  => __( 'Customer ID.', 'woocommerce' ),
+				'order_id'     => __( 'Order ID.', 'woocommerce' ),
+				'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
+				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
+		);
+		$rest_command->set_supported_ids( $supported_ids );
+
 		$parent			 = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
@@ -123,36 +134,14 @@ class WC_CLI_Runner {
 			$synopsis = array();
 			$arg_regs = array();
 
-			if ( strpos( $route, '<product_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'product_id',
-					'type'		  => 'positional',
-					'description' => __( 'Product ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<customer_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'customer_id',
-					'type'		  => 'positional',
-					'description' => __( 'Customer ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<order_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'order_id',
-					'type'		  => 'positional',
-					'description' => __( 'Order ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<refund_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'refund_id',
-					'type'		  => 'positional',
-					'description' => __( 'Refund ID.', 'woocommerce' ),
-				);
+			foreach ( $supported_ids as $id_name => $id_desc ) {
+				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
+					$synopsis[] = array(
+						'name'		  => $id_name,
+						'type'		  => 'positional',
+						'description' => $id_desc,
+					);
+				}
 			}
 
 			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) ) {
