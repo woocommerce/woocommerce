@@ -27,7 +27,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.

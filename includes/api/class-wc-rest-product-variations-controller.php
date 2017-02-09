@@ -27,7 +27,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.

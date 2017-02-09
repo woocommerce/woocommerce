@@ -18,7 +18,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * WP REST API namespace/version.
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
