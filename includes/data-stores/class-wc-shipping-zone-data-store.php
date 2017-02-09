@@ -96,6 +96,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
 			$id = $zone->get_id();
 			$zone->set_id( null );
+			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
 			do_action( 'woocommerce_delete_shipping_zone', $id );
 		}
 	}

@@ -660,6 +660,9 @@ class WC_Checkout {
 	 * @param  WP_Error $errors
 	 */
 	protected function validate_checkout( &$data, &$errors ) {
+		$this->validate_posted_data( $data, $errors );
+		$this->check_cart_items();
+
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) {
 			$errors->add( 'terms', __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
 		}
@@ -671,13 +674,13 @@ class WC_Checkout {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
 				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
-			}
+			} else {
+				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-			foreach ( WC()->shipping->get_packages() as $i => $package ) {
-				if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
-					$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+				foreach ( WC()->shipping->get_packages() as $i => $package ) {
+					if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
+						$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+					}
 				}
 			}
 		}
@@ -691,6 +694,8 @@ class WC_Checkout {
 				$available_gateways[ $data['payment_method'] ]->validate_fields();
 			}
 		}
+
+		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
 	}
 
 	/**
@@ -902,12 +907,11 @@ class WC_Checkout {
 			$errors      = new WP_Error();
 			$posted_data = $this->get_posted_data();
 
-			$this->validate_posted_data( $posted_data, $errors );
-			$this->validate_checkout( $posted_data, $errors );
+			// Update session for customer and totals.
 			$this->update_session( $posted_data );
-			$this->check_cart_items();
 
-			do_action( 'woocommerce_after_checkout_validation', $posted_data, $errors );
+			// Validate posted data and cart items before proceeding.
+			$this->validate_checkout( $posted_data, $errors );
 
 			foreach ( $errors->get_error_messages() as $message ) {
 				wc_add_notice( $message, 'error' );
