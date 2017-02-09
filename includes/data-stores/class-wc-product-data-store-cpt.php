@@ -120,7 +120,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$id = $product->get_id();
 
 		$product->set_props( array(
-			'name'              => get_the_title( $post_object ),
+			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
 			'date_created'      => $post_object->post_date,
 			'date_modified'     => $post_object->post_modified,

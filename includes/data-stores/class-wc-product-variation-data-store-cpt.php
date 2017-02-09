@@ -55,10 +55,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			throw new Exception( sprintf( 'Invalid parent for variation #%d', $product->get_id() ), 422 );
 		}
 
-		$product_name = get_the_title( $post_object );
-
 		$product->set_props( array(
-			'name'              => $product_name,
+			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
 			'date_created'      => $post_object->post_date,
 			'date_modified'     => $post_object->post_modified,
@@ -76,7 +74,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * The "Product #" text is intentionally not wrapped in translation functions for a faster comparision. It was not inserted as a translated string:
 		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
 		 */
-		if ( __( 'Variation #', 'woocommerce' ) === substr( $product_name, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $product_name ) {
+		if ( __( 'Variation #', 'woocommerce' ) === substr( $post_object->post_title, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $post_object->post_title ) {
 			$parent_data = $product->get_parent_data();
 			$new_title   = $parent_data['title'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
 			$product->set_name( $new_title );
@@ -98,12 +96,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		$product->set_date_created( current_time( 'timestamp' ) );
+		$parent_object = get_post( $product->get_parent_id() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -136,9 +135,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$parent_object = get_post( $product->get_parent_id() );
 		$post_data = array(
 			'ID'             => $product->get_id(),
-			'post_title'     => get_the_title( $product->get_parent_id() ) . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
@@ -215,8 +215,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
+		$parent_object = get_post( $product->get_parent_id() );
 		$product->set_parent_data( array(
-			'title'             => get_the_title( $product->get_parent_id() ),
+			'title'             => $parent_object->post_title,
 			'sku'               => get_post_meta( $product->get_parent_id(), '_sku', true ),
 			'manage_stock'      => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 			'backorders'        => get_post_meta( $product->get_parent_id(), '_backorders', true ),
