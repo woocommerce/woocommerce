@@ -674,6 +674,9 @@ class WC_Checkout {
 			}
 
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+            
+            // calculate shipping to populate the packages
+            WC()->cart->calculate_shipping();
 
 			foreach ( WC()->shipping->get_packages() as $i => $package ) {
 				if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
