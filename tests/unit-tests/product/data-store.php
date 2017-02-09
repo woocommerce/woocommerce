@@ -349,4 +349,34 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$_attribute = $loaded_variation->get_attributes( 'edit' );
 		$this->assertEquals( 'green', $_attribute['color'] );
 	}
+
+	function test_get_on_sale_products() {
+
+		$product_store = new WC_Product_Data_Store_CPT();
+
+		$sale_product = WC_Helper_Product::create_simple_product();
+		$sale_product->set_sale_price( 3.49 );
+		$sale_product->set_regular_price( 3.99 );
+		$sale_product->set_price( $sale_product->get_sale_price() );
+		$sale_product->save();
+
+		$not_sale_product = WC_Helper_Product::create_simple_product();
+		$not_sale_product->set_regular_price( 4.00 );
+		$not_sale_product->set_price( $not_sale_product->get_regular_price() );
+		$not_sale_product->save();
+
+		$future_sale_product = WC_Helper_Product::create_simple_product();
+		$future_sale_product->set_date_on_sale_from( 'tomorrow' );
+		$future_sale_product->set_regular_price( 6.49 );
+		$future_sale_product->set_sale_price( 5.99 );
+		$future_sale_product->set_price( $future_sale_product->get_regular_price() );
+		$future_sale_product->save();
+
+		$sale_products = $product_store->get_on_sale_products();
+		$sale_product_ids = array_map( function( $product ){ return $product->id; }, $sale_products );
+
+		$this->assertContains( $sale_product->get_id(), $sale_product_ids );
+		$this->assertNotContains( $not_sale_product->get_id(), $sale_product_ids );
+		$this->assertNotContains( $future_sale_product->get_id(), $sale_product_ids );
+	}
 }

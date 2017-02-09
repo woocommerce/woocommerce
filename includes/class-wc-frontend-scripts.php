@@ -57,18 +57,21 @@ class WC_Frontend_Scripts {
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all',
+				'has_rtl' => true,
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
 				'deps'    => 'woocommerce-layout',
 				'version' => WC_VERSION,
 				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')',
+				'has_rtl' => true,
 			),
 			'woocommerce-general' => array(
 				'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all',
+				'has_rtl' => true,
 			),
 		) );
 	}
@@ -125,10 +128,15 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
-	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		self::$styles[] = $handle;
 		wp_register_style( $handle, $path, $deps, $version, $media );
+
+		if ( $has_rtl ) {
+			wp_style_add_data( $handle, 'rtl', 'replace' );
+		}
 	}
 
 	/**
@@ -141,10 +149,11 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
-	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		if ( ! in_array( $handle, self::$styles ) && $path ) {
-			self::register_style( $handle, $path, $deps, $version, $media );
+			self::register_style( $handle, $path, $deps, $version, $media, $has_rtl );
 		}
 		wp_enqueue_style( $handle );
 	}
@@ -295,25 +304,29 @@ class WC_Frontend_Scripts {
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => false,
 			),
 			'photoswipe-default-skin' => array(
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.css' ),
 				'deps'    => array( 'photoswipe' ),
 				'version' => WC_VERSION,
+				'has_rtl' => false,
 			),
 			'select2' => array(
 				'src'     => self::get_asset_url( 'assets/css/select2.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => true,
 			),
 			'woocommerce_prettyPhoto_css' => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/css/prettyPhoto.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => true,
 			),
 		);
 		foreach ( $register_styles as $name => $props ) {
-			self::register_style( $name, $props['src'], $props['deps'], $props['version'] );
+			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
 		}
 	}
 
@@ -376,7 +389,11 @@ class WC_Frontend_Scripts {
 		// CSS Styles
 		if ( $enqueue_styles = self::get_styles() ) {
 			foreach ( $enqueue_styles as $handle => $args ) {
-				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+				if ( ! isset( $args['has_rtl'] ) ) {
+					$args['has_rtl'] = false;
+				}
+
+				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'], $args['has_rtl'] );
 			}
 		}
 	}

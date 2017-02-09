@@ -107,6 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'label'         => $label,
 						'data_type'     => 'price',
 						'wrapper_class' => 'form-row form-row-first',
+						'placeholder'   => __( 'Variation price (required)', 'woocommerce' ),
 					) );
 
 					/* translators: %s: currency symbol */

@@ -661,6 +661,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_on_sale_products() {
 		global $wpdb;
+
+		$decimals = absint( wc_get_price_decimals() );
+
 		return $wpdb->get_results( "
 			SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
@@ -671,7 +674,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND meta2.meta_key = '_price'
 				AND CAST( meta.meta_value AS DECIMAL ) >= 0
 				AND CAST( meta.meta_value AS CHAR ) != ''
-				AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
+				AND CAST( meta.meta_value AS DECIMAL( 10, {$decimals} ) ) = CAST( meta2.meta_value AS DECIMAL( 10, {$decimals} ) )
 			GROUP BY post.ID;
 		" );
 	}
@@ -1193,5 +1196,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		return wp_parse_id_list( $product_ids );
+	}
+
+	/**
+	 * Get the product type based on product ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $product_id
+	 * @return bool|string
+	 */
+	public function get_product_type( $product_id ) {
+		$post_type = get_post_type( $product_id );
+		if ( 'product_variation' === $post_type ) {
+			return 'variation';
+		} elseif ( 'product' === $post_type ) {
+			$terms = get_the_terms( $product_id, 'product_type' );
+			return ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		} else {
+			return false;
+		}
 	}
 }

@@ -116,4 +116,11 @@ interface WC_Order_Data_Store_Interface {
 	 * @param bool $set
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set );
+
+	/**
+	 * Get the order type based on Order ID.
+	 * @param  int $order_id
+	 * @return string
+	 */
+	public function get_order_type( $order_id );
 }

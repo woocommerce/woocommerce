@@ -65,21 +65,6 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	}
 
 	/**
-	 * Get order ID by order item ID.
-	 *
-	 * @since 2.7.0
-	 * @param  int $item_id
-	 * @return int
-	 */
-	public function get_order_id_by_order_item_id( $item_id ) {
-		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
-			$item_id
-		) );
-	}
-
-	/**
 	 * Update term meta.
 	 *
 	 * @since  2.7.0
@@ -132,5 +117,33 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 */
 	public function get_metadata( $item_id, $key, $single = true ) {
 		return get_metadata( 'order_item', $item_id, $key, $single );
+	}
+
+	/**
+	 * Get order ID by order item ID.
+	 *
+	 * @since 2.7.0
+	 * @param  int $item_id
+	 * @return int
+	 */
+	function get_order_id_by_order_item_id( $item_id ) {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+			$item_id
+		) );
+	}
+
+	/**
+	 * Get the order item type based on Item ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $item_id
+	 * @return string
+	 */
+	public function get_order_item_type( $item_id ) {
+		global $wpdb;
+		$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
+		return $item_data->order_item_type;
 	}
 }

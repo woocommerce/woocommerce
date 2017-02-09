@@ -115,4 +115,11 @@ interface WC_Product_Data_Store_Interface {
 	 * @return array
 	 */
 	public function get_products( $args = array() );
+
+	/**
+	 * Get the product type based on product ID.
+	 * @param  int $product_id
+	 * @return bool|string
+	 */
+	public function get_product_type( $product_id );
 }

@@ -1465,15 +1465,26 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order refunds.
+	 *
 	 * @since 2.2
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
 		$this->refunds = wc_get_orders( array(
 			'type'   => 'shop_order_refund',
 			'parent' => $this->get_id(),
 			'limit'  => -1,
 		) );
+
+		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
+
 		return $this->refunds;
 	}
 
@@ -1484,7 +1495,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		return $this->data_store->get_total_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1494,7 +1516,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		return $this->data_store->get_total_tax_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_tax_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_tax_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1504,7 +1537,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		return $this->data_store->get_total_shipping_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_shipping_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
