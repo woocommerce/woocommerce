@@ -92,9 +92,11 @@ class WC_Emails {
 	 * Queue transactional email via cron so it's not sent in current request.
 	 */
 	public static function queue_transactional_email() {
+		$args = func_get_args();
+
 		wp_schedule_single_event( time() + 10, 'woocommerce_send_queued_transactional_email', array(
 			'filter' => current_filter(),
-			'args'   => func_get_args(),
+			'args'   => $args,
 		) );
 	}
 
