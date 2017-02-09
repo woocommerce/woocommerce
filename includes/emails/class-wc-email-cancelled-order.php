@@ -32,8 +32,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
 		parent::__construct();
@@ -46,10 +46,11 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	 * Trigger.
 	 *
 	 * @param int $order_id
+	 * @param WC_Order $order
 	 */
-	public function trigger( $order_id ) {
-		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
+	public function trigger( $order_id, $order ) {
+		if ( $order ) {
+			$this->object                  = $order;
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );

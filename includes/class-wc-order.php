@@ -287,14 +287,14 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function status_transition() {
 		if ( $this->status_transition ) {
-			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id() );
+			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id(), $this );
 
 			if ( ! empty( $this->status_transition['from'] ) ) {
 				/* translators: 1: old order status 2: new order status */
 				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['from'] ), wc_get_order_status_name( $this->status_transition['to'] ) );
 
-				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id() );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'] );
+				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id(), $this );
+				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'], $this );
 			} else {
 				/* translators: %s: new order status */
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );

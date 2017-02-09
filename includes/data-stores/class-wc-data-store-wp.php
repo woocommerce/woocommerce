@@ -64,9 +64,10 @@ class WC_Data_Store_WP {
 		global $wpdb;
 		$db_info       = $this->get_db_info();
 		$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-			SELECT " . $db_info['meta_id_field'] . " as meta_id, meta_key, meta_value
-			FROM " . $db_info['table'] . "
-			WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
+			SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
+			FROM {$db_info['table']}
+			WHERE {$db_info['object_id_field']} = %d
+			ORDER BY {$db_info['meta_id_field']}
 		", $object->get_id() ) );
 
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
@@ -162,7 +163,7 @@ class WC_Data_Store_WP {
 	 * @return bool
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->internal_meta_keys );
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys ) && 0 !== stripos( $meta->meta_key, 'wp_' );
 	}
 
 	/**
