@@ -371,13 +371,13 @@ class WC_Frontend_Scripts {
 
 		// Load gallery scripts on product pages only if supported.
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
-			if ( get_theme_support( 'wc-product-gallery-zoom' ) ) {
+			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
 				self::enqueue_script( 'zoom' );
 			}
-			if ( get_theme_support( 'wc-product-gallery-slider' ) ) {
+			if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
 				self::enqueue_script( 'flexslider' );
 			}
-			if ( get_theme_support( 'wc-product-gallery-lightbox' ) ) {
+			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
 				self::enqueue_script( 'photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
 			}
