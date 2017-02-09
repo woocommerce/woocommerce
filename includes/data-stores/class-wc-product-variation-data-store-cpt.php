@@ -173,9 +173,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$use_longform_title = apply_filters( 'woocommerce_product_variation_title_use_longform_style', count( $product->get_attributes() ) > 1 );
-		$title_base = apply_filters( 'woocommerce_product_variation_title_base', get_post_field( 'post_title', $product->get_parent_id() ) );
-		$separator = apply_filters( 'woocommerce_product_variation_title_separator', '&ndash;' );
+		$use_longform_title = apply_filters( 'woocommerce_product_variation_title_use_longform_style', count( $product->get_attributes() ) > 1, $product );
+		$title_base = apply_filters( 'woocommerce_product_variation_title_base', get_post_field( 'post_title', $product->get_parent_id() ), $product );
+		$separator = apply_filters( 'woocommerce_product_variation_title_separator', '&ndash;', $product );
 
 		return $title_base . ' ' . $separator . ' ' . wc_get_formatted_variation( $product, true, $use_longform_title );
 	}
