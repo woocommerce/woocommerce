@@ -351,7 +351,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	function test_get_on_sale_products() {
-
 		$product_store = new WC_Product_Data_Store_CPT();
 
 		$sale_product = WC_Helper_Product::create_simple_product();
@@ -378,5 +377,29 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $not_sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $future_sale_product->get_id(), $sale_product_ids );
+	}
+
+	function test_generate_product_title() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$one_attribute_variation = new WC_Product_Variation;
+		$one_attribute_variation->set_parent_id( $product->get_id() );
+		$one_attribute_variation->set_attributes( array( 'Color' => 'Green' ) );
+		$one_attribute_variation->save();
+
+		$two_attribute_variation = new WC_Product_Variation;
+		$two_attribute_variation->set_parent_id( $product->get_id() );
+		$two_attribute_variation->set_attributes( array( 'Color' => 'Green', 'Size' => 'Large' ) );
+		$two_attribute_variation->save();
+
+		//Check the one attribute variation title
+		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
+		$this->assertEquals( "Test Product &ndash; Green", $loaded_variation->get_name() );
+
+		//Check the two attribute variation title
+		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
+		$this->assertEquals( "Test Product &ndash; Color: Green, Size: Large", $loaded_variation->get_name() );
 	}
 }
