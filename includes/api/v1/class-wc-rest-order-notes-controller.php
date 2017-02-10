@@ -145,9 +145,9 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
+		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -161,9 +161,9 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 * @return boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
+		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $order->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -177,14 +177,14 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_items( $request ) {
-		$order = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
+		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
-			'post_id' => $order->ID,
+			'post_id' => $order->get_id(),
 			'approve' => 'approve',
 			'type'    => 'order_note',
 		);
@@ -213,16 +213,15 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
-		$order = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-
-		$order = wc_get_order( $order );
 
 		// Create the note.
 		$note_id = $order->add_order_note( $request['note'], $request['customer_note'] );
@@ -247,7 +246,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$response = $this->prepare_item_for_response( $note, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->id, $this->rest_base ), $note_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->get_id(), $this->rest_base ), $note_id ) ) );
 
 		return $response;
 	}
@@ -260,16 +259,16 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$id    = (int) $request['id'];
-		$order = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
-		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
@@ -293,16 +292,16 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$order = get_post( (int) $request['order_id'] );
+		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
-		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
