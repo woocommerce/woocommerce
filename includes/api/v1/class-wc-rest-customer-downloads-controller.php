@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,7 +67,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		$customer = get_user_by( 'id', (int) $request['customer_id'] );
 
 		if ( ! $customer ) {
-			return new WP_Error( "woocommerce_rest_customer_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_user_permissions( 'read', $customer->id ) ) {
