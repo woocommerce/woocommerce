@@ -455,7 +455,7 @@ class WC_Product_Variable extends WC_Product {
 			$data_store->sync_stock_status( $product );
 			self::sync_attributes( $product ); // Legacy update of attributes.
 
-			do_action( 'woocommerce_variable_product_sync_before_save', $product );
+			do_action( 'woocommerce_variable_product_sync_data', $product );
 
 			if ( $save ) {
 				$product->save();
@@ -463,7 +463,7 @@ class WC_Product_Variable extends WC_Product {
 
 			do_action( 'woocommerce_variable_product_synced', $product );
 
-			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_before_save' );
+			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_data' );
 		}
 		return $product;
 	}
