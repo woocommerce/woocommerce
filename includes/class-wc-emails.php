@@ -260,7 +260,12 @@ class WC_Emails {
 	 */
 	public function customer_invoice( $order ) {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
-		$email->trigger( $order );
+
+		if ( ! is_object( $order ) ) {
+			$order = wc_get_order( absint( $order ) );
+		}
+
+		$email->trigger( $order->get_id(), $order );
 	}
 
 	/**
