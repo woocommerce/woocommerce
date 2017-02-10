@@ -179,7 +179,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+		if ( ! $order || $this->post_type !== $order->get_type() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -219,7 +219,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+		if ( ! $order || $this->post_type !== $order->get_type() ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -261,7 +261,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$id    = (int) $request['id'];
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+		if ( ! $order || $this->post_type !== $order->get_type() ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -294,7 +294,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( empty( $order->get_type() ) || $this->post_type !== $order->get_type() ) {
+		if ( ! $order || $this->post_type !== $order->get_type() ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
