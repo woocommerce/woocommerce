@@ -154,11 +154,21 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Concatenate select2.css onto the admin.css files.
+		concat: {
+			admin: {
+				files: {
+					'<%= dirs.css %>/admin.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin.css'],
+					'<%= dirs.css %>/admin-rtl.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin-rtl.css']
+				}
+			},
+		},
+
 		// Watch changes for assets.
 		watch: {
 			css: {
 				files: ['<%= dirs.css %>/*.scss'],
-				tasks: ['sass', 'cssmin']
+				tasks: ['sass', 'rtlcss', 'cssmin', 'concat']
 			},
 			js: {
 				files: [
@@ -280,6 +290,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
+	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
@@ -301,7 +312,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
-		'cssmin'
+		'cssmin',
+		'concat'
 	]);
 
 	grunt.registerTask( 'docs', [
