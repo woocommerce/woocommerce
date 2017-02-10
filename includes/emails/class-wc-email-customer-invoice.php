@@ -61,12 +61,17 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Trigger the sending of this email.
 	 *
-	 * @param int|WC_Order $order
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
 	 */
-	public function trigger( $order_id, $order ) {
-		if ( $order ) {
+	public function trigger( $order_id, $order = false ) {
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ){
+			$order = wc_get_order( $order_id );
+		}
+
+		if ( is_a( $order, 'WC_Order' ) ) {
 			$this->object                  = $order;
 			$this->recipient               = $this->object->get_billing_email();
 
