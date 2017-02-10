@@ -2395,14 +2395,17 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$strings = array();
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
-			'before'    => '<ul class="wc-item-meta"><li>',
-			'after'     => '</li></ul>',
-			'separator' => '</li><li>',
-			'echo'      => true,
-			'autop'     => false,
+			'before'    	  => '<ul class="wc-item-meta"><li>',
+			'after'     	  => '</li></ul>',
+			'separator' 	  => '</li><li>',
+			'echo'      	  => true,
+			'autop'     	  => false,
+			'skip_attributes' => true,
 		) );
 
-		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+		$hideprefix = $args['skip_attributes'] ? 'attribute_' : '_';
+
+		foreach ( $item->get_formatted_meta_data( $hideprefix ) as $meta_id => $meta ) {
 			if ( '_' === substr( $meta->key, 0, 1 ) ) {
 				continue;
 			}
