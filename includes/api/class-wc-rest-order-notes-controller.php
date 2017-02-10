@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Order Notes controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_ControllerWC_REST_Order_Notes_V1_Controller
  */
-class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
+class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 
 	/**
 	 * Endpoint namespace.
