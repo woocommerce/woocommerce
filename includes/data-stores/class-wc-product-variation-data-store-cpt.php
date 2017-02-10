@@ -95,7 +95,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		$product->set_date_created( current_time( 'timestamp' ) );
-		$parent_object = get_post( $product->get_parent_id() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
@@ -165,19 +164,38 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 	/**
 	 * Generates a title with attribute information for a variation.
-	 * Products with one attribute will get a title of the form "Name - Value"
-	 * Products with 2+ attributes will get a title of the form "Name - Attribute: Value, Attribute: Value"
+	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
+	 * All other products will get a title of the form "Name - Value, Value"
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$use_longform_title = apply_filters( 'woocommerce_product_variation_title_use_longform_style', count( $product->get_attributes() ) > 1, $product );
-		$title_base = apply_filters( 'woocommerce_product_variation_title_base', get_post_field( 'post_title', $product->get_parent_id() ), $product );
-		$separator = apply_filters( 'woocommerce_product_variation_title_separator', '&ndash;', $product );
+		$include_attribute_names = false;
+		$attributes = (array) $product->get_attributes();
+		$one_word_attributes = 0;
+		foreach ( $attributes as $name => $value ) {
+			if ( false === strpos( $value, '-' ) ) {
+				++$one_word_attributes;
+			}
 
-		return $title_base . ' ' . $separator . ' ' . wc_get_formatted_variation( $product, true, $use_longform_title );
+			if ( $one_word_attributes > 1 ) {
+				$include_attribute_names = true;
+				break;
+			}
+		}
+
+		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
+		$title_base_text = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_attributes_text = wc_get_formatted_variation( $product, true, $include_attribute_names );
+
+		return apply_filters( 'woocommerce_product_variation_title', 
+			$title_base_text . ' &ndash; ' . $title_attributes_text,
+			$product,
+			$title_base_text,
+			$title_attributes_text
+		);
 	}
 
 	/**
