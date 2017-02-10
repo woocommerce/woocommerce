@@ -174,12 +174,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function generate_product_title( $product ) {
 		$include_attribute_names = false;
 		$attributes = (array) $product->get_attributes();
+
+		//Determine whether to include attribute names through counting the number of one-word attribute values 
 		$one_word_attributes = 0;
 		foreach ( $attributes as $name => $value ) {
 			if ( false === strpos( $value, '-' ) ) {
 				++$one_word_attributes;
 			}
-
 			if ( $one_word_attributes > 1 ) {
 				$include_attribute_names = true;
 				break;
