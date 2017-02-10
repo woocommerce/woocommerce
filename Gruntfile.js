@@ -135,6 +135,7 @@ module.exports = function( grunt ) {
 				cwd: '<%= dirs.css %>',
 				src: [
 					'*.css',
+					'!select2.css',
 					'!*-rtl.css'
 				],
 				dest: '<%= dirs.css %>/',
