@@ -92,6 +92,7 @@ class WC_CLI_Runner {
 				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
+		$positional_args = array_merge( array( 'id' ), array_keys( $supported_ids ) );
 
 		$parent			 = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
@@ -137,9 +138,10 @@ class WC_CLI_Runner {
 			foreach ( $supported_ids as $id_name => $id_desc ) {
 				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
 					$synopsis[] = array(
-						'name'		  => $id_name,
-						'type'		  => 'positional',
+						'name'        => $id_name,
+						'type'        => 'positional',
 						'description' => $id_desc,
+						'optional'    => false,
 					);
 				}
 			}
@@ -154,12 +156,14 @@ class WC_CLI_Runner {
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
-				$arg_regs[] = array(
-					'name'		  => $name,
-					'type'		  => 'assoc',
-					'description' => ! empty( $args['description'] ) ? $args['description'] : '',
-					'optional'	  => empty( $args['required'] ) ? true : false,
-				);
+				if ( ! in_array( $name, $positional_args ) ) {
+					$arg_regs[] = array(
+						'name'		  => $name,
+						'type'		  => 'assoc',
+						'description' => ! empty( $args['description'] ) ? $args['description'] : '',
+						'optional'	  => empty( $args['required'] ) ? true : false,
+					);
+				}
 			}
 
 			foreach ( $arg_regs as $arg_reg ) {
