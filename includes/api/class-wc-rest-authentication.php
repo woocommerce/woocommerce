@@ -62,7 +62,7 @@ class WC_REST_Authentication {
 		 * - Then this code runs and usually does nothing because the user ID is set.
 		 * - Finally, cookie auth (later) runs validation and because there is no nonce, the user ID reverts to 0 and the request fails.
 		 *
-		 * To prevent this occuring when using query string based authentication, we must run basic auth here again and unset the $wp_rest_auth_cookie global.
+		 * To prevent this occurring when using query string based authentication, we must run basic auth here again and unset the $wp_rest_auth_cookie global.
 		 *
 		 * @todo In future versions, basic auth over query string will be removed and this will no longer be an issue. However for now, to maintain compatibility with
 		 * some hosts we need to keep it around. Note: This is only supported over SSL.
