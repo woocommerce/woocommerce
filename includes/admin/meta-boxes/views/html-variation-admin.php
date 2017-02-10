@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p class="form-row form-row-full options">
 				<label>
 					<?php _e( 'Enabled', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_object->get_status( 'edit' ), 'publish' ); ?> />
+					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ) ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
 					<?php _e( 'Downloadable', 'woocommerce' ); ?>:
