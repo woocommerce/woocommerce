@@ -93,6 +93,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_id( $id );
 			$this->update_post_meta( $product );
 			$this->update_terms( $product );
+			$this->update_visibility( $product )
 			$this->update_attributes( $product );
 			$this->update_version_and_type( $product );
 			$product->save_meta_data();
@@ -161,6 +162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
+		$this->update_visibility( $product )
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
 		$product->save_meta_data();
@@ -455,10 +457,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( $this->update_visibility( $product ) ) {
-			$updated_props[] = 'catalog_visibility';
-		}
-
 		if ( $this->update_downloads( $product ) ) {
 			$updated_props[] = 'downloads';
 		}
@@ -520,38 +518,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
-	 * @return bool Was visibility updated or not?
 	 */
 	protected function update_visibility( &$product ) {
-		$terms = array();
+		$changes = $product->get_changes();
 
-		if ( $product->get_featured() ) {
-			$terms[] = 'featured';
-		}
+		if ( array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
+			$terms = array();
 
-		if ( 'outofstock' === $product->get_stock_status() ) {
-			$terms[] = 'outofstock';
-		}
+			if ( $product->get_featured() ) {
+				$terms[] = 'featured';
+			}
 
-		$rating  = max( array( 5, min( array( 1, round( $product->get_average_rating(), 0 ) ) ) ) );
-		$terms[] = 'rated-' . $rating;
+			if ( 'outofstock' === $product->get_stock_status() ) {
+				$terms[] = 'outofstock';
+			}
 
-		switch ( $product->get_catalog_visibility() ) {
-			case 'hidden' :
-				$terms[] = 'exclude-from-search';
-				$terms[] = 'exclude-from-catalog';
-				break;
-			case 'catalog' :
-				$terms[] = 'exclude-from-search';
-				break;
-			case 'search' :
-				$terms[] = 'exclude-from-catalog';
-				break;
-		}
+			$rating  = max( array( 5, min( array( 1, round( $product->get_average_rating(), 0 ) ) ) ) );
+			$terms[] = 'rated-' . $rating;
 
-		if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
-			delete_transient( 'wc_featured_products' );
-			do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
+			switch ( $product->get_catalog_visibility() ) {
+				case 'hidden' :
+					$terms[] = 'exclude-from-search';
+					$terms[] = 'exclude-from-catalog';
+					break;
+				case 'catalog' :
+					$terms[] = 'exclude-from-search';
+					break;
+				case 'search' :
+					$terms[] = 'exclude-from-catalog';
+					break;
+			}
+
+			if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
+				delete_transient( 'wc_featured_products' );
+				do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
+			}
 		}
 	}
 
@@ -562,64 +563,75 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_attributes( &$product ) {
-		$attributes  = $product->get_attributes();
-		$meta_values = array();
+		$changes = $product->get_changes();
 
-		if ( $attributes ) {
-			foreach ( $attributes as $attribute_key => $attribute ) {
-				$value = '';
+		if ( array_key_exists( 'attributes', $changes ) ) {
+			$attributes  = $product->get_attributes();
+			$meta_values = array();
 
-				if ( is_null( $attribute ) ) {
-					if ( taxonomy_exists( $attribute_key ) ) {
-						// Handle attributes that have been unset.
-						wp_set_object_terms( $product->get_id(), array(), $attribute_key );
+			if ( $attributes ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					$value = '';
+
+					if ( is_null( $attribute ) ) {
+						if ( taxonomy_exists( $attribute_key ) ) {
+							// Handle attributes that have been unset.
+							wp_set_object_terms( $product->get_id(), array(), $attribute_key );
+						}
+						continue;
+
+					} elseif ( $attribute->is_taxonomy() ) {
+						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
+
+					} else {
+						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
-					continue;
 
-				} elseif ( $attribute->is_taxonomy() ) {
-					wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
-
-				} else {
-					$value = wc_implode_text_attributes( $attribute->get_options() );
+					// Store in format WC uses in meta.
+					$meta_values[ $attribute_key ] = array(
+						'name'         => $attribute->get_name(),
+						'value'        => $value,
+						'position'     => $attribute->get_position(),
+						'is_visible'   => $attribute->get_visible() ? 1 : 0,
+						'is_variation' => $attribute->get_variation() ? 1 : 0,
+						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+					);
 				}
-
-				// Store in format WC uses in meta.
-				$meta_values[ $attribute_key ] = array(
-					'name'         => $attribute->get_name(),
-					'value'        => $value,
-					'position'     => $attribute->get_position(),
-					'is_visible'   => $attribute->get_visible() ? 1 : 0,
-					'is_variation' => $attribute->get_variation() ? 1 : 0,
-					'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
-				);
 			}
+			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
 		}
-		update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
 	}
 
 	/**
 	 * Update downloads.
 	 *
 	 * @since 2.7.0
+	 * @param WC_Product $product
+	 * @return bool If updated or not.
 	 */
 	protected function update_downloads( &$product ) {
-		$downloads   = $product->get_downloads();
-		$meta_values = array();
+		$changes = $product->get_changes();
 
-		if ( $downloads ) {
-			foreach ( $downloads as $key => $download ) {
-				// Store in format WC uses in meta.
-				$meta_values[ $key ] = $download->get_data();
+		if ( array_key_exists( 'downloads', $changes ) ) {
+			$downloads   = $product->get_downloads();
+			$meta_values = array();
+
+			if ( $downloads ) {
+				foreach ( $downloads as $key => $download ) {
+					// Store in format WC uses in meta.
+					$meta_values[ $key ] = $download->get_data();
+				}
 			}
-		}
 
-		if ( $product->is_type( 'variation' ) ) {
-			do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
-		} else {
-			do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
-		}
+			if ( $product->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
+			} else {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
+			}
 
-		update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
+			return update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
+		}
+		return false;
 	}
 
 	/**
