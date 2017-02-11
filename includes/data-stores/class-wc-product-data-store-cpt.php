@@ -642,28 +642,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Count terms. These are done at this point so all product props are set in advance.
-	 *
-	 * @param WC_Product
-	 * @since 2.7.0
-	 */
-	protected function update_term_counts( &$product ) {
-		if ( ! wp_defer_term_counting() ) {
-			global $wc_allow_term_recount;
-
-			$wc_allow_term_recount = true;
-
-			$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
-
-			// Update counts for the post's terms.
-			foreach ( (array) get_object_taxonomies( $post_type ) as $taxonomy ) {
-				$tt_ids = wc_get_object_terms( $product->get_id(), $taxonomy, 'term_taxonomy_id' );
-				wp_update_term_count( $tt_ids, $taxonomy );
-			}
-		}
-	}
-
-	/**
 	 * Clear any caches.
 	 *
 	 * @param WC_Product
