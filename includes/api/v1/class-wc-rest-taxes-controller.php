@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -181,7 +181,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -284,7 +284,6 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Take tax data from the request and return the updated or newly created rate.
 	 *
-	 * @todo Replace with CRUD in 2.7.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param stdClass|null $current Existing tax object.
 	 * @return stdClass
@@ -396,7 +395,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax      = $this->prepare_item_for_response( $tax_obj, $request );
@@ -416,7 +415,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax = $this->create_or_update_tax( $request, $tax_obj );
@@ -459,7 +458,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -588,7 +587,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'postcode' => array(
-					'description' => __( 'Postcode/ZIP.', 'woocommerce' ),
+					'description' => __( 'Postcode / ZIP.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -634,7 +633,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'standard',
-					'enum'        => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
+					'enum'        => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 			),
@@ -698,7 +697,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		);
 		$params['class'] = array(
 			'description'        => __( 'Sort by tax class.', 'woocommerce' ),
-			'enum'               => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
+			'enum'               => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 			'sanitize_callback'  => 'sanitize_title',
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',

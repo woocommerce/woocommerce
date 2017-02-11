@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -64,7 +64,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
 					'name'            => 'order_item_qty',
-				)
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',
@@ -80,7 +80,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 
 			if ( $product ) {
 				$top_sellers[] = array(
-					'name'      => $product->get_title(),
+					'name'      => $product->get_name(),
 					'product_id' => (int) $item->product_id,
 					'quantity'   => wc_stock_amount( $item->order_item_qty ),
 				);

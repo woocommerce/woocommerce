@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -133,7 +133,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 		// Add standard class.
 		$tax_classes[] = array(
 			'slug' => 'standard',
-			'name' => __( 'Standard Rate', 'woocommerce' ),
+			'name' => __( 'Standard rate', 'woocommerce' ),
 		);
 
 		$classes = WC_Tax::get_tax_classes();

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -119,7 +119,7 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 		$webhook = new WC_Webhook( (int) $request['webhook_id'] );
 
 		if ( empty( $webhook->post_data->post_type ) || 'shop_webhook' !== $webhook->post_data->post_type ) {
-			return new WP_Error( 'woocommerce_rest_webhook_invalid_id', __( 'Invalid webhook id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_webhook_invalid_id', __( 'Invalid webhook ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$logs = $webhook->get_delivery_logs();
@@ -145,13 +145,13 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 		$webhook = new WC_Webhook( (int) $request['webhook_id'] );
 
 		if ( empty( $webhook->post_data->post_type ) || 'shop_webhook' !== $webhook->post_data->post_type ) {
-			return new WP_Error( 'woocommerce_rest_webhook_invalid_id', __( 'Invalid webhook id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_webhook_invalid_id', __( 'Invalid webhook ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$log = $webhook->get_delivery_log( $id );
 
 		if ( empty( $id ) || empty( $log ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$delivery = $this->prepare_item_for_response( (object) $log, $request );
