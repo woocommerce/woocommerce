@@ -99,7 +99,19 @@ interface WC_Product_Data_Store_Interface {
 	 * @param  int|null $stock_quantity
 	 * @param  string $operation set, increase and decrease.
 	 */
-	function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
+
+	/**
+	 * Update a product's sale count directly.
+	 *
+	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
+	 *
+	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @param  int
+	 * @param  int|null $quantity
+	 * @param  string $operation set, increase and decrease.
+	 */
+	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' );
 
 	/**
 	 * Get shipping class ID by slug.

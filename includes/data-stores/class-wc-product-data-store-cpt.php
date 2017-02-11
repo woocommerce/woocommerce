@@ -982,6 +982,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Update a product's sale count directly.
+	 *
+	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
+	 *
+	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @param  int
+	 * @param  int|null $quantity
+	 * @param  string $operation set, increase and decrease.
+	 */
+	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
+		global $wpdb;
+		add_post_meta( $product_id, 'total_sales', 0, true );
+
+		// Update stock in DB directly
+		switch ( $operation ) {
+			case 'increase' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+			case 'decrease' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+			default :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+		}
+
+		wp_cache_delete( $product_id, 'post_meta' );
+	}
+
+	/**
 	 * Update a products average rating meta.
 	 *
 	 * @since 2.7.0
