@@ -423,6 +423,7 @@ abstract class WC_Data {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
 					$this->data_store->delete_meta( $this, $meta );
+					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
 				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
@@ -435,8 +436,6 @@ abstract class WC_Data {
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
 		}
-
-		$this->read_meta_data( true );
 	}
 
 	/**
