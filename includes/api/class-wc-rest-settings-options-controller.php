@@ -1,17 +1,24 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * REST API Settings Controller.
+ * REST API Settings Options controller
+ *
  * Handles requests to the /settings/$group/$setting endpoints.
  *
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @version  2.7.0
  * @since    2.7.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * REST API Settings Options controller class.
+ *
+ * @package WooCommerce/API
+ * @extends WC_REST_Controller
  */
 class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 
@@ -242,7 +249,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * Update a single setting in a group.
-
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
@@ -422,22 +429,22 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * Boolean for if a setting type is a valid supported setting type.
 	 *
 	 * @since  2.7.0
-	 * @param  string  $type
-	 * @return boolean
+	 * @param  string $type
+	 * @return bool
 	 */
 	public function is_setting_type_valid( $type ) {
 		return in_array( $type, array(
-			'text',         // validates with validate_setting_text_field
-			'email',        // validates with validate_setting_text_field
-			'number',       // validates with validate_setting_text_field
-			'color',        // validates with validate_setting_text_field
-			'password',     // validates with validate_setting_text_field
-			'textarea',     // validates with validate_setting_textarea_field
-			'select',       // validates with validate_setting_select_field
-			'multiselect',  // validates with validate_setting_multiselect_field
-			'radio',        // validates with validate_setting_radio_field (-> validate_setting_select_field)
-			'checkbox',     // validates with validate_setting_checkbox_field
-			'image_width',  // validates with validate_setting_image_width_field
+			'text',         // Validates with validate_setting_text_field.
+			'email',        // Validates with validate_setting_text_field.
+			'number',       // Validates with validate_setting_text_field.
+			'color',        // Validates with validate_setting_text_field.
+			'password',     // Validates with validate_setting_text_field.
+			'textarea',     // Validates with validate_setting_textarea_field.
+			'select',       // Validates with validate_setting_select_field.
+			'multiselect',  // Validates with validate_setting_multiselect_field.
+			'radio',        // Validates with validate_setting_radio_field (-> validate_setting_select_field).
+			'checkbox',     // Validates with validate_setting_checkbox_field.
+			'image_width',  // Validates with validate_setting_image_width_field.
 		) );
 	}
 

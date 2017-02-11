@@ -1,17 +1,24 @@
 <?php
+/**
+ * REST API Settings controller
+ *
+ * Handles requests to the /settings endpoints.
+ *
+ * @author   WooThemes
+ * @category API
+ * @package  WooCommerce/API
+ * @since    2.7.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * REST API Settings Groups Controller.
- * Handles requests to the /settings and /settings/<group> endpoints.
+ * REST API Settings controller class.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @version  2.7.0
- * @since    2.7.0
+ * @package WooCommerce/API
+ * @extends WC_REST_Controller
  */
 class WC_REST_Settings_Controller extends WC_REST_Controller {
 
