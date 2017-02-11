@@ -93,11 +93,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_id( $id );
 			$this->update_post_meta( $product );
 			$this->update_terms( $product );
-			$this->update_visibility( $product );
 			$this->update_attributes( $product );
-			$this->update_downloads( $product );
 			$this->update_version_and_type( $product );
-			$this->update_term_counts( $product );
 			$product->save_meta_data();
 			$product->apply_changes();
 			$this->clear_caches( $product );
@@ -142,28 +139,30 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to update a product in the database.
+	 *
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
-		$post_data = array(
-			'ID'             => $product->get_id(),
-			'post_content'   => $product->get_description(),
-			'post_excerpt'   => $product->get_short_description(),
-			'post_title'     => $product->get_name(),
-			'post_parent'    => $product->get_parent_id(),
-			'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
-			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
-			'menu_order'     => $product->get_menu_order(),
-		);
-		wp_update_post( $post_data );
+		$changes = $product->get_changes();
+
+		// Only update the post when the post data changes.
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) {
+			wp_update_post( array(
+				'ID'             => $product->get_id(),
+				'post_content'   => $product->get_description(),
+				'post_excerpt'   => $product->get_short_description(),
+				'post_title'     => $product->get_name(),
+				'post_parent'    => $product->get_parent_id(),
+				'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
+				'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
+				'menu_order'     => $product->get_menu_order(),
+			) );
+		}
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
-		$this->update_visibility( $product );
 		$this->update_attributes( $product );
-		$this->update_downloads( $product );
 		$this->update_version_and_type( $product );
-		$this->update_term_counts( $product );
 		$product->save_meta_data();
 		$product->apply_changes();
 		$this->clear_caches( $product );
@@ -411,6 +410,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$props_to_update = $this->get_props_to_update( $product, $meta_key_to_props );
+
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
@@ -440,6 +440,40 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// Update extra data associated with the product like button text or product URL for external products.
+		if ( ! $this->extra_data_saved ) {
+			foreach ( $extra_data_keys as $key ) {
+				if ( ! array_key_exists( $key, $props_to_update ) ) {
+					continue;
+				}
+				$function = 'get_' . $key;
+				if ( is_callable( array( $product, $function ) ) ) {
+					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+						$updated_props[] = $key;
+					}
+				}
+			}
+		}
+
+		if ( $this->update_visibility( $product ) ) {
+			$updated_props[] = 'catalog_visibility';
+		}
+
+		if ( $this->update_downloads( $product ) ) {
+			$updated_props[] = 'downloads';
+		}
+
+		$this->handle_updated_props( $product, $updated_props );
+	}
+
+	/**
+	 * Handle updated meta props after updating meta.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Product $product
+	 * @param  array $updated_props
+	 */
+	protected function handle_updated_props( &$product, $updated_props ) {
 		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
@@ -458,21 +492,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
-		// Update extra data associated with the product like button text or product URL for external products.
-		if ( ! $this->extra_data_saved ) {
-			foreach ( $extra_data_keys as $key ) {
-				if ( ! array_key_exists( $key, $props_to_update ) ) {
-					continue;
-				}
-				$function = 'get_' . $key;
-				if ( is_callable( array( $product, $function ) ) ) {
-					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
-						$updated_props[] = $key;
-					}
-				}
-			}
-		}
-
 		do_action( 'woocommerce_product_object_updated_props', $product, $updated_props );
 	}
 
@@ -483,16 +502,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_terms( &$product ) {
-		wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
-		wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
-		wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		$changes = $product->get_changes();
+
+		if ( array_key_exists( 'category_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
+		}
+		if ( array_key_exists( 'tag_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
+		}
+		if ( array_key_exists( 'shipping_class_id', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		}
 	}
 
 	/**
 	 * Update visibility terms based on props.
 	 *
-	 * @param WC_Product
 	 * @since 2.7.0
+	 * @param WC_Product
+	 * @return bool Was visibility updated or not?
 	 */
 	protected function update_visibility( &$product ) {
 		$terms = array();
