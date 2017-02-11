@@ -93,7 +93,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_id( $id );
 			$this->update_post_meta( $product );
 			$this->update_terms( $product );
-			$this->update_visibility( $product )
+			$this->update_visibility( $product );
 			$this->update_attributes( $product );
 			$this->update_version_and_type( $product );
 			$product->save_meta_data();
@@ -147,7 +147,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) {
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
 				'post_content'   => $product->get_description(),
@@ -162,7 +162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
-		$this->update_visibility( $product )
+		$this->update_visibility( $product );
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
 		$product->save_meta_data();
