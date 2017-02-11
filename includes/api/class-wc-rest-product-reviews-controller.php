@@ -453,7 +453,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			if ( ! empty( $items[ $batch_type ] ) ) {
 				$injected_items = array();
 				foreach ( $items[ $batch_type ] as $item ) {
-					$injected_items[] = array_merge( array( 'product_id' => $product_id ), $item );
+					$injected_items[] = is_array( $item ) ? array_merge( array( 'product_id' => $product_id ), $item ) : $item;
 				}
 				$body_params[ $batch_type ] = $injected_items;
 			}

@@ -183,7 +183,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function reduce_stock( $amount = 1 ) {
 		wc_deprecated_function( 'WC_Product::reduce_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'decrease' );
+		return wc_update_product_stock( $this, $amount, 'decrease' );
 	}
 
 	/**
@@ -195,7 +195,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function increase_stock( $amount = 1 ) {
 		wc_deprecated_function( 'WC_Product::increase_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'increase' );
+		return wc_update_product_stock( $this, $amount, 'increase' );
 	}
 
 	/**

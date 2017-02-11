@@ -139,12 +139,12 @@ class WC_Webhook {
 			$should_deliver = false;
 		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
 			// Only deliver deleted event for coupons, orders, and products.
-			if ( ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 				$should_deliver = false;
 			}
 
 			// Check if is delivering for the correct resource.
-			if ( str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+			if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
 				$should_deliver = false;
 			}
 		} elseif ( 'delete_user' == $current_action ) {

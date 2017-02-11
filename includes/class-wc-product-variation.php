@@ -27,14 +27,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'sku'            => '',
-		'manage_stock'   => '',
-		'stock_quantity' => '',
-		'weight'         => '',
-		'length'         => '',
-		'width'          => '',
-		'height'         => '',
-		'tax_class'      => '',
+		'title'             => '',
+		'sku'               => '',
+		'manage_stock'      => '',
+		'backorders'        => '',
+		'stock_quantity'    => '',
+		'weight'            => '',
+		'length'            => '',
+		'width'             => '',
+		'height'            => '',
+		'tax_class'         => '',
+		'shipping_class_id' => '',
+		'image_id'          => '',
 	);
 
 	/**
@@ -281,6 +285,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 		}
 
 		return $image_id;
+	}
+
+	/**
+	 * Get shipping class ID.
+	 *
+	 * @since 2.7.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_shipping_class_id( $context = 'view' ) {
+		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
+
+		if ( 'view' === $context && ! $shipping_class_id ) {
+			$shipping_class_id = $this->parent_data['shipping_class_id'];
+		}
+
+		return $shipping_class_id;
 	}
 
 	/*

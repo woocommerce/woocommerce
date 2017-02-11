@@ -168,6 +168,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		if ( ! empty( $items['delete'] ) ) {
 			foreach ( $items['delete'] as $id ) {
+				$id = (int) $id;
+
+				if ( 0 === $id ) {
+					continue;
+				}
+
 				$_item = new WP_REST_Request( 'DELETE' );
 				$_item->set_query_params( array( 'id' => $id, 'force' => true ) );
 				$_response = $this->delete_item( $_item );
@@ -370,7 +376,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'object',
+						'type'    => 'integer',
 					),
 				),
 			),
