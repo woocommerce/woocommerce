@@ -1618,7 +1618,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $product->get_stock_amount() );
+					$stock_quantity  = wc_stock_amount( $product->get_stock_quantity() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
@@ -1845,7 +1845,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$variation->set_stock_quantity( $data['stock_quantity'] );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $variation->get_stock_amount() );
+					$stock_quantity  = wc_stock_amount( $variation->get_stock_quantity() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$variation->set_stock_quantity( $stock_quantity );
 				}
@@ -2341,7 +2341,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}

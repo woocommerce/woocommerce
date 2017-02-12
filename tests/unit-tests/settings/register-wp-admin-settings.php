@@ -21,7 +21,8 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$mock_page = $this->getMock( 'WC_Settings_General' );
+		// $mock_page = $this->getMock( 'WC_Settings_General' );
+		$mock_page = $this->getMockBuilder( 'WC_Settings_General' )->getMock();
 
 		$mock_page
 			->expects( $this->any() )

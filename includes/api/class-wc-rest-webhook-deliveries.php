@@ -41,6 +41,12 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'webhook_id' => array(
+					'description' => __( 'Unique identifier for the webhook.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -51,6 +57,16 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'webhook_id' => array(
+					'description' => __( 'Unique identifier for the webhook.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -251,6 +267,9 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 				'request_body' => array(
 					'description' => __( 'Request body.', 'woocommerce' ),
@@ -275,6 +294,9 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 				'response_body' => array(
 					'description' => __( 'The response body from the receiving server.', 'woocommerce' ),

@@ -51,13 +51,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $items = array(
-		'line_items'     => null,
-		'coupon_lines'   => null,
-		'shipping_lines' => null,
-		'fee_lines'      => null,
-		'tax_lines'      => null,
-	);
+	protected $items = array();
 
 	/**
 	 * Order items that need deleting are stored here.
@@ -81,6 +75,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var string
 	 */
 	protected $data_store_name = 'order';
+
+	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order';
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
@@ -125,16 +125,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_';
-	}
-
-	/**
 	 * Get all class data in array format.
 	 *
 	 * @since 2.7.0
@@ -142,6 +132,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_data() {
 		return array_merge(
+			array(
+				'id' => $this->get_id(),
+			),
 			$this->data,
 			array(
 				'meta_data'      => $this->get_meta_data(),
@@ -176,6 +169,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -195,7 +191,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 		$this->items_to_delete = array();
 
-		// Add/save items
+		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -211,17 +207,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						switch ( $item_group ) {
 							case 'fee_lines' :
 								if ( isset( $item->legacy_fee, $item->legacy_fee_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_fee_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_fee_meta', array( $this->get_id(), $item_id, $item->legacy_fee, $item->legacy_fee_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_fee_item action instead' );
 								}
 							break;
 							case 'shipping_lines' :
 								if ( isset( $item->legacy_package_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'Use CRUD woocommerce_checkout_create_order_shipping_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_shipping_order_item', array( $this->get_id(), $item_id, $item->legacy_package_key ), '2.7', 'CRUD woocommerce_checkout_create_order_shipping_item action instead' );
 								}
 							break;
 							case 'line_items' :
 								if ( isset( $item->legacy_values, $item->legacy_cart_item_key ) ) {
-									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'Use CRUD and woocommerce_checkout_create_order_line_item action instead.' );
+									wc_do_deprecated_action( 'woocommerce_add_order_item_meta', array( $item_id, $item->legacy_values, $item->legacy_cart_item_key ), '2.7', 'CRUD and woocommerce_checkout_create_order_line_item action instead' );
 								}
 							break;
 						}
@@ -445,6 +441,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return apply_filters( 'woocommerce_order_get_tax_totals', $tax_totals, $this );
 	}
 
+	/**
+	 * Get all valid statuses for this order
+	 *
+	 * @since 2.7.0
+	 * @return array Internal status keys e.g. 'wc-processing'
+	 */
+	protected function get_valid_statuses() {
+		return array_keys( wc_get_order_statuses() );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -482,14 +488,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
 		// Only allow valid new status
-		if ( ! in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) ) {
+		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) ) {
 			$new_status = 'pending';
 		}
 
 		$this->set_prop( 'status', $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-		if ( $old_status && ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) ) {
 			$old_status = 'pending';
 		}
 
@@ -590,7 +596,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
-		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
 	/**
@@ -601,7 +607,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_cart_tax( $value ) {
 		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
-		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
 	/**
@@ -640,6 +646,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
+	 *
 	 * @param string $type Order item type. Default null.
 	 */
 	public function remove_order_items( $type = null ) {
@@ -647,22 +654,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data_store->delete_items( $this, $type );
 
 			if ( $group = $this->type_to_group( $type ) ) {
-				$this->items[ $group ] = null;
+				unset( $this->items[ $group ] );
 			}
 		} else {
 			$this->data_store->delete_items( $this );
-			$this->items = array(
-				'line_items'     => null,
-				'coupon_lines'   => null,
-				'shipping_lines' => null,
-				'fee_lines'      => null,
-				'tax_lines'      => null,
-			);
+			$this->items = array();
 		}
 	}
 
 	/**
 	 * Convert a type to a types group.
+	 *
 	 * @param string $type
 	 * @return string group
 	 */
@@ -679,6 +681,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of items/products within this order.
+	 *
 	 * @param string|array $types Types of line items to get (array or string).
 	 * @return Array of WC_Order_item
 	 */
@@ -688,7 +691,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		foreach ( $types as $type ) {
 			if ( $group = $this->type_to_group( $type ) ) {
-				if ( is_null( $this->items[ $group ] ) ) {
+				if ( ! isset( $this->items[ $group ] ) ) {
 					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 				}
 				// Don't use array_merge here because keys are numeric
@@ -701,6 +704,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of fees within this order.
+	 *
 	 * @return array
 	 */
 	public function get_fees() {
@@ -709,6 +713,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of taxes within this order.
+	 *
 	 * @return array
 	 */
 	public function get_taxes() {
@@ -717,6 +722,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of shipping costs within this order.
+	 *
 	 * @return array
 	 */
 	public function get_shipping_methods() {
@@ -725,6 +731,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Gets formatted shipping method title.
+	 *
 	 * @return string
 	 */
 	public function get_shipping_method() {
@@ -737,6 +744,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get coupon codes only.
+	 *
 	 * @return array
 	 */
 	public function get_used_coupons() {
@@ -768,6 +776,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get an order item object, based on it's type.
+	 *
 	 * @since  2.7.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
@@ -778,6 +787,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get key for where a certain item type is stored in _items.
+	 *
 	 * @since  2.7.0
 	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
 	 * @return string
@@ -800,6 +810,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Remove item from the order.
+	 *
 	 * @param int $item_id
 	 */
 	public function remove_item( $item_id ) {
@@ -816,6 +827,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Adds an order item to this order. The order item will not persist until save.
+	 *
 	 * @since 2.7.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
 	 */
@@ -825,7 +837,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Make sure existing items are loaded so we can append this new one.
-		if ( is_null( $this->items[ $items_key ] ) ) {
+		if ( ! isset( $this->items[ $items_key ] ) ) {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
@@ -833,8 +845,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID
-		if ( $item->get_id() ) {
-			$this->items[ $items_key ][ $item->get_id() ] = $item;
+		if ( $item_id = $item->get_id() ) {
+			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
 			$this->items[ $items_key ][ 'new:' . sizeof( $this->items[ $items_key ] ) ] = $item;
 		}
@@ -843,6 +855,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Add a product line item to the order. This is the only line item type with
 	 * it's own method because it saves looking up order amounts (costs are added up for you).
+	 *
 	 * @param  \WC_Product $product
 	 * @param  int $qty
 	 * @param  array $args
@@ -888,7 +901,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 		$item->save();
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'Use woocommerce_new_order_item action instead.' );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'woocommerce_new_order_item action instead' );
 		return $item->get_id();
 	}
 
@@ -1036,11 +1049,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Inherit tax class from items
 			if ( 'inherit' === $shipping_tax_class ) {
 				$tax_rates         = array();
-				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
 				$found_tax_classes = $this->get_items_tax_classes();
 
 				foreach ( $tax_classes as $tax_class ) {
-					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
 							'country'   => $args['country'],

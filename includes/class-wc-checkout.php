@@ -268,8 +268,9 @@ class WC_Checkout {
 		}
 
 		try {
-			$order_id  = absint( WC()->session->get( 'order_awaiting_payment' ) );
-			$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			$cart_hash          = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -305,7 +306,7 @@ class WC_Checkout {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
-			$order->set_payment_method( $data['payment_method'] );
+			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ]  : $data['payment_method'] );
 			$order->set_shipping_total( WC()->cart->shipping_total );
 			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
 			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
@@ -319,7 +320,7 @@ class WC_Checkout {
 			$this->create_order_coupon_lines( $order );
 
 			/**
-			 * Action hook to adjust order before save. To change $order, use a pointer (&$order) in your hooked function.
+			 * Action hook to adjust order before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
@@ -348,10 +349,6 @@ class WC_Checkout {
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
 				'quantity'     => $values['quantity'],
-				'name'         => $product ? $product->get_name() : '',
-				'tax_class'    => $product ? $product->get_tax_class() : '',
-				'product_id'   => $product ? ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) : 0,
-				'variation_id' => $product && $product->is_type( 'variation' ) ? $product->get_id() : 0,
 				'variation'    => $values['variation'],
 				'subtotal'     => $values['line_subtotal'],
 				'total'        => $values['line_total'],
@@ -359,10 +356,18 @@ class WC_Checkout {
 				'total_tax'    => $values['line_tax'],
 				'taxes'        => $values['line_tax_data'],
 			) );
+			if ( $product ) {
+				$item->set_props( array(
+					'name'         => $product->get_name(),
+					'tax_class'    => $product->get_tax_class(),
+					'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+					'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
+				) );
+			}
 			$item->set_backorder_meta();
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
@@ -393,7 +398,7 @@ class WC_Checkout {
 			) );
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
@@ -413,6 +418,7 @@ class WC_Checkout {
 
 		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
+				/** @var WC_Shipping_Rate $shipping_rate */
 				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
 				$item                     = new WC_Order_Item_Shipping();
 				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
@@ -420,12 +426,17 @@ class WC_Checkout {
 					'method_title' => $shipping_rate->label,
 					'method_id'    => $shipping_rate->id,
 					'total'        => wc_format_decimal( $shipping_rate->cost ),
-					'taxes'        => $shipping_rate->taxes,
-					'meta_data'    => $shipping_rate->get_meta_data(),
+					'taxes'        => array(
+						'total' => $shipping_rate->taxes,
+					),
 				) );
 
+				foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
+					$item->add_meta_data( $key, $value, true );
+				}
+
 				/**
-				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
@@ -455,7 +466,7 @@ class WC_Checkout {
 				) );
 
 				/**
-				 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
@@ -481,7 +492,7 @@ class WC_Checkout {
 			) );
 
 			/**
-			 * Action hook to adjust item before save. To change $item, use a pointer (&$item) in your hooked function.
+			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
@@ -653,6 +664,9 @@ class WC_Checkout {
 	 * @param  WP_Error $errors
 	 */
 	protected function validate_checkout( &$data, &$errors ) {
+		$this->validate_posted_data( $data, $errors );
+		$this->check_cart_items();
+
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) {
 			$errors->add( 'terms', __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
 		}
@@ -664,13 +678,13 @@ class WC_Checkout {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
 				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
-			}
+			} else {
+				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-			foreach ( WC()->shipping->get_packages() as $i => $package ) {
-				if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
-					$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+				foreach ( WC()->shipping->get_packages() as $i => $package ) {
+					if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
+						$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+					}
 				}
 			}
 		}
@@ -684,6 +698,8 @@ class WC_Checkout {
 				$available_gateways[ $data['payment_method'] ]->validate_fields();
 			}
 		}
+
+		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
 	}
 
 	/**
@@ -833,6 +849,13 @@ class WC_Checkout {
 					$customer->update_meta_data( $key, $value );
 				}
 			}
+
+			/**
+			 * Action hook to adjust customer before save.
+			 * @since 2.7.0
+			 */
+			do_action( 'woocommerce_checkout_update_customer', $customer, $data );
+
 			$customer->save();
 		}
 
@@ -888,12 +911,11 @@ class WC_Checkout {
 			$errors      = new WP_Error();
 			$posted_data = $this->get_posted_data();
 
-			$this->validate_posted_data( $posted_data, $errors );
-			$this->validate_checkout( $posted_data, $errors );
+			// Update session for customer and totals.
 			$this->update_session( $posted_data );
-			$this->check_cart_items();
 
-			do_action( 'woocommerce_after_checkout_validation', $posted_data, $errors );
+			// Validate posted data and cart items before proceeding.
+			$this->validate_checkout( $posted_data, $errors );
 
 			foreach ( $errors->get_error_messages() as $message ) {
 				wc_add_notice( $message, 'error' );
@@ -948,8 +970,11 @@ class WC_Checkout {
 			return wc_clean( $_POST[ $input ] );
 
 		} else {
-			if ( has_filter( 'woocommerce_checkout_get_value' ) ) {
-				return apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			if ( $value !== null ) {
+				return $value;
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {

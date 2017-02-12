@@ -51,7 +51,7 @@ class WC_Admin_Attributes {
 		}
 
 		if ( is_wp_error( $result ) ) {
-			echo '<div id="woocommerce_errors" class="error"><p>' . $result->get_error_message() . '</p></div>';
+			echo '<div id="woocommerce_errors" class="error"><p>' . wp_kses_post( $result->get_error_message() ) . '</p></div>';
 		}
 
 		// Show admin interface

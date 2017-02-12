@@ -24,8 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param  string $operation set, increase and decrease.
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	$product = wc_get_product( $product );
-
+	if ( ! $product = wc_get_product( $product ) ) {
+		return false;
+	}
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
 		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
@@ -100,7 +101,7 @@ function wc_reduce_stock_levels( $order_id ) {
 					}
 
 					if ( $new_stock < 0 ) {
-						do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
+						do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty ) );
 					}
 				}
 			}

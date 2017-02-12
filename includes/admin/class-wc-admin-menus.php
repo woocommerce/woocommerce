@@ -303,7 +303,7 @@ class WC_Admin_Menus {
 		$wp_admin_bar->add_node( array(
 			'parent' => 'site-name',
 			'id'     => 'view-store',
-			'title'  => __( 'Visit store', 'woocommerce' ),
+			'title'  => __( 'Visit Store', 'woocommerce' ),
 			'href'   => wc_get_page_permalink( 'shop' ),
 		) );
 	}

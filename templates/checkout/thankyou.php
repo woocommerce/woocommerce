@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<li class="woocommerce-order-overview__payment-method method">
 					<?php _e( 'Payment method:', 'woocommerce' ); ?>
-					<strong><?php echo $order->get_payment_method_title(); ?></strong>
+					<strong><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></strong>
 				</li>
 
 				<?php endif; ?>

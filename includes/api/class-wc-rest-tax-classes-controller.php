@@ -57,6 +57,12 @@ class WC_REST_Tax_Classes_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)', array(
+			'args' => array(
+				'slug' => array(
+					'description' => __( 'Unique slug for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
@@ -64,6 +70,7 @@ class WC_REST_Tax_Classes_Controller extends WC_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),

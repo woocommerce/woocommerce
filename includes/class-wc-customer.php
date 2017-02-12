@@ -119,7 +119,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_customer_';
+		return 'woocommerce_customer_get_';
 	}
 
 	/**

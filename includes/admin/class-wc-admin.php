@@ -207,22 +207,15 @@ class WC_Admin {
 	 */
 	public function admin_footer_text( $footer_text ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! function_exists( 'wc_get_screen_ids' ) ) {
-			return;
+			return $footer_text;
 		}
 		$current_screen = get_current_screen();
 		$wc_pages       = wc_get_screen_ids();
 
-		// Set only wc pages
-		$wc_pages = array_flip( $wc_pages );
-		if ( isset( $wc_pages['profile'] ) ) {
-			unset( $wc_pages['profile'] );
-		}
-		if ( isset( $wc_pages['user-edit'] ) ) {
-			unset( $wc_pages['user-edit'] );
-		}
-		$wc_pages = array_flip( $wc_pages );
+		// Set only WC pages.
+		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
-		// Check to make sure we're on a WooCommerce admin page
+		// Check to make sure we're on a WooCommerce admin page.
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {

@@ -64,6 +64,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -80,6 +86,16 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -94,10 +110,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
 					'force' => array(
-						'default'     => false,
+						'default'     => true,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -236,41 +252,22 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
 		}
 
-		$api_refund = is_bool( $request['api_refund'] ) ? $request['api_refund'] : true;
-
-		$data = array(
-			'order_id'   => $order_data->ID,
-			'amount'     => $request['amount'],
-			'reason'     => empty( $request['reason'] ) ? null : $request['reason'],
-			'line_items' => $request['line_items'],
-		);
-
 		// Create the refund.
-		$refund = wc_create_refund( $data );
+		$refund = wc_create_refund( array(
+			'order_id'       => $order_data->ID,
+			'amount'         => $request['amount'],
+			'reason'         => empty( $request['reason'] ) ? null : $request['reason'],
+			'line_items'     => $request['line_items'],
+			'refund_payment' => is_bool( $request['api_refund'] ) ? $request['api_refund'] : true,
+			'restock_items'  => true,
+		) );
+
+		if ( is_wp_error( $refund ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
+		}
 
 		if ( ! $refund ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
-		}
-
-		// Refund via API.
-		if ( $api_refund ) {
-			if ( WC()->payment_gateways() ) {
-				$payment_gateways = WC()->payment_gateways->payment_gateways();
-			}
-
-			$order = wc_get_order( $order_data );
-
-			if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order->get_id(), $refund->get_amount(), $refund->get_reason() );
-
-				if ( ! $result || is_wp_error( $result ) ) {
-					$refund->delete();
-
-					$message = is_wp_error( $result ) ? $result : new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
-
-					return $message;
-				}
-			}
 		}
 
 		$post = get_post( $refund->get_id() );

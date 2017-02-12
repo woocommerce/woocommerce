@@ -367,12 +367,8 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 				),
 			),
 			'delete' => array(
-				array(
-					'id' => $review_2_id,
-				),
-				array(
-					'id' => $review_3_id,
-				),
+				$review_2_id,
+				$review_3_id
 			),
 			'create' => array(
 				array(

@@ -111,7 +111,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'customer_email'             => '',
 		) );
 		$this->assertEquals( $code, $coupon->get_code() );
-		$this->assertEquals( true, $coupon->get_individual_use() );
+		$this->assertTrue( $coupon->get_individual_use() );
 		$this->assertEquals( 100, $coupon->get_maximum_amount() );
 
 		/**
@@ -143,9 +143,9 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'customer_email'             => '',
 		) );
 		$this->assertEquals( $code, $coupon->get_code() );
-		$this->assertEquals( true, $coupon->get_individual_use() );
-		$this->assertEquals( false, $coupon->get_free_shipping() );
-		$this->assertEquals( false, $coupon->get_exclude_sale_items() );
+		$this->assertTrue( $coupon->get_individual_use() );
+		$this->assertFalse( $coupon->get_free_shipping() );
+		$this->assertFalse( $coupon->get_exclude_sale_items() );
 		$this->assertEquals( array( 5, 6 ), $coupon->get_excluded_product_ids() );
 		$this->assertEquals( array(), $coupon->get_product_ids() );
 	}

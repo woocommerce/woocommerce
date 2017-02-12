@@ -55,11 +55,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 			'date_modified'  => wc_rest_prepare_date_response( $post_1->post_modified_gmt ),
 			'discount_type'  => 'fixed_cart',
 			'description'    => 'This is a dummy coupon',
-			'date_expires'    => '',
+			'expiry_date'    => '',
 			'usage_count'    => 0,
 			'individual_use' => false,
 			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
+			'exclude_product_ids' => array(),
 			'usage_limit'    => '',
 			'usage_limit_per_user' => '',
 			'limit_usage_to_x_items' => 0,
@@ -117,11 +117,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 			'date_modified'  => wc_rest_prepare_date_response( $post->post_modified_gmt ),
 			'discount_type'  => 'fixed_cart',
 			'description'    => 'This is a dummy coupon',
-			'date_expires'    => null,
+			'expiry_date'    => null,
 			'usage_count'    => 0,
 			'individual_use' => false,
 			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
+			'exclude_product_ids' => array(),
 			'usage_limit'    => null,
 			'usage_limit_per_user' => null,
 			'limit_usage_to_x_items' => 0,
@@ -184,11 +184,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 			'date_modified'  => $data['date_modified'],
 			'discount_type'  => 'fixed_product',
 			'description'    => 'Test',
-			'date_expires'    => null,
+			'expiry_date'    => null,
 			'usage_count'    => 0,
 			'individual_use' => false,
 			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
+			'exclude_product_ids' => array(),
 			'usage_limit'    => 10,
 			'usage_limit_per_user' => null,
 			'limit_usage_to_x_items' => 0,
@@ -414,11 +414,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'discount_type', $properties );
 		$this->assertArrayHasKey( 'amount', $properties );
-		$this->assertArrayHasKey( 'date_expires', $properties );
+		$this->assertArrayHasKey( 'expiry_date', $properties );
 		$this->assertArrayHasKey( 'usage_count', $properties );
 		$this->assertArrayHasKey( 'individual_use', $properties );
 		$this->assertArrayHasKey( 'product_ids', $properties );
-		$this->assertArrayHasKey( 'excluded_product_ids', $properties );
+		$this->assertArrayHasKey( 'exclude_product_ids', $properties );
 		$this->assertArrayHasKey( 'usage_limit', $properties );
 		$this->assertArrayHasKey( 'usage_limit_per_user', $properties );
 		$this->assertArrayHasKey( 'limit_usage_to_x_items', $properties );

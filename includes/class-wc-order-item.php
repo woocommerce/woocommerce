@@ -47,11 +47,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $meta_type = 'order_item';
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order_item';
+
+	/**
 	 * Constructor.
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item Object
 	 */
 	public function __construct( $item = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
 		parent::__construct( $item );
 
 		if ( $item instanceof WC_Order_Item ) {
@@ -67,16 +72,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_item_';
 	}
 
 	/*
@@ -211,7 +206,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				'key'           => $meta->key,
 				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
 			);
 		}
 
@@ -307,6 +302,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( 'item_meta' === $offset ) {
 			return $meta_values;
+		} elseif ( 'type' === $offset ) {
+			return $this->get_type();
 		} elseif ( array_key_exists( $offset, $this->data ) ) {
 			$getter = "get_$offset";
 			if ( is_callable( array( $this, $getter ) ) ) {

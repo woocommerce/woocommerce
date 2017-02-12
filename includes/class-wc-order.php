@@ -171,7 +171,7 @@ class WC_Order extends WC_Abstract_Order {
 				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 			if ( ! empty( $tax_string_array ) ) {
-				$tax_string = ' ' . sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
+				$tax_string = ' <small class="includes_tax">' . sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
 			}
 		}
 
@@ -215,6 +215,9 @@ class WC_Order extends WC_Abstract_Order {
 	public function save() {
 		$this->maybe_set_user_billing_email();
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -284,14 +287,14 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function status_transition() {
 		if ( $this->status_transition ) {
-			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id() );
+			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id(), $this );
 
 			if ( ! empty( $this->status_transition['from'] ) ) {
 				/* translators: 1: old order status 2: new order status */
 				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['from'] ), wc_get_order_status_name( $this->status_transition['to'] ) );
 
-				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id() );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'] );
+				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id(), $this );
+				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'], $this );
 			} else {
 				/* translators: %s: new order status */
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );
@@ -321,6 +324,9 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_data() {
 		return array_merge(
+			array(
+				'id' => $this->get_id(),
+			),
 			$this->data,
 			array(
 				'number'         => $this->get_order_number(),
@@ -332,6 +338,22 @@ class WC_Order extends WC_Abstract_Order {
 				'coupon_lines'   => $this->get_items( 'coupon' ),
 			)
 		);
+	}
+
+	/**
+	 * Expands the shipping and billing information in the changes array.
+	 */
+	public function get_changes() {
+		$changed_props = parent::get_changes();
+		$subs          = array( 'shipping', 'billing' );
+		foreach ( $subs as $sub ) {
+			if ( ! empty( $changed_props[ $sub ] ) ) {
+				foreach ( $changed_props[ $sub ] as $sub_prop => $value ) {
+					$changed_props[ $sub . '_' . $sub_prop ] = $value;
+				}
+			}
+		}
+		return $changed_props;
 	}
 
 	/**
@@ -1443,15 +1465,26 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order refunds.
+	 *
 	 * @since 2.2
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
 		$this->refunds = wc_get_orders( array(
 			'type'   => 'shop_order_refund',
 			'parent' => $this->get_id(),
 			'limit'  => -1,
 		) );
+
+		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
+
 		return $this->refunds;
 	}
 
@@ -1462,7 +1495,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		return $this->data_store->get_total_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1472,7 +1516,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		return $this->data_store->get_total_tax_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_tax_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_tax_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1482,7 +1537,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		return $this->data_store->get_total_shipping_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_shipping_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**

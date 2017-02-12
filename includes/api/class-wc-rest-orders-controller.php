@@ -77,6 +77,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -98,9 +104,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -437,7 +443,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			return $order->get_id();
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -460,13 +466,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping'], $request['fee'], $request['coupon'] ) ) {
+			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping_lines'], $request['fee_lines'], $request['coupon_lines'] ) ) {
 				$order->calculate_totals();
 			}
 
 			return $order->get_id();
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -530,6 +536,21 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Maybe set item meta if posted.
+	 * @param WC_Order_Item $item
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_meta_data( $item, $posted ) {
+		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
+			foreach ( $posted['meta_data'] as $meta ) {
+				if ( isset( $meta['key'], $meta['value'] ) ) {
+					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Create or update a line item.
 	 *
 	 * @param array $posted Line item data.
@@ -544,13 +565,15 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$total = $product->get_price() * ( isset( $posted['quantity'] ) ? $posted['quantity'] : 1 );
+				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
+				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -572,6 +595,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -593,6 +617,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -614,6 +639,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -653,6 +679,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 		// Prepare item data
 		$item = $this->$method( $posted, $action );
+
+		/**
+		 * Action hook to adjust item before save.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
 		// Save or add to order
 		if ( 'create' === $action ) {

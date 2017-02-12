@@ -24,6 +24,12 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	protected $id = null;
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'shipping_zone';
+
+	/**
 	 * Zone Data
 	 * @var array
 	 */
@@ -46,7 +52,6 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		} elseif ( 0 === $zone || "0" === $zone ) {
 			$this->set_id( 0 );
 		} else {
-			$this->set_zone_name( __( 'Zone', 'woocommerce' ) );
 			$this->set_object_read( true );
 		}
 
@@ -54,16 +59,6 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		if ( false === $this->get_object_read() ) {
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_shipping_zone_';
 	}
 
 	/*
@@ -189,10 +184,11 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 				// Let's make sure that we have an instance before setting its attributes
 				if ( is_object( $methods[ $raw_method->instance_id ] ) ) {
-					$methods[ $raw_method->instance_id ]->method_order  = absint( $raw_method->method_order );
-					$methods[ $raw_method->instance_id ]->enabled       = $raw_method->is_enabled ? 'yes' : 'no';
-					$methods[ $raw_method->instance_id ]->has_settings  = $methods[ $raw_method->instance_id ]->has_settings();
-					$methods[ $raw_method->instance_id ]->settings_html = $methods[ $raw_method->instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $raw_method->instance_id ]->get_admin_options_html() : false;
+					$methods[ $raw_method->instance_id ]->method_order       = absint( $raw_method->method_order );
+					$methods[ $raw_method->instance_id ]->enabled            = $raw_method->is_enabled ? 'yes' : 'no';
+					$methods[ $raw_method->instance_id ]->has_settings       = $methods[ $raw_method->instance_id ]->has_settings();
+					$methods[ $raw_method->instance_id ]->settings_html      = $methods[ $raw_method->instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $raw_method->instance_id ]->get_admin_options_html() : false;
+					$methods[ $raw_method->instance_id ]->method_description = wp_kses_post( wpautop( $methods[ $raw_method->instance_id ]->method_description ) );
 				}
 			}
 		}
@@ -248,11 +244,13 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @return int
 	 */
 	public function save() {
-		$name = $this->get_zone_name();
-		if ( empty( $name ) ) {
+		if ( ! $this->get_zone_name() ) {
 			$this->set_zone_name( $this->generate_zone_name() );
 		}
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( null === $this->get_id() ) {
 				$this->data_store->create( $this );
 			} else {

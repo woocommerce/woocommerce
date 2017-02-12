@@ -22,6 +22,12 @@ include_once( 'abstract-wc-legacy-product.php' );
 class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'product';
+
+	/**
 	 * Post type.
 	 * @var string
 	 */
@@ -122,16 +128,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_product_get_';
-	}
-
-	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 * @since 2.7.0
 	 * @return string
@@ -148,23 +144,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	|
 	| Methods for getting data from the product object.
 	*/
-
-	/**
-	 * Get all class data in array format.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return array_merge(
-			array(
-				'id' => $this->get_id(),
-			),
-			$this->data,
-			array(
-				'meta_data' => $this->get_meta_data(),
-			)
-		);
-	}
 
 	/**
 	 * Get product name.
@@ -808,7 +787,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
-			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ) );
+			$sku_found = wc_get_product_id_by_sku( $sku );
+
+			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
 		}
 		$this->set_prop( 'sku', $sku );
 	}
@@ -905,7 +886,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $class Tax class.
 	 */
 	public function set_tax_class( $class ) {
-		$this->set_prop( 'tax_class', wc_clean( $class ) );
+		$class       = sanitize_title( $class );
+		$class       = 'standard' === $class ? '' : $class;
+		$this->set_prop( 'tax_class', $class );
 	}
 
 	/**
@@ -1320,6 +1303,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->validate_props();
 
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -1439,23 +1425,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
-	public function is_on_sale() {
-		if ( '' !== (string) $this->get_sale_price() && $this->get_regular_price() > $this->get_sale_price() ) {
-			$onsale = true;
+	public function is_on_sale( $context = 'view' ) {
+		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
+			$on_sale = true;
 
-			if ( '' !== (string) $this->get_date_on_sale_from() && $this->get_date_on_sale_from() > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+			if ( '' !== (string) $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context ) > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$on_sale = false;
 			}
 
-			if ( '' !== (string) $this->get_date_on_sale_to() && $this->get_date_on_sale_to() < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				$onsale = false;
+			if ( '' !== (string) $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				$on_sale = false;
 			}
 		} else {
-			$onsale = false;
+			$on_sale = false;
 		}
-		return apply_filters( 'woocommerce_product_is_on_sale', $onsale, $this );
+
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 
 	/**
@@ -1687,7 +1675,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$identifier = '#' . $this->get_id();
 		}
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_name() );
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() );
 	}
 
 	/**
@@ -1770,7 +1758,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			return '';
 		}
-		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_object_terms( $this->get_id(), $attribute_object->get_name(), 'name' ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
 	}
 
 	/**
@@ -1834,7 +1822,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
-		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}
@@ -1870,7 +1858,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
 			$availability = __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
-			$availability = wc_format_stock_for_display( $this->get_stock_quantity(), $this->backorders_allowed() && $this->backorders_require_notification() );
+			$availability = wc_format_stock_for_display( $this );
 		} else {
 			$availability = '';
 		}

@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'DoCapture Response: ' . print_r( $raw_response, true ) );
+		WC_Gateway_Paypal::log( 'DoCapture Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( empty( $raw_response['body'] ) ) {
 			return new WP_Error( 'paypal-api', 'Empty Response' );
@@ -120,7 +120,7 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'Refund Response: ' . print_r( $raw_response, true ) );
+		WC_Gateway_Paypal::log( 'Refund Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( empty( $raw_response['body'] ) ) {
 			return new WP_Error( 'paypal-api', 'Empty Response' );

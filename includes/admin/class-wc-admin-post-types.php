@@ -31,6 +31,9 @@ class WC_Admin_Post_Types {
 		// Disable Auto Save
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
+		// Extra post data.
+		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
+
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
 		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
 		add_filter( 'manage_shop_coupon_posts_columns', array( $this, 'shop_coupon_columns' ) );
@@ -288,7 +291,6 @@ class WC_Admin_Post_Types {
 		$columns['cb']               = $existing_columns['cb'];
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
-		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
 		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
@@ -339,32 +341,32 @@ class WC_Admin_Post_Types {
 
 				/* Custom inline data for woocommerce. */
 				echo '
-					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
-						<div class="menu_order">' . $the_product->get_menu_order() . '</div>
-						<div class="sku">' . $the_product->get_sku() . '</div>
-						<div class="regular_price">' . $the_product->get_regular_price() . '</div>
-						<div class="sale_price">' . $the_product->get_sale_price() . '</div>
-						<div class="weight">' . $the_product->get_weight() . '</div>
-						<div class="length">' . $the_product->get_length() . '</div>
-						<div class="width">' . $the_product->get_width() . '</div>
-						<div class="height">' . $the_product->get_height() . '</div>
-						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
-						<div class="visibility">' . $the_product->get_catalog_visibility() . '</div>
-						<div class="stock_status">' . $the_product->get_stock_status() . '</div>
-						<div class="stock">' . $the_product->get_stock_quantity() . '</div>
-						<div class="manage_stock">' . $the_product->get_manage_stock() . '</div>
-						<div class="featured">' . $the_product->get_featured() . '</div>
-						<div class="product_type">' . $the_product->get_type() . '</div>
-						<div class="product_is_virtual">' . $the_product->get_virtual() . '</div>
-						<div class="tax_status">' . $the_product->get_tax_status() . '</div>
-						<div class="tax_class">' . $the_product->get_tax_class() . '</div>
-						<div class="backorders">' . $the_product->get_backorders() . '</div>
+					<div class="hidden" id="woocommerce_inline_' . absint( $post->ID ) . '">
+						<div class="menu_order">' . absint( $the_product->get_menu_order() ) . '</div>
+						<div class="sku">' . esc_html( $the_product->get_sku() ) . '</div>
+						<div class="regular_price">' . esc_html( $the_product->get_regular_price() ) . '</div>
+						<div class="sale_price">' . esc_html( $the_product->get_sale_price() ) . '</div>
+						<div class="weight">' . esc_html( $the_product->get_weight() ) . '</div>
+						<div class="length">' . esc_html( $the_product->get_length() ) . '</div>
+						<div class="width">' . esc_html( $the_product->get_width() ) . '</div>
+						<div class="height">' . esc_html( $the_product->get_height() ) . '</div>
+						<div class="shipping_class">' . esc_html( $the_product->get_shipping_class() ) . '</div>
+						<div class="visibility">' . esc_html( $the_product->get_catalog_visibility() ) . '</div>
+						<div class="stock_status">' . esc_html( $the_product->get_stock_status() ) . '</div>
+						<div class="stock">' . esc_html( $the_product->get_stock_quantity() ) . '</div>
+						<div class="manage_stock">' . esc_html( wc_bool_to_string( $the_product->get_manage_stock() ) ) . '</div>
+						<div class="featured">' . esc_html( wc_bool_to_string( $the_product->get_featured() ) ) . '</div>
+						<div class="product_type">' . esc_html( $the_product->get_type() ) . '</div>
+						<div class="product_is_virtual">' . esc_html( wc_bool_to_string( $the_product->get_virtual() ) ) . '</div>
+						<div class="tax_status">' . esc_html( $the_product->get_tax_status() ) . '</div>
+						<div class="tax_class">' . esc_html( $the_product->get_tax_class() ) . '</div>
+						<div class="backorders">' . esc_html( $the_product->get_backorders() ) . '</div>
 					</div>
 				';
 
 			break;
 			case 'sku' :
-				echo $the_product->get_sku() ? $the_product->get_sku() : '<span class="na">&ndash;</span>';
+				echo $the_product->get_sku() ? esc_html( $the_product->get_sku() ) : '<span class="na">&ndash;</span>';
 				break;
 			case 'product_type' :
 				if ( $the_product->is_type( 'grouped' ) ) {
@@ -439,7 +441,7 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_coupon_columns( $column ) {
-		global $post, $woocommerce;
+		global $post;
 
 		switch ( $column ) {
 			case 'coupon_code' :
@@ -509,29 +511,18 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_order_columns( $column ) {
-		global $post, $woocommerce, $the_order;
+		global $post, $the_order;
 
-		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
+		if ( empty( $the_order ) || $the_order->get_id() !== $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
 		}
 
 		switch ( $column ) {
 			case 'order_status' :
-
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
-
 			break;
 			case 'order_date' :
-
-				if ( '0000-00-00 00:00:00' == $post->post_date ) {
-					$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				} else {
-					$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
-				}
-
-				echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
-
+				printf( '<time datetime="%s">%s</time>', date( 'c', $the_order->get_date_created() ), date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -540,40 +531,6 @@ class WC_Admin_Post_Types {
 					echo '<span class="na">&ndash;</span>';
 				}
 
-			break;
-			case 'order_items' :
-
-				/* translators: %d: order items count */
-				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
-
-				if ( sizeof( $the_order->get_items() ) > 0 ) {
-
-					echo '<table class="order_items" cellspacing="0">';
-
-					foreach ( $the_order->get_items() as $item ) {
-						$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
-						$item_meta      = new WC_Order_Item_Meta( $item, $product );
-						$item_meta_html = $item_meta->display( true, true );
-						?>
-						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
-							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
-							<td class="name">
-								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->get_id() ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
-								<?php else : ?>
-									<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>
-								<?php endif; ?>
-								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<?php echo wc_help_tip( $item_meta_html ); ?>
-								<?php endif; ?>
-							</td>
-						</tr>
-						<?php
-					}
-
-					echo '</table>';
-
-				} else echo '&ndash;';
 			break;
 			case 'billing_address' :
 
@@ -639,32 +596,18 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				if ( $the_order->get_user_id() ) {
-					$user_info = get_userdata( $the_order->get_user_id() );
-				}
-
-				if ( ! empty( $user_info ) ) {
-
-					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
-
-					if ( $user_info->first_name || $user_info->last_name ) {
-						/* translators: 1: first name 2: last name */
-						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
-					} else {
-						$username .= esc_html( ucfirst( $user_info->display_name ) );
-					}
-
+				if ( $the_order->get_customer_id() ) {
+					$user     = get_user_by( 'id', $the_order->get_customer_id() );
+					$username = '<a href="user-edit.php?user_id=' . absint( $the_order->get_customer_id() ) . '">';
+					$username .= esc_html( ucwords( $user->display_name ) );
 					$username .= '</a>';
-
+				} elseif ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
+					/* translators: 1: first name 2: last name */
+					$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
+				} elseif ( $the_order->get_billing_company() ) {
+					$username = trim( $the_order->get_billing_company() );
 				} else {
-					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
-						/* translators: 1: first name 2: last name */
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-					} elseif ( $the_order->get_billing_company() ) {
-						$username = trim( $the_order->get_billing_company() );
-					} else {
-						$username = __( 'Guest', 'woocommerce' );
-					}
+					$username = __( 'Guest', 'woocommerce' );
 				}
 
 				/* translators: 1: order and number (i.e. Order #13) 2: user name */
@@ -1268,7 +1211,7 @@ class WC_Admin_Post_Types {
 			$manage_stock = $was_managing_stock;
 		}
 
-		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_change_stock'] ) ? wc_stock_amount( $_REQUEST['_change_stock'] ) : '';
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
@@ -1586,7 +1529,9 @@ class WC_Admin_Post_Types {
 			);
 		}
 		?>
-		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
+		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?><option>
+		</select>
 		<?php
 	}
 
@@ -1756,6 +1701,14 @@ class WC_Admin_Post_Types {
 		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
+	}
+
+	/**
+	 * Output extra data on post forms.
+	 * @param  WP_Post $post
+	 */
+	public function edit_form_top( $post ) {
+		echo '<input type="hidden" id="original_post_title" name="original_post_title" value="' . esc_attr( $post->post_title ) . '" />';
 	}
 
 	/**
@@ -1965,7 +1918,7 @@ class WC_Admin_Post_Types {
 				break;
 			}
 
-			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .wrap .subsubsub  { display: none; } </style></div>';
+			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions, .wrap .subsubsub  { display: none; } </style></div>';
 		}
 	}
 

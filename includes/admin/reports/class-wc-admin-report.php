@@ -220,10 +220,9 @@ class WC_Admin_Report {
 		}
 
 		if ( $filter_range ) {
-
 			$query['where'] .= "
-				AND 	posts.post_date >= '" . date( 'Y-m-d', $this->start_date ) . "'
-				AND 	posts.post_date < '" . date( 'Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
+				AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
 
@@ -325,7 +324,7 @@ class WC_Admin_Report {
 
 		if ( $debug ) {
 			echo '<pre>';
-			print_r( $query );
+			wc_print_r( $query );
 			echo '</pre>';
 		}
 

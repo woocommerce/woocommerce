@@ -81,9 +81,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output() {
 		global $current_section;
 
-		$tax_classes = WC_Tax::get_tax_classes();
+		$tax_classes = WC_Tax::get_tax_class_slugs();
 
-		if ( 'standard' === $current_section || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes ) ) {
 			$this->output_tax_rates();
 		} else {
 			$settings = $this->get_settings();

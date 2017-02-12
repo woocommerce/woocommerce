@@ -418,7 +418,7 @@ class WC_Email extends WC_Settings_API {
 				$content    = $emogrifier->emogrify();
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
-				$logger->add( 'emogrifier', $e->getMessage() );
+				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
 			}
 		}
 		return $content;
@@ -580,7 +580,7 @@ class WC_Email extends WC_Settings_API {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
 			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
-			$code   = stripslashes( $template_code );
+			$code   = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );
@@ -626,7 +626,7 @@ class WC_Email extends WC_Settings_API {
 
 					// Locate template file
 					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
+					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 
 					// Copy template file
 					copy( $template_file, $theme_file );
@@ -755,7 +755,7 @@ class WC_Email extends WC_Settings_API {
 
 					$local_file    = $this->get_theme_template_file( $template );
 					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
+					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 					$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
 					?>
 					<div class="template <?php echo $template_type; ?>">

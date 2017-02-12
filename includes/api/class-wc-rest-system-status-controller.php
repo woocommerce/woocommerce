@@ -83,6 +83,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$response[ $section ] = $values;
 		}
 
+		$response = $this->prepare_item_for_response( $response, $request );
+
 		return rest_ensure_response( $response );
 	}
 
@@ -280,6 +282,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Database tables', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 					),
 				),
@@ -287,6 +292,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'description' => __( 'Active plugins', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 				'theme' => array(
 					'description' => __( 'Theme', 'woocommerce' ),
@@ -338,6 +346,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Template overrides', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 						'parent_name' => array(
 							'description' => __( 'Parent theme name', 'woocommerce' ),
@@ -411,6 +422,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'description' => __( 'Taxonomy terms for product/order statuses', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
+							'items'       => array(
+								'type'    => 'string',
+							),
 						),
 					),
 				),
@@ -435,6 +449,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					'description' => __( 'WooCommerce pages', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'string',
+					),
 				),
 			),
 		);
@@ -596,10 +613,14 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$active_plugins_data = array();
 		foreach ( $active_plugins as $plugin ) {
-			$data                 = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$dirname              = dirname( $plugin );
-			$theme_version_latest = '';
-			if ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) {
+			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$dirname        = dirname( $plugin );
+			$version_latest = '';
+			$slug           = explode( '/', $plugin );
+			$slug           = explode( '.', end( $slug ) );
+			$slug           = $slug[0];
+
+			if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
 				if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
@@ -616,12 +637,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						}
 					}
 				}
-				$theme_version_latest = $version_data['version'];
+				$version_latest = $version_data['version'];
 			} else {
 				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-				$slug = explode( '/', $plugin );
-				$slug = explode( '.', end( $slug ) );
-				$slug = $slug[0];
 
 				$api = plugins_api( 'plugin_information', array(
 					'slug'     => $slug,
@@ -631,8 +649,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					),
 				) );
 
-				if ( is_object( $api ) && ! is_wp_error( $api ) ) {
-					$theme_version_latest = $api->version;
+				if ( is_object( $api ) && ! is_wp_error( $api ) && ! empty( $api->version ) ) {
+					$version_latest = $api->version;
 				}
 			}
 
@@ -641,7 +659,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				'plugin'            => $plugin,
 				'name'              => $data['Name'],
 				'version'           => $data['Version'],
-				'version_latest'    => $theme_version_latest,
+				'version_latest'    => $version_latest,
 				'url'               => $data['PluginURI'],
 				'author_name'       => $data['AuthorName'],
 				'author_url'        => esc_url_raw( $data['AuthorURI'] ),
@@ -846,5 +864,28 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
+	}
+
+	/**
+	 * Prepare the system status response
+	 *
+	 * @param array $system_status
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $system_status, $request ) {
+		$data = $this->add_additional_fields_to_object( $system_status, $request );
+		$data = $this->filter_response_by_context( $data, 'view' );
+
+		$response = rest_ensure_response( $data );
+
+		/**
+		 * Filter the system status returned from the REST API.
+		 *
+		 * @param WP_REST_Response   $response The response object.
+		 * @param mixed              $system_status System status
+		 * @param WP_REST_Request    $request  Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_system_status', $response, $system_status, $request );
 	}
 }

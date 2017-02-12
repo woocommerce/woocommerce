@@ -38,7 +38,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Define user set variables
 		$this->title        = $this->get_option( 'title' );
 		$this->description  = $this->get_option( 'description' );
-		$this->instructions = $this->get_option( 'instructions', $this->description );
+		$this->instructions = $this->get_option( 'instructions' );
 
 		// BACS account fields shown on the thanks page and in emails
 		$this->account_details = get_option( 'woocommerce_bacs_accounts',

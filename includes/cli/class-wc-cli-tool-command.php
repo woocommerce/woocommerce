@@ -21,6 +21,9 @@ class WC_CLI_Tool_Command {
 		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
 		$response      = $wp_rest_server->dispatch( $request );
 		$response_data = $response->get_data();
+		if ( empty( $response_data ) ) {
+			return;
+		}
 
 		$parent	            = "wc tool";
 		$supported_commands = array( 'list', 'run' );

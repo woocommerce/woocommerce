@@ -373,7 +373,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_get_setting_invalid_setting_type() {
-		$controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+		// $controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+		$controller = $this->getMockBuilder( 'WC_Rest_Settings_Options_Controller' )->setMethods( array( 'get_group_settings', 'is_setting_type_valid' ) )->getMock();
 
 		$controller
 			->expects( $this->any() )

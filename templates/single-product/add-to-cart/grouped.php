@@ -33,7 +33,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 					?>
-					<tr>
+					<tr id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<td>
 							<?php if ( $grouped_product->is_sold_individually() || ! $grouped_product->is_purchasable() ) : ?>
 								<?php woocommerce_template_loop_add_to_cart(); ?>

@@ -84,17 +84,40 @@ class WC_Emails {
 		) );
 
 		foreach ( $email_actions as $action ) {
-			add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+			add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
 		}
 	}
 
 	/**
+	 * Queue transactional email via cron so it's not sent in current request.
+	 */
+	public static function queue_transactional_email() {
+		$args = func_get_args();
+
+		wp_schedule_single_event( time() + 10, 'woocommerce_send_queued_transactional_email', array(
+			'filter' => current_filter(),
+			'args'   => $args,
+		) );
+	}
+
+	/**
 	 * Init the mailer instance and call the notifications for the current filter.
+	 *
 	 * @internal param array $args (default: array())
 	 */
-	public static function send_transactional_email() {
+	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
+		self::instance(); // Init self so emails exist.
+		do_action_ref_array( $filter . '_notification', $args );
+	}
+
+	/**
+	 * Init the mailer instance and call the notifications for the current filter.
+	 *
+	 * @internal param array $args (default: array())
+	 */
+	public static function send_transactional_email( $args = array() ) {
 		$args = func_get_args();
-		self::instance();
+		self::instance(); // Init self so emails exist.
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
@@ -237,7 +260,12 @@ class WC_Emails {
 	 */
 	public function customer_invoice( $order ) {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
-		$email->trigger( $order );
+
+		if ( ! is_object( $order ) ) {
+			$order = wc_get_order( absint( $order ) );
+		}
+
+		$email->trigger( $order->get_id(), $order );
 	}
 
 	/**

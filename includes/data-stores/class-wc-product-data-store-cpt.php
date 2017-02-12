@@ -91,7 +91,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product, true );
+			$this->update_post_meta( $product );
 			$this->update_terms( $product );
 			$this->update_visibility( $product );
 			$this->update_attributes( $product );
@@ -102,7 +102,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->apply_changes();
 			$this->clear_caches( $product );
 
-			do_action( 'woocommerce_new_' . $post_type, $id );
+			do_action( 'woocommerce_new_product', $id );
 		}
 	}
 
@@ -113,14 +113,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
 		$id = $product->get_id();
 
 		$product->set_props( array(
-			'name'              => get_the_title( $post_object ),
+			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
 			'date_created'      => $post_object->post_date,
 			'date_modified'     => $post_object->post_modified,
@@ -136,6 +136,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_downloads( $product );
 		$this->read_visibility( $product );
 		$this->read_product_data( $product );
+		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 	}
 
@@ -167,7 +168,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->apply_changes();
 		$this->clear_caches( $product );
 
-		do_action( 'woocommerce_update_' . $post_type, $product->get_id() );
+		do_action( 'woocommerce_update_product', $product->get_id() );
 	}
 
 	/**
@@ -186,11 +187,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $product->get_id() );
 			$product->set_id( 0 );
+			do_action( 'woocommerce_delete_' . $post_type, $id );
 		} else {
 			wp_trash_post( $product->get_id() );
 			$product->set_status( 'trash' );
+			do_action( 'woocommerce_trash_' . $post_type, $id );
 		}
-		do_action( 'woocommerce_delete_' . $post_type, $id );
 	}
 
 	/*
@@ -259,9 +261,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
+	}
 
-		// Gets extra data associated with the product.
-		// Like button text or product URL for external products.
+	/**
+	 * Read extra data associated with the product, like button text or product URL for external products.
+	 *
+	 * @param WC_Product
+	 * @since 2.7.0
+	 */
+	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $product, $function ) ) ) {
@@ -359,12 +367,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$product, $force = false ) {
+	protected function update_post_meta( &$product ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $product->get_changes() );
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -398,10 +404,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_review_count'       => 'review_count',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		// Make sure to take extra data (like product url or text for external products) into account.
+		$extra_data_keys = $product->get_extra_data_keys();
+		foreach ( $extra_data_keys as $key ) {
+			$meta_key_to_props[ '_' . $key ] = $key;
+		}
+
+		$props_to_update = $this->get_props_to_update( $product, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'virtual' :
@@ -431,12 +441,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
-			if ( $product->is_on_sale() ) {
-				update_post_meta( $product->get_id(), '_price', $product->get_sale_price() );
-				$product->set_price( $product->get_sale_price() );
+			if ( $product->is_on_sale( 'edit' ) ) {
+				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
+				$product->set_price( $product->get_sale_price( 'edit' ) );
 			} else {
-				update_post_meta( $product->get_id(), '_price', $product->get_regular_price() );
-				$product->set_price( $product->get_regular_price() );
+				update_post_meta( $product->get_id(), '_price', $product->get_regular_price( 'edit' ) );
+				$product->set_price( $product->get_regular_price( 'edit' ) );
 			}
 		}
 
@@ -448,16 +458,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
-		// Update extra data associated with the product.
-		// Like button text or product URL for external products.
+		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
-			foreach ( $product->get_extra_data_keys() as $key ) {
+			foreach ( $extra_data_keys as $key ) {
+				if ( ! array_key_exists( $key, $props_to_update ) ) {
+					continue;
+				}
 				$function = 'get_' . $key;
-				if ( ( $force || in_array( $key, $changed_props ) ) && is_callable( array( $product, $function ) ) ) {
-					update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) );
+				if ( is_callable( array( $product, $function ) ) ) {
+					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+						$updated_props[] = $key;
+					}
 				}
 			}
 		}
+
+		do_action( 'woocommerce_product_object_updated_props', $product, $updated_props );
 	}
 
 	/**
@@ -585,8 +601,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_version_and_type( &$product ) {
-		wp_set_object_terms( $product->get_id(), $product->get_type(), 'product_type' );
+		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
+		$new_type = $product->get_type();
+
+		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+
+		// Action for the transition.
+		if ( $old_type !== $new_type ) {
+			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
+		}
 	}
 
 	/**
@@ -637,6 +661,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_on_sale_products() {
 		global $wpdb;
+
+		$decimals = absint( wc_get_price_decimals() );
+
 		return $wpdb->get_results( "
 			SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
@@ -647,7 +674,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND meta2.meta_key = '_price'
 				AND CAST( meta.meta_value AS DECIMAL ) >= 0
 				AND CAST( meta.meta_value AS CHAR ) != ''
-				AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
+				AND CAST( meta.meta_value AS DECIMAL( 10, {$decimals} ) ) = CAST( meta2.meta_value AS DECIMAL( 10, {$decimals} ) )
 			GROUP BY post.ID;
 		" );
 	}
@@ -955,6 +982,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Update a product's sale count directly.
+	 *
+	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
+	 *
+	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @param  int
+	 * @param  int|null $quantity
+	 * @param  string $operation set, increase and decrease.
+	 */
+	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
+		global $wpdb;
+		add_post_meta( $product_id, 'total_sales', 0, true );
+
+		// Update stock in DB directly
+		switch ( $operation ) {
+			case 'increase' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+			case 'decrease' :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+			default :
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				break;
+		}
+
+		wp_cache_delete( $product_id, 'post_meta' );
+	}
+
+	/**
 	 * Update a products average rating meta.
 	 *
 	 * @since 2.7.0
@@ -1074,6 +1131,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['paged'] = absint( $args['page'] );
 		}
 
+		if ( ! empty( $args['include'] ) ) {
+			$wp_query_args['post__in'] = array_map( 'absint', $args['include'] );
+		}
+
 		if ( ! empty( $args['exclude'] ) ) {
 			$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 		}
@@ -1152,10 +1213,37 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		if ( is_numeric( $term ) ) {
-			$product_ids[] = absint( $term );
-			$product_ids[] = get_post_parent( $term );
+			$post_id   = absint( $term );
+			$post_type = get_post_type( $post_id );
+
+			if ( 'product_variation' === $post_type && $include_variations ) {
+				$product_ids[] = $post_id;
+			} elseif ( 'product' === $post_type ) {
+				$product_ids[] = $post_id;
+			}
+
+			$product_ids[] = wp_get_post_parent_id( $post_id );
 		}
 
 		return wp_parse_id_list( $product_ids );
+	}
+
+	/**
+	 * Get the product type based on product ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $product_id
+	 * @return bool|string
+	 */
+	public function get_product_type( $product_id ) {
+		$post_type = get_post_type( $product_id );
+		if ( 'product_variation' === $post_type ) {
+			return 'variation';
+		} elseif ( 'product' === $post_type ) {
+			$terms = get_the_terms( $product_id, 'product_type' );
+			return ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		} else {
+			return false;
+		}
 	}
 }

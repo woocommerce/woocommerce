@@ -14,7 +14,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_is_store_notice_showing() {
 
-		$this->assertEquals( false, is_store_notice_showing() );
+		$this->assertFalse( is_store_notice_showing() );
 	}
 
 	/**
@@ -24,7 +24,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_tax_enabled() {
 
-		$this->assertEquals( false, wc_tax_enabled() );
+		$this->assertFalse( wc_tax_enabled() );
 	}
 
 	/**
@@ -34,7 +34,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_prices_include_tax() {
 
-		$this->assertEquals( false, wc_prices_include_tax() );
+		$this->assertFalse( wc_prices_include_tax() );
 	}
 
 	/**
