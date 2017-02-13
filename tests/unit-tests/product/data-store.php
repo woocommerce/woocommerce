@@ -410,6 +410,20 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		//Check the variation with multiple attributes but only one 1-word attribute
 		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
 		$this->assertEquals( "Test Product &ndash; Green, Galaxy S6, One Year", $loaded_variation->get_name() );
+	}
 
+	function test_generate_product_title_no_attributes() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array() );
+		$variation->save();
+
+		//Check the one attribute variation title
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
 }

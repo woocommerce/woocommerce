@@ -175,7 +175,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$include_attribute_names = false;
 		$attributes = (array) $product->get_attributes();
 
-		//Determine whether to include attribute names through counting the number of one-word attribute values 
+		// Determine whether to include attribute names through counting the number of one-word attribute values.
 		$one_word_attributes = 0;
 		foreach ( $attributes as $name => $value ) {
 			if ( false === strpos( $value, '-' ) ) {
@@ -190,9 +190,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
 		$title_base_text = get_post_field( 'post_title', $product->get_parent_id() );
 		$title_attributes_text = wc_get_formatted_variation( $product, true, $include_attribute_names );
+		$separator = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
 
-		return apply_filters( 'woocommerce_product_variation_title', 
-			$title_base_text . ' &ndash; ' . $title_attributes_text,
+		return apply_filters( 'woocommerce_product_variation_title',
+			$title_base_text . $separator . $title_attributes_text,
 			$product,
 			$title_base_text,
 			$title_attributes_text
