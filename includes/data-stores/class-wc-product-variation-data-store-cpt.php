@@ -133,7 +133,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
-		$parent_object = get_post( $product->get_parent_id() );
 		$post_data = array(
 			'ID'             => $product->get_id(),
 			'post_title'     => $this->generate_product_title( $product ),
