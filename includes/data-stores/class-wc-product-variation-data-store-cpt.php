@@ -123,7 +123,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$product->apply_changes();
 			$this->update_version_and_type( $product );
-			$this->update_term_counts( $product );
 			$this->clear_caches( $product );
 		}
 	}
@@ -154,7 +153,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$product->apply_changes();
 		$this->update_version_and_type( $product );
-		$this->update_term_counts( $product );
 		$this->clear_caches( $product );
 	}
 
