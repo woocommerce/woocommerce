@@ -173,7 +173,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			$vars[] = $key;
 		}
 		return $vars;
@@ -185,7 +185,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_query_vars() {
-		return $this->query_vars;
+		return apply_filters( 'woocommerce_get_query_vars', $this->query_vars );
 	}
 
 	/**
@@ -210,7 +210,7 @@ class WC_Query {
 		global $wp;
 
 		// Map query vars to their keys, or get them if endpoints are not supported
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
 			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
