@@ -2395,20 +2395,15 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$strings = array();
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
-			'before'    	  => '<ul class="wc-item-meta"><li>',
-			'after'     	  => '</li></ul>',
-			'separator' 	  => '</li><li>',
-			'echo'      	  => true,
-			'autop'     	  => false,
-			'skip_attributes' => true,
+			'before'				=> '<ul class="wc-item-meta"><li>',
+			'after'					=> '</li></ul>',
+			'separator'				=> '</li><li>',
+			'echo'					=> true,
+			'autop'					=> false,
+			'include_attributes'	=> false,
 		) );
 
-		$hideprefix = $args['skip_attributes'] ? 'attribute_' : '_';
-
-		foreach ( $item->get_formatted_meta_data( $hideprefix ) as $meta_id => $meta ) {
-			if ( '_' === substr( $meta->key, 0, 1 ) ) {
-				continue;
-			}
+		foreach ( $item->get_formatted_meta_data( '_', $args['include_attributes'] ) as $meta_id => $meta ) {
 			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
 			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
