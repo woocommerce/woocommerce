@@ -246,15 +246,17 @@ class WC_Admin_Dashboard {
 	 */
 	public function recent_reviews() {
 		global $wpdb;
-		$comments = $wpdb->get_results( "SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
-		FROM $wpdb->comments
-		LEFT JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID)
-		WHERE comment_approved = '1'
-		AND comment_type = ''
-		AND post_password = ''
-		AND post_type = 'product'
-		ORDER BY comment_date_gmt DESC
-		LIMIT 8" );
+		$comments = $wpdb->get_results( "
+			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, SUBSTRING(comments.comment_content,1,100) AS comment_excerpt
+			FROM $wpdb->comments comments
+			LEFT JOIN $wpdb->posts posts ON (comments.comment_post_ID = posts.ID)
+			WHERE comments.comment_approved = '1'
+			AND comments.comment_type = ''
+			AND posts.post_password = ''
+			AND posts.post_type = 'product'
+			ORDER BY comments.comment_date_gmt DESC
+			LIMIT 5
+		" );
 
 		if ( $comments ) {
 			echo '<ul>';

@@ -260,7 +260,7 @@ function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new
 
 	if ( get_option( 'db_version' ) < 34370 ) {
 		if ( 'product_cat' === $taxonomy || taxonomy_is_product_attribute( $taxonomy ) ) {
-			$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
+			$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
 
 			// Copy across to split term
 			if ( $old_meta_data ) {

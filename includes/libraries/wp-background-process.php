@@ -273,12 +273,12 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 			$key = $this->identifier . '_batch_%';
 
 			$query = $wpdb->get_row( $wpdb->prepare( "
-			SELECT *
-			FROM {$table}
-			WHERE {$column} LIKE %s
-			ORDER BY {$key_column} ASC
-			LIMIT 1
-		", $key ) );
+				SELECT {$value_column}, {$column}
+				FROM {$table}
+				WHERE {$column} LIKE %s
+				ORDER BY {$key_column} ASC
+				LIMIT 1
+			", $key ) );
 
 			$batch       = new stdClass();
 			$batch->key  = $query->$column;

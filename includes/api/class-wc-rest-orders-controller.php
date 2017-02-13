@@ -668,7 +668,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		// Verify provided line item ID is associated with order.
 		if ( 'update' === $action ) {
 			$result = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
+				$wpdb->prepare( "SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
 				absint( $posted['id'] ),
 				absint( $order->get_id() )
 			) );
