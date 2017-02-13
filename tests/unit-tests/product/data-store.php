@@ -399,15 +399,15 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$multiword_attribute_variation->set_attributes( array( 'Color' => 'green', 'Mounting Plate' => 'galaxy-s6', 'Support' => 'one-year' ) );
 		$multiword_attribute_variation->save();
 
-		//Check the one attribute variation title
+		// Check the one attribute variation title.
 		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
 		$this->assertEquals( "Test Product &ndash; Green", $loaded_variation->get_name() );
 
-		//Check the two attribute variation title
+		// Check the two attribute variation title.
 		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
 		$this->assertEquals( "Test Product &ndash; Color: Green, Size: Large", $loaded_variation->get_name() );
 
-		//Check the variation with multiple attributes but only one 1-word attribute
+		// Check the variation with multiple attributes but only one 1-word attribute.
 		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
 		$this->assertEquals( "Test Product &ndash; Green, Galaxy S6, One Year", $loaded_variation->get_name() );
 	}
@@ -422,7 +422,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->set_attributes( array() );
 		$variation->save();
 
-		//Check the one attribute variation title
 		$loaded_variation = wc_get_product( $variation->get_id() );
 		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
