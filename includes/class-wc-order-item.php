@@ -178,6 +178,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Expands things like term slugs before return.
 	 * @param string $hideprefix (default: _)
+	 * @param boolean $include_attributes (default: false)
 	 * @return array
 	 */
 	public function get_formatted_meta_data( $hideprefix = '_', $include_attributes = false ) {
