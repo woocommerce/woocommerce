@@ -38,7 +38,6 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			'total_stock',
 			'crosssell_ids',
 			'parent',
-			'product_type',
 		);
 		if ( $this->is_type( 'variation' ) ) {
 			$valid = array_merge( $valid, array(
