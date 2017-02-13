@@ -257,7 +257,7 @@ function wc_get_loop_class() {
 	global $woocommerce_loop;
 
 	$woocommerce_loop['loop']    = ! empty( $woocommerce_loop['loop'] ) ? $woocommerce_loop['loop'] + 1   : 1;
-	$woocommerce_loop['columns'] = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 );
+	$woocommerce_loop['columns'] = max( 1, ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 ) );
 
 	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
 		return 'first';
@@ -2367,17 +2367,17 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		$args     = wp_parse_args( $args, $defaults );
 		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		wc_get_template( $template, array(
+		wc_get_template( $template, apply_filters( 'woocommerce_email_order_items_args', array(
 			'order'               => $order,
 			'items'               => $order->get_items(),
-			'show_download_links' => $order->is_download_permitted(),
+			'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
 			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $order->is_paid(),
+			'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
 			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin'],
-		) );
+		) ) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
 	}

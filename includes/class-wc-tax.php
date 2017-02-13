@@ -410,8 +410,8 @@ class WC_Tax {
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
 			WHERE 1=1 AND " . implode( ' AND ', $criteria ) . "
-			GROUP BY tax_rate_id
-			ORDER BY tax_rate_priority
+			GROUP BY tax_rates.tax_rate_id
+			ORDER BY tax_rates.tax_rate_priority
 		" );
 
 		$found_rates       = self::sort_rates( $found_rates );

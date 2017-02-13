@@ -1336,6 +1336,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_refunds() {
 		$object     = new WC_Order();
+		$object->set_total( 100 );
 		$id         = $object->save();
 
 		$this->assertCount( 0, $object->get_refunds() );

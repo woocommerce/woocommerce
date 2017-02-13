@@ -68,7 +68,14 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_prices( $include_taxes = false ) {
 		$data_store = $this->get_data_store();
-		return $data_store->read_price_data( $this, $include_taxes );
+
+		$prices = $data_store->read_price_data( $this, $include_taxes );
+
+		foreach ( $prices as $price_key => $variation_prices ) {
+			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
+		}
+
+		return $prices;
 	}
 
 	/**
@@ -455,11 +462,13 @@ class WC_Product_Variable extends WC_Product {
 			$data_store->sync_stock_status( $product );
 			self::sync_attributes( $product ); // Legacy update of attributes.
 
-			do_action( 'woocommerce_variable_product_sync', $product->get_id(), $product->get_visible_children( 'edit' ), $save );
+			do_action( 'woocommerce_variable_product_sync_data', $product );
 
 			if ( $save ) {
 				$product->save();
 			}
+
+			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product' );
 		}
 		return $product;
 	}
@@ -484,5 +493,16 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 		return $product;
+	}
+
+	/**
+	 * Sort an associativate array of $variation_id => $price pairs in order of min and max prices.
+	 *
+	 * @param array $prices Associativate array of $variation_id => $price pairs
+	 * @return array
+	 */
+	protected function sort_variation_prices( $prices ) {
+		asort( $prices );
+		return $prices;
 	}
 }

@@ -51,13 +51,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	protected $items = array(
-		'line_items'     => null,
-		'coupon_lines'   => null,
-		'shipping_lines' => null,
-		'fee_lines'      => null,
-		'tax_lines'      => null,
-	);
+	protected $items = array();
 
 	/**
 	 * Order items that need deleting are stored here.
@@ -197,7 +191,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 		$this->items_to_delete = array();
 
-		// Add/save items
+		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
 				foreach ( $items as $item_key => $item ) {
@@ -652,6 +646,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
+	 *
 	 * @param string $type Order item type. Default null.
 	 */
 	public function remove_order_items( $type = null ) {
@@ -659,22 +654,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data_store->delete_items( $this, $type );
 
 			if ( $group = $this->type_to_group( $type ) ) {
-				$this->items[ $group ] = null;
+				unset( $this->items[ $group ] );
 			}
 		} else {
 			$this->data_store->delete_items( $this );
-			$this->items = array(
-				'line_items'     => null,
-				'coupon_lines'   => null,
-				'shipping_lines' => null,
-				'fee_lines'      => null,
-				'tax_lines'      => null,
-			);
+			$this->items = array();
 		}
 	}
 
 	/**
 	 * Convert a type to a types group.
+	 *
 	 * @param string $type
 	 * @return string group
 	 */
@@ -691,6 +681,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of items/products within this order.
+	 *
 	 * @param string|array $types Types of line items to get (array or string).
 	 * @return Array of WC_Order_item
 	 */
@@ -700,7 +691,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		foreach ( $types as $type ) {
 			if ( $group = $this->type_to_group( $type ) ) {
-				if ( is_null( $this->items[ $group ] ) ) {
+				if ( ! isset( $this->items[ $group ] ) ) {
 					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 				}
 				// Don't use array_merge here because keys are numeric
@@ -713,6 +704,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of fees within this order.
+	 *
 	 * @return array
 	 */
 	public function get_fees() {
@@ -721,6 +713,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of taxes within this order.
+	 *
 	 * @return array
 	 */
 	public function get_taxes() {
@@ -729,6 +722,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Return an array of shipping costs within this order.
+	 *
 	 * @return array
 	 */
 	public function get_shipping_methods() {
@@ -737,6 +731,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Gets formatted shipping method title.
+	 *
 	 * @return string
 	 */
 	public function get_shipping_method() {
@@ -749,6 +744,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get coupon codes only.
+	 *
 	 * @return array
 	 */
 	public function get_used_coupons() {
@@ -780,6 +776,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get an order item object, based on it's type.
+	 *
 	 * @since  2.7.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
@@ -790,6 +787,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get key for where a certain item type is stored in _items.
+	 *
 	 * @since  2.7.0
 	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
 	 * @return string
@@ -812,6 +810,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Remove item from the order.
+	 *
 	 * @param int $item_id
 	 */
 	public function remove_item( $item_id ) {
@@ -828,6 +827,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Adds an order item to this order. The order item will not persist until save.
+	 *
 	 * @since 2.7.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
 	 */
@@ -837,7 +837,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Make sure existing items are loaded so we can append this new one.
-		if ( is_null( $this->items[ $items_key ] ) ) {
+		if ( ! isset( $this->items[ $items_key ] ) ) {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
 		}
 
@@ -845,8 +845,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID
-		if ( $item->get_id() ) {
-			$this->items[ $items_key ][ $item->get_id() ] = $item;
+		if ( $item_id = $item->get_id() ) {
+			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
 			$this->items[ $items_key ][ 'new:' . sizeof( $this->items[ $items_key ] ) ] = $item;
 		}
@@ -855,6 +855,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Add a product line item to the order. This is the only line item type with
 	 * it's own method because it saves looking up order amounts (costs are added up for you).
+	 *
 	 * @param  \WC_Product $product
 	 * @param  int $qty
 	 * @param  array $args

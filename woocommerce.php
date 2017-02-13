@@ -3,8 +3,8 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.7.0-beta-1
- * Author: WooThemes
+ * Version: 2.7.0-beta-2
+ * Author: Automattic
  * Author URI: https://woocommerce.com
  * Requires at least: 4.4
  * Tested up to: 4.7
@@ -14,7 +14,7 @@
  *
  * @package WooCommerce
  * @category Core
- * @author WooThemes
+ * @author Automattic
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -174,6 +174,7 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
+		add_action( 'woocommerce_send_queued_transactional_email', array( 'WC_Emails', 'send_queued_transactional_email' ), 10, 2 );
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 	}
@@ -389,6 +390,7 @@ final class WooCommerce {
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
 		$this->countries       = new WC_Countries();                            // Countries class
 		$this->integrations    = new WC_Integrations();                         // Integrations class
+		$this->structured_data = new WC_Structured_Data();                      // Structured Data class, generates and handles structured data
 
 		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
@@ -399,7 +401,6 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents
-			$this->structured_data = new WC_Structured_Data();                       // Structured Data class, generates and handles structured data
 			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );          // Customer should be saved during shutdown.
 		}

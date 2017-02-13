@@ -77,7 +77,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
 			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
-			&& ! strstr( $meta->meta_key, $wpdb->prefix );
+			&& ! strstr( $meta->meta_key, $wpdb->prefix )
+			&& 0 !== stripos( $meta->meta_key, 'wp_' );
 	 }
 
 	/**

@@ -242,6 +242,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
+		wp_cache_delete( 'order-' . $order->get_id(), 'orders' );
 	}
 
 	/**

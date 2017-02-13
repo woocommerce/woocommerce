@@ -304,9 +304,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				),
 			),
 			'delete' => array(
-				array(
-					'id' => $children[1],
-				),
+				$children[1],
 			),
 			'create' => array(
 				array(

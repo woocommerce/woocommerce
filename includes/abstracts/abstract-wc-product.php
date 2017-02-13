@@ -129,12 +129,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
+	 *
+	 * The product_type property is @deprecated but is used here for BW compat with child classes which may be defining product_type and not have a get_type method.
+	 *
 	 * @since 2.7.0
 	 * @return string
 	 */
 	public function get_type() {
-		// product_type is @deprecated but here for BW compat with child classes.
-		return $this->product_type;
+		return isset( $this->product_type ) ? $this->product_type : 'simple';
 	}
 
 	/*
@@ -886,7 +888,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $class Tax class.
 	 */
 	public function set_tax_class( $class ) {
-		$this->set_prop( 'tax_class', wc_clean( $class ) );
+		$class       = sanitize_title( $class );
+		$class       = 'standard' === $class ? '' : $class;
+		$this->set_prop( 'tax_class', $class );
 	}
 
 	/**
@@ -1820,7 +1824,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
-		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}

@@ -364,6 +364,11 @@ table.variations {
 		margin: 0;
 	}
 
+	.woocommerce-product-gallery__image:nth-child(n+2) {
+		width: 25%;
+		display: inline-block;
+	}
+
 	.flex-control-thumbs {
 		li {
 			list-style: none;
@@ -763,7 +768,7 @@ table.variations {
 
 	li {
 		margin-bottom: .5em;
-		
+
 		input {
 			float: left;
 		}
