@@ -201,13 +201,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					// If ID changed (new item saved to DB)...
 					if ( $item_id !== $item_key ) {
 						$this->items[ $item_group ][ $item_id ] = $item;
-						unset( $this->items[ $item_group ][ $item_key ] );
 
-						// Fire an action for the new item in the database. This is used for firing legacy hooks in particular.
-						do_action( 'woocommerce_order_item_created', $item, $this );
-					} else {
-						// Fire an action for the new item in the database. This is used for firing legacy hooks in particular.
-						do_action( 'woocommerce_order_item_updated', $item, $this );
+						unset( $this->items[ $item_group ][ $item_key ] );
 					}
 				}
 			}

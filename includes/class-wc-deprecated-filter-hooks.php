@@ -84,6 +84,6 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	 * @return mixed
 	 */
 	protected function trigger_hook( $old_hook, $new_callback_args ) {
-		apply_filters_ref_array( $old_hook, $new_callback_args );
+		return apply_filters_ref_array( $old_hook, $new_callback_args );
 	}
 }

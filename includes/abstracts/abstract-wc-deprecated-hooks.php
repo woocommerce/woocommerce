@@ -23,7 +23,8 @@ abstract class WC_Deprecated_Hooks {
 	 * Constructor.
 	 */
 	public function __construct() {
-		array_walk( array_keys( $this->deprecated_hooks ), array( $this, 'hook_in' ) );
+		$new_hooks = array_keys( $this->deprecated_hooks );
+		array_walk( $new_hooks, array( $this, 'hook_in' ) );
 	}
 
 	/**
@@ -89,5 +90,5 @@ abstract class WC_Deprecated_Hooks {
 	 * @param  array $new_callback_args
 	 * @return mixed
 	 */
-	abstract function trigger_hook( $old_hook, $new_callback_args );
+	abstract protected function trigger_hook( $old_hook, $new_callback_args );
 }
