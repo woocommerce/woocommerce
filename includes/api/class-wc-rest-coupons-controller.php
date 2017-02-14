@@ -302,7 +302,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 					'readonly'    => true,
 				),
 				'meta_data' => array(
-					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'description' => __( 'Coupons meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
