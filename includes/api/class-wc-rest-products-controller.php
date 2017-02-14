@@ -154,6 +154,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V1_Controller {
 	}
 
 	/**
+	 * Get product data.
+	 *
+	 * @param WC_Product $product Product instance.
+	 * @return array
+	 */
+	protected function get_product_data( $product ) {
+		$data = parent::get_product_data( $product );
+		$data['meta_data'] = $product->get_meta_data();
+
+		return $data;
+	}
+
+	/**
 	 * Get an individual variation's data.
 	 *
 	 * @todo Remove in future version of the API. We have variations endpoints now.
@@ -1060,6 +1073,32 @@ class WC_REST_Products_Controller extends WC_REST_Products_V1_Controller {
 					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'meta_data' => array(
+					'description' => __( 'Meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key' => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+						),
+					),
 				),
 			),
 		);
