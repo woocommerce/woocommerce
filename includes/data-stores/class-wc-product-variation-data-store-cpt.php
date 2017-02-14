@@ -114,16 +114,22 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-			$this->update_post_meta( $product, true );
+
+			$this->updated_props = array();
+			$this->update_post_meta( $product );
+			$this->handle_updated_props( $product );
+
 			$this->update_terms( $product );
 			$this->update_attributes( $product );
+
 			$product->save_meta_data();
+			$product->apply_changes();
+
+			$this->update_version_and_type( $product );
+
+			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_create_product_variation', $id );
-
-			$product->apply_changes();
-			$this->update_version_and_type( $product );
-			$this->clear_caches( $product );
 		}
 	}
 
@@ -143,17 +149,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'menu_order'     => $product->get_menu_order(),
 		);
+
 		wp_update_post( $post_data );
+
+		$this->updated_props = array();
 		$this->update_post_meta( $product );
+		$this->handle_updated_props( $product );
+
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
+
 		$product->save_meta_data();
+		$product->apply_changes();
+
+		$this->update_version_and_type( $product );
+
+		$this->clear_caches( $product );
 
 		do_action( 'woocommerce_update_product_variation', $product->get_id() );
-
-		$product->apply_changes();
-		$this->update_version_and_type( $product );
-		$this->clear_caches( $product );
 	}
 
 	/*
@@ -270,7 +283,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update_post_meta( &$product ) {
-		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
+		$updated_description = update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
+
+		if ( $updated_description ) {
+			$this->updated_props[] = 'description';
+		}
+
 		parent::update_post_meta( $product );
 	}
 }
