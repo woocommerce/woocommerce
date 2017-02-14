@@ -58,6 +58,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $extra_data_saved = false;
 
+	/**
+	 * Stores updated props.
+	 * @var array
+	 */
+	protected $updated_props = array();
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -91,13 +97,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+
+			$this->updated_props = array();
 			$this->update_post_meta( $product );
+			$this->handle_updated_props( $product );
+
 			$this->update_terms( $product );
 			$this->update_visibility( $product );
 			$this->update_attributes( $product );
 			$this->update_version_and_type( $product );
+
 			$product->save_meta_data();
 			$product->apply_changes();
+
 			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_new_product', $id );
@@ -160,13 +172,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			) );
 		}
 
+		$this->updated_props = array();
 		$this->update_post_meta( $product );
+		$this->handle_updated_props( $product );
+
 		$this->update_terms( $product );
 		$this->update_visibility( $product );
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
+
 		$product->save_meta_data();
 		$product->apply_changes();
+
 		$this->clear_caches( $product );
 
 		do_action( 'woocommerce_update_product', $product->get_id() );
@@ -371,7 +388,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 2.7.0
 	 */
 	protected function update_post_meta( &$product ) {
-		$updated_props     = array();
+
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -438,7 +455,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 			}
 			if ( $updated ) {
-				$updated_props[] = $prop;
+				$this->updated_props[] = $prop;
 			}
 		}
 
@@ -451,17 +468,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$function = 'get_' . $key;
 				if ( is_callable( array( $product, $function ) ) ) {
 					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
-						$updated_props[] = $key;
+						$this->updated_props[] = $key;
 					}
 				}
 			}
 		}
 
 		if ( $this->update_downloads( $product ) ) {
-			$updated_props[] = 'downloads';
+			$this->updated_props[] = 'downloads';
 		}
-
-		$this->handle_updated_props( $product, $updated_props );
 	}
 
 	/**
@@ -469,10 +484,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since  2.7.0
 	 * @param  WC_Product $product
-	 * @param  array $updated_props
 	 */
-	protected function handle_updated_props( &$product, $updated_props ) {
-		if ( in_array( 'date_on_sale_from', $updated_props ) || in_array( 'date_on_sale_to', $updated_props ) || in_array( 'regular_price', $updated_props ) || in_array( 'sale_price', $updated_props ) ) {
+	protected function handle_updated_props( &$product ) { error_log( print_r( $this->updated_props, 1 ) );
+
+		if ( in_array( 'date_on_sale_from', $this->updated_props ) || in_array( 'date_on_sale_to', $this->updated_props ) || in_array( 'regular_price', $this->updated_props ) || in_array( 'sale_price', $this->updated_props ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 				$product->set_price( $product->get_sale_price( 'edit' ) );
@@ -482,15 +497,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( in_array( 'stock_quantity', $updated_props ) ) {
+		if ( in_array( 'stock_quantity', $this->updated_props ) ) {
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $product );
 		}
 
-		if ( in_array( 'stock_status', $updated_props ) ) {
+		if ( in_array( 'stock_status', $this->updated_props ) ) {
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
-		do_action( 'woocommerce_product_object_updated_props', $product, $updated_props );
+		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 	}
 
 	/**
