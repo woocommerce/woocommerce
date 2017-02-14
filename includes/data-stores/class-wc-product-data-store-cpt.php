@@ -485,7 +485,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since  2.7.0
 	 * @param  WC_Product $product
 	 */
-	protected function handle_updated_props( &$product ) { error_log( print_r( $this->updated_props, 1 ) );
+	protected function handle_updated_props( &$product ) {
 
 		if ( in_array( 'date_on_sale_from', $this->updated_props ) || in_array( 'date_on_sale_to', $this->updated_props ) || in_array( 'regular_price', $this->updated_props ) || in_array( 'sale_price', $this->updated_props ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
