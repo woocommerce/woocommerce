@@ -75,8 +75,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
 		 */
 		if ( __( 'Variation #', 'woocommerce' ) === substr( $post_object->post_title, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $post_object->post_title ) {
-			$parent_data = $product->get_parent_data();
-			$new_title   = $parent_data['title'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
+			$new_title   = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
@@ -96,13 +95,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		$product->set_date_created( current_time( 'timestamp' ) );
-		$parent_object = get_post( $product->get_parent_id() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => $this->generate_product_title( $product ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -140,10 +138,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
-		$parent_object = get_post( $product->get_parent_id() );
 		$post_data = array(
 			'ID'             => $product->get_id(),
-			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => $this->generate_product_title( $product ),
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
@@ -174,6 +171,44 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Generates a title with attribute information for a variation.
+	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
+	 * All other products will get a title of the form "Name - Value, Value"
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product
+	 * @return string
+	 */
+	protected function generate_product_title( $product ) {
+		$include_attribute_names = false;
+		$attributes = (array) $product->get_attributes();
+
+		// Determine whether to include attribute names through counting the number of one-word attribute values.
+		$one_word_attributes = 0;
+		foreach ( $attributes as $name => $value ) {
+			if ( false === strpos( $value, '-' ) ) {
+				++$one_word_attributes;
+			}
+			if ( $one_word_attributes > 1 ) {
+				$include_attribute_names = true;
+				break;
+			}
+		}
+
+		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
+		$title_base_text = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_attributes_text = wc_get_formatted_variation( $product, true, $include_attribute_names );
+		$separator = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
+
+		return apply_filters( 'woocommerce_product_variation_title',
+			$title_base_text . $separator . $title_attributes_text,
+			$product,
+			$title_base_text,
+			$title_attributes_text
+		);
+	}
 
 	/**
 	 * Make sure we store the product version (to track data changes).

@@ -183,16 +183,25 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	public function get_formatted_meta_data( $hideprefix = '_' ) {
 		$formatted_meta = array();
 		$meta_data      = $this->get_meta_data();
+		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
+		$product = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
+			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
+
+			// Skip items with values already in the product details area of the product name
+			$value_in_product_name_regex = "/&ndash;.*{$meta->value}/i";
+			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+				continue;
+			}
+
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
-			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
+			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
 
 			if ( taxonomy_exists( $attribute_key ) ) {

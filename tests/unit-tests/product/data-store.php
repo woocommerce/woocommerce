@@ -351,7 +351,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	function test_get_on_sale_products() {
-
 		$product_store = new WC_Product_Data_Store_CPT();
 
 		$sale_product = WC_Helper_Product::create_simple_product();
@@ -378,5 +377,52 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $not_sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $future_sale_product->get_id(), $sale_product_ids );
+	}
+
+	function test_generate_product_title() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$one_attribute_variation = new WC_Product_Variation;
+		$one_attribute_variation->set_parent_id( $product->get_id() );
+		$one_attribute_variation->set_attributes( array( 'Color' => 'green' ) );
+		$one_attribute_variation->save();
+
+		$two_attribute_variation = new WC_Product_Variation;
+		$two_attribute_variation->set_parent_id( $product->get_id() );
+		$two_attribute_variation->set_attributes( array( 'Color' => 'green', 'Size' => 'large' ) );
+		$two_attribute_variation->save();
+
+		$multiword_attribute_variation = new WC_Product_Variation;
+		$multiword_attribute_variation->set_parent_id( $product->get_id() );
+		$multiword_attribute_variation->set_attributes( array( 'Color' => 'green', 'Mounting Plate' => 'galaxy-s6', 'Support' => 'one-year' ) );
+		$multiword_attribute_variation->save();
+
+		// Check the one attribute variation title.
+		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
+		$this->assertEquals( "Test Product &ndash; Green", $loaded_variation->get_name() );
+
+		// Check the two attribute variation title.
+		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
+		$this->assertEquals( "Test Product &ndash; Color: Green, Size: Large", $loaded_variation->get_name() );
+
+		// Check the variation with multiple attributes but only one 1-word attribute.
+		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
+		$this->assertEquals( "Test Product &ndash; Green, Galaxy S6, One Year", $loaded_variation->get_name() );
+	}
+
+	function test_generate_product_title_no_attributes() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array() );
+		$variation->save();
+
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
 }
