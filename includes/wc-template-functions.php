@@ -2395,11 +2395,11 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$strings = array();
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
-			'before'				=> '<ul class="wc-item-meta"><li>',
-			'after'					=> '</li></ul>',
-			'separator'				=> '</li><li>',
-			'echo'					=> true,
-			'autop'					=> false,
+			'before'    => '<ul class="wc-item-meta"><li>',
+			'after'		=> '</li></ul>',
+			'separator'	=> '</li><li>',
+			'echo'		=> true,
+			'autop'		=> false,
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
