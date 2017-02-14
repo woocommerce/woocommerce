@@ -193,15 +193,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
-			$attribute_key = str_replace( 'attribute_', '', $meta->key );
-			$display_key   = wc_attribute_label( $attribute_key, $product );
-			$display_value = $meta->value;
 
 			// Skip items with values already in the product details area of the product name
 			$value_in_product_name_regex = "/&ndash;.*{$meta->value}/i";
 			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
 				continue;
 			}
+
+			$attribute_key = str_replace( 'attribute_', '', $meta->key );
+			$display_key   = wc_attribute_label( $attribute_key, $product );
+			$display_value = $meta->value;
 
 			if ( taxonomy_exists( $attribute_key ) ) {
 				$term = get_term_by( 'slug', $meta->value, $attribute_key );
