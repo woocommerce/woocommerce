@@ -178,18 +178,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Expands things like term slugs before return.
 	 * @param string $hideprefix (default: _)
-	 * @param boolean $include_attributes (default: false)
 	 * @return array
 	 */
-	public function get_formatted_meta_data( $hideprefix = '_', $include_attributes = false ) {
+	public function get_formatted_meta_data( $hideprefix = '_' ) {
 		$formatted_meta = array();
 		$meta_data      = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
 		$product = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
-		$attributes = $product ? $product->get_attributes() : array();
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) || ( ! $include_attributes && isset( $attributes[ $meta->key ] ) ) ) {
+			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
@@ -198,6 +196,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
+
+			// Skip items with values already in the product details area of the product name
+			$value_in_product_name_regex = "/&ndash;.*{$meta->value}/i";
+			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+				continue;
+			}
 
 			if ( taxonomy_exists( $attribute_key ) ) {
 				$term = get_term_by( 'slug', $meta->value, $attribute_key );
