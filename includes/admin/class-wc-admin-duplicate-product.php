@@ -103,7 +103,9 @@ class WC_Admin_Duplicate_Product {
 			wc_product_force_unique_sku( $duplicate->get_id() );
 		}
 
-		if ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) {
+		$exclude = apply_filters( 'woocommerce_duplicate_product_exclude_children', false );
+		
+		if ( ! $exclude && ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) ) {
 			foreach( $product->get_children() as $child_id ) {
 				$child = wc_get_product( $child_id );
 				$child_duplicate = clone $child;
