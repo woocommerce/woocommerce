@@ -483,7 +483,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
 	 */
-	 public function set_status( $new_status ) {
+	public function set_status( $new_status ) {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
@@ -503,7 +503,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'from' => $old_status,
 			'to'   => $new_status,
 		);
-	 }
+	}
 
 	/**
 	 * Set order_version.
@@ -1109,7 +1109,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$item = new WC_Order_Item_Tax();
 			$item->set_rate( $tax_rate_id );
 			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
-			$item->set_shipping_tax_total( isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 			$this->add_item( $item );
 		}
 
