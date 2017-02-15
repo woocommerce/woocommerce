@@ -313,11 +313,11 @@ class WC_Checkout {
 			$order->set_cart_tax( WC()->cart->tax_total );
 			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
 			$order->set_total( WC()->cart->total );
-			$this->create_order_line_items( $order );
-			$this->create_order_fee_lines( $order );
-			$this->create_order_shipping_lines( $order );
-			$this->create_order_tax_lines( $order );
-			$this->create_order_coupon_lines( $order );
+			$this->create_order_line_items( $order, WC()->cart );
+			$this->create_order_fee_lines( $order, WC()->cart );
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
+			$this->create_order_tax_lines( $order, WC()->cart );
+			$this->create_order_coupon_lines( $order, WC()->cart );
 
 			/**
 			 * Action hook to adjust order before save.
@@ -341,8 +341,8 @@ class WC_Checkout {
 	 *
 	 * @param  WC_Order $order
 	 */
-	protected function create_order_line_items( &$order ) {
-		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+	public function create_order_line_items( &$order, $cart ) {
+		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
 			$product                    = $values['data'];
 			$item                       = new WC_Order_Item_Product();
 			$item->legacy_values        = $values; // @deprecated For legacy actions.
@@ -382,8 +382,8 @@ class WC_Checkout {
 	 *
 	 * @param  WC_Order $order
 	 */
-	protected function create_order_fee_lines( &$order ) {
-		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
+	public function create_order_fee_lines( &$order, $cart ) {
+		foreach ( $cart->get_fees() as $fee_key => $fee ) {
 			$item                 = new WC_Order_Item_Fee();
 			$item->legacy_fee     = $fee; // @deprecated For legacy actions.
 			$item->legacy_fee_key = $fee_key; // @deprecated For legacy actions.
@@ -413,10 +413,8 @@ class WC_Checkout {
 	 *
 	 * @param  WC_Order $order
 	 */
-	protected function create_order_shipping_lines( &$order ) {
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
+	public function create_order_shipping_lines( &$order, $chosen_shipping_methods, $packages ) {
+		foreach ( $packages as $package_key => $package ) {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
 				/** @var WC_Shipping_Rate $shipping_rate */
 				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
@@ -452,14 +450,14 @@ class WC_Checkout {
 	 *
 	 * @param  WC_Order $order
 	 */
-	protected function create_order_tax_lines( &$order ) {
-		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
+	public function create_order_tax_lines( &$order, $cart ) {
+		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
 				$item = new WC_Order_Item_Tax();
 				$item->set_props( array(
 					'rate_id'            => $tax_rate_id,
-					'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
-					'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
+					'tax_total'          => $cart->get_tax_amount( $tax_rate_id ),
+					'shipping_tax_total' => $cart->get_shipping_tax_amount( $tax_rate_id ),
 					'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
 					'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 					'compound'           => WC_Tax::is_compound( $tax_rate_id ),
@@ -482,13 +480,13 @@ class WC_Checkout {
 	 *
 	 * @param  WC_Order $order
 	 */
-	protected function create_order_coupon_lines( &$order ) {
-		foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+	public function create_order_coupon_lines( &$order, $cart ) {
+		foreach ( $cart->get_coupons() as $code => $coupon ) {
 			$item = new WC_Order_Item_Coupon();
 			$item->set_props( array(
 				'code'         => $code,
-				'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
-				'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
+				'discount'     => $cart->get_coupon_discount_amount( $code ),
+				'discount_tax' => $cart->get_coupon_discount_tax_amount( $code ),
 			) );
 
 			/**
