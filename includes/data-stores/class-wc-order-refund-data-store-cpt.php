@@ -34,6 +34,19 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	);
 
 	/**
+	 * Delete a refund - no trash is supported.
+	 * @param WC_Order
+	 * @param array $args Array of args to pass to the delete method.
+	 */
+	public function delete( &$order, $args = array() ) {
+		$id = $order->get_id();
+
+		wp_delete_post( $id );
+		$order->set_id( 0 );
+		do_action( 'woocommerce_delete_order', $id );
+	}
+
+	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order
