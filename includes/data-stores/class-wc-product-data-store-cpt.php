@@ -98,14 +98,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
-			$this->updated_props = array();
-			$this->update_post_meta( $product );
-			$this->handle_updated_props( $product );
-
-			$this->update_terms( $product );
-			$this->update_visibility( $product );
-			$this->update_attributes( $product );
+			$this->update_post_meta( $product, true );
+			$this->update_terms( $product, true );
+			$this->update_visibility( $product, true );
+			$this->update_attributes( $product, true );
 			$this->update_version_and_type( $product );
+			$this->handle_updated_props( $product );
 
 			$product->save_meta_data();
 			$product->apply_changes();
@@ -172,14 +170,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			) );
 		}
 
-		$this->updated_props = array();
 		$this->update_post_meta( $product );
-		$this->handle_updated_props( $product );
-
 		$this->update_terms( $product );
 		$this->update_visibility( $product );
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
+		$this->handle_updated_props( $product );
 
 		$product->save_meta_data();
 		$product->apply_changes();
@@ -385,10 +381,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$product ) {
-
+	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -424,11 +420,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Make sure to take extra data (like product url or text for external products) into account.
 		$extra_data_keys = $product->get_extra_data_keys();
+
 		foreach ( $extra_data_keys as $key ) {
 			$meta_key_to_props[ '_' . $key ] = $key;
 		}
 
-		$props_to_update = $this->get_props_to_update( $product, $meta_key_to_props );
+		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
@@ -474,19 +471,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( $this->update_downloads( $product ) ) {
+		if ( $this->update_downloads( $product, $force ) ) {
 			$this->updated_props[] = 'downloads';
 		}
 	}
 
 	/**
-	 * Handle updated meta props after updating meta.
+	 * Handle updated meta props after updating meta data.
 	 *
 	 * @since  2.7.0
 	 * @param  WC_Product $product
 	 */
 	protected function handle_updated_props( &$product ) {
-
 		if ( in_array( 'date_on_sale_from', $this->updated_props ) || in_array( 'date_on_sale_to', $this->updated_props ) || in_array( 'regular_price', $this->updated_props ) || in_array( 'sale_price', $this->updated_props ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
@@ -505,25 +501,30 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
+		// Trigger action so 3rd parties can deal with updated props.
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
+
+		// After handling, we can reset the props array.
+		$this->updated_props = array();
 	}
 
 	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 * @since 2.7.0
 	 */
-	protected function update_terms( &$product ) {
+	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
-		if ( array_key_exists( 'category_ids', $changes ) ) {
+		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
 		}
-		if ( array_key_exists( 'tag_ids', $changes ) ) {
+		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
-		if ( array_key_exists( 'shipping_class_id', $changes ) ) {
+		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
 	}
@@ -532,12 +533,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update visibility terms based on props.
 	 *
 	 * @since 2.7.0
+	 * @param bool Force update. Used during create.
 	 * @param WC_Product
 	 */
-	protected function update_visibility( &$product ) {
+	protected function update_visibility( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
-		if ( array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
+		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
 			$terms = array();
 
 			if ( $product->get_featured() ) {
@@ -575,12 +577,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update attributes which are a mix of terms and meta data.
 	 *
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 * @since 2.7.0
 	 */
-	protected function update_attributes( &$product ) {
+	protected function update_attributes( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
-		if ( array_key_exists( 'attributes', $changes ) ) {
+		if ( $force || array_key_exists( 'attributes', $changes ) ) {
 			$attributes  = $product->get_attributes();
 			$meta_values = array();
 
@@ -622,12 +625,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product $product
+	 * @param bool Force update. Used during create.
 	 * @return bool If updated or not.
 	 */
-	protected function update_downloads( &$product ) {
+	protected function update_downloads( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
-		if ( array_key_exists( 'downloads', $changes ) ) {
+		if ( $force || array_key_exists( 'downloads', $changes ) ) {
 			$downloads   = $product->get_downloads();
 			$meta_values = array();
 
