@@ -118,14 +118,15 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$test_item = reset( $test_items );
 		$test_item_id = $test_item->get_id();
 
-		add_action( 'woocommerce_order_edit_product', function( $order_id, $item_id, $item ) {
-			$this->assertInstanceOf( 'WC_Order_Item_Product', $item );
+		add_action( 'woocommerce_order_edit_product', function( $order_id, $item_id ) {
 			update_post_meta( $order_id, 'wc_action_test_order_meta', true );
-		}, 10, 3 );
-
+			update_post_meta( $item_id, 'wc_action_test_item_meta', true );
+		}, 10, 2 );
 		do_action( 'woocommerce_update_order_item', $test_item_id, $test_item, $test_order_id );
 
 		$order_update_worked = (bool) get_post_meta( $test_order_id, 'wc_action_test_order_meta', true );
+		$item_update_worked = (bool) get_post_meta( $test_item_id, 'wc_action_test_item_meta', true );
 		$this->assertTrue( $order_update_worked );
+		$this->assertTrue( $item_update_worked );
 	}
 }
