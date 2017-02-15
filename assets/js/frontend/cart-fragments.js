@@ -70,11 +70,11 @@ jQuery( function( $ ) {
 		var cart_timeout = null,
 			day_in_ms    = ( 24 * 60 * 60 * 1000 );
 
-		$( document.body ).bind( 'wc_fragment_refresh updated_wc_div', function() {
+		$( document.body ).on( 'wc_fragment_refresh updated_wc_div', function() {
 			refresh_cart_fragment();
 		});
 
-		$( document.body ).bind( 'added_to_cart', function( event, fragments, cart_hash ) {
+		$( document.body ).on( 'added_to_cart', function( event, fragments, cart_hash ) {
 			var prev_cart_hash = sessionStorage.getItem( cart_hash_key );
 
 			if ( prev_cart_hash === null || prev_cart_hash === undefined || prev_cart_hash === '' ) {
@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 			set_cart_hash( cart_hash );
 		});
 
-		$( document.body ).bind( 'wc_fragments_refreshed', function() {
+		$( document.body ).on( 'wc_fragments_refreshed', function() {
 			clearTimeout( cart_timeout );
 			cart_timeout = setTimeout( refresh_cart_fragment, day_in_ms );
 		} );
@@ -158,7 +158,7 @@ jQuery( function( $ ) {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).hide();
 	}
 
-	$( document.body ).bind( 'adding_to_cart', function() {
+	$( document.body ).on( 'adding_to_cart', function() {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
 	});
 });
