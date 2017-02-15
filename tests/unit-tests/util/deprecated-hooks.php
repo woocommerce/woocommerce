@@ -9,6 +9,35 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
 	protected $handlers = array();
 
+	/**
+	 * Generic toggle value function that can be hooked to a filter for testing
+	 * @param bool/int $value
+	 * @return bool/int
+	 */
+	function toggle_value( $value ) {
+		return ! $value;
+	}
+
+	/**
+	 * Generic toggle value function that can be hooked to an action for testing
+	 * @param bool/int $value
+	 */
+	function toggle_value_by_ref( &$value ) {
+		$value = ! $value;
+	}
+
+	/**
+	 * Generic meta setting function that can be hooked to an action for testing
+	 * @param int $item1_id
+	 * @param int $item2_id (default: false)
+	 */
+	function set_meta( $item1_id, $item2_id = false ) {
+		update_post_meta( $item1_id, 'wc_deprecated_hook_test_item1_meta', 1 );
+		if ( $item2_id ) {
+			update_post_meta( $item2_id, 'wc_deprecated_hook_test_item2_meta', 2 );
+		}
+	}
+
 	function setUp() {
 		add_filter( 'deprecated_function_trigger_error', '__return_false' );
 		$this->handlers = WC()->deprecated_hook_handlers;
@@ -61,9 +90,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$args = array( false );
 		$return = -1;
 
-		add_filter( $old_hook, function( $value ) {
-			return ! $value;
-		} );
+		add_filter( $old_hook, array( $this, 'toggle_value' ) );
 
 		$result = $this->handlers['filters']->handle_deprecated_hook( $new_hook, $old_hook, $args, $return );
 		$this->assertTrue( $result );
@@ -81,9 +108,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$args = array(  &$test_value );
 		$return = -1;
 
-		add_action( $old_hook, function( &$value ) {
-			$value = true;
-		} );
+		add_filter( $old_hook, array( $this, 'toggle_value_by_ref' ) );
 
 		$this->handlers['actions']->handle_deprecated_hook( $new_hook, $old_hook, $args, $return );
 		$this->assertTrue( $test_value );
@@ -97,12 +122,10 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	function test_filter_handler() {
 		$test_width = 1;
 
-		add_filter( 'woocommerce_product_width', function( $width ) {
-			return -1 * $width;
-		} );
+		add_filter( 'woocommerce_product_width', array( $this, 'toggle_value' ) );
 
 		$new_width = apply_filters( 'woocommerce_product_get_width', $test_width );
-		$this->assertEquals( -1, $new_width );
+		$this->assertEquals( 0, $new_width );
 	}
 
 	/**
@@ -118,14 +141,12 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$test_item = reset( $test_items );
 		$test_item_id = $test_item->get_id();
 
-		add_action( 'woocommerce_order_edit_product', function( $order_id, $item_id ) {
-			update_post_meta( $order_id, 'wc_action_test_order_meta', true );
-			update_post_meta( $item_id, 'wc_action_test_item_meta', true );
-		}, 10, 2 );
+		add_action( 'woocommerce_order_edit_product', array( $this, 'set_meta' ), 10, 2 );
 		do_action( 'woocommerce_update_order_item', $test_item_id, $test_item, $test_order_id );
 
-		$order_update_worked = (bool) get_post_meta( $test_order_id, 'wc_action_test_order_meta', true );
-		$item_update_worked = (bool) get_post_meta( $test_item_id, 'wc_action_test_item_meta', true );
+		$order_update_worked = (bool) get_post_meta( $test_order_id, 'wc_deprecated_hook_test_item1_meta', 1 );
+		$item_update_worked = (bool) get_post_meta( $test_item_id, 'wc_deprecated_hook_test_item2_meta', 2 );
+
 		$this->assertTrue( $order_update_worked );
 		$this->assertTrue( $item_update_worked );
 	}
