@@ -301,7 +301,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 					'readonly'    => true,
 				),
 				'meta_data' => array(
-					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(

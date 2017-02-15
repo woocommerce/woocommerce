@@ -1092,7 +1092,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'meta_data' => array(
-					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -1204,7 +1204,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -1242,7 +1242,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								'readonly'    => true,
 							),
 							'meta' => array(
-								'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
+								'description' => __( 'Meta data (formatted).', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1324,7 +1324,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								'readonly'    => true,
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -1410,7 +1410,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -1508,7 +1508,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -1566,7 +1566,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 								'readonly'    => true,
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(

@@ -330,7 +330,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'context'     => array( 'view' ),
 				),
 				'meta_data' => array(
-					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -442,7 +442,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 								),
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
