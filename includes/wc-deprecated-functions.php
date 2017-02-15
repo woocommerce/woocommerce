@@ -18,10 +18,11 @@ include_once( 'abstracts/abstract-wc-deprecated-hooks.php' );
 include_once( 'class-wc-deprecated-action-hooks.php' );
 include_once( 'class-wc-deprecated-filter-hooks.php' );
 
-add_action( 'woocommerce_init', function() {
+function wc_initialize_deprecated_hook_handlers() {
 	WC()->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 	WC()->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
-});
+}
+add_action( 'woocommerce_init', 'wc_initialize_deprecated_hook_handlers' );
 
 /**
  * Runs a deprecated action with notice only if used.
