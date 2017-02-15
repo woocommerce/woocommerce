@@ -927,7 +927,7 @@ class WC_Checkout {
 					throw new Exception( $order->get_error_message() );
 				}
 
-				do_action( 'woocommerce_checkout_order_processed', $order, $posted_data );
+				do_action( 'woocommerce_checkout_order_processed', $order->get_id(), $posted_data, $order );
 
 				if ( WC()->cart->needs_payment() ) {
 					$this->process_order_payment( $order, $posted_data['payment_method'] );
