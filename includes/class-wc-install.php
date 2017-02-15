@@ -548,7 +548,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_order BIGINT UNSIGNED NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_id),
-  KEY tax_rate_country (tax_rate_country($max_index_length)),
+  KEY tax_rate_country (tax_rate_country),
   KEY tax_rate_state (tax_rate_state($max_index_length)),
   KEY tax_rate_class (tax_rate_class($max_index_length)),
   KEY tax_rate_priority (tax_rate_priority)
