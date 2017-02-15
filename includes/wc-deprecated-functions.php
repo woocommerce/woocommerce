@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 include_once( 'abstracts/abstract-wc-deprecated-hooks.php' );
 include_once( 'class-wc-deprecated-action-hooks.php' );
+include_once( 'class-wc-deprecated-filter-hooks.php' );
 
 new WC_Deprecated_Action_Hooks();
 new WC_Deprecated_Filter_Hooks();
