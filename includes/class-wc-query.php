@@ -138,7 +138,7 @@ class WC_Query {
 	 * @since 2.6.2
 	 * @return int
 	 */
-	protected function get_endpoints_mask() {
+	public function get_endpoints_mask() {
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$page_on_front     = get_option( 'page_on_front' );
 			$myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
