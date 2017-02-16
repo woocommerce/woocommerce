@@ -207,6 +207,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Performance - Removed the feature where old orders get access to new downloads on product edit. Looping potentially thousands of orders to do this is too much of a performance burden for stores and this can sometimes be unexpected behavior too. This does however updates *edited* downloads.
 * Performance - Removed 'items' column on orders screen due to loading excessive data.
 * Performance - Deferred email sending for faster checkouts. Now uses CRON.
+* API - New Rest API v2 with support for meta_data amongst other things.
 * API - Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
 * API - Allow oAuth1.0a authentication using headers.
 * API - New Shipping Zones endpoints.
@@ -215,7 +216,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * API - Payment gateways and shipping methods endpoints.
 * API - Prevented the (broken) ability to manipulate variations directly on the products endpoints.
 * CLI - New CLI which uses the REST API endpoints rather than it's own functions.
-* CLI - Improved RTL support.
+* Localization - Improved RTL support.
 * Localization - Added a language independent permalink setting function.
 * Localization - Added inline comments for placeholder strings.
 * Localization - Added Nigerian Provinces to i18n/state.
