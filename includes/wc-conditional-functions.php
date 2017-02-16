@@ -195,7 +195,7 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	function is_order_received_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) );
+		return apply_filters( 'woocommerce_is_order_received_page', ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) );
 	}
 }
 
