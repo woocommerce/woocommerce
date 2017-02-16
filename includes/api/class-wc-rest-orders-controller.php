@@ -159,6 +159,181 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 	}
 
 	/**
+	 * Prepare a single order for create.
+	 *
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_Error|WC_Order $data Object.
+	 */
+	protected function prepare_item_for_database( $request ) {
+		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$order     = new WC_Order( $id );
+		$schema    = $this->get_item_schema();
+		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		// Handle all writable props
+		foreach ( $data_keys as $key ) {
+			$value = $request[ $key ];
+
+			if ( ! is_null( $value ) ) {
+				switch ( $key ) {
+					case 'billing' :
+					case 'shipping' :
+						$this->update_address( $order, $value, $key );
+						break;
+					case 'line_items' :
+					case 'shipping_lines' :
+					case 'fee_lines' :
+					case 'coupon_lines' :
+						if ( is_array( $value ) ) {
+							foreach ( $value as $item ) {
+								if ( is_array( $item ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+										$order->remove_item( $item['id'] );
+									} else {
+										$this->set_item( $order, $key, $item );
+									}
+								}
+							}
+						}
+						break;
+					case 'meta_data' :
+						if ( is_array( $value ) ) {
+							foreach ( $value as $meta ) {
+								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
+							}
+						}
+						break;
+					default :
+						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
+							$order->{"set_{$key}"}( $value );
+						}
+						break;
+				}
+			}
+		}
+
+		/**
+		 * Filter the data for the insert.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for the response.
+		 *
+		 * @param WC_Order           $order      The prder object.
+		 * @param WP_REST_Request    $request    Request object.
+		 */
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
+	}
+
+	/**
+	 * Maybe set item meta if posted.
+	 * @param WC_Order_Item $item
+	 * @param array $posted Request data.
+	 */
+	protected function maybe_set_item_meta_data( $item, $posted ) {
+		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
+			foreach ( $posted['meta_data'] as $meta ) {
+				if ( isset( $meta['key'], $meta['value'] ) ) {
+					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create or update a line item.
+	 *
+	 * @param array $posted Line item data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_line_items( $posted, $action = 'create' ) {
+		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+		$product = wc_get_product( $this->get_product_id( $posted ) );
+
+		if ( $product !== $item->get_product() ) {
+			$item->set_product( $product );
+
+			if ( 'create' === $action ) {
+				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
+				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$item->set_total( $total );
+				$item->set_subtotal( $total );
+			}
+		}
+
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
+
+		return $item;
+	}
+
+	/**
+	 * Create or update an order shipping method.
+	 *
+	 * @param $posted $shipping Item data.
+	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_shipping_lines( $posted, $action ) {
+		$item = new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+
+		if ( 'create' === $action ) {
+			if ( empty( $posted['method_id'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
+			}
+		}
+
+		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
+
+		return $item;
+	}
+
+	/**
+	 * Create or update an order fee.
+	 *
+	 * @param array $posted Item data.
+	 * @param string $action 'create' to add fee or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_fee_lines( $posted, $action ) {
+		$item = new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+
+		if ( 'create' === $action ) {
+			if ( empty( $posted['name'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
+			}
+		}
+
+		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
+
+		return $item;
+	}
+
+	/**
+	 * Create or update an order coupon.
+	 *
+	 * @param array $posted Item data.
+	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_coupon_lines( $posted, $action ) {
+		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+
+		if ( 'create' === $action ) {
+			if ( empty( $posted['code'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+			}
+		}
+
+		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
+		$this->maybe_set_item_meta_data( $item, $posted );
+
+		return $item;
+	}
+
+	/**
 	 * Get the Order's schema, conforming to JSON Schema.
 	 *
 	 * @return array

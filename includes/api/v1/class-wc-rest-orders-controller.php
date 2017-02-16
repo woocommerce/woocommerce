@@ -485,13 +485,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							}
 						}
 						break;
-					case 'meta_data' :
-						if ( is_array( $value ) ) {
-							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
-							}
-						}
-						break;
 					default :
 						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 							$order->{"set_{$key}"}( $value );
@@ -551,7 +544,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$order->calculate_totals();
 			$order->save();
 
-			// Handle set paid
+			// Handle set paid.
 			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
 			}
@@ -575,7 +568,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$order = $this->prepare_item_for_database( $request );
 			$order->save();
 
-			// Handle set paid
+			// Handle set paid.
 			if ( $order->needs_payment() && true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
 			}
@@ -651,21 +644,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Maybe set item meta if posted.
-	 * @param WC_Order_Item $item
-	 * @param array $posted Request data.
-	 */
-	protected function maybe_set_item_meta_data( $item, $posted ) {
-		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
-			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'], $meta['value'] ) ) {
-					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Create or update a line item.
 	 *
 	 * @param array $posted Line item data.
@@ -688,7 +666,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -710,7 +687,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -732,7 +708,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -754,7 +729,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
@@ -1059,12 +1033,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address 1.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address 2.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1122,12 +1096,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address 1.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address 2.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1488,6 +1462,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 								'description' => __( 'Tax status of fee.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+								'enum'        => array( 'taxable', 'none' ),
 							),
 							'total' => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
