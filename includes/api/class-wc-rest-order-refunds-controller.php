@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Order Refunds controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Posts_Controller
+ * @extends WC_REST_Orders_Controller
  */
 class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 

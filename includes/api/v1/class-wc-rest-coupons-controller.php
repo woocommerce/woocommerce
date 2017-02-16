@@ -131,8 +131,6 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
-		global $wpdb;
-
 		if ( ! empty( $request['code'] ) ) {
 			$id = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
@@ -232,8 +230,6 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		global $wpdb;
-
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$coupon    = new WC_Coupon( $id );
 		$schema    = $this->get_item_schema();
