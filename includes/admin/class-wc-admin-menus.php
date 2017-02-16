@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Menus' ) ) :
+if ( ! class_exists( 'WC_Admin_Menus', false ) ) :
 
 /**
  * WC_Admin_Menus Class.

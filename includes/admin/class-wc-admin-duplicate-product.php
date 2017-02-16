@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     2.7.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product' ) ) :
+if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -104,7 +104,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		$exclude = apply_filters( 'woocommerce_duplicate_product_exclude_children', false );
-		
+
 		if ( ! $exclude && ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) ) {
 			foreach( $product->get_children() as $child_id ) {
 				$child = wc_get_product( $child_id );

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
+if ( ! class_exists( 'WC_Admin_Post_Types', false ) ) :
 
 /**
  * WC_Admin_Post_Types Class.

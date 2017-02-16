@@ -252,41 +252,14 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
+		/**
+		 * Class autoloader.
+		 */
 		include_once( WC_ABSPATH . 'includes/class-wc-autoloader.php' );
-		include_once( WC_ABSPATH . 'includes/wc-core-functions.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
-		include_once( WC_ABSPATH . 'includes/wc-widget-functions.php' );
-		include_once( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-download-handler.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
 
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
-		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
-
-		if ( $this->is_request( 'admin' ) ) {
-			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
-		}
-
-		if ( $this->is_request( 'frontend' ) ) {
-			$this->frontend_includes();
-		}
-
-		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );
-		}
-
-		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
-		}
-
-		include_once( WC_ABSPATH . 'includes/class-wc-query.php' ); // The main query class
-		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class
-		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class
-		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
+		/**
+		 * Interfaces.
+		 */
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php' );
@@ -303,6 +276,11 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php' );
+
+		/**
+		 * Abstract classes.
+		 */
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
@@ -311,6 +289,24 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php' );
+
+		/**
+		 * Core classes.
+		 */
+		include_once( WC_ABSPATH . 'includes/wc-core-functions.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
+		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-download-handler.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-emails.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-query.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );
@@ -320,7 +316,13 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations
 		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper
 		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper
-		include_once( WC_ABSPATH . 'includes/class-wc-data-store.php' ); // WC_Data_Store for CRUD
+		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
+
+		/**
+		 * Data stores - used to store and retrieve CRUD object data from the database.
+		 */
+		include_once( WC_ABSPATH . 'includes/class-wc-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-wp.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php' );
@@ -343,9 +345,32 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php' );
 
+		/**
+		 * REST API.
+		 */
+		include_once( WC_ABSPATH . 'includes/class-wc-legacy-api.php' );
+ 		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class
+ 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class
+ 		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
-			new WC_CLI;
+ 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
+ 		}
+
+		if ( $this->is_request( 'admin' ) ) {
+			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
+		}
+
+		if ( $this->is_request( 'frontend' ) ) {
+			$this->frontend_includes();
+		}
+
+		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
+			include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );
+		}
+
+		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
 		}
 
 		$this->query = new WC_Query();
@@ -393,11 +418,13 @@ final class WooCommerce {
 		$this->load_plugin_textdomain();
 
 		// Load class instances.
-		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
-		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
-		$this->countries       = new WC_Countries();                            // Countries class
-		$this->integrations    = new WC_Integrations();                         // Integrations class
-		$this->structured_data = new WC_Structured_Data();                      // Structured Data class, generates and handles structured data
+		$this->product_factory                     = new WC_Product_Factory(); // Product Factory to create new product instances
+		$this->order_factory                       = new WC_Order_Factory(); // Order Factory to create new order instances
+		$this->countries                           = new WC_Countries(); // Countries class
+		$this->integrations                        = new WC_Integrations(); // Integrations class
+		$this->structured_data                     = new WC_Structured_Data(); // Structured Data class, generates and handles structured data
+		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
+		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
 		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Tax' ) ) :
+if ( ! class_exists( 'WC_Settings_Tax', false ) ) :
 
 /**
  * WC_Settings_Tax.

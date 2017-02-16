@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Payment_Gateways' ) ) :
+if ( ! class_exists( 'WC_Settings_Payment_Gateways', false ) ) :
 
 /**
  * WC_Settings_Payment_Gateways.

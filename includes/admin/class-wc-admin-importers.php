@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Importers' ) ) :
+if ( ! class_exists( 'WC_Admin_Importers', false ) ) :
 
 /**
  * WC_Admin_Importers Class.

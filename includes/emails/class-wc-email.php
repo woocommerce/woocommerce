@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WC_Email' ) ) {
+if ( class_exists( 'WC_Email', false ) ) {
 	return;
 }
 

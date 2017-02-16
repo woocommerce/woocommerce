@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 
 /**
  * Cancelled Order Email.

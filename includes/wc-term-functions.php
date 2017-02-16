@@ -234,7 +234,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 function wc_walk_category_dropdown_tree() {
 	$args = func_get_args();
 
-	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) {
+	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker', false ) ) {
 		include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 	}
 
