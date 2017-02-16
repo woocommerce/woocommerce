@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Coupons controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Coupons_V1_Controller
+ * @extends WC_REST_CRUD_Controller
  */
-class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
+class WC_REST_Coupons_Controller extends WC_REST_CRUD_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -30,15 +30,113 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 	protected $namespace = 'wc/v2';
 
 	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'coupons';
+
+	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'shop_coupon';
+
+	/**
+	 * Register the routes for coupons.
+	 */
+	public function register_routes() {
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'code' => array(
+						'description' => __( 'Coupon code.', 'woocommerce' ),
+						'required'    => true,
+						'type'        => 'string',
+					),
+				) ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
+					'context'         => $this->get_context_param( array( 'default' => 'view' ) ),
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'type'        => 'boolean',
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+					),
+				),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
+	}
+
+	/**
+	 * Get object.
+	 *
+	 * @since  2.7.0
+	 * @param  int $id Object ID.
+	 * @return WC_Data
+	 */
+	protected function get_object( $id ) {
+		return new WC_Coupon( $id );
+	}
+
+	/**
 	 * Prepare a single coupon output for response.
 	 *
-	 * @param WP_Post $post Post object.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $data
+	 * @since  2.7.0
+	 * @param  WC_Data         $object  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
-	public function prepare_item_for_response( $post, $request ) {
-		$coupon = new WC_Coupon( (int) $post->ID );
-		$data   = $coupon->get_data();
+	public function prepare_object_for_response( $object, $request ) {
+		$data = $object->get_data();
 
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
@@ -63,40 +161,47 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $post, $request ) );
+		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
 		 * Filter the data for a response.
 		 *
-		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
-		 * prepared for the response.
+		 * The dynamic portion of the hook name, $this->post_type,
+		 * refers to object type being prepared for the response.
 		 *
-		 * @param WP_REST_Response   $response   The response object.
-		 * @param WP_Post            $post       Post object.
-		 * @param WP_REST_Request    $request    Request object.
+		 * @param WP_REST_Response $response The response object.
+		 * @param WC_Data          $object   Object data.
+		 * @param WP_REST_Request  $request  Request object.
 		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+	}
+
+	/**
+	 * Only reutrn writeable props from schema.
+	 *
+	 * @param  array $schema
+	 * @return bool
+	 */
+	protected function filter_writable_props( $schema ) {
+		return empty( $schema['readonly'] );
 	}
 
 	/**
 	 * Prepare a single coupon for create or update.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|stdClass $data Post object.
+	 * @param  WP_REST_Request $request Request object.
+	 * @param  bool            $creating If is creating a new object.
+	 * @return WP_Error|WC_Data
 	 */
-	protected function prepare_item_for_database( $request ) {
-		global $wpdb;
-
+	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$coupon    = new WC_Coupon( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
 		// Validate required POST fields.
-		if ( 'POST' === $request->get_method() && 0 === $coupon->get_id() ) {
-			if ( empty( $request['code'] ) ) {
-				return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
-			}
+		if ( $creating && empty( $request['code'] ) ) {
+			return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
 		// Handle all writable props.
@@ -106,8 +211,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
 					case 'code' :
-						$coupon_code = apply_filters( 'woocommerce_coupon_code', $value );
-						$id          = $coupon->get_id() ? $coupon->get_id() : 0;
+						$coupon_code  = apply_filters( 'woocommerce_coupon_code', $value );
+						$id           = $coupon->get_id() ? $coupon->get_id() : 0;
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 						if ( $id_from_code ) {
@@ -136,15 +241,37 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 		}
 
 		/**
-		 * Filter the query_vars used in `get_items` for the constructed query.
+		 * Filters an object before it is inserted via the REST API.
 		 *
-		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
-		 * prepared for insertion.
+		 * The dynamic portion of the hook name, `$this->post_type`,
+		 * refers to the object type slug.
 		 *
-		 * @param WC_Coupon       $coupon        The coupon object.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param WC_Data         $coupon   Object object.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param bool            $creating If is creating a new object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $coupon, $request, $creating );
+	}
+
+	/**
+	 * Prepare objects query.
+	 *
+	 * @since  2.7.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
+
+		if ( ! empty( $request['code'] ) ) {
+			$id = wc_get_coupon_id_by_code( $request['code'] );
+			$args['post__in'] = array( $id );
+		}
+
+		// Get only ids.
+		$args['fields'] = 'ids';
+
+		return $args;
 	}
 
 	/**
@@ -330,5 +457,23 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V1_Controller {
 			),
 		);
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['code'] = array(
+			'description'       => __( 'Limit result set to resources with a specific code.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }
