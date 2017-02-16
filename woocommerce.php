@@ -109,6 +109,13 @@ final class WooCommerce {
 	public $structured_data = null;
 
 	/**
+	 * Array of deprecated hook handlers.
+	 *
+	 * @var array of WC_Deprecated_Hooks
+	 */
+	public $deprecated_hook_handlers = array();
+
+	/**
 	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
