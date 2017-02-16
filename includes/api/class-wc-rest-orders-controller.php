@@ -51,25 +51,10 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 			}
 		}
 
-		// Add meta, SKU and PRICE to products.
+		// Add SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
 			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
-
-			// Format meta data.
-			if ( isset( $data['meta_data'] ) ) {
-				$hideprefix = 'true' === $this->request['all_item_meta'] ? null : '_';
-				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
-
-				foreach ( $item_meta as $key => $values ) {
-					// Label was used in previous version of API - set it here.
-					$item_meta[ $key ]->label = $values->display_key;
-					unset( $item_meta[ $key ]->display_key );
-					unset( $item_meta[ $key ]->display_value );
-				}
-
-				$data['meta'] = array_values( $item_meta );
-			}
 		}
 
 		// Format taxes.
@@ -86,6 +71,11 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 			$data['taxes'] = $taxes;
 		} elseif ( isset( $data['taxes'] ) ) {
 			$data['taxes'] = array();
+		}
+
+		// Remove names for coupons, taxes and shipping.
+		if ( isset( $data['code'] ) || isset( $data['rate_code'] ) || isset( $data['method_title'] ) ) {
+			unset( $data['name'] );
 		}
 
 		// Remove props we don't want to expose.
@@ -362,12 +352,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'order_key' => array(
-					'description' => __( 'Order key.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'currency' => array(
 					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
 					'type'        => 'string',
@@ -398,12 +382,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-				),
-				'customer_id' => array(
-					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce' ),
-					'type'        => 'integer',
-					'default'     => 0,
-					'context'     => array( 'view', 'edit' ),
 				),
 				'discount_total' => array(
 					'description' => __( 'Total discount amount for the order.', 'woocommerce' ),
@@ -443,6 +421,18 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 				),
 				'total_tax' => array(
 					'description' => __( 'Sum of all taxes.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'customer_id' => array(
+					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce' ),
+					'type'        => 'integer',
+					'default'     => 0,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'order_key' => array(
+					'description' => __( 'Order key.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -771,35 +761,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V1_Controller {
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-							),
-							'meta' => array(
-								'description' => __( 'Meta data (formatted).', 'woocommerce' ),
-								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'items'       => array(
-									'type'       => 'object',
-									'properties' => array(
-										'key' => array(
-											'description' => __( 'Meta key.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-										'label' => array(
-											'description' => __( 'Meta label.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-										'value' => array(
-											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-									),
-								),
 							),
 						),
 					),
