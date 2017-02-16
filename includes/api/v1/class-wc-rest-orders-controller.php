@@ -182,8 +182,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 			// Check if the product exists.
 			if ( is_object( $product ) ) {
-				$product_id   = $product->get_id();
-				$variation_id = $product->get_id() === $product->get_variation_id() ? 0 : $product->get_variation_id();
+				$product_id   = $item->get_product_id();
+				$variation_id = $item->get_variation_id();
 				$product_sku  = $product->get_sku();
 			}
 
@@ -334,8 +334,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $order->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
-				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $dp ),
+				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
+				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $dp ),
 			);
 		}
 
