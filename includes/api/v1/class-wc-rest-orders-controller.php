@@ -1572,4 +1572,43 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
+	/**
+	 * Get the query params for collections.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['status'] = array(
+			'default'           => 'any',
+			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['customer'] = array(
+			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['product'] = array(
+			'description'       => __( 'Limit result set to orders assigned a specific product.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['dp'] = array(
+			'default'           => 2,
+			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
+	}
 }
