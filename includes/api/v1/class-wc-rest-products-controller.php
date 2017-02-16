@@ -1363,21 +1363,11 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 * @throws WC_REST_Exception REST API exceptions.
 	 * @param WC_Product      $product          Product instance.
 	 * @param WP_REST_Request $request          Request data.
-	 * @param bool            $single_variation True if saving only a single variation.
 	 * @return bool
 	 */
-	protected function save_variations_data( $product, $request, $single_variation = false ) {
-		global $wpdb;
-
-		if ( $single_variation ) {
-			$variations = array( $request );
-		} else {
-			$variations = $request['variations'];
-		}
-
-		foreach ( $variations as $menu_order => $data ) {
-			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
-			$variation    = new WC_Product_Variation( $variation_id );
+	protected function save_variations_data( $product, $request ) {
+		foreach ( $request['variations'] as $menu_order => $data ) {
+			$variation = new WC_Product_Variation( isset( $data['id'] ) ? absint( $data['id'] ) : 0 );
 
 			// Create initial name and status.
 			if ( ! $variation->get_slug() ) {
