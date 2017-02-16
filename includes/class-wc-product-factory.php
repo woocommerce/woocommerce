@@ -110,7 +110,9 @@ class WC_Product_Factory {
 	 * @return int|bool false on failure
 	 */
 	private function get_product_id( $product ) {
-		if ( is_numeric( $product ) ) {
+		if ( false === $product && isset( $GLOBALS['post'], $GLOBALS['post']->ID ) && 'product' === get_post_type( $GLOBALS['post']->ID ) ) {
+			return $GLOBALS['post']->ID;
+		} elseif ( is_numeric( $product ) ) {
 			return $product;
 		} elseif ( $product instanceof WC_Product ) {
 			return $product->get_id();
