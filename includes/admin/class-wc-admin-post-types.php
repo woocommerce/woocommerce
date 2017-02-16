@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
+if ( ! class_exists( 'WC_Admin_Post_Types', false ) ) :
 
 /**
  * WC_Admin_Post_Types Class.
@@ -386,7 +386,7 @@ class WC_Admin_Post_Types {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->get_type() . '" data-tip="' . ucfirst( $the_product->get_type() ) . '"></span>';
+					echo '<span class="product-type tips ' . esc_attr( sanitize_html_class( $the_product->get_type() ) ) . '" data-tip="' . esc_attr( ucfirst( $the_product->get_type() ) ) . '"></span>';
 				}
 				break;
 			case 'price' :
@@ -519,10 +519,10 @@ class WC_Admin_Post_Types {
 
 		switch ( $column ) {
 			case 'order_status' :
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
+				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', date( 'c', $the_order->get_date_created() ), date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) );
+				printf( '<time datetime="%s">%s</time>', esc_attr( date( 'c', $the_order->get_date_created() ) ), esc_html( date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {

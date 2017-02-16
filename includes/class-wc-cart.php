@@ -1523,6 +1523,7 @@ class WC_Cart {
 			foreach ( $this->cart_contents as $cart_item_key => $values ) {
 				if ( $values['data']->needs_shipping() ) {
 					$needs_shipping = true;
+					break;
 				}
 			}
 		}

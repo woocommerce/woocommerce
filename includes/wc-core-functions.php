@@ -29,6 +29,8 @@ include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
 include( 'wc-rest-functions.php' );
+include( 'wc-widget-functions.php' );
+include( 'wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.

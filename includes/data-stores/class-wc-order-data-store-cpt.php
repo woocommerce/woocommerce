@@ -65,6 +65,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
 		'_shipping_method',
 	);
 
@@ -551,7 +552,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_coupon_usage_counts', true ) );
 	}
 
 	/**
@@ -562,7 +563,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
 
 	/**

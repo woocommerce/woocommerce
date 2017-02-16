@@ -161,7 +161,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/admin.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin.css'],
 					'<%= dirs.css %>/admin-rtl.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin-rtl.css']
 				}
-			},
+			}
 		},
 
 		// Watch changes for assets.

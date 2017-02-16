@@ -27,7 +27,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -149,7 +149,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 *
 	 * @param WP_Post $post Post object.
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $data
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$variation = wc_get_product( $post );
@@ -191,6 +191,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'shipping_class_id'  => $variation->get_shipping_class_id(),
 			'image'              => $this->get_images( $variation ),
 			'attributes'         => $this->get_attributes( $variation ),
+			'menu_order'         => $variation->get_menu_order(),
+			'meta_data'          => $variation->get_meta_data(),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -218,7 +220,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * Prepare a single variation for create or update.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|stdClass $data Post object.
+	 * @return WP_Error|stdClass Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
 		if ( isset( $request['id'] ) ) {
@@ -243,40 +245,213 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	}
 
 	/**
-	 * Update post meta fields.
-	 *
-	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
-	 * @return bool|WP_Error
-	 */
-	protected function update_post_meta_fields( $post, $request ) {
-		try {
-			$variable_product = wc_get_product( $post );
-			$product          = wc_get_product( $variable_product->get_parent_id() );
-			$this->save_variations_data( $product, $request, true );
-			return true;
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Add post meta fields.
 	 *
 	 * @param WP_Post $post
-	 * @param WP_REST_Request $request
-	 * @return bool|WP_Error
+	 * @param WP_REST_Request $request Request data.
+	 * @return bool
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
-		try {
-			$variable_product = wc_get_product( $post->ID );
-			$product          = wc_get_product( $variable_product->get_parent_id() );
-			$request['id']    = $post->ID;
-			$this->save_variations_data( $product, $request, true );
-			return true;
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		return $this->update_post_meta_fields( $post, $request );
+	}
+
+	/**
+	 * Update post meta fields.
+	 *
+	 * @param WP_Post $post
+	 * @param WP_REST_Request $request Request data.
+	 * @return bool
+	 */
+	protected function update_post_meta_fields( $post, $request ) {
+		$variation = wc_get_product( $post );
+
+		// Save variation meta fields.
+		$variation = $this->set_variation_meta( $variation, $request );
+
+		// Save the variation data.
+		$variation->save();
+
+		// Clear caches here so in sync with any new variations.
+		wc_delete_product_transients( $variation->get_parent_id() );
+		wp_cache_delete( 'product-' . $variation->get_parent_id(), 'products' );
+
+		return true;
+	}
+
+	/**
+	 * Set variation meta.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product      $product Product instance.
+	 * @param WP_REST_Request $request Request data.
+	 * @return WC_Product_Variation
+	 */
+	protected function set_variation_meta( $variation, $request ) {
+		// Status.
+		if ( isset( $request['visible'] ) ) {
+			$variation->set_status( false === $request['visible'] ? 'private' : 'publish' );
 		}
+
+		// SKU.
+		if ( isset( $request['sku'] ) ) {
+			$variation->set_sku( wc_clean( $request['sku'] ) );
+		}
+
+		// Thumbnail.
+		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
+			$image = $request['image'];
+			$image = current( $image );
+			if ( is_array( $image ) ) {
+				$image['position'] = 0;
+			}
+
+			$variation = $this->set_product_images( $variation, array( $image ) );
+		}
+
+		// Virtual variation.
+		if ( isset( $request['virtual'] ) ) {
+			$variation->set_virtual( $request['virtual'] );
+		}
+
+		// Downloadable variation.
+		if ( isset( $request['downloadable'] ) ) {
+			$variation->set_downloadable( $request['downloadable'] );
+		}
+
+		// Downloads.
+		if ( $variation->get_downloadable() ) {
+			// Downloadable files.
+			if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
+				$variation = $this->save_downloadable_files( $variation, $request['downloads'] );
+			}
+
+			// Download limit.
+			if ( isset( $request['download_limit'] ) ) {
+				$variation->set_download_limit( $request['download_limit'] );
+			}
+
+			// Download expiry.
+			if ( isset( $request['download_expiry'] ) ) {
+				$variation->set_download_expiry( $request['download_expiry'] );
+			}
+		}
+
+		// Shipping data.
+		$variation = $this->save_product_shipping_data( $variation, $request );
+
+		// Stock handling.
+		if ( isset( $request['manage_stock'] ) ) {
+			$variation->set_manage_stock( $request['manage_stock'] );
+		}
+
+		if ( isset( $request['in_stock'] ) ) {
+			$variation->set_stock_status( true === $request['in_stock'] ? 'instock' : 'outofstock' );
+		}
+
+		if ( isset( $request['backorders'] ) ) {
+			$variation->set_backorders( $request['backorders'] );
+		}
+
+		if ( $variation->get_manage_stock() ) {
+			if ( isset( $request['stock_quantity'] ) ) {
+				$variation->set_stock_quantity( $request['stock_quantity'] );
+			} elseif ( isset( $request['inventory_delta'] ) ) {
+				$stock_quantity  = wc_stock_amount( $variation->get_stock_quantity() );
+				$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
+				$variation->set_stock_quantity( $stock_quantity );
+			}
+		} else {
+			$variation->set_backorders( 'no' );
+			$variation->set_stock_quantity( '' );
+		}
+
+		// Regular Price.
+		if ( isset( $request['regular_price'] ) ) {
+			$variation->set_regular_price( $request['regular_price'] );
+		}
+
+		// Sale Price.
+		if ( isset( $request['sale_price'] ) ) {
+			$variation->set_sale_price( $request['sale_price'] );
+		}
+
+		if ( isset( $request['date_on_sale_from'] ) ) {
+			$variation->set_date_on_sale_from( $request['date_on_sale_from'] );
+		}
+
+		if ( isset( $request['date_on_sale_to'] ) ) {
+			$variation->set_date_on_sale_to( $request['date_on_sale_to'] );
+		}
+
+		// Tax class.
+		if ( isset( $request['tax_class'] ) ) {
+			$variation->set_tax_class( $request['tax_class'] );
+		}
+
+		// Description.
+		if ( isset( $request['description'] ) ) {
+			$variation->set_description( wp_kses_post( $request['description'] ) );
+		}
+
+		// Update taxonomies.
+		if ( isset( $request['attributes'] ) ) {
+			$attributes        = array();
+			$parent            = wc_get_product( $variation->get_parent_id() );
+			$parent_attributes = $parent->get_attributes();
+
+			foreach ( $request['attributes'] as $attribute ) {
+				$attribute_id   = 0;
+				$attribute_name = '';
+
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = sanitize_title( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
+					continue;
+				}
+
+				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
+					continue;
+				}
+
+				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
+				$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+
+				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
+					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
+					$term = get_term_by( 'name', $attribute_value, $attribute_name );
+
+					if ( $term && ! is_wp_error( $term ) ) {
+						$attribute_value = $term->slug;
+					} else {
+						$attribute_value = sanitize_title( $attribute_value );
+					}
+				}
+
+				$attributes[ $attribute_key ] = $attribute_value;
+			}
+
+			$variation->set_attributes( $attributes );
+		}
+
+		// Menu order.
+		if ( $request['menu_order'] ) {
+			$variation->set_menu_order( $request['menu_order'] );
+		}
+
+		// Meta data.
+		if ( is_array( $request['meta_data'] ) ) {
+			foreach ( $request['meta_data'] as $meta ) {
+				$variation->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+			}
+		}
+
+		return $variation;
 	}
 
 	/**
@@ -615,6 +790,37 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 							),
 							'option' => array(
 								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+						),
+					),
+				),
+				'menu_order' => array(
+					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'meta_data' => array(
+					'description' => __( 'Meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key' => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),

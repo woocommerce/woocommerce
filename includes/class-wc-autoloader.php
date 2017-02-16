@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -66,6 +65,11 @@ class WC_Autoloader {
 	 */
 	public function autoload( $class ) {
 		$class = strtolower( $class );
+
+		if ( 0 !== strpos( $class, 'wc_' ) ) {
+			return;
+		}
+
 		$file  = $this->get_file_name_from_class( $class );
 		$path  = '';
 
@@ -87,7 +91,7 @@ class WC_Autoloader {
 			$path = $this->include_path . 'log-handlers/';
 		}
 
-		if ( empty( $path ) || ( ! $this->load_file( $path . $file ) && strpos( $class, 'wc_' ) === 0 ) ) {
+		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
 			$this->load_file( $this->include_path . $file );
 		}
 	}

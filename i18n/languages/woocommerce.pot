@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.7.0-beta-2\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-02-09 17:08:32+00:00\n"
+"POT-Creation-Date: 2017-02-16 10:39:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5113,65 +5113,65 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-legacy-order.php:497
-#: includes/wc-template-functions.php:2454
+#: includes/abstracts/abstract-wc-legacy-order.php:498
+#: includes/wc-template-functions.php:2451
 msgid "Download %d"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-legacy-order.php:497
-#: includes/wc-template-functions.php:2454 templates/myaccount/downloads.php:76
+#: includes/abstracts/abstract-wc-legacy-order.php:498
+#: includes/wc-template-functions.php:2451 templates/myaccount/downloads.php:76
 msgid "Download"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-legacy-product.php:72
+#: includes/abstracts/abstract-wc-legacy-product.php:65
 msgid "Product properties should not be accessed directly."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:474
+#: includes/abstracts/abstract-wc-order.php:456
 msgid "Invalid parent ID"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:526
+#: includes/abstracts/abstract-wc-order.php:508
 msgid "Invalid currency code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1398
+#: includes/abstracts/abstract-wc-order.php:1380
 #. translators: %s: shipping method
 msgid "via %s"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1403
-#: includes/class-wc-cart.php:1612 includes/class-wc-product-grouped.php:100
+#: includes/abstracts/abstract-wc-order.php:1385
+#: includes/class-wc-cart.php:1613 includes/class-wc-product-grouped.php:100
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1431
+#: includes/abstracts/abstract-wc-order.php:1413
 msgid "Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1438
+#: includes/abstracts/abstract-wc-order.php:1420
 #: includes/admin/meta-boxes/views/html-order-items.php:121
 msgid "Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1445
+#: includes/abstracts/abstract-wc-order.php:1427
 #: includes/admin/meta-boxes/views/html-order-items.php:131
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1485
+#: includes/abstracts/abstract-wc-order.php:1467
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:328
 #: includes/shortcodes/class-wc-shortcode-checkout.php:149
 #: templates/checkout/thankyou.php:63
 msgid "Payment method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1493
+#: includes/abstracts/abstract-wc-order.php:1475
 #: includes/admin/meta-boxes/views/html-order-items.php:206
 msgid "Refund"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1500
+#: includes/abstracts/abstract-wc-order.php:1482
 #: includes/admin/meta-boxes/views/html-order-item.php:97
 #: includes/admin/meta-boxes/views/html-order-item.php:139
 #: includes/shortcodes/class-wc-shortcode-checkout.php:144
@@ -5187,40 +5187,40 @@ msgstr ""
 msgid "Save to account"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:755
+#: includes/abstracts/abstract-wc-product.php:757
 msgid "Invalid catalog visibility option."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:792
+#: includes/abstracts/abstract-wc-product.php:794
 msgid "Invalid or duplicated SKU."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:876
+#: includes/abstracts/abstract-wc-product.php:878
 msgid "Invalid product tax status."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1156
+#: includes/abstracts/abstract-wc-product.php:1158
 msgid ""
 "The downloadable file %1$s cannot be used as it does not have an allowed "
 "file type. Allowed types include: %2$s"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1162
+#: includes/abstracts/abstract-wc-product.php:1164
 msgid "The downloadable file %s cannot be used as it does not exist on the server."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1696
+#: includes/abstracts/abstract-wc-product.php:1698
 #: includes/class-wc-product-simple.php:54
 msgid "Add to cart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1705
+#: includes/abstracts/abstract-wc-product.php:1707
 #: includes/class-wc-embed.php:112 includes/class-wc-product-simple.php:54
 #: includes/class-wc-product-variable.php:60
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1857
+#: includes/abstracts/abstract-wc-product.php:1859
 #: includes/admin/class-wc-admin-post-types.php:423
 #: includes/admin/class-wc-admin-reports.php:100
 #: includes/admin/reports/class-wc-report-stock.php:110
@@ -5228,7 +5228,7 @@ msgstr ""
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1859 templates/cart/cart.php:91
+#: includes/abstracts/abstract-wc-product.php:1861 templates/cart/cart.php:91
 msgid "Available on backorder"
 msgstr ""
 
@@ -6702,7 +6702,7 @@ msgstr ""
 msgid "Rating"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:181
+#: includes/admin/class-wc-admin-meta-boxes.php:174
 #: includes/admin/settings/class-wc-settings-products.php:461
 #: templates/single-product-reviews.php:36
 msgid "Reviews"
@@ -7613,13 +7613,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:84
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:86
-#: includes/class-wc-countries.php:1078 includes/class-wc-emails.php:379
+#: includes/class-wc-countries.php:1078 includes/class-wc-emails.php:386
 msgid "Phone"
 msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:83
-#: includes/class-wc-countries.php:1087 includes/class-wc-emails.php:372
+#: includes/class-wc-countries.php:1087 includes/class-wc-emails.php:379
 #: includes/class-wc-form-handler.php:197
 #: templates/myaccount/form-edit-account.php:40
 #: templates/myaccount/form-login.php:91
@@ -10192,7 +10192,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-stock.php:164
 #: includes/class-wc-post-types.php:259
-#: includes/data-stores/class-wc-product-data-store-cpt.php:81
+#: includes/data-stores/class-wc-product-data-store-cpt.php:87
 #: includes/wc-account-functions.php:197 templates/cart/cart.php:35
 #: templates/cart/cart.php:78 templates/checkout/form-pay.php:29
 #: templates/checkout/review-order.php:26
@@ -10700,9 +10700,9 @@ msgid "Content type"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:240
-#: includes/emails/class-wc-email-cancelled-order.php:110
-#: includes/emails/class-wc-email-failed-order.php:110
-#: includes/emails/class-wc-email-new-order.php:115
+#: includes/emails/class-wc-email-cancelled-order.php:114
+#: includes/emails/class-wc-email-failed-order.php:114
+#: includes/emails/class-wc-email-new-order.php:119
 msgid "Recipient(s)"
 msgstr ""
 
@@ -13234,7 +13234,7 @@ msgid "Downloadable file name."
 msgstr ""
 
 #: includes/api/class-wc-rest-customer-downloads-controller.php:190
-#: includes/cli/class-wc-cli-runner.php:146
+#: includes/cli/class-wc-cli-runner.php:90
 msgid "Order ID."
 msgstr ""
 
@@ -13571,7 +13571,7 @@ msgstr ""
 #: includes/api/class-wc-rest-order-refunds-controller.php:377
 #: includes/api/class-wc-rest-orders-controller.php:1139
 #: includes/api/class-wc-rest-report-top-sellers-controller.php:158
-#: includes/cli/class-wc-cli-runner.php:130
+#: includes/cli/class-wc-cli-runner.php:88
 msgid "Product ID."
 msgstr ""
 
@@ -13896,7 +13896,7 @@ msgid "List of refunds."
 msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:1606
-#: includes/cli/class-wc-cli-runner.php:154
+#: includes/cli/class-wc-cli-runner.php:91
 msgid "Refund ID."
 msgstr ""
 
@@ -14399,6 +14399,7 @@ msgstr ""
 #: includes/api/class-wc-rest-products-controller.php:2199
 #: includes/api/class-wc-rest-products-controller.php:2241
 #: includes/api/class-wc-rest-products-controller.php:2534
+#: includes/cli/class-wc-cli-runner.php:92
 msgid "Attribute ID."
 msgstr ""
 
@@ -16660,63 +16661,63 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:595
 #. translators: %s: field name
 msgid "Shipping %s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:601
+#: includes/class-wc-checkout.php:599
 #. translators: %s: field name
 msgid "Billing %s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:610 includes/class-wc-form-handler.php:114
+#: includes/class-wc-checkout.php:608 includes/class-wc-form-handler.php:114
 #: includes/shortcodes/class-wc-shortcode-cart.php:27
 msgid "Please enter a valid postcode / ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:619 includes/class-wc-form-handler.php:123
+#: includes/class-wc-checkout.php:617 includes/class-wc-form-handler.php:123
 #. translators: %s: phone number
 msgid "%s is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:628 includes/class-wc-form-handler.php:130
+#: includes/class-wc-checkout.php:626 includes/class-wc-form-handler.php:130
 #. translators: %s: email address
 msgid "%s is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:646
+#: includes/class-wc-checkout.php:644
 #. translators: 1: state field 2: valid states
 msgid "%1$s is not valid. Please enter one of the following: %2$s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:653 includes/class-wc-form-handler.php:101
+#: includes/class-wc-checkout.php:651 includes/class-wc-form-handler.php:101
 #: includes/class-wc-form-handler.php:202
 #. translators: %s: field name
 msgid "%s is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:671 includes/class-wc-form-handler.php:307
+#: includes/class-wc-checkout.php:669 includes/class-wc-form-handler.php:307
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:678
+#: includes/class-wc-checkout.php:676
 msgid "Please enter an address to continue."
 msgstr ""
 
-#: includes/class-wc-checkout.php:680
+#: includes/class-wc-checkout.php:678
 msgid ""
 "Unfortunately <strong>we do not ship %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:686
+#: includes/class-wc-checkout.php:684
 msgid ""
 "No shipping method has been selected. Please double check your address, or "
 "contact us if you need any help."
 msgstr ""
 
-#: includes/class-wc-checkout.php:696 includes/class-wc-form-handler.php:317
+#: includes/class-wc-checkout.php:694 includes/class-wc-form-handler.php:317
 #: includes/class-wc-form-handler.php:400
 #: includes/class-wc-form-handler.php:405
 #: includes/class-wc-form-handler.php:410
@@ -16726,11 +16727,11 @@ msgstr ""
 msgid "Invalid payment method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:897
+#: includes/class-wc-checkout.php:895
 msgid "We were unable to process your order, please try again."
 msgstr ""
 
-#: includes/class-wc-checkout.php:906
+#: includes/class-wc-checkout.php:904
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" "
 "class=\"wc-backward\">Return to shop</a>"
@@ -17009,33 +17010,33 @@ msgstr ""
 msgid "Go to shop"
 msgstr ""
 
-#: includes/class-wc-emails.php:365
+#: includes/class-wc-emails.php:372
 msgid "Note"
 msgstr ""
 
-#: includes/class-wc-emails.php:418
+#: includes/class-wc-emails.php:425
 msgid "Product low in stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:421
+#: includes/class-wc-emails.php:428
 #. translators: 1: product name 2: items in stock
 msgid "%1$s is low in stock. There are %2$d left."
 msgstr ""
 
-#: includes/class-wc-emails.php:441
+#: includes/class-wc-emails.php:448
 msgid "Product out of stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:443
+#: includes/class-wc-emails.php:450
 #. translators: %s: product name
 msgid "%s is out of stock."
 msgstr ""
 
-#: includes/class-wc-emails.php:472
+#: includes/class-wc-emails.php:479
 msgid "Product backorder"
 msgstr ""
 
-#: includes/class-wc-emails.php:473
+#: includes/class-wc-emails.php:480
 msgid "%1$s units of %2$s have been backordered in order #%3$s."
 msgstr ""
 
@@ -17291,7 +17292,7 @@ msgid "Invalid variation ID"
 msgstr ""
 
 #: includes/class-wc-order-refund.php:64
-#: includes/data-stores/class-wc-order-refund-data-store-cpt.php:88
+#: includes/data-stores/class-wc-order-refund-data-store-cpt.php:101
 #. translators: %s: Order date
 msgid "Refund &ndash; %s"
 msgstr ""
@@ -17789,15 +17790,15 @@ msgstr ""
 msgid "Error: Delivery URL returned response code: %s"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:102
+#: includes/cli/class-wc-cli-rest-command.php:125
 msgid "Trashed"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:104
+#: includes/cli/class-wc-cli-rest-command.php:127
 msgid "Deleted"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:193
+#: includes/cli/class-wc-cli-rest-command.php:216
 msgid "Updated"
 msgstr ""
 
@@ -17805,31 +17806,31 @@ msgstr ""
 msgid "No schema title found for %s, skipping REST command registration."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:138
+#: includes/cli/class-wc-cli-runner.php:89
 msgid "Customer ID."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:162
+#: includes/cli/class-wc-cli-runner.php:153
 #: includes/cli/class-wc-cli-tool-command.php:36
 msgid "The id for the resource."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:184
+#: includes/cli/class-wc-cli-runner.php:177
 #: includes/cli/class-wc-cli-tool-command.php:45
 msgid "Limit response to specific fields. Defaults to all fields."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:190
+#: includes/cli/class-wc-cli-runner.php:183
 #: includes/cli/class-wc-cli-tool-command.php:51
 msgid "Get the value of an individual field."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:196
+#: includes/cli/class-wc-cli-runner.php:189
 #: includes/cli/class-wc-cli-tool-command.php:57
 msgid "Render response in a particular format."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:217
+#: includes/cli/class-wc-cli-runner.php:210
 msgid "Output just the id when the operation is successful."
 msgstr ""
 
@@ -17872,11 +17873,11 @@ msgstr ""
 msgid "Invalid payment token."
 msgstr ""
 
-#: includes/data-stores/class-wc-product-data-store-cpt.php:117
+#: includes/data-stores/class-wc-product-data-store-cpt.php:127
 msgid "Invalid product."
 msgstr ""
 
-#: includes/data-stores/class-wc-product-variation-data-store-cpt.php:79
+#: includes/data-stores/class-wc-product-variation-data-store-cpt.php:77
 msgid "Variation #"
 msgstr ""
 
@@ -17895,11 +17896,11 @@ msgstr ""
 msgid "[{site_title}] Cancelled order ({order_number})"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:104
-#: includes/emails/class-wc-email-customer-completed-order.php:139
+#: includes/emails/class-wc-email-cancelled-order.php:108
+#: includes/emails/class-wc-email-customer-completed-order.php:143
 #: includes/emails/class-wc-email-customer-refunded-order.php:197
-#: includes/emails/class-wc-email-failed-order.php:104
-#: includes/emails/class-wc-email-new-order.php:109
+#: includes/emails/class-wc-email-failed-order.php:108
+#: includes/emails/class-wc-email-new-order.php:113
 #: includes/emails/class-wc-email.php:487
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:73
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
@@ -17911,72 +17912,72 @@ msgstr ""
 msgid "Enable/Disable"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:106
-#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-cancelled-order.php:110
+#: includes/emails/class-wc-email-customer-completed-order.php:145
 #: includes/emails/class-wc-email-customer-refunded-order.php:199
-#: includes/emails/class-wc-email-failed-order.php:106
-#: includes/emails/class-wc-email-new-order.php:111
+#: includes/emails/class-wc-email-failed-order.php:110
+#: includes/emails/class-wc-email-new-order.php:115
 #: includes/emails/class-wc-email.php:489
 msgid "Enable this email notification"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:113
-#: includes/emails/class-wc-email-failed-order.php:112
-#: includes/emails/class-wc-email-new-order.php:117
+#: includes/emails/class-wc-email-cancelled-order.php:117
+#: includes/emails/class-wc-email-failed-order.php:116
+#: includes/emails/class-wc-email-new-order.php:121
 #. translators: %s: admin email
 msgid "Enter recipients (comma separated) for this email. Defaults to %s."
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:119
-#: includes/emails/class-wc-email-customer-completed-order.php:145
-#: includes/emails/class-wc-email-failed-order.php:118
-#: includes/emails/class-wc-email-new-order.php:123
+#: includes/emails/class-wc-email-cancelled-order.php:123
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-failed-order.php:122
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Subject"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:122
-#: includes/emails/class-wc-email-failed-order.php:120
-#: includes/emails/class-wc-email-new-order.php:125
+#: includes/emails/class-wc-email-cancelled-order.php:126
+#: includes/emails/class-wc-email-failed-order.php:124
+#: includes/emails/class-wc-email-new-order.php:129
 #. translators: %s: default subject
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: %s."
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:128
-#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-cancelled-order.php:132
+#: includes/emails/class-wc-email-customer-completed-order.php:158
 #: includes/emails/class-wc-email-customer-invoice.php:167
-#: includes/emails/class-wc-email-failed-order.php:126
-#: includes/emails/class-wc-email-new-order.php:131
+#: includes/emails/class-wc-email-failed-order.php:130
+#: includes/emails/class-wc-email-new-order.php:135
 #: includes/emails/class-wc-email.php:502
 msgid "Email heading"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:131
-#: includes/emails/class-wc-email-failed-order.php:128
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-cancelled-order.php:135
+#: includes/emails/class-wc-email-failed-order.php:132
+#: includes/emails/class-wc-email-new-order.php:137
 #. translators: %s: default heading
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: %s."
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:137
-#: includes/emails/class-wc-email-customer-completed-order.php:181
+#: includes/emails/class-wc-email-cancelled-order.php:141
+#: includes/emails/class-wc-email-customer-completed-order.php:185
 #: includes/emails/class-wc-email-customer-invoice.php:194
 #: includes/emails/class-wc-email-customer-refunded-order.php:239
-#: includes/emails/class-wc-email-failed-order.php:134
-#: includes/emails/class-wc-email-new-order.php:139
+#: includes/emails/class-wc-email-failed-order.php:138
+#: includes/emails/class-wc-email-new-order.php:143
 #: includes/emails/class-wc-email.php:511
 msgid "Email type"
 msgstr ""
 
-#: includes/emails/class-wc-email-cancelled-order.php:139
-#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-cancelled-order.php:143
+#: includes/emails/class-wc-email-customer-completed-order.php:187
 #: includes/emails/class-wc-email-customer-invoice.php:196
 #: includes/emails/class-wc-email-customer-refunded-order.php:241
-#: includes/emails/class-wc-email-failed-order.php:136
-#: includes/emails/class-wc-email-new-order.php:141
+#: includes/emails/class-wc-email-failed-order.php:140
+#: includes/emails/class-wc-email-new-order.php:145
 #: includes/emails/class-wc-email.php:513
 msgid "Choose which format of email to send."
 msgstr ""
@@ -18007,10 +18008,10 @@ msgstr ""
 msgid "Your {site_title} order from {order_date} is complete - download your files"
 msgstr ""
 
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:157
-#: includes/emails/class-wc-email-customer-completed-order.php:166
-#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-completed-order.php:152
+#: includes/emails/class-wc-email-customer-completed-order.php:161
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-completed-order.php:179
 #: includes/emails/class-wc-email-customer-invoice.php:161
 #: includes/emails/class-wc-email-customer-invoice.php:170
 #: includes/emails/class-wc-email-customer-invoice.php:179
@@ -18033,11 +18034,11 @@ msgstr ""
 msgid "Defaults to %s"
 msgstr ""
 
-#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:167
 msgid "Subject (downloadable)"
 msgstr ""
 
-#: includes/emails/class-wc-email-customer-completed-order.php:172
+#: includes/emails/class-wc-email-customer-completed-order.php:176
 msgid "Email heading (downloadable)"
 msgstr ""
 
@@ -20526,13 +20527,13 @@ msgstr ""
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2534
+#: includes/wc-template-functions.php:2531
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:166
 #: includes/widgets/class-wc-widget-rating-filter.php:188
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/wc-template-functions.php:2535
+#: includes/wc-template-functions.php:2532
 msgid "out of 5"
 msgstr ""
 
@@ -21912,7 +21913,7 @@ msgstr ""
 
 #: includes/class-wc-order-refund.php:64
 #: includes/data-stores/abstract-wc-order-data-store-cpt.php:169
-#: includes/data-stores/class-wc-order-refund-data-store-cpt.php:88
+#: includes/data-stores/class-wc-order-refund-data-store-cpt.php:101
 msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
@@ -21994,7 +21995,7 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2550
+#: includes/wc-template-functions.php:2547
 msgctxt "min_price"
 msgid "From:"
 msgstr ""

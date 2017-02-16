@@ -309,7 +309,7 @@ class WC_API_Customers extends WC_API_Resource {
 					if ( is_callable( array( $customer, "set_billing_{$field}" ) ) ) {
 						$customer->{"set_billing_{$field}"}( $data['billing_address'][ $field ] );
 					} else {
-						$customer->update_meta_data( 'billing_' . $field, wc_clean( $data['billing_address'][ $field ] ), $meta['id'] );
+						$customer->update_meta_data( 'billing_' . $field, wc_clean( $data['billing_address'][ $field ] ) );
 					}
 				}
 			}
@@ -322,7 +322,7 @@ class WC_API_Customers extends WC_API_Resource {
 					if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
 						$customer->{"set_shipping_{$field}"}( $data['shipping_address'][ $field ] );
 					} else {
-						$customer->update_meta_data( 'shipping_' . $field, wc_clean( $data['shipping_address'][ $field ] ), $meta['id'] );
+						$customer->update_meta_data( 'shipping_' . $field, wc_clean( $data['shipping_address'][ $field ] ) );
 					}
 				}
 			}
