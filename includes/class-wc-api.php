@@ -14,10 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Legacy_API' ) ) {
-	include_once( dirname( __FILE__ ) . '/class-wc-legacy-api.php' );
-}
-
 class WC_API extends WC_Legacy_API {
 
 	/**

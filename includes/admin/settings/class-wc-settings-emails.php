@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Emails' ) ) :
+if ( ! class_exists( 'WC_Settings_Emails', false ) ) :
 
 /**
  * WC_Settings_Emails.

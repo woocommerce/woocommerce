@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     2.7.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product' ) ) :
+if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
 
 /**
  * WC_Admin_Duplicate_Product Class.

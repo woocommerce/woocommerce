@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Eval_Math' ) ) {
+if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 	/**
 	 * Class WC_Eval_Math. Supports basic math only (removed eval function).
 	 *
