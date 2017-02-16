@@ -1,9 +1,9 @@
 <?php
-include_once( 'abstract-wc-legacy-payment-token.php' );
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+include_once(  WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php' );
 
 /**
  * WooCommerce Payment Token.
