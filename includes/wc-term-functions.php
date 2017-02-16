@@ -532,31 +532,27 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
- * @param  array $terms
- * @param  string $taxonomy
- * @param  bool $callback
- * @param  bool $terms_are_term_taxonomy_ids
+ *
+ * @param array $terms
+ * @param string $taxonomy
+ * @param bool $callback
+ * @param bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
-	global $wpdb, $wc_allow_term_recount;
+	global $wpdb;
 
-	// Don't recount unless CRUD is calling this.
-	if ( empty( $wc_allow_term_recount ) ) {
-		return;
-	}
-
-	// Standard callback
+	// Standard callback.
 	if ( $callback ) {
 		_update_post_term_count( $terms, $taxonomy );
 	}
 
-	// Main query
+	// Main query.
 	$count_query = "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		WHERE 	post_status = 'publish'
-		AND 	post_type 	= 'product'
+		WHERE post_status = 'publish'
+		AND post_type = 'product'
 	";
 
 	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
@@ -569,12 +565,12 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$count_query .= " AND term_taxonomy_id !=" . $product_visibility_term_ids['outofstock'];
 	}
 
-	// Pre-process term taxonomy ids
+	// Pre-process term taxonomy ids.
 	if ( ! $terms_are_term_taxonomy_ids ) {
-		// We passed in an array of TERMS in format id=>parent
+		// We passed in an array of TERMS in format id=>parent.
 		$terms = array_filter( (array) array_keys( $terms ) );
 	} else {
-		// If we have term taxonomy IDs we need to get the term ID
+		// If we have term taxonomy IDs we need to get the term ID.
 		$term_taxonomy_ids = $terms;
 		$terms             = array();
 		foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
@@ -583,22 +579,22 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		}
 	}
 
-	// Exit if we have no terms to count
+	// Exit if we have no terms to count.
 	if ( empty( $terms ) ) {
 		return;
 	}
 
-	// Ancestors need counting
+	// Ancestors need counting.
 	if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
 		foreach ( $terms as $term_id ) {
 			$terms = array_merge( $terms, get_ancestors( $term_id, $taxonomy->name ) );
 		}
 	}
 
-	// Unique terms only
+	// Unique terms only.
 	$terms = array_unique( $terms );
 
-	// Count the terms
+	// Count the terms.
 	foreach ( $terms as $term_id ) {
 		$terms_to_count = array( absint( $term_id ) );
 
