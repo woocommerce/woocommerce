@@ -41,7 +41,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_validate_reports_request_arg() {
-		$request = new WP_REST_Request( 'GET', '/wc/v1/foo', array(
+		$request = new WP_REST_Request( 'GET', '/wc/v2/foo', array(
 			'args' => array(
 				'date' => array(
 					'type'   => 'string',
