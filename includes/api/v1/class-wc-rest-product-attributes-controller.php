@@ -658,7 +658,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 *
 	 * @since 2.7.0
 	 */
-	private function flush_rewrite_rules() {
+	protected function flush_rewrite_rules() {
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 	}
 }

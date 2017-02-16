@@ -902,7 +902,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 * @param array      $data    Shipping data.
 	 * @return WC_Product
 	 */
-	private function save_product_shipping_data( $product, $data ) {
+	protected function save_product_shipping_data( $product, $data ) {
 		// Virtual.
 		if ( isset( $data['virtual'] ) && true === $data['virtual'] ) {
 			$product->set_weight( '' );
@@ -950,7 +950,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 * @param int        $deprecated Deprecated since 2.7.
 	 * @return WC_Product
 	 */
-	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
+	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
 			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
 		}
