@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy product contains all deprecated methods for this class and can be
  * removed in the future.
  */
-include_once( 'abstract-wc-legacy-product.php' );
+include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php' );
 
 /**
  * Abstract Product Class

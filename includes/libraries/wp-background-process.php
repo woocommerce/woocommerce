@@ -275,7 +275,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		WHERE {$column} LIKE %s
 		ORDER BY {$key_column} ASC
 		LIMIT 1
-	", $key ) );
+		", $key ) );
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;

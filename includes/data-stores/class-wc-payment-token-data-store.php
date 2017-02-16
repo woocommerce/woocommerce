@@ -123,7 +123,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 */
 	public function read( &$token ) {
 		global $wpdb;
-		if ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d LIMIT 1;", $token->get_id() ) ) ) {
+		if ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT token, user_id, gateway_id, is_default FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d LIMIT 1;", $token->get_id() ) ) ) {
 			$token->set_props( array(
 				'token'      => $data->token,
 				'user_id'    => $data->user_id,
