@@ -195,7 +195,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$meta->value   = rawurldecode( (string) $meta->value );
 
 			// Skip items with values already in the product details area of the product name
-			$value_in_product_name_regex = "/&ndash;.*{$meta->value}/i";
+			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
+
 			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
 				continue;
 			}
