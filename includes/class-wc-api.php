@@ -150,9 +150,9 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-coupons-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-customer-downloads-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-customers-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-orders-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-order-notes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-order-refunds-controller.php' );
-		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-orders-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-attribute-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-attributes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-categories-controller.php' );
@@ -172,9 +172,9 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customers-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-orders-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-notes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-refunds-controller.php' );
-		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-orders-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-attributes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-categories-controller.php' );

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
+class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -120,8 +120,6 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
@@ -130,17 +128,17 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 
 		$refund = wc_get_order( $post );
 
-		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->id ) ) {
+		if ( ! $refund || $refund->get_parent_id() !== $order->get_id() ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
 		$dp = $request['dp'];
 
 		$data = array(
-			'id'           => $refund->id,
-			'date_created' => wc_rest_prepare_date_response( $refund->date ),
-			'amount'       => wc_format_decimal( $refund->get_refund_amount(), $dp ),
-			'reason'       => $refund->get_refund_reason(),
+			'id'           => $refund->get_id(),
+			'date_created' => wc_rest_prepare_date_response( $refund->get_date_created() ),
+			'amount'       => wc_format_decimal( $refund->get_amount(), $dp ),
+			'reason'       => $refund->get_reason(),
 			'line_items'   => array(),
 		);
 
@@ -153,8 +151,8 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 
 			// Check if the product exists.
 			if ( is_object( $product ) ) {
-				$product_id   = $product->id;
-				$variation_id = $product->variation_id;
+				$product_id   = $item->get_product_id();
+				$variation_id = $item->get_variation_id();
 				$product_sku  = $product->get_sku();
 			}
 
@@ -237,14 +235,15 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Order_Refund $refund Comment object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given order refund.
 	 */
 	protected function prepare_links( $refund, $request ) {
-		$order_id = $refund->post->post_parent;
+		$order_id = $refund->get_parent_id();
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
 		$links    = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
@@ -260,13 +259,13 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @param array $args
-	 * @param WP_REST_Request $request
+	 * @param array           $args    Request args.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
-		// Set post_status.
-		$args['post_status'] = 'any';
+		$args['post_status']     = array_keys( wc_get_order_statuses() );
+		$args['post_parent__in'] = array( absint( $request['order_id'] ) );
 
 		return $args;
 	}
@@ -279,6 +278,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
@@ -292,42 +292,25 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
 		}
 
-		$api_refund = is_bool( $request['api_refund'] ) ? $request['api_refund'] : true;
-
-		$data = array(
-			'order_id'   => $order_data->ID,
-			'amount'     => $request['amount'],
-			'reason'     => empty( $request['reason'] ) ? null : $request['reason'],
-			'line_items' => $request['line_items'],
-		);
-
 		// Create the refund.
-		$refund = wc_create_refund( $data );
+		$refund = wc_create_refund( array(
+			'order_id'       => $order_data->ID,
+			'amount'         => $request['amount'],
+			'reason'         => empty( $request['reason'] ) ? null : $request['reason'],
+			'line_items'     => $request['line_items'],
+			'refund_payment' => is_bool( $request['api_refund'] ) ? $request['api_refund'] : true,
+			'restock_items'  => true,
+		) );
+
+		if ( is_wp_error( $refund ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
+		}
 
 		if ( ! $refund ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
 		}
 
-		// Refund via API.
-		if ( $api_refund ) {
-			if ( WC()->payment_gateways() ) {
-				$payment_gateways = WC()->payment_gateways->payment_gateways();
-			}
-
-			$order = wc_get_order( $order_data );
-
-			if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->payment_method ]->process_refund( $order->id, $refund->get_refund_amount(), $refund->get_refund_reason() );
-
-				if ( is_wp_error( $result ) ) {
-					return $result;
-				} elseif ( ! $result ) {
-					return new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
-				}
-			}
-		}
-
-		$post = get_post( $refund->id );
+		$post = get_post( $refund->get_id() );
 		$this->update_additional_fields_for_object( $post, $request );
 
 		/**
