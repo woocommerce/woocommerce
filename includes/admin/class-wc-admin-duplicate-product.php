@@ -163,14 +163,14 @@ class WC_Admin_Duplicate_Product {
 			return false;
 		}
 
-		$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
+		$post = $wpdb->get_row( $wpdb->prepare( "SELECT {$wpdb->posts}.* FROM {$wpdb->posts} WHERE ID = %d", $id ) );
 
 		if ( isset( $post->post_type ) && 'revision' === $post->post_type ) {
 			$id   = $post->post_parent;
-			$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
+			$post = $wpdb->get_row( $wpdb->prepare( "SELECT {$wpdb->posts}.* FROM {$wpdb->posts} WHERE ID = %d", $id ) );
 		}
 
-		return $post[0];
+		return $post;
 	}
 }
 

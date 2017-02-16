@@ -431,7 +431,7 @@ class WC_Install {
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
-				$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY, ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT;" );
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY, ADD `permission_id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT;" );
 			}
 		}
 
@@ -448,7 +448,16 @@ class WC_Install {
 
 	/**
 	 * Get Table schema.
+	 *
 	 * https://github.com/woocommerce/woocommerce/wiki/Database-Description/
+	 *
+	 * A note on indexes; Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+	 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+	 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+	 *
+	 * Changing indexes may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
+	 * indexes first causes too much load on some servers/larger DB.
+	 *
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -460,29 +469,19 @@ class WC_Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
-		/*
-		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
-		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
-		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
-		 *
-		 * This may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
-		 * indexes first causes too much load on some servers/larger DB.
-		 */
-		$max_index_length = 191;
-
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
-  session_id bigint(20) NOT NULL AUTO_INCREMENT,
+  session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
-  session_expiry bigint(20) NOT NULL,
+  session_expiry BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (session_key),
   UNIQUE KEY session_id (session_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
-  key_id bigint(20) NOT NULL auto_increment,
-  user_id bigint(20) NOT NULL,
-  description longtext NULL,
+  key_id BIGINT UNSIGNED NOT NULL auto_increment,
+  user_id BIGINT UNSIGNED NOT NULL,
+  description varchar(200) NULL,
   permissions varchar(10) NOT NULL,
   consumer_key char(64) NOT NULL,
   consumer_secret char(43) NOT NULL,
@@ -494,123 +493,121 @@ CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   KEY consumer_secret (consumer_secret)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
-  attribute_id bigint(20) NOT NULL auto_increment,
+  attribute_id BIGINT UNSIGNED NOT NULL auto_increment,
   attribute_name varchar(200) NOT NULL,
-  attribute_label longtext NULL,
-  attribute_type varchar(200) NOT NULL,
-  attribute_orderby varchar(200) NOT NULL,
+  attribute_label varchar(200) NULL,
+  attribute_type varchar(20) NOT NULL,
+  attribute_orderby varchar(20) NOT NULL,
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
-  KEY attribute_name (attribute_name($max_index_length))
+  KEY attribute_name (attribute_name(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
-  permission_id bigint(20) NOT NULL auto_increment,
+  permission_id BIGINT UNSIGNED NOT NULL auto_increment,
   download_id varchar(32) NOT NULL,
-  product_id bigint(20) NOT NULL,
-  order_id bigint(20) NOT NULL DEFAULT 0,
+  product_id BIGINT UNSIGNED NOT NULL,
+  order_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
   order_key varchar(200) NOT NULL,
   user_email varchar(200) NOT NULL,
-  user_id bigint(20) NULL,
+  user_id BIGINT UNSIGNED NULL,
   downloads_remaining varchar(9) NULL,
   access_granted datetime NOT NULL default '0000-00-00 00:00:00',
   access_expires datetime NULL default null,
-  download_count bigint(20) NOT NULL DEFAULT 0,
+  download_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
-  KEY download_order_key_product (product_id,order_id,order_key($max_index_length),download_id),
+  KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
-  order_item_id bigint(20) NOT NULL auto_increment,
-  order_item_name longtext NOT NULL,
-  order_item_type varchar(200) NOT NULL DEFAULT '',
-  order_id bigint(20) NOT NULL,
+  order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
+  order_item_name TEXT NOT NULL,
+  order_item_type varchar(20) NOT NULL DEFAULT '',
+  order_id BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (order_item_id),
   KEY order_id (order_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  order_item_id bigint(20) NOT NULL,
+  meta_id BIGINT UNSIGNED NOT NULL auto_increment,
+  order_item_id BIGINT UNSIGNED NOT NULL,
   meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY order_item_id (order_item_id),
-  KEY meta_key (meta_key($max_index_length))
+  KEY meta_key (meta_key(32))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
-  tax_rate_id bigint(20) NOT NULL auto_increment,
-  tax_rate_country varchar(200) NOT NULL DEFAULT '',
+  tax_rate_id BIGINT UNSIGNED NOT NULL auto_increment,
+  tax_rate_country varchar(2) NOT NULL DEFAULT '',
   tax_rate_state varchar(200) NOT NULL DEFAULT '',
-  tax_rate varchar(200) NOT NULL DEFAULT '',
+  tax_rate varchar(8) NOT NULL DEFAULT '',
   tax_rate_name varchar(200) NOT NULL DEFAULT '',
-  tax_rate_priority bigint(20) NOT NULL,
+  tax_rate_priority BIGINT UNSIGNED NOT NULL,
   tax_rate_compound int(1) NOT NULL DEFAULT 0,
   tax_rate_shipping int(1) NOT NULL DEFAULT 1,
-  tax_rate_order bigint(20) NOT NULL,
+  tax_rate_order BIGINT UNSIGNED NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_id),
-  KEY tax_rate_country (tax_rate_country($max_index_length)),
-  KEY tax_rate_state (tax_rate_state($max_index_length)),
-  KEY tax_rate_class (tax_rate_class($max_index_length)),
+  KEY tax_rate_country (tax_rate_country),
+  KEY tax_rate_state (tax_rate_state(2)),
+  KEY tax_rate_class (tax_rate_class(10)),
   KEY tax_rate_priority (tax_rate_priority)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
-  location_id bigint(20) NOT NULL auto_increment,
-  location_code varchar(255) NOT NULL,
-  tax_rate_id bigint(20) NOT NULL,
+  location_id BIGINT UNSIGNED NOT NULL auto_increment,
+  location_code varchar(200) NOT NULL,
+  tax_rate_id BIGINT UNSIGNED NOT NULL,
   location_type varchar(40) NOT NULL,
   PRIMARY KEY  (location_id),
   KEY tax_rate_id (tax_rate_id),
-  KEY location_type (location_type),
-  KEY location_type_code (location_type(40),location_code(90))
+  KEY location_type_code (location_type(10),location_code(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
-  zone_id bigint(20) NOT NULL auto_increment,
-  zone_name varchar(255) NOT NULL,
-  zone_order bigint(20) NOT NULL,
+  zone_id BIGINT UNSIGNED NOT NULL auto_increment,
+  zone_name varchar(200) NOT NULL,
+  zone_order BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (zone_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
-  location_id bigint(20) NOT NULL auto_increment,
-  zone_id bigint(20) NOT NULL,
-  location_code varchar(255) NOT NULL,
+  location_id BIGINT UNSIGNED NOT NULL auto_increment,
+  zone_id BIGINT UNSIGNED NOT NULL,
+  location_code varchar(200) NOT NULL,
   location_type varchar(40) NOT NULL,
   PRIMARY KEY  (location_id),
   KEY location_id (location_id),
-  KEY location_type (location_type),
-  KEY location_type_code (location_type(40),location_code(90))
+  KEY location_type_code (location_type(10),location_code(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
-  zone_id bigint(20) NOT NULL,
-  instance_id bigint(20) NOT NULL auto_increment,
-  method_id varchar(255) NOT NULL,
-  method_order bigint(20) NOT NULL,
+  zone_id BIGINT UNSIGNED NOT NULL,
+  instance_id BIGINT UNSIGNED NOT NULL auto_increment,
+  method_id varchar(200) NOT NULL,
+  method_order BIGINT UNSIGNED NOT NULL,
   is_enabled tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY  (instance_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
-  token_id bigint(20) NOT NULL auto_increment,
-  gateway_id varchar(255) NOT NULL,
+  token_id BIGINT UNSIGNED NOT NULL auto_increment,
+  gateway_id varchar(200) NOT NULL,
   token text NOT NULL,
-  user_id bigint(20) NOT NULL DEFAULT '0',
-  type varchar(255) NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL DEFAULT '0',
+  type varchar(200) NOT NULL,
   is_default tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (token_id),
   KEY user_id (user_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  payment_token_id bigint(20) NOT NULL,
+  meta_id BIGINT UNSIGNED NOT NULL auto_increment,
+  payment_token_id BIGINT UNSIGNED NOT NULL,
   meta_key varchar(255) NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY payment_token_id (payment_token_id),
-  KEY meta_key (meta_key($max_index_length))
+  KEY meta_key (meta_key(32))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_log (
-  log_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
   level smallint(4) NOT NULL,
-  source varchar(255) NOT NULL,
+  source varchar(200) NOT NULL,
   message longtext NOT NULL,
   context longtext NULL,
   PRIMARY KEY (log_id),
@@ -618,17 +615,19 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
 ) $collate;
 		";
 
-		// Term meta is only needed for old installs.
+		/**
+		 * Term meta is only needed for old installs and is now @deprecated by WordPress term meta.
+		 */
 		if ( ! function_exists( 'get_term_meta' ) ) {
 			$tables .= "
 CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  woocommerce_term_id bigint(20) NOT NULL,
+  meta_id BIGINT UNSIGNED NOT NULL auto_increment,
+  woocommerce_term_id BIGINT UNSIGNED NOT NULL,
   meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key($max_index_length))
+  KEY meta_key (meta_key(32))
 ) $collate;
 			";
 		}
