@@ -437,7 +437,7 @@ class WC_Install {
 
 		dbDelta( self::get_schema() );
 
-		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE Column_name = 'comment_type' and Key_name = 'comment_type'" );
+		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
 
 		if ( is_null( $index_exists ) ) {
 			// Add an index to the field comment_type to improve the response time of the query
