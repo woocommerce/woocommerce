@@ -27,7 +27,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.

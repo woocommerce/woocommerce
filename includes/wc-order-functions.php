@@ -754,9 +754,9 @@ function wc_update_total_sales_counts( $order_id ) {
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
-			if ( $product = $item->get_product() ) {
-				$product->set_total_sales( $product->get_total_sales() + absint( $item['qty'] ) );
-				$product->save();
+			if ( $product_id = $item->get_product_id() ) {
+				$data_store = WC_Data_Store::load( 'product' );
+				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
 			}
 		}
 	}

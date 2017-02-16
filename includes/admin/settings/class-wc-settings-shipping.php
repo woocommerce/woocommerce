@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Shipping' ) ) :
+if ( ! class_exists( 'WC_Settings_Shipping', false ) ) :
 
 /**
  * WC_Settings_Shipping.

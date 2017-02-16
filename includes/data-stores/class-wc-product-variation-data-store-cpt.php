@@ -75,8 +75,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
 		 */
 		if ( __( 'Variation #', 'woocommerce' ) === substr( $post_object->post_title, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $post_object->post_title ) {
-			$parent_data = $product->get_parent_data();
-			$new_title   = $parent_data['title'] . ' &ndash; ' . wc_get_formatted_variation( $product, true, false );
+			$new_title   = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
@@ -96,13 +95,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		$product->set_date_created( current_time( 'timestamp' ) );
-		$parent_object = get_post( $product->get_parent_id() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
+			'post_title'     => $this->generate_product_title( $product ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -114,17 +112,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+
 			$this->update_post_meta( $product, true );
-			$this->update_terms( $product );
-			$this->update_attributes( $product );
+			$this->update_terms( $product, true );
+			$this->update_attributes( $product, true );
+			$this->handle_updated_props( $product );
+
 			$product->save_meta_data();
+			$product->apply_changes();
+
+			$this->update_version_and_type( $product );
+
+			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_create_product_variation', $id );
-
-			$product->apply_changes();
-			$this->update_version_and_type( $product );
-			$this->update_term_counts( $product );
-			$this->clear_caches( $product );
 		}
 	}
 
@@ -135,27 +136,34 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
-		$parent_object = get_post( $product->get_parent_id() );
-		$post_data = array(
-			'ID'             => $product->get_id(),
-			'post_title'     => $parent_object->post_title . ' &ndash; ' . wc_get_formatted_variation( $product, true, false ),
-			'post_parent'    => $product->get_parent_id(),
-			'comment_status' => 'closed',
-			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
-			'menu_order'     => $product->get_menu_order(),
-		);
-		wp_update_post( $post_data );
+		$changes = $product->get_changes();
+		$title   = $this->generate_product_title( $product );
+
+		// Only update the post when the post data changes.
+		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
+			wp_update_post( array(
+				'ID'             => $product->get_id(),
+				'post_title'     => $title,
+				'post_parent'    => $product->get_parent_id( 'edit' ),
+				'comment_status' => 'closed',
+				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'     => $product->get_menu_order( 'edit' ),
+			) );
+		}
+
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
+		$this->handle_updated_props( $product );
+
 		$product->save_meta_data();
+		$product->apply_changes();
+
+		$this->update_version_and_type( $product );
+
+		$this->clear_caches( $product );
 
 		do_action( 'woocommerce_update_product_variation', $product->get_id() );
-
-		$product->apply_changes();
-		$this->update_version_and_type( $product );
-		$this->update_term_counts( $product );
-		$this->clear_caches( $product );
 	}
 
 	/*
@@ -163,6 +171,44 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Generates a title with attribute information for a variation.
+	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
+	 * All other products will get a title of the form "Name - Value, Value"
+	 *
+	 * @since 2.7.0
+	 * @param WC_Product
+	 * @return string
+	 */
+	protected function generate_product_title( $product ) {
+		$include_attribute_names = false;
+		$attributes = (array) $product->get_attributes();
+
+		// Determine whether to include attribute names through counting the number of one-word attribute values.
+		$one_word_attributes = 0;
+		foreach ( $attributes as $name => $value ) {
+			if ( false === strpos( $value, '-' ) ) {
+				++$one_word_attributes;
+			}
+			if ( $one_word_attributes > 1 ) {
+				$include_attribute_names = true;
+				break;
+			}
+		}
+
+		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
+		$title_base_text = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_attributes_text = wc_get_formatted_variation( $product, true, $include_attribute_names );
+		$separator = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
+
+		return apply_filters( 'woocommerce_product_variation_title',
+			$title_base_text . $separator . $title_attributes_text,
+			$product,
+			$title_base_text,
+			$title_attributes_text
+		);
+	}
 
 	/**
 	 * Make sure we store the product version (to track data changes).
@@ -237,9 +283,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 */
-	protected function update_terms( &$product ) {
-		wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+	protected function update_terms( &$product, $force = false ) {
+		$changes = $product->get_changes();
+
+		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		}
 	}
 
 	/**
@@ -247,21 +298,26 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 */
-	protected function update_attributes( &$product ) {
-		global $wpdb;
-		$attributes             = $product->get_attributes();
-		$updated_attribute_keys = array();
-		foreach ( $attributes as $key => $value ) {
-			update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
-			$updated_attribute_keys[] = 'attribute_' . $key;
-		}
+	protected function update_attributes( &$product, $force = false ) {
+		$changes = $product->get_changes();
 
-		// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
-		$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d;", $product->get_id() ) );
+		if ( $force || array_key_exists( 'attributes', $changes ) ) {
+			global $wpdb;
+			$attributes             = $product->get_attributes();
+			$updated_attribute_keys = array();
+			foreach ( $attributes as $key => $value ) {
+				update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
+				$updated_attribute_keys[] = 'attribute_' . $key;
+			}
 
-		foreach ( $delete_attribute_keys as $key ) {
-			delete_post_meta( $product->get_id(), $key );
+			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
+			$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d;", $product->get_id() ) );
+
+			foreach ( $delete_attribute_keys as $key ) {
+				delete_post_meta( $product->get_id(), $key );
+			}
 		}
 	}
 
@@ -270,9 +326,23 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 2.7.0
 	 * @param WC_Product
+	 * @param bool Force update. Used during create.
 	 */
-	public function update_post_meta( &$product ) {
-		update_post_meta( $product->get_id(), '_variation_description', $product->get_description() );
+	public function update_post_meta( &$product, $force = false ) {
+		$meta_key_to_props = array(
+			'_variation_description' => 'description',
+		);
+
+		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
+			$value   = $product->{"get_$prop"}( 'edit' );
+			$updated = update_post_meta( $product->get_id(), $meta_key, $value );
+			if ( $updated ) {
+				$this->updated_props[] = $prop;
+			}
+		}
+
 		parent::update_post_meta( $product );
 	}
 }

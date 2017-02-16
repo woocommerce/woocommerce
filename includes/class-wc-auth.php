@@ -9,12 +9,9 @@
  * @package  WooCommerce/API
  * @since    2.4.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-if ( ! class_exists( 'WC_Auth' ) ) :
 
 class WC_Auth {
 
@@ -402,7 +399,4 @@ class WC_Auth {
 		}
 	}
 }
-
-endif;
-
-return new WC_Auth();
+new WC_Auth();

@@ -383,18 +383,19 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	}
 
 	/**
-	 * Magic __isset method for backwards compatibility.
+	 * Magic __isset method for backwards compatibility. Handles legacy properties which could be accessed directly in the past.
+	 *
 	 * @param string $key
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		// Legacy properties which could be accessed directly in the past.
 		$legacy_props = array( 'completed_date', 'id', 'order_type', 'post', 'status', 'post_status', 'customer_note', 'customer_message', 'user_id', 'customer_user', 'prices_include_tax', 'tax_display_cart', 'display_totals_ex_tax', 'display_cart_ex_tax', 'order_date', 'modified_date', 'cart_discount', 'cart_discount_tax', 'order_shipping', 'order_shipping_tax', 'order_total', 'order_tax', 'billing_first_name', 'billing_last_name', 'billing_company', 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_state', 'billing_postcode', 'billing_country', 'billing_phone', 'billing_email', 'shipping_first_name', 'shipping_last_name', 'shipping_company', 'shipping_address_1', 'shipping_address_2', 'shipping_city', 'shipping_state', 'shipping_postcode', 'shipping_country', 'customer_ip_address', 'customer_user_agent', 'payment_method_title', 'payment_method', 'order_currency' );
 		return $this->get_id() ? ( in_array( $key, $legacy_props ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) ) : false;
 	}
 
 	/**
 	 * Magic __get method for backwards compatibility.
+	 *
 	 * @param string $key
 	 * @return mixed
 	 */

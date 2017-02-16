@@ -18,13 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
-	 * The product's type (simple, variable etc).
-	 * @deprecated 2.7.0 get_type() method should return string instead since this prop should not be changed or be public.
-	 * @var string
-	 */
-	public $product_type = 'simple';
-
-	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 *
 	 * @param  string $key Key name.
@@ -74,6 +67,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		switch ( $key ) {
 			case 'id' :
 				$value = $this->is_type( 'variation' ) ? $this->get_parent_id() : $this->get_id();
+				break;
+			case 'product_type' :
+				$value = $this->get_type();
 				break;
 			case 'product_attributes' :
 				$value = isset( $this->data['attributes'] ) ? $this->data['attributes'] : '';

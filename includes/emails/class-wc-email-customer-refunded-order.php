@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 
 /**
  * Customer Refunded Order Email.

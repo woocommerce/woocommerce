@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include( 'class-wc-rest-orders-controller.php' );
-
 /**
  * REST API Order Refunds controller class.
  *
@@ -29,7 +27,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -220,13 +218,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @param array $args
-	 * @param WP_REST_Request $request
+	 * @param array           $args    Request args.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
 		$args['post_status']     = array_keys( wc_get_order_statuses() );
 		$args['post_parent__in'] = array( absint( $request['order_id'] ) );
+
 		return $args;
 	}
 
@@ -330,7 +329,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'context'     => array( 'view' ),
 				),
 				'meta_data' => array(
-					'description' => __( 'Order meta data.', 'woocommerce' ),
+					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -442,7 +441,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 								),
 							),
 							'meta_data' => array(
-								'description' => __( 'Order item meta data.', 'woocommerce' ),
+								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -478,35 +477,6 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-							),
-							'meta' => array(
-								'description' => __( 'Order item meta data (formatted).', 'woocommerce' ),
-								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'items'       => array(
-									'type'       => 'object',
-									'properties' => array(
-										'key' => array(
-											'description' => __( 'Meta key.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-										'label' => array(
-											'description' => __( 'Meta label.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-										'value' => array(
-											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-									),
-								),
 							),
 						),
 					),

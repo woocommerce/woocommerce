@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Admin_Dashboard' ) ) :
+if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 /**
  * WC_Admin_Dashboard Class.
