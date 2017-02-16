@@ -160,13 +160,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
-				'post_content'   => $product->get_description(),
-				'post_excerpt'   => $product->get_short_description(),
-				'post_title'     => $product->get_name(),
-				'post_parent'    => $product->get_parent_id(),
-				'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
-				'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
-				'menu_order'     => $product->get_menu_order(),
+				'post_content'   => $product->get_description( 'edit' ),
+				'post_excerpt'   => $product->get_short_description( 'edit' ),
+				'post_title'     => $product->get_name( 'edit' ),
+				'post_parent'    => $product->get_parent_id( 'edit' ),
+				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
+				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'     => $product->get_menu_order( 'edit' ),
 			) );
 		}
 
