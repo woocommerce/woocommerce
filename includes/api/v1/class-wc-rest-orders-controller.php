@@ -183,7 +183,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			// Check if the product exists.
 			if ( is_object( $product ) ) {
 				$product_id   = $product->get_id();
-				$variation_id = $product->get_variation_id();
+				$variation_id = $product->get_id() === $product->get_variation_id() ? 0 : $product->get_variation_id();
 				$product_sku  = $product->get_sku();
 			}
 
