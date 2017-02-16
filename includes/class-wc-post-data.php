@@ -60,8 +60,7 @@ class WC_Post_Data {
 	 * @return string
 	 */
 	public static function variation_post_link( $permalink, $post ) {
-		if ( 'product_variation' === $post->post_type ) {
-			$variation = wc_get_product( $post->ID );
+		if ( isset( $post->ID, $post->post_type ) && 'product_variation' === $post->post_type && ( $variation = wc_get_product( $post->ID ) ) ) {
 			return $variation->get_permalink();
 		}
 		return $permalink;
