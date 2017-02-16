@@ -177,6 +177,27 @@ class WC_REST_Coupons_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Prepare objects query.
+	 *
+	 * @since  2.7.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
+
+		if ( ! empty( $request['code'] ) ) {
+			$id = wc_get_coupon_id_by_code( $request['code'] );
+			$args['post__in'] = array( $id );
+		}
+
+		// Get only ids.
+		$args['fields'] = 'ids';
+
+		return $args;
+	}
+
+	/**
 	 * Only reutrn writeable props from schema.
 	 *
 	 * @param  array $schema
@@ -251,27 +272,6 @@ class WC_REST_Coupons_Controller extends WC_REST_CRUD_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $coupon, $request, $creating );
-	}
-
-	/**
-	 * Prepare objects query.
-	 *
-	 * @since  2.7.0
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array
-	 */
-	protected function prepare_objects_query( $request ) {
-		$args = parent::prepare_objects_query( $request );
-
-		if ( ! empty( $request['code'] ) ) {
-			$id = wc_get_coupon_id_by_code( $request['code'] );
-			$args['post__in'] = array( $id );
-		}
-
-		// Get only ids.
-		$args['fields'] = 'ids';
-
-		return $args;
 	}
 
 	/**
