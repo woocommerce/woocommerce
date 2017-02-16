@@ -241,8 +241,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V1_Controller {
 		// Allow set meta_data.
 		if ( is_array( $request['meta_data'] ) ) {
 			foreach ( $request['meta_data'] as $meta ) {
-				$meta_id = isset( $meta['id'] ) ? $meta['id'] : '';
-				$product->update_meta_data( $meta['key'], $meta['value'], $meta_id );
+				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 			}
 		}
 
