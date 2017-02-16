@@ -437,7 +437,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'applied_coupon' );
+					$( document.body ).trigger( 'applied_coupon', [ coupon ] );
 				},
 				complete: function() {
 					unblock( $form );
@@ -474,7 +474,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'removed_coupon' );
+					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
 					unblock( $wrapper );
 				},
 				complete: function() {
