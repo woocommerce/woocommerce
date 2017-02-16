@@ -78,7 +78,7 @@ class WC_Meta_Box_Coupon_Data {
 				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
 				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => 'YYYY-MM-DD', 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
-				do_action( 'woocommerce_coupon_options' );
+				do_action( 'woocommerce_coupon_options', $coupon->get_id(), $coupon );
 
 			?></div>
 			<div id="usage_restriction_coupon_data" class="panel woocommerce_options_panel"><?php
@@ -184,7 +184,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				echo '</div>';
 
-				do_action( 'woocommerce_coupon_options_usage_restriction' );
+				do_action( 'woocommerce_coupon_options_usage_restriction', $coupon->get_id(), $coupon );
 
 			?></div>
 			<div id="usage_limit_coupon_data" class="panel woocommerce_options_panel"><?php
@@ -241,10 +241,10 @@ class WC_Meta_Box_Coupon_Data {
 
 				echo '</div>';
 
-				do_action( 'woocommerce_coupon_options_usage_limit' );
+				do_action( 'woocommerce_coupon_options_usage_limit', $coupon->get_id(), $coupon );
 
 			?></div>
-			<?php do_action( 'woocommerce_coupon_data_panels' ); ?>
+			<?php do_action( 'woocommerce_coupon_data_panels', $coupon->get_id(), $coupon ); ?>
 			<div class="clear"></div>
 		</div>
 		<?php
@@ -291,6 +291,6 @@ class WC_Meta_Box_Coupon_Data {
 			'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 		) );
 		$coupon->save();
-		do_action( 'woocommerce_coupon_options_save', $post_id );
+		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}
 }
