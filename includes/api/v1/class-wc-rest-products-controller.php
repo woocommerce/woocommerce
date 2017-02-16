@@ -1063,7 +1063,8 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 * @throws WC_REST_Exception
 	 */
 	protected function save_product_meta( $product, $request ) {
-		$this->set_product_meta( $product, $request );
+		$product = $this->set_product_meta( $product, $request );
+		$product->save();
 
 		return true;
 	}
@@ -1352,8 +1353,6 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		if ( $product->is_type( 'variable' ) ) {
 			$product = $this->save_default_attributes( $product, $request );
 		}
-
-		$product->save();
 
 		return $product;
 	}

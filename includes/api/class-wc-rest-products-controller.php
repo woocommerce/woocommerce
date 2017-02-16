@@ -228,6 +228,28 @@ class WC_REST_Products_Controller extends WC_REST_Products_V1_Controller {
 	}
 
 	/**
+	 * Set product meta.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product      $product Product instance.
+	 * @param WP_REST_Request $request Request data.
+	 * @return WC_Product
+	 */
+	protected function set_product_meta( $product, $request ) {
+		$product = parent::set_product_meta( $product, $request );
+
+		// Allow set meta_data.
+		if ( is_array( $request['meta_data'] ) ) {
+			foreach ( $request['meta_data'] as $meta ) {
+				$meta_id = isset( $meta['id'] ) ? $meta['id'] : '';
+				$product->update_meta_data( $meta['key'], $meta['value'], $meta_id );
+			}
+		}
+
+		return $product;
+	}
+
+	/**
 	 * Get the Product's schema, conforming to JSON Schema.
 	 *
 	 * @return array
