@@ -999,7 +999,13 @@ function wc_update_270_webhooks() {
 function wc_update_270_comment_type_index() {
 	global $wpdb;
 
-	$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+
+	if ( is_null( $index_exists ) ) {
+		// Add an index to the field comment_type to improve the response time of the query
+		// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	}
 }
 
 function wc_update_270_grouped_products() {
