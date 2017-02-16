@@ -196,12 +196,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Prevent payment details being cleared after update_checkout events.
 * Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
 * Includes product attributes archives links in "Additional Information" tab.
+* Select2 has been upgraded to v4.
+* Improved logging system for extensions.
+* Tax suffix is now hidden on non-taxable products.
 * Performance - Converted rating filters to visibility terms.
 * Performance - Added visibility term for outofstock products to speed those queries up also.
 * Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
 * Performance - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
 * Performance - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
 * Performance - Removed the feature where old orders get access to new downloads on product edit. Looping potentially thousands of orders to do this is too much of a performance burden for stores and this can sometimes be unexpected behavior too. This does however updates *edited* downloads.
+* Performance - Removed 'items' column on orders screen due to loading excessive data.
+* Performance - Deferred email sending for faster checkouts. Now uses CRON.
 * API - Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
 * API - Allow oAuth1.0a authentication using headers.
 * API - New Shipping Zones endpoints.
@@ -210,6 +215,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * API - Payment gateways and shipping methods endpoints.
 * API - Prevented the (broken) ability to manipulate variations directly on the products endpoints.
 * CLI - New CLI which uses the REST API endpoints rather than it's own functions.
+* CLI - Improved RTL support.
+* Localization - Added a language independent permalink setting function.
 * Localization - Added inline comments for placeholder strings.
 * Localization - Added Nigerian Provinces to i18n/state.
 * Localization - US and Poland postcode validation.
