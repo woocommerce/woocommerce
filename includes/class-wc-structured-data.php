@@ -198,13 +198,13 @@ class WC_Structured_Data {
 			$prices = $product->get_variation_prices();
 
 			$markup_offer['priceSpecification'] = array(
-				'price'         => woocommerce_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-				'minPrice'      => woocommerce_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
-				'maxPrice'      => woocommerce_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+				'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+				'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
+				'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
 				'priceCurrency' => $currency,
 			);
 		} else {
-			$markup_offer['price']    = woocommerce_format_decimal( $product->get_price(), wc_get_price_decimals() );
+			$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
 		}
 
 		$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
