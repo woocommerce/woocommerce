@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
-class WC_REST_Coupons_Controller extends WC_REST_CRUD_Controller {
+class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 
 	/**
 	 * Endpoint namespace.

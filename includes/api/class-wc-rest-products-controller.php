@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
-class WC_REST_Products_Controller extends WC_REST_CRUD_Controller {
+class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 
 	/**
 	 * Endpoint namespace.

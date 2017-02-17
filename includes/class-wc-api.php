@@ -165,6 +165,11 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhook-deliveries.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhooks-controller.php' );
 
+		// Legacy v2 code.
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-coupons-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-orders-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-products-controller.php' );
+
 		// REST API v2 controllers.
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php' );

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
-class WC_REST_Orders_Controller extends WC_REST_CRUD_Controller {
+class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -413,17 +413,6 @@ class WC_REST_Orders_Controller extends WC_REST_CRUD_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
-	}
-
-	/**
-	 * Create base WC Order object.
-	 *
-	 * @deprecated 2.7.0
-	 * @param array $data
-	 * @return WC_Order
-	 */
-	protected function create_base_order( $data ) {
-		return wc_create_order( $data );
 	}
 
 	/**

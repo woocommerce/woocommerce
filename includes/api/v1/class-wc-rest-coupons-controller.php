@@ -44,7 +44,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_coupon';
 
 	/**
-	 * Order refunds actions.
+	 * Coupons actions.
 	 */
 	public function __construct() {
 		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
