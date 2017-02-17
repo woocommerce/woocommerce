@@ -337,4 +337,26 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	public function offsetExists( $offset ) {
 		return in_array( $offset, array_keys( $this->data ) );
 	}
+
+	/**
+	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
+	 *
+	 * @param  string $key Key name.
+	 * @return bool
+	 */
+	public function __isset( $key ) {
+		return in_array( $offset, array_keys( $this->data ) );
+	}
+
+	/**
+	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
+	 *
+	 * @param  string $key Key name.
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		if ( is_callable( array( $this, "get_$key" ) ) ) {
+			return $this->{"get_$key"}( '' );
+		}
+	}
 }
