@@ -34,13 +34,25 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	protected $hierarchical = false;
 
 	/**
+	 * Get object.
+	 *
+	 * @param  int $id Object ID.
+	 * @return WP_Error|WC_Data
+	 */
+	protected function get_object( $id ) {
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+	}
+
+	/**
 	 * Check if a given request has access to read an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', (int) $request['id'] ) ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -54,7 +66,9 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'edit', (int) $request['id'] ) ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -68,21 +82,13 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', (int) $request['id'] ) ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
-	}
-
-	/**
-	 * Get object.
-	 *
-	 * @param  int $id Object ID.
-	 * @return WP_Error|WC_Data
-	 */
-	protected function get_object( $id ) {
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -128,7 +134,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	public function get_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
-		if ( 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -215,7 +221,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	public function update_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
-		if ( 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -375,7 +381,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;
 
-		if ( 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
