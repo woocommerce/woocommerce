@@ -348,7 +348,7 @@ class WC_REST_Orders_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Prepare a single coupon for create or update.
+	 * Prepare a single order for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
