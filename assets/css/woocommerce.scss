@@ -462,6 +462,18 @@ p.demo_store,
 					padding-bottom: 0.5em;
 					border: 0;
 				}
+
+				td:first-child {
+					width: 4em;
+					text-align: center;
+				}
+
+				.wc-grouped-product-add-to-cart-checkbox {
+					display: inline-block;
+					width: auto;
+					margin: 0 auto;
+					transform:scale(1.5, 1.5);
+				}
 			}
 		}
 	}

@@ -15,7 +15,6 @@
  * @package 	WooCommerce/Templates
  * @version     2.7.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -28,24 +27,40 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 	<table cellspacing="0" class="group_table">
 		<tbody>
 			<?php
+				$quantites_required = false;
+
 				foreach ( $grouped_products as $grouped_product ) {
 					$post_object = get_post( $grouped_product->get_id() );
+					$quantites_required = $quantites_required || $grouped_product->is_purchasable();
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 					?>
 					<tr id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<td>
-							<?php if ( $grouped_product->is_sold_individually() || ! $grouped_product->is_purchasable() ) : ?>
+							<?php if ( ! $grouped_product->is_purchasable() ) : ?>
 								<?php woocommerce_template_loop_add_to_cart(); ?>
+
+							<?php elseif ( $grouped_product->is_sold_individually() ) : ?>
+								<input type="checkbox" name="<?php echo esc_attr( 'quantity[' . $grouped_product->get_id() . ']' ); ?>" value="1" class="wc-grouped-product-add-to-cart-checkbox" />
+
 							<?php else : ?>
 								<?php
-									$quantites_required = true;
+									/**
+									 * @since 2.7.0.
+									 */
+									do_action( 'woocommerce_before_add_to_cart_quantity' );
+
 									woocommerce_quantity_input( array(
 										'input_name'  => 'quantity[' . $grouped_product->get_id() . ']',
-										'input_value' => ( isset( $_POST['quantity'][ $grouped_product->get_id() ] ) ? wc_stock_amount( $_POST['quantity'][ $grouped_product->get_id() ] ) : 0 ),
+										'input_value' => isset( $_POST['quantity'][ $grouped_product->get_id() ] ) ? wc_stock_amount( $_POST['quantity'][ $grouped_product->get_id() ] ) : 0,
 										'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $grouped_product ),
-										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $grouped_product->backorders_allowed() || ! $grouped_product->get_manage_stock() ? '' : $grouped_product->get_stock_quantity(), $grouped_product ),
+										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $grouped_product->get_max_purchase_quantity(), $grouped_product ),
 									) );
+
+									/**
+									 * @since 2.7.0.
+									 */
+									do_action( 'woocommerce_after_add_to_cart_quantity' );
 								?>
 							<?php endif; ?>
 						</td>
