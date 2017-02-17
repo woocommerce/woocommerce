@@ -34,6 +34,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
+		delete_transient( 'wc_product_children_' . ( $product_with_stock->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
 
 		// Re-read product data after updating stock, then have stock status calculated and saved.
 		$product_with_stock = wc_get_product( $product_id_with_stock );
