@@ -373,6 +373,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$id     = (int) $request['id'];
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
+		$result = false;
 
 		if ( 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -400,7 +401,8 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-			$result = $object->delete( true );
+			$object->delete( true );
+			$result = 0 === $object->get_id();
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -409,12 +411,15 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Otherwise, only trash if we haven't already.
-			if ( is_callable( array( $object, 'get_status' ) ) && 'trash' === $object->get_status() ) {
-				/* translators: %s: post type */
-				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
-			}
+			if ( is_callable( array( $object, 'get_status' ) ) ) {
+				if ( 'trash' === $object->get_status() ) {
+					/* translators: %s: post type */
+					return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+				}
 
-			$result = $object->delete();
+				$object->delete();
+				$result = 'trash' === $object->get_status();
+			}
 		}
 
 		if ( ! $result ) {
