@@ -252,7 +252,7 @@ class WC_Product_Variable extends WC_Product {
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'min_qty'               => $variation->get_min_purchase_quantity(),
-			'max_qty'               => $variation->get_max_purchase_quantity(),
+			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
 			'backorders_allowed'    => $variation->backorders_allowed(),
 			'is_in_stock'           => $variation->is_in_stock(),
 			'is_downloadable'       => $variation->is_downloadable(),
