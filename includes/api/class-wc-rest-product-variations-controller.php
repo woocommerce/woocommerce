@@ -440,8 +440,78 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		$request['id'] = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
-		return parent::delete_item( $request );
+		$id     = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
+		$force  = (bool) $request['force'];
+		$object = $this->get_object( (int) $request['id'] );
+		$result = false;
+
+		if ( ! $object || 0 === $object->get_id() ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
+
+		/**
+		 * Filter whether an object is trashable.
+		 *
+		 * Return false to disable trash support for the object.
+		 *
+		 * @param boolean $supports_trash Whether the object type support trashing.
+		 * @param WC_Data $object         The object being considered for trashing support.
+		 */
+		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
+
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+			/* translators: %s: post type */
+			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_object_for_response( $object, $request );
+
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$object->delete( true );
+			$result = 0 === $object->get_id();
+		} else {
+			// If we don't support trashing for this type, error out.
+			if ( ! $supports_trash ) {
+				/* translators: %s: post type */
+				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+			}
+
+			// Otherwise, only trash if we haven't already.
+			if ( is_callable( array( $object, 'get_status' ) ) ) {
+				if ( 'trash' === $object->get_status() ) {
+					/* translators: %s: post type */
+					return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+				}
+
+				$object->delete();
+				$result = 'trash' === $object->get_status();
+			}
+		}
+
+		if ( ! $result ) {
+			/* translators: %s: post type */
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+		}
+
+		// Delete parent product transients.
+		if ( 0 !== $object->get_parent_id() ) {
+			wc_delete_product_transients( $object->get_parent_id() );
+		}
+
+		/**
+		 * Fires after a single object is deleted or trashed via the REST API.
+		 *
+		 * @param WC_Data          $object   The deleted or trashed object.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
+
+		return $response;
 	}
 
 	/**

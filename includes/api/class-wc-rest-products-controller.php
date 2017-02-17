@@ -1228,13 +1228,12 @@ class WC_REST_Products_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id        = (int) $request['id'];
-		$force     = (bool) $request['force'];
-		$object    = $this->get_object( (int) $request['id'] );
-		$parent_id = $object->get_parent_id();
-		$result    = false;
+		$id     = (int) $request['id'];
+		$force  = (bool) $request['force'];
+		$object = $this->get_object( (int) $request['id'] );
+		$result = false;
 
-		if ( 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -1304,8 +1303,8 @@ class WC_REST_Products_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Delete parent product transients.
-		if ( 0 !== $parent_id ) {
-			wc_delete_product_transients( $parent_id );
+		if ( 0 !== $object->get_parent_id() ) {
+			wc_delete_product_transients( $object->get_parent_id() );
 		}
 
 		/**
