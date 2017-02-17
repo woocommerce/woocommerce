@@ -45,7 +45,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
-		'used_by'                     => '',
+		'used_by'                     => array(),
 	);
 
 	// Coupon message codes
