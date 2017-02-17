@@ -138,6 +138,7 @@ class WC_API extends WC_Legacy_API {
 		// Abstract controllers.
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-posts-controller.php' );
+		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-crud-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php' );
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php' );
@@ -163,6 +164,11 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-taxes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhook-deliveries.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhooks-controller.php' );
+
+		// Legacy v2 code.
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-coupons-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-orders-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-products-controller.php' );
 
 		// REST API v2 controllers.
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php' );

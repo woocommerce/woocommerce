@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Webhooks controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Posts_Controller
+ * @extends WC_REST_Webhooks_V1_Controller
  */
 class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 
