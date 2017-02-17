@@ -2002,6 +2002,10 @@ class WC_Cart {
 		// If fees were added, total them and calculate tax
 		if ( ! empty( $this->fees ) ) {
 			foreach ( $this->fees as $fee_key => $fee ) {
+				if ( $fee->amount < 0 ) {
+					wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
+					continue;
+				}
 				$this->fee_total += $fee->amount;
 
 				if ( $fee->taxable ) {
