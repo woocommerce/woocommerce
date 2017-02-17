@@ -30,7 +30,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			'downloads_remaining' => $download->get_downloads_remaining(),
 			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
 			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : NULL,
+			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : null,
 		);
 
 		$format = array(
@@ -96,7 +96,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			'downloads_remaining' => $download->get_downloads_remaining(),
 			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
 			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : NULL,
+			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : null,
 		);
 
 		$format = array(

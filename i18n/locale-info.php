@@ -269,10 +269,10 @@ return array(
 					'state'    => '',
 					'rate'     => '24.0000',
 					'name'     => 'ALV',
-					'shipping' => true
-				)
-			)
-		)
+					'shipping' => true,
+				),
+			),
+		),
 	),
 	'FR' => array(
 		'currency_code'  => 'EUR',

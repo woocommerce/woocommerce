@@ -105,7 +105,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$new_hook = 'wc_new_hook';
 		$old_hook = 'wc_old_hook';
 		$test_value = false;
-		$args = array(  &$test_value );
+		$args = array( &$test_value );
 		$return = -1;
 
 		add_filter( $old_hook, array( $this, 'toggle_value_by_ref' ) );

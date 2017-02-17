@@ -199,7 +199,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			$args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => $request['sku'],
-				'compare' => '='
+				'compare' => '=',
 			);
 		}
 

@@ -227,7 +227,7 @@ class WC_Geolocation {
 	 */
 	private static function geolocate_via_db( $ip_address ) {
 		if ( ! class_exists( 'WC_Geo_IP', false ) ) {
-			include_once(  WC_ABSPATH . 'includes/class-wc-geo-ip.php' );
+			include_once( WC_ABSPATH . 'includes/class-wc-geo-ip.php' );
 		}
 
 		$gi = new WC_Geo_IP();
