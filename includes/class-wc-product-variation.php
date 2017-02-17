@@ -475,8 +475,9 @@ class WC_Product_Variation extends WC_Product {
 			// Clear caches
 			wp_cache_delete( $this->variation_id, 'post_meta' );
 
-			// Clear total stock transient
+			// Clear transients.
 			delete_transient( 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' ) );
+			delete_transient( 'wc_product_children_' . $this->id );
 
 			// Stock status
 			$this->check_stock_status();
