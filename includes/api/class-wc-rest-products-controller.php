@@ -652,6 +652,10 @@ class WC_REST_Products_Controller extends WC_REST_CRUD_Controller {
 			$product = new WC_Product_Simple();
 		}
 
+		if ( 'variation' === $product->get_type() ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		// Post title.
 		if ( isset( $request['name'] ) ) {
 			$product->set_name( wp_filter_post_kses( $request['name'] ) );
@@ -1232,6 +1236,10 @@ class WC_REST_Products_Controller extends WC_REST_CRUD_Controller {
 
 		if ( 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		if ( 'variation' === $object->get_type() ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
