@@ -461,7 +461,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				}
 			}
 
-			return $object;
+			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
