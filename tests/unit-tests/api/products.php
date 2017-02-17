@@ -435,28 +435,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			}
 		}
 
-		// Test filtering with filter[post_status]=publish
-		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
-		$request->set_param( 'filter', array( 'post_status' => 'publish' ) );
-		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
-
-		$this->assertEquals( 4, count( $products ) );
-		foreach ( $products as $product ) {
-			$this->assertEquals( 'publish', $product['status'] );
-		}
-
-		// Test filtering with filter[post_status]=draft
-		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
-		$request->set_param( 'filter', array( 'post_status' => 'draft' ) );
-		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
-
-		$this->assertEquals( 4, count( $products ) );
-		foreach ( $products as $product ) {
-			$this->assertEquals( 'draft', $product['status'] );
-		}
-
 		// Test filtering with status=publish
 		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
 		$request->set_param( 'status', 'publish' );
@@ -477,19 +455,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 4, count( $products ) );
 		foreach ( $products as $product ) {
 			$this->assertEquals( 'draft', $product['status'] );
-		}
-
-		// Test filtering with status=draft and filter[post_status]=publish
-		// filter[post_status]=publish should win
-		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
-		$request->set_param( 'status', 'draft' );
-		$request->set_param( 'filter', array( 'post_status' => 'publish' ) );
-		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
-
-		$this->assertEquals( 4, count( $products ) );
-		foreach ( $products as $product ) {
-			$this->assertEquals( 'publish', $product['status'] );
 		}
 
 		// Test filtering with no filters - which should return 'any' (all 8)
