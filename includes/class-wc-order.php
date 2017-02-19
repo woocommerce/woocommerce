@@ -115,7 +115,7 @@ class WC_Order extends WC_Abstract_Order {
 				if ( sizeof( $this->get_items() ) > 0 ) {
 					foreach ( $this->get_items() as $item ) {
 						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
-							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+							$virtual_downloadable_item = $product->is_downloadable() || $product->is_virtual();
 
 							if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
 								$order_needs_processing = true;
