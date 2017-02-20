@@ -106,7 +106,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	public function set_rate( $tax_rate_id ) {
 		$this->set_rate_id( $tax_rate_id );
 		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
+		$this->set_label( WC_Tax::get_rate_label( $tax_rate_id ) );
 		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
 	}
 
