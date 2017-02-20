@@ -542,10 +542,6 @@ class WC_Cart {
 		// This is because variation titles display the attributes.
 		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
 			foreach ( $cart_item['variation'] as $name => $value ) {
-				if ( '' === $value || stristr( $cart_item['data']->get_name(), $value ) ) {
-					continue;
-				}
-
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
 				// If this is a term slug, get the term's nice name
@@ -556,10 +552,15 @@ class WC_Cart {
 					}
 					$label = wc_attribute_label( $taxonomy );
 
-				// If this is a custom option slug, get the options name
+				// If this is a custom option slug, get the options name.
 				} else {
 					$value = apply_filters( 'woocommerce_variation_option_name', $value );
 					$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
+				}
+
+				// Check the nicename against the title.
+				if ( '' === $value || stristr( $cart_item['data']->get_name(), $value ) ) {
+					continue;
 				}
 
 				$item_data[] = array(
