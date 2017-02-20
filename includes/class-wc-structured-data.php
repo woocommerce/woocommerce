@@ -33,7 +33,7 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
-		add_action( 'woocommerce_email_order_details', array( $this, 'output_structured_data' ), 30 );
+		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 	}
 
@@ -119,6 +119,20 @@ class WC_Structured_Data {
 		$types[] = 'order';
 
 		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
+	}
+
+	/**
+	 * Makes sure email structured data only outputs on non-plain text versions.
+	 *
+	 * @param WP_Order  $order         Order data.
+	 * @param bool	    $sent_to_admin Send to admin (default: false).
+	 * @param bool	    $plain_text    Plain text email (default: false).
+	 */
+	public function output_email_structured_data( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( $plain_text ) {
+			return;
+		}
+		$this->output_structured_data();
 	}
 
 	/**
