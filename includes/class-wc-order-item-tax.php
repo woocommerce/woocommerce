@@ -104,10 +104,12 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate( $tax_rate_id ) {
+		$tax_rate = WC_Tax::_get_tax_rate( $tax_rate_id, OBJECT );
+
 		$this->set_rate_id( $tax_rate_id );
-		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_label( WC_Tax::get_rate_label( $tax_rate_id ) );
-		$this->set_compound( WC_Tax::is_compound( $tax_rate_id ) );
+		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate ) );
+		$this->set_label( WC_Tax::get_rate_label( $tax_rate ) );
+		$this->set_compound( WC_Tax::is_compound( $tax_rate ) );
 	}
 
 	/*
