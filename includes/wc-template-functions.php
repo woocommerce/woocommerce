@@ -1042,28 +1042,27 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		$defaults = array(
 			'input_name'  => 'quantity',
 			'input_value' => '1',
-			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', '', $product ),
-			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', '', $product ),
-			'step'        => apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
+			'step'        => apply_filters( 'woocommerce_quantity_input_step', 1, $product ),
 			'pattern'     => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
 			'inputmode'   => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 
-		// Set min and max value to empty string if not set.
-		$args['min_value'] = isset( $args['min_value'] ) ? $args['min_value'] : '';
-		$args['max_value'] = isset( $args['max_value'] ) ? $args['max_value'] : '';
+		// Apply sanity to min/max args - min cannot be lower than 0.
+		if ( $args['min_value'] < 0 ) {
+			$args['min_value'] = 0;
+		}
 
-		// Apply sanity to min/max args - min cannot be lower than 0
-		if ( '' !== $args['min_value'] && is_numeric( $args['min_value'] ) && $args['min_value'] < 0 ) {
-			$args['min_value'] = 0; // Cannot be lower than 0
+		if ( '' === $args['max_value'] ) {
+			$args['max_value'] = -1;
 		}
 
 		// Max cannot be lower than 0 or min
-		if ( '' !== $args['max_value'] && is_numeric( $args['max_value'] ) ) {
-			$args['max_value'] = $args['max_value'] < 0 ? 0 : $args['max_value'];
-			$args['max_value'] = $args['max_value'] < $args['min_value'] ? $args['min_value'] : $args['max_value'];
+		if ( 0 < $args['max_value'] && $args['max_value'] < $args['min_value'] ) {
+			$args['max_value'] = $args['min_value'];
 		}
 
 		ob_start();
