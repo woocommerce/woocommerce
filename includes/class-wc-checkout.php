@@ -370,7 +370,7 @@ class WC_Checkout {
 			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
+			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -401,7 +401,7 @@ class WC_Checkout {
 			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
+			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -437,7 +437,7 @@ class WC_Checkout {
 				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
+				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -467,7 +467,7 @@ class WC_Checkout {
 				 * Action hook to adjust item before save.
 				 * @since 2.7.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
+				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -493,7 +493,7 @@ class WC_Checkout {
 			 * Action hook to adjust item before save.
 			 * @since 2.7.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
+			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
