@@ -594,12 +594,21 @@ class WC_Tax {
 	/**
 	 * Return true/false depending on if a rate is a compound rate.
 	 *
-	 * @param   int		key
+	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
 	 * @return  bool
 	 */
-	public static function is_compound( $key ) {
+	public static function is_compound( $key_or_rate ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
+
+		if ( is_object( $key_or_rate ) ) {
+			$key       = $key_or_rate->tax_rate_id;
+			$compound  = $key_or_rate->tax_rate_compound;
+		} else {
+			$key 	   = $key_or_rate;
+			$compound  = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
+		}
+
+		return (bool) apply_filters( 'woocommerce_rate_compound', $compound, $key );
 	}
 
 	/**
