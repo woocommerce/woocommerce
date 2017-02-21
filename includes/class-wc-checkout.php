@@ -834,8 +834,14 @@ class WC_Checkout {
 		// Add customer info from other fields.
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
-			$customer->set_first_name( $data['billing_first_name'] );
-			$customer->set_last_name( $data['billing_last_name'] );
+
+			if ( ! empty( $data['billing_first_name'] ) ) {
+				$customer->set_first_name( $data['billing_first_name'] );
+			}
+
+			if ( ! empty( $data['billing_last_name'] ) ) {
+				$customer->set_last_name( $data['billing_last_name'] );
+			}
 
 			foreach ( $data as $key => $value ) {
 				// Use setters where available.
