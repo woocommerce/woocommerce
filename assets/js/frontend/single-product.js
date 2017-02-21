@@ -198,15 +198,16 @@ jQuery( function( $ ) {
 			var pswpElement = $( '.pswp' )[0],
 				items  = wc_product_gallery.get_gallery_items(),
 				target = $( e.target ),
-				index  = -1;
+				clicked;
 
 			if ( ! target.is( '.woocommerce-product-gallery__trigger' ) ) {
-				var clicked = e.target.closest( 'figure' );
-				index = $( clicked ).index();
+				clicked = e.target.closest( 'figure' );
+			} else {
+				clicked = target.parents( '.woocommerce-product-gallery' ).find( '.flex-active-slide' );
 			}
 
 			var options = {
-				index:                 index,
+				index:                 $( clicked ).index(),
 				shareEl:               false,
 				closeOnScroll:         false,
 				history:               false,
