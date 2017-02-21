@@ -67,9 +67,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $include_taxes = false ) {
-		$data_store = $this->get_data_store();
-
-		$prices = $data_store->read_price_data( $this, $include_taxes );
+		$prices = $this->data_store->read_price_data( $this, $include_taxes );
 
 		foreach ( $prices as $price_key => $variation_prices ) {
 			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
