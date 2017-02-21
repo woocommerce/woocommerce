@@ -971,7 +971,8 @@ ul.wc_coupon_list_block {
 		._shipping_first_name_field,
 		._shipping_address_1_field,
 		._shipping_city_field,
-		._shipping_country_field {
+		._shipping_country_field,
+		.first_column {
 			float: left;
 		}
 
@@ -983,13 +984,15 @@ ul.wc_coupon_list_block {
 		._shipping_last_name_field,
 		._shipping_address_2_field,
 		._shipping_postcode_field,
-		._shipping_state_field {
+		._shipping_state_field,
+		.second_column {
 			float: right;
 		}
 
 		._billing_company_field,
 		._shipping_company_field,
-		._transaction_id_field {
+		._transaction_id_field,
+		.full_width {
 			clear: both;
 			width: 100%;
 		}
