@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</p>
 						<p class="form-row form-row-last">
 							<label>' . __( 'Sale end date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 						</p>
 					</div>';
 
