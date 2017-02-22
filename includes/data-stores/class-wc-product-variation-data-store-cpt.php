@@ -343,6 +343,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			}
 		}
 
-		parent::update_post_meta( $product );
+		parent::update_post_meta( $product, $force );
 	}
 }
