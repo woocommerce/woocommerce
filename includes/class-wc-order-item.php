@@ -253,6 +253,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		$this->update_meta_data( '_' . $offset, $value );
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -276,6 +277,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		$this->delete_meta_data( '_' . $offset );
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
