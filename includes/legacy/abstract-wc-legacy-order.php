@@ -417,7 +417,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} elseif ( 'status' === $key ) {
 			return $this->get_status();
 		} elseif ( 'post_status' === $key ) {
-			return 'wc-' . $this->get_status();
+			return get_post_status( $this->get_id() );
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
 			return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
