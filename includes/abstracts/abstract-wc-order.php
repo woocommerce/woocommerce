@@ -470,14 +470,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
 		// Only allow valid new status
-		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) ) {
+		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) && 'trash' !== $new_status ) {
 			$new_status = 'pending';
 		}
 
 		$this->set_prop( 'status', $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) ) {
+		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) && 'trash' !== $old_status ) {
 			$old_status = 'pending';
 		}
 
