@@ -290,9 +290,6 @@ function wc_save_order_items( $order_id, $items ) {
 		}
 	}
 
-	// Updates tax totals
-	$order->update_taxes();
-
 	// Calc totals - this also triggers save
 	$order->calculate_totals( false );
 
