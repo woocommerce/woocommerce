@@ -209,4 +209,55 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	public function is_compound() {
 		return $this->get_compound();
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Array Access Methods
+	|--------------------------------------------------------------------------
+	|
+	| For backwards compat with legacy arrays.
+	|
+	*/
+
+	/**
+	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @return mixed
+	 */
+	public function offsetGet( $offset ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		return parent::offsetGet( $offset );
+	}
+
+	/**
+	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet( $offset, $value ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		parent::offsetSet( $offset, $value );
+	}
+
+	/**
+	 * offsetExists for ArrayAccess
+	 * @param string $offset
+	 * @return bool
+	 */
+	public function offsetExists( $offset ) {
+		if ( in_array( $offset, array( 'tax_amount', 'shipping_tax_amount' ) ) ) {
+			return true;
+		}
+		return parent::offsetExists( $offset );
+	}
 }
