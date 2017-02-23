@@ -1068,6 +1068,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function update_taxes() {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
+		$existing_taxes = $this->get_taxes();
+		$saved_rate_ids = array();
 
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
@@ -1083,11 +1085,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// Remove old existing tax rows.
-		$this->remove_order_items( 'tax' );
+		foreach ( $existing_taxes as $tax ) {
+			// Remove taxes which no longer exist for cart/shipping.
+			if ( ! array_key_exists( $tax->get_rate_id(), $cart_taxes ) && ! array_key_exists( $tax->get_rate_id(), $shipping_taxes ) || in_array( $tax->get_rate_id(), $saved_rate_ids ) ) {
+				$this->remove_item( $tax->get_id() );
+				continue;
+			}
+			$saved_rate_ids[] = $tax_rate_id;
+			$tax->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+			$tax->save();
+		}
 
-		// Now merge to keep tax rows.
-		foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
+		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
+
+		// New taxes.
+		foreach ( $new_rate_ids as $tax_rate_id ) {
 			$item = new WC_Order_Item_Tax();
 			$item->set_rate( $tax_rate_id );
 			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
