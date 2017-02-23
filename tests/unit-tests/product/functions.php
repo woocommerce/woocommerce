@@ -145,6 +145,27 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
+	public function test_wc_update_product_stock_increase_decrease() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
+		wc_update_product_stock( $product->get_id(), 5 );
+
+		$new_value = wc_update_product_stock( $product->get_id(), 1, 'increase' );
+
+		$product = new WC_Product_Simple( $product->get_id() );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
+		$this->assertEquals( 6, $new_value );
+
+		$new_value = wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+
+		$product = new WC_Product_Simple( $product->get_id() );
+		$this->assertEquals( 5, $product->get_stock_quantity() );
+		$this->assertEquals( 5, $new_value );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
 	/**
 	 * Test wc_delete_product_transients().
 	 *
