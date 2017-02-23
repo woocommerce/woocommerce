@@ -1683,6 +1683,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_remaining_refund_items() {
-		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+		return $this->get_item_count() - absint( $this->get_item_count_refunded() );
 	}
 }
