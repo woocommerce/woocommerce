@@ -1568,7 +1568,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$count += $refunded_item->get_quantity();
+				$count += abs( $refunded_item->get_quantity() );
 			}
 		}
 
