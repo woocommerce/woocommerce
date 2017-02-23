@@ -68,6 +68,10 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
+		if ( 0 > $value ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
+		}
+
 		$this->set_prop( 'total', wc_format_decimal( $value ) );
 	}
 

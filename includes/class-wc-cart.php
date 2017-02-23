@@ -1959,8 +1959,11 @@ class WC_Cart {
 	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-
 		$new_fee_id = sanitize_title( $name );
+
+		if ( 0 > $amount ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
+		}
 
 		// Only add each fee once
 		foreach ( $this->fees as $fee ) {
@@ -2003,10 +2006,6 @@ class WC_Cart {
 		// If fees were added, total them and calculate tax
 		if ( ! empty( $this->fees ) ) {
 			foreach ( $this->fees as $fee_key => $fee ) {
-				if ( $fee->amount < 0 ) {
-					wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
-					continue;
-				}
 				$this->fee_total += $fee->amount;
 
 				if ( $fee->taxable ) {
