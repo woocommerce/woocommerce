@@ -304,4 +304,37 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'type'    => 'DECIMAL',
 		), $meta_query );
 	}
+
+	/**
+	 * Test wc_product_force_unique_sku
+	 *
+	 * @since 2.7.0
+	 */
+	public function test_wc_product_force_unique_sku() {
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_3 = WC_Helper_Product::create_simple_product();
+		$product_4 = WC_Helper_Product::create_simple_product();
+
+		$product_1->set_sku( 'some-custom-sku' );
+		$product_2->set_sku( 'another-custom-sku' );
+		$product_3->set_sku( 'another-custom-sku-1' );
+		$product_4->set_sku( '' );
+
+		$product_1_id = $product_1->save();
+		$product_2_id = $product_2->save();
+		$product_3_id = $product_3->save();
+		$product_4_id = $product_4->save();
+
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), '' );
+
+		update_post_meta( $product_4_id, '_sku', 'some-custom-sku' );
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'some-custom-sku-1' );
+
+		update_post_meta( $product_4_id, '_sku', 'another-custom-sku' );
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
+	}
 }
