@@ -592,12 +592,14 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	protected function init( $order ) {
 		wc_deprecated_function( 'init', '2.7', 'Logic moved to constructor' );
 		if ( is_numeric( $order ) ) {
-			$this->read( $order );
+			$this->set_id( $order );
 		} elseif ( $order instanceof WC_Order ) {
-			$this->read( absint( $order->get_id() ) );
+			$this->set_id( absint( $order->get_id() ) );
 		} elseif ( isset( $order->ID ) ) {
-			$this->read( absint( $order->ID ) );
+			$this->set_id( absint( $order->ID ) );
 		}
+		$this->set_object_read( false );
+		$this->data_store->read( $this );
 	}
 
 	/**
@@ -607,7 +609,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return bool
 	 */
 	public function get_order( $id = 0 ) {
-		wc_deprecated_function( 'get_order', '2.7', 'read' );
+		wc_deprecated_function( 'get_order', '2.7' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -624,8 +626,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param mixed $result
 	 */
 	public function populate( $result ) {
-		wc_deprecated_function( 'populate', '2.7', 'read' );
-		$this->read( $result->ID );
+		wc_deprecated_function( 'populate', '2.7' );
+		$this->set_id( $result->ID );
+		$this->set_object_read( false );
+		$this->data_store->read( $this );
 	}
 
 	/**
