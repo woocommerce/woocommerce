@@ -469,7 +469,7 @@ class WC_Admin_Post_Types {
 				echo esc_html( wc_get_coupon_type( $the_coupon->get_discount_type() ) );
 			break;
 			case 'amount' :
-				echo esc_html( $the_coupon->get_amount() );
+				echo esc_html( wc_format_localized_price( $the_coupon->get_amount() ) );
 			break;
 			case 'products' :
 				$product_ids = $the_coupon->get_product_ids();
