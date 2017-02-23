@@ -2474,7 +2474,9 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 	 *
 	 */
 	function woocommerce_photoswipe() {
-		wc_get_template( 'single-product/photoswipe.php' );
+		if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+			wc_get_template( 'single-product/photoswipe.php' );
+		}
 	}
 }
 
