@@ -43,7 +43,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endforeach; ?>
 
 	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
-
+</div>
+<div class="woocommerce-account-fields">
 	<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
 
 		<?php if ( ! $checkout->is_registration_required() ) : ?>
@@ -56,32 +57,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php endif; ?>
 
-		<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
+	<?php endif; ?>
 
-		<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
+	<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
 
-			<div class="create-account">
+	<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
 
-				<p><?php
-					_e( 'Create an account by entering the information below.', 'woocommerce' );
-					if ( 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ) ) {
-						echo ' ' . __( 'If you are a returning customer please login at the top of the page.', 'woocommerce' );
-					}
-				?></p>
+		<div class="create-account">
 
-				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
+			<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
+				<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+			<?php endforeach; ?>
 
-					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+			<div class="clear"></div>
 
-				<?php endforeach; ?>
-
-				<div class="clear"></div>
-
-			</div>
-
-		<?php endif; ?>
-
-		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
+		</div>
 
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
 </div>

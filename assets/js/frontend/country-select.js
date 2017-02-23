@@ -46,9 +46,8 @@ jQuery( function( $ ) {
 				return wc_country_select_params.i18n_searching;
 			}
 		};
-       
-        var language = { 'language' : formatString };
-       
+
+		var language = { 'language' : formatString };
 		return language;
 	}
 
@@ -62,6 +61,10 @@ jQuery( function( $ ) {
 				}, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
+				// Maintain focus after select https://github.com/select2/select2/issues/4384
+				$( this ).on( 'select2:select', function() {
+					$( this ).focus();
+				} );
 			});
 		};
 
