@@ -256,7 +256,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,]/', '', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
 	}
 
 	if ( false !== $dp ) {
