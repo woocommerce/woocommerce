@@ -1953,16 +1953,19 @@ class WC_Cart {
 	/**
 	 * Add additional fee to the cart.
 	 *
-	 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
-	 * @param float $amount Fee amount.
-	 * @param bool $taxable (default: false) Is the fee taxable?
-	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
+	 * Fee is an amount of money charged for a particular piece of work
+	 * or for a particular right or service, and not supposed to be negative.
+	 *
+	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
+	 * @param float  $amount    Fee amount (do not enter negative amounts).
+	 * @param bool   $taxable   Is the fee taxable? (default: false).
+	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 
 		$new_fee_id = sanitize_title( $name );
 
-		// Only add each fee once
+		// Only add each fee once.
 		foreach ( $this->fees as $fee ) {
 			if ( $fee->id == $new_fee_id ) {
 				return;
@@ -2003,10 +2006,6 @@ class WC_Cart {
 		// If fees were added, total them and calculate tax
 		if ( ! empty( $this->fees ) ) {
 			foreach ( $this->fees as $fee_key => $fee ) {
-				if ( $fee->amount < 0 ) {
-					wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
-					continue;
-				}
 				$this->fee_total += $fee->amount;
 
 				if ( $fee->taxable ) {

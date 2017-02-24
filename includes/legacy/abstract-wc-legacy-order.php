@@ -94,9 +94,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	/**
 	 * Add a fee to the order.
 	 * Order must be saved prior to adding items.
-	 * @param object $fee
-	 * @return int updated order item ID
+	 *
+	 * Fee is an amount of money charged for a particular piece of work
+	 * or for a particular right or service, and not supposed to be negative.
+	 *
 	 * @throws WC_Data_Exception
+	 * @param  object $fee Fee data.
+	 * @return int         Updated order item ID.
 	 */
 	public function add_fee( $fee ) {
 		wc_deprecated_function( 'WC_Order::add_fee', '2.7', 'a new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
