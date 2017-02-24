@@ -162,6 +162,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$this->widget_start( $args, $instance );
 
 		if ( 'dropdown' === $display_type ) {
+			wp_enqueue_script( 'select2' );
+			wp_enqueue_style( 'select2' );
+
 			$found = $this->layered_nav_dropdown( $terms, $taxonomy, $query_type );
 		} else {
 			$found = $this->layered_nav_list( $terms, $taxonomy, $query_type );
@@ -222,7 +225,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$taxonomy_label       = wc_attribute_label( $taxonomy );
 			$any_label            = apply_filters( 'woocommerce_layered_nav_any_label', sprintf( __( 'Any %s', 'woocommerce' ), $taxonomy_label ), $taxonomy_label, $taxonomy );
 
-			echo '<select class="dropdown_layered_nav_' . esc_attr( $taxonomy_filter_name ) . '">';
+			// Use a multiple select for the 'or' query
+			if ( 'or' === $query_type ) {
+				$multiple = 'multiple="multiple"';
+			} else {
+				$multiple = '';
+			}
+
+			echo '<select class="dropdown_layered_nav_' . esc_attr( $taxonomy_filter_name ) . '"' . $multiple . '>';
 			echo '<option value="">' . esc_html( $any_label ) . '</option>';
 
 			foreach ( $terms as $term ) {
@@ -254,7 +264,47 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					var slug = jQuery( this ).val();
 					location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter_name ) ) ) ) ) ) . "&filter_" . esc_js( $taxonomy_filter_name ) . "=' + slug;
 				});
+
+				// Use Select2 enhancement if possible
+				if ( jQuery().select2 ) {
+					var wc_layered_nav_select = function() {
+						var select2_args = {
+							placeholder: '" . esc_html( $any_label ) . "',
+							minimumResultsForSearch: Infinity,
+							width: '100%'
+						};
+
+						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).select2( select2_args );
+					};
+					wc_layered_nav_select();
+				}
 			" );
+
+			// TODO: This is temporary. Need real styles, probably somewhere better.
+			echo "
+				<style>
+					.widget_layered_nav li:before {
+						content: '';
+					}
+					.widget_layered_nav .select2-container .select2-selection--multiple .select2-selection__rendered {
+						display: block;
+					}
+					::-webkit-input-placeholder {
+						color: #333;
+					}
+					:-ms-input-placeholder {
+						color: #333;
+					}
+					::-moz-placeholder {
+						color: #333;
+						opacity: 1;
+					}
+					:-moz-placeholder {
+						color: #333;
+						opacity: 1;
+					}
+				</style>
+			";
 		}
 
 		return $found;
