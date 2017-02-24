@@ -103,10 +103,13 @@ class WC_Emails {
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
 	 *
-	 * @internal param array $args (default: array())
+	 * @internal
+	 *
+	 * @param string $filter Filter name.
+	 * @param array  $args   Email args (default: []).
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
-		if ( apply_filters( 'woocommerce_send_queued_transactional_email', true, $filter, $args ) ) {
+		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
 			self::instance(); // Init self so emails exist.
 			do_action_ref_array( $filter . '_notification', $args );
 		}
@@ -115,7 +118,9 @@ class WC_Emails {
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
 	 *
-	 * @internal param array $args (default: array())
+	 * @internal
+	 *
+	 * @param array $args Email args (default: []).
 	 */
 	public static function send_transactional_email( $args = array() ) {
 		$args = func_get_args();
