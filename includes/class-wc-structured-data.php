@@ -254,6 +254,10 @@ class WC_Structured_Data {
 				'@type'       => 'rating',
 				'ratingValue' => $rating,
 			);
+
+		// Skip replies unless they have a rating.
+		} elseif ( $comment->comment_parent ) {
+			return;
 		}
 
 		$markup['author']        = array(
