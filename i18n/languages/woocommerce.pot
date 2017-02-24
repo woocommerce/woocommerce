@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.7.0-beta-4\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-02-24 20:19:34+00:00\n"
+"POT-Creation-Date: 2017-02-24 20:30:33+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -7463,7 +7463,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:1537
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:258
 #: includes/admin/settings/views/html-keys-edit.php:35
-#: includes/class-wc-ajax.php:1241
+#: includes/class-wc-ajax.php:1240
 #. translators: 1: user display name 2: user ID 3: user email
 msgid "%1$s (#%2$s &ndash; %3$s)"
 msgstr ""
@@ -7656,13 +7656,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:84
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:86
-#: includes/class-wc-countries.php:1078 includes/class-wc-emails.php:388
+#: includes/class-wc-countries.php:1078 includes/class-wc-emails.php:393
 msgid "Phone"
 msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:83
-#: includes/class-wc-countries.php:1087 includes/class-wc-emails.php:381
+#: includes/class-wc-countries.php:1087 includes/class-wc-emails.php:386
 #: includes/class-wc-form-handler.php:197
 #: templates/myaccount/form-edit-account.php:40
 #: templates/myaccount/form-login.php:91
@@ -7824,8 +7824,9 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:220
 msgid ""
-"Your store needs a few essential %1$spages%2$s. The following will be "
-"created automatically (if they do not already exist):"
+"Your store needs a few essential <a href=\"%s\" "
+"target=\"_blank\">pages</a>. The following will be created automatically "
+"(if they do not already exist):"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:224
@@ -7855,8 +7856,9 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:252
 msgid ""
 "Once created, these pages can be managed from your admin dashboard on the "
-"%1$sPages screen%2$s. You can control which pages are shown on your website "
-"via %3$sAppearance > Menus%4$s."
+"<a href=\"%1$s\" target=\"_blank\">Pages screen</a>. You can control which "
+"pages are shown on your website via <a href=\"%2$s\" "
+"target=\"_blank\">Appearance > Menus</a>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:255
@@ -7897,7 +7899,9 @@ msgid "%1$s (%2$s)"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:314
-msgid "If your currency is not listed you can %1$sadd it later%2$s."
+msgid ""
+"If your currency is not listed you can <a href=\"%s\" target=\"_blank\">add "
+"it later</a>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:318
@@ -8043,7 +8047,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:457
 msgid ""
 "The following tax rates will be imported automatically for you. You can "
-"read more about taxes in %1$sour documentation%2$s."
+"read more about taxes in <a href=\"%s\" target=\"_blank\">our "
+"documentation</a>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:463
@@ -8058,15 +8063,15 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:484
 msgid ""
 "You may need to add/edit rates based on your products or business location "
-"which can be done from the %1$stax settings%2$s screen. If in doubt, speak "
-"to an accountant."
+"which can be done from the <a href=\"%s\" target=\"_blank\">tax "
+"settings</a> screen. If in doubt, speak to an accountant."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:567
 #: includes/admin/class-wc-admin-setup-wizard.php:574
 msgid ""
 "Safe and secure payments using credit cards or your customer's PayPal "
-"account. %1$sLearn more about PayPal%2$s."
+"account. <a href=\"%s\" target=\"_blank\">Learn more about PayPal</a>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:572
@@ -8075,8 +8080,8 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:581
 msgid ""
-"A modern and robust way to accept credit card payments on your store. "
-"%1$sLearn more about Stripe%2$s."
+"A modern and robust way to accept credit card payments on your store. <a "
+"href=\"%s\" target=\"_blank\">Learn more about Stripe</a>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:587
@@ -8102,9 +8107,10 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:644
 msgid ""
-"WooCommerce can accept both online and offline payments. %2$sAdditional "
-"payment methods%3$s can be installed later and managed from the "
-"%1$scheckout settings%3$s screen."
+"WooCommerce can accept both online and offline payments. <a href=\"%1$s\" "
+"target=\"_blank\">Additional payment methods</a> can be installed later and "
+"managed from the <a href=\"%2$s\" target=\"_blank\">checkout settings</a> "
+"screen."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:749
@@ -8390,18 +8396,18 @@ msgstr ""
 msgid "HTML email template"
 msgstr ""
 
-#: includes/admin/class-wc-admin.php:222
+#: includes/admin/class-wc-admin.php:223
+#. translators: %s: five stars
 msgid ""
-"If you like <strong>WooCommerce</strong> please leave us a "
-"%1$s&#9733;&#9733;&#9733;&#9733;&#9733;%2$s rating. A huge thanks in "
-"advance!"
+"If you like <strong>WooCommerce</strong> please leave us a %s rating. A "
+"huge thanks in advance!"
 msgstr ""
 
-#: includes/admin/class-wc-admin.php:222
+#: includes/admin/class-wc-admin.php:223
 msgid "Thanks :)"
 msgstr ""
 
-#: includes/admin/class-wc-admin.php:230
+#: includes/admin/class-wc-admin.php:231
 msgid "Thank you for selling with WooCommerce."
 msgstr ""
 
@@ -8853,7 +8859,7 @@ msgid "by %s"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:65
-#: includes/class-wc-ajax.php:1103
+#: includes/class-wc-ajax.php:1102
 msgid "Delete note"
 msgstr ""
 
@@ -11589,7 +11595,7 @@ msgid "Generate API key"
 msgstr ""
 
 #: includes/admin/settings/views/html-keys-edit.php:106
-#: includes/class-wc-ajax.php:1518
+#: includes/class-wc-ajax.php:1517
 msgid "Revoke key"
 msgstr ""
 
@@ -12589,7 +12595,7 @@ msgid "Page ID is set, but the page does not exist"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:492
-msgid "Page visibility should be %1$spublic%2$s"
+msgid "Page visibility should be <a href=\"%s\" target=\"_blank\">public</a>"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:498
@@ -12948,9 +12954,10 @@ msgstr ""
 #: includes/admin/views/html-notice-theme-support.php:14
 msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; "
-"Please read our %1$sintegration%2$s guide or check out our "
-"%3$sStorefront%4$s theme which is totally free to download and designed "
-"specifically for use with WooCommerce."
+"Please read our <a href=\"%1$s\" target=\"_blank\">integration</a> guide or "
+"check out our <a href=\"%2$s\" target=\"_blank\">Storefront</a> theme which "
+"is totally free to download and designed specifically for use with "
+"WooCommerce."
 msgstr ""
 
 #: includes/admin/views/html-notice-theme-support.php:16
@@ -16777,53 +16784,53 @@ msgstr ""
 msgid "Invalid order"
 msgstr ""
 
-#: includes/class-wc-ajax.php:944
+#: includes/class-wc-ajax.php:943
 msgid "Item %1$s stock reduced from %2$s to %3$s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:951
+#: includes/class-wc-ajax.php:950
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:984
+#: includes/class-wc-ajax.php:983
 msgid "Item %1$s stock increased from %2$s to %3$s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:991
+#: includes/class-wc-ajax.php:990
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1355
+#: includes/class-wc-ajax.php:1354
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1452
+#: includes/class-wc-ajax.php:1451
 msgid "Description is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1455
+#: includes/class-wc-ajax.php:1454
 msgid "User is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1458
+#: includes/class-wc-ajax.php:1457
 msgid "Permissions is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1487
+#: includes/class-wc-ajax.php:1486
 msgid "API Key updated successfully."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1517
+#: includes/class-wc-ajax.php:1516
 msgid ""
 "API Key generated successfully. Make sure to copy your new API keys now. "
 "You won't be able to see it again!"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1599
+#: includes/class-wc-ajax.php:1598
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -17393,33 +17400,33 @@ msgstr ""
 msgid "Go to shop"
 msgstr ""
 
-#: includes/class-wc-emails.php:374
+#: includes/class-wc-emails.php:379
 msgid "Note"
 msgstr ""
 
-#: includes/class-wc-emails.php:427
+#: includes/class-wc-emails.php:432
 msgid "Product low in stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:430
+#: includes/class-wc-emails.php:435
 #. translators: 1: product name 2: items in stock
 msgid "%1$s is low in stock. There are %2$d left."
 msgstr ""
 
-#: includes/class-wc-emails.php:450
+#: includes/class-wc-emails.php:455
 msgid "Product out of stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:452
+#: includes/class-wc-emails.php:457
 #. translators: %s: product name
 msgid "%s is out of stock."
 msgstr ""
 
-#: includes/class-wc-emails.php:481
+#: includes/class-wc-emails.php:486
 msgid "Product backorder"
 msgstr ""
 
-#: includes/class-wc-emails.php:482
+#: includes/class-wc-emails.php:487
 msgid "%1$s units of %2$s have been backordered in order #%3$s."
 msgstr ""
 

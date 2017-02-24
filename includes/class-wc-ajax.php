@@ -763,7 +763,6 @@ class WC_AJAX {
 				$order_taxes = $order->get_taxes();
 				$class       = 'new_row';
 
-
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 				include( 'admin/meta-boxes/views/html-order-item.php' );
 			}

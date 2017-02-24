@@ -335,8 +335,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	* Test mapping from old tax array keys to CRUD functions
-	*/
+	 * Test mapping from old tax array keys to CRUD functions.
+	 */
 	function test_tax_legacy_arrayaccess() {
 		$tax = new WC_Order_item_Tax();
 		$tax->set_rate_id( 5 );
