@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 2.6.14 - 2017-02-02 =
+* Fix - Ensure product exists in wc_update_product_stock.
+* Fix - Send emails using the site language.
+* Fix - Remove tilde typo.
+* Fix - Fixed notice in get_rating_count.
+* Tweak - Define arg and return data types, added extra descriptions, and correctly cast IDs in the Rest API.
+* Tweak - Handle custom error data in WC_REST_Exception.
+* Tweak - Display conflicted product ID when using a duplicate SKU via the API.
+* Localisation - Add Finnish defaults to the installer.
+
 = 2.6.13 - 2017-01-18 =
 * Fix - Demo store banner styling in 2017.
 * Fix - Removed default instructions from COD, BACS and Cheque gateways so displayed messages can be unset.
