@@ -940,9 +940,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -1079,9 +1080,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}

@@ -202,7 +202,6 @@ class WC_Checkout {
 					'label'        => __( 'Account username', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
-					'autocomplete' => 'username',
 				);
 			}
 
@@ -212,7 +211,6 @@ class WC_Checkout {
 					'label'        => __( 'Account password', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
-					'autocomplete' => 'password',
 				);
 			}
 
@@ -618,10 +616,10 @@ class WC_Checkout {
 					}
 				}
 
-				if ( in_array( 'email', $format ) ) {
+				if ( in_array( 'email', $format ) && '' !== $data[ $key ] ) {
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( '' !== $data[ $key ] && ! is_email( $data[ $key ] ) ) {
+					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
 					}

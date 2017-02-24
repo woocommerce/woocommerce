@@ -106,8 +106,10 @@ class WC_Emails {
 	 * @internal param array $args (default: array())
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
-		self::instance(); // Init self so emails exist.
-		do_action_ref_array( $filter . '_notification', $args );
+		if ( apply_filters( 'woocommerce_send_queued_transactional_email', true, $filter, $args ) ) {
+			self::instance(); // Init self so emails exist.
+			do_action_ref_array( $filter . '_notification', $args );
+		}
 	}
 
 	/**
