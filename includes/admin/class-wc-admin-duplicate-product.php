@@ -118,8 +118,8 @@ class WC_Admin_Duplicate_Product {
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
 		$duplicate->set_total_sales( 0 );
-		if ( '' !== $product->get_sku() ) {
-			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku() ) );
+		if ( '' !== $product->get_sku( 'edit' ) ) {
+			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		$duplicate->set_status( 'draft' );
 
@@ -140,8 +140,8 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
 
-				if ( '' !== $child->get_sku() ) {
-					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku() ) );
+				if ( '' !== $child->get_sku( 'edit' ) ) {
+					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
 				}
 
 				foreach ( $meta_to_exclude as $meta_key ) {
