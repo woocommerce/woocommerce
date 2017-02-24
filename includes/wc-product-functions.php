@@ -554,7 +554,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 function wc_product_force_unique_sku( $product_id ) {
 	$product = wc_get_product( $product_id );
 
-	if ( $product && ( $current_sku = $product->get_sku() ) ) {
+	if ( $product && ( $current_sku = $product->get_sku( 'edit' ) ) ) {
 		try {
 			$new_sku = wc_product_generate_unique_sku( $product_id, $current_sku );
 
