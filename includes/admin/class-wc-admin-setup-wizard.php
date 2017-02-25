@@ -768,7 +768,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-last">
 				<h2><?php _e( 'Learn more', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-101-video-series/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php _e( 'Watch the Guided Tour videos', 'woocommerce' ); ?></a></li>
 					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="learn-more"><a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
