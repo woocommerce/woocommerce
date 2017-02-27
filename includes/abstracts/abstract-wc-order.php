@@ -1475,22 +1475,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
-			$total_rows['payment_method'] = array(
-				'label' => __( 'Payment method:', 'woocommerce' ),
-				'value' => $this->get_payment_method_title(),
-			);
-		}
-
-		if ( $refunds = $this->get_refunds() ) {
-			foreach ( $refunds as $id => $refund ) {
-				$total_rows[ 'refund_' . $id ] = array(
-					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
-					'value'    => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
-				);
-			}
-		}
-
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'    => $this->get_formatted_order_total( $tax_display ),
