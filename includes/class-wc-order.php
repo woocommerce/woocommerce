@@ -1685,4 +1685,35 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_remaining_refund_items() {
 		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
 	}
+
+	/**
+	 * Get totals for display on pages and in emails.
+	 *
+	 * @param mixed $tax_display
+	 * @return array
+	 */
+	public function get_order_item_totals( $tax_display = '' ) {
+		$total_rows = parent::get_order_item_totals( $tax_display );
+		$total_row  = array_pop( $total_rows );
+
+		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
+			$total_rows['payment_method'] = array(
+				'label' => __( 'Payment method:', 'woocommerce' ),
+				'value' => $this->get_payment_method_title(),
+			);
+		}
+
+		if ( $refunds = $this->get_refunds() ) {
+			foreach ( $refunds as $id => $refund ) {
+				$total_rows[ 'refund_' . $id ] = array(
+					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value'    => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
+				);
+			}
+		}
+
+		$total_rows['order_total'] = $total_row;
+
+		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
+	}
 }
