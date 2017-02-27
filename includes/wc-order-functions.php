@@ -581,7 +581,12 @@ function wc_create_refund( $args = array() ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() ) );
+
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+
+				if ( $parent_status ) {
+					$order->update_status( $parent_status );
+				}
 			}
 		}
 
