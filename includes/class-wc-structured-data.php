@@ -328,7 +328,7 @@ class WC_Structured_Data {
 	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
+		if ( $plain_text || ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
