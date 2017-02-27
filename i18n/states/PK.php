@@ -2,10 +2,10 @@
 /**
  * Pakistan's states
  *
- * @author      WooThemes
+ * @author      WooCommerce
  * @category    i18n
  * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @version     2.7.0
  */
 global $states;
 
