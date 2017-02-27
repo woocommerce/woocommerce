@@ -16973,14 +16973,14 @@ msgstr ""
 #. translators: %s: product name
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
-"apologise for any inconvenience caused."
+"apologize for any inconvenience caused."
 msgstr ""
 
 #: includes/class-wc-cart.php:493
 #. translators: 1: product name 2: quantity in stock
 msgid ""
 "Sorry, we do not have enough \"%1$s\" in stock to fulfill your order (%2$s "
-"in stock). Please edit your cart and try again. We apologise for any "
+"in stock). Please edit your cart and try again. We apologize for any "
 "inconvenience caused."
 msgstr ""
 
@@ -16989,7 +16989,7 @@ msgstr ""
 msgid ""
 "Sorry, we do not have enough \"%1$s\" in stock to fulfill your order right "
 "now. Please try again in %2$d minutes or edit your cart and try again. We "
-"apologise for any inconvenience caused."
+"apologize for any inconvenience caused."
 msgstr ""
 
 #: includes/class-wc-cart.php:681
