@@ -92,10 +92,20 @@ class WC_Emails {
 	 * Queue transactional email via cron so it's not sent in current request.
 	 */
 	public static function queue_transactional_email() {
-		$args = func_get_args();
+		$filter     = current_filter();
+		$args       = func_get_args();
 
-		wp_schedule_single_event( time() + 10, 'woocommerce_send_queued_transactional_email', array(
-			'filter' => current_filter(),
+		// Remove objects and store IDs.
+		if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
+			$args[1] = $args[1]->get_id();
+		} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
+			$args[0] = $args[0]->get_id();
+		} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
+			$args[0]['product'] = $args[0]['product']->get_id();
+		}
+
+		wp_schedule_single_event( time() + 5, 'woocommerce_send_queued_transactional_email', array(
+			'filter' => $filter,
 			'args'   => $args,
 		) );
 	}
@@ -106,11 +116,21 @@ class WC_Emails {
 	 * @internal
 	 *
 	 * @param string $filter Filter name.
-	 * @param array  $args   Email args (default: []).
+	 * @param array  $args Email args (default: []).
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
 		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
 			self::instance(); // Init self so emails exist.
+
+			// Expand objects from IDs.
+			if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
+				$args[1] = wc_get_order( $args[1] );
+			} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
+				$args[0] = wc_get_product( $args[0] );
+			} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
+				$args[0]['product'] = wc_get_product( $args[0]['product'] );
+			}
+
 			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}
@@ -372,7 +392,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( ! is_a( 'WC_Order', $order ) ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 		$fields = array();
@@ -411,7 +431,7 @@ class WC_Emails {
 	 * Get the email addresses.
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( ! is_a( 'WC_Order', $order ) ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 		if ( $plain_text ) {
