@@ -219,7 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Localization - Improved RTL support.
 * Localization - Added a language independent permalink setting function.
 * Localization - Added inline comments for placeholder strings.
-* Localization - Added Nigerian Provinces to i18n/state.
+* Localization - Added Nigerian and Pakistan Provinces to i18n/state.
 * Localization - US and Poland postcode validation.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).

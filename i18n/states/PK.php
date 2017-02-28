@@ -10,12 +10,12 @@
 global $states;
 
 $states['PK'] = array(
+	'JK' => __( 'Azad Kashmir', 'woocommerce' ),
 	'BA' => __( 'Balochistan', 'woocommerce' ),
+	'TA' => __( 'FATA', 'woocommerce' ),
+	'GB' => __( 'Gilgit Baltistan', 'woocommerce' ),
+	'IS' => __( 'Islamabad Capital Territory', 'woocommerce' ),
+	'KP' => __( 'Khyber Pakhtunkhwa', 'woocommerce' ),
 	'PB' => __( 'Punjab', 'woocommerce' ),
 	'SD' => __( 'Sindh', 'woocommerce' ),
-	'KP' => __( 'Khyber Pakhtunkhwa', 'woocommerce' ),
-	'GB' => __( 'Gilgit Baltistan', 'woocommerce' ),
-	'TA' => __( 'FATA', 'woocommerce' ),
-	'JK' => __( 'Azad Kashmir', 'woocommerce' ),
-	'IS' => __( 'Islamabad Capital Territory', 'woocommerce' ),
 );
