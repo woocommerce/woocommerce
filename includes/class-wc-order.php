@@ -130,7 +130,6 @@ class WC_Order extends WC_Abstract_Order {
 				}
 
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
-				$this->set_date_paid( current_time( 'timestamp' ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
@@ -248,12 +247,12 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			if ( 'pending' === $result['from'] && ! $manual_update ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
-			}
-
-			if ( ! $this->get_date_paid() && 'pending' === $result['from'] ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
+			// If there is no date paid set yet, or this is not a manual update, update date paid.
+			if ( ! $this->get_date_paid( 'edit' ) || ! $manual_update ) {
+				$unpaid_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this );
+				if ( in_array( $result['from'], $unpaid_statuses ) && ! in_array( $result['to'], $unpaid_statuses ) ) {
+					$this->set_date_paid( current_time( 'timestamp' ) );
+				}
 			}
 
 			if ( 'completed' === $result['to'] ) {
