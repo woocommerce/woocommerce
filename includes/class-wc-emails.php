@@ -116,7 +116,7 @@ class WC_Emails {
 	 * @internal
 	 *
 	 * @param string $filter Filter name.
-	 * @param array  $event_args Email args (default: []).
+	 * @param array  $args Email args (default: []).
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
 		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
