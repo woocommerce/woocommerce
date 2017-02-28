@@ -267,7 +267,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed( $from_status, $to_status ) {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_paid( current_time( 'timestamp' ) );
+			$this->set_date_completed( current_time( 'timestamp' ) );
 		}
 	}
 
