@@ -281,16 +281,24 @@ a.remove {
 	}
 }
 
-dl.variation {
-	dt {
+dl.variation, .wc-item-meta {
+	list-style: none outside;
+
+	dt, .wc-item-meta-label {
 		float: left;
 		clear: both;
 		margin-right: .25em;
 		display: inline-block;
+		list-style: none outside;
 	}
 
 	dd {
 		margin: 0;
+	}
+
+	p,
+	&:last-child {
+		margin-bottom: 0;
 	}
 }
 
