@@ -49,17 +49,17 @@ class WC_Admin_Help {
 				'title' => __( 'Product Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?',
 			),
-				'wc-settings-products-display' => array(
-					'title' => __( 'Display Settings', 'woocommerce' ),
-					'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=55s&',
+			'wc-settings-products-display' => array(
+				'title' => __( 'Display Settings', 'woocommerce' ),
+				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=55s&',
 			),
-				'wc-settings-products-inventory' => array(
-					'title' => __( 'Inventory Settings', 'woocommerce' ),
-					'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=2m38s&',
+			'wc-settings-products-inventory' => array(
+				'title' => __( 'Inventory Settings', 'woocommerce' ),
+				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=2m38s&',
 			),
-				'wc-settings-products-downloadable' => array(
-					'title' => __( 'Downloadable Products Settings', 'woocommerce' ),
-					'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=3m50s&',
+			'wc-settings-products-downloadable' => array(
+				'title' => __( 'Downloadable Products Settings', 'woocommerce' ),
+				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=3m50s&',
 			),
 			'wc-settings-tax' => array(
 				'title' => __( 'Tax Settings', 'woocommerce' ),
