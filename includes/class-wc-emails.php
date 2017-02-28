@@ -92,26 +92,22 @@ class WC_Emails {
 	 * Queue transactional email via cron so it's not sent in current request.
 	 */
 	public static function queue_transactional_email() {
-		$args       = func_get_args();
 		$filter     = current_filter();
-		$event_args = array(
-			'filter' => $filter,
-			'args'   => $args,
-		);
+		$args       = func_get_args();
 
 		// Remove objects and store IDs.
 		if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
-			$event_args['object_id'] = $args[0];
-			$event_args['args'][1]   = false;
+			$args[1] = $args[1]->get_id();
 		} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
-			$event_args['object_id'] = $args[0]->get_id();
-			$event_args['args'][0]   = false;
+			$args[0] = $args[0]->get_id();
 		} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
-			$event_args['object_id']          = $args[0]['product']->get_id();
-			$event_args['args'][0]['product'] = false;
+			$args[0]['product'] = $args[0]['product']->get_id();
 		}
 
-		wp_schedule_single_event( time() + 10, 'woocommerce_send_queued_transactional_email', $event_args );
+		wp_schedule_single_event( time() + 5, 'woocommerce_send_queued_transactional_email', array(
+			'filter' => $filter,
+			'args'   => $args,
+		) );
 	}
 
 	/**
@@ -122,22 +118,20 @@ class WC_Emails {
 	 * @param string $filter Filter name.
 	 * @param array  $event_args Email args (default: []).
 	 */
-	public static function send_queued_transactional_email( $filter = '', $event_args = array() ) {
-		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $event_args ) ) {
+	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
+		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
 			self::instance(); // Init self so emails exist.
 
 			// Expand objects from IDs.
-			if ( isset( $event_args['object_id'] ) ) {
-				if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
-					$event_args['args'][1] = wc_get_order( absint( $event_args['object_id'] ) );
-				} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
-					$event_args['args'][0] = wc_get_product( absint( $event_args['object_id'] ) );
-				} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
-					$event_args['args'][0]['product'] = wc_get_product( absint( $event_args['object_id'] ) );
-				}
+			if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
+				$args[1] = wc_get_order( $args[1] );
+			} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
+				$args[0] = wc_get_product( $args[0] );
+			} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
+				$args[0]['product'] = wc_get_product( $args[0]['product'] );
 			}
 
-			do_action_ref_array( $filter . '_notification', $event_args );
+			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}
 
