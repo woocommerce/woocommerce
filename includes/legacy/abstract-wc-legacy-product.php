@@ -45,6 +45,13 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				'variation_data',
 				'variation_has_stock',
 				'variation_shipping_class_id',
+				'variation_has_sku',
+				'variation_has_length',
+				'variation_has_width',
+				'variation_has_height',
+				'variation_has_weight',
+				'variation_has_tax_class',
+				'variation_has_downloadable_files',
 			) );
 		}
 		return in_array( $key, array_merge( $valid, array_keys( $this->data ) ) ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) || metadata_exists( 'post', $this->get_parent_id(), '_' . $key );
@@ -126,6 +133,15 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				break;
 			case 'variation_shipping_class_id' :
 				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_id() : '';
+				break;
+			case 'variation_has_sku' :
+			case 'variation_has_length' :
+			case 'variation_has_width' :
+			case 'variation_has_height' :
+			case 'variation_has_weight' :
+			case 'variation_has_tax_class' :
+			case 'variation_has_downloadable_files' :
+				$value = true; // These were deprecated in 2.2 and simply returned true in 2.6.x.
 				break;
 			default :
 				if ( in_array( $key, array_keys( $this->data ) ) ) {
