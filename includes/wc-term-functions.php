@@ -405,11 +405,6 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		$children = get_terms( $taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0" );
 		if ( ! empty( $children ) ) {
 			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
-			
-			/**
-			 * After a term has had its children reordered.
-			*/
-			do_action( 'woocommerce_reorder_terms', $the_term, $next_id, $taxonomy, $index, $children );
 		}
 	}
 
