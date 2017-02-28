@@ -237,10 +237,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
 
-			switch ( $prop ) {
-				case 'prices_include_tax' :
-					$value = $value ? 'yes' : 'no';
-					break;
+			if ( 'prices_include_tax' === $prop ) {
+				$value = $value ? 'yes' : 'no';
 			}
 
 			if ( update_post_meta( $order->get_id(), $meta_key, $value ) ) {
