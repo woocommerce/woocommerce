@@ -249,6 +249,9 @@ module.exports = function( grunt ) {
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )
+			},
+			frontend_tests: {
+				command: 'npm run test'
 			}
 		},
 
@@ -324,5 +327,9 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'dev', [
 		'default',
 		'makepot'
+	]);
+
+	grunt.registerTask( 'frontend-tests', [
+		'shell:frontend_tests'
 	]);
 };
