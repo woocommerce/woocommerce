@@ -3,8 +3,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import test from 'selenium-webdriver/testing';
 import { WebDriverManager, WebDriverHelper as helper } from 'wp-e2e-webdriver';
-import * as wcHelper from 'wc-e2e-page-objects';
-import { PageMap, CheckoutOrderReceivedPage, StoreOwnerFlow, GuestCustomerFlow } from 'wc-e2e-page-objects';
+import { Helper, PageMap, CheckoutOrderReceivedPage, StoreOwnerFlow, GuestCustomerFlow } from 'wc-e2e-page-objects';
 
 chai.use( chaiAsPromised );
 
@@ -60,7 +59,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.openCheckout();
-		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 
 		const orderReview = checkoutPage.components.orderReview;
 		assertOrderItem( orderReview, 'Flying Ninja', { qty: '1', total: '$12.00' } );
@@ -73,7 +72,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.openCheckout();
-		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'PayPal' ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'Direct bank transfer' ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'Cash on delivery' ) );
@@ -84,7 +83,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
-		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 
 		const billingDetails = checkoutPage.components.billingDetails;
 		assert.eventually.ok( billingDetails.setFirstName( 'John' ) );
@@ -105,7 +104,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
-		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 		assert.eventually.ok( checkoutPage.checkShipToDifferentAddress() );
 
 		const shippingDetails = checkoutPage.components.shippingDetails;
@@ -126,7 +125,7 @@ test.describe( 'Checkout Page', function() {
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
 		const billingDetails = checkoutPage.components.billingDetails;
-		wcHelper.waitTillUIBlockNotPresent( driver );
+		Helper.waitTillUIBlockNotPresent( driver );
 		billingDetails.setFirstName( 'John' );
 		billingDetails.setLastName( 'Doe' );
 		billingDetails.setCompany( 'Automattic' );
@@ -140,7 +139,7 @@ test.describe( 'Checkout Page', function() {
 		billingDetails.setZip( '94107' );
 		checkoutPage.selectPaymentMethod( 'Cash on delivery' );
 		checkoutPage.placeOrder();
-		wcHelper.waitTillUIBlockNotPresent( driver );
+		Helper.waitTillUIBlockNotPresent( driver );
 
 		const orderReceivedPage = new CheckoutOrderReceivedPage( driver, { visit: false } );
 
