@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 2.7.0 - 20XX-XX-XX =
+= 2.7.0 - 2017-03-14 =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom. Declare support with add_theme_support() - wc-product-gallery-zoom, wc-product-gallery-lightbox, wc-product-gallery-slider
 * Made the store notice dismissible on the frontend.
 * Variable products no longer show striked out prices in combination with ranges for clarity when on sale.
@@ -227,4 +227,4 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Upgrade Notice ==
 
 = 2.7 =
-2.7 is a major update. It is important that you make backups and ensure themes and extensions are 2.7 compatible before upgrading..
+2.7 is a major update. It is important that you make backups and ensure themes and extensions are 2.7 compatible before upgrading.
