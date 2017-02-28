@@ -79,7 +79,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'ID'             => $product->get_id(),
 				'post_title'     => $new_title,
 			) );
-			exit;
 		}
 
 		// Set object_read true once all data is read.
