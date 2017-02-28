@@ -110,27 +110,11 @@ class WC_Order extends WC_Abstract_Order {
 			}
 
 			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-				$order_needs_processing = false;
-
-				if ( sizeof( $this->get_items() ) > 0 ) {
-					foreach ( $this->get_items() as $item ) {
-						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
-							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-							if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-								$order_needs_processing = true;
-								break;
-							}
-						}
-					}
-				}
-
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
-
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
-				$this->set_date_paid( current_time( 'timestamp' ) );
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) );
+				$this->maybe_set_date_paid();
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
@@ -248,20 +232,43 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			if ( 'pending' === $result['from'] && ! $manual_update ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
-			}
-
-			if ( ! $this->get_date_paid() && 'pending' === $result['from'] ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
-			}
-
-			if ( 'completed' === $result['to'] ) {
-				$this->set_date_completed( current_time( 'timestamp' ) );
-			}
+			$this->maybe_set_date_paid();
+			$this->maybe_set_date_completed();
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Maybe set date paid.
+	 *
+	 * Sets the date paid variable when transitioning to the payment complete
+	 * order status. This is either processing or completed.
+	 * Date paid is set once in this manner - only when it is not already set.
+	 * This ensures the data exists even if a gateway does not use the
+	 * `payment_complete` method.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function maybe_set_date_paid() {
+		$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() );
+
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( $payment_complete_status ) ) {
+			$this->set_date_paid( current_time( 'timestamp' ) );
+		}
+	}
+
+	/**
+	 * Maybe set date completed.
+	 *
+	 * Sets the date completed variable when transitioning to completed status.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function maybe_set_date_completed() {
+		if ( $this->has_status( 'completed' ) ) {
+			$this->set_date_completed( current_time( 'timestamp' ) );
+		}
 	}
 
 	/**
@@ -1268,6 +1275,34 @@ class WC_Order extends WC_Abstract_Order {
 	public function needs_payment() {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
 		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
+	}
+
+	/**
+	 * See if the order needs processing before it can be completed.
+	 *
+	 * Orders which only contain virtual, downloadable items do not need admin
+	 * intervention.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	protected function needs_processing() {
+		$needs_processing = false;
+
+		if ( sizeof( $this->get_items() ) > 0 ) {
+			foreach ( $this->get_items() as $item ) {
+				if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
+					$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+					if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+						$needs_processing = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return $needs_processing;
 	}
 
 	/*
