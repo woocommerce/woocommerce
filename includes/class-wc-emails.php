@@ -103,17 +103,24 @@ class WC_Emails {
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
 	 *
-	 * @internal param array $args (default: array())
+	 * @internal
+	 *
+	 * @param string $filter Filter name.
+	 * @param array  $args   Email args (default: []).
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
-		self::instance(); // Init self so emails exist.
-		do_action_ref_array( $filter . '_notification', $args );
+		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
+			self::instance(); // Init self so emails exist.
+			do_action_ref_array( $filter . '_notification', $args );
+		}
 	}
 
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
 	 *
-	 * @internal param array $args (default: array())
+	 * @internal
+	 *
+	 * @param array $args Email args (default: []).
 	 */
 	public static function send_transactional_email( $args = array() ) {
 		$args = func_get_args();
@@ -359,12 +366,15 @@ class WC_Emails {
 	/**
 	 * Add customer details to email templates.
 	 *
-	 * @param mixed $order
+	 * @param WC_Order $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
 	 * @return string
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( 'WC_Order', $order ) ) {
+			return;
+		}
 		$fields = array();
 
 		if ( $order->get_customer_note() ) {
@@ -379,14 +389,14 @@ class WC_Emails {
 				'label' => __( 'Email address', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_email() ),
 			);
-	    }
+		}
 
-	    if ( $order->get_billing_phone() ) {
+		if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Phone', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_phone() ),
 			);
-	    }
+		}
 
 		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
@@ -401,6 +411,9 @@ class WC_Emails {
 	 * Get the email addresses.
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( 'WC_Order', $order ) ) {
+			return;
+		}
 		if ( $plain_text ) {
 			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
 		} else {

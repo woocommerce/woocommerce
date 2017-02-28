@@ -199,7 +199,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Select2 has been upgraded to v4.
 * Improved logging system for extensions.
 * Tax suffix is now hidden on non-taxable products.
-* Fix to disallow negative fees.
 * Performance - Converted rating filters to visibility terms.
 * Performance - Added visibility term for outofstock products to speed those queries up also.
 * Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
@@ -220,7 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Localization - Improved RTL support.
 * Localization - Added a language independent permalink setting function.
 * Localization - Added inline comments for placeholder strings.
-* Localization - Added Nigerian Provinces to i18n/state.
+* Localization - Added Nigerian and Pakistan Provinces to i18n/state.
 * Localization - US and Poland postcode validation.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).

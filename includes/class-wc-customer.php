@@ -100,7 +100,12 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		// If we have an ID, load the user from the DB.
 		if ( $this->get_id() ) {
-			$this->data_store->read( $this );
+			try {
+				$this->data_store->read( $this );
+			} catch ( Exception $e ) {
+				$this->set_id( 0 );
+				$this->set_object_read( true );
+			}
 		} else {
 			$this->set_object_read( true );
 		}

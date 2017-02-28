@@ -43,9 +43,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endforeach; ?>
 
 	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
-
-	<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
-
+</div>
+<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
+	<div class="woocommerce-account-fields">
 		<?php if ( ! $checkout->is_registration_required() ) : ?>
 
 			<p class="form-row form-row-wide create-account">
@@ -62,17 +62,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="create-account">
 
-				<p><?php
-					_e( 'Create an account by entering the information below.', 'woocommerce' );
-					if ( 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ) ) {
-						echo ' ' . __( 'If you are a returning customer please login at the top of the page.', 'woocommerce' );
-					}
-				?></p>
-
 				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
-
 					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-
 				<?php endforeach; ?>
 
 				<div class="clear"></div>
@@ -82,6 +73,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
-
-	<?php endif; ?>
-</div>
+	</div>
+<?php endif; ?>

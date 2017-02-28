@@ -252,7 +252,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 		}
 
-		$this->update_meta_data( '_' . $offset, $value );
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -275,7 +275,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			unset( $this->changes[ $offset ] );
 		}
 
-		$this->delete_meta_data( '_' . $offset );
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
@@ -288,7 +288,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
-		return array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
+		return array_key_exists( $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) ) || array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -298,6 +298,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function offsetGet( $offset ) {
 		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset ) {
 			$return = array();
 
@@ -322,6 +323,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
 			return $meta_values[ '_' . $offset ];
+		} elseif ( array_key_exists( $offset, $meta_values ) ) {
+			return $meta_values[ $offset ];
 		}
 
 		return null;

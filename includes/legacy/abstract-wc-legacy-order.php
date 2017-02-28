@@ -94,9 +94,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	/**
 	 * Add a fee to the order.
 	 * Order must be saved prior to adding items.
-	 * @param object $fee
-	 * @return int updated order item ID
+	 *
+	 * Fee is an amount of money charged for a particular piece of work
+	 * or for a particular right or service, and not supposed to be negative.
+	 *
 	 * @throws WC_Data_Exception
+	 * @param  object $fee Fee data.
+	 * @return int         Updated order item ID.
 	 */
 	public function add_fee( $fee ) {
 		wc_deprecated_function( 'WC_Order::add_fee', '2.7', 'a new WC_Order_Item_Fee object and add to order with WC_Order::add_item()' );
@@ -417,7 +421,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} elseif ( 'status' === $key ) {
 			return $this->get_status();
 		} elseif ( 'post_status' === $key ) {
-			return 'wc-' . $this->get_status();
+			return get_post_status( $this->get_id() );
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
 			return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
@@ -592,12 +596,14 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	protected function init( $order ) {
 		wc_deprecated_function( 'init', '2.7', 'Logic moved to constructor' );
 		if ( is_numeric( $order ) ) {
-			$this->read( $order );
+			$this->set_id( $order );
 		} elseif ( $order instanceof WC_Order ) {
-			$this->read( absint( $order->get_id() ) );
+			$this->set_id( absint( $order->get_id() ) );
 		} elseif ( isset( $order->ID ) ) {
-			$this->read( absint( $order->ID ) );
+			$this->set_id( absint( $order->ID ) );
 		}
+		$this->set_object_read( false );
+		$this->data_store->read( $this );
 	}
 
 	/**
@@ -607,7 +613,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return bool
 	 */
 	public function get_order( $id = 0 ) {
-		wc_deprecated_function( 'get_order', '2.7', 'read' );
+		wc_deprecated_function( 'get_order', '2.7' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -624,8 +630,10 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @param mixed $result
 	 */
 	public function populate( $result ) {
-		wc_deprecated_function( 'populate', '2.7', 'read' );
-		$this->read( $result->ID );
+		wc_deprecated_function( 'populate', '2.7' );
+		$this->set_id( $result->ID );
+		$this->set_object_read( false );
+		$this->data_store->read( $this );
 	}
 
 	/**

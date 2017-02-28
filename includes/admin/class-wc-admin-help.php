@@ -234,7 +234,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Help &amp; Support', 'woocommerce' ) . '</h2>' .
 				'<p>' . sprintf(
-					__( 'Should you need help understanding, using, or extending WooCommerce, <a href="%s">splease read our documentation</a>. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
+					__( 'Should you need help understanding, using, or extending WooCommerce, <a href="%s">please read our documentation</a>. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
 					'https://docs.woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin'
 				) . '</p>' .
 				'<p>' . sprintf(

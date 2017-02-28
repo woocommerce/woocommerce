@@ -477,7 +477,7 @@ class WC_Cart {
 			 */
 			if ( ! $product->is_in_stock() ) {
 				/* translators: %s: product name */
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 				return $error;
 			}
 
@@ -490,7 +490,7 @@ class WC_Cart {
 			 */
 			if ( ! $product->has_enough_stock( $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
 				/* translators: 1: product name 2: quantity in stock */
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product ) ) );
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product ) ) );
 				return $error;
 			}
 
@@ -519,7 +519,7 @@ class WC_Cart {
 
 				if ( $product->get_stock_quantity() < ( $held_stock + $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
 					/* translators: 1: product name 2: minutes */
-					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $product->get_name(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 					return $error;
 				}
 			}
@@ -1703,7 +1703,7 @@ class WC_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
+		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
 	}
 
 	/**
@@ -1719,7 +1719,7 @@ class WC_Cart {
 		}
 
 		// Sanitize coupon code
-		$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
+		$coupon_code = wc_format_coupon_code( $coupon_code );
 
 		// Get the coupon
 		$the_coupon = new WC_Coupon( $coupon_code );
@@ -1852,7 +1852,7 @@ class WC_Cart {
 		}
 
 		// Get the coupon
-		$coupon_code  = apply_filters( 'woocommerce_coupon_code', $coupon_code );
+		$coupon_code  = wc_format_coupon_code( $coupon_code );
 		$position     = array_search( $coupon_code, $this->applied_coupons );
 
 		if ( false !== $position ) {
@@ -1890,12 +1890,12 @@ class WC_Cart {
 					$discount_amount = min( $price, $discount_amount );
 					$price           = max( $price - $discount_amount, 0 );
 
-					// Store the totals for DISPLAY in the cart
+					// Store the totals for DISPLAY in the cart.
 					if ( $add_totals ) {
 						$total_discount     = $discount_amount * $values['quantity'];
 						$total_discount_tax = 0;
 
-						if ( wc_tax_enabled() ) {
+						if ( wc_tax_enabled() && $product->is_taxable() ) {
 							$tax_rates          = WC_Tax::get_rates( $product->get_tax_class() );
 							$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
 							$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
@@ -1953,16 +1953,19 @@ class WC_Cart {
 	/**
 	 * Add additional fee to the cart.
 	 *
-	 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
-	 * @param float $amount Fee amount.
-	 * @param bool $taxable (default: false) Is the fee taxable?
-	 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
+	 * Fee is an amount of money charged for a particular piece of work
+	 * or for a particular right or service, and not supposed to be negative.
+	 *
+	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
+	 * @param float  $amount    Fee amount (do not enter negative amounts).
+	 * @param bool   $taxable   Is the fee taxable? (default: false).
+	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 
 		$new_fee_id = sanitize_title( $name );
 
-		// Only add each fee once
+		// Only add each fee once.
 		foreach ( $this->fees as $fee ) {
 			if ( $fee->id == $new_fee_id ) {
 				return;
@@ -2003,10 +2006,6 @@ class WC_Cart {
 		// If fees were added, total them and calculate tax
 		if ( ! empty( $this->fees ) ) {
 			foreach ( $this->fees as $fee_key => $fee ) {
-				if ( $fee->amount < 0 ) {
-					wc_doing_it_wrong( __FUNCTION__, __( 'Fees should not be negative.', 'woocommerce' ), '2.7' );
-					continue;
-				}
 				$this->fee_total += $fee->amount;
 
 				if ( $fee->taxable ) {

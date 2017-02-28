@@ -25,11 +25,14 @@ jQuery( function( $ ) {
 				this.$order_review.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
 			}
 
+			// Prevent HTML5 validation which can conflict.
+			this.$checkout_form.attr( 'novalidate', 'novalidate' );
+
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'blur change', '.input-text, select, input:checkbox', this.validate_field );
+			this.$checkout_form.on( 'input blur change', '.input-text, select, input:checkbox', this.validate_field );
 
 			// Manual trigger
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
@@ -104,6 +107,8 @@ jQuery( function( $ ) {
 			$( 'div.create-account' ).hide();
 
 			if ( $( this ).is( ':checked' ) ) {
+				// Ensure password is not pre-populated.
+				$( '#account_password' ).val( '' ).change();
 				$( 'div.create-account' ).slideDown();
 			}
 		},
@@ -163,36 +168,45 @@ jQuery( function( $ ) {
 		reset_update_checkout_timer: function() {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
-		validate_field: function() {
-			var $this     = $( this ),
-				$parent   = $this.closest( '.form-row' ),
-				validated = true;
+		validate_field: function( e ) {
+			var $this             = $( this ),
+				$parent           = $this.closest( '.form-row' ),
+				validated         = true,
+				validate_required = $parent.is( '.validate-required' ),
+				validate_email    = $parent.is( '.validate-email' ),
+				event_type        = e.type;
 
-			if ( $parent.is( '.validate-required' ) ) {
-				if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
-					$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
-					validated = false;
-				} else if ( $this.val() === '' ) {
-					$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
-					validated = false;
-				}
+			if ( 'input' === event_type ) {
+				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' );
 			}
 
-			if ( $parent.is( '.validate-email' ) ) {
-				if ( $this.val() ) {
+			if ( 'focusout' === event_type || 'change' === event_type ) {
 
-					/* https://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex */
-					var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
-
-					if ( ! pattern.test( $this.val()  ) ) {
-						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email' );
+				if ( validate_required ) {
+					if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
+						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
+						validated = false;
+					} else if ( $this.val() === '' ) {
+						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 						validated = false;
 					}
 				}
-			}
 
-			if ( validated ) {
-				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' ).addClass( 'woocommerce-validated' );
+				if ( validate_email ) {
+					if ( $this.val() ) {
+						/* https://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex */
+						var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+
+						if ( ! pattern.test( $this.val()  ) ) {
+							$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email' );
+							validated = false;
+						}
+					}
+				}
+
+				if ( validated ) {
+					$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email' ).addClass( 'woocommerce-validated' );
+				}
 			}
 		},
 		update_checkout: function( event, args ) {

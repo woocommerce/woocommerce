@@ -248,14 +248,18 @@ class WC_Structured_Data {
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
 		$markup['description']   = get_comment_text( $comment->comment_ID );
-		$markup['itemReviewed']  = array(
-			'@type' => 'Product',
-			'name'  => get_the_title( $comment->post_ID ),
-		);
-		$markup['reviewRating']  = array(
-			'@type'       => 'rating',
-			'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
-		);
+
+		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
+			$markup['reviewRating']  = array(
+				'@type'       => 'rating',
+				'ratingValue' => $rating,
+			);
+
+		// Skip replies unless they have a rating.
+		} elseif ( $comment->comment_parent ) {
+			return;
+		}
+
 		$markup['author']        = array(
 			'@type' => 'Person',
 			'name'  => get_comment_author( $comment->comment_ID ),
@@ -324,7 +328,7 @@ class WC_Structured_Data {
 	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
+		if ( $plain_text || ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
