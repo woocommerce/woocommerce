@@ -44,9 +44,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
 </div>
-<div class="woocommerce-account-fields">
-	<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
-
+<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
+	<div class="woocommerce-account-fields">
 		<?php if ( ! $checkout->is_registration_required() ) : ?>
 
 			<p class="form-row form-row-wide create-account">
@@ -57,23 +56,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php endif; ?>
 
-	<?php endif; ?>
+		<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
 
-	<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
+		<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
 
-	<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
+			<div class="create-account">
 
-		<div class="create-account">
+				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
+					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+				<?php endforeach; ?>
 
-			<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
-				<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-			<?php endforeach; ?>
+				<div class="clear"></div>
 
-			<div class="clear"></div>
+			</div>
 
-		</div>
+		<?php endif; ?>
 
-	<?php endif; ?>
-
-	<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
-</div>
+		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
+	</div>
+<?php endif; ?>
