@@ -250,7 +250,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since 2.7.0
 	 */
-	protected function maybe_set_date_paid( $from_status, $to_status ) {
+	protected function maybe_set_date_paid() {
 		$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() );
 
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( $payment_complete_status ) ) {
@@ -265,7 +265,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since 2.7.0
 	 */
-	protected function maybe_set_date_completed( $from_status, $to_status ) {
+	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
 			$this->set_date_completed( current_time( 'timestamp' ) );
 		}
@@ -1283,6 +1283,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
+	 * @since 2.7.0
 	 * @return bool
 	 */
 	protected function needs_processing() {
