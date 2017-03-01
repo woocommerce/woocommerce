@@ -96,6 +96,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$this->read_order_data( $order, $post_object );
 		$order->read_meta_data();
 		$order->set_object_read( true );
+
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored.
+		 * @todo When/if meta is flattened, handle this in the migration script.
+		 */
+		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) ) {
+			if ( $order->get_prices_include_tax( 'edit' ) ) {
+				$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+			}
+		}
 	}
 
 	/**
@@ -223,9 +235,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value   = $order->{"get_$prop"}( 'edit' );
-			$updated = update_post_meta( $order->get_id(), $meta_key, $value );
-			if ( $updated ) {
+			$value = $order->{"get_$prop"}( 'edit' );
+
+			if ( 'prices_include_tax' === $prop ) {
+				$value = $value ? 'yes' : 'no';
+			}
+
+			if ( update_post_meta( $order->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
