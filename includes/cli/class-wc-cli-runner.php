@@ -31,6 +31,12 @@ class WC_CLI_Runner {
 	);
 
 	/**
+	 * The version of the REST API we should target to
+	 * generate commands.
+	 */
+	private static $target_rest_version = 'v2';
+
+	/**
 	 * Register's all endpoints as commands once WP and WC have all loaded.
 	 */
 	public static function after_wp_load() {
@@ -48,10 +54,11 @@ class WC_CLI_Runner {
 
 		// Loop through all of our endpoints and register any valid WC endpoints.
 		foreach ( $response_data['routes'] as $route => $route_data ) {
-			// Only register WC endpoints
-			if ( substr( $route, 0, 4 ) !== '/wc/' ) {
+			// Only register endpoints for WC and our target version.
+			if ( '/wc/' . self::$target_rest_version !== substr( $route, 0, 4 + strlen( self::$target_rest_version ) ) ) {
 				continue;
 			}
+
 			// Only register endpoints with schemas
 			if ( empty( $route_data['schema']['title'] ) ) {
 				WP_CLI::debug( sprintf( __( 'No schema title found for %s, skipping REST command registration.', 'woocommerce' ), $route ), 'wc' );
