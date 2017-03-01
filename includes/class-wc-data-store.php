@@ -72,7 +72,7 @@ class WC_Data_Store {
 		if ( array_key_exists( $object_type, $this->stores ) ) {
 			$store = apply_filters( 'woocommerce_' . $object_type . '_data_store', $this->stores[ $object_type ] );
 			if ( is_object( $store ) ) {
-				if ( ! class_implements( $store, WC_Object_Data_Store_Interface::class ) ) {
+				if ( ! $store instanceof WC_Object_Data_Store_Interface ) {
 					throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 				}
 				$this->current_class_name = get_class( $store );
