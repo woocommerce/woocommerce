@@ -90,17 +90,13 @@ class WC_Data_Store {
 	}
 
 	/**
-	 * Loads a data store for us or returns null if an invalid store.
+	 * Loads a data store.
 	 *
 	 * @param string $object_type Name of object.
 	 * @since 2.7.0
 	 */
 	public static function load( $object_type ) {
-		try {
-			return new WC_Data_Store( $object_type );
-		} catch ( Exception $e ) {
-			return null;
-		}
+		return new WC_Data_Store( $object_type );
 	}
 
 	/**
