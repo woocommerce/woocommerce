@@ -189,7 +189,7 @@ class WC_Meta_Box_Product_Data {
 			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
-				if ( empty( $attribute_names[ $i ] ) || ! isset( $attribute_values[ $i ] ) ) {
+				if ( empty( $attribute_names[ $i ] ) || ! isset( $attribute_values[ $i ] ) || is_string( $attribute_values[ $i ] ) && "" === trim( $attribute_values[ $i ] ) ) {
 					continue;
 				}
 				$attribute_name = wc_clean( $attribute_names[ $i ] );
