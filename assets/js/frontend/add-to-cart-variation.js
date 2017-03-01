@@ -565,6 +565,7 @@
 
 		window.setTimeout( function() {
 			$( 'body' ).trigger( 'woocommerce_init_gallery' );
+			$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
 			$( window ).trigger( 'resize' );
 		}, 10 );
 	};
