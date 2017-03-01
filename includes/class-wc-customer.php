@@ -790,7 +790,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $city
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_location( $country, $state, $postcode = '', $city = '' ) {
+	public function set_billing_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$billing             = $this->get_prop( 'billing', 'edit' );
 		$billing['country']  = $country;
 		$billing['state']    = $state;
