@@ -333,17 +333,21 @@ EOT;
 	 * @return string
 	 */
 	private function get_filled_route( $args = array() ) {
-		$parent_id_matched = false;
-		$route             = $this->route;
+		$supported_id_matched = false;
+		$route                = $this->route;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
 			if ( strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
-				$route             = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
-				$parent_id_matched = true;
+				$route                = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
+				$supported_id_matched = true;
 			}
 		}
 
-		$route = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)' ), ( $parent_id_matched && ! empty( $args[1] ) ? $args[1] : $args[0] ), $route );
+		if ( ! empty( $args ) ) {
+			$id_replacement = $supported_id_matched && ! empty( $args[1] ) ? $args[1] : $args[0];
+			$route          = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)' ), $id_replacement, $route );
+		}
+
 		return rtrim( $route );
 	}
 
