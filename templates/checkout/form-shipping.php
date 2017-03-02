@@ -34,18 +34,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<?php do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); ?>
 
-			<?php foreach ( $checkout->get_checkout_fields( 'shipping' )  as $key => $field ) : ?>
-
-				<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-
-			<?php endforeach; ?>
+			<div class="woocommerce-shipping-fields__field-wrapper">
+				<?php foreach ( $checkout->get_checkout_fields( 'shipping' )  as $key => $field ) : ?>
+					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+				<?php endforeach; ?>
+			</div>
 
 			<?php do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); ?>
 
 		</div>
 
 	<?php endif; ?>
-
+</div>
+<div class="woocommerce-additional-fields">
 	<?php do_action( 'woocommerce_before_order_notes', $checkout ); ?>
 
 	<?php if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) === 'yes' ) ) : ?>
@@ -56,11 +57,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php endif; ?>
 
-		<?php foreach ( $checkout->get_checkout_fields( 'order' )  as $key => $field ) : ?>
-
-			<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-
-		<?php endforeach; ?>
+		<div class="woocommerce-additional-fields__field-wrapper">
+			<?php foreach ( $checkout->get_checkout_fields( 'order' )  as $key => $field ) : ?>
+				<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+			<?php endforeach; ?>
+		</div>
 
 	<?php endif; ?>
 
