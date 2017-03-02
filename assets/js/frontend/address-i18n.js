@@ -113,7 +113,7 @@ jQuery( function( $ ) {
 
 			});
 
-			var fieldsets = $('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-address-fields');
+			var fieldsets = $('.woocommerce-billing-fields, .woocommerce-shipping-fields .shipping_address, .woocommerce-address-fields');
 
 			fieldsets.each( function( index, fieldset ) {
 				var rows    = $( fieldset ).find( '.form-row' );
