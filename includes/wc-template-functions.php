@@ -2504,7 +2504,7 @@ function wc_get_stock_html( $product ) {
 	$html = "";
 	$availability = $product->get_availability();
 
-	if ( "" !== $availability['availability'] ) {
+	if ( ! empty( $availability['availability'] ) ) {
 		ob_start();
 
 		wc_get_template( 'single-product/stock.php', array(
