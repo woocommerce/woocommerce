@@ -37,7 +37,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order_itemmeta';
+	protected $cache_group = 'order-items';
 
 	/**
 	 * Meta type. This should match up with
