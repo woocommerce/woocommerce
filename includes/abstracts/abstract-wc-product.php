@@ -1262,9 +1262,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function sanitize_term_ids( $terms, $taxonomy ) {
 		$term_ids = array();
 		foreach ( $terms as $term ) {
-			if ( isset( $term->term_id ) || isset( $term['term_id'] ) ) {
-				$term = (object) $term;
+			if ( isset( $term->term_id ) ) {
 				$term_ids[] = (int) $term->term_id;
+			} elseif ( isset( $term['term_id'] ) ) {
+				$term_ids[] = (int) $term['term_id'];
 			} elseif ( is_integer( $term ) ) {
 				$term_ids[] = absint( $term );
 			} else {
