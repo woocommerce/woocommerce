@@ -121,6 +121,21 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting meta that hasn't been set
+	 */
+	function test_get_meta_no_meta() {
+		$object = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$single_on = $object->get_meta( 'doesnt-exist', true );
+		$single_off = $object->get_meta( 'also-doesnt-exist', false );
+
+		$this->assertEquals( '', $single_on );
+		$this->assertEquals( array(), $single_off );
+	}
+
+	/**
 	 * Test setting meta.
 	 */
 	function test_set_meta_data() {
