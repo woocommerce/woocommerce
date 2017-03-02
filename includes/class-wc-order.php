@@ -360,6 +360,9 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			}
 		}
+		if ( isset( $changed_props['customer_note'] ) ) {
+			$changed_props['post_excerpt'] = $changed_props['customer_note'];
+		}
 		return $changed_props;
 	}
 

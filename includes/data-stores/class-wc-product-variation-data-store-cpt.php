@@ -76,8 +76,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$new_title = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
-				'post_title'     => $new_title,
+				'ID'         => $product->get_id(),
+				'post_title' => $new_title,
 			) );
 		}
 
@@ -138,14 +138,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title   = $this->generate_product_title( $product );
 
 		// Only update the post when the post data changes.
-		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
+		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
-				'post_title'     => $title,
-				'post_parent'    => $product->get_parent_id( 'edit' ),
-				'comment_status' => 'closed',
-				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'ID'                => $product->get_id(),
+				'post_title'        => $title,
+				'post_parent'       => $product->get_parent_id( 'edit' ),
+				'comment_status'    => 'closed',
+				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'        => $product->get_menu_order( 'edit' ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ) ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
