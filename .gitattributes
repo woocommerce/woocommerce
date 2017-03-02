@@ -1,5 +1,5 @@
-.* export-ignore
-apigen.neon export-ignore
+/.* export-ignore
+apigen* export-ignore
 CHANGELOG.txt export-ignore
 composer.* export-ignore
 Gruntfile.js export-ignore
