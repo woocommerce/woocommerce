@@ -117,15 +117,21 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function update( &$order ) {
 		$order->set_version( WC_VERSION );
 
-		wp_update_post( array(
-			'ID'            => $order->get_id(),
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
-			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'post_parent'   => $order->get_parent_id(),
-			'post_excerpt'  => $this->get_post_excerpt( $order ),
-		) );
+		$changes = $order->get_changes();
 
+		// Only update the post when the post data changes.
+		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
+			wp_update_post( array(
+				'ID'                => $order->get_id(),
+				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+				'post_parent'       => $order->get_parent_id(),
+				'post_excerpt'      => $this->get_post_excerpt( $order ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+			) );
+		}
 		$this->update_post_meta( $order );
 		$order->save_meta_data();
 		$order->apply_changes();
