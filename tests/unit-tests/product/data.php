@@ -98,8 +98,8 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		}
 		$product->save();
 
-		$this->assertEquals( array( $test_cat_1['term_id'], $test_cat_2['term_id'] ), $product->get_category_ids() );
-		$this->assertEquals( array( $test_tag_1['term_id'], $test_tag_2['term_id'] ), $product->get_tag_ids() );
+		$this->assertEquals( array( (int) $test_cat_1['term_id'], (int) $test_cat_2['term_id'] ), $product->get_category_ids() );
+		$this->assertEquals( array( (int) $test_tag_1['term_id'], (int) $test_tag_2['term_id'] ), $product->get_tag_ids() );
 	}
 
 	/**
