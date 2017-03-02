@@ -1052,7 +1052,7 @@ function wc_update_270_product_visibility() {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
 	}
 
-	if ( $outofstock_term = get_term_by( 'name', 'out-of-stock', 'product_visibility' ) ) {
+	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IN 'outofstock';", $outofstock_term->term_id ) );
 	}
 
