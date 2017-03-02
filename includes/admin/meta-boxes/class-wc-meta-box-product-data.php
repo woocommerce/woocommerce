@@ -189,7 +189,7 @@ class WC_Meta_Box_Product_Data {
 			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
-				if ( empty( $attribute_names[ $i ] ) || ! isset( $attribute_values[ $i ] ) || is_string( $attribute_values[ $i ] ) && "" === trim( $attribute_values[ $i ] ) ) {
+				if ( empty( $attribute_names[ $i ] ) || ! isset( $attribute_values[ $i ] ) ) {
 					continue;
 				}
 				$attribute_name = wc_clean( $attribute_names[ $i ] );
@@ -203,6 +203,10 @@ class WC_Meta_Box_Product_Data {
 					// Terms or text sent in textarea.
 					$options = 0 < $attribute_id ? wc_sanitize_textarea( wc_sanitize_term_text_based( $options ) ) : wc_sanitize_textarea( $options );
 					$options = wc_get_text_attributes( $options );
+				}
+
+				if ( empty( $options ) ) {
+					continue;
 				}
 
 				$attribute = new WC_Product_Attribute();
