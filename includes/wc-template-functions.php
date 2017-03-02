@@ -1315,27 +1315,29 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
 		global $product, $woocommerce_loop;
 
-		// Get visble upsells then sort them at random.
-		$upsells = array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' );
+		// Handle the legacy filter which controlled posts per page etc.
+		$args = apply_filters( 'woocommerce_upsell_display_args', array(
+			'posts_per_page' => $limit,
+			'orderby'        => $orderby,
+			'columns'        => $columns,
+		) );
+		$woocommerce_loop['name']    = 'up-sells';
+		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns );
+		$orderby                     = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
+		$limit                       = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
-		// Handle orderby and limit results.
-		$orderby = apply_filters( 'woocommerce_upsells_orderby', $orderby );
-		$upsells = wc_products_array_orderby( $upsells, $orderby, $order );
-		$limit   = apply_filters( 'woocommerce_upsells_total', $limit );
+		// Get visble upsells then sort them at random, then limit result set.
+		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
 		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 
-		// Set global loop values.
-		$woocommerce_loop['name']    = 'up-sells';
-		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_up_sells_columns', $columns );
-
-		wc_get_template( 'single-product/up-sells.php', apply_filters( 'woocommerce_upsell_display_args', array(
-			'upsells'            => $upsells,
+		wc_get_template( 'single-product/up-sells.php', array(
+			'upsells' => $upsells,
 
 			// Not used now, but used in previous version of up-sells.php.
-			'posts_per_page'	 => $limit,
-			'orderby'			 => $orderby,
-			'columns'			 => $columns,
-		) ) );
+			'posts_per_page' => $limit,
+			'orderby'        => $orderby,
+			'columns'        => $columns,
+		) );
 	}
 }
 
