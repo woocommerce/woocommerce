@@ -185,6 +185,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
 				'taxes'        => array(),
 				'meta'         => $item_meta,
+                'refunded_item_id' => (int) $item['refunded_item_id'],
 			);
 
 			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
