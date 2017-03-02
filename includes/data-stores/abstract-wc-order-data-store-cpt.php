@@ -108,6 +108,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
 			}
 		}
+
+		/**
+		 * In older versions, paid date may not have been set.
+		 * @todo When/if meta is flattened, handle this in the migration script.
+		 */
+		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.7', '<' ) ) {
+			$order->maybe_set_date_paid( $order->get_date_created( 'edit' ) );
+		}
 	}
 
 	/**
