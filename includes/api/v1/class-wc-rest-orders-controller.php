@@ -159,7 +159,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
 			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed() ),
-			'date_paid'            => $order->get_date_paid(),
+			'date_paid'            => wc_rest_prepare_date_response( $order->get_date_paid() ),
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
 			'tax_lines'            => array(),
