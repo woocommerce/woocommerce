@@ -1321,6 +1321,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		// Handle orderby and limit results.
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', $orderby );
 		$upsells = wc_products_array_orderby( $upsells, $orderby, $order );
+		$limit   = apply_filters( 'woocommerce_upsells_total', $limit );
 		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 
 		// Set global loop values.
