@@ -1382,10 +1382,10 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
+			if ( isset( $data['attributes'] ) ) {
 				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+				foreach ( $data['attributes'] as $attribute_key => $attribute ) {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
