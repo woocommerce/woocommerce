@@ -1134,7 +1134,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 */
 	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
 		$term_ids = wp_list_pluck( $terms, 'id' );
-		$term_ids = array_unique( array_map( 'intval', $term_ids ) );
 
 		if ( 'cat' === $taxonomy ) {
 			$product->set_category_ids( $term_ids );
