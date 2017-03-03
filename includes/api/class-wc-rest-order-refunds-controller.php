@@ -128,7 +128,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
-		$refund = wc_get_order( $post );
+		$refund = wc_get_order( $post->ID );
 
 		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->id ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
@@ -267,7 +267,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	public function query_args( $args, $request ) {
 		// Set post_status.
 		$args['post_status'] = 'any';
-
+		$args['post_parent'] = (int) $request['order_id'];
 		return $args;
 	}
 
