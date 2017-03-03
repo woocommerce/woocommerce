@@ -546,7 +546,6 @@
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
-
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
@@ -567,7 +566,6 @@
 			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
 			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
-
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'width' );
