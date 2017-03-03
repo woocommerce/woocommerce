@@ -89,7 +89,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$test_tag_2 = wp_insert_term( 'Tag 2', 'product_tag' );
 
 		$getters_and_setters = array(
-			'tag_ids'      => array( 'Tag 1', 'Tag 2' ),
+			'tag_ids'      => array( $test_tag_1['term_id'], $test_tag_2['term_id'] ),
 			'category_ids' => array( $test_cat_1['term_id'], $test_cat_2['term_id'] ),
 		);
 		$product = new WC_Product_Simple;

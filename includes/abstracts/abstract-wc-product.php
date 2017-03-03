@@ -1086,7 +1086,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_category_ids( $term_ids ) {
-		$this->set_prop( 'category_ids', $this->sanitize_term_ids( $term_ids, 'product_cat' ) );
+		$this->set_prop( 'category_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**
@@ -1096,7 +1096,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_tag_ids( $term_ids ) {
-		$this->set_prop( 'tag_ids', $this->sanitize_term_ids( $term_ids, 'product_tag' ) );
+		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**
@@ -1250,31 +1250,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	| Other Methods
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Get term ids from either a list of names, ids, or terms.
-	 *
-	 * @since 2.7.0
-	 * @param array $terms
-	 * @param string $taxonomy
-	 */
-	protected function sanitize_term_ids( $terms, $taxonomy ) {
-		$term_ids = array();
-		foreach ( $terms as $term ) {
-			if ( is_object( $term ) ) {
-				$term_ids[] = $term->term_id;
-			} elseif ( is_integer( $term ) ) {
-				$term_ids[] = absint( $term );
-			} else {
-				$term_object = get_term_by( 'name', $term, $taxonomy );
-
-				if ( $term_object && ! is_wp_error( $term_object ) ) {
-					$term_ids[] = $term_object->term_id;
-				}
-			}
-		}
-		return $term_ids;
-	}
 
 	/**
 	 * Ensure properties are set correctly before save.

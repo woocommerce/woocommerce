@@ -1182,14 +1182,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
-			$product->set_category_ids( $term_ids );
+			$product->set_category_ids( $data['categories'] );
 		}
 
 		// Product tags
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			$product->set_tag_ids( $term_ids );
+			$product->set_tag_ids( $data['tags'] );
 		}
 
 		// Downloadable
