@@ -139,7 +139,7 @@ class WC_CLI_REST_Command {
 		list( $status, $body, $headers ) = $this->do_request( 'GET', $route, $assoc_args );
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
-			$body = self::limit_item_to_fields( $body, $fields );
+			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
 		if ( 'headers' === $assoc_args['format'] ) {
@@ -179,7 +179,7 @@ class WC_CLI_REST_Command {
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
 			foreach ( $items as $key => $item ) {
-				$items[ $key ] = self::limit_item_to_fields( $item, $fields );
+				$items[ $key ] = self::limit_item_to_fields( $item, $assoc_args['fields'] );
 			}
 		}
 
