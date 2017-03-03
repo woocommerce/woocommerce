@@ -1257,19 +1257,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.7.0
 	 * @param array $terms
 	 * @param string $taxonomy
+	 * @return array
 	 */
 	protected function sanitize_term_ids( $terms, $taxonomy ) {
 		$term_ids = array();
 		foreach ( $terms as $term ) {
-			if ( is_object( $term ) ) {
-				$term_ids[] = $term->term_id;
+			if ( isset( $term->term_id ) ) {
+				$term_ids[] = (int) $term->term_id;
+			} elseif ( isset( $term['term_id'] ) ) {
+				$term_ids[] = (int) $term['term_id'];
 			} elseif ( is_integer( $term ) ) {
 				$term_ids[] = absint( $term );
 			} else {
 				$term_object = get_term_by( 'name', $term, $taxonomy );
 
 				if ( $term_object && ! is_wp_error( $term_object ) ) {
-					$term_ids[] = $term_object->term_id;
+					$term_ids[] = (int) $term_object->term_id;
 				}
 			}
 		}
