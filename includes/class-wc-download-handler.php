@@ -21,7 +21,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+		if ( isset( $_GET['download_file'], $_GET['order'], $_GET['email'] ) ) {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -74,8 +74,8 @@ class WC_Download_Handler {
 		);
 		$count     = $download->get_download_count();
 		$remaining = $download->get_downloads_remaining();
-		$download->set_download_count( $count ++ );
-		$download->set_downloads_remaining( $remaining -- );
+		$download->set_download_count( $count + 1 );
+		$download->set_downloads_remaining( $remaining - 1 );
 		$download->save();
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );

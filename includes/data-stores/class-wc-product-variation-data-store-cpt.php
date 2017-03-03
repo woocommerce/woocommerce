@@ -70,16 +70,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		/**
-		 * Clean up old variation titles.
-		 * The "Product #" text is intentionally not wrapped in translation functions for a faster comparision. It was not inserted as a translated string:
-		 * https://github.com/woocommerce/woocommerce/blob/5fc88694d211e2e176bded16d7fb95cf6285249e/includes/class-wc-ajax.php#L776
+		 * If a variation title is not in sync with the parent e.g. saved prior to 2.7, or if the parent title has changed, detect here and update.
 		 */
-		if ( __( 'Variation #', 'woocommerce' ) === substr( $post_object->post_title, 0, 11 ) || ( 'Product #' . $product->get_parent_id() . ' Variation' ) === $post_object->post_title ) {
-			$new_title   = $this->generate_product_title( $product );
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.7', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) )  {
+			$new_title = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
-				'post_title'     => $new_title,
+				'ID'         => $product->get_id(),
+				'post_title' => $new_title,
 			) );
 		}
 
@@ -140,14 +138,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title   = $this->generate_product_title( $product );
 
 		// Only update the post when the post data changes.
-		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
+		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
-				'post_title'     => $title,
-				'post_parent'    => $product->get_parent_id( 'edit' ),
-				'comment_status' => 'closed',
-				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'ID'                => $product->get_id(),
+				'post_title'        => $title,
+				'post_parent'       => $product->get_parent_id( 'edit' ),
+				'comment_status'    => 'closed',
+				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'        => $product->get_menu_order( 'edit' ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ) ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
@@ -198,9 +200,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
-		$title_base_text = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_attributes_text = wc_get_formatted_variation( $product, true, $include_attribute_names );
-		$separator = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
+		$title_base_text         = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_attributes_text   = wc_get_formatted_variation( $product, true, $include_attribute_names );
+		$separator               = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
 
 		return apply_filters( 'woocommerce_product_variation_title',
 			$title_base_text . $separator . $title_attributes_text,
@@ -343,6 +345,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			}
 		}
 
-		parent::update_post_meta( $product );
+		parent::update_post_meta( $product, $force );
 	}
 }

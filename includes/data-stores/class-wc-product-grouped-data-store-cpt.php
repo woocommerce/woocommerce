@@ -34,7 +34,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			}
 		}
 
-		parent::update_post_meta( $product );
+		parent::update_post_meta( $product, $force );
 	}
 
 	/**

@@ -335,6 +335,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test mapping from old tax array keys to CRUD functions.
+	 */
+	function test_tax_legacy_arrayaccess() {
+		$tax = new WC_Order_item_Tax();
+		$tax->set_rate_id( 5 );
+		$tax->set_compound( true );
+		$tax->set_tax_total( 2.00 );
+		$tax->set_shipping_tax_total( 1.50 );
+
+		$this->assertEquals( $tax->get_rate_id(), $tax['rate_id'] );
+		$this->assertEquals( $tax->get_compound(), $tax['compound'] );
+		$this->assertEquals( $tax->get_tax_total(), $tax['tax_total'] );
+		$this->assertEquals( $tax->get_tax_total(), $tax['tax_amount'] );
+		$this->assertEquals( $tax->get_shipping_tax_total(), $tax['shipping_tax_total'] );
+		$this->assertEquals( $tax->get_shipping_tax_total(), $tax['shipping_tax_amount'] );
+	}
+
+	/**
 	 * Test: get_shipping_methods
 	 */
 	function test_get_shipping_methods() {

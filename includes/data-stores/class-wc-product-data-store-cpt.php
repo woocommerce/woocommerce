@@ -157,16 +157,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
 				'ID'             => $product->get_id(),
-				'post_content'   => $product->get_description( 'edit' ),
-				'post_excerpt'   => $product->get_short_description( 'edit' ),
-				'post_title'     => $product->get_name( 'edit' ),
-				'post_parent'    => $product->get_parent_id( 'edit' ),
-				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
-				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'post_content'      => $product->get_description( 'edit' ),
+				'post_excerpt'      => $product->get_short_description( 'edit' ),
+				'post_title'        => $product->get_name( 'edit' ),
+				'post_parent'       => $product->get_parent_id( 'edit' ),
+				'comment_status'    => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
+				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'        => $product->get_menu_order( 'edit' ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ) ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
@@ -680,7 +684,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
-		wp_cache_delete( 'product-' . $product->get_id(), 'products' );
+		wp_cache_delete( 'object-' . $product->get_id(), 'products' );
 	}
 
 	/*

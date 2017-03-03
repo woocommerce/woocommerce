@@ -533,7 +533,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			'username'      => $_data['username'],
 			'last_order'    => array(
 				'id'   => is_object( $last_order ) ? $last_order->get_id() : null,
-				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $last_order->get_date_created() ) ) ) : null
+				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $last_order->get_date_created() ) ) ) : null,
 			),
 			'orders_count'  => $customer->get_order_count(),
 			'total_spent'   => $customer->get_total_spent(),

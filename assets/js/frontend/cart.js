@@ -437,7 +437,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'applied_coupon', [ coupon ] );
+					$( document.body ).trigger( 'applied_coupon', [ coupon_code ] );
 				},
 				complete: function() {
 					unblock( $form );

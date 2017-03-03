@@ -285,12 +285,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
 		}
 
-		// Apply all WP_Query filters again.
-		if ( is_array( $request['filter'] ) ) {
-			$args = array_merge( $args, $request['filter'] );
-			unset( $args['filter'] );
-		}
-
 		// Force the post_type argument, since it's not a user input variable.
 		if ( ! empty( $request['sku'] ) ) {
 			$args['post_type'] = array( 'product', 'product_variation' );

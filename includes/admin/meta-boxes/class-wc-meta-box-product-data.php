@@ -205,6 +205,10 @@ class WC_Meta_Box_Product_Data {
 					$options = wc_get_text_attributes( $options );
 				}
 
+				if ( empty( $options ) ) {
+					continue;
+				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( $attribute_id );
 				$attribute->set_name( $attribute_name );

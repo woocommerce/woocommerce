@@ -6,7 +6,7 @@ When contributing please ensure you follow the guidelines below to help us keep 
 
 __Please Note:__
 
-GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooThemes Support](https://support.woothemes.com) for customer support, [WordPress.org](https://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
+GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooCommerce Support](https://support.woocommerce.com) for customer support, [WordPress.org](https://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
 
 - [WooExperts](https://woocommerce.com/experts/)
 - [Codeable](https://codeable.io/)
@@ -96,4 +96,4 @@ By translating video tutorials you'll be helping non-English speaking users and 
 * [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
 * [Translator Handbook](https://make.wordpress.org/polyglots/handbook/)
 * [WooCommerce Docs](https://docs.woocommerce.com/)
-* [WooThemes Support](https://support.woothemes.com)
+* [WooCommerce Support](https://support.woocommerce.com)

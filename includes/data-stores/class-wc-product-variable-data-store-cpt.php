@@ -313,7 +313,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					WHERE post_type = 'product_variation'
 					AND post_parent = %d
 				",
-				$previous_name,
+				$previous_name ? $previous_name : __( 'Auto Draft' ),
 				$new_name,
 				$product->get_id()
 			 ) );
@@ -394,7 +394,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			'post_parent' => $product_id,
 			'post_type'   => 'product_variation',
 			'fields'      => 'ids',
-			'post_status' => 'any',
+			'post_status' => array( 'any', 'trash', 'auto-draft' ),
 			'numberposts' => -1,
 		) ) );
 

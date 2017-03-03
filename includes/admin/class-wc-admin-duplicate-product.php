@@ -94,14 +94,32 @@ class WC_Admin_Duplicate_Product {
 			wp_die( sprintf( __( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $product_id ) );
 		}
 
+		$duplicate = $this->product_duplicate( $product );
+
+		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
+		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
+		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '2.7', 'Use woocommerce_product_duplicate action instead.' );
+
+		// Redirect to the edit screen for the new draft page
+		wp_redirect( admin_url( 'post.php?action=edit&post=' . $duplicate->get_id() ) );
+		exit;
+	}
+
+	/**
+	 * Function to create the duplicate of the product.
+	 *
+	 * @param WC_Product $product
+	 * @return WC_Product
+	 */
+	public function product_duplicate( $product ) {
 		// Filter to allow us to unset/remove data we don't want to copy to the duplicate. @since 2.6
 		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
 		$duplicate->set_total_sales( 0 );
-		if ( '' !== $product->get_sku() ) {
-			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku() ) );
+		if ( '' !== $product->get_sku( 'edit' ) ) {
+			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		$duplicate->set_status( 'draft' );
 
@@ -122,8 +140,8 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
 
-				if ( '' !== $child->get_sku() ) {
-					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku() ) );
+				if ( '' !== $child->get_sku( 'edit' ) ) {
+					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
 				}
 
 				foreach ( $meta_to_exclude as $meta_key ) {
@@ -137,13 +155,7 @@ class WC_Admin_Duplicate_Product {
 			}
 		}
 
-		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
-		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
-		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '2.7', 'Use woocommerce_product_duplicate action instead.' );
-
-		// Redirect to the edit screen for the new draft page
-		wp_redirect( admin_url( 'post.php?action=edit&post=' . $duplicate->get_id() ) );
-		exit;
+		return $duplicate;
 	}
 
 	/**

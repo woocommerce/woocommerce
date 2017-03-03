@@ -239,7 +239,7 @@ abstract class WC_Data {
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
-		$value    = '';
+		$value      = $single ? '' : array();
 
 		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
@@ -435,6 +435,7 @@ abstract class WC_Data {
 
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			wp_cache_delete( 'object-' . $this->get_id(), $this->cache_group );
 		}
 	}
 

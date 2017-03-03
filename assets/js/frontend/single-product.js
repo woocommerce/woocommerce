@@ -131,16 +131,24 @@ jQuery( function( $ ) {
 		 * Init zoom.
 		 */
 		init_zoom: function() {
-			var zoom_target   = $( '.woocommerce-product-gallery__image' );
+			var zoom_target = $( '.woocommerce-product-gallery__image' ),
+				enable_zoom = false;
 
 			if ( ! wc_single_product_params.flexslider_enabled ) {
 				zoom_target = zoom_target.first();
 			}
 
-			var image_to_zoom = zoom_target.find( 'img' );
+			$( zoom_target ).each( function( index, target ) {
+				var image = $( target ).find( 'img' );
+
+				if ( image.attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) {
+					enable_zoom = true;
+					return false;
+				}
+			} );
 
 			// But only zoom if the img is larger than its container.
-			if ( image_to_zoom.attr( 'width' ) > $( '.woocommerce-product-gallery' ).width() ) {
+			if ( enable_zoom ) {
 				zoom_target.trigger( 'zoom.destroy' );
 				zoom_target.zoom({
 					touch: false
@@ -198,15 +206,16 @@ jQuery( function( $ ) {
 			var pswpElement = $( '.pswp' )[0],
 				items  = wc_product_gallery.get_gallery_items(),
 				target = $( e.target ),
-				index  = -1;
+				clicked;
 
 			if ( ! target.is( '.woocommerce-product-gallery__trigger' ) ) {
-				var clicked = e.target.closest( 'figure' );
-				index = $( clicked ).index();
+				clicked = e.target.closest( 'figure' );
+			} else {
+				clicked = target.parents( '.woocommerce-product-gallery' ).find( '.flex-active-slide' );
 			}
 
 			var options = {
-				index:                 index,
+				index:                 $( clicked ).index(),
 				shareEl:               false,
 				closeOnScroll:         false,
 				history:               false,

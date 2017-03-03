@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</td>
 				<td>
 					<label><?php _e( 'Access expires', 'woocommerce' ); ?></label>
-					<input type="text" class="short date-picker" name="access_expires[<?php echo $loop; ?>]" value="<?php echo $download->get_access_expires() > 0 ? date_i18n( 'Y-m-d', $download->get_access_expires() ) : ''; ?>" maxlength="10" placeholder="<?php esc_attr_e( 'Never', 'woocommerce' ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+					<input type="text" class="short date-picker" name="access_expires[<?php echo $loop; ?>]" value="<?php echo $download->get_access_expires() > 0 ? date_i18n( 'Y-m-d', $download->get_access_expires() ) : ''; ?>" maxlength="10" placeholder="<?php esc_attr_e( 'Never', 'woocommerce' ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />
 				</td>
 				<td>
 					<label><?php _e( 'Customer download link', 'woocommerce' ); ?></label>

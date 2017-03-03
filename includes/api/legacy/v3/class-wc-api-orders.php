@@ -983,6 +983,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		$item_id = $line_item->save();
+
+		if ( ! $item_id ) {
+			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+		}
 	}
 
 	/**

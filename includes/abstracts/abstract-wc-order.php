@@ -67,7 +67,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order';
+	protected $cache_group = 'orders';
 
 	/**
 	 * Which data store to load.
@@ -470,14 +470,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
 		// Only allow valid new status
-		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) ) {
+		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) && 'trash' !== $new_status ) {
 			$new_status = 'pending';
 		}
 
 		$this->set_prop( 'status', $new_status );
 
 		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) ) {
+		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) && 'trash' !== $old_status ) {
 			$old_status = 'pending';
 		}
 
@@ -1068,6 +1068,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function update_taxes() {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
+		$existing_taxes = $this->get_taxes();
+		$saved_rate_ids = array();
 
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
@@ -1083,11 +1085,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// Remove old existing tax rows.
-		$this->remove_order_items( 'tax' );
+		foreach ( $existing_taxes as $tax ) {
+			// Remove taxes which no longer exist for cart/shipping.
+			if ( ( ! array_key_exists( $tax->get_rate_id(), $cart_taxes ) && ! array_key_exists( $tax->get_rate_id(), $shipping_taxes ) ) || in_array( $tax->get_rate_id(), $saved_rate_ids ) ) {
+				$this->remove_item( $tax->get_id() );
+				continue;
+			}
+			$saved_rate_ids[] = $tax->get_rate_id();
+			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
+			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );
+			$tax->save();
+		}
 
-		// Now merge to keep tax rows.
-		foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
+		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
+
+		// New taxes.
+		foreach ( $new_rate_ids as $tax_rate_id ) {
 			$item = new WC_Order_Item_Tax();
 			$item->set_rate( $tax_rate_id );
 			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
@@ -1458,22 +1471,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$total_rows['tax'] = array(
 					'label' => WC()->countries->tax_or_vat() . ':',
 					'value'    => wc_price( $this->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
-				);
-			}
-		}
-
-		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
-			$total_rows['payment_method'] = array(
-				'label' => __( 'Payment method:', 'woocommerce' ),
-				'value' => $this->get_payment_method_title(),
-			);
-		}
-
-		if ( $refunds = $this->get_refunds() ) {
-			foreach ( $refunds as $id => $refund ) {
-				$total_rows[ 'refund_' . $id ] = array(
-					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
-					'value'    => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}

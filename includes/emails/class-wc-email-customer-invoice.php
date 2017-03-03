@@ -67,7 +67,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @param WC_Order $order Order object.
 	 */
 	public function trigger( $order_id, $order = false ) {
-		if ( $order_id && ! is_a( $order, 'WC_Order' ) ){
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
 			$order = wc_get_order( $order_id );
 		}
 

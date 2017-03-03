@@ -33,7 +33,7 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
-		add_action( 'woocommerce_email_order_details', array( $this, 'output_structured_data' ), 30 );
+		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 	}
 
@@ -119,6 +119,20 @@ class WC_Structured_Data {
 		$types[] = 'order';
 
 		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
+	}
+
+	/**
+	 * Makes sure email structured data only outputs on non-plain text versions.
+	 *
+	 * @param WP_Order  $order         Order data.
+	 * @param bool	    $sent_to_admin Send to admin (default: false).
+	 * @param bool	    $plain_text    Plain text email (default: false).
+	 */
+	public function output_email_structured_data( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( $plain_text ) {
+			return;
+		}
+		$this->output_structured_data();
 	}
 
 	/**
@@ -234,14 +248,18 @@ class WC_Structured_Data {
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
 		$markup['description']   = get_comment_text( $comment->comment_ID );
-		$markup['itemReviewed']  = array(
-			'@type' => 'Product',
-			'name'  => get_the_title( $comment->post_ID ),
-		);
-		$markup['reviewRating']  = array(
-			'@type'       => 'rating',
-			'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
-		);
+
+		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
+			$markup['reviewRating']  = array(
+				'@type'       => 'rating',
+				'ratingValue' => $rating,
+			);
+
+		// Skip replies unless they have a rating.
+		} elseif ( $comment->comment_parent ) {
+			return;
+		}
+
 		$markup['author']        = array(
 			'@type' => 'Person',
 			'name'  => get_comment_author( $comment->comment_ID ),
@@ -310,12 +328,13 @@ class WC_Structured_Data {
 	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
+		if ( $plain_text || ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
 		$shop_name      = get_bloginfo( 'name' );
 		$shop_url       = home_url();
+		$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
 		$order_statuses = array(
 			'pending'    => 'http://schema.org/OrderPaymentDue',
 			'processing' => 'http://schema.org/OrderProcessing',
@@ -335,7 +354,6 @@ class WC_Structured_Data {
 			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
-			$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
 
 			$markup_offers[]  = array(
 				'@type'              => 'Offer',

@@ -1681,6 +1681,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get min quantity which can be purchased at once.
+	 *
+	 * @since  2.7.0
+	 * @return int
+	 */
+	public function get_min_purchase_quantity() {
+		return 1;
+	}
+
+	/**
+	 * Get max quantity which can be purchased at once.
+	 *
+	 * @since  2.7.0
+	 * @return int Quantity or -1 if unlimited.
+	 */
+	public function get_max_purchase_quantity() {
+		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->get_manage_stock() ? -1 : $this->get_stock_quantity() );
+	}
+
+	/**
 	 * Get the add to url used mainly in loops.
 	 *
 	 * @return string

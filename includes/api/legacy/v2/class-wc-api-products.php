@@ -264,7 +264,7 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_description( isset( $data['description'] ) ? $post_content : '' );
 
 			// Attempts to create the new product.
-			$product->create();
+			$product->save();
 			$id = $product->get_id();
 
 			// Checks for an error in the product creation
@@ -1498,7 +1498,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();

@@ -96,6 +96,26 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$this->read_order_data( $order, $post_object );
 		$order->read_meta_data();
 		$order->set_object_read( true );
+
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored.
+		 * @todo When/if meta is flattened, handle this in the migration script.
+		 */
+		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) ) {
+			if ( $order->get_prices_include_tax( 'edit' ) ) {
+				$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+			}
+		}
+
+		/**
+		 * In older versions, paid date may not have been set.
+		 * @todo When/if meta is flattened, handle this in the migration script.
+		 */
+		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.7', '<' ) ) {
+			$order->maybe_set_date_paid( $order->get_date_created( 'edit' ) );
+		}
 	}
 
 	/**
@@ -105,15 +125,21 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function update( &$order ) {
 		$order->set_version( WC_VERSION );
 
-		wp_update_post( array(
-			'ID'            => $order->get_id(),
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
-			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'post_parent'   => $order->get_parent_id(),
-			'post_excerpt'  => $this->get_post_excerpt( $order ),
-		) );
+		$changes = $order->get_changes();
 
+		// Only update the post when the post data changes.
+		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
+			wp_update_post( array(
+				'ID'                => $order->get_id(),
+				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+				'post_parent'       => $order->get_parent_id(),
+				'post_excerpt'      => $this->get_post_excerpt( $order ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+			) );
+		}
 		$this->update_post_meta( $order );
 		$order->save_meta_data();
 		$order->apply_changes();
@@ -223,9 +249,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value   = $order->{"get_$prop"}( 'edit' );
-			$updated = update_post_meta( $order->get_id(), $meta_key, $value );
-			if ( $updated ) {
+			$value = $order->{"get_$prop"}( 'edit' );
+
+			if ( 'prices_include_tax' === $prop ) {
+				$value = $value ? 'yes' : 'no';
+			}
+
+			if ( update_post_meta( $order->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -242,7 +272,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
-		wp_cache_delete( 'order-' . $order->get_id(), 'orders' );
+		wp_cache_delete( 'object-' . $order->get_id(), 'orders' );
 	}
 
 	/**

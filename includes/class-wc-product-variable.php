@@ -67,9 +67,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $include_taxes = false ) {
-		$data_store = $this->get_data_store();
-
-		$prices = $data_store->read_price_data( $this, $include_taxes );
+		$prices = $this->data_store->read_price_data( $this, $include_taxes );
 
 		foreach ( $prices as $price_key => $variation_prices ) {
 			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
@@ -251,8 +249,8 @@ class WC_Product_Variable extends WC_Product {
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'min_qty'               => 1,
-			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
+			'min_qty'               => $variation->get_min_purchase_quantity(),
+			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
 			'backorders_allowed'    => $variation->backorders_allowed(),
 			'is_in_stock'           => $variation->is_in_stock(),
 			'is_downloadable'       => $variation->is_downloadable(),
