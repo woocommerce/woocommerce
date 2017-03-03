@@ -67,7 +67,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order';
+	protected $cache_group = 'orders';
 
 	/**
 	 * Which data store to load.

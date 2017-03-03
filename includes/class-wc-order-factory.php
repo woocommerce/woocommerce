@@ -45,11 +45,11 @@ class WC_Order_Factory {
 
 		try {
 			// Try to get from cache, otherwise create a new object,
-			$order = wp_cache_get( 'order-' . $order_id, 'orders' );
+			$order = wp_cache_get( 'object-' . $order_id, 'orders' );
 
 			if ( ! is_a( $order, 'WC_Order' ) ) {
 				$order = new $classname( $order_id );
-				wp_cache_set( 'order-' . $order_id, $order, 'orders' );
+				wp_cache_set( 'object-' . $order_id, $order, 'orders' );
 			}
 
 			return $order;
@@ -104,11 +104,11 @@ class WC_Order_Factory {
 			if ( $classname ) {
 				try {
 					// Try to get from cache, otherwise create a new object,
-					$item = wp_cache_get( 'order-item-' . $id, 'order-items' );
+					$item = wp_cache_get( 'object-' . $id, 'order-items' );
 
 					if ( ! is_a( $item, 'WC_Order_Item' ) ) {
 						$item = new $classname( $id );
-						wp_cache_set( 'order-item-' . $id, $item, 'order-items' );
+						wp_cache_set( 'object-' . $id, $item, 'order-items' );
 					}
 
 					return $item;

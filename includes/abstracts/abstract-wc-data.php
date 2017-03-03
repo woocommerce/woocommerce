@@ -435,6 +435,7 @@ abstract class WC_Data {
 
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			wp_cache_delete( 'object-' . $this->get_id(), $this->cache_group );
 		}
 	}
 
