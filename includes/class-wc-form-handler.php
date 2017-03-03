@@ -397,7 +397,6 @@ class WC_Form_Handler {
 
 			if ( is_null( $token ) || get_current_user_id() !== $token->get_user_id() || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $token_id ) ) {
 				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
 			} else {
 				WC_Payment_Tokens::delete( $token_id );
 				wc_add_notice( __( 'Payment method deleted.', 'woocommerce' ) );
