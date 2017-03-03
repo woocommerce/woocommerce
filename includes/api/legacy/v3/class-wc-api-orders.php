@@ -967,6 +967,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 		if ( isset( $item['total'] ) ) {
 			$line_item->set_total( floatval( $item['total'] ) );
+		} elseif ( $creating ) {
+			$total = wc_get_price_excluding_tax( $product, array( 'qty' => $line_item->get_quantity() ) );
+			$line_item->set_total( $total );
+			$line_item->set_subtotal( $total );
 		}
 		if ( isset( $item['total_tax'] ) ) {
 			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
