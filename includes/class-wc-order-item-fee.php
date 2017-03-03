@@ -80,7 +80,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @param string $amount
 	 * @throws WC_Data_Exception
 	 */
-	protected function set_total_tax( $amount ) {
+	public function set_total_tax( $amount ) {
 		$this->set_prop( 'total_tax', wc_format_decimal( $amount ) );
 	}
 
