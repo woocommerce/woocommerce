@@ -1086,7 +1086,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_category_ids( $term_ids ) {
-		$this->set_prop( 'category_ids', array_unique( array_map( 'intval', $term_ids, 'product_cat' ) ) );
+		$this->set_prop( 'category_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**
@@ -1096,7 +1096,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_tag_ids( $term_ids ) {
-		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids, 'product_tag' ) ) );
+		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**
