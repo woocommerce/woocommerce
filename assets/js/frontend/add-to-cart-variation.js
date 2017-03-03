@@ -524,20 +524,37 @@
 	};
 
 	/**
+	 * Reset the slide position if the variation has a different image than the current one
+	 */
+	$.fn.wc_maybe_trigger_slide_position_reset = function( variation ) {
+		var $form = $( this ),
+			reset_slide_position = false,
+			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
+
+		if ( $form.attr( 'current-image' ) !== new_image_id ) {
+			reset_slide_position = true;
+		}
+
+		$form.attr( 'current-image', new_image_id );
+
+		if ( reset_slide_position ) {
+			$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
+		}
+	};
+
+	/**
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
+
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
 			$gallery_wrapper  = $product.find( '.woocommerce-product-gallery__wrapper ' ),
 			$product_img_wrap = $gallery_wrapper.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
-			$product_img      = $product_img_wrap.find( '.wp-post-image' ),
-			previous_gallery_img = $gallery_img.attr('src'),
-			new_gallery_img = '';
+			$product_img      = $product_img_wrap.find( '.wp-post-image' );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
-			new_gallery_img = variation.image.src;
 			$product_img.wc_set_variation_attr( 'src', variation.image.src );
 			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
 			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
@@ -550,6 +567,7 @@
 			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
 			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
+
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'width' );
@@ -568,9 +586,7 @@
 
 		window.setTimeout( function() {
 			$( 'body' ).trigger( 'woocommerce_init_gallery' );
-			if ( previous_gallery_img !== new_gallery_img ) {
-				$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
-			}
+			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
 		}, 10 );
 	};
