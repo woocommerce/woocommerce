@@ -1749,7 +1749,7 @@ class WC_API_Products extends WC_API_Resource {
 		$variations = $request['variations'];
 		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
 
-		foreach ( $variations as $menu_order => $variation ) {
+		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
 			$variation    = new WC_Product_Variation( $variation_id );
 
@@ -1881,10 +1881,10 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
+			if ( isset( $data['attributes'] ) ) {
 				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+				foreach ( $data['attributes'] as $attribute_key => $attribute ) {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
