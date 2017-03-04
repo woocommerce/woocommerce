@@ -1641,7 +1641,7 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+						$gallery[] = $this->set_product_image_as_attachment( $upload, $product->get_id() );
 					} else {
 						$gallery[] = $attachment_id;
 					}
