@@ -869,7 +869,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				return 0;
 			}
 
-			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+			// Note not wc_clean here to prevent removal of entities.
+			$value = $match_attributes[ $attribute_field_name ];
 
 			$query_args['meta_query'][] = array(
 				'relation' => 'OR',
