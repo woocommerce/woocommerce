@@ -356,7 +356,7 @@ jQuery( function( $ ) {
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
-							$form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
+							$form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
 						} else {
 							$form.prepend( data );
 						}
@@ -488,8 +488,8 @@ jQuery( function( $ ) {
 			return false;
 		},
 		submit_error: function( error_message ) {
-			$( '.woocommerce-error, .woocommerce-message' ).remove();
-			wc_checkout_form.$checkout_form.prepend( error_message );
+			$( '.woocommerce-NoticeGroup-checkout' ).remove();
+			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
