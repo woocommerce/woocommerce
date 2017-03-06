@@ -294,7 +294,7 @@ jQuery( function( $ ) {
 					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
 
 					// Reload the page if requested
-					if ( 'true' === data.reload ) {
+					if ( true === data.reload ) {
 						window.location.reload();
 						return;
 					}
@@ -448,26 +448,26 @@ jQuery( function( $ ) {
 					dataType:   'json',
 					success:	function( result ) {
 						try {
-							if ( result.result === 'success' ) {
+							if ( 'success' === result.result ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {
 									window.location = decodeURI( result.redirect );
 								}
-							} else if ( result.result === 'failure' ) {
+							} else if ( 'failure' === result.result ) {
 								throw 'Result failure';
 							} else {
 								throw 'Invalid response';
 							}
 						} catch( err ) {
 							// Reload page
-							if ( result.reload === 'true' ) {
+							if ( true === result.reload ) {
 								window.location.reload();
 								return;
 							}
 
 							// Trigger update in case we need a fresh nonce
-							if ( result.refresh === 'true' ) {
+							if ( true === result.refresh ) {
 								$( document.body ).trigger( 'update_checkout' );
 							}
 
@@ -489,7 +489,7 @@ jQuery( function( $ ) {
 		},
 		submit_error: function( error_message ) {
 			$( '.woocommerce-error, .woocommerce-message' ).remove();
-			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + error_message + '</div>' );
+			wc_checkout_form.$checkout_form.prepend( error_message );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
