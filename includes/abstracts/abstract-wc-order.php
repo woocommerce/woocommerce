@@ -1412,36 +1412,57 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get totals for display on pages and in emails.
+	 * Add total row for subtotal.
 	 *
-	 * @param mixed $tax_display
-	 * @return array
+	 * @param array $total_rows
+	 * @param string $tax_display
 	 */
-	public function get_order_item_totals( $tax_display = '' ) {
-		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$total_rows  = array();
-
+	protected function add_order_item_totals_subtotal_row( &$total_rows, $tax_display ) {
 		if ( $subtotal = $this->get_subtotal_to_display( false, $tax_display ) ) {
 			$total_rows['cart_subtotal'] = array(
 				'label' => __( 'Subtotal:', 'woocommerce' ),
 				'value'    => $subtotal,
 			);
 		}
+	}
 
+	/**
+	 * Add total row for discounts.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_discount_row( &$total_rows, $tax_display ) {
 		if ( $this->get_total_discount() > 0 ) {
 			$total_rows['discount'] = array(
 				'label' => __( 'Discount:', 'woocommerce' ),
 				'value'    => '-' . $this->get_discount_to_display( $tax_display ),
 			);
 		}
+	}
 
+	/**
+	 * Add total row for shipping.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_shipping_row( &$total_rows, $tax_display ) {
 		if ( $this->get_shipping_method() ) {
 			$total_rows['shipping'] = array(
 				'label' => __( 'Shipping:', 'woocommerce' ),
 				'value'    => $this->get_shipping_to_display( $tax_display ),
 			);
 		}
+	}
 
+	/**
+	 * Add total row for fees.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_fee_rows( &$total_rows, $tax_display ) {
 		if ( $fees = $this->get_fees() ) {
 			foreach ( $fees as $id => $fee ) {
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', empty( $fee['line_total'] ) && empty( $fee['line_tax'] ), $id ) ) {
@@ -1453,34 +1474,64 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				);
 			}
 		}
+	}
 
+	/**
+	 * Add total row for taxes.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_tax_rows( &$total_rows, $tax_display ) {
 		// Tax for tax exclusive prices.
 		if ( 'excl' === $tax_display ) {
-
-			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
-
+			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
-
 					$total_rows[ sanitize_title( $code ) ] = array(
 						'label' => $tax->label . ':',
 						'value'    => $tax->formatted_amount,
 					);
 				}
 			} else {
-
 				$total_rows['tax'] = array(
 					'label' => WC()->countries->tax_or_vat() . ':',
 					'value'    => wc_price( $this->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}
+	}
 
+	/**
+	 * Add total row for grand total.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_total_row( &$total_rows, $tax_display ) {
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'    => $this->get_formatted_order_total( $tax_display ),
 		);
+	}
 
-		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
+	/**
+	 * Get totals for display on pages and in emails.
+	 *
+	 * @param mixed $tax_display
+	 * @return array
+	 */
+	public function get_order_item_totals( $tax_display = '' ) {
+		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+		$total_rows  = array();
+
+		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
+
+		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
 
 	/*

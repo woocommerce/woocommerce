@@ -1726,22 +1726,27 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get totals for display on pages and in emails.
+	 * Add total row for the payment method.
 	 *
-	 * @param mixed $tax_display
-	 * @return array
+	 * @param array $total_rows
+	 * @param string $tax_display
 	 */
-	public function get_order_item_totals( $tax_display = '' ) {
-		$total_rows = parent::get_order_item_totals( $tax_display );
-		$total_row  = array_pop( $total_rows );
-
+	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
 		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $this->get_payment_method_title(),
 			);
 		}
+	}
 
+	/**
+	 * Add total row for refunds.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_refund_rows( &$total_rows, $tax_display ) {
 		if ( $refunds = $this->get_refunds() ) {
 			foreach ( $refunds as $id => $refund ) {
 				$total_rows[ 'refund_' . $id ] = array(
@@ -1750,9 +1755,27 @@ class WC_Order extends WC_Abstract_Order {
 				);
 			}
 		}
+	}
 
-		$total_rows['order_total'] = $total_row;
+	/**
+	 * Get totals for display on pages and in emails.
+	 *
+	 * @param mixed $tax_display
+	 * @return array
+	 */
+	public function get_order_item_totals( $tax_display = '' ) {
+		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+		$total_rows  = array();
 
-		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
+		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_refund_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
+
+		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
 }
