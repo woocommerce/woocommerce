@@ -108,6 +108,9 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		$data['access_expires']      = $data['access_expires'] ? wc_rest_prepare_date_response( $data['access_expires'] ) : 'never';
 		$data['downloads_remaining'] = '' === $data['downloads_remaining'] ? 'unlimited' : $data['downloads_remaining'];
 
+		// Remove "product_name" since it's new in 2.7.
+		unset( $data['product_name'] );
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
