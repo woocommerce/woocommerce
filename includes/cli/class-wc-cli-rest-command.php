@@ -281,7 +281,15 @@ EOT;
 			$query_total_time = round( $query_total_time, 6 );
 			WP_CLI::debug( "wc command executed {$query_count} queries in {$query_total_time} seconds{$slow_query_message}", 'wc' );
 		}
+
 		if ( $error = $response->as_error() ) {
+			// For authentication errors (status 401), include a reminder to set the --user flag.
+			// WP_CLI::error will only return the first message from WP_Error, so we will pass a string containing both instead.
+			if ( 401 === $response->get_status() ) {
+				$errors   = $error->get_error_messages();
+				$errors[] = __( 'Make sure to include the --user flag with an account that has permissions for this action.', 'woocommerce' ) . ' {"status":401}';
+				$error    = implode( "\n", $errors );
+			}
 			WP_CLI::error( $error );
 		}
 		return array( $response->get_status(), $response->get_data(), $response->get_headers() );
