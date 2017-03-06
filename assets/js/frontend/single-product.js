@@ -125,6 +125,10 @@ jQuery( function( $ ) {
 					});
 				}
 			});
+
+			$( 'body' ).on( 'woocommerce_gallery_reset_slide_position', function(){
+				$( '.woocommerce-product-gallery' ).flexslider( 0 );
+			} );
 		},
 
 		/**

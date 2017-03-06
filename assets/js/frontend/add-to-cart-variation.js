@@ -524,6 +524,25 @@
 	};
 
 	/**
+	 * Reset the slide position if the variation has a different image than the current one
+	 */
+	$.fn.wc_maybe_trigger_slide_position_reset = function( variation ) {
+		var $form = $( this ),
+			reset_slide_position = false,
+			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
+
+		if ( $form.attr( 'current-image' ) !== new_image_id ) {
+			reset_slide_position = true;
+		}
+
+		$form.attr( 'current-image', new_image_id );
+
+		if ( reset_slide_position ) {
+			$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
+		}
+	};
+
+	/**
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
@@ -565,6 +584,7 @@
 
 		window.setTimeout( function() {
 			$( 'body' ).trigger( 'woocommerce_init_gallery' );
+			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
 		}, 10 );
 	};
