@@ -21,17 +21,7 @@ jQuery( function( $ ) {
 			return ui;
 		},
 		start: function( event, ui ) {
-			ui.placeholder.children().each( function() {
-				var $original = ui.item.children().eq( ui.placeholder.children().index( this ) ),
-					$this = $( this );
-
-				$.each( $original[0].attributes, function( k, attr ) {
-					$this.attr( attr.name, attr.value );
-				});
-			});
-			if ( ! ui.item.hasClass( 'alternate' ) ) {
-				ui.item.css( 'background-color', '#ffffff' );
-			}
+			ui.item.css( 'background-color', '#ffffff' );
 			ui.item.children( 'td, th' ).css( 'border-bottom-width', '0' );
 			ui.item.css( 'outline', '1px solid #dfdfdf' );
 		},
