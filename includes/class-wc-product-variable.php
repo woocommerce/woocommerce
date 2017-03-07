@@ -493,7 +493,7 @@ class WC_Product_Variable extends WC_Product {
 				return 0;
 			}
 
-			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+			$value = $match_attributes[ $attribute_field_name ];
 
 			$query_args['meta_query'][] = array(
 				'relation' => 'OR',
