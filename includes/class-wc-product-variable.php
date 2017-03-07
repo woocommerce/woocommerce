@@ -118,6 +118,16 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns the price in html format.
 	 *
+	 * Note: Variable prices do not show suffixes like other product types. This
+	 * is due to some things like tax classes being set at variation level which
+	 * could differ from the parent price. The only way to show accurate prices
+	 * would be to load the variation and get IT's price, which adds extra
+	 * overhead and still has edge cases where the values would be inaccurate.
+	 *
+	 * Additionally, ranges of prices no longer show 'striked out' sale prices
+	 * due to the strings being very long and unclear/confusing. A single range
+	 * is shown instead.
+	 *
 	 * @param string $price (default: '')
 	 * @return string
 	 */
@@ -132,11 +142,32 @@ class WC_Product_Variable extends WC_Product {
 		$max_price = end( $prices['price'] );
 
 		if ( $min_price !== $max_price ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ), $this );
+			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
 		} else {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
 		}
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Get the suffix to display after prices > 0.
+	 *
+	 * This is skipped if the suffix
+	 * has dynamic values such as {price_excluding_tax} for variable products.
+	 * @see get_price_html for an explanation as to why.
+	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+		$suffix = get_option( 'woocommerce_price_display_suffix' );
+
+		if ( strstr( $suffix, '{' ) ) {
+			return apply_filters( 'woocommerce_get_price_suffix', '', $this, $price, $qty );
+		} else {
+			return parent::get_price_suffix( $price, $qty );
+		}
 	}
 
 	/**
