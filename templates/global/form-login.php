@@ -25,11 +25,11 @@ if ( is_user_logged_in() ) {
 }
 
 ?>
-<form class="woocomerce-form woocommerce-form-login login" method="post" <?php if ( $hidden ) echo 'style="display:none;"'; ?>>
+<form class="woocomerce-form woocommerce-form-login login" method="post" <?php echo ( $hidden ) ? 'style="display:none;"' : ''; ?>>
 
 	<?php do_action( 'woocommerce_login_form_start' ); ?>
 
-	<?php if ( $message ) echo wpautop( wptexturize( $message ) ); ?>
+	<?php echo ( $message ) ? wpautop( wptexturize( $message ) ) : ''; ?>
 
 	<p class="form-row form-row-first">
 		<label for="username"><?php _e( 'Username or email', 'woocommerce' ); ?> <span class="required">*</span></label>

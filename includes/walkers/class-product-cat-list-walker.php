@@ -46,8 +46,9 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
 	public function start_lvl( &$output, $depth = 0, $args = array() ) {
-		if ( 'list' != $args['style'] )
+		if ( 'list' != $args['style'] ) {
 			return;
+		}
 
 		$indent = str_repeat( "\t", $depth );
 		$output .= "$indent<ul class='children'>\n";
@@ -64,8 +65,9 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
 	public function end_lvl( &$output, $depth = 0, $args = array() ) {
-		if ( 'list' != $args['style'] )
+		if ( 'list' != $args['style'] ) {
 			return;
+		}
 
 		$indent = str_repeat( "\t", $depth );
 		$output .= "$indent</ul>\n";

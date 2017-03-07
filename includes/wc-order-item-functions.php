@@ -22,8 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_add_order_item( $order_id, $item ) {
 	$order_id = absint( $order_id );
 
-	if ( ! $order_id )
+	if ( ! $order_id ) {
 		return false;
+	}
 
 	$defaults = array(
 		'order_item_name'       => '',

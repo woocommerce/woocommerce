@@ -30,8 +30,9 @@ class WC_HookFinder {
 				$found_files = array();
 				$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
 				foreach ( $retrieved_files as $file ) {
-					if ( ! in_array( $file, self::$found_files ) )
+					if ( ! in_array( $file, self::$found_files ) ) {
 						$found_files[] = $file;
+					}
 				}
 
 				self::$found_files = array_merge( self::$found_files, $found_files );

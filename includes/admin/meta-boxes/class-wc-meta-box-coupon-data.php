@@ -192,8 +192,10 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
 				</select> <?php echo wc_help_tip( __( 'A product must be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will be discounted.', 'woocommerce' ) ); ?></p>
@@ -207,8 +209,10 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_excluded_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
 				</select> <?php echo wc_help_tip( __( 'Product must not be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will not be discounted.', 'woocommerce' ) ); ?></p>

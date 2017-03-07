@@ -16,7 +16,9 @@
  * @version 2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Load colors
 $bg              = get_option( 'woocommerce_email_background_color' );
