@@ -286,7 +286,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) ) {
+			if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
 				$order->calculate_totals();
 			}
 
