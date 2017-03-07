@@ -135,7 +135,7 @@ class WC_Product_Variable extends WC_Product {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ), $this );
 		} else {
 			$suffix = '';
-			if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() ) {
+			if ( get_option( 'woocommerce_price_display_suffix' ) && wc_tax_enabled() ) {
 				$variation_id = key( $prices['price'] );
 				$variation    = wc_get_product( $variation_id );
 				$suffix       = $variation->get_price_suffix();
