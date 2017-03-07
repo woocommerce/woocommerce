@@ -1,7 +1,7 @@
 /*global ajaxurl */
 
 /**
- * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/)
+ * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/)
  *
  * Modified - products have no children (non hierarchical)
  */
@@ -21,17 +21,7 @@ jQuery( function( $ ) {
 			return ui;
 		},
 		start: function( event, ui ) {
-			ui.placeholder.children().each( function() {
-				var $original = ui.item.children().eq( ui.placeholder.children().index( this ) ),
-					$this = $( this );
-
-				$.each( $original[0].attributes, function( k, attr ) {
-					$this.attr( attr.name, attr.value );
-				});
-			});
-			if ( ! ui.item.hasClass( 'alternate' ) ) {
-				ui.item.css( 'background-color', '#ffffff' );
-			}
+			ui.item.css( 'background-color', '#ffffff' );
 			ui.item.children( 'td, th' ).css( 'border-bottom-width', '0' );
 			ui.item.css( 'outline', '1px solid #dfdfdf' );
 		},

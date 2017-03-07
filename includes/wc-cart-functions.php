@@ -82,7 +82,6 @@ function wc_get_raw_referer() {
 /**
  * Add to cart messages.
  *
- * @access public
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
@@ -111,12 +110,17 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue Shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
-		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
-	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+	if ( has_filter( 'wc_add_to_cart_message' ) ) {
+		wc_deprecated_function( 'The wc_add_to_cart_message filter', '2.7', 'wc_add_to_cart_message_html' );
+		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+	}
+
+	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products );
 
 	if ( $return ) {
 		return $message;
@@ -205,8 +209,9 @@ function wc_cart_totals_shipping_html() {
 
 		if ( sizeof( $packages ) > 1 ) {
 			foreach ( $package['contents'] as $item_id => $values ) {
-				$product_names[] = $values['data']->get_title() . ' &times;' . $values['quantity'];
+				$product_names[ $item_id ] = $values['data']->get_name() . ' &times;' . $values['quantity'];
 			}
+			$product_names = apply_filters( 'woocommerce_shipping_package_details_array', $product_names, $package );
 		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
@@ -215,7 +220,7 @@ function wc_cart_totals_shipping_html() {
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			// @codingStandardsIgnoreEnd
 			'index'                => $i,
 			'chosen_method'        => $chosen_method,
@@ -244,7 +249,7 @@ function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
-	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
+	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', sprintf( esc_html__( 'Coupon: %s', 'woocommerce' ), $coupon->get_code() ), $coupon );
 
 	if ( $echo ) {
 		echo $label;

@@ -22,6 +22,13 @@ Thumbs.db
 # ApiGen
 /wc-apidocs/
 
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
 # Unit tests
 /tmp
 /tests/bin/tmp

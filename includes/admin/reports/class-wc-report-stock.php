@@ -76,7 +76,7 @@ class WC_Report_Stock extends WP_List_Table {
 	public function column_default( $item, $column_name ) {
 		global $product;
 
-		if ( ! $product || $product->id !== $item->id ) {
+		if ( ! $product || $product->get_id() !== $item->id ) {
 			$product = wc_get_product( $item->id );
 		}
 
@@ -84,21 +84,14 @@ class WC_Report_Stock extends WP_List_Table {
 
 			case 'product' :
 				if ( $sku = $product->get_sku() ) {
-					echo $sku . ' - ';
+					echo esc_html( $sku ) . ' - ';
 				}
 
-				echo $product->get_title();
+				echo esc_html( $product->get_name() );
 
-				// Get variation data
+				// Get variation data.
 				if ( $product->is_type( 'variation' ) ) {
-					$list_attributes = array();
-					$attributes = $product->get_variation_attributes();
-
-					foreach ( $attributes as $name => $attribute ) {
-						$list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
-					}
-
-					echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';
+					echo '<div class="description">' . wp_kses_post( wc_get_formatted_variation( $product, true ) ) . '</div>';
 				}
 			break;
 
@@ -120,7 +113,7 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_level' :
-				echo $product->get_stock_quantity();
+				echo esc_html( $product->get_stock_quantity() );
 			break;
 
 			case 'wc_actions' :
@@ -146,7 +139,13 @@ class WC_Report_Stock extends WP_List_Table {
 						$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
 
 						foreach ( $actions as $action ) {
-							printf( '<a class="button tips %s" href="%s" data-tip="%s ' . __( 'product', 'woocommerce' ) . '">%s</a>', $action['action'], esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+							printf(
+								'<a class="button tips %1$s" href="%2$s" data-tip="%3$s">%4$s</a>',
+								esc_attr( $action['action'] ),
+								esc_url( $action['url'] ),
+								sprintf( esc_attr__( '%s product', 'woocommerce' ), $action['name'] ),
+								esc_html( $action['name'] )
+							);
 						}
 					?>
 				</p><?php

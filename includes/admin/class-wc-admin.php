@@ -179,7 +179,7 @@ class WC_Admin {
 			$mailer        = WC()->mailer();
 
 			// get the preview email subject
-			$email_heading = __( 'HTML Email Template', 'woocommerce' );
+			$email_heading = __( 'HTML email template', 'woocommerce' );
 
 			// get the preview email content
 			ob_start();
@@ -207,26 +207,20 @@ class WC_Admin {
 	 */
 	public function admin_footer_text( $footer_text ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! function_exists( 'wc_get_screen_ids' ) ) {
-			return;
+			return $footer_text;
 		}
 		$current_screen = get_current_screen();
 		$wc_pages       = wc_get_screen_ids();
 
-		// Set only wc pages
-		$wc_pages = array_flip( $wc_pages );
-		if ( isset( $wc_pages['profile'] ) ) {
-			unset( $wc_pages['profile'] );
-		}
-		if ( isset( $wc_pages['user-edit'] ) ) {
-			unset( $wc_pages['user-edit'] );
-		}
-		$wc_pages = array_flip( $wc_pages );
+		// Set only WC pages.
+		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
-		// Check to make sure we're on a WooCommerce admin page
+		// Check to make sure we're on a WooCommerce admin page.
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
-				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %1$s&#9733;&#9733;&#9733;&#9733;&#9733;%2$s rating. A huge thanks in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">', '</a>' );
+				/* translators: %s: five stars */
+				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %s rating. A huge thanks in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>' );
 				wc_enqueue_js( "
 					jQuery( 'a.wc-rating-link' ).click( function() {
 						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );

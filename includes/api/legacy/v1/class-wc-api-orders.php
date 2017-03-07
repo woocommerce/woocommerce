@@ -106,19 +106,17 @@ class WC_API_Orders extends WC_API_Resource {
 		// ensure order ID is valid & user has permission to read
 		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
-		$order = wc_get_order( $id );
-
-		$order_post = get_post( $id );
-
+		$order      = wc_get_order( $id );
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
@@ -129,8 +127,8 @@ class WC_API_Orders extends WC_API_Resource {
 			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
-			'cart_discount'             => wc_format_decimal( $order->get_cart_discount(), 2 ),
-			'order_discount'            => wc_format_decimal( $order->get_order_discount(), 2 ),
+			'cart_discount'             => wc_format_decimal( 0, 2 ),
+			'order_discount'            => wc_format_decimal( 0, 2 ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
@@ -284,7 +282,6 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Delete an order
 	 *
-	 * @TODO enable along with POST in 2.2
 	 * @param int $id the order ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array

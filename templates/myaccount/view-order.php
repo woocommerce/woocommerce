@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <p><?php
+	/* translators: 1: order number 2: order date 3: order status */
 	printf(
 		__( 'Order #%1$s was placed on %2$s and is currently %3$s.', 'woocommerce' ),
 		'<mark class="order-number">' . $order->get_order_number() . '</mark>',
@@ -33,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?></p>
 
 <?php if ( $notes = $order->get_customer_order_notes() ) : ?>
-	<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Order updates', 'woocommerce' ); ?></h2>
 	<ol class="woocommerce-OrderUpdates commentlist notes">
 		<?php foreach ( $notes as $note ) : ?>
 		<li class="woocommerce-OrderUpdate comment note">

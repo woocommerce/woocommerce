@@ -26,8 +26,8 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v1/payment_gateways', $routes );
-		$this->assertArrayHasKey( '/wc/v1/payment_gateways/(?P<id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/payment_gateways', $routes );
+		$this->assertArrayHasKey( '/wc/v2/payment_gateways/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
@@ -38,28 +38,28 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	public function test_get_payment_gateways() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways' ) );
 		$gateways = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( array(
 			'id'                 => 'cheque',
-			'title'              => 'Check Payments',
+			'title'              => 'Check payments',
 			'description'        => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
 			'order'              => '',
 			'enabled'            => true,
-			'method_title'       => 'Check Payments',
+			'method_title'       => 'Check payments',
 			'method_description' => "Allows check payments. Why would you take checks in this day and age? Well you probably wouldn't but it does allow you to make test purchases for testing order emails and the 'success' pages etc.",
 			'settings'           => $this->get_settings( 'WC_Gateway_Cheque' ),
 			'_links' => array(
 				'self'       => array(
 					array(
-						'href' => rest_url( '/wc/v1/payment_gateways/cheque' ),
+						'href' => rest_url( '/wc/v2/payment_gateways/cheque' ),
 					),
 				),
 				'collection' => array(
 					array(
-						'href' => rest_url( '/wc/v1/payment_gateways' ),
+						'href' => rest_url( '/wc/v2/payment_gateways' ),
 					),
 				),
 			),
@@ -73,7 +73,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_payment_gateways_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -85,7 +85,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	public function test_get_payment_gateway() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways/paypal' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways/paypal' ) );
 		$paypal   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -96,7 +96,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'order' => '',
 			'enabled'    => true,
 			'method_title' => 'PayPal',
-			'method_description' => 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
+			'method_description' => 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
 			'settings' => $this->get_settings( 'WC_Gateway_Paypal' ),
 		), $paypal );
 	}
@@ -108,7 +108,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways/paypal' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways/paypal' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -119,7 +119,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways/totally_fake_method' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways/totally_fake_method' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
@@ -132,7 +132,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		// Test defaults
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/payment_gateways/paypal' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/payment_gateways/paypal' ) );
 		$paypal   = $response->get_data();
 
 		$this->assertEquals( 'PayPal', $paypal['settings']['title']['value'] );
@@ -140,7 +140,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'no', $paypal['settings']['testmode']['value'] );
 
 		// test updating single setting
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'settings' => array(
 				'email' => 'woo@woo.local',
@@ -155,7 +155,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'no', $paypal['settings']['testmode']['value'] );
 
 		// test updating multiple settings
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'settings' => array(
 				'testmode' => 'yes',
@@ -171,7 +171,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
 		// Test other parameters, and recheck settings
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'enabled' => false,
 			'order'   => 2,
@@ -186,7 +186,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
 		// test bogus
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'settings' => array(
 				'paymentaction' => 'afasfasf',
@@ -195,7 +195,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'settings' => array(
 				'paymentaction' => 'authorization',
@@ -213,7 +213,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
-		$request = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/paypal' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/paypal' );
 		$request->set_body_params( array(
 			'settings' => array(
 				'testmode' => 'yes',
@@ -231,7 +231,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
-		$request  = new WP_REST_Request( 'POST', '/wc/v1/payment_gateways/totally_fake_method' );
+		$request  = new WP_REST_Request( 'POST', '/wc/v2/payment_gateways/totally_fake_method' );
 		$request->set_body_params( array(
 			'enabled' => true,
 		) );
@@ -247,7 +247,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	public function test_payment_gateway_schema() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/payment_gateways' );
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/payment_gateways' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];

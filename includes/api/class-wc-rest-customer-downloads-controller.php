@@ -18,77 +18,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Customers controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Customer_Downloads_V1_Controller
  */
-class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
+class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V1_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'customers/(?P<customer_id>[\d]+)/downloads';
-
-	/**
-	 * Register the routes for customers.
-	 */
-	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-	}
-
-	/**
-	 * Check whether a given request has permission to read customers.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		$customer = get_user_by( 'id', (int) $request['customer_id'] );
-
-		if ( ! $customer ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( ! wc_rest_check_user_permissions( 'read', $customer->id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get all customer downloads.
-	 *
-	 * @param WP_REST_Request $request
-	 * @return array
-	 */
-	public function get_items( $request ) {
-		$downloads = wc_get_customer_available_downloads( (int) $request['customer_id'] );
-
-		$data = array();
-		foreach ( $downloads as $download_data ) {
-			$download = $this->prepare_item_for_response( (object) $download_data, $request );
-			$download = $this->prepare_response_for_collection( $download );
-			$data[]   = $download;
-		}
-
-		return rest_ensure_response( $data );
-	}
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Prepare a single download output for response.
@@ -122,30 +61,6 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Prepare links for the request.
-	 *
-	 * @param stdClass $download Download object.
-	 * @param WP_REST_Request $request Request object.
-	 * @return array Links for the given customer download.
-	 */
-	protected function prepare_links( $download, $request ) {
-		$base  = str_replace( '(?P<customer_id>[\d]+)', $request['customer_id'], $this->rest_base );
-		$links = array(
-			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
-			),
-			'product' => array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $download->product_id ) ),
-			),
-			'order' => array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $download->order_id ) ),
-			),
-		);
-
-		return $links;
-	}
-
-	/**
 	 * Get the Customer Download's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -171,6 +86,12 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
 				'product_id' => array(
 					'description' => __( 'Downloadable product ID.', 'woocommerce' ),
 					'type'        => 'integer',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'product_name' => array(
+					'description' => __( 'Product name.', 'woocommerce' ),
+					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -206,7 +127,7 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
 				),
 				'file' => array(
 					'description' => __( 'File details.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties' => array(
@@ -228,16 +149,5 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the query params for collections.
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-		);
 	}
 }

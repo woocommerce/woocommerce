@@ -16,13 +16,15 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->add_to_cart_text() );
+		$this->assertEquals( 'Add to cart', $product->add_to_cart_text() );
 
-		$product->stock_status = 'outofstock';
-		$this->assertEquals( __( 'Read more', 'woocommerce' ), $product->add_to_cart_text() );
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		$this->assertEquals( 'Read more', $product->add_to_cart_text() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -34,10 +36,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( __( 'Add to cart', 'woocommerce' ), $product->single_add_to_cart_text() );
+		$this->assertEquals( 'Add to cart', $product->single_add_to_cart_text() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -49,10 +51,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( 'Dummy Product', $product->get_title() );
+		$this->assertEquals( 'Dummy Product', $product->get_name() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -64,10 +66,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( get_permalink( $product->id ), $product->get_permalink() );
+		$this->assertEquals( get_permalink( $product->get_id() ), $product->get_permalink() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -79,10 +81,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( $product->sku, $product->get_sku() );
+		$this->assertEquals( 'DUMMY SKU', $product->get_sku() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -101,77 +103,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $product->get_stock_quantity() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
-	}
-
-	/**
-	 * Test get_total_stock().
-	 *
-	 * @since 2.3
-	 */
-	public function test_get_total_stock() {
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
-
-		$this->assertEmpty( $product->get_total_stock() );
-
-		$product->manage_stock = 'yes';
-		$this->assertEquals( 0, $product->get_total_stock() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
-	}
-
-	/**
-	 * Test set_stock().
-	 *
-	 * @since 2.3
-	 */
-	public function test_set_stock() {
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
-
-		$product->manage_stock = 'yes';
-		$this->assertEquals( 5, $product->set_stock( 5 ) );
-		$this->assertEquals( 2, $product->set_stock( 3, 'subtract' ) );
-		$this->assertEquals( 5, $product->set_stock( 3, 'add' ) );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
-	}
-
-	/**
-	 * Test reduce_stock().
-	 *
-	 * @since 2.3
-	 */
-	public function test_reduce_stock() {
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
-
-		$product->manage_stock = 'yes';
-		$product->set_stock( 5 );
-		$this->assertEquals( 2, $product->reduce_stock( 3 ) );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
-	}
-
-	/**
-	 * Test increase_stock().
-	 *
-	 * @since 2.3
-	 */
-	public function test_increase_stock() {
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
-
-		$product->manage_stock = 'yes';
-		$product->set_stock( 5 );
-		$this->assertEquals( 8, $product->increase_stock( 3 ) );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -189,7 +121,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_type( 'external' ) );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -203,14 +135,14 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( $product->is_downloadable() );
 
-		$product->downloadable = 'yes';
+		$product->set_downloadable( 'yes' );
 		$this->assertTrue( $product->is_downloadable() );
 
-		$product->downloadable = 'no';
+		$product->set_downloadable( 'no' );
 		$this->assertFalse( $product->is_downloadable() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -224,14 +156,14 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( $product->is_virtual() );
 
-		$product->virtual = 'yes';
+		$product->set_virtual( 'yes' );
 		$this->assertTrue( $product->is_virtual() );
 
-		$product->virtual = 'no';
+		$product->set_virtual( 'no' );
 		$this->assertFalse( $product->is_virtual() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -243,14 +175,14 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product->virtual = 'yes';
+		$product->set_virtual( 'yes' );
 		$this->assertFalse( $product->needs_shipping() );
 
-		$product->virtual = 'no';
+		$product->set_virtual( 'no' );
 		$this->assertTrue( $product->needs_shipping() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -262,14 +194,14 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product->sold_individually = 'yes';
+		$product->set_sold_individually( 'yes' );
 		$this->assertTrue( $product->is_sold_individually() );
 
-		$product->sold_individually = 'no';
+		$product->set_sold_individually( 'no' );
 		$this->assertFalse( $product->is_sold_individually() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -281,17 +213,17 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product->backorders = 'yes';
+		$product->set_backorders( 'yes' );
 		$this->assertTrue( $product->backorders_allowed() );
 
-		$product->backorders = 'notify';
+		$product->set_backorders( 'notify' );
 		$this->assertTrue( $product->backorders_allowed() );
 
-		$product->backorders = 'no';
+		$product->set_backorders( 'no' );
 		$this->assertFalse( $product->backorders_allowed() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -303,21 +235,21 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
-		$product->backorders = 'notify';
-		$product->manage_stock = 'yes';
+		$product->set_backorders( 'notify' );
+		$product->set_manage_stock( 'yes' );
 		$this->assertTrue( $product->backorders_require_notification() );
 
-		$product->backorders = 'yes';
+		$product->set_backorders( 'yes' );
 		$this->assertFalse( $product->backorders_require_notification() );
 
-		$product->backorders = 'no';
+		$product->set_backorders( 'no' );
 		$this->assertFalse( $product->backorders_require_notification() );
 
-		$product->backorders = 'yes';
-		$product->manage_stock = 'no';
+		$product->set_backorders( 'yes' );
+		$product->set_manage_stock( 'no' );
 		$this->assertFalse( $product->backorders_require_notification() );
 
 		// Delete product
-		WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }

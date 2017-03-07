@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 
 /**
  * Customer Note Order Email.

@@ -1165,13 +1165,15 @@ class WC_Geo_IP {
 	/**
 	 * Logging method.
 	 *
-	 * @param string $message
+	 * @param string $message Log message.
+	 * @param string $level   Optional. Default 'info'.
+	 *     emergency|alert|critical|error|warning|notice|info|debug
 	 */
-	public static function log( $message ) {
+	public static function log( $message, $level = 'info' ) {
 		if ( empty( self::$log ) ) {
 			self::$log = wc_get_logger();
 		}
-		self::$log->add( 'geoip', $message );
+		self::$log->log( $level, $message, array( 'source' => 'geoip' ) );
 	}
 
 	/**
@@ -1191,7 +1193,7 @@ class WC_Geo_IP {
 					$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
 				}
 			} else {
-				$this->log( 'GeoIP API: Can not open ' . $filename );
+				$this->log( 'GeoIP API: Can not open ' . $filename, 'error' );
 			}
 		}
 
@@ -1550,7 +1552,7 @@ class WC_Geo_IP {
 			}
 		}
 
-		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?', 'error' );
 
 		return false;
 	}
@@ -1605,7 +1607,7 @@ class WC_Geo_IP {
 			}
 		}
 
-		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?', 'error' );
 
 		return false;
 	}
@@ -1629,9 +1631,13 @@ class WC_Geo_IP {
 	 * Country ID by addr IPv6.
 	 *
 	 * @param  string $addr
-	 * @return int
+	 * @return int|bool
 	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
+		if ( ! defined( 'AF_INET6' ) ) {
+			$this->log( 'GEOIP (geoip_country_id_by_addr_v6): PHP was compiled with --disable-ipv6 option' );
+			return false;
+		}
 		$ipnum = inet_pton( $addr );
 		return $this->_geoip_seek_country_v6( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
 	}

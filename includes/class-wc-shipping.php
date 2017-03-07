@@ -66,7 +66,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -238,7 +238,7 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		$this->shipping_total = null;
+		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->packages       = array();
 
@@ -296,7 +296,7 @@ class WC_Shipping {
 				}
 
 				// Store total costs
-				if ( $chosen_method ) {
+				if ( $chosen_method && isset( $package['rates'][ $chosen_method ] ) ) {
 					$rate = $package['rates'][ $chosen_method ];
 
 					// Merge cost and taxes - label and ID will be the same
@@ -393,7 +393,7 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
-		$this->shipping_total = null;
+		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->packages = array();
 	}
@@ -402,7 +402,7 @@ class WC_Shipping {
 	 * @deprecated 2.6.0 Was previously used to determine sort order of methods, but this is now controlled by zones and thus unused.
 	 */
 	public function sort_shipping_methods() {
-		_deprecated_function( 'sort_shipping_methods', '2.6', '' );
+		wc_deprecated_function( 'sort_shipping_methods', '2.6' );
 		return $this->shipping_methods;
 	}
 }

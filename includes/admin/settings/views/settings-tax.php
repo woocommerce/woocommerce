@@ -4,12 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-return apply_filters( 'woocommerce_tax_settings', array(
+$settings = array(
 
-	array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
+	array( 'title' => __( 'Tax options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
 	array(
-		'title'    => __( 'Prices Entered With Tax', 'woocommerce' ),
+		'title'    => __( 'Prices entered with tax', 'woocommerce' ),
 		'id'       => 'woocommerce_prices_include_tax',
 		'default'  => 'no',
 		'type'     => 'radio',
@@ -21,7 +21,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'    => __( 'Calculate Tax Based On', 'woocommerce' ),
+		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
 		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => 'shipping',
@@ -34,15 +34,15 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		),
 	),
 
-	array(
-		'title'    => __( 'Shipping Tax Class', 'woocommerce' ),
+	'shipping-tax-class' => array(
+		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
 		'css'      => 'min-width:150px;',
-		'default'  => '',
+		'default'  => 'inherit',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
-		'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
+		'options'  => array_merge( array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ), wc_get_product_tax_class_options() ),
 		'desc_tip' => true,
 	),
 
@@ -55,16 +55,16 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Additional Tax Classes', 'woocommerce' ),
-		'desc_tip'    => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard Rate".', 'woocommerce' ),
+		'title'   => __( 'Additional tax classes', 'woocommerce' ),
+		'desc_tip'    => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard rate".', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_classes',
 		'css'     => 'width:100%; height: 65px;',
 		'type'    => 'textarea',
-		'default' => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL ),
+		'default' => sprintf( __( 'Reduced rate%sZero rate', 'woocommerce' ), PHP_EOL ),
 	),
 
 	array(
-		'title'   => __( 'Display Prices in the Shop', 'woocommerce' ),
+		'title'   => __( 'Display prices in the shop', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_shop',
 		'default' => 'excl',
 		'type'    => 'select',
@@ -76,7 +76,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Prices During Cart and Checkout', 'woocommerce' ),
+		'title'   => __( 'Display prices during cart and checkout', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_cart',
 		'default' => 'excl',
 		'type'    => 'select',
@@ -89,7 +89,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'       => __( 'Price Display Suffix', 'woocommerce' ),
+		'title'       => __( 'Price display suffix', 'woocommerce' ),
 		'id'          => 'woocommerce_price_display_suffix',
 		'default'     => '',
 		'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -98,7 +98,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Tax Totals', 'woocommerce' ),
+		'title'   => __( 'Display tax totals', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_total_display',
 		'default' => 'itemized',
 		'type'    => 'select',
@@ -112,4 +112,10 @@ return apply_filters( 'woocommerce_tax_settings', array(
 
 	array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
-) );
+);
+
+if ( ! wc_shipping_enabled() ) {
+	unset( $settings['shipping-tax-class'] );
+}
+
+return apply_filters( 'woocommerce_tax_settings', $settings );

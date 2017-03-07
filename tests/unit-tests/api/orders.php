@@ -30,9 +30,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v1/orders', $routes );
-		$this->assertArrayHasKey( '/wc/v1/orders/batch', $routes );
-		$this->assertArrayHasKey( '/wc/v1/orders/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/orders', $routes );
+		$this->assertArrayHasKey( '/wc/v2/orders/batch', $routes );
+		$this->assertArrayHasKey( '/wc/v2/orders/(?P<id>[\d]+)', $routes );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			$this->orders[] = WC_Helper_Order::create_order( $this->user );
 		}
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/orders' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
 		$orders   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -73,7 +73,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
 		$this->orders[] = WC_Helper_Order::create_order();
-		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/orders' ) );
+		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
 		$this->stoppit_and_tidyup();
 	}
@@ -86,7 +86,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$order          = WC_Helper_Order::create_order();
 		$this->orders[] = $order;
-		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/orders/' . $order->get_id() ) );
+		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
 		$data           = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -102,7 +102,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		$order          = WC_Helper_Order::create_order();
 		$this->orders[] = $order;
-		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/orders/' . $order->get_id() ) );
+		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 		$this->stoppit_and_tidyup();
 	}
@@ -113,7 +113,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_invalid_id() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/orders/99999999' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/99999999' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
@@ -124,7 +124,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_create_order() {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
 		$request->set_body_params( array(
 			'payment_method' => 'bacs',
 			'payment_method_title' => 'Direct Bank Transfer',
@@ -160,7 +160,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'shipping_lines' => array(
 				array(
 					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat Rate',
+					'method_title' => 'Flat rate',
 					'total'        => 10,
 				),
 			),
@@ -207,7 +207,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// non-existant customer
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
 		$request->set_body_params( array(
 			'payment_method'       => 'bacs',
 			'payment_method_title' => 'Direct Bank Transfer',
@@ -244,7 +244,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'shipping_lines' => array(
 				array(
 					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat Rate',
+					'method_title' => 'Flat rate',
 					'total'        => 10,
 				),
 			),
@@ -262,7 +262,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_update_order() {
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/' . $order->get_id() );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_body_params( array(
 			'payment_method' => 'test-update',
 			'billing' => array(
@@ -288,7 +288,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_update_order_without_permission() {
 		wp_set_current_user( 0 );
 		$order = WC_Helper_Order::create_order();
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/' . $order->get_id() );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_body_params( array(
 			'payment_method' => 'test-update',
 			'billing' => array(
@@ -306,7 +306,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_invalid_id() {
 		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/999999' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/999999' );
 		$request->set_body_params( array(
 			'payment_method' => 'test-update',
 			'billing' => array(
@@ -325,7 +325,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_delete_order() {
 		wp_set_current_user( $this->user );
 		$order    = WC_Helper_Order::create_order();
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/orders/' . $order->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -339,7 +339,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
 		$order    = WC_Helper_Order::create_order();
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/orders/' . $order->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
@@ -353,7 +353,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_invalid_id() {
 		wp_set_current_user( $this->user );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v1/orders/9999999' );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/9999999' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
@@ -369,7 +369,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order2 = WC_Helper_Order::create_order();
 		$order3 = WC_Helper_Order::create_order();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders/batch' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/batch' );
 		$request->set_body_params( array(
 			'update' => array(
 				array(
@@ -389,7 +389,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order2->get_id(), $data['delete'][0]['id'] );
 		$this->assertEquals( $order3->get_id(), $data['delete'][1]['id'] );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v1/orders' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v2/orders' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 1, count( $data ) );
@@ -406,7 +406,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_order_schema() {
 		wp_set_current_user( $this->user );
 		$order      = WC_Helper_Order::create_order();
-		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v1/orders/' . $order->get_id() );
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/orders/' . $order->get_id() );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];

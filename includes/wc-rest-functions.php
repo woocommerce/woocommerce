@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
  *
- * Requered WP 4.4 or later.
+ * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since 2.6.0
@@ -25,6 +25,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
 function wc_rest_prepare_date_response( $date ) {
+	if ( false === strpos( $date, '-' ) ) {
+		$date = date( 'Y-m-d H:i:s', $date );
+	}
+
 	// Check if mysql_to_rfc3339 exists first!
 	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
 		return null;

@@ -93,6 +93,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		}
 
 		if ( $total > $limit ) {
+			/* translators: %s: items limit */
 			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
 		}
 
@@ -167,6 +168,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		if ( ! empty( $items['delete'] ) ) {
 			foreach ( $items['delete'] as $id ) {
+				$id = (int) $id;
+
+				if ( 0 === $id ) {
+					continue;
+				}
+
 				$_item = new WP_REST_Request( 'DELETE' );
 				$_item->set_query_params( array( 'id' => $id, 'force' => true ) );
 				$_response = $this->delete_item( $_item );
@@ -320,6 +327,24 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Add meta query.
+	 *
+	 * @since 2.7.0
+	 * @param array $args       Query args.
+	 * @param array $meta_query Meta query.
+	 * @return array
+	 */
+	protected function add_meta_query( $args, $meta_query ) {
+		if ( ! empty( $args['meta_query'] ) ) {
+			$args['meta_query'] = array();
+		}
+
+		$args['meta_query'][] = $meta_query;
+
+		return $args['meta_query'];
+	}
+
+	/**
 	 * Get the batch schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -334,16 +359,25 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'description' => __( 'List of created resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'object',
+					),
 				),
 				'update' => array(
 					'description' => __( 'List of updated resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'object',
+					),
 				),
 				'delete' => array(
 					'description' => __( 'List of delete resources.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'integer',
+					),
 				),
 			),
 		);

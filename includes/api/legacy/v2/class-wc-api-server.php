@@ -466,7 +466,7 @@ class WC_API_Server {
 					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 					'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
 					'links'              => array(
-						'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
+						'help' => 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
 					),
 				),
 			),
@@ -704,9 +704,17 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param int|string $timestamp unix timestamp or MySQL datetime
 	 * @param bool $convert_to_utc
+	 * @param bool $convert_to_gmt Use GMT timezone.
 	 * @return string RFC3339 datetime
 	 */
-	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+	public function format_datetime( $timestamp, $convert_to_utc = false, $convert_to_gmt = false ) {
+		if ( $convert_to_gmt ) {
+			if ( is_numeric( $timestamp ) ) {
+				$timestamp = date( 'Y-m-d H:i:s', $timestamp );
+			}
+
+			$timestamp = get_gmt_from_date( $timestamp );
+		}
 
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );

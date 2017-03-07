@@ -18,7 +18,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Addons {
 
 	/**
+	 * Get featured for the addons screen
+	 *
+	 * @return array of objects
+	 */
+	public static function get_featured() {
+		if ( false === ( $featured = get_transient( 'wc_addons_featured' ) ) ) {
+			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			if ( ! is_wp_error( $raw_featured ) ) {
+				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
+				if ( $featured ) {
+					set_transient( 'wc_addons_featured', $featured, WEEK_IN_SECONDS );
+				}
+			}
+		}
+
+		if ( is_object( $featured ) ) {
+			self::output_featured_sections( $featured->sections );
+			return $featured;
+		}
+	}
+
+	/**
 	 * Get sections for the addons screen
+	 *
 	 * @return array of objects
 	 */
 	public static function get_sections() {
@@ -124,6 +147,216 @@ class WC_Admin_Addons {
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
 	}
+
+	/**
+	 * Handles the outputting of a banner block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_banner_block( $block ) {
+		?>
+		<div class="addons-banner-block">
+			<h1><?php echo esc_html( $block->title ); ?></h1>
+			<p><?php echo esc_html( $block->description ); ?></p>
+			<div class="addons-banner-block-items">
+				<?php foreach ( $block->items as $item ) : ?>
+					<div class="addons-banner-block-item">
+						<div class="addons-banner-block-item-icon">
+							<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+						</div>
+						<div class="addons-banner-block-item-content">
+							<h3><?php echo esc_html( $item->title ); ?></h3>
+							<p><?php echo esc_html( $item->description ); ?></p>
+							<?php
+								self::output_button(
+									$item->href,
+									$item->button,
+									'addons-button-solid',
+									$item->plugin
+								);
+							?>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of a column.
+	 *
+	 * @param object $block
+	 */
+	public static function output_column( $block ) {
+		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
+			?>
+			<div class="addons-column-section">
+			<?php
+		}
+		if ( 'column_start' === $block->module ) {
+			?>
+			<div class="addons-column">
+			<?php
+		} else {
+			?>
+			</div>
+			<?php
+		}
+		if ( isset( $block->container ) && 'column_container_end' === $block->container ) {
+			?>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Handles the outputting of a column block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_column_block( $block ) {
+		?>
+		<div class="addons-column-block">
+			<h1><?php echo esc_html( $block->title ); ?></h1>
+			<p><?php echo esc_html( $block->description ); ?></p>
+			<?php foreach ( $block->items as $item ) : ?>
+				<div class="addons-column-block-item">
+					<div class="addons-column-block-item-icon">
+						<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+					</div>
+
+					<div class="addons-column-block-item-content">
+						<h2><?php echo esc_html( $item->title ); ?></h2>
+						<?php
+							self::output_button(
+								$item->href,
+								$item->button,
+								'addons-button-solid',
+								$item->plugin
+							);
+						?>
+						<p><?php echo esc_html( $item->description ); ?></p>
+
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of a small light block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_small_light_block( $block ) {
+		?>
+		<div class="addons-small-light-block">
+			<img class="addons-img" src="<?php echo esc_url( $block->image ) ?>" />
+			<div class="addons-small-light-block-content">
+				<h1><?php echo esc_html( $block->title ); ?></h1>
+				<p><?php echo esc_html( $block->description ); ?></p>
+				<div class="addons-small-light-block-buttons">
+					<?php foreach ( $block->buttons as $button ) : ?>
+						<?php
+							self::output_button(
+								$button->href,
+								$button->text,
+								'addons-button-solid'
+							);
+						?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of a small dark block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_small_dark_block( $block ) {
+		?>
+		<div class="addons-small-dark-block">
+			<h1><?php echo esc_html( $block->title ); ?></h1>
+			<p><?php echo esc_html( $block->description ); ?></p>
+			<div class="addons-small-dark-items">
+				<?php foreach ( $block->items as $item ) : ?>
+					<div class="addons-small-dark-item">
+						<?php if ( ! empty( $item->image ) ) : ?>
+							<div class="addons-small-dark-item-icon">
+								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+							</div>
+						<?php endif; ?>
+						<?php
+							self::output_button(
+								$item->href,
+								$item->button,
+								'addons-button-outline-white'
+							);
+						?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of featured sections
+	 *
+	 * @param array $sections
+	 */
+	public static function output_featured_sections( $sections ) {
+		foreach ( $sections as $section ) {
+			switch ( $section->module ) {
+				case 'banner_block':
+					self::output_banner_block( $section );
+					break;
+				case 'column_start':
+					self::output_column( $section );
+					break;
+				case 'column_end':
+					self::output_column( $section );
+					break;
+				case 'column_block':
+					self::output_column_block( $section );
+					break;
+				case 'small_light_block':
+					self::output_small_light_block( $section );
+					break;
+				case 'small_dark_block':
+					self::output_small_dark_block( $section );
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Outputs a button.
+	 *
+	 * @param string $url
+	 * @param string $text
+	 * @param string $theme
+	 * @param string $plugin
+	 */
+	public static function output_button( $url, $text, $theme, $plugin = '' ) {
+		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
+		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
+		$text = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
+		?>
+		<a
+			class="addons-button <?php echo esc_attr( $theme ); ?>"
+			href="<?php echo esc_url( $url ); ?>">
+			<?php echo esc_html( $text ); ?>
+		</a>
+		<?php
+	}
+
 
 	/**
 	 * Handles output of the addons page in admin.
