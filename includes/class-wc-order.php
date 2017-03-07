@@ -116,7 +116,7 @@ class WC_Order extends WC_Abstract_Order {
 				if ( ! $this->get_date_paid( 'edit' ) ) {
 					$this->set_date_paid( current_time( 'timestamp' ) );
 				}
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) );
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
@@ -254,7 +254,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param $date_paid What to set date paid to. Defaults to current time.
 	 */
 	public function maybe_set_date_paid( $date_paid = '' ) {
-		$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() );
+		$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this );
 
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( $payment_complete_status ) ) {
 			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
