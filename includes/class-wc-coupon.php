@@ -561,7 +561,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
-		$this->set_prop( 'limit_usage_to_x_items', $limit_usage_to_x_items );
+		$this->set_prop( 'limit_usage_to_x_items', absint( $limit_usage_to_x_items ) );
 	}
 
 	/**

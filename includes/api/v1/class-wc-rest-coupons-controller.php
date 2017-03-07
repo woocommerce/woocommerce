@@ -152,7 +152,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
-		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
+		$format_null    = array( 'usage_limit', 'usage_limit_per_user' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
