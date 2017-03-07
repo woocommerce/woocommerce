@@ -113,8 +113,10 @@ class WC_Order extends WC_Abstract_Order {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) );
-				$this->maybe_set_date_paid();
+				if ( ! $this->get_date_paid( 'edit' ) ) {
+					$this->set_date_paid( current_time( 'timestamp' ) );
+				}
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
@@ -243,7 +245,9 @@ class WC_Order extends WC_Abstract_Order {
 	 * Maybe set date paid.
 	 *
 	 * Sets the date paid variable when transitioning to the payment complete
-	 * order status. This is either processing or completed.
+	 * order status. This is either processing or completed. This is not filtered
+	 * to avoid infinite loops e.g. if loading an order via the filter.
+	 *
 	 * Date paid is set once in this manner - only when it is not already set.
 	 * This ensures the data exists even if a gateway does not use the
 	 * `payment_complete` method.
@@ -252,9 +256,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param $date_paid What to set date paid to. Defaults to current time.
 	 */
 	public function maybe_set_date_paid( $date_paid = '' ) {
-		$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() );
-
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( $payment_complete_status ) ) {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
 			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
 		}
 	}
