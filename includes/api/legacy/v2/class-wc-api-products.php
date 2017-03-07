@@ -676,10 +676,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get standard product data that applies to every product type
 	 *
 	 * @since 2.1
-	 * @param WC_Product $product
+	 * @param WC_Product|int $product
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
+		if ( is_numeric( $product ) ) {
+			$product = wc_get_product( $product );
+		}
+
 		$prices_precision = wc_get_price_decimals();
 		return array(
 			'title'              => $product->get_name(),
