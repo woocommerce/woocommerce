@@ -1713,30 +1713,30 @@ class WC_Cart {
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
 	 */
 	public function add_discount( $coupon_code ) {
-		// Coupons are globally disabled
+		// Coupons are globally disabled.
 		if ( ! wc_coupons_enabled() ) {
 			return false;
 		}
 
-		// Sanitize coupon code
+		// Sanitize coupon code.
 		$coupon_code = wc_format_coupon_code( $coupon_code );
 
-		// Get the coupon
+		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
-		// Check it can be used with cart
+		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
 			wc_add_notice( $the_coupon->get_error_message(), 'error' );
 			return false;
 		}
 
-		// Check if applied
+		// Check if applied.
 		if ( $this->has_discount( $coupon_code ) ) {
 			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
 			return false;
 		}
 
-		// If its individual use then remove other coupons
+		// If its individual use then remove other coupons.
 		if ( $the_coupon->get_individual_use() ) {
 			$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
 
@@ -1754,14 +1754,14 @@ class WC_Cart {
 			}
 		}
 
-		// Check to see if an individual use coupon is set
+		// Check to see if an individual use coupon is set.
 		if ( $this->applied_coupons ) {
 			foreach ( $this->applied_coupons as $code ) {
 				$coupon = new WC_Coupon( $code );
 
 				if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
 
-					// Reject new coupon
+					// Reject new coupon.
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
 
 					return false;
@@ -1771,7 +1771,7 @@ class WC_Cart {
 
 		$this->applied_coupons[] = $coupon_code;
 
-		// Choose free shipping
+		// Choose free shipping.
 		if ( $the_coupon->get_free_shipping() ) {
 			$packages = WC()->shipping->get_packages();
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
