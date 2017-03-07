@@ -113,8 +113,10 @@ class WC_Order extends WC_Abstract_Order {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
+				if ( ! $this->get_date_paid( 'edit' ) ) {
+					$this->set_date_paid( current_time( 'timestamp' ) );
+				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) );
-				$this->maybe_set_date_paid();
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
