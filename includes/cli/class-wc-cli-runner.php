@@ -55,7 +55,7 @@ class WC_CLI_Runner {
 		// Loop through all of our endpoints and register any valid WC endpoints.
 		foreach ( $response_data['routes'] as $route => $route_data ) {
 			// Only register endpoints for WC and our target version.
-			if ( '/wc/' . self::$target_rest_version !== substr( $route, 0, 4 + strlen( self::$target_rest_version ) ) ) {
+			if ( substr( $route, 0, 4 + strlen( self::$target_rest_version ) ) !== '/wc/' . self::$target_rest_version ) {
 				continue;
 			}
 
