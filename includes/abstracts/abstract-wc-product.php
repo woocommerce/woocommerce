@@ -1827,9 +1827,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				'{price_including_tax}' => wc_price( wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
 				'{price_excluding_tax}' => wc_price( wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
 			);
-			$html = str_replace( array_keys( $replacements ), array_values( $replacements ), ' <small class ="woocommerce-price-suffix">' . wp_kses_post( $suffix ) . '</small>' );
+			$html = str_replace( array_keys( $replacements ), array_values( $replacements ), ' <small class="woocommerce-price-suffix">' . wp_kses_post( $suffix ) . '</small>' );
 		}
-		return apply_filters( 'woocommerce_get_price_suffix', $html, $this );
+		return apply_filters( 'woocommerce_get_price_suffix', $html, $this, $price, $qty );
 	}
 
 	/**
