@@ -1738,7 +1738,19 @@ class WC_Cart {
 
 		// If its individual use then remove other coupons
 		if ( $the_coupon->get_individual_use() ) {
-			$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
+			$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
+
+			foreach ( $this->applied_coupons as $applied_coupon ) {
+				$keep_key = array_search( $applied_coupon, $coupons_to_keep );
+				if ( false !== $keep_key ) {
+					$this->remove_coupon( $applied_coupon );
+					unset( $coupons_to_keep[ $keep_key ] );
+				}
+			}
+
+			if ( ! empty( $coupons_to_keep ) ) {
+				$this->applied_coupons += $coupons_to_keep;
+			}
 		}
 
 		if ( $this->applied_coupons ) {
