@@ -1736,21 +1736,6 @@ class WC_Cart {
 			return false;
 		}
 
-		// Check to see if an individual use coupon is set
-		if ( $this->applied_coupons ) {
-			foreach ( $this->applied_coupons as $code ) {
-				$coupon = new WC_Coupon( $code );
-
-				if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
-
-					// Reject new coupon
-					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
-
-					return false;
-				}
-			}
-		}
-
 		// If its individual use then remove other coupons
 		if ( $the_coupon->get_individual_use() ) {
 			$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
@@ -1766,6 +1751,21 @@ class WC_Cart {
 
 			if ( ! empty( $coupons_to_keep ) ) {
 				$this->applied_coupons += $coupons_to_keep;
+			}
+		}
+
+		// Check to see if an individual use coupon is set
+		if ( $this->applied_coupons ) {
+			foreach ( $this->applied_coupons as $code ) {
+				$coupon = new WC_Coupon( $code );
+
+				if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
+
+					// Reject new coupon
+					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
+
+					return false;
+				}
 			}
 		}
 

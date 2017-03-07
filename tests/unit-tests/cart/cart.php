@@ -645,7 +645,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupons = WC()->cart->get_coupons();
 
 		$this->assertEquals( count( $coupons ), 1 );
-		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
+		$this->assertEquals( 'code2', reset( $coupons )->get_code() );
 
 		// Clean up
 		WC()->cart->empty_cart();
