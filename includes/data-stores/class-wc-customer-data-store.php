@@ -56,6 +56,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'shipping_last_name',
 		'wptests_capabilities',
 		'wptests_user_level',
+		'_order_count',
+		'_money_spent',
 	);
 
 	/**
