@@ -864,6 +864,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $set_to, $object->get_billing_phone() );
 	}
 
+	/**
+	 * Test: Setting/getting billing settings after an order is saved
+	 */
 	function test_set_billing_after_save() {
 		$object = new WC_Order();
 		$phone = '123456678';
@@ -966,6 +969,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $set_to, $object->get_shipping_country() );
 	}
 
+	/**
+	 * Test: Setting/getting shipping settings after an order is saved
+	 */
 	function test_set_shipping_after_save() {
 		$object = new WC_Order();
 		$country = 'US';

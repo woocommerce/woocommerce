@@ -274,6 +274,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
 
+	/**
+	 * Test applying changes
+	 */
 	function test_apply_changes() {
 		$data = array(
 			'prop1' => 'value1',
@@ -299,6 +302,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEmpty( $new_changes );
 	}
 
+	/**
+	 * Test applying changes with a nested array
+	 */
 	function test_apply_changes_nested() {
 		$data = array(
 			'prop1' => 'value1',
