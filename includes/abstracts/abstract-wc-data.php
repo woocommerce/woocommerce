@@ -589,6 +589,28 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Sets a date prop whilst handling formatting and datatime objects.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param string|integer $value Value of the prop.
+	 */
+	protected function set_date_prop( $prop, $value ) {
+		try {
+			if ( empty( $value ) ) {
+				$datetime = null;
+			} elseif ( is_numeric( $value ) ) {
+				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			} else {
+				$datetime = new WC_DateTime( $value, new DateTimeZone( wc_timezone_string() ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			}
+			$this->set_prop( $prop, $datetime );
+		} catch ( Exception $e ) {}
+	}
+
+	/**
 	 * When invalid data is found, throw an exception unless reading from the DB.
 	 *
 	 * @throws WC_Data_Exception
