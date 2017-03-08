@@ -228,13 +228,15 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function increase_usage_count( &$coupon, $used_by = '' ) {
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count( 'edit' ) );
+		$new_count = $this->increase_usage_count_meta( $coupon );
 		if ( $used_by ) {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 		}
+		return $new_count;
 	}
 
 	/**
@@ -243,10 +245,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count() );
+		$new_count = $this->decrease_usage_count_meta( $coupon );
 		if ( $used_by ) {
 			/**
 			 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes.
@@ -258,6 +261,45 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 			}
 		}
+		return $new_count;
+	}
+
+	/**
+	 * Increase coupon usage count post meta.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Coupon
+	 * @return int New usage count
+	 */
+	private function increase_usage_count_meta( &$coupon ) {
+		global $wpdb;
+		$id = $coupon->get_id();
+		$new_count = $coupon->get_usage_count( 'edit' ) + 1;
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value + 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
+		if ( ! $updated ) {
+			add_post_meta( $id, 'usage_count', $new_count, true );
+		}
+
+		return $new_count;
+	}
+
+	/**
+	 * Decrease coupon usage count post meta.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Coupon
+	 * @return int New usage count
+	 */
+	private function decrease_usage_count_meta( &$coupon ) {
+		global $wpdb;
+		$id = $coupon->get_id();
+		$new_count = $coupon->get_usage_count( 'edit' ) - 1;
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value - 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
+		if ( ! $updated ) {
+			add_post_meta( $id, 'usage_count', $new_count, true );
+		}
+
+		return $new_count;
 	}
 
 	/**
