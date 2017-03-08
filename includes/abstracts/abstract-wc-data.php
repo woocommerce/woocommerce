@@ -550,7 +550,14 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 */
 	public function apply_changes() {
-		$this->data = array_merge( $this->data, $this->changes );
+		foreach ( $this->changes as $key => $change ) {
+			if ( is_array( $change ) ) {
+				$this->data[ $key ] = array_key_exists( $key, $this->data ) ? array_merge( $this->data[ $key ], $change ) : $change;
+			} else {
+				$this->data[ $key ] = $change;
+			}
+		}
+
 		$this->changes = array();
 	}
 
