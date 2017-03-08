@@ -273,4 +273,48 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->update_meta_data( 'test_field_0', 'another field 2' );
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
+
+	/**
+	 * Test protected method set_date_prop by testing a order date setter.
+	 */
+	function test_set_date_prop() {
+		$object = new WC_Order();
+
+		// Change timezone in WP.
+		update_option( 'gmt_offset', -4 );
+
+		// Set date to a UTC timestamp and expect a valid UTC timestamp back.
+		$object->set_date_created( 1488979186 );
+		$this->assertEquals( 1488979186, $object->get_date_created()->getTimestamp() );
+
+		// Set date to a string without timezone info. This will be assumed in local timezone and thus should match the offset timestamp.
+		$object->set_date_created( '2017-01-02' );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+		$this->assertEquals( '2017-01-02 00:00:00', date( 'Y-m-d H:i:s', $object->get_date_created()->getOffsetTimestamp() ) );
+
+		// Date time with no timezone.
+		$object->set_date_created( '2017-01-02T00:00' );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+		$this->assertEquals( '2017-01-02 00:00:00', date( 'Y-m-d H:i:s', $object->get_date_created()->getOffsetTimestamp() ) );
+
+		// ISO 8601 date time with offset.
+		$object->set_date_created( '2017-01-01T20:00:00-04:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', date( 'Y-m-d H:i:s', $object->get_date_created()->getOffsetTimestamp() ) );
+
+		// ISO 8601 date time different offset to site timezone.
+		$object->set_date_created( '2017-01-01T16:00:00-08:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', date( 'Y-m-d H:i:s', $object->get_date_created()->getOffsetTimestamp() ) );
+
+		// ISO 8601 date time in UTC.
+		$object->set_date_created( '2017-01-02T00:00:00+00:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', date( 'Y-m-d H:i:s', $object->get_date_created()->getOffsetTimestamp() ) );
+
+		// Restore default.
+		update_option( 'gmt_offset', 0 );
+	}
 }
