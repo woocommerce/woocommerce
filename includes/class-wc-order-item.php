@@ -181,10 +181,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_formatted_meta_data( $hideprefix = '_' ) {
-		$formatted_meta = array();
-		$meta_data      = $this->get_meta_data();
+		$formatted_meta    = array();
+		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
-		$product = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
 			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
