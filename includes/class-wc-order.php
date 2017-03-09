@@ -253,11 +253,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * `payment_complete` method.
 	 *
 	 * @since 2.7.0
-	 * @param $date_paid What to set date paid to. Defaults to current time.
 	 */
-	public function maybe_set_date_paid( $date_paid = '' ) {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
-			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
+	public function maybe_set_date_paid() {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
 
@@ -729,7 +728,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_date_paid( $context = 'view' ) {
-		return $this->get_prop( 'date_paid', $context );
+		$date_paid = $this->get_prop( 'date_paid', $context );
+
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '2.7', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			// In view context, return a date if missing.
+			$date_paid = $this->get_date_created( 'edit' )
+		}
+		return $date_paid;
 	}
 
 	/**

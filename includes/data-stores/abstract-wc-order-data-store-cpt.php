@@ -100,21 +100,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		/**
 		 * In older versions, discounts may have been stored differently.
 		 * Update them now so if the object is saved, the correct values are
-		 * stored.
-		 * @todo When/if meta is flattened, handle this in the migration script.
+		 * stored. @todo When meta is flattened, handle this during migration.
 		 */
-		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) ) {
-			if ( $order->get_prices_include_tax( 'edit' ) ) {
-				$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
-			}
-		}
-
-		/**
-		 * In older versions, paid date may not have been set.
-		 * @todo When/if meta is flattened, handle this in the migration script.
-		 */
-		if ( ! $order->get_version( 'edit' ) || version_compare( $order->get_version( 'edit' ), '2.7', '<' ) ) {
-			$order->maybe_set_date_paid( $order->get_date_created( 'edit' ) );
+		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
+			$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
 		}
 	}
 
@@ -248,6 +237,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
 
