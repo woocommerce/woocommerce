@@ -44,4 +44,26 @@ class WC_DateTime extends DateTime {
 	public function getOffsetTimestamp() {
 		return $this->getTimestamp() + $this->getOffset();
 	}
+
+	/**
+	 * Format a date based on the offset timestamp.
+	 *
+	 * @since  2.7.0
+	 * @param  string $format
+	 * @return string
+	 */
+	public function date( $format ) {
+		return gmdate( $format, $this->getOffsetTimestamp() );
+	}
+
+	/**
+	 * Return a localised date based on offset timestamp. Wrapper for date_i18n function.
+	 *
+	 * @since  2.7.0
+	 * @param  string $format
+	 * @return string
+	 */
+	public function date_i18n( $format = 'Y-m-d' ) {
+		return date_i18n( $format, $this->getOffsetTimestamp() );
+	}
 }
