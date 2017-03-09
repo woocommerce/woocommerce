@@ -732,7 +732,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '2.7', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
 			// In view context, return a date if missing.
-			$date_paid = $this->get_date_created( 'edit' )
+			$date_paid = $this->get_date_created( 'edit' );
 		}
 		return $date_paid;
 	}
