@@ -550,7 +550,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 */
 	public function apply_changes() {
-		$this->data = array_merge( $this->data, $this->changes );
+		$this->data = array_replace_recursive( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
