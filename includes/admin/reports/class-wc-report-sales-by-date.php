@@ -341,7 +341,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
 
 		// 3rd party filtering of report data
-		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data, $this );
 	}
 
 	/**
@@ -465,7 +465,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 4,
 		);
 
-		return $legend;
+		return apply_filters( 'woocommerce_admin_report_legend', $legend, $this );
 	}
 
 	/**
@@ -479,7 +479,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colours = array(
+		$this->chart_colours = apply_filters( 'woocommerce_admin_report_chart_colours', array(
 			'sales_amount'     => '#b1d4ea',
 			'net_sales_amount' => '#3498db',
 			'average'          => '#b1d4ea',
@@ -489,7 +489,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'shipping_amount'  => '#5cc488',
 			'coupon_amount'    => '#f1c40f',
 			'refund_amount'    => '#e74c3c',
-		);
+		), $this );
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
@@ -571,7 +571,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		// 3rd party filtering of report data
-		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
+		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data, $this );
 
 		// Encode in json format
 		$chart_data = json_encode( array(
