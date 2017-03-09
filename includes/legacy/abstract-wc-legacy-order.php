@@ -133,7 +133,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return int updated order item ID
 	 * @throws WC_Data_Exception
 	 */
-	 public function update_product( $item, $product, $args ) {
+	public function update_product( $item, $product, $args ) {
 		wc_deprecated_function( 'WC_Order::update_product', '2.7', 'an interaction with the WC_Order_Item_Product class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
@@ -499,6 +499,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 			foreach ( $download_files as $download_id => $file ) {
 				$i++;
+				/* translators: 1: current item count */
 				$prefix  = count( $download_files ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
 				$links[] = '<small class="download-url">' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
 			}
@@ -532,6 +533,23 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 */
 	public function get_item_downloads( $item ) {
 		wc_deprecated_function( 'get_item_downloads', '2.7', 'WC_Order_Item_Product::get_item_downloads' );
+
+		if ( ! $item instanceof WC_Order_Item ) {
+			if ( ! empty( $item['variation_id'] ) ) {
+				$product_id = $item['variation_id'];
+			} elseif ( ! empty( $item['product_id'] ) ) {
+				$product_id = $item['product_id'];
+			} else {
+				return array();
+			}
+
+			// Create a 'virtual' order item to allow retrieving item downloads when
+			// an array of product_id is passed instead of actual order item.
+			$item = new WC_Order_Item_Product();
+			$item->set_product( wc_get_product( $product_id ) );
+			$item->set_order_id( $this->get_id() );
+		}
+
 		return $item->get_item_downloads();
 	}
 
@@ -614,13 +632,18 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 */
 	public function get_order( $id = 0 ) {
 		wc_deprecated_function( 'get_order', '2.7' );
+
 		if ( ! $id ) {
 			return false;
 		}
-		if ( $result = get_post( $id ) ) {
+
+		$result = get_post( $id );
+
+		if ( $result ) {
 			$this->populate( $result );
 			return true;
 		}
+
 		return false;
 	}
 
