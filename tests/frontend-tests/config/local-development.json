@@ -1,9 +1,0 @@
-{
-  "url": "http://local.wordpress.dev/",
-  "users": {
-    "admin": {
-      "username": "admin",
-      "password": "password"
-    }
-  }
-}
