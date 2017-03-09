@@ -1120,7 +1120,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item = new WC_Order_Item_Fee();
 			$item->set_order_id( $order->get_id() );
-			$item->set_name( sanitize_title( $fee['title'] ) );
+			$item->set_name( wc_clean( $fee['title'] ) );
 			$item->set_total( isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0 );
 
 			// if taxable, tax class and total are required
@@ -1152,7 +1152,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$item = new WC_Order_Item_Fee( $fee['id'] );
 
 			if ( isset( $fee['title'] ) ) {
-				$item->set_name( sanitize_title( $fee['title'] ) );
+				$item->set_name( wc_clean( $fee['title'] ) );
 			}
 
 			if ( isset( $fee['tax_class'] ) ) {
