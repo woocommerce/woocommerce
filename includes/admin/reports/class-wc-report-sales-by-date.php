@@ -583,7 +583,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'shipping_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $data['shipping_amounts'] ) ),
 			'coupon_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $data['coupon_amounts'] ) ),
 			'refund_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $data['refund_amounts'] ) ),
-		) ), $this );
+		) ), $data, $this );
 		?>
 		<div class="chart-container">
 			<div class="chart-placeholder main"></div>
