@@ -454,7 +454,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 			return $this->{"get_{$key}"}();
 		} else {
 			return get_post_meta( $this->get_id(), '_' . $key, true );
-		} // End if().
+		}
 	}
 
 	/**
@@ -534,8 +534,14 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function get_item_downloads( $item ) {
 		wc_deprecated_function( 'get_item_downloads', '2.7', 'WC_Order_Item_Product::get_item_downloads' );
 
-		if ( ! $item instanceof WC_Order_Item && ! empty( $item['product_id'] ) ) {
-			$product_id = $item['product_id'];
+		if ( ! $item instanceof WC_Order_Item ) {
+			if ( ! empty( $item['variation_id'] ) ) {
+				$product_id = $item['variation_id'];
+			} elseif ( ! empty( $item['product_id'] ) ) {
+				$product_id = $item['product_id'];
+			} else {
+				return array();
+			}
 
 			// Create a 'virtual' order item to allow retrieving item downloads when
 			// an array of product_id is passed instead of actual order item.
