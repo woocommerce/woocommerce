@@ -740,7 +740,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 									alignTicksWithAxis: 1,
 									color: 'transparent',
 									font: { color: "#aaa" }
-								}
+								},
+								<?= apply_filters( 'woocommerce_admin_report_chart_yaxes_extra_json', '', $this ) ?>
 							],
 						}
 					);
