@@ -882,8 +882,16 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price        = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty          = (int) $args['qty'] ? $args['qty']               : 1;
+
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$qty   = '' !== $args['qty'] ? max( 0, (int) $args['qty'] ) : 1;
+
+	if ( '' === $price ) {
+		return '';
+	} elseif ( 0 === $qty ) {
+		return 0.0;
+	}
+
 	$line_price   = $price * $qty;
 	$return_price = $line_price;
 
@@ -933,8 +941,15 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		'qty'   => '',
 		'price' => '',
 	) );
-	$price = (float) max( 0, $args['price'] ? $args['price'] : $product->get_price() );
-	$qty   = (int) $args['qty'] ? $args['qty'] : 1;
+
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$qty   = '' !== $args['qty'] ? max( 0, (int) $args['qty'] ) : 1;
+
+	if ( '' === $price ) {
+		return '';
+	} elseif ( 0 === $qty ) {
+		return 0.0;
+	}
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
