@@ -22,8 +22,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @var array
 	 */
 	protected $data = array(
-		'date_created'       => '',
-		'date_modified'      => '',
+		'date_created'       => null,
+		'date_modified'      => null,
 		'email'              => '',
 		'first_name'         => '',
 		'last_name'          => '',
@@ -398,7 +398,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since  2.7.0
 	 * @param  string $context
-	 * @return integer
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
 		return $this->get_prop( 'date_created', $context );
@@ -409,7 +409,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since  2.7.0
 	 * @param  string $context
-	 * @return integer
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
 		return $this->get_prop( 'date_modified', $context );
@@ -740,23 +740,23 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since 2.7.0
-	 * @param integer $timestamp
+	 * @since  2.7.0
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_modified( $timestamp ) {
-		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
 	}
 
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since 2.7.0
-	 * @param integer $timestamp
+	 * @since  2.7.0
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_created( $timestamp ) {
-		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
 	}
 
 	/**
