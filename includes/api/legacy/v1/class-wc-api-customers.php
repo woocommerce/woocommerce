@@ -132,7 +132,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$last_order    = $customer->get_last_order();
 		$customer_data = array(
 			'id'               => $customer->get_id(),
-			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ? $customer->get_date_created()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ? $customer->get_date_created()->getTimestamp() : 0 ), // API gives UTC times.
 			'email'            => $customer->get_email(),
 			'first_name'       => $customer->get_first_name(),
 			'last_name'        => $customer->get_last_name(),
