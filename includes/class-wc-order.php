@@ -114,7 +114,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp' ) );
+					$this->set_date_paid( current_time( 'timestamp', true ) );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -257,7 +257,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function maybe_set_date_paid( $date_paid = '' ) {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
-			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
+			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp', true ) );
 		}
 	}
 
@@ -270,7 +270,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp' ) );
+			$this->set_date_completed( current_time( 'timestamp', true ) );
 		}
 	}
 
