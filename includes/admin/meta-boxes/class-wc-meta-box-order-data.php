@@ -193,13 +193,13 @@ class WC_Meta_Box_Order_Data {
 
 						if ( $order->get_date_paid() ) {
 							/* translators: 1: date 2: time */
-							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
+							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), wc_format_datetime( $order->get_date_paid() ), wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) ) );
 						}
 
 						echo '. ';
 					}
 
-					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
+					if ( $ip_address = $order->get_customer_ip_address() ) {
 						/* translators: %s: IP address */
 						printf(
 							__( 'Customer IP: %s', 'woocommerce' ),

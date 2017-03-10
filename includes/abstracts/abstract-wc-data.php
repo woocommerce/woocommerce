@@ -599,6 +599,8 @@ abstract class WC_Data {
 		try {
 			if ( empty( $value ) ) {
 				$datetime = null;
+			} elseif ( is_a( $value, 'WC_DateTime' ) ) {
+				$datetime = $value;
 			} elseif ( is_numeric( $value ) ) {
 				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
 				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
