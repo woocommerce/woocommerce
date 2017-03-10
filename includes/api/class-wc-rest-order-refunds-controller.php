@@ -179,6 +179,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			$data['fee_lines'], $data['coupon_lines']
 	 	);
 
+		ksort( $data );
+
+		$data    = array_merge( array( 'id' => $object->get_id() ), $data );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
