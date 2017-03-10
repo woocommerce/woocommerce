@@ -88,7 +88,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		parent::read_order_data( $order, $post_object );
-		$id = $order->get_id();
+		$id             = $order->get_id();
+		$date_completed = get_post_meta( $id, '_date_completed', true );
+		$date_paid      = get_post_meta( $id, '_date_paid', true );
+
+		if ( ! $date_completed ) {
+			$date_completed = get_post_meta( $id, '_completed_date', true );
+		}
+
+		if ( ! $date_paid ) {
+			$date_paid = get_post_meta( $id, '_paid_date', true );
+		}
 
 		$order->set_props( array(
 			'order_key'            => get_post_meta( $id, '_order_key', true ),
@@ -119,8 +129,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
 			'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
 			'created_via'          => get_post_meta( $id, '_created_via', true ),
-			'date_completed'       => get_post_meta( $id, '_completed_date', true ),
-			'date_paid'            => get_post_meta( $id, '_paid_date', true ),
+			'date_completed'       => $date_completed,
+			'date_paid'            => $date_paid,
 			'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
 			'customer_note'        => $post_object->post_excerpt,
 		) );
