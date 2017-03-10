@@ -161,9 +161,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
 			'order_key'                 => $order->get_order_key(),
-			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ),
-			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ),
-			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created() ? $order->get_date_created()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified() ? $order->get_date_modified()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed() ? $order->get_date_completed()->getTimestamp() : 0, false, false ), // API gives UTC times.
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -178,7 +178,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => 0 < $order->get_date_paid(),
+				'paid'         => ! is_null( $order->get_date_paid() ),
 			),
 			'billing_address' => array(
 				'first_name' => $order->get_billing_first_name(),
@@ -1589,7 +1589,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( $refund->get_date_created(), false, true ),
+				'created_at' => $this->server->format_datetime( $refund->get_date_created() ? $refund->get_date_created()->getTimestamp() : 0, false, false ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items,

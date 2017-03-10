@@ -139,8 +139,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'currency'             => $order->get_currency(),
 			'version'              => $order->get_version(),
 			'prices_include_tax'   => $order->get_prices_include_tax(),
-			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),
-			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),  // v1 API used UTC.
+			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ), // v1 API used UTC.
 			'customer_id'          => $order->get_customer_id(),
 			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'discount_tax'         => wc_format_decimal( $order->get_discount_tax(), $dp ),
@@ -158,8 +158,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->get_customer_user_agent(),
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed() ),
-			'date_paid'            => $order->get_date_paid() ? wc_rest_prepare_date_response( $order->get_date_paid() ) : '',
+			'date_completed'       => wc_rest_prepare_date_response( is_null( $order->get_date_completed() ) ? null : $order->get_date_completed()->getOffsetTimestamp() ), // v1 API used local time.
+			'date_paid'            => wc_rest_prepare_date_response( is_null( $order->get_date_paid() ) ? null : $order->get_date_paid()->getOffsetTimestamp() ), // v1 API used local time.
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
 			'tax_lines'            => array(),

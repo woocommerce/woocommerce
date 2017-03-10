@@ -206,7 +206,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( $data[ $key ] ) : null;
 		}
 
 		// Format the order status.
