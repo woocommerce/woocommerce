@@ -103,11 +103,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_object_read( true );
 		}
 
-		// Set default status if none were read.
-		if ( ! $this->get_status() ) {
-			$this->set_status( apply_filters( 'woocommerce_default_order_status', 'pending' ) );
-		}
-
 		$this->data_store = WC_Data_Store::load( $this->data_store_name );
 
 		if ( $this->get_id() > 0 ) {
@@ -283,7 +278,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
-		return $this->get_prop( 'status', $context );
+		$status = $this->get_prop( 'status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'woocommerce_default_order_status', 'pending' );
+		}
+		return $status;
 	}
 
 	/**
