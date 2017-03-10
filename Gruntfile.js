@@ -250,6 +250,9 @@ module.exports = function( grunt ) {
 					'php hook-docs.php'
 				].join( '&&' )
 			},
+			frontend_test: {
+				command: 'npm run test:single tests/frontend-tests/' + grunt.option( 'file' )
+			},
 			frontend_tests: {
 				command: 'npm run test'
 			}
@@ -331,5 +334,9 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'frontend-tests', [
 		'shell:frontend_tests'
+	]);
+
+	grunt.registerTask( 'frontend-test', [
+		'shell:frontend_test'
 	]);
 };
