@@ -633,13 +633,13 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the customer was created, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the customer was last modified, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

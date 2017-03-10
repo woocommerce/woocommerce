@@ -137,7 +137,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
-					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the order was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -149,7 +149,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 					'readonly'    => true,
 				),
 				'date_modified_gmt' => array(
-					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the order was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
