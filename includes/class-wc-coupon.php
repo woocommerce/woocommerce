@@ -710,7 +710,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function increase_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->data_store ) {
 			$new_count = $this->data_store->increase_usage_count( $this, $used_by );
-			$this->set_prop( 'usage_count', $new_count );
+
+			// Bypass set_prop and remove pending changes to prevent overwriting usage_count on coupon save.
+			$this->data['usage_count'] = $new_count;
+			if ( isset( $this->changes['usage_count'] ) ) {
+				unset( $this->changes['usage_count'] );
+			}
 		}
 	}
 
@@ -722,7 +727,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function decrease_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->get_usage_count() > 0 && $this->data_store ) {
 			$new_count = $this->data_store->decrease_usage_count( $this, $used_by );
-			$this->set_prop( 'usage_count', $new_count );
+
+			// Bypass set_prop and remove pending changes to prevent overwriting usage_count on coupon save.
+			$this->data['usage_count'] = $new_count;
+			if ( isset( $this->changes['usage_count'] ) ) {
+				unset( $this->changes['usage_count'] );
+			}
 		}
 	}
 
