@@ -20,22 +20,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
- * @since 2.6.0
- * @param string|null|WC_DateTime $date
+ * @since  2.6.0
+ * @param  string|null|WC_DateTime $date
+ * @param  bool Send false to get local/offset time.
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_prepare_date_response( $date ) {
+function wc_rest_prepare_date_response( $date, $utc = true ) {
 	if ( is_numeric( $date ) ) {
-		$date = new WC_DateTime( "@$date" );
+		$date = new WC_DateTime( "@$date", new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
 	} elseif ( is_string( $date ) ) {
-		$date = new WC_DateTime( $date );
+		$date = new WC_DateTime( $date, new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
 	}
 
 	if ( ! is_a( $date, 'WC_DateTime' ) ) {
 		return null;
 	}
 
-	return $date->format( DATE_ATOM );
+	// Get timestamp before changing timezone to UTC.
+	return gmdate( 'Y-m-d\TH:i:s', $utc ? $date->getTimestamp() : $date->getOffsetTimestamp() );
 }
 
 /**

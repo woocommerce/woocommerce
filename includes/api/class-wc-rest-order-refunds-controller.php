@@ -160,7 +160,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+			$datetime              = $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
 
 		// Format line items.
@@ -331,7 +333,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order refund was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order refund was created, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

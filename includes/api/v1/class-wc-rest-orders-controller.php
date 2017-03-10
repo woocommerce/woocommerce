@@ -158,8 +158,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->get_customer_user_agent(),
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( is_null( $order->get_date_completed() ) ? null : $order->get_date_completed()->getOffsetTimestamp() ), // v1 API used local time.
-			'date_paid'            => wc_rest_prepare_date_response( is_null( $order->get_date_paid() ) ? null : $order->get_date_paid()->getOffsetTimestamp() ), // v1 API used local time.
+			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed(), false ), // v1 API used local time.
+			'date_paid'            => wc_rest_prepare_date_response( $order->get_date_paid(), false ), // v1 API used local time.
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
 			'tax_lines'            => array(),
@@ -953,13 +953,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

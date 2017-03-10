@@ -522,9 +522,9 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date.
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time( 'timestamp' );
+			$date = current_time( 'timestamp', true );
 		} else {
-			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
+			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' ) );
 		}
 
 		$props['date_created'] = $date;
