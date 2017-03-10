@@ -194,7 +194,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request     = $request;
-		$data              = array_merge( array( 'id' => $object->get_id() ), $object->get_data() );
+		$data              = $object->get_data();
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
@@ -206,7 +206,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
+			$datetime              = $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
 
 		// Format the order status.
@@ -227,6 +229,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			);
 		}
 
+		ksort( $data );
+
+		$data     = array_merge( array( 'id' => $object->get_id() ), $data );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
@@ -776,8 +781,20 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -993,11 +1010,25 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_completed_gmt' => array(
+					'description' => __( "The date the order was completed, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'date_paid' => array(
 					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_paid_gmt' => array(
+					'description' => __( "The date the order has been paid, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'cart_hash' => array(
 					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),

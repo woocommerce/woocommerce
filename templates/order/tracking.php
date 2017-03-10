@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	echo wp_kses_post( apply_filters( 'woocommerce_order_tracking_status', sprintf(
 		__( 'Order #%1$s was placed on %2$s and is currently %3$s.', 'woocommerce' ),
 		'<mark class="order-number">' . $order->get_order_number() . '</mark>',
-		'<mark class="order-date">' . date_i18n( get_option( 'date_format' ), $order->get_date_created() ) . '</mark>',
+		'<mark class="order-date">' . wc_format_datetime( $order->get_date_created() ) . '</mark>',
 		'<mark class="order-status">' . wc_get_order_status_name( $order->get_status() ) . '</mark>'
 	) ) );
 ?></p>

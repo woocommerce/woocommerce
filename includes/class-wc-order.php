@@ -79,8 +79,8 @@ class WC_Order extends WC_Abstract_Order {
 		'customer_user_agent'  => '',
 		'created_via'          => '',
 		'customer_note'        => '',
-		'date_completed'       => '',
-		'date_paid'            => '',
+		'date_completed'       => null,
+		'date_paid'            => null,
 		'cart_hash'            => '',
 	);
 
@@ -114,7 +114,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp' ) );
+					$this->set_date_paid( current_time( 'timestamp', true ) );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -257,7 +257,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function maybe_set_date_paid( $date_paid = '' ) {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
-			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
+			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp', true ) );
 		}
 	}
 
@@ -270,7 +270,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp' ) );
+			$this->set_date_completed( current_time( 'timestamp', true ) );
 		}
 	}
 
@@ -716,7 +716,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get date_completed.
 	 *
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_completed( $context = 'view' ) {
 		return $this->get_prop( 'date_completed', $context );
@@ -726,7 +726,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get date_paid.
 	 *
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_paid( $context = 'view' ) {
 		return $this->get_prop( 'date_paid', $context );
@@ -1155,21 +1155,21 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date_completed.
 	 *
-	 * @param string $timestamp
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_completed( $timestamp ) {
-		$this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_completed( $date = null ) {
+		$this->set_date_prop( 'date_completed', $date );
 	}
 
 	/**
 	 * Set date_paid.
 	 *
-	 * @param string $timestamp
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_paid( $timestamp ) {
-		$this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_paid( $date = null ) {
+		$this->set_date_prop( 'date_paid', $date );
 	}
 
 	/**

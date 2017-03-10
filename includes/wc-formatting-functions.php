@@ -1023,3 +1023,21 @@ function wc_format_dimensions( $dimensions ) {
 
 	return apply_filters( 'woocommerce_format_dimensions', $dimension_string, $dimensions );
 }
+
+/**
+ * Format a date for output.
+ *
+ * @since  2.7.0
+ * @param  WC_DateTime $date
+ * @param  string $format Defaults to the wc_date_format function if not set.
+ * @return string
+ */
+function wc_format_datetime( $date, $format = '' ) {
+	if ( ! $format ) {
+		$format = wc_date_format();
+	}
+	if ( ! is_a( $date, 'WC_DateTime' ) ) {
+		return '';
+	}
+	return $date->date_i18n( $format );
+}
