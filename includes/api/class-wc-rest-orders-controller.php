@@ -192,35 +192,35 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
-		$item              = $object->get_data();
+		$data              = $object->get_data();
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
-			$item[ $key ] = wc_format_decimal( $item[ $key ], $this->request['dp'] );
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 		}
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$datetime              = $item[ $key ];
-			$item[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
-			$item[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
+			$datetime              = $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
 
 		// Format the order status.
-		$item['status'] = 'wc-' === substr( $item['status'], 0, 3 ) ? substr( $item['status'], 3 ) : $item['status'];
+		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
 
 		// Format line items.
 		foreach ( $format_line_items as $key ) {
-			$item[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $item[ $key ] ) );
+			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
 		// Refunds.
-		$item['refunds'] = array();
+		$data['refunds'] = array();
 		foreach ( $object->get_refunds() as $refund ) {
-			$item['refunds'][] = array(
+			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
 				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
 				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
@@ -229,46 +229,46 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		return array(
 			'id'                   => $object->get_id(),
-			'parent_id'            => $item['parent_id'],
-			'number'               => $item['number'],
-			'order_key'            => $item['order_key'],
-			'created_via'          => $item['created_via'],
-			'version'              => $item['version'],
-			'status'               => $item['status'],
-			'currency'             => $item['currency'],
-			'date_created'         => $item['date_created'],
-			'date_created_gmt'     => $item['date_created_gmt'],
-			'date_modified'        => $item['date_modified'],
-			'date_modified_gmt'    => $item['date_modified_gmt'],
-			'discount_total'       => $item['discount_total'],
-			'discount_tax'         => $item['discount_tax'],
-			'shipping_total'       => $item['shipping_total'],
-			'shipping_tax'         => $item['shipping_tax'],
-			'cart_tax'             => $item['cart_tax'],
-			'total'                => $item['total'],
-			'total_tax'            => $item['total_tax'],
-			'prices_include_tax'   => $item['prices_include_tax'],
-			'customer_id'          => $item['customer_id'],
-			'customer_ip_address'  => $item['customer_ip_address'],
-			'customer_user_agent'  => $item['customer_user_agent'],
-			'customer_note'        => $item['customer_note'],
-			'billing'              => $item['billing'],
-			'shipping'             => $item['shipping'],
-			'payment_method'       => $item['payment_method'],
-			'payment_method_title' => $item['payment_method_title'],
-			'transaction_id'       => $item['transaction_id'],
-			'date_paid'            => $item['date_paid'],
-			'date_paid_gmt'        => $item['date_paid_gmt'],
-			'date_completed'       => $item['date_completed'],
-			'date_completed_gmt'   => $item['date_completed_gmt'],
-			'cart_hash'            => $item['cart_hash'],
-			'meta_data'            => $item['meta_data'],
-			'line_items'           => $item['line_items'],
-			'tax_lines'            => $item['tax_lines'],
-			'shipping_lines'       => $item['shipping_lines'],
-			'fee_lines'            => $item['fee_lines'],
-			'coupon_lines'         => $item['coupon_lines'],
-			'refunds'              => $item['refunds'],
+			'parent_id'            => $data['parent_id'],
+			'number'               => $data['number'],
+			'order_key'            => $data['order_key'],
+			'created_via'          => $data['created_via'],
+			'version'              => $data['version'],
+			'status'               => $data['status'],
+			'currency'             => $data['currency'],
+			'date_created'         => $data['date_created'],
+			'date_created_gmt'     => $data['date_created_gmt'],
+			'date_modified'        => $data['date_modified'],
+			'date_modified_gmt'    => $data['date_modified_gmt'],
+			'discount_total'       => $data['discount_total'],
+			'discount_tax'         => $data['discount_tax'],
+			'shipping_total'       => $data['shipping_total'],
+			'shipping_tax'         => $data['shipping_tax'],
+			'cart_tax'             => $data['cart_tax'],
+			'total'                => $data['total'],
+			'total_tax'            => $data['total_tax'],
+			'prices_include_tax'   => $data['prices_include_tax'],
+			'customer_id'          => $data['customer_id'],
+			'customer_ip_address'  => $data['customer_ip_address'],
+			'customer_user_agent'  => $data['customer_user_agent'],
+			'customer_note'        => $data['customer_note'],
+			'billing'              => $data['billing'],
+			'shipping'             => $data['shipping'],
+			'payment_method'       => $data['payment_method'],
+			'payment_method_title' => $data['payment_method_title'],
+			'transaction_id'       => $data['transaction_id'],
+			'date_paid'            => $data['date_paid'],
+			'date_paid_gmt'        => $data['date_paid_gmt'],
+			'date_completed'       => $data['date_completed'],
+			'date_completed_gmt'   => $data['date_completed_gmt'],
+			'cart_hash'            => $data['cart_hash'],
+			'meta_data'            => $data['meta_data'],
+			'line_items'           => $data['line_items'],
+			'tax_lines'            => $data['tax_lines'],
+			'shipping_lines'       => $data['shipping_lines'],
+			'fee_lines'            => $data['fee_lines'],
+			'coupon_lines'         => $data['coupon_lines'],
+			'refunds'              => $data['refunds'],
 		);
 	}
 
