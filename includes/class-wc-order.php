@@ -226,7 +226,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
 
-		if ( ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
 			$this->status_transition = array(
 				'from'   => ! empty( $this->status_transition['from'] ) ? $this->status_transition['from'] : $result['from'],
 				'to'     => $result['to'],
