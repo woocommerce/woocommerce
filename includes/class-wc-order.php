@@ -1297,7 +1297,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 2.7.0
 	 * @return bool
 	 */
-	protected function needs_processing() {
+	public function needs_processing() {
 		$needs_processing = false;
 
 		if ( sizeof( $this->get_items() ) > 0 ) {
