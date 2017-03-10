@@ -276,14 +276,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		$id = $coupon->get_id();
 		$operator = ( 'increase' === $operation ) ? '+' : '-';
-		$new_count = ( 'increase' === $operation ) ? ( $coupon->get_usage_count( 'edit' ) + 1 ) : ( $coupon->get_usage_count( 'edit' ) - 1 );
 
-		$updated = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
-		if ( ! $updated ) {
-			add_post_meta( $id, 'usage_count', $new_count, true );
-		}
+		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
 
-		return $new_count;
+		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
 	}
 
 	/**
