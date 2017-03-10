@@ -336,6 +336,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
+					'description' => __( "The date the order refund was created, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created_gmt' => array(
 					'description' => __( "The date the order refund was created, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
