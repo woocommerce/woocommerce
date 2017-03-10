@@ -563,7 +563,7 @@ add_action( 'update_user_meta', 'wc_meta_update_last_update_time', 10, 4 );
  * @param int $user_id The user to set a timestamp for.
  */
 function wc_set_user_last_update_time( $user_id ) {
-	update_user_meta( $user_id, 'last_update', time() );
+	update_user_meta( $user_id, 'last_update', (int) gmdate( 'U' ) );
 }
 
 /**
