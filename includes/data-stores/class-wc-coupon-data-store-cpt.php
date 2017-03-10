@@ -231,7 +231,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @return int New usage count
 	 */
 	public function increase_usage_count( &$coupon, $used_by = '' ) {
-		$new_count = $this->vary_usage_count_meta( $coupon, 'increase' );
+		$new_count = $this->update_usage_count_meta( $coupon, 'increase' );
 		if ( $used_by ) {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
@@ -249,7 +249,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
-		$new_count = $this->vary_usage_count_meta( $coupon, 'decrease' );
+		$new_count = $this->update_usage_count_meta( $coupon, 'decrease' );
 		if ( $used_by ) {
 			/**
 			 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes.
@@ -272,7 +272,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param string $operation 'increase' or 'decrease'
 	 * @return int New usage count
 	 */
-	private function vary_usage_count_meta( &$coupon, $operation = 'increase' ) {
+	private function update_usage_count_meta( &$coupon, $operation = 'increase' ) {
 		global $wpdb;
 		$id = $coupon->get_id();
 		$operator = ( 'increase' === $operation ) ? '+' : '-';
