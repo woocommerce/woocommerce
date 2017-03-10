@@ -153,15 +153,34 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_customer_ip_address'  => 'customer_ip_address',
 			'_customer_user_agent'  => 'customer_user_agent',
 			'_created_via'          => 'created_via',
-			'_completed_date'       => 'date_completed',
-			'_paid_date'            => 'date_paid',
+			'_date_completed'       => 'date_completed',
+			'_date_paid'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-			update_post_meta( $id, $meta_key, $value );
+
+			if ( 'date_paid' === $prop ) {
+				// In 2.7.x we store this as a UTC timestamp.
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '', true );
+
+				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '', true );
+
+			} elseif ( 'date_completed' === $prop ) {
+				// In 2.7.x we store this as a UTC timestamp.
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '', true );
+
+				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '', true );
+
+			} else {
+				update_post_meta( $id, $meta_key, $value );
+			}
+
 			$updated_props[] = $prop;
 		}
 
