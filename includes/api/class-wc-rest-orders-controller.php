@@ -185,6 +185,94 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	}
 
 	/**
+	 * Get formatted item data.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
+	 */
+	protected function get_formatted_item_data( $object ) {
+		$item              = $object->get_data();
+		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
+
+		// Format decimal values.
+		foreach ( $format_decimal as $key ) {
+			$item[ $key ] = wc_format_decimal( $item[ $key ], $this->request['dp'] );
+		}
+
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			$datetime              = $item[ $key ];
+			$item[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$item[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
+		}
+
+		// Format the order status.
+		$item['status'] = 'wc-' === substr( $item['status'], 0, 3 ) ? substr( $item['status'], 3 ) : $item['status'];
+
+		// Format line items.
+		foreach ( $format_line_items as $key ) {
+			$item[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $item[ $key ] ) );
+		}
+
+		// Refunds.
+		$item['refunds'] = array();
+		foreach ( $object->get_refunds() as $refund ) {
+			$item['refunds'][] = array(
+				'id'     => $refund->get_id(),
+				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
+				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+			);
+		}
+
+		return array(
+			'id'                   => $object->get_id(),
+			'parent_id'            => $item['parent_id'],
+			'number'               => $item['number'],
+			'order_key'            => $item['order_key'],
+			'created_via'          => $item['created_via'],
+			'version'              => $item['version'],
+			'status'               => $item['status'],
+			'currency'             => $item['currency'],
+			'date_created'         => $item['date_created'],
+			'date_created_gmt'     => $item['date_created_gmt'],
+			'date_modified'        => $item['date_modified'],
+			'date_modified_gmt'    => $item['date_modified_gmt'],
+			'discount_total'       => $item['discount_total'],
+			'discount_tax'         => $item['discount_tax'],
+			'shipping_total'       => $item['shipping_total'],
+			'shipping_tax'         => $item['shipping_tax'],
+			'cart_tax'             => $item['cart_tax'],
+			'total'                => $item['total'],
+			'total_tax'            => $item['total_tax'],
+			'prices_include_tax'   => $item['prices_include_tax'],
+			'customer_id'          => $item['customer_id'],
+			'customer_ip_address'  => $item['customer_ip_address'],
+			'customer_user_agent'  => $item['customer_user_agent'],
+			'customer_note'        => $item['customer_note'],
+			'billing'              => $item['billing'],
+			'shipping'             => $item['shipping'],
+			'payment_method'       => $item['payment_method'],
+			'payment_method_title' => $item['payment_method_title'],
+			'transaction_id'       => $item['transaction_id'],
+			'date_paid'            => $item['date_paid'],
+			'date_paid_gmt'        => $item['date_paid_gmt'],
+			'date_completed'       => $item['date_completed'],
+			'date_completed_gmt'   => $item['date_completed_gmt'],
+			'cart_hash'            => $item['cart_hash'],
+			'meta_data'            => $item['meta_data'],
+			'line_items'           => $item['line_items'],
+			'tax_lines'            => $item['tax_lines'],
+			'shipping_lines'       => $item['shipping_lines'],
+			'fee_lines'            => $item['fee_lines'],
+			'coupon_lines'         => $item['coupon_lines'],
+			'refunds'              => $item['refunds'],
+		);
+	}
+
+	/**
 	 * Prepare a single order output for response.
 	 *
 	 * @since  2.7.0
@@ -193,49 +281,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request     = $request;
-		$data              = $object->get_data();
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
-		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
-
-		// Format decimal values.
-		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
-		}
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$datetime              = $data[ $key ];
-			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
-			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
-		}
-
-		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
-
-		// Format line items.
-		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
-		}
-
-		// Refunds.
-		$data['refunds'] = array();
-		foreach ( $object->get_refunds() as $refund ) {
-			$data['refunds'][] = array(
-				'id'     => $refund->get_id(),
-				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
-			);
-		}
-
-		ksort( $data );
-
-		$data     = array_merge( array( 'id' => $object->get_id() ), $data );
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
+		$this->request = $request;
+		$data          = $this->get_formatted_item_data( $object );
+		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data          = $this->add_additional_fields_to_object( $data, $request );
+		$data          = $this->filter_response_by_context( $data, $context );
+		$response      = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
@@ -749,6 +800,30 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
+				'number' => array(
+					'description' => __( 'Order number.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'order_key' => array(
+					'description' => __( 'Order key.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'created_via' => array(
+					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'version' => array(
+					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'status' => array(
 					'description' => __( 'Order status.', 'woocommerce' ),
 					'type'        => 'string',
@@ -762,18 +837,6 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'default'     => get_woocommerce_currency(),
 					'enum'        => array_keys( get_woocommerce_currencies() ),
 					'context'     => array( 'view', 'edit' ),
-				),
-				'version' => array(
-					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'prices_include_tax' => array(
-					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'date_created' => array(
 					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
@@ -841,17 +904,34 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'prices_include_tax' => array(
+					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'customer_id' => array(
 					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => 0,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'order_key' => array(
-					'description' => __( 'Order key.', 'woocommerce' ),
+				'customer_ip_address' => array(
+					'description' => __( "Customer's IP address.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'customer_user_agent' => array(
+					'description' => __( 'User agent of the customer.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'customer_note' => array(
+					'description' => __( 'Note left by customer during checkout.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
 				),
 				'billing' => array(
 					'description' => __( 'Billing address.', 'woocommerce' ),
@@ -983,28 +1063,17 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'customer_ip_address' => array(
-					'description' => __( "Customer's IP address.", 'woocommerce' ),
-					'type'        => 'string',
+				'date_paid' => array(
+					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_user_agent' => array(
-					'description' => __( 'User agent of the customer.', 'woocommerce' ),
-					'type'        => 'string',
+				'date_paid_gmt' => array(
+					'description' => __( "The date the order has been paid, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-				),
-				'created_via' => array(
-					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'customer_note' => array(
-					'description' => __( 'Note left by customer during checkout.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
 				),
 				'date_completed' => array(
 					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
@@ -1018,26 +1087,8 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_paid' => array(
-					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'date_paid_gmt' => array(
-					'description' => __( "The date the order has been paid, as GMT.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'cart_hash' => array(
 					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'number' => array(
-					'description' => __( 'Order number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
