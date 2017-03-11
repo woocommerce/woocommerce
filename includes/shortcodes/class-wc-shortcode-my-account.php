@@ -246,8 +246,14 @@ class WC_Shortcode_My_Account {
 		if ( ! $user_data && is_email( $login ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 			$user_data = get_user_by( 'email', $login );
 		}
+		
+		$errors = new WP_Error();
+        do_action( 'lostpassword_post', $errors );
 
-		do_action( 'lostpassword_post' );
+        if ( $errors->get_error_code() ) {
+			wc_add_notice( $allow->get_error_message(), 'error' );
+			return false;
+		}
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
