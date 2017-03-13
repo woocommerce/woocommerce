@@ -520,7 +520,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $_data[ $key ] ) ) ) : null;
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null; // v1 API used UTC.
 		}
 
 		$data = array(
@@ -533,7 +533,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			'username'      => $_data['username'],
 			'last_order'    => array(
 				'id'   => is_object( $last_order ) ? $last_order->get_id() : null,
-				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $last_order->get_date_created() ) ) ) : null,
+				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( $last_order->get_date_created() ) : null, // v1 API used UTC.
 			),
 			'orders_count'  => $customer->get_order_count(),
 			'total_spent'   => $customer->get_total_spent(),
@@ -633,13 +633,13 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -692,7 +692,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 							'readonly'    => true,
 						),
 						'date' => array(
-							'description' => __( 'UTC DateTime of the customer last order.', 'woocommerce' ),
+							'description' => __( 'The date of the customer last order, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
