@@ -33,7 +33,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		'order_id'            => 0,
 		'order_key'           => '',
 		'downloads_remaining' => '',
-		'access_granted'      => '',
+		'access_granted'      => null,
 		'access_expires'      => null,
 		'download_count'      => 0,
 	);
@@ -145,7 +145,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Get access_granted.
 	 *
 	 * @param  string $context
-	 * @return integer
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_granted( $context = 'view' ) {
 		return $this->get_prop( 'access_granted', $context );
@@ -242,10 +242,10 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get access_granted.
 	 *
-	 * @param int $timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_access_granted( $timestamp ) {
-		$this->set_prop( 'access_granted', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_access_granted( $date = null ) {
+		$this->set_date_prop( 'access_granted', $date );
 	}
 
 	/**
