@@ -26,11 +26,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $data = array(
 		'code'                        => '',
 		'amount'                      => 0,
-		'date_created'                => '',
-		'date_modified'               => '',
+		'date_created'                => null,
+		'date_modified'               => null,
+		'date_expires'                => null,
 		'discount_type'               => 'fixed_cart',
 		'description'                 => '',
-		'date_expires'                => '',
 		'usage_count'                 => 0,
 		'individual_use'              => false,
 		'product_ids'                 => array(),
@@ -172,7 +172,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Get coupon expiration date.
 	 * @since  2.7.0
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_expires( $context = 'view' ) {
 		return $this->get_prop( 'date_expires', $context );
@@ -182,7 +182,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Get date_created
 	 * @since  2.7.0
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
 		return $this->get_prop( 'date_created', $context );
@@ -192,7 +192,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Get date_modified
 	 * @since  2.7.0
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
 		return $this->get_prop( 'date_modified', $context );
@@ -467,31 +467,31 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Set expiration date.
 	 * @since  2.7.0
-	 * @param string $timestamp Timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_expires( $timestamp ) {
-		$this->set_prop( 'date_expires', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_expires( $date ) {
+		$this->set_date_prop( 'date_expires', $date );
 	}
 
 	/**
 	 * Set date_created
 	 * @since  2.7.0
-	 * @param string $timestamp Timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_created( $timestamp ) {
-		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_created( $date ) {
+		$this->set_date_prop( 'date_created', $date );
 	}
 
 	/**
 	 * Set date_modified
 	 * @since  2.7.0
-	 * @param string $timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_modified( $timestamp ) {
-		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_modified( $date ) {
+		$this->set_date_prop( 'date_modified', $date );
 	}
 
 	/**
@@ -792,7 +792,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_expiry_date() {
-		if ( $this->get_date_expires() && current_time( 'timestamp' ) > $this->get_date_expires() ) {
+		if ( $this->get_date_expires() && current_time( 'timestamp' ) > $this->get_date_expires()->getTimestamp() ) {
 			throw new Exception( $error_code = self::E_WC_COUPON_EXPIRED );
 		}
 	}
