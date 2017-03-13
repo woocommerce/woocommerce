@@ -61,6 +61,15 @@ class WC_Meta_Box_Order_Actions {
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
+					<?php foreach( apply_filters( 'woocommerce_order_grouped_actions', array() ) as $group_title => $grouped_options ) { ?>
+                        <optgroup label="<?php echo $group_title ?>" >
+                            <?php
+                            foreach( $grouped_options as $action => $title ) { ?>
+                                <option value="<?php echo $action; ?>"><?php echo $title; ?></option>
+                            <?php  } ?>
+                        </optgroup>
+                    <?php } ?>
+
 					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
