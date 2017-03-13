@@ -54,7 +54,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon
 	 */
 	public function create( &$coupon ) {
-		$coupon->set_date_created( current_time( 'timestamp' ) );
+		$coupon->set_date_created( current_time( 'timestamp', true ) );
 
 		$coupon_id = wp_insert_post( apply_filters( 'woocommerce_new_coupon_data', array(
 			'post_type'     => 'shop_coupon',
@@ -63,8 +63,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_title'    => $coupon->get_code(),
 			'post_content'  => '',
 			'post_excerpt'  => $coupon->get_description(),
-			'post_date'     => date( 'Y-m-d H:i:s', $coupon->get_date_created() ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $coupon->get_date_created() ) ),
+			'post_date'     => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+			'post_date_gmt' => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
 
 		if ( $coupon_id ) {
@@ -93,8 +93,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->set_props( array(
 			'code'                        => $post_object->post_title,
 			'description'                 => $post_object->post_excerpt,
-			'date_created'                => $post_object->post_date,
-			'date_modified'               => $post_object->post_modified,
+			'date_created'                => strtotime( $post_object->post_date_gmt ),
+			'date_modified'               => strtotime( $post_object->post_modified_gmt ),
 			'date_expires'                => get_post_meta( $coupon_id, 'expiry_date', true ),
 			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
@@ -209,6 +209,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					break;
 				case 'email_restrictions' :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'sanitize_email', $value ) ) );
+					break;
+				case 'date_expires' :
+					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->getTimestamp() : null ) );
 					break;
 				default :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, $value );

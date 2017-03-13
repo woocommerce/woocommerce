@@ -250,6 +250,11 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
+	/**
+	 * Test date setters/getters.
+	 *
+	 * @since 3.0.0
+	 */
 	public function test_dates() {
 		$valid_coupon = WC_Helper_Coupon::create_coupon();
 		$valid_coupon->set_date_expires( time() + 1000 );

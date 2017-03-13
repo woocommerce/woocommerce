@@ -100,6 +100,28 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test coupon date saving/loading.
+	 * @since 3.0.0
+	 */
+	function test_coupon_dates() {
+		$created_date = time() - 30;
+		$modified_date = time() - 20;
+		$expiry_date = time() - 10;
+
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->set_date_created( $created_date);
+		$coupon->set_date_modified( $modified_date );
+		$coupon->set_date_expires( $expiry_date );
+		$coupon->save();
+
+		$coupon_read = new WC_Coupon( $coupon->get_id() );
+
+		$this->assertEquals( $created_date, $coupon->get_date_created()->getTimestamp() );
+		$this->assertEquals( $modified_date, $coupon->get_date_modified()->getTimestamp() );
+		$this->assertEquals( $expiry_date, $coupon->get_date_expires()->getTimestamp() );
+	}
+
+	/**
 	 * Test coupon increase, decrease, user usage count methods.
 	 * @since 2.7.0
 	 */
