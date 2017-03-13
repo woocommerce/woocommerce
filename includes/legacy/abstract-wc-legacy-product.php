@@ -85,10 +85,10 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				$value = $this->get_catalog_visibility();
 				break;
 			case 'sale_price_dates_from' :
-				$value = $this->get_date_on_sale_from();
+				return $this->get_date_on_sale_from() ? $this->get_date_on_sale_from()->getTimestamp() : '';
 				break;
 			case 'sale_price_dates_to' :
-				$value = $this->get_date_on_sale_to();
+				return $this->get_date_on_sale_to() ? $this->get_date_on_sale_to()->getTimestamp() : '';
 				break;
 			case 'post' :
 				$value = get_post( $this->get_id() );
