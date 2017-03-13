@@ -550,7 +550,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 */
 	public function apply_changes() {
-		$this->data = array_merge( $this->data, $this->changes );
+		$this->data    = array_replace_recursive( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
@@ -579,12 +579,13 @@ abstract class WC_Data {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {
-			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
+
 		return $value;
 	}
 
